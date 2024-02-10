@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +16,6 @@ class _MockRenderSliver extends RenderSliver {
       maxPaintExtent: 10,
     );
   }
-
 }
 
 Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
@@ -180,15 +180,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing up', (WidgetTester tester) async {
@@ -202,15 +202,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing left', (WidgetTester tester) async {
@@ -224,15 +224,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing right', (WidgetTester tester) async {
@@ -246,15 +246,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding no child', (WidgetTester tester) async {
@@ -617,7 +617,15 @@ void main() {
   });
 }
 
-void expectIsTextSpan(Object target, String text) {
-  expect(target, isA<TextSpan>());
-  expect((target as TextSpan).text, text);
+void hitsText(HitTestResult hitTestResult, String text) {
+  switch (hitTestResult.path.first.target) {
+    case final TextSpan span:
+      expect(span.text, text);
+    case final RenderParagraph paragraph:
+      final InlineSpan span = paragraph.text;
+      expect(span, isA<TextSpan>());
+      expect((span as TextSpan).text, text);
+    case final HitTestTarget target:
+      fail('$target is not a TextSpan or a RenderParagraph.');
+  }
 }

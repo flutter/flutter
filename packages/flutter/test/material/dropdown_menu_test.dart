@@ -1935,6 +1935,71 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Menu shows scrollbar when height is limited', (WidgetTester tester) async {
+    final List<DropdownMenuEntry<TestMenu>> menuItems = <DropdownMenuEntry<TestMenu>>[
+      DropdownMenuEntry<TestMenu>(
+        value: TestMenu.mainMenu0,
+        label: 'Item 0',
+        style: MenuItemButton.styleFrom(
+          minimumSize: const Size.fromHeight(1000),
+        )
+      ),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuItems,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('DropdownMenu.focusNode can focus text input field', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: DropdownMenu<String>(
+          focusNode: focusNode,
+          dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+            DropdownMenuEntry<String>(
+              value: 'Yolk',
+              label: 'Yolk',
+            ),
+            DropdownMenuEntry<String>(
+              value: 'Eggbert',
+              label: 'Eggbert',
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when not focused.
+    expect(box, paints..rrect(color: theme.colorScheme.outline));
+
+    focusNode.requestFocus();
+    await tester.pump();
+    // Advance input decorator animation.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when focused.
+    expect(box, paints..rrect(color: theme.colorScheme.primary));
+  });
 }
 
 enum TestMenu {

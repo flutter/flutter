@@ -5,7 +5,7 @@
 name: Cherry-pick Labeled PR to Release Branch
 
 on:
-  pull_request:
+  pull_request_target:
     branches: master
     types: [labeled]
 
@@ -32,10 +32,10 @@ jobs:
       - name: Checkout Flutter Repo
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
-          repository: flutter/flutter
-          token: ${{ github.token }}
+          repository: flutteractionsbot/flutter
           path: flutter
           ref: master
+          persist-credentials: false
           # Checkout all history commits on master branch, so that the cp commit is a known object
           fetch-depth: 0
       # use same name when checking out branch, since the marketplace action does a hard reset.
@@ -45,9 +45,10 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git fetch origin $RELEASE_BRANCH
-          git fetch origin master
-          git checkout -b $RELEASE_BRANCH --track origin/$RELEASE_BRANCH
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch upstream $RELEASE_BRANCH
+          git fetch upstream master
+          git checkout -b cp-${CHANNEL}-${COMMIT_SHA} --track upstream/$RELEASE_BRANCH
           git cherry-pick $COMMIT_SHA
       # TODO(xilaizhang): remove this step once the template is available on release branches.
       - name: Get CP Template
@@ -55,16 +56,27 @@ jobs:
           curl -o PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/flutter/flutter/master/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
-        with:
-          base: ${{ env.RELEASE_BRANCH }}
-          branch: cp-${{ env.CHANNEL }}-${{ env.COMMIT_SHA }}
-          path: flutter
-          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          labels: |
-            cp: review
-          title: '[${{ env.CHANNEL }}-cherrypick] cherrypicks commit ${{ env.COMMIT_SHA }} from PR ${{ github.event.pull_request.title }}'
-          body-path: PULL_REQUEST_CP_TEMPLATE.md
+        working-directory: ./flutter
+        id: create-pr
+        run: |
+          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter cp-${CHANNEL}-${COMMIT_SHA}
+          {
+            echo 'PR_URL<<EOF'
+            gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
+            echo EOF
+          } >> "$GITHUB_ENV"
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+      - name: Leave Comment on CP success
+        if: ${{ steps.create-pr.conclusion == 'success' }}
+        run: |
+          echo $PR_URL
+          NEW_PR_NUMBER="${PR_URL##*/}"
+          SUCCESS_MSG=" @${{ github.actor }} please fill out the PR description above, afterwards the release team will review this request."
+          gh pr comment $NEW_PR_NUMBER -R flutter/flutter -b "${SUCCESS_MSG}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
       - name: Leave Comment on CP failure
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
@@ -72,4 +84,4 @@ jobs:
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}

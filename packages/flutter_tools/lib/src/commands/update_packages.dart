@@ -18,26 +18,8 @@ import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-
-/// Map from package name to package version, used to artificially pin a pub
-/// package version in cases when upgrading to the latest breaks Flutter.
-///
-/// These version pins must be pins, not ranges! Allowing these to be ranges
-/// defeats the whole purpose of pinning all our dependencies, which is to
-/// prevent upstream changes from causing our CI to fail randomly in ways
-/// unrelated to the commits. It also, more importantly, risks breaking users
-/// in ways that prevent them from ever upgrading Flutter again!
-const Map<String, String> kManuallyPinnedDependencies = <String, String>{
-  // Add pinned packages here. Please leave a comment explaining why.
-  'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
-  'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
-  'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
-  'leak_tracker_flutter_testing': '2.0.0', // https://github.com/flutter/devtools/issues/3951
-  'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
-  'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
-  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
-};
+import '../update_packages_pins.dart';
+import '../version.dart';
 
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand() {
@@ -1732,6 +1714,10 @@ Directory createTemporaryFlutterSdk(
   // Fill in version info.
   realFlutter.childFile('version')
     .copySync(directory.childFile('version').path);
+  final File versionJson = FlutterVersion.getVersionFile(realFlutter.fileSystem, realFlutter.path);
+  final Directory binCacheDirectory = directory.childDirectory('bin').childDirectory('cache');
+  binCacheDirectory.createSync(recursive: true);
+  versionJson.copySync(binCacheDirectory.childFile('flutter.version.json').path);
 
   // Directory structure should mirror the current Flutter SDK
   final Directory packages = directory.childDirectory('packages');

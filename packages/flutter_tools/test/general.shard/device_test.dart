@@ -531,7 +531,7 @@ void main() {
       ]);
     });
 
-    testUsingContext('Unconnencted devices filtered out by default', () async {
+    testUsingContext('Unconnected devices filtered out by default', () async {
       final List<Device> devices = <Device>[
         unconnectedDevice,
       ];

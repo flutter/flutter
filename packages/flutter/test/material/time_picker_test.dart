@@ -1083,7 +1083,7 @@ void main() {
         // Verify that the time display is not affected by text scale.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 2,
+          textScaler: const TextScaler.linear(2),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1098,7 +1098,7 @@ void main() {
         // Verify that text scale for AM/PM is at most 2x.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 3,
+          textScaler: const TextScaler.linear(3),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1996,7 +1996,7 @@ Future<void> mediaQueryBoilerplate(
   WidgetTester tester, {
   bool alwaysUse24HourFormat = false,
   TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-  double textScaleFactor = 1,
+  TextScaler textScaler = TextScaler.noScaling,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
   String? hourLabelText,
@@ -2020,7 +2020,7 @@ Future<void> mediaQueryBoilerplate(
         child: MediaQuery(
           data: MediaQueryData(
             alwaysUse24HourFormat: alwaysUse24HourFormat,
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
             accessibleNavigation: accessibleNavigation,
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),

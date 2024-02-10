@@ -20,10 +20,10 @@ import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -296,9 +296,6 @@ abstract class UnpackIOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await _thinFramework(environment, frameworkBinaryPath, archs);
-    if (buildMode == BuildMode.release) {
-      await _bitcodeStripFramework(environment, frameworkBinaryPath);
-    }
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
@@ -374,26 +371,6 @@ abstract class UnpackIOS extends Target {
 
     if (extractResult.exitCode != 0) {
       throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
-    }
-  }
-
-  /// Destructively strip bitcode from the framework. This can be removed
-  /// when the framework is no longer built with bitcode.
-  Future<void> _bitcodeStripFramework(
-    Environment environment,
-    String frameworkBinaryPath,
-  ) async {
-    final ProcessResult stripResult = await environment.processManager.run(<String>[
-      'xcrun',
-      'bitcode_strip',
-      frameworkBinaryPath,
-      '-r', // Delete the bitcode segment.
-      '-o',
-      frameworkBinaryPath,
-    ]);
-
-    if (stripResult.exitCode != 0) {
-      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
@@ -526,9 +503,6 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      // Always specify an impeller shader target so that we support runtime toggling and
-      // the --enable-impeller debug flag.
-      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
@@ -684,9 +658,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=11.0'
+        '-miphoneos-version-min=12.0'
       else
-        '-miphonesimulator-version-min=11.0',
+        '-miphonesimulator-version-min=12.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

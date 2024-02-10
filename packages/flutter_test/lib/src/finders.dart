@@ -23,7 +23,7 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
-/// The `CandidateType` of finders that search for and filter subtrings,
+/// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
 final class TextRangeContext {
   const TextRangeContext._(this.view, this.renderObject, this.textRange);
@@ -36,7 +36,7 @@ final class TextRangeContext {
   /// The RenderObject that contains the static text.
   final RenderParagraph renderObject;
 
-  /// The [TextRange] of the subtring within [renderObject]'s text.
+  /// The [TextRange] of the substring within [renderObject]'s text.
   final TextRange textRange;
 
   @override

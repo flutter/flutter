@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -148,8 +147,10 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidSkipBuildDependencyValidation = 'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
+  static const String kNativeAssetsYamlFile = 'native-assets-yaml-file';
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
@@ -366,7 +367,7 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
-  /// Indicates if the currenet command running has a terminal attached.
+  /// Indicates if the current command running has a terminal attached.
   bool get hasTerminal => globals.stdio.hasTerminal;
 
   /// Path to the Dart's package config file.
@@ -376,6 +377,8 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether flutter is being run from our CI.
   bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
+
+  String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -972,6 +975,12 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: true,
       hide: hide,
     );
+    argParser.addFlag(
+      FlutterOptions.kAndroidSkipBuildDependencyValidation,
+      help: 'Whether to skip version checking for Java, Gradle, '
+          'the Android Gradle Plugin (AGP), and the Kotlin Gradle Plugin (KGP)'
+          ' during Android builds.',
+    );
     argParser.addMultiOption(
       FlutterOptions.kAndroidProjectArgs,
       help: 'Additional arguments specified as key=value that are passed directly to the gradle '
@@ -1007,12 +1016,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addMultidexOption({ bool hide = false }) {
-    argParser.addFlag('multidex',
-      defaultsTo: true,
-      help: 'When enabled, indicates that the app should be built with multidex support. This '
-            'flag adds the dependencies for multidex when the minimum android sdk is 20 or '
-            'below. For android sdk versions 21 and above, multidex support is native.',
+  void usesNativeAssetsOption({ required bool hide }) {
+    argParser.addOption(FlutterOptions.kNativeAssetsYamlFile,
+      help: 'Initializes the resident compiler with a custom native assets '
+      'yaml file instead of the default cached location.',
+      hide: hide,
     );
   }
 
@@ -1141,16 +1149,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
-    argParser.addFlag('impeller-force-gl',
-        hide: !verboseHelp,
-        help: 'On platforms that support OpenGL Rendering using Impeller, force '
-              'rendering using OpenGL over other APIs. If Impeller is not '
-              'enabled or the platform does not support OpenGL ES, this flag '
-              'does nothing.',
-    );
-  }
-
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
@@ -1236,6 +1234,9 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
       || boolArg(FlutterOptions.kAndroidGradleDaemon);
+
+    final bool androidSkipBuildDependencyValidation = !argParser.options.containsKey(FlutterOptions.kAndroidSkipBuildDependencyValidation)
+        || boolArg(FlutterOptions.kAndroidSkipBuildDependencyValidation);
 
     final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
       ? stringsArg(FlutterOptions.kAndroidProjectArgs)
@@ -1332,6 +1333,7 @@ abstract class FlutterCommand extends Command<void> {
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
+      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
@@ -1399,7 +1401,7 @@ abstract class FlutterCommand extends Command<void> {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
           final DateTime endTime = globals.systemClock.now();
-          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+          globals.printTrace(globals.userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
             _sendPostUsage(
               commandPath,
@@ -1736,6 +1738,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
 
       await pub.get(
@@ -1826,7 +1829,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       return null;
     }
     if (deviceList.length > 1) {
-      globals.printStatus(userMessages.flutterSpecifyDevice);
+      globals.printStatus(globals.userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList, globals.logger);
@@ -1845,7 +1848,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       // until one can be found.
       final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
       if (path == null) {
-        throwToolExit(userMessages.flutterNoPubspec);
+        throwToolExit(globals.userMessages.flutterNoPubspec);
       }
       if (path != globals.fs.currentDirectory.path) {
         globals.fs.currentDirectory = path;
@@ -1856,7 +1859,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
+        throw ToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
       }
     }
   }
@@ -1963,6 +1966,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       }
       return null;
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }

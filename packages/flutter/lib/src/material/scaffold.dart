@@ -290,13 +290,38 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
   /// {@end-tool}
   ///
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+  /// If [AnimationStyle.duration] is provided in the [snackBarAnimationStyle]
+  /// parameter, it will be used to override the snackbar show animation duration.
+  /// Otherwise, defaults to 250ms.
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided in the [snackBarAnimationStyle]
+  /// parameter, it will be used to override the snackbar hide animation duration.
+  /// Otherwise, defaults to 250ms.
+  ///
+  /// To disable the snackbar animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override [SnackBar] show and hide animation
+  /// duration using [AnimationStyle] in [ScaffoldMessengerState.showSnackBar].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.2.dart **
+  /// {@end-tool}
+  ///
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
+    SnackBar snackBar,
+    { AnimationStyle? snackBarAnimationStyle }
+  ) {
     assert(
       _scaffolds.isNotEmpty,
       'ScaffoldMessenger.showSnackBar was called, but there are currently no '
       'descendant Scaffolds to present to.',
     );
-    _snackBarController ??= SnackBar.createAnimationController(vsync: this)
+    _didUpdateAnimationStyle(snackBarAnimationStyle);
+    _snackBarController ??= SnackBar.createAnimationController(
+        duration: snackBarAnimationStyle?.duration,
+        reverseDuration: snackBarAnimationStyle?.reverseDuration,
+        vsync: this,
+      )
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
       assert(_snackBarController!.isDismissed);
@@ -353,6 +378,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     }
 
     return controller;
+  }
+
+  void _didUpdateAnimationStyle(AnimationStyle? snackBarAnimationStyle) {
+    if (snackBarAnimationStyle != null) {
+      if (_snackBarController?.duration != snackBarAnimationStyle.duration ||
+          _snackBarController?.reverseDuration != snackBarAnimationStyle.reverseDuration) {
+        _snackBarController?.dispose();
+        _snackBarController = null;
+      }
+    }
   }
 
   void _handleSnackBarStatusChanged(AnimationStatus status) {
@@ -2306,6 +2341,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
@@ -2380,6 +2416,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       key: bottomSheetKey,
       animationController: animationController,
       enableDrag: enableDrag ?? !isPersistent,
+      showDragHandle: showDragHandle,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -2481,6 +2518,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2508,6 +2546,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         clipBehavior: clipBehavior,
         constraints: constraints,
         enableDrag: enableDrag,
+        showDragHandle: showDragHandle,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -3133,6 +3172,7 @@ class _StandardBottomSheet extends StatefulWidget {
     super.key,
     required this.animationController,
     this.enableDrag = true,
+    this.showDragHandle,
     required this.onClosing,
     required this.onDismissed,
     required this.builder,
@@ -3147,6 +3187,7 @@ class _StandardBottomSheet extends StatefulWidget {
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
+  final bool? showDragHandle;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
   final VoidCallback? onDispose;
@@ -3252,6 +3293,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            showDragHandle: widget.showDragHandle,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing!,

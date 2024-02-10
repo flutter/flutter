@@ -276,7 +276,7 @@ class _TextLayout {
   // color of the text is changed).
   //
   // The creator of this _TextLayout is also responsible for disposing this
-  // object when it's no logner needed.
+  // object when it's no longer needed.
   ui.Paragraph _paragraph;
 
   /// Whether this layout has been invalidated and disposed.
@@ -506,7 +506,7 @@ class TextPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterPaintingLibrary,
         className: '$TextPainter',
         object: this,
@@ -1632,7 +1632,7 @@ class TextPainter {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;

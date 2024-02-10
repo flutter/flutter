@@ -19,6 +19,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../macos/macos_ipad_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -195,7 +196,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
-    addImpellerForceGLFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
@@ -210,7 +210,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
-  bool get impellerForceGL => boolArg('impeller-force-gl');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
 
@@ -261,11 +260,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
-        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
+        debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -316,31 +315,35 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
-        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
+        debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
     }
   }
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
+  RunCommand({
+    bool verboseHelp = false,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : _nativeAssetsBuilder = nativeAssetsBuilder,
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
 
     // By default, the app should to publish the VM service port over mDNS.
     // This will allow subsequent "flutter attach" commands to connect to the VM
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
       ..addFlag('await-first-frame-when-tracing',
@@ -411,6 +414,8 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
       );
   }
+
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'run';
@@ -595,6 +600,15 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
+
+    if (devices!.length == 1 && devices!.first is MacOSDesignedForIPadDevice) {
+      throwToolExit('Mac Designed for iPad is currently not supported for flutter run -d.');
+    }
+
+    if (globals.deviceManager!.hasSpecifiedAllDevices) {
+      devices?.removeWhere((Device device) => device is MacOSDesignedForIPadDevice);
+    }
+
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported');
     }
@@ -614,6 +628,13 @@ class RunCommand extends RunCommandBase {
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    final String? flavor = stringArg('flavor');
+    final bool flavorsSupportedOnEveryDevice = devices!
+      .every((Device device) => device.supportsFlavors);
+    if (flavor != null && !flavorsSupportedOnEveryDevice) {
+      throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+    }
   }
 
   @visibleForTesting
@@ -636,8 +657,9 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
         ipv6: ipv6 ?? false,
-        multidexEnabled: boolArg('multidex'),
         analytics: globals.analytics,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        nativeAssetsBuilder: _nativeAssetsBuilder,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -665,7 +687,6 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6 ?? false,
       stayResident: stayResident,
-      multidexEnabled: boolArg('multidex'),
     );
   }
 
@@ -710,9 +731,9 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6 ?? false,
-          multidexEnabled: boolArg('multidex'),
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

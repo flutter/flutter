@@ -706,7 +706,12 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default this updates the engine with the navigation status.
+  /// By default this updates the engine with the navigation status and stops
+  /// bubbling the notification.
+  ///
+  /// See also:
+  ///
+  ///  * [NotificationListener.onNotification], which uses this callback.
   /// {@endtemplate}
   final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
@@ -1221,6 +1226,7 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),

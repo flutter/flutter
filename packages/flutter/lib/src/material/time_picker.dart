@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -612,12 +613,10 @@ class _DayPeriodControl extends StatelessWidget {
       case TimePickerEntryMode.dial:
       case TimePickerEntryMode.dialOnly:
         orientation = _TimePickerModel.orientationOf(context);
-        switch (orientation) {
-          case Orientation.portrait:
-            dayPeriodSize = defaultTheme.dayPeriodPortraitSize;
-          case Orientation.landscape:
-            dayPeriodSize = defaultTheme.dayPeriodLandscapeSize;
-        }
+        dayPeriodSize = switch (orientation) {
+          Orientation.portrait  => defaultTheme.dayPeriodPortraitSize,
+          Orientation.landscape => defaultTheme.dayPeriodLandscapeSize,
+        };
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         orientation = Orientation.portrait;
@@ -842,20 +841,12 @@ class _RenderInputPadding extends RenderShiftedBox {
     }
 
     Offset newPosition = child!.size.center(Offset.zero);
-    switch (orientation) {
-      case Orientation.portrait:
-        if (position.dy > newPosition.dy) {
-          newPosition += const Offset(0, 1);
-        } else {
-          newPosition += const Offset(0, -1);
-        }
-      case Orientation.landscape:
-        if (position.dx > newPosition.dx) {
-          newPosition += const Offset(1, 0);
-        } else {
-          newPosition += const Offset(-1, 0);
-        }
-    }
+    newPosition += switch (orientation) {
+      Orientation.portrait  when position.dy > newPosition.dy => const Offset(0, 1),
+      Orientation.landscape when position.dx > newPosition.dx => const Offset(1, 0),
+      Orientation.portrait  => const Offset(0, -1),
+      Orientation.landscape => const Offset(-1, 0),
+    };
 
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(newPosition),
@@ -904,7 +895,17 @@ class _DialPainter extends CustomPainter {
     required this.radius,
     required this.textDirection,
     required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_DialPainter',
+        object: this,
+      );
+    }
+  }
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> selectedLabels;
@@ -920,6 +921,9 @@ class _DialPainter extends CustomPainter {
   final int selectedValue;
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     for (final _TappableLabel label in primaryLabels) {
       label.painter.dispose();
     }
@@ -1145,22 +1149,15 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
-    final int hoursFactor;
-    switch (widget.hourDialType) {
-      case _HourDialType.twentyFourHour:
-        hoursFactor = TimeOfDay.hoursPerDay;
-      case _HourDialType.twentyFourHourDoubleRing:
-        hoursFactor = TimeOfDay.hoursPerPeriod;
-      case _HourDialType.twelveHour:
-        hoursFactor = TimeOfDay.hoursPerPeriod;
-    }
-    final double fraction;
-    switch (widget.hourMinuteMode) {
-      case _HourMinuteMode.hour:
-        fraction = (time.hour / hoursFactor) % hoursFactor;
-      case _HourMinuteMode.minute:
-        fraction = (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
-    }
+    final int hoursFactor = switch (widget.hourDialType) {
+      _HourDialType.twentyFourHour           => TimeOfDay.hoursPerDay,
+      _HourDialType.twentyFourHourDoubleRing => TimeOfDay.hoursPerPeriod,
+      _HourDialType.twelveHour               => TimeOfDay.hoursPerPeriod,
+    };
+    final double fraction = switch (widget.hourMinuteMode) {
+      _HourMinuteMode.hour   => (time.hour / hoursFactor) % hoursFactor,
+      _HourMinuteMode.minute => (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour,
+    };
     return (math.pi / 2 - fraction * _kTwoPi) % _kTwoPi;
   }
 
@@ -1288,12 +1285,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final TimeOfDay time;
 
     TimeOfDay getAmPmTime() {
-      switch (widget.selectedTime.period) {
-        case DayPeriod.am:
-          return TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
-        case DayPeriod.pm:
-          return TimeOfDay(hour: hour + TimeOfDay.hoursPerPeriod, minute: widget.selectedTime.minute);
-      }
+      return switch (widget.selectedTime.period) {
+        DayPeriod.am => TimeOfDay(hour: hour, minute: widget.selectedTime.minute),
+        DayPeriod.pm => TimeOfDay(hour: hour + TimeOfDay.hoursPerPeriod, minute: widget.selectedTime.minute),
+      };
     }
 
     switch (widget.hourMinuteMode) {
@@ -2303,12 +2298,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
       case TimePickerEntryMode.dialOnly:
-        switch (orientation) {
-          case Orientation.portrait:
-            return _kTimePickerMinPortraitSize;
-          case Orientation.landscape:
-            return _kTimePickerMinLandscapeSize;
-        }
+        return switch (orientation) {
+          Orientation.portrait  => _kTimePickerMinPortraitSize,
+          Orientation.landscape => _kTimePickerMinLandscapeSize,
+        };
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -2334,7 +2327,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).textScaleFactor;
+    //
+    // 14 is a common font size used to compute the effective text scale.
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).scale(fontSizeToScale) / fontSizeToScale;
 
     final Size timePickerSize;
     switch (_entryMode.value) {
@@ -2427,14 +2423,11 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       ),
     );
 
-    final Offset tapTargetSizeOffset;
-    switch (theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        tapTargetSizeOffset = Offset.zero;
-      case MaterialTapTargetSize.shrinkWrap:
-        // _dialogSize returns "padded" sizes.
-        tapTargetSizeOffset = const Offset(0, -12);
-    }
+    final Offset tapTargetSizeOffset = switch (theme.materialTapTargetSize) {
+      MaterialTapTargetSize.padded => Offset.zero,
+      // _dialogSize returns "padded" sizes.
+      MaterialTapTargetSize.shrinkWrap => const Offset(0, -12),
+    };
     final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(
@@ -2777,18 +2770,10 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
           ? localizations.timePickerDialHelpText
           : localizations.timePickerDialHelpText.toUpperCase());
 
-        final EdgeInsetsGeometry dialPadding;
-        switch (orientation) {
-          case Orientation.portrait:
-            dialPadding = const EdgeInsets.only(left: 12, right: 12, top: 36);
-          case Orientation.landscape:
-            switch (theme.materialTapTargetSize) {
-              case MaterialTapTargetSize.padded:
-                dialPadding = const EdgeInsetsDirectional.only(start: 64);
-              case MaterialTapTargetSize.shrinkWrap:
-                dialPadding = const EdgeInsetsDirectional.only(start: 64);
-            }
-        }
+        final EdgeInsetsGeometry dialPadding = switch (orientation) {
+          Orientation.portrait  => const EdgeInsets.only(left: 12, right: 12, top: 36),
+          Orientation.landscape => const EdgeInsetsDirectional.only(start: 64),
+        };
         final Widget dial = Padding(
           padding: dialPadding,
           child: ExcludeSemantics(
