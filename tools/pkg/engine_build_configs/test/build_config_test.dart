@@ -6,92 +6,15 @@ import 'dart:convert' as convert;
 
 import 'package:engine_build_configs/src/build_config.dart';
 import 'package:litetest/litetest.dart';
+import 'package:platform/platform.dart';
 
-const String buildConfigJson = '''
-{
-  "builds": [
-    {
-      "archives": [
-        {
-          "name": "build_name",
-          "base_path": "base/path",
-          "type": "gcs",
-          "include_paths": ["include/path"],
-          "realm": "archive_realm"
-        }
-      ],
-      "drone_dimensions": ["dimension"],
-      "gclient_variables": {
-        "variable": false
-      },
-      "gn": ["--gn-arg"],
-      "name": "build_name",
-      "ninja": {
-        "config": "build_name",
-        "targets": ["ninja_target"]
-      },
-      "tests": [
-        {
-          "language": "python3",
-          "name": "build_name tests",
-          "parameters": ["--test-params"],
-          "script": "test/script.py",
-          "contexts": ["context"]
-        }
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "generator_task",
-            "parameters": ["--gen-param"],
-            "scripts": ["gen/script.py"]
-          }
-        ]
-      }
-    }
-  ],
-  "generators": {
-    "tasks": [
-      {
-        "name": "global generator task",
-        "parameters": ["--global-gen-param"],
-        "script": "global/gen_script.dart",
-        "language": "dart"
-      }
-    ]
-  },
-  "tests": [
-    {
-      "name": "global test",
-      "recipe": "engine_v2/tester_engine",
-      "drone_dimensions": ["dimension"],
-      "gclient_variables": {
-        "variable": false
-      },
-      "dependencies": ["dependency"],
-      "test_dependencies": [
-        {
-          "dependency": "test_dependency",
-          "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"
-        }
-      ],
-      "tasks": [
-        {
-          "name": "global test task",
-          "parameters": ["--test-parameter"],
-          "script": "global/test/script.py"
-        }
-      ]
-    }
-  ]
-}
-''';
+import 'fixtures.dart' as fixtures;
 
 int main() {
   test('BuildConfig parser works', () {
     final BuildConfig buildConfig = BuildConfig.fromJson(
       path: 'linux_test_config',
-      map: convert.jsonDecode(buildConfigJson) as Map<String, Object?>,
+      map: convert.jsonDecode(fixtures.buildConfigJson) as Map<String, Object?>,
     );
     expect(buildConfig.valid, isTrue);
     expect(buildConfig.errors, isNull);
@@ -99,10 +22,18 @@ int main() {
 
     final GlobalBuild globalBuild = buildConfig.builds[0];
     expect(globalBuild.name, equals('build_name'));
-    expect(globalBuild.gn.length, equals(1));
+    expect(globalBuild.gn.length, equals(4));
     expect(globalBuild.gn[0], equals('--gn-arg'));
     expect(globalBuild.droneDimensions.length, equals(1));
-    expect(globalBuild.droneDimensions[0], equals('dimension'));
+    expect(globalBuild.droneDimensions[0], equals('os=Linux'));
+    expect(
+      globalBuild.canRunOn(FakePlatform(operatingSystem: Platform.linux)),
+      isTrue,
+    );
+    expect(
+      globalBuild.canRunOn(FakePlatform(operatingSystem: Platform.macOS)),
+      isFalse,
+    );
 
     final BuildNinja ninja = globalBuild.ninja;
     expect(ninja.config, equals('build_name'));
@@ -148,7 +79,15 @@ int main() {
     expect(globalTest.name, equals('global test'));
     expect(globalTest.recipe, equals('engine_v2/tester_engine'));
     expect(globalTest.droneDimensions.length, equals(1));
-    expect(globalTest.droneDimensions[0], equals('dimension'));
+    expect(globalTest.droneDimensions[0], equals('os=Linux'));
+    expect(
+      globalTest.canRunOn(FakePlatform(operatingSystem: Platform.linux)),
+      isTrue,
+    );
+    expect(
+      globalTest.canRunOn(FakePlatform(operatingSystem: Platform.macOS)),
+      isFalse,
+    );
     expect(globalTest.dependencies.length, equals(1));
     expect(globalTest.dependencies[0], equals('dependency'));
 
