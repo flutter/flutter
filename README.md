@@ -1,5 +1,4 @@
-Flutter Engine
-==============
+# Flutter Engine
 
 [![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=engine)](https://flutter-dashboard.appspot.com/#/build?repo=engine)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/engine/badge)](https://deps.dev/project/github/flutter%2Fengine)
@@ -11,7 +10,7 @@ code, is used by developers and organizations around the world, and is free
 and open source.
 
 The Flutter Engine is a portable runtime for hosting
-[Flutter](https://flutter.dev) applications.  It implements Flutter's core
+[Flutter](https://flutter.dev) applications. It implements Flutter's core
 libraries, including animation and graphics, file and network I/O,
 accessibility support, plugin architecture, and a Dart runtime and compile
 toolchain. Most developers will interact with Flutter via the [Flutter
@@ -31,8 +30,3 @@ the [docs.flutter.dev](https://docs.flutter.dev/).
 Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
 [contributor guide](CONTRIBUTING.md).
-
-[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/engine.svg?branch=main
-
-[Build status]: https://cirrus-ci.com/github/flutter/engine
-

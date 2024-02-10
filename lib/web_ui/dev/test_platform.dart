@@ -1147,5 +1147,3 @@ class _BrowserEnvironment implements Environment {
   @override
   CancelableOperation<void> displayPause() => _manager._displayPause();
 }
-
-bool get isCirrus => Platform.environment['CIRRUS_CI'] == 'true';
