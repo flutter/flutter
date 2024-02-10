@@ -13,7 +13,7 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/android_choreographer.h"
+#include "flutter/shell/platform/android/ndk_helpers.h"
 
 namespace flutter {
 
@@ -22,32 +22,51 @@ static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 static std::atomic_uint g_refresh_rate_ = 60;
 
 VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
-    : VsyncWaiter(task_runners),
-      use_ndk_choreographer_(
-          AndroidChoreographer::ShouldUseNDKChoreographer()) {}
+    : VsyncWaiter(task_runners) {}
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
 // |VsyncWaiter|
 void VsyncWaiterAndroid::AwaitVSync() {
-  if (use_ndk_choreographer_) {
-    auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetUITaskRunner(), [weak_this]() {
-          AndroidChoreographer::PostFrameCallback(&OnVsyncFromNDK, weak_this);
-        });
-  } else {
-    // TODO(99798): Remove it when we drop support for API level < 29.
-    auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
-    jlong java_baton = reinterpret_cast<jlong>(weak_this);
-    task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
-      JNIEnv* env = fml::jni::AttachCurrentThread();
-      env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //
-                                g_async_wait_for_vsync_method_,  //
-                                java_baton                       //
-      );
-    });
+  switch (NDKHelpers::ChoreographerSupported()) {
+    case ChoreographerSupportStatus::kSupported32: {
+      auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetUITaskRunner(), [weak_this]() {
+            NDKHelpers::AChoreographer_postFrameCallback(
+                NDKHelpers::AChoreographer_getInstance(), &OnVsyncFromNDK32,
+                weak_this);
+          });
+    } break;
+    case ChoreographerSupportStatus::kSupported64: {
+      auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetUITaskRunner(), [weak_this]() {
+            NDKHelpers::AChoreographer_postFrameCallback64(
+                NDKHelpers::AChoreographer_getInstance(), &OnVsyncFromNDK,
+                weak_this);
+          });
+    } break;
+    case ChoreographerSupportStatus::kUnsupported: {
+      // TODO(99798): Remove it when we drop support for API level < 29.
+      auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
+      jlong java_baton = reinterpret_cast<jlong>(weak_this);
+      task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
+        JNIEnv* env = fml::jni::AttachCurrentThread();
+        env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //
+                                  g_async_wait_for_vsync_method_,  //
+                                  java_baton                       //
+        );
+      });
+    } break;
   }
+}
+
+// static
+void VsyncWaiterAndroid::OnVsyncFromNDK32(
+    long frame_nanos,  // NOLINT to match a deprecated NDK interface.
+    void* data) {
+  OnVsyncFromNDK(frame_nanos, data);
 }
 
 // static

@@ -78,8 +78,6 @@ source_set("flutter_shell_native_src") {
   visibility = [ ":*" ]
 
   sources = [
-    "android_choreographer.cc",
-    "android_choreographer.h",
     "android_context_gl_impeller.cc",
     "android_context_gl_impeller.h",
     "android_context_gl_skia.cc",

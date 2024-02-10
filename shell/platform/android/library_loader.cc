@@ -14,6 +14,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   // Initialize the Java VM.
   fml::jni::InitJavaVM(vm);
 
+  // Registery dlsym lookups for NDK functions
+  flutter::NDKHelpers::Init();
+
   JNIEnv* env = fml::jni::AttachCurrentThread();
   bool result = false;
 

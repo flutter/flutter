@@ -25,6 +25,18 @@ typedef void (*fp_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
 typedef void (*fp_AHardwareBuffer_getId)(AHardwareBuffer* buffer,
                                          uint64_t* outId);
 
+typedef bool (*fp_ATrace_isEnabled)(void);
+
+typedef AChoreographer* (*fp_AChoreographer_getInstance)(void);
+typedef void (*fp_AChoreographer_postFrameCallback)(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback callbackk,
+    void* data);
+typedef void (*fp_AChoreographer_postFrameCallback64)(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback64 callbackk,
+    void* data);
+
 typedef EGLClientBuffer (*fp_eglGetNativeClientBufferANDROID)(
     AHardwareBuffer* buffer);
 
@@ -37,6 +49,17 @@ void (*_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
                                   AHardwareBuffer_Desc* desc) = nullptr;
 void (*_AHardwareBuffer_getId)(AHardwareBuffer* buffer,
                                uint64_t* outId) = nullptr;
+bool (*_ATrace_isEnabled)() = nullptr;
+AChoreographer* (*_AChoreographer_getInstance)() = nullptr;
+void (*_AChoreographer_postFrameCallback)(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback callbackk,
+    void* data) = nullptr;
+void (*_AChoreographer_postFrameCallback64)(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback64 callbackk,
+    void* data) = nullptr;
+
 EGLClientBuffer (*_eglGetNativeClientBufferANDROID)(AHardwareBuffer* buffer) =
     nullptr;
 
@@ -75,6 +98,32 @@ void InitOnceCallback() {
           ->ResolveFunction<fp_AHardwareBuffer_describe>(
               "AHardwareBuffer_describe")
           .value_or(nullptr);
+
+  _ATrace_isEnabled =
+      android->ResolveFunction<fp_ATrace_isEnabled>("ATrace_isEnabled")
+          .value_or(nullptr);
+
+  _AChoreographer_getInstance =
+      android
+          ->ResolveFunction<fp_AChoreographer_getInstance>(
+              "AChoreographer_getInstance")
+          .value_or(nullptr);
+  if (_AChoreographer_getInstance) {
+    _AChoreographer_postFrameCallback64 =
+        android
+            ->ResolveFunction<fp_AChoreographer_postFrameCallback64>(
+                "AChoreographer_postFrameCallback64")
+            .value_or(nullptr);
+#if FML_ARCH_CPU_64_BITS
+    if (!_AChoreographer_postFrameCallback64) {
+      _AChoreographer_postFrameCallback =
+          android
+              ->ResolveFunction<fp_AChoreographer_postFrameCallback>(
+                  "AChoreographer_postFrameCallback")
+              .value_or(nullptr);
+    }
+#endif
+  }
 }
 
 }  // namespace
@@ -83,8 +132,45 @@ void NDKHelpers::Init() {
   std::call_once(init_once, InitOnceCallback);
 }
 
+bool NDKHelpers::ATrace_isEnabled() {
+  if (_ATrace_isEnabled) {
+    return _ATrace_isEnabled();
+  }
+  return false;
+}
+
+ChoreographerSupportStatus NDKHelpers::ChoreographerSupported() {
+  if (_AChoreographer_postFrameCallback64) {
+    return ChoreographerSupportStatus::kSupported64;
+  }
+  if (_AChoreographer_postFrameCallback) {
+    return ChoreographerSupportStatus::kSupported32;
+  }
+  return ChoreographerSupportStatus::kUnsupported;
+}
+
+AChoreographer* NDKHelpers::AChoreographer_getInstance() {
+  FML_CHECK(_AChoreographer_getInstance);
+  return _AChoreographer_getInstance();
+}
+
+void NDKHelpers::AChoreographer_postFrameCallback(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback callback,
+    void* data) {
+  FML_CHECK(_AChoreographer_postFrameCallback);
+  return _AChoreographer_postFrameCallback(choreographer, callback, data);
+}
+
+void NDKHelpers::AChoreographer_postFrameCallback64(
+    AChoreographer* choreographer,
+    AChoreographer_frameCallback64 callback,
+    void* data) {
+  FML_CHECK(_AChoreographer_postFrameCallback64);
+  return _AChoreographer_postFrameCallback64(choreographer, callback, data);
+}
+
 bool NDKHelpers::HardwareBufferSupported() {
-  NDKHelpers::Init();
   const bool r = _AHardwareBuffer_fromHardwareBuffer != nullptr;
   return r;
 }
@@ -92,33 +178,28 @@ bool NDKHelpers::HardwareBufferSupported() {
 AHardwareBuffer* NDKHelpers::AHardwareBuffer_fromHardwareBuffer(
     JNIEnv* env,
     jobject hardwareBufferObj) {
-  NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_fromHardwareBuffer != nullptr);
   return _AHardwareBuffer_fromHardwareBuffer(env, hardwareBufferObj);
 }
 
 void NDKHelpers::AHardwareBuffer_acquire(AHardwareBuffer* buffer) {
-  NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_acquire != nullptr);
   _AHardwareBuffer_acquire(buffer);
 }
 
 void NDKHelpers::AHardwareBuffer_release(AHardwareBuffer* buffer) {
-  NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_release != nullptr);
   _AHardwareBuffer_release(buffer);
 }
 
 void NDKHelpers::AHardwareBuffer_describe(AHardwareBuffer* buffer,
                                           AHardwareBuffer_Desc* desc) {
-  NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_describe != nullptr);
   _AHardwareBuffer_describe(buffer, desc);
 }
 
 std::optional<HardwareBufferKey> NDKHelpers::AHardwareBuffer_getId(
     AHardwareBuffer* buffer) {
-  NDKHelpers::Init();
   if (_AHardwareBuffer_getId == nullptr) {
     return std::nullopt;
   }
@@ -129,7 +210,6 @@ std::optional<HardwareBufferKey> NDKHelpers::AHardwareBuffer_getId(
 
 EGLClientBuffer NDKHelpers::eglGetNativeClientBufferANDROID(
     AHardwareBuffer* buffer) {
-  NDKHelpers::Init();
   FML_CHECK(_eglGetNativeClientBufferANDROID != nullptr);
   return _eglGetNativeClientBufferANDROID(buffer);
 }
