@@ -5,14 +5,3 @@
 platforms:
   - chrome
   - vm
-
-presets:
-  cirrus:
-    override_platforms:
-      chrome:
-        settings:
-          # Required because Cirrus runs us as root.
-          # https://chromium.googlesource.com/chromium/src/+/master/docs/design/sandbox.md
-          # https://docs.travis-ci.com/user/chrome#Sandboxing
-          arguments: --no-sandbox
-    reporter: expanded
