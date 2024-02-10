@@ -30,6 +30,8 @@ dev_dependencies:
   async_helper: any
   expect: any
   litetest: any
+  process_fakes:
+    path: ../process_fakes
   smith: any
 
 dependency_overrides:

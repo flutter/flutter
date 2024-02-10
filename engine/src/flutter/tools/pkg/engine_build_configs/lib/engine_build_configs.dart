@@ -22,3 +22,4 @@ library;
 
 export 'src/build_config.dart';
 export 'src/build_config_loader.dart';
+export 'src/build_config_runner.dart';
