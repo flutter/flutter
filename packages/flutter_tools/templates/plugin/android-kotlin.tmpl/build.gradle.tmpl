@@ -1,5 +1,5 @@
-group "{{androidIdentifier}}"
-version "1.0-SNAPSHOT"
+group = "{{androidIdentifier}}"
+version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "{{kotlinVersion}}"
@@ -9,8 +9,8 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:{{agpVersion}}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("com.android.tools.build:gradle:{{agpVersion}}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
 
@@ -26,14 +26,14 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace "{{androidIdentifier}}"
+        namespace = "{{androidIdentifier}}"
     }
 
-    compileSdk {{compileSdkVersion}}
+    compileSdk = {{compileSdkVersion}}
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
@@ -46,12 +46,12 @@ android {
     }
 
     defaultConfig {
-        minSdk {{minSdkVersion}}
+        minSdk = {{minSdkVersion}}
     }
 
     dependencies {
-        testImplementation "org.jetbrains.kotlin:kotlin-test"
-        testImplementation "org.mockito:mockito-core:5.0.0"
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.mockito:mockito-core:5.0.0")
     }
 
     testOptions {
