@@ -41,7 +41,6 @@ List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBo
 Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
   assert(0 <= offset);
   final RenderEditable renderEditable = findRenderEditable(tester, index: index);
-  assert(offset < renderEditable.plainText.length, '$offset >= ${renderEditable.plainText.length}');
   final List<TextSelectionPoint> endpoints = globalize(
     renderEditable.getEndpointsForSelection(
       TextSelection.collapsed(offset: offset),

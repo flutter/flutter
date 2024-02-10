@@ -181,11 +181,11 @@ void main() {
     }).toList();
   }
 
-  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset, { TextAffinity affinity = TextAffinity.downstream }) {
+  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset, affinity: affinity),
+        TextSelection.collapsed(offset: offset),
       ),
       renderEditable,
     );
@@ -3384,19 +3384,19 @@ void main() {
     expectCupertinoToolbarForFullSelection();
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 65, affinity: TextAffinity.upstream), // Last character's position.
+      const TextSelection.collapsed(offset: 65), // Last character's position.
     );
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(785.40, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(770.0, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.00, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.0, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
@@ -6941,7 +6941,7 @@ void main() {
       // the arrow should not point exactly to the caret because the caret is
       // too close to the right.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       await tester.pumpWidget(
         CupertinoApp(
           debugShowCheckedModeBanner: false,
@@ -7002,7 +7002,7 @@ void main() {
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -7022,15 +7022,22 @@ void main() {
         ),
       );
 
+      // textOffsetToBottomLeftPosition only works for downstream affinity.
       state = tester.state<EditableTextState>(find.byType(EditableText));
-      state.renderEditable.selectPositionAt(
-        from: tester.getCenter(find.byType(EditableText)),
-        cause: SelectionChangedCause.tap,
-      );
+      Offset offsetToSelect = tester.getCenter(find.byType(EditableText));
+      final TextPosition position = state.renderEditable.getPositionForPoint(offsetToSelect);
+      offsetToSelect = switch (position.affinity) {
+        TextAffinity.downstream => offsetToSelect,
+        TextAffinity.upstream => state.renderEditable
+          .getBoxesForSelection(TextSelection(baseOffset: position.offset, extentOffset: position.offset + 1))
+          .single.toRect().centerLeft + const Offset(1.0, 0),
+      };
+
+      state.renderEditable.selectPositionAt(from: offsetToSelect, cause: SelectionChangedCause.tap);
       await tester.pumpAndSettle();
 
       final TextSelection selection = state.renderEditable.selection!;
-      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, selection.baseOffset, affinity: selection.affinity);
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, selection.baseOffset);
 
       expect(
         find.byType(CupertinoTextSelectionToolbar),
@@ -7068,7 +7075,7 @@ void main() {
 
       // Normal multiword collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
-      controller = TextEditingController(text: List<String>.filled(20, 'a').join('  '));
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(

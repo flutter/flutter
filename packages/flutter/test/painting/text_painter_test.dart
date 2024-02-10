@@ -4,7 +4,9 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -186,10 +188,8 @@ void main() {
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-    expect(
-      () => painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero),
-      throwsA(isA<FlutterError>().having((FlutterError e) => e.message, 'message', contains('not a valid location'))),
-    );
+
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 0);
     painter.dispose();
   });

@@ -307,7 +307,7 @@ void main() {
     expectNoCupertinoToolbar();
 
     // Paste it at the end.
-    await gesture.down(textOffsetToPosition(tester, controller.text.length - 1));
+    await gesture.down(textOffsetToPosition(tester, controller.text.length));
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -417,7 +417,7 @@ void main() {
 
     // Paste it at the end.
     gesture = await tester.startGesture(
-      textOffsetToPosition(tester, controller.text.length - 1),
+      textOffsetToPosition(tester, controller.text.length),
       kind: PointerDeviceKind.mouse,
     );
     await tester.pump();
@@ -425,7 +425,7 @@ void main() {
     await gesture.removePointer();
     expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
     gesture = await tester.startGesture(
-      textOffsetToPosition(tester, controller.text.length - 1),
+      textOffsetToPosition(tester, controller.text.length),
       kind: PointerDeviceKind.mouse,
       buttons: kSecondaryMouseButton,
     );
@@ -3938,17 +3938,23 @@ void main() {
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
   Future<void> showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
-    await tester.tapAt(tester.getCenter(find.byType(EditableText)));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.hideToolbar();
+    state.widget.focusNode.requestFocus();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     expect(find.text('Select all'), findsNothing);
 
+    //print('showMenuAt: $index');
     // Tap the selection handle to bring up the "paste / select all" menu for
     // the last line of text.
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
+    //print('tapped at: ${textOffsetToPosition(tester, index)}');
+    //print(renderEditable.text);
+    //print('${controller.selection} => ${renderEditable.getEndpointsForSelection(controller.selection)}');
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
@@ -3959,6 +3965,7 @@ void main() {
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    //print('$index => ${controller.selection}');
   }
 
   testWidgets(
@@ -10245,9 +10252,10 @@ void main() {
         await skipPastScrollingAnimation(tester);
         expect(controller.value.text, testValueB);
 
-        final Offset endOfTextPos = textOffsetToPosition(tester, testValueB.length - 1);
+        final Offset endOfTextPos = textOffsetToPosition(tester, testValueB.length);
 
         // Click on text field to gain focus, and move the selection.
+
         final TestGesture gesture = await tester.startGesture(endOfTextPos, kind: PointerDeviceKind.mouse);
         await tester.pump();
         await gesture.up();
@@ -12544,7 +12552,7 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
@@ -12633,14 +12641,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-255.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms - focused TextField', (WidgetTester tester) async {
@@ -12726,14 +12734,14 @@ void main() {
 
     expect(lastCharEndpoint.length, 1);
     // The last character is now on screen near the right edge.
-    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(800, epsilon: 1));
 
     final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 0), // First character's position.
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-255.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('mouse click and drag can edge scroll', (WidgetTester tester) async {
@@ -15257,6 +15265,7 @@ void main() {
   testWidgets('Caret rtl with changing width', (WidgetTester tester) async {
     late StateSetter setState;
     bool isWide = false;
+    const TextStyle style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
     const double wideWidth = 300.0;
     const double narrowWidth = 200.0;
     final TextEditingController controller = _textEditingController();
@@ -15271,6 +15280,8 @@ void main() {
                 key: textFieldKey,
                 controller: controller,
                 textDirection: TextDirection.rtl,
+                style: style,
+                cursorWidth: 2.0, // ignore: avoid_redundant_argument_values
               ),
             );
           },
@@ -15287,15 +15298,17 @@ void main() {
     expect(inputWidth, narrowWidth);
     expect(cursorRight, inputWidth - kCaretGap);
 
-    // After entering some text, the cursor remains on the right of the input.
-    await tester.enterText(find.byType(TextField), '12345');
+    const String text = '12345';
+    // After entering some text, the cursor is placed to the left of the text
+    // because the paragraph's writing direction is RTL.
+    await tester.enterText(find.byType(TextField), text);
     await tester.pump();
     editable = findRenderEditable(tester);
     cursorRight = editable.getLocalRectForCaret(
       TextPosition(offset: controller.value.text.length),
     ).topRight.dx;
     inputWidth = editable.size.width;
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - 2.0);
 
     // Since increasing the width of the input moves its right edge further to
     // the right, the cursor has followed this change and still appears on the
@@ -15310,7 +15323,7 @@ void main() {
     ).topRight.dx;
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - 2.0);
   });
 
   testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {

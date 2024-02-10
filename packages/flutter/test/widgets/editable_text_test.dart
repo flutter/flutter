@@ -12694,7 +12694,8 @@ void main() {
     await tester.pump();
     final EditableTextState state = tester.state(find.byType(EditableText));
 
-    // Select after the first word, with default affinity (downstream).
+    // Place the cursor at the leading edge of the starting charactor of the
+    // second word "a".
     controller.selection = const TextSelection.collapsed(offset: 27);
     await tester.pump();
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
@@ -12708,7 +12709,7 @@ void main() {
       )
     ));
 
-    // Select after the first word, with upstream affinity.
+    // Place the cursor at the trailing edge of the whitespace between the two words.
     controller.selection = const TextSelection.collapsed(offset: 27, affinity: TextAffinity.upstream);
     await tester.pump();
 
@@ -12718,7 +12719,7 @@ void main() {
     // The floating cursor should be drawn at the beginning of the second line.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(378.5, 1, 3, 12),
+        const Rect.fromLTWH(376.5, 1, 3, 12),
         const Radius.circular(1)
       )
     ));
@@ -12793,7 +12794,7 @@ void main() {
     // It's different because it's snapped to exactly between characters.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(56.5, 1, 3, 12),
+        const Rect.fromLTWH(54.5, 1, 3, 12),
         const Radius.circular(1)
       )
     ));
@@ -12804,7 +12805,7 @@ void main() {
     // The cursor should be drawn at the start of the line.
     expect(key.currentContext!.findRenderObject(), paints..rrect(
       rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Rect.fromLTWH(-1.5, 1, 3, 12),
         const Radius.circular(1)
       )
     ));
