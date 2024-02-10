@@ -9,8 +9,8 @@ import 'dart:ui' as ui;
 
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, FlutterError;
-import 'package:flutter_test/flutter_test.dart' hide test;
 import 'package:flutter_test/flutter_test.dart' as test_package;
+import 'package:flutter_test/flutter_test.dart' hide test;
 
 // 1x1 transparent pixel
 const List<int> _kExpectedPngBytes = <int>[
@@ -84,6 +84,15 @@ void main() {
       expect(goldenFileComparator, isA<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator as LocalFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
+    });
+
+    test('image comparison should not loop over all pixels when the data is the same', () async {
+      final List<int> invalidImageData1 = Uint8List.fromList(<int>[127]);
+      final List<int> invalidImageData2 = Uint8List.fromList(<int>[127]);
+      // This will fail if the comparison algorithm tries to generate the images
+      // to loop over every pixel which is not necessary when test and master
+      // is exactly the same (for performance reasons).
+      await GoldenFileComparator.compareLists(invalidImageData1, invalidImageData2);
     });
   });
 
@@ -192,7 +201,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
           final io.File master = fs.file(
@@ -223,7 +232,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
           final io.File master = fs.file(
@@ -302,7 +311,7 @@ void main() {
             throwsA(isFlutterError.having(
               (FlutterError error) => error.message,
               'message',
-              contains('% diff detected'),
+              contains('100.00%, 1px diff detected'),
             )),
           );
         });

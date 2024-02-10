@@ -763,15 +763,14 @@ class CupertinoTextField extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// Configuration for the text field magnifier.
+  ///
+  /// By default (when this property is set to null), a [CupertinoTextMagnifier]
+  /// is used on mobile platforms, and nothing on desktop platforms. To suppress
+  /// the magnifier on all platforms, consider passing
+  /// [TextMagnifierConfiguration.disabled] explicitly.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
-  ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
-  /// platforms. If it is desired to suppress the magnifier, consider passing
-  /// [TextMagnifierConfiguration.disabled].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the magnifier that this text field uses.

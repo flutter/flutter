@@ -175,18 +175,18 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master)) {
-    return ComparisonResult(
-      passed: true,
-      diffPercent: 0.0,
-    );
-  }
-
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
+    );
+  }
+
+  if (listEquals(test, master)) {
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
     );
   }
 
@@ -262,7 +262,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${(diffPercent * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}%, ${pixelDiffCount}px '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
