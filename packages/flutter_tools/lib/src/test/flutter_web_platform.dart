@@ -51,6 +51,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Logger logger,
     required Artifacts? artifacts,
     required ProcessManager processManager,
+    required this.webRenderer,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
@@ -80,7 +81,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: processManager,
-      webRenderer: _rendererMode,
+      webRenderer: webRenderer,
     );
   }
 
@@ -96,6 +97,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
+  final WebRendererMode webRenderer;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -118,6 +120,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ChromiumLauncher chromiumLauncher,
     required Artifacts? artifacts,
     required ProcessManager processManager,
+    required WebRendererMode webRenderer,
     TestTimeRecorder? testTimeRecorder,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -147,6 +150,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       logger: logger,
       nullAssertions: nullAssertions,
       processManager: processManager,
+      webRenderer: webRenderer,
       testTimeRecorder: testTimeRecorder,
     );
   }
@@ -155,12 +159,6 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// Uri of the test package.
   Uri get testUri => _flutterToolPackageConfig['test']!.packageUriRoot;
-
-  WebRendererMode get _rendererMode  {
-    return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
-      ? WebRendererMode.canvaskit
-      : WebRendererMode.html;
-  }
 
   NullSafetyMode get _nullSafetyMode {
     return buildInfo.nullSafetyMode == NullSafetyMode.sound
@@ -200,10 +198,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
