@@ -13,7 +13,7 @@ dependencies:
   flutter_devicelab:
     path: ../devicelab
   http_parser: 4.0.2
-  meta: 1.11.0
+  meta: 1.12.0
   path: 1.9.0
   platform: 3.1.4
   process: 5.0.2
@@ -75,4 +75,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.7.0
 
-# PUBSPEC CHECKSUM: e4d2
+# PUBSPEC CHECKSUM: e0d3
