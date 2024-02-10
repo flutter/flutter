@@ -347,12 +347,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    final FlutterView view = renderView.flutterView;
-    final double devicePixelRatio = view.devicePixelRatio;
-    return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
-    );
+    return ViewConfiguration.fromView(renderView.flutterView);
   }
 
   /// Called when the system metrics change.
@@ -759,6 +754,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
 /// A [PipelineManifold] implementation that is backed by the [RendererBinding].
 class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifold {
   _BindingPipelineManifold(this._binding) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _binding.addSemanticsEnabledListener(notifyListeners);
   }
 

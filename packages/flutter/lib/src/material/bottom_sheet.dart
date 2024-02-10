@@ -1333,6 +1333,7 @@ PersistentBottomSheetController showBottomSheet({
   Clip? clipBehavior,
   BoxConstraints? constraints,
   bool? enableDrag,
+  bool? showDragHandle,
   AnimationController? transitionAnimationController,
 }) {
   assert(debugCheckHasScaffold(context));
@@ -1345,6 +1346,7 @@ PersistentBottomSheetController showBottomSheet({
     clipBehavior: clipBehavior,
     constraints: constraints,
     enableDrag: enableDrag,
+    showDragHandle: showDragHandle,
     transitionAnimationController: transitionAnimationController,
   );
 }

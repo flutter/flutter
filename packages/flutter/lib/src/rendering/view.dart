@@ -19,14 +19,40 @@ import 'object.dart';
 class ViewConfiguration {
   /// Creates a view configuration.
   ///
-  /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
+  /// By default, the view has [logicalConstraints] and [physicalConstraints]
+  /// with all dimensions set to zero (i.e. the view is forced to [Size.zero])
+  /// and a [devicePixelRatio] of 1.0.
+  ///
+  /// [ViewConfiguration.fromView] is a more convenient way for deriving a
+  /// [ViewConfiguration] from a given [FlutterView].
   const ViewConfiguration({
-    this.size = Size.zero,
+    this.physicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
+    this.logicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.devicePixelRatio = 1.0,
   });
 
-  /// The size of the output surface.
-  final Size size;
+  /// Creates a view configuration for the provided [FlutterView].
+  factory ViewConfiguration.fromView(ui.FlutterView view) {
+    final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
+    final double devicePixelRatio = view.devicePixelRatio;
+    return ViewConfiguration(
+      physicalConstraints: physicalConstraints,
+      logicalConstraints: physicalConstraints / devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+    );
+  }
+
+  /// The constraints of the output surface in logical pixel.
+  ///
+  /// The constraints are passed to the child of the root render object.
+  final BoxConstraints logicalConstraints;
+
+  /// The constraints of the output surface in physical pixel.
+  ///
+  /// These constraints are enforced in [toPhysicalSize] when translating
+  /// the logical size of the root render object back to physical pixels for
+  /// the [FlutterView.render] method.
+  final BoxConstraints physicalConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -40,21 +66,36 @@ class ViewConfiguration {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
+  /// Transforms the provided [Size] in logical pixels to physical pixels.
+  ///
+  /// The [FlutterView.render] method accepts only sizes in physical pixels, but
+  /// the framework operates in logical pixels. This method is used to transform
+  /// the logical size calculated for a [RenderView] back to a physical size
+  /// suitable to be passed to [FlutterView.render].
+  ///
+  /// By default, this method just multiplies the provided [Size] with the
+  /// [devicePixelRatio] and constraints the results to the
+  /// [physicalConstraints].
+  Size toPhysicalSize(Size logicalSize) {
+    return physicalConstraints.constrain(logicalSize * devicePixelRatio);
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
     return other is ViewConfiguration
-        && other.size == size
+        && other.logicalConstraints == logicalConstraints
+        && other.physicalConstraints == physicalConstraints
         && other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
-  int get hashCode => Object.hash(size, devicePixelRatio);
+  int get hashCode => Object.hash(logicalConstraints, physicalConstraints, devicePixelRatio);
 
   @override
-  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
+  String toString() => '$logicalConstraints at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.
@@ -76,8 +117,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     ViewConfiguration? configuration,
     required ui.FlutterView view,
-  }) : _configuration = configuration,
-       _view = view {
+  }) : _view = view {
+    if (configuration != null) {
+      this.configuration = configuration;
+    }
     this.child = child;
   }
 
@@ -118,6 +161,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Whether a [configuration] has been set.
   bool get hasConfiguration => _configuration != null;
+
+  @override
+  BoxConstraints get constraints {
+    if (!hasConfiguration) {
+      throw StateError('Constraints are not available because RenderView has not been given a configuration yet.');
+    }
+    return configuration.logicalConstraints;
+  }
 
   /// The [FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
@@ -188,12 +239,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    _size = configuration.size;
-    assert(_size.isFinite);
-
+    final bool sizedByChild = !constraints.isTight;
     if (child != null) {
-      child!.layout(BoxConstraints.tight(_size));
+      child!.layout(constraints, parentUsesSize: sizedByChild);
     }
+    _size = sizedByChild && child != null ? child!.size : constraints.smallest;
+    assert(size.isFinite);
+    assert(constraints.isSatisfiedBy(size));
   }
 
   /// Determines the set of render objects located at the given position.
@@ -253,7 +305,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _view.render(scene);
+      assert(configuration.logicalConstraints.isSatisfiedBy(size));
+      _view.render(scene, size: configuration.toPhysicalSize(size));
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {

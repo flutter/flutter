@@ -149,8 +149,9 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  final double? factor = MediaQuery.maybeTextScalerOf(context)?.textScaleFactor;
-  return factor != null && factor > _kMaxRegularTextScaleFactor;
+  const double defaultFontSize = 14.0;
+  final double? scaledFontSize = MediaQuery.maybeTextScalerOf(context)?.scale(defaultFontSize);
+  return scaledFontSize != null && scaledFontSize > defaultFontSize * _kMaxRegularTextScaleFactor;
 }
 
 /// An iOS-style alert dialog.
@@ -264,7 +265,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
   Widget _buildContent(BuildContext context) {
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    const double defaultFontSize = 14.0;
+    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
     final List<Widget> children = <Widget>[
       if (widget.title != null || widget.content != null)
@@ -278,12 +280,12 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
               bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
-              top: _kDialogEdgePadding * textScaleFactor,
+              top: _kDialogEdgePadding * effectiveTextScaleFactor,
             ),
             messagePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: _kDialogEdgePadding * textScaleFactor,
+              bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
               top: widget.title == null ? _kDialogEdgePadding : 1.0,
             ),
             titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
@@ -1653,10 +1655,6 @@ class CupertinoDialogAction extends StatelessWidget {
   /// value.
   bool get enabled => onPressed != null;
 
-  double _calculatePadding(BuildContext context) {
-    return 8.0 * MediaQuery.textScalerOf(context).textScaleFactor;
-  }
-
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
   //
@@ -1665,6 +1663,7 @@ class CupertinoDialogAction extends StatelessWidget {
     required BuildContext context,
     required TextStyle textStyle,
     required Widget content,
+    required double padding,
   }) {
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double dialogWidth = isInAccessibilityMode
@@ -1675,7 +1674,6 @@ class CupertinoDialogAction extends StatelessWidget {
     // buttons. This ratio information is used to automatically scale down action
     // button text to fit the available space.
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) / _kDialogMinButtonFontSize;
-    final double padding = _calculatePadding(context);
 
     return IntrinsicHeight(
       child: SizedBox(
@@ -1724,8 +1722,7 @@ class CupertinoDialogAction extends StatelessWidget {
         isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    );
-    style = style.merge(textStyle);
+    ).merge(textStyle);
 
     if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
@@ -1734,7 +1731,10 @@ class CupertinoDialogAction extends StatelessWidget {
     if (!enabled) {
       style = style.copyWith(color: style.color!.withOpacity(0.5));
     }
-
+    final double fontSize = style.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double padding = 8.0 * effectiveTextScale;
     // Apply a sizing policy to the action button's content based on whether or
     // not the device is in accessibility mode.
     // TODO(mattcarroll): The following logic is not entirely correct. It is also
@@ -1750,6 +1750,7 @@ class CupertinoDialogAction extends StatelessWidget {
             context: context,
             textStyle: style,
             content: child,
+            padding: padding,
           );
 
     return MouseRegion(
@@ -1764,7 +1765,7 @@ class CupertinoDialogAction extends StatelessWidget {
           ),
           child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.all(_calculatePadding(context)),
+            padding: EdgeInsets.all(padding),
             child: sizedContent,
           ),
         ),

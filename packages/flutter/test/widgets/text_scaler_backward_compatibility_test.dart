@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TextStyle', () {
-    test('getTextSyle is backward compatible', () {
+    test('getTextStyle is backward compatible', () {
       expect(
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),

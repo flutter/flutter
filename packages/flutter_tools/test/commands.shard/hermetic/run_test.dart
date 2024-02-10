@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
@@ -26,9 +25,11 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -243,6 +244,62 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('Using flutter run -d with MacOSDesignedForIPadDevices throws an error', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
+
+        await expectLater(
+              () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '-d',
+            'mac-designed-for-ipad',
+              ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with a single MacOSDesignedForIPadDevices throws a tool error', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
+
+        await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '-d',
+              'all',
+            ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with MacOSDesignedForIPadDevices removes from device list, and attempts to launch', () async {
+        final RunCommand command = TestRunCommandThatOnlyValidates();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice(), FakeDevice()];
+
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '-d',
+          'all',
+        ]);
+
+        expect(command.devices?.length, 1);
+        expect(command.devices?.single.id, 'fake_device');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
       testUsingContext('exits and lists available devices when specified device not found', () async {
         final RunCommand command = RunCommand();
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
@@ -419,9 +476,38 @@ void main() {
         expect(
           testLogger.statusText,
           containsIgnoringWhitespace(
-            userMessages.flutterMissPlatformProjects(
+            globals.userMessages.flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
+        const List<String> runCommand = <String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--flavor=vanilla',
+          '-d',
+          'all',
+        ];
+
+        // Useful for test readability.
+        // ignore: avoid_redundant_argument_values
+        final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
+        final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
+        testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
+
+        await expectLater(
+          () => createTestCommandRunner(RunCommand()).run(runCommand),
+          throwsToolExit(
+            message: '--flavor is only supported for Android, macOS, and iOS devices.',
           ),
         );
       }, overrides: <Type, Generator>{
@@ -567,61 +653,6 @@ void main() {
       });
 
       group('--machine', () {
-        testUsingContext('enables multidex by default', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isTrue);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
-        testUsingContext('can disable multidex with --no-multidex', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--no-multidex',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isFalse);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
         testUsingContext('can pass --device-user', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice(platformType: PlatformType.android);
@@ -1227,12 +1258,12 @@ void main() {
       '--native-null-assertions',
       '--enable-impeller',
       '--enable-vulkan-validation',
-      '--impeller-force-gl',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
       '--ci',
+      '--debug-logs-dir=path/to/logs'
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1249,10 +1280,10 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.enableVulkanValidation, true);
-    expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
+    expect(options.debugLogsDirectoryPath, 'path/to/logs');
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1301,9 +1332,6 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   String get adbPath => 'adb';
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     bool isLocalEmulator = false,
@@ -1311,11 +1339,13 @@ class FakeDevice extends Fake implements Device {
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
     bool isSupported = true,
+    bool supportsFlavors = false,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
       _platformType = platformType,
-      _isSupported = isSupported;
+      _isSupported = isSupported,
+      _supportsFlavors = supportsFlavors;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
@@ -1324,6 +1354,7 @@ class FakeDevice extends Fake implements Device {
   final String _sdkNameAndVersion;
   final PlatformType _platformType;
   final bool _isSupported;
+  final bool _supportsFlavors;
 
   @override
   Category get category => Category.mobile;
@@ -1350,6 +1381,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get supportsFlavors => _supportsFlavors;
 
   @override
   bool get ephemeral => true;
@@ -1439,9 +1473,27 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
+class FakeMacDesignedForIpadDevice extends Fake implements MacOSDesignedForIPadDevice {
+
+  @override
+  String get id => 'mac-designed-for-ipad';
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject project) => true;
+}
+
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     this.connectionInterface = DeviceConnectionInterface.attached,
@@ -1508,6 +1560,9 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
   }
+
+  @override
+  bool get shouldRunPub => false;
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
@@ -1544,7 +1599,6 @@ class DaemonCapturingRunCommand extends RunCommand {
 class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon);
 
-  bool? multidexEnabled;
   String? userIdentifier;
   bool? enableDevTools;
 
@@ -1562,14 +1616,13 @@ class CapturingAppDomain extends AppDomain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
     String? flavor,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
-    this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
     this.enableDevTools = enableDevTools;
     throwToolExit('');

@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 /// features are enabled, consider the [FakeAccessibilityFeatures.allOn]
 /// constant.
 @immutable
-// ignore: avoid_implementing_value_types
 class FakeAccessibilityFeatures implements AccessibilityFeatures {
   /// Creates a test instance of [AccessibilityFeatures].
   ///
@@ -751,6 +750,9 @@ class TestFlutterView implements FlutterView {
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
   ///
+  /// Setting this value also sets [physicalConstraints] to tight constraints
+  /// based on the given size.
+  ///
   /// See also:
   ///
   ///   * [FlutterView.physicalSize] for the standard implementation
@@ -761,12 +763,39 @@ class TestFlutterView implements FlutterView {
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
+    // For backwards compatibility the constraints are set based on the provided size.
+    physicalConstraints = ViewConstraints.tight(value);
+  }
+
+  /// Resets [physicalSize] (and implicitly also the [physicalConstraints]) to
+  /// the default value for this view.
+  void resetPhysicalSize() {
+    _physicalSize = null;
+    resetPhysicalConstraints();
+  }
+
+  /// The physical constraints to use for this test.
+  ///
+  /// Defaults to the value provided by [FlutterView.physicalConstraints]. This
+  /// can only be set in a test environment to emulate different view
+  /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [FlutterView.physicalConstraints] for the standard implementation
+  ///   * [physicalConstraints] to reset this value specifically
+  ///   * [reset] to reset all test values for this view
+  @override
+  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
+  ViewConstraints? _physicalConstraints;
+  set physicalConstraints(ViewConstraints value) {
+    _physicalConstraints = value;
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// Resets [physicalSize] to the default value for this view.
-  void resetPhysicalSize() {
-    _physicalSize = null;
+  /// Resets [physicalConstraints] to the default value for this view.
+  void resetPhysicalConstraints() {
+    _physicalConstraints = null;
     platformDispatcher.onMetricsChanged?.call();
   }
 
@@ -875,8 +904,7 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @override
@@ -901,6 +929,7 @@ class TestFlutterView implements FlutterView {
     resetDisplayFeatures();
     resetPadding();
     resetPhysicalSize();
+    // resetPhysicalConstraints is implicitly called by resetPhysicalSize.
     resetSystemGestureInsets();
     resetViewInsets();
     resetViewPadding();
@@ -1637,8 +1666,7 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @Deprecated(

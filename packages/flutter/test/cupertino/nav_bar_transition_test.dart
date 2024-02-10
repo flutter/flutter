@@ -20,14 +20,14 @@ Future<void> startTransitionBetween(
   String? toTitle,
   TextDirection textDirection = TextDirection.ltr,
   CupertinoThemeData? theme,
-  double textScale = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
       theme: theme,
       builder: (BuildContext context, Widget? navigator) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
           child: Directionality(
             textDirection: textDirection,
             child: navigator!,
@@ -1393,11 +1393,13 @@ void main() {
   });
 
   testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
-    await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
+    await startTransitionBetween(tester, fromTitle: 'Page 1', textScaler: const TextScaler.linear(99));
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
+    final TextScaler scaler = tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaler;
+    final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
+    expect(fontSizes.map(scaler.scale), fontSizes);
   });
 
   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {

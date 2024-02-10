@@ -191,13 +191,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         return;
       }
 
-      final double left;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          left = size.width - width - x;
-        case TextDirection.ltr:
-          left = x;
-      }
+      final double left = switch (textDirection) {
+        TextDirection.rtl => size.width - width - x,
+        TextDirection.ltr => x,
+      };
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {
@@ -705,7 +702,18 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
-    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
+    final double? value = widget.value;
+    if (value == null) {
+      return CupertinoActivityIndicator(
+        key: widget.key,
+        color: tickColor
+      );
+    }
+    return CupertinoActivityIndicator.partiallyRevealed(
+      key: widget.key,
+      color: tickColor,
+      progress: value
+    );
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {

@@ -116,7 +116,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
-  /// The button diabled background color. This color is shown after the
+  /// The button disabled background color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   ///
   /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
@@ -476,9 +476,14 @@ class SnackBar extends StatefulWidget {
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({
+    required TickerProvider vsync,
+    Duration? duration,
+    Duration? reverseDuration,
+  }) {
     return AnimationController(
-      duration: _snackBarTransitionDuration,
+      duration: duration ?? _snackBarTransitionDuration,
+      reverseDuration: reverseDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
     );

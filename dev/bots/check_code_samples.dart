@@ -234,7 +234,7 @@ class SampleChecker {
     final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
     // Looks for some common broken versions of example links. This looks for
     // something that is at minimum "///*seecode<something>*" to indicate that it
-    // looks like an example link. It should be narrowed if we start gettting false
+    // looks like an example link. It should be narrowed if we start getting false
     // positives.
     final RegExp malformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)');
     for (final File file in files) {
@@ -374,7 +374,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/checkbox/checkbox.1_test.dart',
   'examples/api/test/material/checkbox/checkbox.0_test.dart',
   'examples/api/test/material/navigation_rail/navigation_rail.extended_animation.0_test.dart',
-  'examples/api/test/material/text_button/text_button.0_test.dart',
   'examples/api/test/rendering/growth_direction/growth_direction.0_test.dart',
   'examples/api/test/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.0_test.dart',
   'examples/api/test/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.1_test.dart',
@@ -406,7 +405,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/drag_target/draggable.0_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.1_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.0_test.dart',
-  'examples/api/test/widgets/form/form.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.2_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.1_test.dart',

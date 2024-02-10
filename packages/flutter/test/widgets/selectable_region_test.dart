@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
+import 'process_text_utils.dart';
 import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
@@ -373,40 +374,40 @@ void main() {
       expect(edgeEvent.granularity, TextGranularity.word);
     });
 
-  testWidgets(
-    'touch long press cancel does not send ClearSelectionEvent',
-    (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
+    testWidgets(
+      'touch long press cancel does not send ClearSelectionEvent',
+      (WidgetTester tester) async {
+        final UniqueKey spy = UniqueKey();
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
 
-      await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
+        await tester.pumpWidget(
+            MaterialApp(
+              home: SelectableRegion(
+                focusNode: focusNode,
+                selectionControls: materialTextSelectionControls,
+                child: SelectionSpy(key: spy),
+              ),
             ),
-          ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final RenderSelectionSpy renderSelectionSpy =
-          tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
-      renderSelectionSpy.events.clear();
-      final TestGesture gesture =
-          await tester.startGesture(const Offset(200.0, 200.0));
+        final RenderSelectionSpy renderSelectionSpy =
+            tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+        renderSelectionSpy.events.clear();
+        final TestGesture gesture =
+            await tester.startGesture(const Offset(200.0, 200.0));
 
-      addTearDown(gesture.removePointer);
+        addTearDown(gesture.removePointer);
 
-      await tester.pump(const Duration(milliseconds: 500));
-      await gesture.cancel();
-      expect(
-        renderSelectionSpy.events.any((SelectionEvent element) => element is ClearSelectionEvent),
-        isFalse,
-      );
-    },
-  );
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.cancel();
+        expect(
+          renderSelectionSpy.events.any((SelectionEvent element) => element is ClearSelectionEvent),
+          isFalse,
+        );
+      },
+    );
 
     testWidgets(
       'scrolling after the selection does not send ClearSelectionEvent',
@@ -1066,10 +1067,12 @@ void main() {
         final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
-              focusNode: FocusNode(),
+              focusNode: focusNode,
               selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder: (
                 BuildContext context,
@@ -1418,7 +1421,7 @@ void main() {
     );
 
     testWidgets(
-      'right-click mouse shows the context menu at position on Android, Fucshia, and Windows',
+      'right-click mouse shows the context menu at position on Android, Fuchsia, and Windows',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
@@ -2074,7 +2077,7 @@ void main() {
       );
       final Offset gestureOffset = tester.getCenter(find.byKey(flutterLogo).first);
 
-      // Right click on unseletable element.
+      // Right click on unselectable element.
       final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -3164,7 +3167,7 @@ void main() {
     });
   });
 
-  testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+  testWidgets('toolbar is hidden on Android and iOS when orientation changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -3207,8 +3210,8 @@ void main() {
       defaultTargetPlatform == TargetPlatform.android ? findsNothing : findsNWidgets(2),
     );
   },
-    skip: kIsWeb, // [intended] Web uses its native context menu.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
   testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
@@ -3240,10 +3243,8 @@ void main() {
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
-    expect(buttonItems.length, 2);
+    // Press `Copy` item.
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
-
-    // Press `Copy` item
     buttonItems[0].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
@@ -3262,10 +3263,11 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(regionState.selectionOverlay, isNotNull);
-    }
+        // Test doesn't run these platforms.
+        break;    }
   },
-    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.mobile(),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
   testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
@@ -3297,11 +3299,23 @@ void main() {
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
-    expect(buttonItems.length, 2);
-    expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+    late ContextMenuButtonItem selectAllButton;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        // On Android, the select all button is after the share button.
+        expect(buttonItems[2].type, ContextMenuButtonType.selectAll);
+        selectAllButton = buttonItems[2];
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+        selectAllButton = buttonItems[1];
+    }
 
-    // Press `Select All` item
-    buttonItems[1].onPressed?.call();
+    // Press `Select All` item.
+    selectAllButton.onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
@@ -3318,14 +3332,13 @@ void main() {
         // Test doesn't run these platforms.
         break;
     }
-
   },
-    skip: kIsWeb, // [intended]
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }),
+    variant: TargetPlatformVariant.mobile(),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
-  testWidgets('builds the correct button items', (WidgetTester tester) async {
-    Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+  testWidgets('Selection behavior when clicking the `Share` button on Android', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -3338,9 +3351,67 @@ void main() {
             BuildContext context,
             SelectableRegionState selectableRegionState,
           ) {
-            buttonTypes = selectableRegionState.contextMenuButtonItems
-              .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-              .toSet();
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    await tester.longPressAt(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
+
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    String? lastShare;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'Share.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastShare = methodCall.arguments as String;
+      }
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    // Press the `Share` button.
+    expect(buttonItems[1].type, ContextMenuButtonType.share);
+    buttonItems[1].onPressed?.call();
+    expect(lastShare, 'are');
+    // On Android, share should clear the selection.
+    expect(regionState.selectionOverlay, isNull);
+    expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+    expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
+  },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
+  testWidgets('builds the correct button items', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
             return const SizedBox.shrink();
           },
           child: const Text('How are you?'),
@@ -3351,21 +3422,94 @@ void main() {
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
-    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
-    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(buttonTypes, contains(ContextMenuButtonType.copy));
-    expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        // On Android, the share button is before the select all button.
+        expect(buttonItems.length, 3);
+        expect(buttonItems[0].type, ContextMenuButtonType.copy);
+        expect(buttonItems[1].type, ContextMenuButtonType.share);
+        expect(buttonItems[2].type, ContextMenuButtonType.selectAll);
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(buttonItems.length, 2);
+        expect(buttonItems[0].type, ContextMenuButtonType.copy);
+        expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+    }
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended]
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+    final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+    Set<String?> buttonLabels = <String?>{};
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonLabels = selectableRegionState.contextMenuButtonItems
+              .map((ContextMenuButtonItem buttonItem) => buttonItem.label)
+              .toSet();
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The text processing actions are available on Android only.
+    final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+    expect(buttonLabels.contains(fakeAction1Label), areTextActionsSupported);
+    expect(buttonLabels.contains(fakeAction2Label), areTextActionsSupported);
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
   testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {

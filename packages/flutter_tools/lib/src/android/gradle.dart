@@ -38,7 +38,6 @@ import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
-import 'multidex.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
 ///
@@ -371,6 +370,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!buildInfo.androidGradleDaemon) {
       command.add('--no-daemon');
     }
+    if (buildInfo.androidSkipBuildDependencyValidation) {
+      command.add('-PskipDependencyChecks=true');
+    }
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
@@ -395,16 +397,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       command.add('-Ptarget-platform=$targetPlatforms');
     }
     command.add('-Ptarget=$target');
-    // Only attempt adding multidex support if all the flutter generated files exist.
-    // If the files do not exist and it was unintentional, the app will fail to build
-    // and prompt the developer if they wish Flutter to add the files again via gradle_error.dart.
-    if (androidBuildInfo.multidexEnabled &&
-        multiDexApplicationExists(project.directory) &&
-        androidManifestHasNameVariable(project.directory)) {
-      command.add('-Pmultidex-enabled=true');
-      ensureMultiDexApplicationExists(project.directory);
-      _logger.printStatus('Building with Flutter multidex support enabled.');
-    }
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final String baseApplicationName =
         project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2 ?
@@ -512,7 +504,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
         line: detectedGradleErrorLine!,
         project: project,
         usesAndroidX: usesAndroidX,
-        multidexEnabled: androidBuildInfo.multidexEnabled,
       );
 
       if (maxRetries == null || retry < maxRetries) {

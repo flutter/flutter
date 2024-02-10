@@ -877,8 +877,8 @@ void main() {
       // Test vertical divider position.
       final Finder divider = find.byType(VerticalDivider);
       final Offset dividerTopLeft = tester.getTopLeft(divider);
-      final Offset headerTextTopRiught = tester.getTopRight(headerText);
-      expect(dividerTopLeft.dx, headerTextTopRiught.dx + 16.0);
+      final Offset headerTextTopRight = tester.getTopRight(headerText);
+      expect(dividerTopLeft.dx, headerTextTopRight.dx + 16.0);
       expect(dividerTopLeft.dy, dialogTopLeft.dy);
 
       // Test sub header text position.

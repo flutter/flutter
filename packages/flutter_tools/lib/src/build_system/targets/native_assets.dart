@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
+import 'package:native_assets_cli/native_assets_cli_internal.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
-import '../../android/native_assets.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
-import '../../ios/native_assets.dart';
-import '../../linux/native_assets.dart';
-import '../../macos/native_assets.dart';
+import '../../isolated/native_assets/android/native_assets.dart';
+import '../../isolated/native_assets/ios/native_assets.dart';
+import '../../isolated/native_assets/linux/native_assets.dart';
+import '../../isolated/native_assets/macos/native_assets.dart';
+import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/windows/native_assets.dart';
 import '../../macos/xcode.dart';
-import '../../native_assets.dart';
-import '../../windows/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -104,6 +104,7 @@ class NativeAssets extends Target {
             fileSystem,
             buildRunner,
           );
+        case TargetPlatform.windows_arm64:
         case TargetPlatform.windows_x64:
           dependencies = await _buildWindows(
             environment,
@@ -306,8 +307,6 @@ class NativeAssets extends Target {
       Uri projectUri,
       FileSystem fileSystem,
       NativeAssetsBuildRunner buildRunner) {
-    final bool isAndroidLibrary =
-        environment.defines[kIsAndroidLibrary] == 'true';
     final String? androidArchsEnvironment = environment.defines[kAndroidArchs];
     final List<AndroidArch> androidArchs = _androidArchs(
       targetPlatform,
@@ -323,7 +322,6 @@ class NativeAssets extends Target {
       buildRunner: buildRunner,
       androidArchs: androidArchs,
       targetAndroidNdkApi: targetAndroidNdkApi,
-      isAndroidLibrary: isAndroidLibrary,
     );
   }
 
@@ -357,6 +355,7 @@ class NativeAssets extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throwToolExit('Unsupported Android target platform: $targetPlatform.');
     }
   }

@@ -36,6 +36,8 @@ void main() {
         );
       },
     );
+    addTearDown(() {entry1.remove(); entry1.dispose();});
+
     final OverlayEntry entry2 = OverlayEntry(
       maintainState: true,
       opaque: true,
@@ -43,6 +45,7 @@ void main() {
         return const Text('number2');
       },
     );
+    addTearDown(() { entry2.dispose();});
 
     await tester.pumpWidget(
       MaterialApp(

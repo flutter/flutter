@@ -71,6 +71,7 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _stdio = stdio,
        _logger = logger,
@@ -78,7 +79,8 @@ class AttachCommand extends FlutterCommand {
        _signals = signals,
        _platform = platform,
        _processInfo = processInfo,
-       _fileSystem = fileSystem {
+       _fileSystem = fileSystem,
+       _nativeAssetsBuilder = nativeAssetsBuilder {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -90,6 +92,7 @@ class AttachCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -149,6 +152,7 @@ class AttachCommand extends FlutterCommand {
   final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'attach';
@@ -212,9 +216,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<void> validateCommand() async {
-    // ARM macOS as an iOS target is hidden, except for attach.
-    MacOSDesignedForIPadDevices.allowDiscovery = true;
-
     await super.validateCommand();
 
     final Device? targetDevice = await findTargetDevice();
@@ -418,6 +419,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         late AppInstance app;
         try {
@@ -451,6 +453,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
@@ -507,6 +510,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required Device device,
     required FlutterProject flutterProject,
     required bool usesIpv6,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -527,6 +531,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       devToolsServerAddress: devToolsServerAddress,
       serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     return buildInfo.isDebug
@@ -539,6 +544,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+          nativeAssetsBuilder: _nativeAssetsBuilder,
           analytics: analytics,
         )
       : ColdRunner(
@@ -572,6 +579,8 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    String? nativeAssetsYamlFile,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
     required Analytics analytics,
   }) => HotRunner(
     devices,
@@ -584,6 +593,8 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
+    nativeAssetsBuilder: nativeAssetsBuilder,
     analytics: analytics,
   );
 }

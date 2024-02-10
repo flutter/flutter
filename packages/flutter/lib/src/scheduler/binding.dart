@@ -200,7 +200,7 @@ class PerformanceModeRequestHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/scheduler.dart',
         className: '$PerformanceModeRequestHandle',
         object: this,
@@ -219,7 +219,7 @@ class PerformanceModeRequestHandle {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _cleanup!();
     _cleanup = null;
@@ -391,11 +391,12 @@ mixin SchedulerBinding on BindingBase {
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
 
-  /// Allows the test framework to reset the lifecycle state back to its
-  /// initial value.
+  /// Allows the test framework to reset the lifecycle state and framesEnabled
+  /// back to their initial values.
   @visibleForTesting
-  void resetLifecycleState() {
+  void resetInternalState() {
     _lifecycleState = null;
+    _framesEnabled = true;
   }
 
   /// Called when the application lifecycle state changes.

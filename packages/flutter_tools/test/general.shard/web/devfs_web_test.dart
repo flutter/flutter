@@ -12,11 +12,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
@@ -71,9 +70,9 @@ void main() {
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
         fileSystem: globals.fs,
-        flutterRoot: null, // ignore: avoid_redundant_argument_values
+        flutterRoot: null,
         platform: FakePlatform(),
-        webBuildDirectory: null, // ignore: avoid_redundant_argument_values
+        webBuildDirectory: null,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
@@ -665,7 +664,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -681,9 +680,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -782,7 +781,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -797,9 +796,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -960,7 +959,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -969,9 +968,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
@@ -998,7 +997,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1016,9 +1015,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1044,7 +1043,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1062,9 +1061,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1098,7 +1097,7 @@ void main() {
       tlsCertPath: dummyCertPath,
       tlsCertKeyPath: dummyCertKeyPath,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1109,9 +1108,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1243,7 +1242,7 @@ void main() {
       tlsCertPath: null,
       tlsCertKeyPath: null,
       packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      urlTunneller: null,
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       useSseForInjectedClient: true,
@@ -1254,9 +1253,9 @@ void main() {
       enableDds: false,
       entrypoint: Uri.base,
       testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      expressionCompiler: null,
       extraHeaders: const <String, String>{},
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1309,10 +1308,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
