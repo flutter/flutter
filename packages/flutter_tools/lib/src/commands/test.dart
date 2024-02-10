@@ -13,6 +13,7 @@ import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -21,7 +22,6 @@ import '../test/runner.dart';
 import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
-import '../web/compile.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -64,6 +64,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
+    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -238,6 +239,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
   final bool verbose;
 
   @visibleForTesting
@@ -354,10 +357,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -370,7 +369,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      webRenderer: webRenderer,
     );
 
     String? testAssetDirectory;
@@ -510,6 +508,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
