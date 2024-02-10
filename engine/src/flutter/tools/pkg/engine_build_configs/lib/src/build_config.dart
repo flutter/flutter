@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 // This library parses Engine build config data out of the "Engine v2" build
 // config JSON files with the format described at:
@@ -286,6 +287,10 @@ final class GlobalBuild extends BuildConfigBase {
   /// A dictionary with variables included in the `custom_vars` section of the
   /// .gclient file before `gclient sync` is run.
   final Map<String, Object?> gclientVariables;
+
+  /// Returns true if platform is capable of executing this build and false
+  /// otherwise.
+  bool canRunOn(Platform platform) => _canRunOn(droneDimensions, platform);
 
   @override
   List<String> check(String path) {
@@ -601,6 +606,10 @@ final class GlobalTest extends BuildConfigBase {
   /// A list of dictionaries representing scripts and parameters to run them
   final List<TestTask> tasks;
 
+  /// Returns true if platform is capable of executing this build and false
+  /// otherwise.
+  bool canRunOn(Platform platform) => _canRunOn(droneDimensions, platform);
+
   @override
   List<String> check(String path) {
     final List<String> errors = <String>[];
@@ -744,6 +753,18 @@ final class GlobalArchive extends BuildConfigBase {
   final String realm;
 }
 
+bool _canRunOn(List<String> droneDimensions, Platform platform) {
+  String? os;
+  for (final String dimension in droneDimensions) {
+    os ??= switch (dimension.split('=')) {
+      ['os', 'Linux'] => Platform.linux,
+      ['os', final String win] when win.startsWith('Windows') => Platform.windows,
+      ['os', final String mac] when mac.startsWith('Mac') => Platform.macOS,
+      _ => null,
+    };
+  }
+  return os == platform.operatingSystem;
+}
 
 void appendTypeError(
   Map<String, Object?> map,
@@ -765,7 +786,6 @@ void appendTypeError(
     );
   }
 }
-
 
 List<T>? objListOfJson<T>(
   Map<String, Object?> map,
