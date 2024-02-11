@@ -324,59 +324,49 @@ class _TextLayout {
     };
   }
 
-  /// This line caret metrics in the paragraph's coordinates, when the caret is
-  /// placed at the end of the text (e.g.
-  /// TextPosition(offset: text.length, affinity: downstream)).
+  /// The line caret metrics in the paragraph's coordinates, when the caret is
+  /// placed at the end of the text (which is typically the EOT position
+  /// (text.length, downstream), unless maxLines is set to a non-null value).
   ///
-  /// This should not be called when the paragraph is emtpy.
+  /// This should not be called when the paragraph is emtpy as the implementation
+  /// relies on line metrics.
   ///
-  /// When the last text run in the paragraph has the opposite writing direction
-  /// (as compared to the paragraph's writing direction), this makes sure the
-  /// caret is placed at the same "end" of the line as if the line was ended with
-  /// a line feed.
+  /// When the last bidi level run in the paragraph and the parargraph's bidi
+  /// levels have opposite parities (which implies different opposite writing
+  /// directions), this makes sure the caret is placed at the same "end" of the
+  /// line as if the line was ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
-    assert(rawString.isNotEmpty);
+    final int lastLineIndex = _paragraph.numberOfLines - 1;
+    assert(lastLineIndex >= 0);
+    final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
     // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
     // spaces don't contribute to the line width thus require special handling
     // when they're present.
-    // Luckily trailing whitespaces have the same writing direction as the
-    // paragraph.
+    // Luckily they have the same bidi embedding level as the paragraph:
+    // https://unicode.org/reports/tr9/#L1
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
       0x9 ||        // horizontal tab
       0x20 => true, // space
       _ => false,
     };
-    final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(_paragraph.numberOfLines - 1)!;
-    assert(lineMetrics.hardBreak);
 
     final double baseline = lineMetrics.baseline;
-    if (hasTrailingSpaces) {
-      // This is the caret metrics for EOT so the full text must have been laid out.
-      final ui.GlyphInfo lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1)!;
-      final Rect glyphBounds = lastGlyph.graphemeClusterLayoutBounds;
-      return switch (writingDirection) {
-        TextDirection.ltr => _LineCaretMetrics(
-          offset: Offset(glyphBounds.right, baseline),
-          paintToRight: true,
-        ),
-        TextDirection.rtl => _LineCaretMetrics(
-          offset: Offset(glyphBounds.left, baseline),
-          paintToRight: false,
-        ),
+    final double dx;
+    final ui.GlyphInfo? lastGlyph;
+    if (hasTrailingSpaces && (lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1)) != null) {
+      final Rect glyphBounds = lastGlyph!.graphemeClusterLayoutBounds;
+      dx = switch (writingDirection) {
+        TextDirection.ltr => glyphBounds.right,
+        TextDirection.rtl => glyphBounds.left,
       };
     } else {
-      return switch (writingDirection) {
-        TextDirection.ltr => _LineCaretMetrics(
-          offset: Offset(lineMetrics.left + lineMetrics.width, baseline),
-          paintToRight: true,
-        ),
-        TextDirection.rtl => _LineCaretMetrics(
-          offset: Offset(lineMetrics.left, baseline),
-          paintToRight: false,
-        ),
+      dx = switch (writingDirection) {
+        TextDirection.ltr => lineMetrics.left + lineMetrics.width,
+        TextDirection.rtl => lineMetrics.left,
       };
     }
+    return _LineCaretMetrics(offset: Offset(dx, baseline), writingDirection: writingDirection);
   }
 
   double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
@@ -500,19 +490,20 @@ typedef _EmptyParagraph = Right<_LineCaretMetrics, void>;
 /// The _CaretMetrics for carets located in a non-empty line. Carets located in a
 /// non-empty line are associated with a glyph within the same line.
 final class _LineCaretMetrics {
-  const _LineCaretMetrics({required this.offset, required this.paintToRight});
+  const _LineCaretMetrics({required this.offset, required this.writingDirection});
   /// The offset from the top left corner of the paragraph to the the caret's
   /// baseline location.
   final Offset offset;
 
-  /// Whether the caret should be painted to the right of the [offset], or to
-  /// the left of it.
-  final bool paintToRight;
+  /// The writing direction of the glyph the _LineCaretMetrics is associated with.
+  /// The value determines whether the cursor is painted to the left or to the
+  /// right of [offset].
+  final TextDirection writingDirection;
 
   _LineCaretMetrics shift(Offset offset) {
     return offset == Offset.zero
       ? this
-      : _LineCaretMetrics(offset: offset + this.offset, paintToRight: paintToRight);
+      : _LineCaretMetrics(offset: offset + this.offset, writingDirection: writingDirection);
   }
 }
 
@@ -1364,9 +1355,9 @@ class TextPainter {
         // should be handled by RenderEditable instead.
         final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
         return Offset(dx, 0.0);
-      case _HasLineMetrics(value: _LineCaretMetrics(paintToRight: true, :final Offset offset)):
+      case _HasLineMetrics(value: _LineCaretMetrics(writingDirection: TextDirection.ltr, :final Offset offset)):
         rawOffset = offset;
-      case _HasLineMetrics(value: _LineCaretMetrics(paintToRight: false, :final Offset offset)):
+      case _HasLineMetrics(value: _LineCaretMetrics(writingDirection: TextDirection.rtl, :final Offset offset)):
         rawOffset = Offset(offset.dx - caretPrototype.width, offset.dy);
     }
     // If offset.dx is outside of the advertised content area, then the associated
@@ -1442,9 +1433,10 @@ class TextPainter {
     assert(!_debugNeedsRelayout);
 
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    // If nothing is laid out, there's only reasonable place to place the cursor.
-    // TODO: assert;
+    // If nothing is laid out, top start is the only reasonable place to place
+    // the cursor.
     if (cachedLayout.paragraph.numberOfLines < 1) {
+      // TODO(LongCatIsLooong): assert when an invalid position is given.
       return _emptyParagraph;
     }
     assert(plainText.isNotEmpty);
@@ -1456,7 +1448,6 @@ class TextPainter {
       TextPosition(:final int offset, affinity: TextAffinity.upstream) => (offset - 1, false)
     };
 
-    //print('position: $position > $offset, $anchorToLeadingEdge => ${cachedLayout.paragraph.getGlyphInfoAt(offset)}');
     final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset - 1;
     if (caretPositionCacheKey == cachedLayout._previousCaretPosition) {
       return _CaretMetrics.left(_caretMetrics);
@@ -1467,12 +1458,10 @@ class TextPainter {
     if (glyphInfo == null) {
       // If the glyph isn't laid out, it's either the position is (textLength,
       // downstream), or the position argument is invalid. Use the EOT caret.
-      // TODO: assert in the latter case.
+      // TODO(LongCatIsLooong): assert when an invalid position is given.
 
-      //print('// ${cachedLayout.paragraph.getGlyphInfoAt(offset)} $offset, $anchorToLeadingEdge => ${plainText.length} (${plainText.substring(offset, offset + 1)})');
       final ui.Paragraph template = _getOrCreateLayoutTemplate();
       assert(template.numberOfLines == 1);
-      // TODO: cache?
       final double baselineOffset = template.getLineMetricsAt(0)!.baseline;
       return _CaretMetrics.left(cachedLayout.layout._endOfTextCaretMetrics.shift(Offset(0.0, -baselineOffset)));
     }
@@ -1497,10 +1486,7 @@ class TextPainter {
       .single;
     final _LineCaretMetrics metrics =_LineCaretMetrics(
       offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
-      paintToRight: switch (box.direction) {
-        TextDirection.ltr => true,
-        TextDirection.rtl => false,
-      }
+      writingDirection: box.direction,
     );
 
     cachedLayout._previousCaretPosition = caretPositionCacheKey;
