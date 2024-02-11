@@ -1499,7 +1499,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ),
           ErrorHint(
             'When $when, the associated ScrollController must only have one '
-            'ScrollPosition attached.'
+            'ScrollPosition attached. '
             '${tryPrimary
               ? 'If a ScrollController has not been provided, the '
                 'PrimaryScrollController is used by default on mobile platforms '
