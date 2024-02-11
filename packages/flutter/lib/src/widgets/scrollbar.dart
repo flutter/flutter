@@ -1466,7 +1466,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ErrorHint(
             'The Scrollbar attempted to use the $controllerForError. This '
             'ScrollController should be associated with the ScrollView that '
-            'the Scrollbar is being applied to.'
+            'the Scrollbar is being applied to. '
             '${tryPrimary
               ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
                 'platforms will automatically use the '
