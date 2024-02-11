@@ -90,7 +90,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test icon alignment start in LTR.
-    expectedRightIconPosition(iconOffset: 16, textButtonIconOffset: 12) ;
+    expectedRightIconPosition(iconOffset: 16, textButtonIconOffset: 12);
 
     // Update icon alignment to end.
     await tester.tap(find.text('end'));
