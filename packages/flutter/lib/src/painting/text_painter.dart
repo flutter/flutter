@@ -478,21 +478,12 @@ class _TextPainterLayoutCacheWithOffset {
   int? _previousCaretPosition;
 }
 
-/// This is used to cache and pass the computed metrics regarding the
-/// caret's size and position. This is preferred due to the expensive
-/// nature of the calculation.
-///
-// A _CaretMetrics is either a _LineCaretMetrics or an _EmptyLineCaretMetrics.
-typedef _CaretMetrics = Either<_LineCaretMetrics, void>;
-typedef _HasLineMetrics = Left<_LineCaretMetrics, void>;
-typedef _EmptyParagraph = Right<_LineCaretMetrics, void>;
-
 /// The _CaretMetrics for carets located in a non-empty line. Carets located in a
-/// non-empty line are associated with a glyph within the same line.
+/// non-empty line are typically associated with a glyph within the same line.
 final class _LineCaretMetrics {
   const _LineCaretMetrics({required this.offset, required this.writingDirection});
   /// The offset from the top left corner of the paragraph to the the caret's
-  /// baseline location.
+  /// top start location.
   final Offset offset;
 
   /// The writing direction of the glyph the _LineCaretMetrics is associated with.
@@ -506,12 +497,6 @@ final class _LineCaretMetrics {
       : _LineCaretMetrics(offset: offset + this.offset, writingDirection: writingDirection);
   }
 }
-
-/// The _CaretMetrics for carets located in an empty line (when the text is
-/// empty, or the caret is between two a newline characters).
-///
-/// The y offset of the unoccupied line.
-const _CaretMetrics _emptyParagraph = _CaretMetrics.right(null);
 
 const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 
@@ -1344,22 +1329,21 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     final _TextPainterLayoutCacheWithOffset layoutCache = _layoutCache!;
-    final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
+    final _LineCaretMetrics? caretMetrics = _computeCaretMetrics(position);
 
-    final Offset rawOffset;
-    switch (caretMetrics) {
-      case _EmptyParagraph():
+    if (caretMetrics == null) {
         final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
-        // The full width is not (width - caretPrototype.width), because
-        // RenderEditable reserves cursor width on the right. Ideally this
-        // should be handled by RenderEditable instead.
-        final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
-        return Offset(dx, 0.0);
-      case _HasLineMetrics(value: _LineCaretMetrics(writingDirection: TextDirection.ltr, :final Offset offset)):
-        rawOffset = offset;
-      case _HasLineMetrics(value: _LineCaretMetrics(writingDirection: TextDirection.rtl, :final Offset offset)):
-        rawOffset = Offset(offset.dx - caretPrototype.width, offset.dy);
+      // The full width is not (width - caretPrototype.width), because
+      // RenderEditable reserves cursor width on the right. Ideally this
+      // should be handled by RenderEditable instead.
+      final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
+      return Offset(dx, 0.0);
     }
+
+    final Offset rawOffset = switch (caretMetrics) {
+      _LineCaretMetrics(writingDirection: TextDirection.ltr, :final Offset offset) => offset,
+      _LineCaretMetrics(writingDirection: TextDirection.rtl, :final Offset offset) => Offset(offset.dx - caretPrototype.width, offset.dy),
+    };
     // If offset.dx is outside of the advertised content area, then the associated
     // glyph belongs to a trailing whitespace character. Ideally the behavior
     // should be handled by higher-level implementations (for instance,
@@ -1387,16 +1371,15 @@ class TextPainter {
   // The cache implementation assumes there's only one cursor at any given time.
   late _LineCaretMetrics _caretMetrics;
 
-  // This function turns a TextPosition into a _CaretMetrics that represents the
-  // location to render the caret.
+  // This function turns a TextPosition into a _LineCaretMetrics that represents
+  // the location to render the caret, or null if the paragraph is empty.
   //
   // Typically, when the TextAffinity is downstream, the I-beam is anchored to
   // the leading edge of the `offset`-th character. When the TextAffinity is
   // upstream, the I-beam is then anchored to the trailing edge of the preceding
   // character, except for a few edge cases:
   //
-  // 1. empty paragraph: returns an _emptyParagraph which needs to be handled
-  //    by the caller.
+  // 1. empty paragraph: returns null.
   //
   // 2. (textLength, downstream), the end-of-text caret when the text is not
   //    empty: it's placed next to the trailing edge of the last line of the
@@ -1428,7 +1411,7 @@ class TextPainter {
   //     * upstream: show the caret at the trailing edge of the previous grapheme
   //       only if x points to the start of the grapheme. Otherwise place the
   //       caret at the trailing edge of the grapheme.
-  _CaretMetrics _computeCaretMetrics(TextPosition position) {
+  _LineCaretMetrics? _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
 
@@ -1437,7 +1420,7 @@ class TextPainter {
     // the cursor.
     if (cachedLayout.paragraph.numberOfLines < 1) {
       // TODO(LongCatIsLooong): assert when an invalid position is given.
-      return _emptyParagraph;
+      return null;
     }
     assert(plainText.isNotEmpty);
 
@@ -1450,7 +1433,7 @@ class TextPainter {
 
     final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset - 1;
     if (caretPositionCacheKey == cachedLayout._previousCaretPosition) {
-      return _CaretMetrics.left(_caretMetrics);
+      return _caretMetrics;
     }
 
     final ui.GlyphInfo? glyphInfo = cachedLayout.paragraph.getGlyphInfoAt(offset);
@@ -1463,7 +1446,7 @@ class TextPainter {
       final ui.Paragraph template = _getOrCreateLayoutTemplate();
       assert(template.numberOfLines == 1);
       final double baselineOffset = template.getLineMetricsAt(0)!.baseline;
-      return _CaretMetrics.left(cachedLayout.layout._endOfTextCaretMetrics.shift(Offset(0.0, -baselineOffset)));
+      return cachedLayout.layout._endOfTextCaretMetrics.shift(Offset(0.0, -baselineOffset));
     }
 
     final TextRange graphemeRange = glyphInfo.graphemeClusterCodeUnitRange;
@@ -1490,7 +1473,7 @@ class TextPainter {
     );
 
     cachedLayout._previousCaretPosition = caretPositionCacheKey;
-    return _CaretMetrics.left(_caretMetrics = metrics);
+    return _caretMetrics = metrics;
   }
 
   /// Returns a list of rects that bound the given selection.
