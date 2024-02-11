@@ -24,8 +24,8 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/targets/scene_importer.dart';
-import '../build_system/targets/shader_compiler.dart';
+import '../build_system/tools/scene_importer.dart';
+import '../build_system/tools/shader_compiler.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -884,7 +884,6 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
-          bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
           impellerStatus: ImpellerStatus.disabled,
         );

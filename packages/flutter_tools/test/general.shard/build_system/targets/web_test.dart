@@ -207,7 +207,6 @@ void main() {
       contains('flutter_service_worker.js?v='),
     ));
   }));
-
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
     final File mainFile = globals.fs.file(globals.fs.path.join('other', 'lib', 'main.dart'))
       ..createSync(recursive: true)
@@ -590,7 +589,7 @@ void main() {
         '--packages=.dart_tool/package_config.json',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
-      ], onRun: () {
+      ], onRun: (_) {
         environment.buildDir.childFile('app.dill.deps')
           .writeAsStringSync('file:///a.dart');
       },
@@ -809,7 +808,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(
@@ -848,7 +847,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(
@@ -884,7 +883,7 @@ void main() {
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+      ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
       processManager.addCommand(FakeCommand(
         command: <String>[
@@ -919,7 +918,7 @@ void main() {
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
-      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+      ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
     await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
@@ -942,7 +941,7 @@ void main() {
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
-      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     processManager.addCommand(FakeCommand(

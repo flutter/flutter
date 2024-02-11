@@ -192,6 +192,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// ```
 ///
 /// See also:
+///
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
 ///  * [SelectionHandler], which contains APIs to handle selection events from the
@@ -216,13 +217,13 @@ class SelectableRegion extends StatefulWidget {
     this.onSelectionChanged,
   });
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
+  /// The configuration for the magnifier used with selections in this region.
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
+  /// For a version of [SelectableRegion] that adapts automatically to the
+  /// current platform, consider [SelectionArea].
   ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -267,9 +268,29 @@ class SelectableRegion extends StatefulWidget {
     required final SelectionGeometry selectionGeometry,
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
+    required final VoidCallback? onShare,
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
+    final bool platformCanShare = switch (defaultTargetPlatform) {
+      TargetPlatform.android
+        => selectionGeometry.status == SelectionStatus.uncollapsed,
+      TargetPlatform.macOS
+      || TargetPlatform.fuchsia
+      || TargetPlatform.linux
+      || TargetPlatform.windows
+        => false,
+      // TODO(bleroux): the share button should be shown on iOS but the share
+      // functionality requires some changes on the engine side because, on iPad,
+      // it needs an anchor for the popup.
+      // See: https://github.com/flutter/flutter/issues/141775.
+      TargetPlatform.iOS
+        => false,
+    };
+    final bool canShare = onShare != null && platformCanShare;
+
+    // On Android, the share button is before the select all button.
+    final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
@@ -280,10 +301,20 @@ class SelectableRegion extends StatefulWidget {
           onPressed: onCopy,
           type: ContextMenuButtonType.copy,
         ),
+      if (canShare && showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
+        ),
       if (canSelectAll)
         ContextMenuButtonItem(
           onPressed: onSelectAll,
           type: ContextMenuButtonType.selectAll,
+        ),
+      if (canShare && !showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
         ),
     ];
   }
@@ -1089,6 +1120,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  Future<void> _share() async {
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return;
+    }
+    await SystemChannels.platform.invokeMethod('Share.invoke', data.plainText);
+  }
+
   /// {@macro flutter.widgets.EditableText.getAnchors}
   ///
   /// See also:
@@ -1191,7 +1230,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onCopy: () {
         _copy();
 
-        // In Android copy should clear the selection.
+        // On Android copy should clear the selection.
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -1214,6 +1253,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             selectAll();
+            hideToolbar();
+        }
+      },
+      onShare: () {
+        _share();
+
+        // On Android, share should clear the selection.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            _clearSelection();
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
             hideToolbar();
         }
       },

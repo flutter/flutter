@@ -13,6 +13,7 @@ import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -63,6 +64,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
+    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -237,6 +239,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
   final bool verbose;
 
   @visibleForTesting
@@ -364,6 +368,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     String? testAssetDirectory;
@@ -503,6 +508,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
@@ -583,14 +589,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
-        assetBundle.entryKinds,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
       );
     }
   }
 
-  bool _needRebuild(Map<String, DevFSContent> entries) {
+  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.

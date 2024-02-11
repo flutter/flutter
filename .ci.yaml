@@ -3,6 +3,12 @@
 # Flutter infra uses this file to generate a checklist of tasks to be performed
 # for every commit.
 #
+# The recipes mentioned below refer to those in this repo:
+#   https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/
+#
+# The "flutter_drone" recipe just defers to dev/bots/test.dart in this repo,
+# with the shard set according to the "shard" key in this file.
+#
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
@@ -29,6 +35,26 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+  # The current android emulator config names can be found here:
+  # https://chromium.googlesource.com/chromium/src.git/+/HEAD/tools/android/avd/proto
+  # You may use those names for the android_virtual_device version.
+  linux_android_emu:
+    properties:
+      contexts: >-
+        [
+          "android_virtual_device"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8759428741582061553"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      os: Ubuntu
+      cores: "8"
+      device_type: none
+      kvm: "1"
   linux_build_test:
     properties:
       dependencies: >-
@@ -327,17 +353,12 @@ targets:
           {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"}
         ]
 
-  - name: Linux android views
-    recipe: flutter/android_views
+  - name: Linux_android_emu android views
+    recipe: devicelab/devicelab_drone
     properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "android_virtual_device", "version": "34"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
       tags: >
         ["framework","hostonly","linux"]
+      task_name: android_views
     timeout: 60
 
   - name: Linux build_tests_1_3
@@ -408,6 +429,9 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    # This really just runs dev/bots/customer_testing/ci.sh,
+    # but it does so indirectly via the flutter_drone recipe
+    # calling the dev/bots/test.dart script.
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
@@ -420,7 +444,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
-    timeout: 90 # https://github.com/flutter/flutter/issues/120901
+    timeout: 60
     dimensions:
       os: "Linux"
     properties:
@@ -718,6 +742,9 @@ targets:
       shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
 
   - name: Linux gradle_desugar_classes_test
     recipe: devicelab/devicelab_drone
@@ -1729,27 +1756,13 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux_pixel_7pro android_defines_test
+  - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
     timeout: 60
-    dimensions:
-      kvm: "1"
-      cores: "8"
-      machine_type: "n1-standard-8"
     properties:
-      contexts: >-
-        [
-          "android_virtual_device"
-        ]
-      device_type: "none"
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
-      dependencies: >-
-        [
-          {"dependency": "android_virtual_device", "version": "34"}
-        ]
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -2064,7 +2077,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
@@ -2168,6 +2180,9 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
+  # TODO(https://github.com/flutter/flutter/issues/142178): Remove this.
+  # In the process of (a) renaming this "external_textures" and (b) making it
+  # an emulator test instead of a physical device.
   - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2175,7 +2190,24 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_ui_integration_test
+      task_name: external_textures_integration_test
+
+  - name: Linux_android_emu external_ui_integration_test
+    recipe: devicelab/devicelab_drone
+    # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
+    bringup: true
+    timeout: 60
+    # Functionally the same as "presubmit: false", except that we will run on
+    # presubmit during engine rolls. This test is the *only* automated e2e
+    # test for external textures for the engine, it should never break.
+    runIf:
+      - bin/internal/engine.version
+      - .ci.yaml
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
+      task_name: external_textures_integration_test
 
   # linux motog4 benchmark
   - name: Linux_android fading_child_animation_perf__timeline_summary
@@ -3161,7 +3193,7 @@ targets:
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
-    bringup: true
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3180,7 +3212,7 @@ targets:
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
-    bringup: true
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3199,7 +3231,7 @@ targets:
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
-    bringup: true
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3218,7 +3250,7 @@ targets:
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
-    bringup: true
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3237,7 +3269,6 @@ targets:
 
   - name: Mac_arm64 build_tests_1_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3256,7 +3287,6 @@ targets:
 
   - name: Mac_arm64 build_tests_2_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3275,7 +3305,6 @@ targets:
 
   - name: Mac_arm64 build_tests_3_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3294,7 +3323,6 @@ targets:
 
   - name: Mac_arm64 build_tests_4_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3361,7 +3389,6 @@ targets:
       - .ci.yaml
 
   - name: Mac flavors_test_macos
-    bringup: true
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3485,7 +3512,6 @@ targets:
   - name: Mac_x64 framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
@@ -3515,7 +3541,6 @@ targets:
   - name: Mac_arm64 framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
@@ -3661,7 +3686,6 @@ targets:
 
   - name: Mac_x64 module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3744,8 +3768,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac plugin_lint_mac
+  - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3965,7 +3990,22 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_tests_commands
+  - name: Mac_x64 tool_tests_commands
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      shard: tool_tests
+      subshard: commands
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4127,7 +4167,6 @@ targets:
   - name: Mac_pixel_7pro native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4202,7 +4241,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_ios basic_material_app_ios__compile
+  - name: Mac_arm64_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4265,6 +4304,13 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
 
+  # TODO(https://github.com/flutter/flutter/issues/106806): Find a way to
+  # re-enable this without "ignore_flakiness: "true"", likely by loostening the
+  # test assertions, or potentially not running the frame rate tests at all on
+  # iOS (for example, doing pixel-tests instead).
+  #
+  # Also, rename this to "external_textures_integration_test" to be consistent
+  # with the Android test, but that can wait until we've figured out the flake.
   - name: Mac_ios external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4272,7 +4318,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: external_ui_integration_test_ios
+      task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
   - name: Mac_ios route_test_ios
@@ -4303,15 +4349,6 @@ targets:
       task_name: flavors_test_ios_xcode_debug
     bringup: true
 
-  - name: Mac_ios flutter_gallery_ios__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios__compile
-
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4340,18 +4377,6 @@ targets:
       task_name: flutter_gallery_ios__start_up_xcode_debug
     bringup: true
 
-  # TODO(vashworth): Remove after https://github.com/flutter/flutter/issues/141383 is fixed.
-  - name: Mac_arm64_ios flutter_gallery_ios__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios__start_up
-      os: Mac-14
-    bringup: true
-
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4360,15 +4385,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
-
-  - name: Mac_ios hello_world_ios__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: hello_world_ios__compile
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -4410,7 +4426,16 @@ targets:
       - .ci.yaml
       - dev/**
 
-  - name: Mac_ios integration_test_test_ios
+  - name: Mac_x64_ios integration_test_test_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: integration_test_test_ios
+
+  - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4490,24 +4515,6 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
-
-  - name: Mac_ios ios_content_validation_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_content_validation_test
-
-  - name: Mac_arm64_ios ios_content_validation_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
-      task_name: ios_content_validation_test
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
@@ -4721,9 +4728,19 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
 
-  - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
+  - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hot_mode_dev_cycle_ios__benchmark
+
+  - name: Mac_arm64_ios hot_mode_dev_cycle_ios__benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4772,6 +4789,7 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4807,7 +4825,24 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: spell_check_test_ios
 
-  - name: Mac native_ui_tests_macos
+  - name: Mac_x64 native_ui_tests_macos
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: native_ui_tests_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4869,24 +4904,6 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: run_debug_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Mac run_release_test_macos
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: run_release_test_macos
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5077,6 +5094,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5162,6 +5180,7 @@ targets:
     bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
+      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5221,6 +5240,7 @@ targets:
 
   - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5304,6 +5324,7 @@ targets:
 
   - name: Windows_arm64 platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5372,7 +5393,8 @@ targets:
 
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/134083
+    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -5409,6 +5431,7 @@ targets:
   - name: Windows_arm64 run_debug_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5445,6 +5468,7 @@ targets:
   - name: Windows_arm64 run_release_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5701,6 +5725,7 @@ targets:
 
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5728,6 +5753,7 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5755,6 +5781,7 @@ targets:
   - name: Windows_arm64 flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5781,6 +5808,7 @@ targets:
   - name: Windows_arm64 flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5807,6 +5835,7 @@ targets:
   - name: Windows_arm64 complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5833,6 +5862,7 @@ targets:
   - name: Windows_arm64 flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5859,6 +5889,7 @@ targets:
   - name: Windows_arm64 platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5923,7 +5954,6 @@ targets:
   - name: Windows_android native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5969,6 +5999,7 @@ targets:
   - name: Windows_arm64 windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5991,6 +6022,7 @@ targets:
   - name: Windows_arm64 flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
