@@ -129,7 +129,7 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                           ),
                           ButtonSegment<TextDirection>(
                             value: TextDirection.rtl,
-                            label: Text('LTR'),
+                            label: Text('RTL'),
                           ),
                         ],
                       ),
