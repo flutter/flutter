@@ -3477,7 +3477,7 @@ void main() {
     expectCupertinoToolbarForCollapsedSelection();
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream), // Last character's position.
+      const TextSelection.collapsed(offset: 66), // Last character's position.
     );
 
     expect(lastCharEndpoint.length, 1);
@@ -7068,7 +7068,7 @@ void main() {
 
       // Normal multiword collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
-      controller = TextEditingController(text: 'a' * 200);
+      controller = TextEditingController(text: List<String>.filled(20, 'a').join('  '));
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(

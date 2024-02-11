@@ -422,6 +422,30 @@ void main() {
       );
     });
 
+    test('End of text caret when the text ends with +1 bidi level', () {
+      const double fontSize = 14.0;
+      final TextPainter painter = TextPainter();
+      final Rect largeRect = Offset.zero & const Size.square(5);
+      const String text =  'aل';
+      painter
+        ..text = const TextSpan(text: text)
+        ..textDirection = TextDirection.ltr
+        ..layout(minWidth: 1000.0, maxWidth: 1000.0);
+
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 0), largeRect).dx,
+        0.0,
+      );
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 1), largeRect).dx,
+        fontSize * 2 - largeRect.width,
+      );
+      expect(
+        painter.getOffsetForCaret(const TextPosition(offset: 2), largeRect).dx,
+        fontSize * 2,
+      );
+    });
+
     test('handles newlines properly', () {
       final TextPainter painter = TextPainter()
         ..textDirection = TextDirection.ltr;

@@ -332,9 +332,9 @@ class _TextLayout {
   /// relies on line metrics.
   ///
   /// When the last bidi level run in the paragraph and the parargraph's bidi
-  /// levels have opposite parities (which implies different opposite writing
-  /// directions), this makes sure the caret is placed at the same "end" of the
-  /// line as if the line was ended with a line feed.
+  /// levels have opposite parities (which implies opposite writing directions),
+  /// this makes sure the caret is placed at the same "end" of the line as if the
+  /// line was ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
     final int lastLineIndex = _paragraph.numberOfLines - 1;
@@ -353,9 +353,10 @@ class _TextLayout {
 
     final double baseline = lineMetrics.baseline;
     final double dx;
-    final ui.GlyphInfo? lastGlyph;
-    if (hasTrailingSpaces && (lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1)) != null) {
-      final Rect glyphBounds = lastGlyph!.graphemeClusterLayoutBounds;
+    late final ui.GlyphInfo? lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1);
+    if (hasTrailingSpaces && lastGlyph != null) {
+      final Rect glyphBounds = lastGlyph.graphemeClusterLayoutBounds;
+      assert(!glyphBounds.isEmpty);
       dx = switch (writingDirection) {
         TextDirection.ltr => glyphBounds.right,
         TextDirection.rtl => glyphBounds.left,
@@ -473,9 +474,8 @@ class _TextPainterLayoutCacheWithOffset {
   List<ui.LineMetrics> get lineMetrics => _cachedLineMetrics ??= paragraph.computeLineMetrics();
   List<ui.LineMetrics>? _cachedLineMetrics;
 
-  // Holds the TextPosition the last caret metrics were computed with. When new
-  // values are passed in, we recompute the caret metrics only as necessary.
-  int? _previousCaretPosition;
+  // Used to determinne whether the caret metrics cache should be invalidated.
+  int? _previousCaretPositionKey;
 }
 
 /// The _CaretMetrics for carets located in a non-empty line. Carets located in a
@@ -1432,7 +1432,7 @@ class TextPainter {
     };
 
     final int caretPositionCacheKey = anchorToLeadingEdge ? offset : -offset - 1;
-    if (caretPositionCacheKey == cachedLayout._previousCaretPosition) {
+    if (caretPositionCacheKey == cachedLayout._previousCaretPositionKey) {
       return _caretMetrics;
     }
 
@@ -1472,7 +1472,7 @@ class TextPainter {
       writingDirection: box.direction,
     );
 
-    cachedLayout._previousCaretPosition = caretPositionCacheKey;
+    cachedLayout._previousCaretPositionKey = caretPositionCacheKey;
     return _caretMetrics = metrics;
   }
 
