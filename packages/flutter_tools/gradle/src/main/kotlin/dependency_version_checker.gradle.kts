@@ -48,7 +48,7 @@ class DependencyVersionChecker {
             return "Your project's gradle version is typically " +
                     "defined in the gradle wrapper file. By default, this can be found at " +
                     "$projectDirectory/gradle/wrapper/gradle-wrapper.properties. \n" +
-                    "For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html."
+                    "For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.\n"
         }
 
         // The potential java fix does not make use of the project directory,
@@ -56,7 +56,7 @@ class DependencyVersionChecker {
         private const val POTENTIAL_JAVA_FIX : String = "The Java version used by Flutter can be " +
                 "set with `flutter config --jdk-dir=<path>`. \nFor more information about how Flutter " +
                 "chooses which version of Java to use, see the --jdk-dir section of the " +
-                "output of `flutter config -h`."
+                "output of `flutter config -h`.\n"
 
         private fun getPotentialAGPFix(projectDirectory : String) : String {
             return "Your project's AGP version is typically " +
@@ -66,7 +66,7 @@ class DependencyVersionChecker {
                     "was likely created with an older template version. In this case it is most " +
                     "likely defined in the top-level build.gradle file " +
                     "($projectDirectory/build.gradle) by the following line in the dependencies" +
-                    " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\"."
+                    " block of the buildscript: \"classpath 'com.android.tools.build:gradle:<version>'\".\n"
         }
 
         private fun getPotentialKGPFix(projectDirectory : String) : String {
@@ -76,7 +76,7 @@ class DependencyVersionChecker {
                     "org.jetbrains.kotlin.android. \nIf you don't see a plugins block, your project " +
                     "was likely created with an older template version, in which case it is most " +
                     "likely defined in the top-level build.gradle file " +
-                    "($projectDirectory/build.gradle) by the ext.kotlin_version property."
+                    "($projectDirectory/build.gradle) by the ext.kotlin_version property.\n"
         }
 
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
@@ -194,7 +194,7 @@ class DependencyVersionChecker {
             return "Error: Your project's $dependencyName version ($versionString) is lower " +
                     "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
                     "your $dependencyName version. \nAlternatively, use the flag " +
-                    "\"--android-skip-build-dependency-validation\" to bypass this check.\n\n" +
+                    "\"--android-skip-build-dependency-validation\" to bypass this check.\n\n"+
                     "Potential fix: $potentialFix"
         }
 
@@ -206,7 +206,7 @@ class DependencyVersionChecker {
                     "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
                     "version to a version of at least $warnVersion soon." +
                     "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
-                    " to bypass this check.\n\n Potential fix: $potentialFix"
+                    " to bypass this check.\n\nPotential fix: $potentialFix"
         }
 
         fun checkGradleVersion(version : Version, project : Project) {
