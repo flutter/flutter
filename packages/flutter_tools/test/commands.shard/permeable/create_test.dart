@@ -286,6 +286,66 @@ void main() {
     ),
   });
 
+  testUsingContext('creates a new project with flutter version constraint in pubspec', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
+
+    expect(flutterVersionConstraint, isNotNull);
+    expect(flutterVersionConstraint, isA<VersionRange>());
+
+    final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
+
+    final Version flutterSdkVersion = Version.parse(globals.flutterVersion.frameworkVersion);
+
+    expect(flutterSdkVersion, isNot(Version.none));
+
+    expect(flutterVersionRange, VersionRange(min: Version(1, 2, 0), includeMin: true));
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.2.3'),
+  });
+
+  testUsingContext('does not modify flutter version constraint if it already exists', () async {
+    Cache.flutterRoot = '../..';
+
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+
+    pubspecFile.createSync(recursive: true);
+    pubspecFile.writeAsStringSync('''
+name: flutter_project
+description: A new Flutter project
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: 3.16.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+
+    final Pubspec effectivePubspec = Pubspec.parse(await pubspecFile.readAsString());
+    final VersionConstraint? effectiveFlutterVersion = effectivePubspec.environment?['flutter'];
+
+    expect(effectiveFlutterVersion, isNotNull);
+    expect(effectiveFlutterVersion, isA<Version>());
+    expect(effectiveFlutterVersion, Version(3, 16, 0));
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FakeFlutterVersion(frameworkRevision: '1.2.3'),
+  });
+
   testUsingContext('creates a module project correctly', () async {
     await _createAndAnalyzeProject(projectDir, <String>[
       '--template=module',
