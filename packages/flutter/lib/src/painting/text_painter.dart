@@ -1418,11 +1418,12 @@ class TextPainter {
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
     // If nothing is laid out, top start is the only reasonable place to place
     // the cursor.
-    if (cachedLayout.paragraph.numberOfLines < 1) {
+    // The HTML renderer reports numberOfLines == 1 when the text is empty:
+    // https://github.com/flutter/flutter/issues/143331
+    if (cachedLayout.paragraph.numberOfLines < 1 || plainText.isEmpty) {
       // TODO(LongCatIsLooong): assert when an invalid position is given.
       return null;
     }
-    assert(plainText.isNotEmpty);
 
     final (int offset, bool anchorToLeadingEdge) = switch (position) {
       TextPosition(offset: 0) => (0, true), // As a special case, always anchor to the leading edge of the first grapheme regardless of the affinity.
