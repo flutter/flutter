@@ -272,6 +272,7 @@ class CreateCommand extends CreateBase {
     }
 
     final String dartSdk = globals.cache.dartSdkBuild;
+    final Version flutterSdkVersion = Version.parse(globals.flutterVersion.frameworkVersion)!;
     final bool includeIos;
     final bool includeAndroid;
     final bool includeWeb;
@@ -337,6 +338,7 @@ class CreateCommand extends CreateBase {
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
+      flutterSdkVersionBounds: "'>=${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,

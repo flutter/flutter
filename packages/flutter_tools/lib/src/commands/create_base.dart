@@ -346,6 +346,7 @@ abstract class CreateBase extends FlutterCommand {
     String? iosDevelopmentTeam,
     String? iosLanguage,
     required String flutterRoot,
+    required String flutterSdkVersionBounds,
     required String dartSdkVersionBounds,
     String? agpVersion,
     String? kotlinVersion,
@@ -410,6 +411,7 @@ abstract class CreateBase extends FlutterCommand {
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
+      'flutterSdkVersionBounds': flutterSdkVersionBounds,
       'flutterRevision': escapeYamlString(globals.flutterVersion.frameworkRevision),
       'flutterChannel': escapeYamlString(globals.flutterVersion.getBranchName()), // may contain PII
       'ios': ios,
