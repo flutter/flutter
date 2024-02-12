@@ -18,9 +18,17 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 /// `--dart-define=flutter.memory_allocations=true`.
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 
-/// Create an object with exemption from disposal.
+/// Create an object with exemption from release.
 ///
-/// All objects created by [builder] will be exempt from disposal.
+/// All objects created by [builder] will be exempt from release.
+///
+/// Exempt from release for an object means the object is
+/// not expected to be disposed and garbage collected
+/// during application lifecycle. However, if the object is
+/// garbage collected without being disposed, it is considered as
+/// violation of disposal contract even for exempted from release
+/// objects.
+///
 /// Noop if [kFlutterMemoryAllocationsEnabled] is false.
 ///
 /// The method is useful for creating singletons:
@@ -28,15 +36,15 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 /// ```dart
 /// class MyDisposableClass {}
 ///
-/// final MyDisposableClass mySingleton = exemptFromDisposal(() => MyDisposableClass());
+/// final MyDisposableClass mySingleton = exemptFromRelease(() => exemptFromRelease());
 /// ```
-T exemptFromDisposal<T>(ObjectBuilderCallback<T> builder){
+T exemptFromRelease<T>(ObjectBuilderCallback<T> builder){
   if (kFlutterMemoryAllocationsEnabled) {
-    ObjectCreated._exemptionFromDisposal++;
+    ObjectCreated._exemptionFromRelease++;
     try {
       return builder();
     } finally {
-      ObjectCreated._exemptionFromDisposal--;
+      ObjectCreated._exemptionFromRelease--;
     }
   } else {
     return builder();
@@ -89,10 +97,10 @@ class ObjectCreated extends ObjectEvent {
     required this.library,
     required this.className,
     required super.object,
-  }) : isExemptFromDisposal = _exemptionFromDisposal > 0;
+  }) : isExemptFromDisposal = _exemptionFromRelease > 0;
 
   /// If more then zero, created objects are exempt from disposal.
-  static int _exemptionFromDisposal = 0;
+  static int _exemptionFromRelease = 0;
 
   /// Name of the instrumented library.
   ///
@@ -310,7 +318,7 @@ class FlutterMemoryAllocations {
 
   /// Create [ObjectCreated] and invoke [dispatchObjectEvent] if there are listeners.
   ///
-  /// If invoked in `builder` for [exemptFromDisposal],
+  /// If invoked in `builder` for [exemptFromRelease],
   /// [ObjectCreated.isExemptFromDisposal] will be set to true.
   ///
   /// This method is more efficient than [dispatchObjectEvent] if the event
