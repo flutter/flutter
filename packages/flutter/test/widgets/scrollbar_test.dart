@@ -1514,7 +1514,12 @@ void main() {
     expect(exception, isAssertionError);
     expect(
       exception.message,
-      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
+      '''
+The Scrollbar's ScrollController has no ScrollPosition attached.
+A Scrollbar cannot be painted without a ScrollPosition.
+The Scrollbar attempted to use the PrimaryScrollController. This ScrollController should be associated with the ScrollView that the Scrollbar is being applied to.
+When ScrollView.scrollDirection is Axis.vertical, mobile platforms default to the PrimaryScrollController if no ScrollController is provided.
+To use the PrimaryScrollController explicitly, set ScrollView.primary to true on the Scrollable widget.''',
     );
   });
 

@@ -1466,18 +1466,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ErrorHint(
             'The Scrollbar attempted to use the $controllerForError. This '
             'ScrollController should be associated with the ScrollView that '
-            'the Scrollbar is being applied to. '
-            '${tryPrimary
-              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
-                'platforms will automatically use the '
-                'PrimaryScrollController if the user has not provided a '
-                'ScrollController. To use the PrimaryScrollController '
-                'explicitly, set ScrollView.primary to true for the Scrollable '
-                'widget.'
-              : 'When providing your own ScrollController, ensure both the '
-                'Scrollbar and the Scrollable widget use the same one.'
-            }',
+            'the Scrollbar is being applied to.',
           ),
+          if (tryPrimary) ...[
+            ErrorHint(
+              'When ScrollView.scrollDirection is Axis.vertical, '
+              'mobile platforms default to the PrimaryScrollController if no '
+              'ScrollController is provided. '
+            ),
+            ErrorHint(
+              'To use the PrimaryScrollController explicitly, '
+              'set ScrollView.primary to true on the Scrollable widget.',
+            ),
+          ]
+          else
+            ErrorHint(
+              'When providing your own ScrollController, ensure both the '
+              'Scrollbar and the Scrollable widget use the same one.',
+            ),
         ]);
       }
       return true;
