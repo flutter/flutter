@@ -17,7 +17,10 @@ if (is_fuchsia) {
 config("skia_public") {
   include_dirs = [ "$_skia_root" ]
 
-  defines = []
+  defines = [
+    "SK_CODEC_DECODES_BMP",
+    "SK_CODEC_DECODES_WBMP",
+  ]
   cflags_objcc = []
   if (is_fuchsia || is_linux) {
     defines += [ "SK_R32_SHIFT=16" ]
@@ -534,7 +537,10 @@ optional("xps") {
 
 optional("png_decode") {
   enabled = skia_use_libpng_decode
-  public_defines = [ "SK_CODEC_DECODES_PNG" ]
+  public_defines = [
+    "SK_CODEC_DECODES_PNG",
+    "SK_CODEC_DECODES_ICO",
+  ]
 
   deps = [ "//third_party/libpng" ]
   sources = [
@@ -581,7 +587,11 @@ optional("webp_encode") {
 
 optional("wuffs") {
   enabled = skia_use_wuffs
-  public_defines = [ "SK_HAS_WUFFS_LIBRARY" ]
+  public_defines = [
+    "SK_HAS_WUFFS_LIBRARY",  # TODO remove after rolling
+                             # http://review.skia.org/811816
+    "SK_CODEC_DECODES_GIF",
+  ]
 
   deps = [ "//flutter/third_party/wuffs" ]
   sources = [ "$_skia_root/src/codec/SkWuffsCodec.cpp" ]
