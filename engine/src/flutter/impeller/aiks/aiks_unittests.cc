@@ -503,6 +503,28 @@ TEST_P(AiksTest, CanPictureConvertToImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/142358 .
+// Without a change to force render pass construction the image is left in an
+// undefined layout and triggers a validation error.
+TEST_P(AiksTest, CanEmptyPictureConvertToImage) {
+  Canvas recorder_canvas;
+
+  Canvas canvas;
+  AiksContext renderer(GetContext(), nullptr);
+  Paint paint;
+  paint.color = Color::BlackTransparent();
+  canvas.DrawPaint(paint);
+  Picture picture = recorder_canvas.EndRecordingAsPicture();
+  auto image = picture.ToImage(renderer, ISize{1000, 1000});
+  if (image) {
+    canvas.DrawImage(image, Point(), Paint());
+    paint.color = Color{0.1, 0.1, 0.1, 0.2};
+    canvas.DrawRect(Rect::MakeSize(ISize{1000, 1000}), paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, BlendModeShouldCoverWholeScreen) {
   Canvas canvas;
   Paint paint;
