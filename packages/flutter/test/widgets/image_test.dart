@@ -2065,6 +2065,61 @@ void main() {
         : isNot(throwsA(anything)),
     );
   });
+
+  testWidgets('Animated GIFs do not require layout for subsequent frames', (WidgetTester tester) async {
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    int? lastFrame;
+
+    await tester.pumpWidget(
+      Center(
+        child: Image(
+          image: imageProvider,
+          frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+            lastFrame = frame;
+            return child;
+          },
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isFalse);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    // We only complete the build phase and expect that it does not mark the
+    // RenderImage for layout because the new frame has the same dimensions as
+    // the old one. We only need to repaint.
+    await tester.pump(null, EnginePhase.build);
+    expect(lastFrame, 1);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isTrue);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 2);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isFalse);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    codec.dispose();
+  });
 }
 
 @immutable
