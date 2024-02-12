@@ -1042,6 +1042,28 @@ void main() {
     ));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('Cursor layout has correct height and width when specified', (WidgetTester tester) async {
+    const double cursorWidth = 15.0;
+    const double cursorHeight = 30.0;
+
+    await tester.pumpWidget(
+       const MaterialApp(
+        home: Material(
+          child: TextField(
+            autofocus: true,
+            cursorWidth: cursorWidth,
+            cursorHeight: cursorHeight,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable, paints..rect(
+      rect: const Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight),
+    ));
+  });
+
   testWidgets('Material3 - Default cursor layout has correct height and vertical offset', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
