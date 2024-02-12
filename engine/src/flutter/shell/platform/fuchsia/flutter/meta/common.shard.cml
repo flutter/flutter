@@ -2,16 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 {
-    capabilities: [
-        // Required for inspect.
-        // Copied from inspect/client.shard.cml because out-of-tree doesn't
-        // have support for CML includes from the SDK.
-        {
-            directory: "diagnostics",
-            rights: [ "connect" ],
-            path: "/diagnostics",
-        },
-    ],
     use: [
         // This is used by the Dart VM to communicate from Dart code to C++ code.
         {
@@ -43,6 +33,7 @@
                 "fuchsia.device.NameProvider",
                 "fuchsia.feedback.CrashReporter",
                 "fuchsia.fonts.Provider",
+                "fuchsia.inspect.InspectSink", // Copied from inspect/client.shard.cml.
                 "fuchsia.intl.PropertyProvider",
                 "fuchsia.logger.LogSink", // Copied from syslog/client.shard.cml.
                 "fuchsia.media.ProfileProvider",
@@ -64,15 +55,5 @@
             ],
             availability: "optional",
         },
-    ],
-    expose: [
-        // Required for inspect.
-        // Copied from inspect/client.shard.cml because out-of-tree doesn't
-        // have support for CML includes from the SDK.
-        {
-            directory: "diagnostics",
-            from: "self",
-            to: "framework",
-        },
-    ],
+    ]
 }

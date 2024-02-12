@@ -5,7 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_ROOT_INSPECT_NODE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_ROOT_INSPECT_NODE_H_
 
-#include <lib/sys/inspect/cpp/component.h>
+#include <lib/inspect/component/cpp/component.h>
+#include <lib/sys/cpp/component_context.h>
 
 #include <memory>
 #include <mutex>
@@ -36,7 +37,7 @@ class RootInspectNode {
   static inspect::Inspector* GetInspector();
 
  private:
-  static std::unique_ptr<sys::ComponentInspector> inspector_;
+  static std::unique_ptr<inspect::ComponentInspector> inspector_;
   static std::mutex mutex_;
 };
 

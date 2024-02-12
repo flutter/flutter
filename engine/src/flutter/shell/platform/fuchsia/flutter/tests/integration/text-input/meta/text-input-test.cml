@@ -24,6 +24,7 @@
     offer: [
         {
             protocol: [
+                "fuchsia.inspect.InspectSink",
                 "fuchsia.kernel.RootJobForInspect",
                 "fuchsia.kernel.Stats",
                 "fuchsia.logger.LogSink",

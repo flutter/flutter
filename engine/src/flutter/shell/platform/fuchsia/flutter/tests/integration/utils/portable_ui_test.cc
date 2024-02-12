@@ -4,6 +4,7 @@
 
 #include "portable_ui_test.h"
 
+#include <fuchsia/inspect/cpp/fidl.h>
 #include <fuchsia/logger/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
@@ -77,6 +78,7 @@ void PortableUITest::SetUpRealmBase() {
   // // Route base system services to flutter and the test UI stack.
   realm_builder_.AddRoute(Route{
       .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
+                       Protocol{fuchsia::inspect::InspectSink::Name_},
                        Protocol{fuchsia::sysmem::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{fuchsia::ui::input::ImeService::Name_},

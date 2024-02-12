@@ -44,7 +44,7 @@ template("make_utils") {
              "$fuchsia_sdk_root/pkg:async-loop-default",
              "$fuchsia_sdk_root/pkg:fdio",
              "$fuchsia_sdk_root/pkg:sys_cpp",
-             "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
+             "$fuchsia_sdk_root/pkg:inspect_component_cpp",
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
@@ -99,7 +99,8 @@ executable("dart_utils_unittests") {
   deps = [
     ":utils",
     ":utils_fixtures",
-    "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
+    "$fuchsia_sdk_root/pkg:inspect_component_cpp",
+    "$fuchsia_sdk_root/pkg:sys_cpp",
     "//flutter/testing",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",

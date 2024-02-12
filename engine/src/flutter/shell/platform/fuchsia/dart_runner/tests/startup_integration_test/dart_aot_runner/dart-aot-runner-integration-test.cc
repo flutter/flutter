@@ -83,6 +83,7 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
                              Protocol{"fuchsia.posix.socket.Provider"},
                              Protocol{"fuchsia.intl.PropertyProvider"},
                              Protocol{"fuchsia.vulkan.loader.Loader"},
+                             Protocol{"fuchsia.inspect.InspectSink"},
                              Directory{"config-data"}},
             .source = ParentRef(),
             .targets = {kDartAotRunnerRef, kDartAotEchoServerRef}});
