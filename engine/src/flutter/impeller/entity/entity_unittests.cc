@@ -994,8 +994,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     const char* input_type_names[] = {"Texture", "Solid Color"};
     const char* blur_type_names[] = {"Image blur", "Mask blur"};
-    const char* pass_variation_names[] = {"New", "2D Directional",
-                                          "Directional"};
+    const char* pass_variation_names[] = {"New"};
     const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const FilterContents::BlurStyle blur_styles[] = {
@@ -1108,13 +1107,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
             FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
             blur_styles[selected_blur_style], tile_modes[selected_tile_mode]);
         break;
-      case 2: {
-        Vector2 blur_vector(blur_sigma_x.sigma, blur_sigma_y.sigma);
-        blur = FilterContents::MakeDirectionalGaussianBlur(
-            FilterInput::Make(input), Sigma{blur_vector.GetLength()},
-            blur_vector.Normalize());
-        break;
-      }
     };
     FML_CHECK(blur);
 
