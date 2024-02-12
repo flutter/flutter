@@ -420,7 +420,7 @@ void main() {
         painter.getOffsetForCaret(TextPosition(offset: text.length), largeRect).dx,
         1000 - text.length * fontSize - largeRect.width,
       );
-    });
+    }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
     test('End of text caret when the text ends with +1 bidi level', () {
       const double fontSize = 14.0;
@@ -444,7 +444,7 @@ void main() {
         painter.getOffsetForCaret(const TextPosition(offset: 2), largeRect).dx,
         fontSize * 2,
       );
-    });
+    }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
     test('handles newlines properly', () {
       final TextPainter painter = TextPainter()
