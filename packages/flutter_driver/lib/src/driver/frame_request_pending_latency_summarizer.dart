@@ -47,16 +47,17 @@ class FrameRequestPendingLatencySummarizer {
     final Map<String, int> starts = <String, int>{};
     for (int i = 0; i < frameRequestPendingEvents.length; i++) {
       final TimelineEvent event = frameRequestPendingEvents[i];
-      if (event.phase == 'b') {
-        final String? id = event.json['id'] as String?;
-        if (id != null) {
-          starts[id] = event.timestampMicros!;
-        }
-      } else if (event.phase == 'e') {
-        final int? start = starts[event.json['id']];
-        if (start != null) {
-          result.add((event.timestampMicros! - start).toDouble());
-        }
+      switch (event.phase) {
+        case 'b':
+          final String? id = event.json['id'] as String?;
+          if (id != null) {
+            starts[id] = event.timestampMicros!;
+          }
+        case 'e':
+          final int? start = starts[event.json['id']];
+          if (start != null) {
+            result.add((event.timestampMicros! - start).toDouble());
+          }
       }
     }
     return result;

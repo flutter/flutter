@@ -126,28 +126,29 @@ void copyDirectory(
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
-    if (entity is Link) {
-      final Link newLink = destDir.fileSystem.link(newPath);
-      newLink.createSync(entity.targetSync());
-    } else if (entity is File) {
-      final File newFile = destDir.fileSystem.file(newPath);
-      if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
-        continue;
-      }
-      newFile.writeAsBytesSync(entity.readAsBytesSync());
-      onFileCopied?.call(entity, newFile);
-    } else if (entity is Directory) {
-      if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
-        continue;
-      }
-      copyDirectory(
-        entity,
-        destDir.fileSystem.directory(newPath),
-        shouldCopyFile: shouldCopyFile,
-        onFileCopied: onFileCopied,
-      );
-    } else {
-      throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
+    switch (entity) {
+      case Link():
+        final Link newLink = destDir.fileSystem.link(newPath);
+        newLink.createSync(entity.targetSync());
+      case File():
+        final File newFile = destDir.fileSystem.file(newPath);
+        if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
+          continue;
+        }
+        newFile.writeAsBytesSync(entity.readAsBytesSync());
+        onFileCopied?.call(entity, newFile);
+      case Directory():
+        if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
+          continue;
+        }
+        copyDirectory(
+          entity,
+          destDir.fileSystem.directory(newPath),
+          shouldCopyFile: shouldCopyFile,
+          onFileCopied: onFileCopied,
+        );
+      default:
+        throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
     }
   }
 }

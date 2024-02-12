@@ -330,17 +330,11 @@ class _FlutterLogoPainter extends BoxPainter {
     if (canvasSize.isEmpty) {
       return;
     }
-    final Size logoSize;
-    if (_config._position > 0.0) {
-      // horizontal style
-      logoSize = const Size(820.0, 232.0);
-    } else if (_config._position < 0.0) {
-      // stacked style
-      logoSize = const Size(252.0, 306.0);
-    } else {
-      // only the mark
-      logoSize = const Size(202.0, 202.0);
-    }
+    final Size logoSize = switch (_config._position) {
+      > 0.0 => const Size(820.0, 232.0), // horizontal style
+      < 0.0 => const Size(252.0, 306.0), // stacked style
+      _     => const Size(202.0, 202.0), // only the mark
+    };
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
     final Rect rect = Alignment.center.inscribe(fittedSize.destination, offset & canvasSize);
@@ -353,21 +347,22 @@ class _FlutterLogoPainter extends BoxPainter {
     );
 
     final Rect logoTargetSquare;
-    if (_config._position > 0.0) {
-      // horizontal style
-      logoTargetSquare = Rect.fromLTWH(rect.left, rect.top, rect.height, rect.height);
-    } else if (_config._position < 0.0) {
-      // stacked style
-      final double logoHeight = rect.height * 191.0 / 306.0;
-      logoTargetSquare = Rect.fromLTWH(
-        rect.left + (rect.width - logoHeight) / 2.0,
-        rect.top,
-        logoHeight,
-        logoHeight,
-      );
-    } else {
-      // only the mark
-      logoTargetSquare = centerSquare;
+    switch (_config._position) {
+      case > 0.0:
+        // horizontal style
+        logoTargetSquare = Rect.fromLTWH(rect.left, rect.top, rect.height, rect.height);
+      case < 0.0:
+        // stacked style
+        final double logoHeight = rect.height * 191.0 / 306.0;
+        logoTargetSquare = Rect.fromLTWH(
+          rect.left + (rect.width - logoHeight) / 2.0,
+          rect.top,
+          logoHeight,
+          logoHeight,
+        );
+      default:
+        // only the mark
+        logoTargetSquare = centerSquare;
     }
     final Rect logoSquare = Rect.lerp(centerSquare, logoTargetSquare, _config._position.abs())!;
 
@@ -381,8 +376,8 @@ class _FlutterLogoPainter extends BoxPainter {
           ),
       );
     }
-    if (_config._position != 0.0) {
-      if (_config._position > 0.0) {
+    switch (_config._position) {
+      case > 0.0:
         // horizontal style
         final double fontSize = 2.0 / 3.0 * logoSquare.height * (1 - (10.4 * 2.0) / 202.0);
         final double scale = fontSize / 100.0;
@@ -409,7 +404,7 @@ class _FlutterLogoPainter extends BoxPainter {
         canvas.scale(scale, scale);
         _textPainter.paint(canvas, Offset.zero);
         canvas.restore();
-      } else if (_config._position < 0.0) {
+      case < 0.0:
         // stacked style
         final double fontSize = 0.35 * logoTargetSquare.height * (1 - (10.4 * 2.0) / 202.0);
         final double scale = fontSize / 100.0;
@@ -437,7 +432,8 @@ class _FlutterLogoPainter extends BoxPainter {
           );
         }
         canvas.restore();
-      }
+      default:
+        break;
     }
     _paintLogo(canvas, logoSquare);
     if (_config._opacity < 1.0) {

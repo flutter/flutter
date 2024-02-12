@@ -527,40 +527,37 @@ class _BottomNavigationTile extends StatelessWidget {
     // | text
     // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
     // =======
-    double bottomPadding;
-    double topPadding;
-    if (showSelectedLabels && !showUnselectedLabels) {
-      bottomPadding = Tween<double>(
-        begin: selectedIconDiff / 2.0,
-        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-      topPadding = Tween<double>(
-        begin: selectedFontSize + selectedIconDiff / 2.0,
-        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-    } else if (!showSelectedLabels && !showUnselectedLabels) {
-      bottomPadding = Tween<double>(
-        begin: selectedIconDiff / 2.0,
-        end: unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-      topPadding = Tween<double>(
-        begin: selectedFontSize + selectedIconDiff / 2.0,
-        end: selectedFontSize + unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-    } else {
-      bottomPadding = Tween<double>(
-        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
-        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-      topPadding = Tween<double>(
-        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
-        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
-      ).evaluate(animation);
-    }
-
-    size = switch (type) {
-      BottomNavigationBarType.fixed => 1,
-      BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
+    final EdgeInsets padding = switch ((showSelectedLabels, showUnselectedLabels)) {
+      (true, false) => EdgeInsets.only(
+        top: Tween<double>(
+          begin: selectedFontSize + selectedIconDiff / 2.0,
+          end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+        bottom: Tween<double>(
+          begin: selectedIconDiff / 2.0,
+          end: unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+      ),
+      (false, false) => EdgeInsets.only(
+        top: Tween<double>(
+          begin: selectedFontSize + selectedIconDiff / 2.0,
+          end: selectedFontSize + unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+        bottom: Tween<double>(
+          begin: selectedIconDiff / 2.0,
+          end: unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+      ),
+      _ => EdgeInsets.only(
+        top: Tween<double>(
+          begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+          end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+        bottom: Tween<double>(
+          begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+          end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+        ).evaluate(animation),
+      ),
     };
 
     Widget result = InkResponse(
@@ -568,7 +565,7 @@ class _BottomNavigationTile extends StatelessWidget {
       mouseCursor: mouseCursor,
       enableFeedback: enableFeedback,
       child: Padding(
-        padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+        padding: padding,
         child: _Tile(
           layout: layout,
           icon: _TileIcon(
@@ -603,22 +600,23 @@ class _BottomNavigationTile extends StatelessWidget {
       );
     }
 
-    result = Semantics(
-      selected: selected,
-      container: true,
-      child: Stack(
-        children: <Widget>[
-          result,
-          Semantics(
-            label: indexLabel,
-          ),
-        ],
-      ),
-    );
-
     return Expanded(
-      flex: size,
-      child: result,
+      flex: switch (type) {
+        BottomNavigationBarType.fixed => 1,
+        BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
+      },
+      child: Semantics(
+        selected: selected,
+        container: true,
+        child: Stack(
+          children: <Widget>[
+            result,
+            Semantics(
+              label: indexLabel,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

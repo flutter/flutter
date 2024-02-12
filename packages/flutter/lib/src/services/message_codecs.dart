@@ -383,85 +383,86 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// Android, that would get converted to a `java.math.BigInteger` object. On
   /// iOS, the string representation is returned.
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value == null) {
-      buffer.putUint8(_valueNull);
-    } else if (value is bool) {
-      buffer.putUint8(value ? _valueTrue : _valueFalse);
-    } else if (value is double) {  // Double precedes int because in JS everything is a double.
-                                   // Therefore in JS, both `is int` and `is double` always
-                                   // return `true`. If we check int first, we'll end up treating
-                                   // all numbers as ints and attempt the int32/int64 conversion,
-                                   // which is wrong. This precedence rule is irrelevant when
-                                   // decoding because we use tags to detect the type of value.
-      buffer.putUint8(_valueFloat64);
-      buffer.putFloat64(value);
-    } else if (value is int) { // ignore: avoid_double_and_int_checks, JS code always goes through the `double` path above
-      if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
-        buffer.putUint8(_valueInt32);
-        buffer.putInt32(value);
-      } else {
-        buffer.putUint8(_valueInt64);
-        buffer.putInt64(value);
-      }
-    } else if (value is String) {
-      buffer.putUint8(_valueString);
-      final Uint8List asciiBytes = Uint8List(value.length);
-      Uint8List? utf8Bytes;
-      int utf8Offset = 0;
-      // Only do utf8 encoding if we encounter non-ascii characters.
-      for (int i = 0; i < value.length; i += 1) {
-        final int char = value.codeUnitAt(i);
-        if (char <= 0x7f) {
-          asciiBytes[i] = char;
+    switch (value) {
+      case null:
+        buffer.putUint8(_valueNull);
+      case bool():
+        buffer.putUint8(value ? _valueTrue : _valueFalse);
+      case double():  // Double precedes int because in JS everything is a double.
+                      // Therefore in JS, both `is int` and `is double` always
+                      // return `true`. If we check int first, we'll end up treating
+                      // all numbers as ints and attempt the int32/int64 conversion,
+                      // which is wrong. This precedence rule is irrelevant when
+                      // decoding because we use tags to detect the type of value.
+        buffer.putUint8(_valueFloat64);
+        buffer.putFloat64(value);
+      case int(): // ignore: avoid_double_and_int_checks, JS code always goes through the `double` path above
+        if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
+          buffer.putUint8(_valueInt32);
+          buffer.putInt32(value);
         } else {
-          utf8Bytes = utf8.encode(value.substring(i));
-          utf8Offset = i;
-          break;
+          buffer.putUint8(_valueInt64);
+          buffer.putInt64(value);
         }
-      }
-      if (utf8Bytes != null) {
-        writeSize(buffer, utf8Offset + utf8Bytes.length);
-        buffer.putUint8List(Uint8List.sublistView(asciiBytes, 0, utf8Offset));
-        buffer.putUint8List(utf8Bytes);
-      } else {
-        writeSize(buffer, asciiBytes.length);
-        buffer.putUint8List(asciiBytes);
-      }
-    } else if (value is Uint8List) {
-      buffer.putUint8(_valueUint8List);
-      writeSize(buffer, value.length);
-      buffer.putUint8List(value);
-    } else if (value is Int32List) {
-      buffer.putUint8(_valueInt32List);
-      writeSize(buffer, value.length);
-      buffer.putInt32List(value);
-    } else if (value is Int64List) {
-      buffer.putUint8(_valueInt64List);
-      writeSize(buffer, value.length);
-      buffer.putInt64List(value);
-    } else if (value is Float32List) {
-      buffer.putUint8(_valueFloat32List);
-      writeSize(buffer, value.length);
-      buffer.putFloat32List(value);
-    } else if (value is Float64List) {
-      buffer.putUint8(_valueFloat64List);
-      writeSize(buffer, value.length);
-      buffer.putFloat64List(value);
-    } else if (value is List) {
-      buffer.putUint8(_valueList);
-      writeSize(buffer, value.length);
-      for (final Object? item in value) {
-        writeValue(buffer, item);
-      }
-    } else if (value is Map) {
-      buffer.putUint8(_valueMap);
-      writeSize(buffer, value.length);
-      value.forEach((Object? key, Object? value) {
-        writeValue(buffer, key);
-        writeValue(buffer, value);
-      });
-    } else {
-      throw ArgumentError.value(value);
+      case String():
+        buffer.putUint8(_valueString);
+        final Uint8List asciiBytes = Uint8List(value.length);
+        Uint8List? utf8Bytes;
+        int utf8Offset = 0;
+        // Only do utf8 encoding if we encounter non-ascii characters.
+        for (int i = 0; i < value.length; i += 1) {
+          final int char = value.codeUnitAt(i);
+          if (char <= 0x7f) {
+            asciiBytes[i] = char;
+          } else {
+            utf8Bytes = utf8.encode(value.substring(i));
+            utf8Offset = i;
+            break;
+          }
+        }
+        if (utf8Bytes != null) {
+          writeSize(buffer, utf8Offset + utf8Bytes.length);
+          buffer.putUint8List(Uint8List.sublistView(asciiBytes, 0, utf8Offset));
+          buffer.putUint8List(utf8Bytes);
+        } else {
+          writeSize(buffer, asciiBytes.length);
+          buffer.putUint8List(asciiBytes);
+        }
+      case Uint8List():
+        buffer.putUint8(_valueUint8List);
+        writeSize(buffer, value.length);
+        buffer.putUint8List(value);
+      case Int32List():
+        buffer.putUint8(_valueInt32List);
+        writeSize(buffer, value.length);
+        buffer.putInt32List(value);
+      case Int64List():
+        buffer.putUint8(_valueInt64List);
+        writeSize(buffer, value.length);
+        buffer.putInt64List(value);
+      case Float32List():
+        buffer.putUint8(_valueFloat32List);
+        writeSize(buffer, value.length);
+        buffer.putFloat32List(value);
+      case Float64List():
+        buffer.putUint8(_valueFloat64List);
+        writeSize(buffer, value.length);
+        buffer.putFloat64List(value);
+      case List<Object?>():
+        buffer.putUint8(_valueList);
+        writeSize(buffer, value.length);
+        for (final Object? item in value) {
+          writeValue(buffer, item);
+        }
+      case Map<Object?, Object?>():
+        buffer.putUint8(_valueMap);
+        writeSize(buffer, value.length);
+        value.forEach((Object? key, Object? value) {
+          writeValue(buffer, key);
+          writeValue(buffer, value);
+        });
+      default:
+        throw ArgumentError.value(value);
     }
   }
 
@@ -540,14 +541,15 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// [writeValue].
   void writeSize(WriteBuffer buffer, int value) {
     assert(0 <= value && value <= 0xffffffff);
-    if (value < 254) {
-      buffer.putUint8(value);
-    } else if (value <= 0xffff) {
-      buffer.putUint8(254);
-      buffer.putUint16(value);
-    } else {
-      buffer.putUint8(255);
-      buffer.putUint32(value);
+    switch (value) {
+      case < 254:
+        buffer.putUint8(value);
+      case <= 0xffff:
+        buffer.putUint8(254);
+        buffer.putUint16(value);
+      default:
+        buffer.putUint8(255);
+        buffer.putUint32(value);
     }
   }
 

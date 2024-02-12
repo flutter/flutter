@@ -540,14 +540,11 @@ class BoxConstraints extends Constraints {
         if (affectedFieldsList.length > 1) {
           affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
         }
-        String whichFields = '';
-        if (affectedFieldsList.length > 2) {
-          whichFields = affectedFieldsList.join(', ');
-        } else if (affectedFieldsList.length == 2) {
-          whichFields = affectedFieldsList.join(' ');
-        } else {
-          whichFields = affectedFieldsList.single;
-        }
+        final String whichFields = switch (affectedFieldsList.length) {
+          1 => affectedFieldsList.single,
+          2 => affectedFieldsList.join(' '),
+          _ => affectedFieldsList.join(', '),
+        };
         throwError(ErrorSummary('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.'));
       }
       if (minWidth < 0.0 && minHeight < 0.0) {
@@ -2695,11 +2692,11 @@ abstract class RenderBox extends RenderObject {
   bool debugHandleEvent(PointerEvent event, HitTestEntry entry) {
     assert(() {
       if (debugPaintPointersEnabled) {
-        if (event is PointerDownEvent) {
-          _debugActivePointers += 1;
-        } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-          _debugActivePointers -= 1;
-        }
+        _debugActivePointers += switch (event) {
+          PointerDownEvent() => 1,
+          PointerUpEvent() || PointerCancelEvent() => -1,
+          _ => 0,
+        };
         markNeedsPaint();
       }
       return true;

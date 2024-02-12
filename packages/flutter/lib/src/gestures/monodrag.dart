@@ -349,17 +349,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _addPointer(PointerEvent event) {
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
-    if (_state == _DragState.ready) {
-      _state = _DragState.possible;
-      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-      _finalPosition = _initialPosition;
-      _pendingDragOffset = OffsetPair.zero;
-      _globalDistanceMoved = 0.0;
-      _lastPendingEventTimestamp = event.timeStamp;
-      _lastTransform = event.transform;
-      _checkDown();
-    } else if (_state == _DragState.accepted) {
-      resolve(GestureDisposition.accepted);
+    switch (_state) {
+      case _DragState.ready:
+        _state = _DragState.possible;
+        _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+        _finalPosition = _initialPosition;
+        _pendingDragOffset = OffsetPair.zero;
+        _globalDistanceMoved = 0.0;
+        _lastPendingEventTimestamp = event.timeStamp;
+        _lastTransform = event.transform;
+        _checkDown();
+      case _DragState.possible:
+        break;
+      case _DragState.accepted:
+        resolve(GestureDisposition.accepted);
     }
   }
 
@@ -401,14 +404,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
          event is PointerMoveEvent ||
          event is PointerPanZoomStartEvent ||
          event is PointerPanZoomUpdateEvent)) {
-      final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      if (event is PointerPanZoomStartEvent) {
-        tracker.addPosition(event.timeStamp, Offset.zero);
-      } else if (event is PointerPanZoomUpdateEvent) {
-        tracker.addPosition(event.timeStamp, event.pan);
-      } else {
-        tracker.addPosition(event.timeStamp, event.localPosition);
-      }
+      _velocityTrackers[event.pointer]!.addPosition(
+        event.timeStamp,
+        switch (event) {
+          PointerPanZoomStartEvent() => Offset.zero,
+          PointerPanZoomUpdateEvent() => event.pan,
+          _ => event.localPosition,
+        },
+      );
     }
     if (event is PointerMoveEvent && event.buttons != _initialButtons) {
       _giveUpPointer(event.pointer);

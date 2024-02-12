@@ -910,67 +910,70 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
 
-    if (_gestureType == _GestureType.pan) {
-      if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
-        _currentAxis = null;
-        return;
-      }
-      final Vector3 translationVector = _transformationController!.value.getTranslation();
-      final Offset translation = Offset(translationVector.x, translationVector.y);
-      final FrictionSimulation frictionSimulationX = FrictionSimulation(
-        widget.interactionEndFrictionCoefficient,
-        translation.dx,
-        details.velocity.pixelsPerSecond.dx,
-      );
-      final FrictionSimulation frictionSimulationY = FrictionSimulation(
-        widget.interactionEndFrictionCoefficient,
-        translation.dy,
-        details.velocity.pixelsPerSecond.dy,
-      );
-      final double tFinal = _getFinalTime(
-        details.velocity.pixelsPerSecond.distance,
-        widget.interactionEndFrictionCoefficient,
-      );
-      _animation = Tween<Offset>(
-        begin: translation,
-        end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
-      ).animate(CurvedAnimation(
-        parent: _controller,
-        curve: Curves.decelerate,
-      ));
-      _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
-      _animation!.addListener(_onAnimate);
-      _controller.forward();
-    } else if (_gestureType == _GestureType.scale) {
-      if (details.scaleVelocity.abs() < 0.1) {
-        _currentAxis = null;
-        return;
-      }
-      final double scale = _transformationController!.value.getMaxScaleOnAxis();
-      final FrictionSimulation frictionSimulation = FrictionSimulation(
-        widget.interactionEndFrictionCoefficient * widget.scaleFactor,
-        scale,
-        details.scaleVelocity / 10
-      );
-      final double tFinal = _getFinalTime(details.scaleVelocity.abs(), widget.interactionEndFrictionCoefficient, effectivelyMotionless: 0.1);
-      _scaleAnimation = Tween<double>(
-        begin: scale,
-        end: frictionSimulation.x(tFinal)
-      ).animate(CurvedAnimation(
-        parent: _scaleController,
-        curve: Curves.decelerate
-      ));
-      _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
-      _scaleAnimation!.addListener(_onScaleAnimate);
-      _scaleController.forward();
+    switch (_gestureType) {
+      case _GestureType.rotate:
+        break;
+      case _GestureType.pan:
+        if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+          _currentAxis = null;
+          return;
+        }
+        final Vector3 translationVector = _transformationController!.value.getTranslation();
+        final Offset translation = Offset(translationVector.x, translationVector.y);
+        final FrictionSimulation frictionSimulationX = FrictionSimulation(
+          widget.interactionEndFrictionCoefficient,
+          translation.dx,
+          details.velocity.pixelsPerSecond.dx,
+        );
+        final FrictionSimulation frictionSimulationY = FrictionSimulation(
+          widget.interactionEndFrictionCoefficient,
+          translation.dy,
+          details.velocity.pixelsPerSecond.dy,
+        );
+        final double tFinal = _getFinalTime(
+          details.velocity.pixelsPerSecond.distance,
+          widget.interactionEndFrictionCoefficient,
+        );
+        _animation = Tween<Offset>(
+          begin: translation,
+          end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
+        ).animate(CurvedAnimation(
+          parent: _controller,
+          curve: Curves.decelerate,
+        ));
+        _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
+        _animation!.addListener(_onAnimate);
+        _controller.forward();
+      case _GestureType.scale:
+        if (details.scaleVelocity.abs() < 0.1) {
+          _currentAxis = null;
+          return;
+        }
+        final double scale = _transformationController!.value.getMaxScaleOnAxis();
+        final FrictionSimulation frictionSimulation = FrictionSimulation(
+          widget.interactionEndFrictionCoefficient * widget.scaleFactor,
+          scale,
+          details.scaleVelocity / 10
+        );
+        final double tFinal = _getFinalTime(details.scaleVelocity.abs(), widget.interactionEndFrictionCoefficient, effectivelyMotionless: 0.1);
+        _scaleAnimation = Tween<double>(
+          begin: scale,
+          end: frictionSimulation.x(tFinal)
+        ).animate(CurvedAnimation(
+          parent: _scaleController,
+          curve: Curves.decelerate
+        ));
+        _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
+        _scaleAnimation!.addListener(_onScaleAnimate);
+        _scaleController.forward();
     }
   }
 
   // Handle mousewheel and web trackpad scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
-    if (event is PointerScrollEvent) {
-      if (event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale) {
+    switch (event) {
+      case PointerScrollEvent() when event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale:
         // Trackpad scroll, so treat it as a pan.
         widget.onInteractionStart?.call(
           ScaleStartDetails(
@@ -1015,18 +1018,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
-      }
-      // Ignore left and right mouse wheel scroll.
-      if (event.scrollDelta.dy == 0.0) {
+      case PointerScrollEvent() when event.scrollDelta.dy == 0.0:
+        // Ignore left and right mouse wheel scroll.
         return;
-      }
-      scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
-    }
-    else if (event is PointerScaleEvent) {
-      scaleChange = event.scale;
-    }
-    else {
-      return;
+      case PointerScrollEvent():
+        scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+      case PointerScaleEvent():
+        scaleChange = event.scale;
+      default:
+        return;
     }
     widget.onInteractionStart?.call(
       ScaleStartDetails(

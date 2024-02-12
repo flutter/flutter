@@ -528,43 +528,44 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _ScaleState.ready);
     bool didChangeConfiguration = false;
     bool shouldStartIfAccepted = false;
-    if (event is PointerMoveEvent) {
-      final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      if (!event.synthesized) {
-        tracker.addPosition(event.timeStamp, event.position);
-      }
-      _pointerLocations[event.pointer] = event.position;
-      shouldStartIfAccepted = true;
-      _lastTransform = event.transform;
-    } else if (event is PointerDownEvent) {
-      _pointerLocations[event.pointer] = event.position;
-      _pointerQueue.add(event.pointer);
-      didChangeConfiguration = true;
-      shouldStartIfAccepted = true;
-      _lastTransform = event.transform;
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _pointerLocations.remove(event.pointer);
-      _pointerQueue.remove(event.pointer);
-      didChangeConfiguration = true;
-      _lastTransform = event.transform;
-    } else if (event is PointerPanZoomStartEvent) {
-      assert(_pointerPanZooms[event.pointer] == null);
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromStartEvent(this, event);
-      didChangeConfiguration = true;
-      shouldStartIfAccepted = true;
-      _lastTransform = event.transform;
-    } else if (event is PointerPanZoomUpdateEvent) {
-      assert(_pointerPanZooms[event.pointer] != null);
-      if (!event.synthesized && !trackpadScrollCausesScale) {
-        _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, event.pan);
-      }
-      _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromUpdateEvent(this, event);
-      _lastTransform = event.transform;
-      shouldStartIfAccepted = true;
-    } else if (event is PointerPanZoomEndEvent) {
-      assert(_pointerPanZooms[event.pointer] != null);
-      _pointerPanZooms.remove(event.pointer);
-      didChangeConfiguration = true;
+    switch (event) {
+      case PointerMoveEvent():
+        final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
+        if (!event.synthesized) {
+          tracker.addPosition(event.timeStamp, event.position);
+        }
+        _pointerLocations[event.pointer] = event.position;
+        shouldStartIfAccepted = true;
+        _lastTransform = event.transform;
+      case PointerDownEvent():
+        _pointerLocations[event.pointer] = event.position;
+        _pointerQueue.add(event.pointer);
+        didChangeConfiguration = true;
+        shouldStartIfAccepted = true;
+        _lastTransform = event.transform;
+      case PointerUpEvent() || PointerCancelEvent():
+        _pointerLocations.remove(event.pointer);
+        _pointerQueue.remove(event.pointer);
+        didChangeConfiguration = true;
+        _lastTransform = event.transform;
+      case PointerPanZoomStartEvent():
+        assert(_pointerPanZooms[event.pointer] == null);
+        _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromStartEvent(this, event);
+        didChangeConfiguration = true;
+        shouldStartIfAccepted = true;
+        _lastTransform = event.transform;
+      case PointerPanZoomUpdateEvent():
+        assert(_pointerPanZooms[event.pointer] != null);
+        if (!event.synthesized && !trackpadScrollCausesScale) {
+          _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, event.pan);
+        }
+        _pointerPanZooms[event.pointer] = _PointerPanZoomData.fromUpdateEvent(this, event);
+        _lastTransform = event.transform;
+        shouldStartIfAccepted = true;
+      case PointerPanZoomEndEvent():
+        assert(_pointerPanZooms[event.pointer] != null);
+        _pointerPanZooms.remove(event.pointer);
+        didChangeConfiguration = true;
     }
 
     _updateLines();
@@ -697,43 +698,40 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted, PointerEvent event) {
-    if (_state == _ScaleState.ready) {
-      _state = _ScaleState.possible;
-    }
-
-    if (_state == _ScaleState.possible) {
-      final double spanDelta = (_currentSpan - _initialSpan).abs();
-      final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(event.kind) || focalPointDelta > computePanSlop(event.kind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
+    switch (_state) {
+      case _ScaleState.ready:
+        _state = _ScaleState.possible;
+      case _ScaleState.possible:
+        final double spanDelta = (_currentSpan - _initialSpan).abs();
+        final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
+        if (spanDelta > computeScaleSlop(event.kind) || focalPointDelta > computePanSlop(event.kind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
+          resolve(GestureDisposition.accepted);
+        }
+      case _ScaleState.accepted:
         resolve(GestureDisposition.accepted);
-      }
-    } else if (_state.index >= _ScaleState.accepted.index) {
-      resolve(GestureDisposition.accepted);
-    }
-
-    if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
-      _initialEventTimestamp = event.timeStamp;
-      _state = _ScaleState.started;
-      _dispatchOnStartCallbackIfNeeded();
-    }
-
-    if (_state == _ScaleState.started) {
-      _scaleVelocityTracker?.addPosition(event.timeStamp, Offset(_scaleFactor, 0));
-      if (onUpdate != null) {
-        invokeCallback<void>('onUpdate', () {
-          onUpdate!(ScaleUpdateDetails(
-            scale: _scaleFactor,
-            horizontalScale: _horizontalScaleFactor,
-            verticalScale: _verticalScaleFactor,
-            focalPoint: _currentFocalPoint!,
-            localFocalPoint: _localFocalPoint,
-            rotation: _computeRotationFactor(),
-            pointerCount: pointerCount,
-            focalPointDelta: _delta,
-            sourceTimeStamp: event.timeStamp
-          ));
-        });
-      }
+        if (shouldStartIfAccepted) {
+          _initialEventTimestamp = event.timeStamp;
+          _state = _ScaleState.started;
+          _dispatchOnStartCallbackIfNeeded();
+        }
+      case _ScaleState.started:
+        resolve(GestureDisposition.accepted);
+        _scaleVelocityTracker?.addPosition(event.timeStamp, Offset(_scaleFactor, 0));
+        if (onUpdate != null) {
+          invokeCallback<void>('onUpdate', () {
+            onUpdate!(ScaleUpdateDetails(
+              scale: _scaleFactor,
+              horizontalScale: _horizontalScaleFactor,
+              verticalScale: _verticalScaleFactor,
+              focalPoint: _currentFocalPoint!,
+              localFocalPoint: _localFocalPoint,
+              rotation: _computeRotationFactor(),
+              pointerCount: pointerCount,
+              focalPointDelta: _delta,
+              sourceTimeStamp: event.timeStamp
+            ));
+          });
+        }
     }
   }
 

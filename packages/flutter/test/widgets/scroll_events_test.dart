@@ -10,12 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 Widget _buildScroller({ required List<String> log }) {
   return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
-      if (notification is ScrollStartNotification) {
-        log.add('scroll-start');
-      } else if (notification is ScrollUpdateNotification) {
-        log.add('scroll-update');
-      } else if (notification is ScrollEndNotification) {
-        log.add('scroll-end');
+      switch (notification) {
+        case ScrollStartNotification():
+          log.add('scroll-start');
+        case ScrollUpdateNotification():
+          log.add('scroll-update');
+        case ScrollEndNotification():
+          log.add('scroll-end');
       }
       return false;
     },

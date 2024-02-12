@@ -237,18 +237,19 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
-    if (event is PointerUpEvent) {
-      _up = event;
-      _checkUp();
-    } else if (event is PointerCancelEvent) {
-      resolve(GestureDisposition.rejected);
-      if (_sentTapDown) {
-        _checkCancel(event, '');
-      }
-      _reset();
-    } else if (event.buttons != _down!.buttons) {
-      resolve(GestureDisposition.rejected);
-      stopTrackingPointer(primaryPointer!);
+    switch (event) {
+      case PointerUpEvent():
+        _up = event;
+        _checkUp();
+      case PointerCancelEvent():
+        resolve(GestureDisposition.rejected);
+        if (_sentTapDown) {
+          _checkCancel(event, '');
+        }
+        _reset();
+      case _ when event.buttons != _down!.buttons:
+        resolve(GestureDisposition.rejected);
+        stopTrackingPointer(primaryPointer!);
     }
   }
 

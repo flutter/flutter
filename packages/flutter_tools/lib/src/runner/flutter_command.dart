@@ -776,11 +776,11 @@ abstract class FlutterCommand extends Command<void> {
     if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
       final String? connectionType = stringArg(FlutterOptions.kDeviceConnection);
-      if (connectionType == 'attached') {
-        return DeviceConnectionInterface.attached;
-      } else if (connectionType == 'wireless') {
-        return DeviceConnectionInterface.wireless;
-      }
+      return switch (connectionType) {
+        'attached' => DeviceConnectionInterface.attached,
+        'wireless' => DeviceConnectionInterface.wireless,
+        _ => null,
+      };
     }
     return null;
   }

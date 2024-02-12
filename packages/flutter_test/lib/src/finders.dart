@@ -1453,12 +1453,11 @@ class _ImageWidgetFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
-    if (widget is Image) {
-      return widget.image == image;
-    } else if (widget is FadeInImage) {
-      return widget.image == image;
-    }
-    return false;
+    return switch (widget) {
+      Image()       => widget.image == image,
+      FadeInImage() => widget.image == image,
+      _ => false,
+    };
   }
 }
 

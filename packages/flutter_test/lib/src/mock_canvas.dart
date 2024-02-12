@@ -520,24 +520,21 @@ class _MismatchedCall extends Error {
 }
 
 bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
-  if (object is _ContextPainterFunction) {
-    final _ContextPainterFunction function = object;
-    function(context, Offset.zero);
-  } else if (object is _CanvasPainterFunction) {
-    final _CanvasPainterFunction function = object;
-    function(canvas);
-  } else {
-    if (object is Finder) {
+  switch (object) {
+    case _ContextPainterFunction():
+      final _ContextPainterFunction function = object;
+      function(context, Offset.zero);
+    case _CanvasPainterFunction():
+      final _CanvasPainterFunction function = object;
+      function(canvas);
+    case Finder():
       TestAsyncUtils.guardSync();
       final Finder finder = object;
       object = finder.evaluate().single.renderObject;
-    }
-    if (object is RenderObject) {
-      final RenderObject renderObject = object;
-      renderObject.paint(context, Offset.zero);
-    } else {
+    case RenderObject():
+      object.paint(context, Offset.zero);
+    default:
       return false;
-    }
   }
   return true;
 }

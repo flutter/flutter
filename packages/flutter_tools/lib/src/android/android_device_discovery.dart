@@ -165,25 +165,26 @@ class AndroidDevices extends PollingDeviceDiscovery {
           info['model'] = cleanAdbDeviceName(model);
         }
 
-        if (deviceState == 'unauthorized') {
-          diagnostics?.add(
-            'Device $deviceID is not authorized.\n'
-            'You might need to check your device for an authorization dialog.'
-          );
-        } else if (deviceState == 'offline') {
-          diagnostics?.add('Device $deviceID is offline.');
-        } else {
-          devices?.add(AndroidDevice(
-            deviceID,
-            productID: info['product'],
-            modelID: info['model'] ?? deviceID,
-            deviceCodeName: info['device'],
-            androidSdk: _androidSdk!,
-            fileSystem: _fileSystem,
-            logger: _logger,
-            platform: _platform,
-            processManager: _processManager,
-          ));
+        switch (deviceState) {
+          case 'unauthorized':
+            diagnostics?.add(
+              'Device $deviceID is not authorized.\n'
+              'You might need to check your device for an authorization dialog.'
+            );
+          case 'offline':
+            diagnostics?.add('Device $deviceID is offline.');
+          default:
+            devices?.add(AndroidDevice(
+              deviceID,
+              productID: info['product'],
+              modelID: info['model'] ?? deviceID,
+              deviceCodeName: info['device'],
+              androidSdk: _androidSdk!,
+              fileSystem: _fileSystem,
+              logger: _logger,
+              platform: _platform,
+              processManager: _processManager,
+            ));
         }
       } else {
         diagnostics?.add(

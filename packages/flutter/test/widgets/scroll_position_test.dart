@@ -37,21 +37,18 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
         data: MediaQueryData.fromView(tester.view),
         child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (RouteSettings settings) {
-            if (settings.name == '/') {
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 0),
-                maintainState: maintainState,
-              );
-            } else if (settings.name == '/second') {
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 10000),
-                maintainState: maintainState,
-              );
-            }
-            return null;
+          onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+            '/' => MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => const ThePositiveNumbers(from: 0),
+              maintainState: maintainState,
+            ),
+            '/second' => MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => const ThePositiveNumbers(from: 10000),
+              maintainState: maintainState,
+            ),
+            _ => null,
           },
         ),
       ),

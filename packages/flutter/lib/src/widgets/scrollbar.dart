@@ -1439,7 +1439,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ? 'PrimaryScrollController'
       : 'provided ScrollController';
 
-    String when = '';
+    final String when;
     if (widget.thumbVisibility ?? false) {
       when = 'Scrollbar.thumbVisibility is true';
     } else if (enableGestures) {

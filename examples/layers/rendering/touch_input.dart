@@ -66,20 +66,21 @@ class RenderDots extends RenderBox {
   /// painting commands.
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    if (event is PointerDownEvent) {
-      final Color color = _kColors[event.pointer.remainder(_kColors.length)];
-      _dots[event.pointer] = Dot(color: color)..update(event);
-      // We call markNeedsPaint to indicate that our painting commands have
-      // changed and that paint needs to be called before displaying a new frame
-      // to the user. It's harmless to call markNeedsPaint multiple times
-      // because the render tree will ignore redundant calls.
-      markNeedsPaint();
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _dots.remove(event.pointer);
-      markNeedsPaint();
-    } else if (event is PointerMoveEvent) {
-      _dots[event.pointer]!.update(event);
-      markNeedsPaint();
+    switch (event) {
+      case PointerDownEvent():
+        final Color color = _kColors[event.pointer.remainder(_kColors.length)];
+        _dots[event.pointer] = Dot(color: color)..update(event);
+        // We call markNeedsPaint to indicate that our painting commands have
+        // changed and that paint needs to be called before displaying a new frame
+        // to the user. It's harmless to call markNeedsPaint multiple times
+        // because the render tree will ignore redundant calls.
+        markNeedsPaint();
+      case PointerUpEvent() || PointerCancelEvent():
+        _dots.remove(event.pointer);
+        markNeedsPaint();
+      case PointerMoveEvent():
+        _dots[event.pointer]!.update(event);
+        markNeedsPaint();
     }
   }
 

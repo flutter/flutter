@@ -546,12 +546,11 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
-  if (key is Uri) {
-    return MatchesGoldenFile(key, version);
-  } else if (key is String) {
-    return MatchesGoldenFile.forStringPath(key, version);
-  }
-  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+  return switch (key) {
+    Uri() => MatchesGoldenFile(key, version),
+    String() => MatchesGoldenFile.forStringPath(key, version),
+    _ => throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}'),
+  };
 }
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
@@ -2152,22 +2151,23 @@ class _MatchesReferenceImage extends AsyncMatcher {
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
     final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
-    if (item is Future<ui.Image>) {
-      imageFuture = item;
-      disposeImage = false;
-    } else if (item is ui.Image) {
-      imageFuture = Future<ui.Image>.value(item);
-      disposeImage = false;
-    } else {
-      final Finder finder = item as Finder;
-      final Iterable<Element> elements = finder.evaluate();
-      if (elements.isEmpty) {
-        return 'could not be rendered because no widget was found';
-      } else if (elements.length > 1) {
-        return 'matched too many widgets';
-      }
-      imageFuture = captureImage(elements.single);
-      disposeImage = true;
+    switch (item) {
+      case Future<ui.Image>():
+        imageFuture = item;
+        disposeImage = false;
+      case ui.Image:
+        imageFuture = Future<ui.Image>.value(item);
+        disposeImage = false;
+      default:
+        final Finder finder = item as Finder;
+        final Iterable<Element> elements = finder.evaluate();
+        if (elements.isEmpty) {
+          return 'could not be rendered because no widget was found';
+        } else if (elements.length > 1) {
+          return 'matched too many widgets';
+        }
+        imageFuture = captureImage(elements.single);
+        disposeImage = true;
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;

@@ -194,13 +194,11 @@ abstract class KeyHelper {
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   factory KeyHelper(String toolkit) {
-    if (toolkit == 'glfw') {
-      return GLFWKeyHelper();
-    } else if (toolkit == 'gtk') {
-      return GtkKeyHelper();
-    } else {
-      throw FlutterError('Window toolkit not recognized: $toolkit');
-    }
+    return switch (toolkit) {
+      'glfw' => GLFWKeyHelper(),
+      'gtk'  => GtkKeyHelper(),
+      _      => throw FlutterError('Window toolkit not recognized: $toolkit'),
+    };
   }
 
   /// Returns the name for the toolkit.

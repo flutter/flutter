@@ -1168,17 +1168,19 @@ class _DecelerateCurve extends Curve {
 // BOUNCE CURVES
 
 double _bounce(double t) {
-  if (t < 1.0 / 2.75) {
-    return 7.5625 * t * t;
-  } else if (t < 2 / 2.75) {
-    t -= 1.5 / 2.75;
-    return 7.5625 * t * t + 0.75;
-  } else if (t < 2.5 / 2.75) {
-    t -= 2.25 / 2.75;
-    return 7.5625 * t * t + 0.9375;
+  switch (t * 2.75) {
+    case < 1.0:
+      return 7.5625 * t * t;
+    case < 2.0:
+      t -= 1.5 / 2.75;
+      return 7.5625 * t * t + 0.75;
+    case < 2.5:
+      t -= 2.25 / 2.75;
+      return 7.5625 * t * t + 0.9375;
+    default:
+      t -= 2.625 / 2.75;
+      return 7.5625 * t * t + 0.984375;
   }
-  t -= 2.625 / 2.75;
-  return 7.5625 * t * t + 0.984375;
 }
 
 /// An oscillating curve that grows in magnitude.

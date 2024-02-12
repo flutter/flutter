@@ -1227,11 +1227,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
       final RangeValues currentValues = _discretizeRangeValues(values);
-      if (_lastThumbSelection == Thumb.start) {
-        _newValues = RangeValues(tapValue, currentValues.end);
-      } else if (_lastThumbSelection == Thumb.end) {
-        _newValues = RangeValues(currentValues.start, tapValue);
-      }
+      _newValues = switch (_lastThumbSelection) {
+        Thumb.start => RangeValues(tapValue, currentValues.end),
+        Thumb.end   => RangeValues(currentValues.start, tapValue),
+        null => _newValues,
+      };
       _updateLabelPainter(_lastThumbSelection!);
 
       onChangeStart?.call(currentValues);
@@ -1283,11 +1283,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       final double currentDragValue = _discretize(dragValue);
 
-      if (_lastThumbSelection == Thumb.start) {
-        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - _minThumbSeparationValue), currentValues.end);
-      } else if (_lastThumbSelection == Thumb.end) {
-        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + _minThumbSeparationValue));
-      }
+      _newValues = switch (_lastThumbSelection) {
+        Thumb.start => RangeValues(math.min(currentDragValue, currentValues.end - _minThumbSeparationValue), currentValues.end),
+        Thumb.end   => RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + _minThumbSeparationValue)),
+        null => _newValues,
+      };
       onChanged!(_newValues);
     }
   }

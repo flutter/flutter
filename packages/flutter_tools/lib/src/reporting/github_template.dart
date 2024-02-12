@@ -39,37 +39,25 @@ class GitHubTemplateCreator {
 
   /// Restricts exception object strings to contain only information about tool internals.
   static String sanitizedCrashException(Object error) {
-    if (error is ProcessException) {
+    return switch (error) {
       // Suppress args.
-      return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
-    } else if (error is FileSystemException) {
+      ProcessException() => 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}',
       // Suppress path.
-      return 'FileSystemException: ${error.message}, ${error.osError}';
-    } else if (error is SocketException) {
+      FileSystemException() => 'FileSystemException: ${error.message}, ${error.osError}',
       // Suppress address and port.
-      return 'SocketException: ${error.message}, ${error.osError}';
-    } else if (error is DevFSException) {
+      SocketException() => 'SocketException: ${error.message}, ${error.osError}',
       // Suppress underlying error.
-      return 'DevFSException: ${error.message}';
-    } else if (error is NoSuchMethodError
-      || error is ArgumentError
-      || error is VersionCheckError
-      || error is MissingDefineException
-      || error is UnsupportedError
-      || error is UnimplementedError
-      || error is StateError
-      || error is ProcessExit
-      || error is OSError) {
+      DevFSException() => 'DevFSException: ${error.message}',
       // These exception objects only reference tool internals, print the whole error.
-      return '${error.runtimeType}: $error';
-    } else if (error is Error) {
-      return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
-    } else if (error is String) {
+      UnimplementedError() || UnsupportedError()  || ProcessExit() || MissingDefineException()
+        || ArgumentError() || NoSuchMethodError() || StateError()  || VersionCheckError()
+        || OSError() => '${error.runtimeType}: $error',
+      Error() => '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}',
       // Force comma separator to standardize.
-      return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
-    }
-    // Exception, other.
-    return error.runtimeType.toString();
+      String() => 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>',
+      // Exception, other.
+      _ => error.runtimeType.toString(),
+    };
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.

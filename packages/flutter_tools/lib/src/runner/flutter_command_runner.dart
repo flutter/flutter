@@ -225,13 +225,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // their sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1) {
-      if (args.first == 'build') {
-        args = <String>['build', '-h'];
-      } else if (args.first == 'custom-devices') {
-        args = <String>['custom-devices', '-h'];
-      } else if (args.first == 'pub') {
-        args = <String>['pub', '-h'];
-      }
+      args = switch (args.first) {
+        'build' => <String>['build', '-h'],
+        'custom-devices' => <String>['custom-devices', '-h'],
+        'pub' => <String>['pub', '-h'],
+        _ => args,
+      };
     }
 
     return super.run(args);

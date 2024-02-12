@@ -80,23 +80,24 @@ class MatchesGoldenFile extends AsyncMatcher {
     }
     Future<ui.Image?> imageFuture;
     final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
-    if (item is Future<ui.Image?>) {
-      imageFuture = item;
-      disposeImage = false;
-    } else if (item is ui.Image) {
-      imageFuture = Future<ui.Image>.value(item);
-      disposeImage = false;
-    } else if (item is Finder) {
-      final Iterable<Element> elements = item.evaluate();
-      if (elements.isEmpty) {
-        return 'could not be rendered because no widget was found';
-      } else if (elements.length > 1) {
-        return 'matched too many widgets';
-      }
-      imageFuture = captureImage(elements.single);
-      disposeImage = true;
-    } else {
-      throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
+    switch (item) {
+      case Future<ui.Image?>():
+        imageFuture = item;
+        disposeImage = false;
+      case ui.Image:
+        imageFuture = Future<ui.Image>.value(item);
+        disposeImage = false;
+      case Finder():
+        final Iterable<Element> elements = item.evaluate();
+        if (elements.isEmpty) {
+          return 'could not be rendered because no widget was found';
+        } else if (elements.length > 1) {
+          return 'matched too many widgets';
+        }
+        imageFuture = captureImage(elements.single);
+        disposeImage = true;
+      default:
+        throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;

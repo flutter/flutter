@@ -501,20 +501,21 @@ class HardwareKeyboard {
         'bug to Flutter. If this occurs in unit tests, please ensure that '
         "simulated events follow Flutter's event model as documented in "
         '`HardwareKeyboard`. This was the event: ';
-      if (event is KeyDownEvent) {
-        assert(!_pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is already pressed. $common$event');
-      } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
-        assert(_pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is not pressed. $common$event');
-        assert(_pressedKeys[event.physicalKey] == event.logicalKey,
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is pressed on a different logical key. $common$event '
-          'and the recorded logical key ${_pressedKeys[event.physicalKey]}');
-      } else {
-        assert(false, 'Unexpected key event class ${event.runtimeType}');
+      switch (event) {
+        case KeyDownEvent():
+          assert(!_pressedKeys.containsKey(event.physicalKey),
+            'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+            'key is already pressed. $common$event');
+        case KeyRepeatEvent() || KeyUpEvent():
+          assert(_pressedKeys.containsKey(event.physicalKey),
+            'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+            'key is not pressed. $common$event');
+          assert(_pressedKeys[event.physicalKey] == event.logicalKey,
+            'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+            'key is pressed on a different logical key. $common$event '
+            'and the recorded logical key ${_pressedKeys[event.physicalKey]}');
+        default:
+          assert(false, 'Unexpected key event class ${event.runtimeType}');
       }
       return true;
     }());
@@ -643,20 +644,21 @@ class HardwareKeyboard {
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
-    if (event is KeyDownEvent) {
-      _pressedKeys[physicalKey] = logicalKey;
-      final KeyboardLockMode? lockMode = KeyboardLockMode.findLockByLogicalKey(event.logicalKey);
-      if (lockMode != null) {
-        if (_lockModes.contains(lockMode)) {
-          _lockModes.remove(lockMode);
-        } else {
-          _lockModes.add(lockMode);
+    switch (event) {
+      case KeyDownEvent():
+        _pressedKeys[physicalKey] = logicalKey;
+        final KeyboardLockMode? lockMode = KeyboardLockMode.findLockByLogicalKey(event.logicalKey);
+        if (lockMode != null) {
+          if (_lockModes.contains(lockMode)) {
+            _lockModes.remove(lockMode);
+          } else {
+            _lockModes.add(lockMode);
+          }
         }
-      }
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(physicalKey);
-    } else if (event is KeyRepeatEvent) {
-      // Empty
+      case KeyUpEvent():
+        _pressedKeys.remove(physicalKey);
+      case KeyRepeatEvent():
+        break;
     }
 
     assert(_keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails));
@@ -1143,18 +1145,17 @@ class KeyEventManager {
     final RawKeyEvent rawEvent = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
 
     bool shouldDispatch = true;
-    if (rawEvent is RawKeyDownEvent) {
-      if (!rawEvent.data.shouldDispatchEvent()) {
+    switch (rawEvent) {
+      case RawKeyDownEvent() when rawEvent.data.shouldDispatchEvent():
+        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+      case RawKeyDownEvent():
         shouldDispatch = false;
         _skippedRawKeysPressed.add(rawEvent.physicalKey);
-      } else {
-        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
-      }
-    } else if (rawEvent is RawKeyUpEvent) {
-      if (_skippedRawKeysPressed.contains(rawEvent.physicalKey)) {
-        _skippedRawKeysPressed.remove(rawEvent.physicalKey);
-        shouldDispatch = false;
-      }
+      case RawKeyUpEvent():
+        if (_skippedRawKeysPressed.contains(rawEvent.physicalKey)) {
+          _skippedRawKeysPressed.remove(rawEvent.physicalKey);
+          shouldDispatch = false;
+        }
     }
 
     bool handled = true;

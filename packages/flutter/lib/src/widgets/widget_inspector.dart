@@ -1681,14 +1681,11 @@ mixin WidgetInspectorService {
 
   List<Object?> _getParentChain(String? id, String groupName) {
     final Object? value = toObject(id);
-    List<_DiagnosticsPathNode> path;
-    if (value is RenderObject) {
-      path = _getRenderObjectParentChain(value, groupName)!;
-    } else if (value is Element) {
-      path = _getElementParentChain(value, groupName);
-    } else {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]);
-    }
+    final List<_DiagnosticsPathNode> path = switch (value) {
+      RenderObject() => _getRenderObjectParentChain(value, groupName)!
+      Element() => _getElementParentChain(value, groupName),
+      _ => FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]),
+    };
 
     return path.map<Object?>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,

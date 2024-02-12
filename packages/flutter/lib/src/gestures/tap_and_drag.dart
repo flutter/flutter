@@ -524,23 +524,24 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    if (event is PointerMoveEvent) {
-      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
-      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > computedSlop;
+    switch (event) {
+      case PointerMoveEvent():
+        final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+        final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > computedSlop;
 
-      if (isSlopPastTolerance) {
-        _consecutiveTapTimerStop();
-        _previousButtons = null;
-        _lastTapOffset = null;
-      }
-    } else if (event is PointerUpEvent) {
-      _up = event;
-      if (_down != null) {
-        _consecutiveTapTimerStop();
-        _consecutiveTapTimerStart();
-      }
-    } else if (event is PointerCancelEvent) {
-      _tapTrackerReset();
+        if (isSlopPastTolerance) {
+          _consecutiveTapTimerStop();
+          _previousButtons = null;
+          _lastTapOffset = null;
+        }
+      case PointerUpEvent():
+        _up = event;
+        if (_down != null) {
+          _consecutiveTapTimerStop();
+          _consecutiveTapTimerStart();
+        }
+      case PointerCancelEvent():
+        _tapTrackerReset();
     }
   }
 
@@ -1047,50 +1048,57 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       return;
     }
     super.handleEvent(event);
-    if (event is PointerMoveEvent) {
-      // Receiving a [PointerMoveEvent], does not automatically mean the pointer
-      // being tracked is doing a drag gesture. There is some drift that can happen
-      // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s.
-      // Accessing [_pastSlopTolerance] lets us know if our tap has moved past the
-      // acceptable tolerance. If the pointer does not move past this tolerance than
-      // it is not considered a drag.
-      //
-      // To be recognized as a drag, the [PointerMoveEvent] must also have moved
-      // a sufficient global distance from the initial [PointerDownEvent] to be
-      // accepted as a drag. This logic is handled in [_hasSufficientGlobalDistanceToAccept].
-      //
-      // The recognizer will also detect the gesture as a drag when the pointer
-      // has been accepted and it has moved past the [slopTolerance] but has not moved
-      // a sufficient global distance from the initial position to be considered a drag.
-      // In this case since the gesture cannot be a tap, it defaults to a drag.
-      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
-      _pastSlopTolerance = _pastSlopTolerance || _getGlobalDistance(event, _initialPosition) > computedSlop;
+    switch (event) {
+      case PointerMoveEvent():
+        // Receiving a [PointerMoveEvent], does not automatically mean the pointer
+        // being tracked is doing a drag gesture. There is some drift that can happen
+        // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s.
+        // Accessing [_pastSlopTolerance] lets us know if our tap has moved past the
+        // acceptable tolerance. If the pointer does not move past this tolerance than
+        // it is not considered a drag.
+        //
+        // To be recognized as a drag, the [PointerMoveEvent] must also have moved
+        // a sufficient global distance from the initial [PointerDownEvent] to be
+        // accepted as a drag. This logic is handled in [_hasSufficientGlobalDistanceToAccept].
+        //
+        // The recognizer will also detect the gesture as a drag when the pointer
+        // has been accepted and it has moved past the [slopTolerance] but has not moved
+        // a sufficient global distance from the initial position to be considered a drag.
+        // In this case since the gesture cannot be a tap, it defaults to a drag.
+        final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+        _pastSlopTolerance = _pastSlopTolerance || _getGlobalDistance(event, _initialPosition) > computedSlop;
 
-      if (_dragState == _DragState.accepted) {
-        _checkDragUpdate(event);
-      } else if (_dragState == _DragState.possible) {
-        if (_start == null) {
-          // Only check for a drag if the start of a drag was not already identified.
-          _checkDrag(event);
-        }
+        switch (_dragState) {
+          case _DragState.ready:
+            break;
+          case _DragState.possible:
+            if (_start == null) {
+              // Only check for a drag if the start of a drag was not already identified.
+              _checkDrag(event);
+            }
 
-        // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
-        // received that moves the pointer a sufficient global distance to be considered a drag.
-        if (_start != null) {
-          _acceptDrag(_start!);
+            // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
+            // received that moves the pointer a sufficient global distance to be considered a drag.
+            if (_start != null) {
+              _acceptDrag(_start!);
+            }
+          case _DragState.accepted:
+            _checkDragUpdate(event);
         }
-      }
-    } else if (event is PointerUpEvent) {
-      if (_dragState == _DragState.possible) {
-        // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
-        // attempts to recognize a tap.
-        stopTrackingIfPointerNoLongerDown(event);
-      } else if (_dragState == _DragState.accepted) {
+      case PointerUpEvent():
+        switch (_dragState) {
+          case _DragState.ready:
+            break;
+          case _DragState.possible:
+            // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
+            // attempts to recognize a tap.
+            stopTrackingIfPointerNoLongerDown(event);
+          case _DragState.accepted:
+            _giveUpPointer(event.pointer);
+        }
+      case PointerCancelEvent():
+        _dragState = _DragState.ready;
         _giveUpPointer(event.pointer);
-      }
-    } else if (event is PointerCancelEvent) {
-      _dragState = _DragState.ready;
-      _giveUpPointer(event.pointer);
     }
   }
 

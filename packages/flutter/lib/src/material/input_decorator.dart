@@ -282,13 +282,11 @@ class _Shaker extends AnimatedWidget {
   double get translateX {
     const double shakeDelta = 4.0;
     final double t = animation.value;
-    if (t <= 0.25) {
-      return -t * shakeDelta;
-    } else if (t < 0.75) {
-      return (t - 0.5) * shakeDelta;
-    } else {
-      return (1.0 - t) * 4.0 * shakeDelta;
-    }
+    return shakeDelta * switch (t) {
+      <= 0.25 => -t,
+      <  0.75 => (t - 0.5),
+      _ => (1.0 - t) * 4.0,
+    };
   }
 
   @override

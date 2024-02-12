@@ -620,29 +620,30 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       }
     }
 
-    if (event is PointerUpEvent) {
-      if (_longPressAccepted) {
-        _checkLongPressEnd(event);
-      } else {
-        // Pointer is lifted before timeout.
-        resolve(GestureDisposition.rejected);
-      }
-      _reset();
-    } else if (event is PointerCancelEvent) {
-      _checkLongPressCancel();
-      _reset();
-    } else if (event is PointerDownEvent) {
-      // The first touch.
-      _longPressOrigin = OffsetPair.fromEventPosition(event);
-      _initialButtons = event.buttons;
-      _checkLongPressDown(event);
-    } else if (event is PointerMoveEvent) {
-      if (event.buttons != _initialButtons && !_longPressAccepted) {
-        resolve(GestureDisposition.rejected);
-        stopTrackingPointer(primaryPointer!);
-      } else if (_longPressAccepted) {
-        _checkLongPressMoveUpdate(event);
-      }
+    switch (event) {
+      case PointerUpEvent():
+        if (_longPressAccepted) {
+          _checkLongPressEnd(event);
+        } else {
+          // Pointer is lifted before timeout.
+          resolve(GestureDisposition.rejected);
+        }
+        _reset();
+      case PointerCancelEvent():
+        _checkLongPressCancel();
+        _reset();
+      case PointerDownEvent():
+        // The first touch.
+        _longPressOrigin = OffsetPair.fromEventPosition(event);
+        _initialButtons = event.buttons;
+        _checkLongPressDown(event);
+      case PointerMoveEvent():
+        if (event.buttons != _initialButtons && !_longPressAccepted) {
+          resolve(GestureDisposition.rejected);
+          stopTrackingPointer(primaryPointer!);
+        } else if (_longPressAccepted) {
+          _checkLongPressMoveUpdate(event);
+        }
     }
   }
 

@@ -263,24 +263,27 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     assert(_pointers!.containsKey(event.pointer));
     final MultiDragPointerState state = _pointers![event.pointer]!;
-    if (event is PointerMoveEvent) {
-      state._move(event);
-      // We might be disposed here.
-    } else if (event is PointerUpEvent) {
-      assert(event.delta == Offset.zero);
-      state._up();
-      // We might be disposed here.
-      _removeState(event.pointer);
-    } else if (event is PointerCancelEvent) {
-      assert(event.delta == Offset.zero);
-      state._cancel();
-      // We might be disposed here.
-      _removeState(event.pointer);
-    } else if (event is! PointerDownEvent) {
-      // we get the PointerDownEvent that resulted in our addPointer getting called since we
-      // add ourselves to the pointer router then (before the pointer router has heard of
-      // the event).
-      assert(false);
+    switch (event) {
+      case PointerMoveEvent():
+        state._move(event);
+        // We might be disposed here.
+      case PointerUpEvent():
+        assert(event.delta == Offset.zero);
+        state._up();
+        // We might be disposed here.
+        _removeState(event.pointer);
+      case PointerCancelEvent():
+        assert(event.delta == Offset.zero);
+        state._cancel();
+        // We might be disposed here.
+        _removeState(event.pointer);
+      case PointerDownEvent():
+        break;
+      default:
+        // we get the PointerDownEvent that resulted in our addPointer getting called since we
+        // add ourselves to the pointer router then (before the pointer router has heard of
+        // the event).
+        assert(false);
     }
   }
 

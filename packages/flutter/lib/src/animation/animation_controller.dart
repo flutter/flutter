@@ -895,13 +895,11 @@ class _InterpolationSimulation extends Simulation {
   @override
   double x(double timeInSeconds) {
     final double t = clampDouble(timeInSeconds / _durationInSeconds, 0.0, 1.0);
-    if (t == 0.0) {
-      return _begin;
-    } else if (t == 1.0) {
-      return _end;
-    } else {
-      return _begin + (_end - _begin) * _curve.transform(t);
-    }
+    return switch (t) {
+      0.0 => _begin,
+      1.0 => _end,
+      _ => _begin + (_end - _begin) * _curve.transform(t),
+    };
   }
 
   @override

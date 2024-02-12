@@ -619,20 +619,16 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
-    final int action;
-    if (event is PointerDownEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionDown
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
-    } else if (event is PointerUpEvent) {
-      action = numPointers == 1
-          ? AndroidViewController.kActionUp
-          : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
-    } else if (event is PointerMoveEvent) {
-      action = AndroidViewController.kActionMove;
-    } else if (event is PointerCancelEvent) {
-      action = AndroidViewController.kActionCancel;
-    } else {
+    final int? action = switch (event) {
+      PointerDownEvent() when numPointers != 1 => AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown),
+      PointerUpEvent()   when numPointers != 1 => AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp),
+      PointerDownEvent()   => AndroidViewController.kActionDown,
+      PointerUpEvent()     => AndroidViewController.kActionUp,
+      PointerMoveEvent()   => AndroidViewController.kActionMove,
+      PointerCancelEvent() => AndroidViewController.kActionCancel,
+      _ => null,
+    };
+    if (action == null) {
       return null;
     }
 

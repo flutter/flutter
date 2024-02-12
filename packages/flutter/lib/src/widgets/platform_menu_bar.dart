@@ -373,17 +373,18 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
       return;
     }
     final PlatformMenuItem item = _idMap[id]!;
-    if (call.method == _kMenuSelectedCallbackMethod) {
-      assert(item.onSelected == null || item.onSelectedIntent == null,
-        'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
-      item.onSelected?.call();
-      if (item.onSelectedIntent != null) {
-        Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, item.onSelectedIntent!);
-      }
-    } else if (call.method == _kMenuItemOpenedMethod) {
-      item.onOpen?.call();
-    } else if (call.method == _kMenuItemClosedMethod) {
-      item.onClose?.call();
+    switch (call.method) {
+      case _kMenuSelectedCallbackMethod:
+        assert(item.onSelected == null || item.onSelectedIntent == null,
+          'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
+        item.onSelected?.call();
+        if (item.onSelectedIntent != null) {
+          Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, item.onSelectedIntent!);
+        }
+      case _kMenuItemOpenedMethod:
+        item.onOpen?.call();
+      case _kMenuItemClosedMethod:
+        item.onClose?.call();
     }
   }
 }
