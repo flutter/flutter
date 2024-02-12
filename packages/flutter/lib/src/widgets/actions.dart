@@ -1340,9 +1340,8 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    return switch (mode) {
-      NavigationMode.traditional => widget.enabled,
+    return switch (MediaQuery.maybeNavigationModeOf(context)) {
+      NavigationMode.traditional || null => widget.enabled,
       NavigationMode.directional => true,
     };
   }
