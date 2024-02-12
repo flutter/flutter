@@ -795,7 +795,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
     required this.items,
-    this.itemKeys,
+    required this.itemKeys,
     this.initialValue,
     this.elevation,
     this.surfaceTintColor,
@@ -816,7 +816,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
-  final List<GlobalKey>? itemKeys;
+  final List<GlobalKey> itemKeys;
   final List<Size?> itemSizes;
   final T? initialValue;
   final double? elevation;
@@ -844,8 +844,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   void scrollTo(int selectedItemIndex) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (itemKeys?[selectedItemIndex].currentContext != null) {
-        Scrollable.ensureVisible(itemKeys![selectedItemIndex].currentContext!);
+      if (itemKeys[selectedItemIndex].currentContext != null) {
+        Scrollable.ensureVisible(itemKeys[selectedItemIndex].currentContext!);
       }
     });
   }
@@ -976,7 +976,6 @@ Future<T?> showMenu<T>({
   required BuildContext context,
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
-  List<GlobalKey>? itemKeys,
   T? initialValue,
   double? elevation,
   Color? shadowColor,
@@ -1004,7 +1003,7 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
-  final List<GlobalKey> menuItemKeys = itemKeys ?? List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
+  final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
