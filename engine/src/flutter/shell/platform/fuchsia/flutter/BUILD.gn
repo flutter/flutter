@@ -140,8 +140,8 @@ template("runner_sources") {
 
     public_deps = [
                     "$fuchsia_sdk_root/pkg:inspect",
+                    "$fuchsia_sdk_root/pkg:inspect_component_cpp",
                     "$fuchsia_sdk_root/pkg:sys_cpp",
-                    "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
                     "//flutter/shell/platform/fuchsia/runtime/dart/utils",
                   ] + flutter_public_deps
 

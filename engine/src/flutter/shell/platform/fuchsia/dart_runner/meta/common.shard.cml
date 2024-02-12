@@ -2,16 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 {
-    capabilities: [
-        // Required for inspect.
-        // Copied from inspect/client.shard.cml because out-of-tree doesn't
-        // have support for CML includes from the SDK.
-        {
-            directory: "diagnostics",
-            rights: [ "connect" ],
-            path: "/diagnostics",
-        },
-    ],
     use: [
         // This is used by the Dart VM to communicate from Dart code to C++ code.
         {
@@ -36,6 +26,7 @@
             protocol: [
                 "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
+                "fuchsia.inspect.InspectSink",  // For inspect
                 "fuchsia.intl.PropertyProvider",  // For dartVM timezone support
                 "fuchsia.logger.LogSink",  // For syslog
                 "fuchsia.net.name.Lookup",  // For fdio sockets
@@ -50,15 +41,5 @@
             from: "parent",
             availability: "optional",
         },
-    ],
-    expose: [
-        // Required for inspect.
-        // Copied from inspect/client.shard.cml because out-of-tree doesn't
-        // have support for CML includes from the SDK.
-        {
-            directory: "diagnostics",
-            from: "self",
-            to: "framework",
-        },
-    ],
+    ]
 }
