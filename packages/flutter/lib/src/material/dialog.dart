@@ -54,7 +54,7 @@ class Dialog extends StatelessWidget {
     this.surfaceTintColor,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -215,7 +215,7 @@ class Dialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context) + (insetPadding ?? EdgeInsets.zero);
+    final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context) + (insetPadding ?? _defaultInsetPadding);
     final DialogTheme defaults = theme.useMaterial3
       ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
       : _DialogDefaultsM2(context);
@@ -387,7 +387,7 @@ class AlertDialog extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.semanticLabel,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -676,7 +676,7 @@ class AlertDialog extends StatelessWidget {
   final String? semanticLabel;
 
   /// {@macro flutter.material.dialog.insetPadding}
-  final EdgeInsets insetPadding;
+  final EdgeInsets? insetPadding;
 
   /// {@macro flutter.material.dialog.clipBehavior}
   final Clip clipBehavior;
@@ -912,7 +912,7 @@ class _AdaptiveAlertDialog extends AlertDialog {
     super.shadowColor,
     super.surfaceTintColor,
     super.semanticLabel,
-    super.insetPadding = _defaultInsetPadding,
+    super.insetPadding,
     super.clipBehavior = Clip.none,
     super.shape,
     super.alignment,
@@ -1110,7 +1110,7 @@ class SimpleDialog extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.semanticLabel,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -1185,7 +1185,7 @@ class SimpleDialog extends StatelessWidget {
   final String? semanticLabel;
 
   /// {@macro flutter.material.dialog.insetPadding}
-  final EdgeInsets insetPadding;
+  final EdgeInsets? insetPadding;
 
   /// {@macro flutter.material.dialog.clipBehavior}
   final Clip clipBehavior;
