@@ -4832,6 +4832,8 @@ ORIGIN: ../../../flutter/fml/platform/android/jni_weak_ref.cc + ../../../flutter
 ORIGIN: ../../../flutter/fml/platform/android/jni_weak_ref.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/message_loop_android.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/message_loop_android.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/android/ndk_helpers.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/android/ndk_helpers.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/paths_android.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/paths_android.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/scoped_java_ref.cc + ../../../flutter/LICENSE
@@ -6474,8 +6476,6 @@ ORIGIN: ../../../flutter/shell/platform/android/jni/jni_mock.h + ../../../flutte
 ORIGIN: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/library_loader.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/ndk_helpers.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/ndk_helpers.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_handler_android.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_response_android.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_response_android.h + ../../../flutter/LICENSE
@@ -7663,6 +7663,8 @@ FILE: ../../../flutter/fml/platform/android/jni_weak_ref.cc
 FILE: ../../../flutter/fml/platform/android/jni_weak_ref.h
 FILE: ../../../flutter/fml/platform/android/message_loop_android.cc
 FILE: ../../../flutter/fml/platform/android/message_loop_android.h
+FILE: ../../../flutter/fml/platform/android/ndk_helpers.cc
+FILE: ../../../flutter/fml/platform/android/ndk_helpers.h
 FILE: ../../../flutter/fml/platform/android/paths_android.cc
 FILE: ../../../flutter/fml/platform/android/paths_android.h
 FILE: ../../../flutter/fml/platform/android/scoped_java_ref.cc
@@ -9324,8 +9326,6 @@ FILE: ../../../flutter/shell/platform/android/jni/jni_mock.h
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/library_loader.cc
-FILE: ../../../flutter/shell/platform/android/ndk_helpers.cc
-FILE: ../../../flutter/shell/platform/android/ndk_helpers.h
 FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc

@@ -12,7 +12,7 @@
 #include <sstream>
 #include <utility>
 
-#include "flutter/shell/platform/android/ndk_helpers.h"
+#include "flutter/fml/platform/android/ndk_helpers.h"
 #include "include/android/SkImageAndroid.h"
 #include "unicode/uchar.h"
 

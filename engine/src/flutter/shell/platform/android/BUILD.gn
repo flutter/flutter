@@ -42,6 +42,7 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "//flutter/fml/platform/android/ndk_helpers_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
     "android_context_gl_unittests.cc",
     "android_shell_holder_unittests.cc",
@@ -53,6 +54,7 @@ executable("flutter_shell_native_unittests") {
   public_configs = [ "//flutter:config" ]
   deps = [
     ":flutter_shell_native_src",
+    "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest",
@@ -113,8 +115,6 @@ source_set("flutter_shell_native_src") {
     "image_lru.cc",
     "image_lru.h",
     "library_loader.cc",
-    "ndk_helpers.cc",
-    "ndk_helpers.h",
     "platform_message_handler_android.cc",
     "platform_message_handler_android.h",
     "platform_message_response_android.cc",
