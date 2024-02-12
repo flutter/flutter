@@ -230,6 +230,7 @@ executable("flutter_windows_unittests") {
     "testing/test_keyboard.cc",
     "testing/test_keyboard.h",
     "testing/test_keyboard_unittests.cc",
+    "testing/view_modifier.h",
     "testing/windows_test.cc",
     "testing/windows_test.h",
     "testing/windows_test_config_builder.cc",

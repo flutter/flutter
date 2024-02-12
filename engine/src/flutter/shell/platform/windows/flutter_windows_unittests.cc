@@ -30,8 +30,9 @@ class HalfBrokenEGLManager : public egl::Manager {
  public:
   HalfBrokenEGLManager() : egl::Manager(/*enable_impeller = */ false) {}
 
-  bool CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
-    return false;
+  std::unique_ptr<egl::WindowSurface>
+  CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
+    return nullptr;
   }
 };
 

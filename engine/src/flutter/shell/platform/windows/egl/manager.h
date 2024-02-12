@@ -37,22 +37,19 @@ class Manager {
   // Whether the manager is currently valid.
   bool IsValid() const;
 
-  // Creates an EGLSurface wrapper and backing DirectX 11 SwapChain
-  // associated with window, in the appropriate format for display.
-  // HWND is the window backing the surface. Width and height represent
-  // dimensions surface is created at.
+  // Creates an EGL surface that can be used to render a Flutter view into a
+  // win32 HWND.
   //
-  // After the surface is created, |SetVSyncEnabled| should be called on a
-  // thread that can bind the |render_context_|.
-  virtual bool CreateWindowSurface(HWND hwnd, size_t width, size_t height);
-
-  // Resizes backing surface from current size to newly requested size
-  // based on width and height for the specific case when width and height do
-  // not match current surface dimensions. HWND is the window backing the
-  // surface.
+  // After the surface is created, |WindowSurface::SetVSyncEnabled| should be
+  // called on a thread that can make the surface current.
   //
-  // This binds |render_context_| to the current thread.
-  virtual void ResizeWindowSurface(HWND hwnd, size_t width, size_t height);
+  // HWND is the window backing the surface. Width and height are the surface's
+  // physical pixel dimensions.
+  //
+  // Returns nullptr on failure.
+  virtual std::unique_ptr<WindowSurface> CreateWindowSurface(HWND hwnd,
+                                                             size_t width,
+                                                             size_t height);
 
   // Check if the current thread has a context bound.
   bool HasContextCurrent();
@@ -73,9 +70,6 @@ class Manager {
 
   // Get the EGL context used for async texture uploads.
   virtual Context* resource_context() const;
-
-  // Get the EGL surface that backs the Flutter view.
-  virtual WindowSurface* surface() const;
 
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
@@ -114,9 +108,6 @@ class Manager {
 
   // The EGL context used for async texture uploads.
   std::unique_ptr<Context> resource_context_;
-
-  // Th EGL surface used to render into the Flutter view.
-  std::unique_ptr<WindowSurface> surface_;
 
   // The current D3D device.
   Microsoft::WRL::ComPtr<ID3D11Device> resolved_device_ = nullptr;
