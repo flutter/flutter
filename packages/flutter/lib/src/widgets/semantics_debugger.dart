@@ -317,7 +317,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
         effectivelabel = switch (data.textDirection!) {
-          TextDirection.rtl => '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}',
+          TextDirection.rtl => '${Unicode.RLI}$tooltipAndLabel${Unicode.PDI}',
           TextDirection.ltr => tooltipAndLabel,
         };
       }
