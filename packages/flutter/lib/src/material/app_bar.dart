@@ -1135,7 +1135,7 @@ class _AppBarState extends State<AppBar> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: effectiveBackgroundColor,
+          color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
           elevation: effectiveElevation,
           type: widget.forceMaterialTransparency
               ? MaterialType.transparency
