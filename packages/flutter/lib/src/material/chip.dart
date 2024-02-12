@@ -1239,6 +1239,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final IconThemeData? iconTheme = widget.iconTheme
       ?? chipTheme.iconTheme
       ?? chipDefaults.iconTheme;
+    final BoxConstraints? avatarBoxConstraints = widget.avatarBoxConstraints
+      ?? chipTheme.avatarBoxConstraints;
+    final BoxConstraints? deleteIconBoxConstraints = widget.deleteIconBoxConstraints
+      ?? chipTheme.deleteIconBoxConstraints;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
@@ -1334,8 +1338,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
               deleteDrawerAnimation: deleteDrawerAnimation,
               isEnabled: widget.isEnabled,
               avatarBorder: widget.avatarBorder,
-              avatarBoxConstraints: widget.avatarBoxConstraints,
-              deleteIconBoxConstraints: widget.deleteIconBoxConstraints,
+              avatarBoxConstraints: avatarBoxConstraints,
+              deleteIconBoxConstraints: deleteIconBoxConstraints,
             ),
           ),
         ),

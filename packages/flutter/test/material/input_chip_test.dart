@@ -512,8 +512,8 @@ void main() {
     // Test default avatar layout constraints.
     await tester.pumpWidget(buildChip());
 
-    expect(tester.getSize(find.byType(InputChip)).width, closeTo(234.0, 0.1));
-    expect(tester.getSize(find.byType(InputChip)).height, closeTo(118.0, 0.1));
+    expect(tester.getSize(find.byType(InputChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
 
     // Calculate the distance between avatar and chip edges.
     Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
@@ -529,8 +529,8 @@ void main() {
     await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(InputChip)).width, closeTo(152.0, 0.1));
-    expect(tester.getSize(find.byType(InputChip)).height, closeTo(118.0, 0.1));
+    expect(tester.getSize(find.byType(InputChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));;
 
     // Calculate the distance between avatar and chip edges.
     chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
@@ -568,8 +568,8 @@ void main() {
     // Test default delete icon layout constraints.
     await tester.pumpWidget(buildChip());
 
-    expect(tester.getSize(find.byType(InputChip)).width, closeTo(234.0, 0.1));
-    expect(tester.getSize(find.byType(InputChip)).height, closeTo(118.0, 0.1));
+    expect(tester.getSize(find.byType(InputChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
 
     // Calculate the distance between delete icon and chip edges.
     Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
@@ -587,8 +587,8 @@ void main() {
     ));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(InputChip)).width, closeTo(152.0, 0.1));
-    expect(tester.getSize(find.byType(InputChip)).height, closeTo(118.0, 0.1));
+    expect(tester.getSize(find.byType(InputChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
 
     // Calculate the distance between delete icon and chip edges.
     chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
