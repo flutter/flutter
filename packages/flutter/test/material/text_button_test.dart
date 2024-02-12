@@ -2022,7 +2022,6 @@ void main() {
     expect(textChildOf(decorations.at(1)).data, 'button');
   });
 
-
   testWidgets('TextButton backgroundBuilder drops button child and foregroundBuilder return value', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000011);
     const Color foregroundColor = Color(0xFF000022);
@@ -2151,7 +2150,6 @@ void main() {
     expect(sameStates(focusedHoveredStates, backgroundStates), isTrue);
     expect(sameStates(focusedHoveredStates, foregroundStates), isTrue);
 
-
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
@@ -2189,6 +2187,118 @@ void main() {
 
     await tester.pumpWidget(buildFrame()); // onPressed: null - disabled
     expect(material.color, backgroundColor);
+  });
+
+  testWidgets('Default iconAlignment', (WidgetTester tester) async {
+    Widget buildWidget({ required TextDirection textDirection }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Center(
+            child: TextButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default iconAlignment when textDirection is ltr.
+    await tester.pumpWidget(buildWidget(textDirection: TextDirection.ltr));
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    // The icon is aligned to the left of the button.
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 12.0); // 12.0 - padding between icon and button edge.
+
+    // Test default iconAlignment when textDirection is rtl.
+    await tester.pumpWidget(buildWidget(textDirection: TextDirection.rtl));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    // The icon is aligned to the right of the button.
+    expect(buttonTopRight.dx, iconTopRight.dx + 12.0); // 12.0 - padding between icon and button edge.
+  });
+
+  testWidgets('iconAlignment can be customized', (WidgetTester tester) async {
+    Widget buildWidget({
+      required TextDirection textDirection,
+      required IconAlignment iconAlignment,
+    }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Center(
+            child: TextButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('button'),
+              iconAlignment: iconAlignment,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test iconAlignment when textDirection is ltr.
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.ltr,
+        iconAlignment: IconAlignment.start,
+      ),
+    );
+
+    Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    // The icon is aligned to the left of the button.
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 12.0); // 12.0 - padding between icon and button edge.
+
+    // Test iconAlignment when textDirection is ltr.
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.ltr,
+        iconAlignment: IconAlignment.end,
+      ),
+    );
+
+    Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    // The icon is aligned to the right of the button.
+    expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
+
+    // Test iconAlignment when textDirection is rtl.
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.rtl,
+        iconAlignment: IconAlignment.start,
+      ),
+    );
+
+    buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    // The icon is aligned to the right of the button.
+    expect(buttonTopRight.dx, iconTopRight.dx + 12.0); // 12.0 - padding between icon and button edge.
+
+    // Test iconAlignment when textDirection is rtl.
+    await tester.pumpWidget(
+      buildWidget(
+        textDirection: TextDirection.rtl,
+        iconAlignment: IconAlignment.end,
+      ),
+    );
+
+    buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    // The icon is aligned to the left of the button.
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0); // 16.0 - padding between icon and button edge.
   });
 }
 
