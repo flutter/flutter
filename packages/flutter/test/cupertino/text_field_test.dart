@@ -529,8 +529,11 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,],
                         textDirection: TextDirection.ltr,
@@ -7912,14 +7915,8 @@ void main() {
         ),
       ),
     );
-
     expect(
-      tester.getSemantics(
-        find.descendant(
-          of: find.byType(CupertinoTextField),
-          matching: find.byType(Semantics),
-        ).first,
-      ),
+      find.semantics.byFlag(SemanticsFlag.isTextField).evaluate().single,
       matchesSemantics(
         hasEnabledState: true,
         isTextField: true,
