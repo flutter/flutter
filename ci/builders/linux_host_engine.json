@@ -13,30 +13,6 @@
                 "--runtime-mode",
                 "debug",
                 "--unoptimized",
-                "--prebuilt-dart-sdk"
-            ],
-            "name": "host_debug_unopt",
-            "ninja": {
-                "config": "host_debug_unopt",
-                "targets": [
-                    "flutter",
-                    "flutter/sky/packages"
-                ]
-            }
-        },
-        {
-            "archives": [],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false
-            },
-            "gn": [
-                "--runtime-mode",
-                "debug",
-                "--unoptimized",
                 "--prebuilt-dart-sdk",
                 "--target-dir",
                 "host_debug_impeller_vulkan"
