@@ -626,8 +626,8 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
     return FALSE;
   }
 
-  GdkEventKey* key_event = reinterpret_cast<GdkEventKey*>(event->origin);
-  if (gtk_im_context_filter_keypress(priv->im_context, key_event)) {
+  if (gtk_im_context_filter_keypress(
+          priv->im_context, reinterpret_cast<GdkEventKey*>(event->origin))) {
     return TRUE;
   }
 

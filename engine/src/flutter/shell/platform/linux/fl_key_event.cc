@@ -4,11 +4,6 @@
 
 #include "flutter/shell/platform/linux/fl_key_event.h"
 
-static void dispose_origin_from_gdk_event(gpointer origin) {
-  g_return_if_fail(origin != nullptr);
-  gdk_event_free(reinterpret_cast<GdkEvent*>(origin));
-}
-
 FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
   g_return_val_if_fail(event != nullptr, nullptr);
   GdkEventType type = gdk_event_get_event_type(event);
@@ -30,14 +25,13 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
   result->state = state;
   result->group = event->key.group;
   result->origin = event;
-  result->dispose_origin = dispose_origin_from_gdk_event;
 
   return result;
 }
 
 void fl_key_event_dispose(FlKeyEvent* event) {
-  if (event->dispose_origin != nullptr) {
-    event->dispose_origin(event->origin);
+  if (event->origin != nullptr) {
+    gdk_event_free(event->origin);
   }
   g_free(event);
 }

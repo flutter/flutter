@@ -346,8 +346,6 @@ static void fl_mock_view_delegate_class_init(FlMockViewDelegateClass* klass) {
   G_OBJECT_CLASS(klass)->finalize = fl_mock_view_delegate_finalize;
 }
 
-static FlKeyEvent* fl_key_event_clone_information_only(FlKeyEvent* event);
-
 static void fl_mock_view_keyboard_send_key_event(
     FlKeyboardViewDelegate* view_delegate,
     const FlutterKeyEvent* event,
@@ -469,35 +467,20 @@ static void fl_mock_view_set_layout(FlMockViewDelegate* self,
 
 /***** End FlMockViewDelegate *****/
 
-// Return a newly allocated #FlKeyEvent that is a clone to the given #event
-// but with #origin and #dispose set to 0.
-static FlKeyEvent* fl_key_event_clone_information_only(FlKeyEvent* event) {
-  FlKeyEvent* new_event = fl_key_event_clone(event);
-  new_event->origin = nullptr;
-  new_event->dispose_origin = nullptr;
-  return new_event;
-}
-
 // Create a new #FlKeyEvent with the given information.
-//
-// The #origin will be another #FlKeyEvent with the exact information,
-// so that it can be used to redispatch, and is freed upon disposal.
 static FlKeyEvent* fl_key_event_new_by_mock(bool is_press,
                                             guint keyval,
                                             guint16 keycode,
                                             int state,
                                             gboolean is_modifier,
                                             guint8 group = 0) {
-  FlKeyEvent* event = g_new(FlKeyEvent, 1);
+  FlKeyEvent* event = g_new0(FlKeyEvent, 1);
   event->is_press = is_press;
   event->time = 0;
   event->state = state;
   event->keyval = keyval;
   event->group = group;
   event->keycode = keycode;
-  FlKeyEvent* origin_event = fl_key_event_clone_information_only(event);
-  event->origin = origin_event;
-  event->dispose_origin = [](gpointer origin) { g_free(origin); };
   return event;
 }
 
