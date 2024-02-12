@@ -23,6 +23,7 @@ executable("flutter-embedder-test-bin") {
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.inspect",
     "$fuchsia_sdk_root/fidl:fuchsia.logger",
     "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",

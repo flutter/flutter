@@ -58,9 +58,10 @@ template("runner_sources") {
       "$fuchsia_sdk_root/pkg:async-loop-cpp",
       "$fuchsia_sdk_root/pkg:async-loop-default",
       "$fuchsia_sdk_root/pkg:fidl_cpp",
+      "$fuchsia_sdk_root/pkg:inspect",
+      "$fuchsia_sdk_root/pkg:inspect_component_cpp",
       "$fuchsia_sdk_root/pkg:sys_cpp",
       "$fuchsia_sdk_root/pkg:sys_cpp_testing",
-      "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
       "$fuchsia_sdk_root/pkg:trace",
       "$fuchsia_sdk_root/pkg:vfs_cpp",
       "$fuchsia_sdk_root/pkg:zx",
@@ -99,7 +100,7 @@ template("runner") {
 
     deps = [
              ":" + target_name + "_runner_sources",
-             "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
+             "$fuchsia_sdk_root/pkg:inspect_component_cpp",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
            ] + extra_deps
   }
