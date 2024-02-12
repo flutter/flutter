@@ -4,8 +4,9 @@
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
 
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/ndk_helpers.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/ndk_helpers.h"
 
 namespace flutter {
 

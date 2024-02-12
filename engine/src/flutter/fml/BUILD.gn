@@ -184,6 +184,8 @@ source_set("fml") {
       "platform/android/jni_weak_ref.h",
       "platform/android/message_loop_android.cc",
       "platform/android/message_loop_android.h",
+      "platform/android/ndk_helpers.cc",
+      "platform/android/ndk_helpers.h",
       "platform/android/paths_android.cc",
       "platform/android/paths_android.h",
       "platform/android/scoped_java_ref.cc",
