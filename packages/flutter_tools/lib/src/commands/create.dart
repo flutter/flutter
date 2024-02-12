@@ -24,6 +24,7 @@ import '../ios/code_signing.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -318,6 +319,13 @@ class CreateCommand extends CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
+    // Only channels that have prereleases should allow them.
+    final String flutterSdkVersionBounds = switch(globals.flutterVersion.channel) {
+      'main' || 'master' || 'beta' || kUserBranch => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0-0'",
+      'stable' => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
+      _ => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
+    };
+
     final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
@@ -338,7 +346,7 @@ class CreateCommand extends CreateBase {
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
-      flutterSdkVersionBounds: "'>=${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
+      flutterSdkVersionBounds: flutterSdkVersionBounds,
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,

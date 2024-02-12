@@ -286,7 +286,7 @@ void main() {
     ),
   });
 
-  testUsingContext('creates a new project with flutter version constraint in pubspec', () async {
+  testUsingContext('creates a new project with pre-release flutter version constraint in pubspec', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -307,9 +307,62 @@ void main() {
 
     expect(flutterSdkVersion, isNot(Version.none));
 
-    expect(flutterVersionRange, VersionRange(min: Version(1, 2, 0), includeMin: true));
+    // The version pin should allow minor & patch releases,
+    // both of which are allowed to be pre-releases.
+    expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
+    expect(flutterVersionRange.allows(Version(1, 2, 0)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 3)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 4)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
+    expect(flutterVersionRange.allows(Version(2, 0, 0)), isFalse);
+
+    expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '10')), isFalse);
+    expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 3, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 4, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(2, 0, 0, pre: '10')), isFalse);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.2.3'),
+  });
+
+  testUsingContext('creates a new project with stable flutter version constraint in pubspec', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
+
+    expect(flutterVersionConstraint, isNotNull);
+    expect(flutterVersionConstraint, isA<VersionRange>());
+
+    final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
+
+    final Version flutterSdkVersion = Version.parse(globals.flutterVersion.frameworkVersion);
+
+    expect(flutterSdkVersion, isNot(Version.none));
+
+    // The version pin should allow minor & patch releases.
+    expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
+    expect(flutterVersionRange.allows(Version(1, 2, 0)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 3)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 4)), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
+    expect(flutterVersionRange.allows(Version(2, 0, 0)), isFalse);
+
+    expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '10')), isFalse);
+    expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isFalse);
+    expect(flutterVersionRange.allows(Version(1, 2, 3, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 2, 4, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '10')), isTrue);
+    expect(flutterVersionRange.allows(Version(2, 0, 0, pre: '10')), isFalse);
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.2.3', branch: 'stable'),
   });
 
   testUsingContext('does not modify flutter version constraint if it already exists', () async {
