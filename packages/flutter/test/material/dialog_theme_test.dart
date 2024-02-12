@@ -48,6 +48,11 @@ RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
 }
 
 void main() {
+  test('DialogTheme copyWith, ==, hashCode basics', () {
+    expect(const DialogTheme(), const DialogTheme().copyWith());
+    expect(const DialogTheme().hashCode, const DialogTheme().copyWith().hashCode);
+  });
+
   test('DialogTheme lerp special cases', () {
     expect(DialogTheme.lerp(null, null, 0), const DialogTheme());
     const DialogTheme theme = DialogTheme();

@@ -141,7 +141,20 @@ class DialogTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => shape.hashCode;
+  int get hashCode => Object.hashAll(<Object?>[
+    backgroundColor,
+    elevation,
+    shadowColor,
+    surfaceTintColor,
+    shape,
+    alignment,
+    iconColor,
+    titleTextStyle,
+    contentTextStyle,
+    actionsPadding,
+    barrierColor,
+    insetPadding,
+  ]);
 
   @override
   bool operator ==(Object other) {
