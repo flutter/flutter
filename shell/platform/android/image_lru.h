@@ -9,7 +9,7 @@
 #include <cstddef>
 
 #include "display_list/image/dl_image.h"
-#include "shell/platform/android/ndk_helpers.h"
+#include "fml/platform/android/ndk_helpers.h"
 
 namespace flutter {
 
