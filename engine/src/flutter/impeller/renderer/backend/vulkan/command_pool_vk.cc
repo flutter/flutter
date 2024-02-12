@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
+#include "vulkan/vulkan_handles.hpp"
 #include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
@@ -21,12 +22,18 @@ class BackgroundCommandPoolVK final {
  public:
   BackgroundCommandPoolVK(BackgroundCommandPoolVK&&) = default;
 
+  // The recycler also recycles command buffers that were never used, up to a
+  // limit of 16 per frame. This number was somewhat arbitrarily chosen.
+  static constexpr size_t kUnusedCommandBufferLimit = 16u;
+
   explicit BackgroundCommandPoolVK(
       vk::UniqueCommandPool&& pool,
       std::vector<vk::UniqueCommandBuffer>&& buffers,
+      size_t unused_count,
       std::weak_ptr<CommandPoolRecyclerVK> recycler)
       : pool_(std::move(pool)),
         buffers_(std::move(buffers)),
+        unused_count_(unused_count),
         recycler_(std::move(recycler)) {}
 
   ~BackgroundCommandPoolVK() {
@@ -39,9 +46,14 @@ class BackgroundCommandPoolVK final {
     if (!recycler) {
       return;
     }
-    buffers_.clear();
+    // If there are many unused command buffers, release some of them.
+    if (unused_count_ > kUnusedCommandBufferLimit) {
+      for (auto i = 0u; i < unused_count_; i++) {
+        buffers_.pop_back();
+      }
+    }
 
-    recycler->Reclaim(std::move(pool_));
+    recycler->Reclaim(std::move(pool_), std::move(buffers_));
   }
 
  private:
@@ -55,6 +67,7 @@ class BackgroundCommandPoolVK final {
   // wrapper type will attempt to reset the cmd buffer, and doing so may be a
   // thread safety violation as this may happen on the fence waiter thread.
   std::vector<vk::UniqueCommandBuffer> buffers_;
+  const size_t unused_count_;
   std::weak_ptr<CommandPoolRecyclerVK> recycler_;
 };
 
@@ -71,9 +84,16 @@ CommandPoolVK::~CommandPoolVK() {
   if (!recycler) {
     return;
   }
+  // Any unused command buffers are added to the set of used command buffers.
+  // both will be reset to the initial state when the pool is reset.
+  size_t unused_count = unused_command_buffers_.size();
+  for (auto i = 0u; i < unused_command_buffers_.size(); i++) {
+    collected_buffers_.push_back(std::move(unused_command_buffers_[i]));
+  }
+  unused_command_buffers_.clear();
 
   auto reset_pool_when_dropped = BackgroundCommandPoolVK(
-      std::move(pool_), std::move(collected_buffers_), recycler);
+      std::move(pool_), std::move(collected_buffers_), unused_count, recycler);
 
   UniqueResourceVKT<BackgroundCommandPoolVK> pool(
       context->GetResourceManager(), std::move(reset_pool_when_dropped));
@@ -89,6 +109,11 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateCommandBuffer() {
   Lock lock(pool_mutex_);
   if (!pool_) {
     return {};
+  }
+  if (!unused_command_buffers_.empty()) {
+    vk::UniqueCommandBuffer buffer = std::move(unused_command_buffers_.back());
+    unused_command_buffers_.pop_back();
+    return buffer;
   }
 
   auto const device = context->GetDevice();
@@ -123,6 +148,10 @@ void CommandPoolVK::Destroy() {
   for (auto& buffer : collected_buffers_) {
     buffer.release();
   }
+  for (auto& buffer : unused_command_buffers_) {
+    buffer.release();
+  }
+  unused_command_buffers_.clear();
   collected_buffers_.clear();
 }
 
@@ -158,13 +187,13 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
   }
 
   // Otherwise, create a new resource and return it.
-  auto pool = Create();
-  if (!pool) {
+  auto data = Create();
+  if (!data || !data->pool) {
     return nullptr;
   }
 
-  auto const resource =
-      std::make_shared<CommandPoolVK>(std::move(*pool), context_);
+  auto const resource = std::make_shared<CommandPoolVK>(
+      std::move(data->pool), std::move(data->buffers), context_);
   pool_map.emplace(hash, resource);
 
   {
@@ -176,10 +205,11 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
 }
 
 // TODO(matanlurey): Return a status_or<> instead of nullopt when we have one.
-std::optional<vk::UniqueCommandPool> CommandPoolRecyclerVK::Create() {
-  // If we can reuse a command pool, do so.
-  if (auto pool = Reuse()) {
-    return pool;
+std::optional<CommandPoolRecyclerVK::RecycledData>
+CommandPoolRecyclerVK::Create() {
+  // If we can reuse a command pool and its buffers, do so.
+  if (auto data = Reuse()) {
+    return data;
   }
 
   // Otherwise, create a new one.
@@ -196,10 +226,12 @@ std::optional<vk::UniqueCommandPool> CommandPoolRecyclerVK::Create() {
   if (result != vk::Result::eSuccess) {
     return std::nullopt;
   }
-  return std::move(pool);
+  return CommandPoolRecyclerVK::RecycledData{.pool = std::move(pool),
+                                             .buffers = {}};
 }
 
-std::optional<vk::UniqueCommandPool> CommandPoolRecyclerVK::Reuse() {
+std::optional<CommandPoolRecyclerVK::RecycledData>
+CommandPoolRecyclerVK::Reuse() {
   // If there are no recycled pools, return nullopt.
   Lock recycled_lock(recycled_mutex_);
   if (recycled_.empty()) {
@@ -207,12 +239,14 @@ std::optional<vk::UniqueCommandPool> CommandPoolRecyclerVK::Reuse() {
   }
 
   // Otherwise, remove and return a recycled pool.
-  auto pool = std::move(recycled_.back());
+  auto data = std::move(recycled_.back());
   recycled_.pop_back();
-  return std::move(pool);
+  return std::move(data);
 }
 
-void CommandPoolRecyclerVK::Reclaim(vk::UniqueCommandPool&& pool) {
+void CommandPoolRecyclerVK::Reclaim(
+    vk::UniqueCommandPool&& pool,
+    std::vector<vk::UniqueCommandBuffer>&& buffers) {
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
@@ -223,7 +257,8 @@ void CommandPoolRecyclerVK::Reclaim(vk::UniqueCommandPool&& pool) {
 
   // Move the pool to the recycled list.
   Lock recycled_lock(recycled_mutex_);
-  recycled_.push_back(std::move(pool));
+  recycled_.push_back(
+      RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
 }
 
 CommandPoolRecyclerVK::~CommandPoolRecyclerVK() {

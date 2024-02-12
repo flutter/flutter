@@ -261,6 +261,7 @@ VkResult vkAllocateCommandBuffers(
     const VkCommandBufferAllocateInfo* pAllocateInfo,
     VkCommandBuffer* pCommandBuffers) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkAllocateCommandBuffers");
   *pCommandBuffers =
       reinterpret_cast<VkCommandBuffer>(mock_device->NewCommandBuffer());
   return VK_SUCCESS;
