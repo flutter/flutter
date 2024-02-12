@@ -2442,7 +2442,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       // Sort the selectable every time a selection start.
       selectables.sort(compareOrder);
     }
-    _selectionInProgress = selectionWillBeInProgress;
+    _selectionInProgress = selectionWillbeInProgress;
     _isHandlingSelectionEvent = true;
     late SelectionResult result;
     switch (event.type) {

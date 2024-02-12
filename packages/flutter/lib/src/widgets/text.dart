@@ -1732,12 +1732,6 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     return result ?? SelectionResult.next;
   }
 
-  /// Adjusts the selection based on the drag selection update event if there
-  /// is already a selectable child that contains the selection edge.
-  ///
-  /// This method starts by sending the selection event to the current
-  /// selectable that contains the selection edge, and finds forward or backward
-  /// if that selectable no longer contains the selection edge.
   SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
     assert(() {
       if (isEnd) {
@@ -1770,8 +1764,8 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       (false, false, true) => currentSelectionEndIndex,
       (false, false, false) => 0,
     };
+    debugPrint('adjust start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex');
     bool? forward;
-    bool foundStart = false;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
     // the direction of the search.
@@ -1788,49 +1782,40 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      // currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
-      bool globalRectsContainsPosition = false;
-      if (!foundStart) {
-        if (selectables[newIndex].boundingBoxes.isNotEmpty) {
-          for (final Rect rect in selectables[newIndex].boundingBoxes) {
-            final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
-            if (globalRect.contains(event.globalPosition)) {
-              globalRectsContainsPosition = true;
-              break;
+      if (!paragraph.selectables!.contains(selectables[newIndex])){
+        debugPrint('woahskip');
+        if (forward == null) {
+          final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+          if (!forwardSelection) {
+            if (newIndex == 0) {
+              debugPrint('end by placeholder2');
+              finalResult = SelectionResult.previous;
+              continue;
             }
-          }
-        }
-        if (globalRectsContainsPosition) {
-          if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
-            if (isEnd) {
-              currentSelectionEndIndex = newIndex;
-            } else {
-              currentSelectionStartIndex = newIndex;
-            }
-            dispatchSelectionEventToChild(selectables[newIndex], event);
-            _flushInactiveSelections();
-            return SelectionResult.end;
-          } else {
-            foundStart = true;
-          }
-        }
-      } else {
-        if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
-          dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
-          if (currentSelectableResult == SelectionResult.previous) {
             newIndex -= 1;
-          } else if (currentSelectableResult == SelectionResult.next) {
+          } else {
             newIndex += 1;
           }
-          debugPrint('continue');
           continue;
         }
+        if (forward) {
+          newIndex += 1;
+        } else {
+          if (newIndex == 0) {
+            debugPrint('end by placeholder');
+            finalResult = SelectionResult.previous;
+            continue;
+          }
+          newIndex -= 1;
+        }
+        continue;
       }
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
         case SelectionResult.pending:
         case SelectionResult.none:
+          // forward = null;
           finalResult = currentSelectableResult;
         case SelectionResult.next:
           if (forward == false) {
@@ -1843,33 +1828,51 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
             newIndex += 1;
           }
         case SelectionResult.previous:
+          debugPrint('prev $newIndex');
           if (forward ?? false) {
             newIndex -= 1;
             finalResult = SelectionResult.end;
           } else if (newIndex == 0) {
             finalResult = currentSelectableResult;
           } else {
+            debugPrint('not forward');
             forward = false;
             newIndex -= 1;
           }
       }
     }
     if (isEnd) {
+      final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+      debugPrint('is inverted $forwardSelection');
+      // if (!forwardSelection && (!(forward ?? false) ?? false)) {
+      //   currentSelectionStartIndex = currentSelectionEndIndex;
+      // }
+      // if (forwardSelection && (forward ?? false)) {
+      //   currentSelectionStartIndex = currentSelectionEndIndex;
+      // }
+      // final bool shouldSwap = forwardSelection != forward;
+      // final bool shouldSwap = (forwardSelection && forward!) || (!forwardSelection && !forward!);
+
+      // debugPrint('should swap $shouldSwap $forwardSelection $forward ${forwardSelection != forward}');
+      if (forward != null && ((!forwardSelection && forward! && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward! && newIndex <= currentSelectionStartIndex))) {
+        debugPrint('swapping text-container');
+        currentSelectionStartIndex = currentSelectionEndIndex;
+      }
       currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
     }
-    debugPrint('$currentSelectionEndIndex $newIndex');
     _flushInactiveSelections();
+    debugPrint('adjustEnd $currentSelectionStartIndex $currentSelectionEndIndex ${finalResult!}');
     return finalResult!;
   }
 
-  // /// Adjusts the selection based on the drag selection update event if there
-  // /// is already a selectable child that contains the selection edge.
-  // ///
-  // /// This method starts by sending the selection event to the current
-  // /// selectable that contains the selection edge, and finds forward or backward
-  // /// if that selectable no longer contains the selection edge.
+  /// Adjusts the selection based on the drag selection update event if there
+  /// is already a selectable child that contains the selection edge.
+  ///
+  /// This method starts by sending the selection event to the current
+  /// selectable that contains the selection edge, and finds forward or backward
+  /// if that selectable no longer contains the selection edge.
   // SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
   //   assert(() {
   //     if (isEnd) {
@@ -1893,18 +1896,18 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   //   final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
   //   final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
   //   int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
-  //     (true, true, true) => currentSelectionStartIndex,
-  //     (true, true, false) => 0,
+  //     (true, true, true) => currentSelectionEndIndex,
+  //     (true, true, false) => currentSelectionEndIndex,
   //     (true, false, true) => currentSelectionStartIndex,
   //     (true, false, false) => 0,
-  //     (false, true, true) => currentSelectionEndIndex,
-  //     (false, true, false) => currentSelectionEndIndex,
-  //     (false, false, true) => 0,
+  //     (false, true, true) => currentSelectionStartIndex,
+  //     (false, true, false) => currentSelectionStartIndex,
+  //     (false, false, true) => currentSelectionEndIndex,
   //     (false, false, false) => 0,
   //   };
   //   bool? forward;
-  //   late SelectionResult currentSelectableResult;
   //   bool foundStart = false;
+  //   late SelectionResult currentSelectableResult;
   //   // This loop sends the selection event to one of the following to determine
   //   // the direction of the search.
   //   //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
@@ -1919,26 +1922,10 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   //   // 1. the selectable returns end, pending, none.
   //   // 2. the selectable returns previous when looking forward.
   //   // 2. the selectable returns next when looking backward.
-  //   debugPrint('adjust called');
   //   while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-  //     debugPrint('$newIndex');
-  //     if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
-  //       if (foundStart) {
-  //         // Once we have found the start for boundary search any placeholders
-  //         // encountered should be absorbed into the selection.
-  //         debugPrint('found');
-  //         dispatchSelectionEventToChild(
-  //           selectables[newIndex],
-  //           SelectionEdgeUpdateEvent.forEnd(
-  //             globalPosition: selectables[newIndex].boundingBoxes.isNotEmpty ? selectables[newIndex].boundingBoxes[selectables[newIndex].boundingBoxes.length - 1].bottomRight : event.globalPosition,
-  //             granularity: TextGranularity.paragraph,
-  //           ),
-  //         );
-  //         newIndex += 1;
-  //         continue;
-  //       }
-  //       debugPrint('not found');
-  //       bool globalRectsContainsPosition = false;
+  //     // currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
+  //     bool globalRectsContainsPosition = false;
+  //     if (!foundStart) {
   //       if (selectables[newIndex].boundingBoxes.isNotEmpty) {
   //         for (final Rect rect in selectables[newIndex].boundingBoxes) {
   //           final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
@@ -1949,45 +1936,38 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   //         }
   //       }
   //       if (globalRectsContainsPosition) {
-  //         // The placeholder selectable absorbs the event if the target global
-  //         // position is within the placeholders bounding box.
-  //         debugPrint('not found contains global');
-  //         if (isEnd) {
-  //           currentSelectionEndIndex = newIndex;
+  //         if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+  //           if (isEnd) {
+  //             currentSelectionEndIndex = newIndex;
+  //           } else {
+  //             currentSelectionStartIndex = newIndex;
+  //           }
+  //           dispatchSelectionEventToChild(selectables[newIndex], event);
+  //           _flushInactiveSelections();
+  //           return SelectionResult.end;
   //         } else {
-  //           currentSelectionStartIndex = newIndex;
+  //           foundStart = true;
   //         }
-  //         dispatchSelectionEventToChild(selectables[newIndex], event);
-  //         _flushInactiveSelections();
-  //         return SelectionResult.end;
-  //       } else {
-  //         debugPrint('not found does not contain global');
-  //         newIndex += 1;
+  //       }
+  //     } else {
+  //       if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
+  //         dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
+  //         if (currentSelectableResult == SelectionResult.previous) {
+  //           newIndex -= 1;
+  //         } else if (currentSelectableResult == SelectionResult.next) {
+  //           newIndex += 1;
+  //         }
+  //         debugPrint('continue');
   //         continue;
   //       }
   //     }
   //     currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
-  //     debugPrint('$newIndex $currentSelectableResult');
   //     switch (currentSelectableResult) {
   //       case SelectionResult.end:
   //       case SelectionResult.pending:
   //       case SelectionResult.none:
   //         finalResult = currentSelectableResult;
   //       case SelectionResult.next:
-  //         bool globalRectsContainsPosition = false;
-  //         if (selectables[newIndex].boundingBoxes.isNotEmpty) {
-  //           for (final Rect rect in selectables[newIndex].boundingBoxes) {
-  //             final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
-  //             if (globalRect.contains(event.globalPosition)) {
-  //               globalRectsContainsPosition = true;
-  //               break;
-  //             }
-  //           }
-  //         }
-  //         if (globalRectsContainsPosition) {
-  //           debugPrint('hello found start');
-  //           foundStart = true;
-  //         }
   //         if (forward == false) {
   //           newIndex += 1;
   //           finalResult = SelectionResult.end;
@@ -2014,126 +1994,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   //   } else {
   //     currentSelectionStartIndex = newIndex;
   //   }
-  //   _flushInactiveSelections();
-  //   return finalResult!;
-  // }
-
-  // /// Adjusts the selection based on the drag selection update event if there
-  // /// is already a selectable child that contains the selection edge.
-  // ///
-  // /// This method starts by sending the selection event to the current
-  // /// selectable that contains the selection edge, and finds forward or backward
-  // /// if that selectable no longer contains the selection edge.
-  // SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
-  //   assert(() {
-  //     if (isEnd) {
-  //       assert(currentSelectionEndIndex < selectables.length && currentSelectionEndIndex >= 0);
-  //       return true;
-  //     }
-  //     assert(currentSelectionStartIndex < selectables.length && currentSelectionStartIndex >= 0);
-  //     return true;
-  //   }());
-  //   SelectionResult? finalResult;
-  //   // Determines if the edge being adjusted is within the current viewport.
-  //   //  - If so, we begin the search for the new selection edge position at the
-  //   //    currentSelectionEndIndex/currentSelectionStartIndex.
-  //   //  - If not, we attempt to locate the new selection edge starting from
-  //   //    the opposite end.
-  //   //  - If neither edge is in the current viewport, the search for the new
-  //   //    selection edge position begins at 0.
-  //   //
-  //   // This can happen when there is a scrollable child and the edge being adjusted
-  //   // has been scrolled out of view.
-  //   final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
-  //   final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
-  //   int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
-  //     (true, true, true) => currentSelectionStartIndex,
-  //     (true, true, false) => 0,
-  //     (true, false, true) => currentSelectionStartIndex,
-  //     (true, false, false) => 0,
-  //     (false, true, true) => currentSelectionEndIndex,
-  //     (false, true, false) => currentSelectionEndIndex,
-  //     (false, false, true) => 0,
-  //     (false, false, false) => 0,
-  //   };
-  //   bool? forward;
-  //   late SelectionResult currentSelectableResult;
-  //   bool foundStart = false;
-  //   // This loop sends the selection event to one of the following to determine
-  //   // the direction of the search.
-  //   //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
-  //   //    is in the current viewport.
-  //   //  - The opposite edge index if the current edge is not in the current viewport.
-  //   //  - Index 0 if neither edge is in the current viewport.
-  //   //
-  //   // If the result is `SelectionResult.next`, this loop look backward.
-  //   // Otherwise, it looks forward.
-  //   //
-  //   // The terminate condition are:
-  //   // 1. the selectable returns end, pending, none.
-  //   // 2. the selectable returns previous when looking forward.
-  //   // 2. the selectable returns next when looking backward.
-  //   debugPrint('start at $newIndex');
-  //   while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-  //     debugPrint('adjustSelection newIndex ${selectables[newIndex]}');
-  //     // if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex])) {
-  //     //   if (foundStart) {
-  //     //     dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
-  //     //   }
-  //     //   newIndex += 1;
-  //     //   continue;
-  //     // }
-  //     if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[newIndex]) && foundStart) {
-  //       debugPrint('ummmm');
-  //       dispatchSelectionEventToChild(selectables[newIndex], SelectAllSelectionEvent());
-  //       newIndex += 1;
-  //       continue;
-  //     }
-  //     currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
-  //     debugPrint('results $currentSelectableResult');
-  //     switch (currentSelectableResult) {
-  //       case SelectionResult.end:
-  //       case SelectionResult.pending:
-  //       case SelectionResult.none:
-  //         finalResult = currentSelectableResult;
-  //       case SelectionResult.next:
-  //         if (selectables[newIndex].boundingBoxes.isNotEmpty) {
-  //           for (final Rect rect in selectables[newIndex].boundingBoxes) {
-  //             final Rect globalRect = MatrixUtils.transformRect(selectables[newIndex].getTransformTo(null), rect);
-  //             if (globalRect.contains(event.globalPosition)) {
-  //               debugPrint('found');
-  //               foundStart = true;
-  //               break;
-  //             }
-  //           }
-  //         }
-  //         if (forward == false) {
-  //           newIndex += 1;
-  //           finalResult = SelectionResult.end;
-  //         } else if (newIndex == selectables.length - 1) {
-  //           finalResult = currentSelectableResult;
-  //         } else {
-  //           // debugPrint('$newIndex ${selectables[newIndex]}');
-  //           forward = true;
-  //           newIndex += 1;
-  //         }
-  //       case SelectionResult.previous:
-  //         if (forward ?? false) {
-  //           newIndex -= 1;
-  //           finalResult = SelectionResult.end;
-  //         } else if (newIndex == 0) {
-  //           finalResult = currentSelectableResult;
-  //         } else {
-  //           forward = false;
-  //           newIndex -= 1;
-  //         }
-  //     }
-  //   }
-  //   if (isEnd) {
-  //     currentSelectionEndIndex = newIndex;
-  //   } else {
-  //     currentSelectionStartIndex = newIndex;
-  //   }
+  //   debugPrint('$currentSelectionEndIndex $newIndex');
   //   _flushInactiveSelections();
   //   return finalResult!;
   // }
