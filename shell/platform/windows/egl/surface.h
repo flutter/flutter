@@ -19,7 +19,7 @@ class Surface {
  public:
   Surface(EGLDisplay display, EGLContext context, EGLSurface surface);
 
-  ~Surface();
+  virtual ~Surface();
 
   // Destroy the EGL surface and invalidate this object.
   //

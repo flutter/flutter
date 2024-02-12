@@ -52,11 +52,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Destroys current rendering surface if one has been allocated.
   void DestroyRenderSurface();
 
+  // Get the EGL surface that backs the Flutter view.
+  //
+  // This might be nullptr or an invalid surface.
+  egl::WindowSurface* surface() const;
+
   // Return the currently configured HWND.
   virtual HWND GetWindowHandle() const;
 
   // Returns the engine backing this view.
-  FlutterWindowsEngine* GetEngine();
+  FlutterWindowsEngine* GetEngine() const;
 
   // Tells the engine to generate a new frame
   void ForceRedraw();
@@ -79,16 +84,17 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void OnHighContrastChanged() override;
 
   // Called on the raster thread when |CompositorOpenGL| receives an empty
-  // frame.
+  // frame. Returns true if the frame can be presented.
   //
-  // This resizes the surface if a resize is pending.
-  void OnEmptyFrameGenerated();
+  // This destroys and then re-creates the view's surface if a resize is
+  // pending.
+  bool OnEmptyFrameGenerated();
 
   // Called on the raster thread when |CompositorOpenGL| receives a frame.
   // Returns true if the frame can be presented.
   //
-  // This resizes the surface if a resize is pending and |width| and
-  // |height| match the target size.
+  // This destroys and then re-creates the view's surface if a resize is pending
+  // and |width| and |height| match the target size.
   bool OnFrameGenerated(size_t width, size_t height);
 
   // Called on the raster thread after |CompositorOpenGL| presents a frame.
@@ -226,6 +232,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   CreateAccessibilityBridge();
 
  private:
+  // Allows setting the surface in tests.
+  friend class ViewModifier;
+
   // Struct holding the state of an individual pointer. The engine doesn't keep
   // track of which buttons have been pressed, so it's the embedding's
   // responsibility.
@@ -266,6 +275,17 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
     // and the buffers have been swapped.
     kDone,
   };
+
+  // Resize the surface to the desired size.
+  //
+  // If the dimensions have changed, this destroys the original surface and
+  // creates a new one.
+  //
+  // This must be run on the raster thread. This binds the surface to the
+  // current thread.
+  //
+  // Width and height are the surface's desired physical pixel dimensions.
+  bool ResizeRenderSurface(size_t width, size_t height);
 
   // Sends a window metrics update to the Flutter engine using current window
   // dimensions in physical
@@ -370,6 +390,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Mocks win32 APIs.
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
+
+  // The EGL surface backing the view.
+  //
+  // Null if using software rasterization, the surface hasn't been created yet,
+  // or if surface creation failed.
+  std::unique_ptr<egl::WindowSurface> surface_ = nullptr;
 
   // Keeps track of pointer states in relation to the window.
   std::unordered_map<int32_t, std::unique_ptr<PointerState>> pointer_states_;

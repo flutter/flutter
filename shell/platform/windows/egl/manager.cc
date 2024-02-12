@@ -263,11 +263,11 @@ bool Manager::IsValid() const {
   return is_valid_;
 }
 
-bool Manager::CreateWindowSurface(HWND hwnd, size_t width, size_t height) {
-  FML_DCHECK(surface_ == nullptr || !surface_->IsValid());
-
+std::unique_ptr<WindowSurface> Manager::CreateWindowSurface(HWND hwnd,
+                                                            size_t width,
+                                                            size_t height) {
   if (!hwnd || !is_valid_) {
-    return false;
+    return nullptr;
   }
 
   // Disable ANGLE's automatic surface resizing and provide an explicit size.
@@ -286,43 +286,11 @@ bool Manager::CreateWindowSurface(HWND hwnd, size_t width, size_t height) {
       surface_attributes);
   if (surface == EGL_NO_SURFACE) {
     LogEGLError("Surface creation failed.");
-    return false;
+    return nullptr;
   }
 
-  surface_ = std::make_unique<WindowSurface>(
-      display_, render_context_->GetHandle(), surface, width, height);
-  return true;
-}
-
-void Manager::ResizeWindowSurface(HWND hwnd, size_t width, size_t height) {
-  FML_CHECK(surface_ != nullptr);
-
-  auto const existing_width = surface_->width();
-  auto const existing_height = surface_->height();
-  auto const existing_vsync = surface_->vsync_enabled();
-
-  if (width != existing_width || height != existing_height) {
-    // TODO: Destroying the surface and re-creating it is expensive.
-    // Ideally this would use ANGLE's automatic surface sizing instead.
-    // See: https://github.com/flutter/flutter/issues/79427
-    if (!surface_->Destroy()) {
-      FML_LOG(ERROR) << "Manager::ResizeSurface failed to destroy surface";
-      return;
-    }
-
-    if (!CreateWindowSurface(hwnd, width, height)) {
-      FML_LOG(ERROR) << "Manager::ResizeSurface failed to create surface";
-      return;
-    }
-
-    if (!surface_->MakeCurrent() ||
-        !surface_->SetVSyncEnabled(existing_vsync)) {
-      // Surfaces block until the v-blank by default.
-      // Failing to update the vsync might result in unnecessary blocking.
-      // This regresses performance but not correctness.
-      FML_LOG(ERROR) << "Manager::ResizeSurface failed to set vsync";
-    }
-  }
+  return std::make_unique<WindowSurface>(display_, render_context_->GetHandle(),
+                                         surface, width, height);
 }
 
 bool Manager::HasContextCurrent() {
@@ -353,10 +321,6 @@ Context* Manager::render_context() const {
 
 Context* Manager::resource_context() const {
   return resource_context_.get();
-}
-
-WindowSurface* Manager::surface() const {
-  return surface_.get();
 }
 
 }  // namespace egl

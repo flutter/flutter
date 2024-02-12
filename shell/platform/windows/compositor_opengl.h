@@ -53,7 +53,7 @@ class CompositorOpenGL : public Compositor {
   bool Initialize();
 
   // Clear the view's surface and removes any previously presented layers.
-  bool ClearSurface();
+  bool Clear(FlutterWindowsView* view);
 };
 
 }  // namespace flutter
