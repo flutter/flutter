@@ -67,6 +67,7 @@ void main() {
       contentTextStyle: TextStyle(color: Color(0xff000000)),
       actionsPadding: EdgeInsets.all(8.0),
       barrierColor: Color(0xff000005),
+      insetPadding: EdgeInsets.all(20.0),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -82,6 +83,7 @@ void main() {
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'actionsPadding: EdgeInsets.all(8.0)',
       'barrierColor: Color(0xff000005)',
+      'insetPadding: EdgeInsets.all(20.0)',
     ]);
   });
 
@@ -513,5 +515,32 @@ void main() {
 
     final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
     expect(modalBarrier.color, barrierColor);
+  });
+
+  testWidgets('DialogTheme.insetPadding updates Dialog insetPadding', (WidgetTester tester) async {
+    // The default testing screen (800, 600)
+    const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+    const DialogTheme dialogTheme = DialogTheme(
+      insetPadding: EdgeInsets.fromLTRB(10, 15, 20, 25)
+    );
+    const Dialog dialog = Dialog(child: Placeholder());
+
+    await tester.pumpWidget(_appWithDialog(
+      tester,
+      dialog,
+      theme: ThemeData(dialogTheme: dialogTheme),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      Rect.fromLTRB(
+        screenRect.left + dialogTheme.insetPadding!.left,
+        screenRect.top + dialogTheme.insetPadding!.top,
+        screenRect.right - dialogTheme.insetPadding!.right,
+        screenRect.bottom - dialogTheme.insetPadding!.bottom,
+      ),
+    );
   });
 }
