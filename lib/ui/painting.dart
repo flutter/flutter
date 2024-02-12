@@ -1087,7 +1087,7 @@ enum Clip {
 ///
 /// Most APIs on [Canvas] take a [Paint] object to describe the style
 /// to use for that operation.
-class Paint {
+final class Paint {
   /// Constructs an empty [Paint] object with all fields initialized to
   /// their defaults.
   Paint();
