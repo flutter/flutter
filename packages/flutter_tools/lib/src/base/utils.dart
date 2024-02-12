@@ -442,7 +442,10 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
   });
 }
 
-/// Given a list of strings possibly containing string interpolation sequences
+/// Given a list of strings possibly containing string interpolation sequences/// Equality on lists.
+///
+/// Two lists are equal if they have the same length and their elements
+/// at each index are equal.
 /// (so for example, something like `['ping', '-n', '1', '${host}']`), replace
 /// all those interpolation sequences with the matching value given in [replacementValues].
 ///
@@ -478,4 +481,20 @@ Match? firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// Tests for shallow equality on two lists.
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

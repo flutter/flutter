@@ -27,7 +27,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
-      processManager: FakeProcessManager.any(),
+      processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -76,7 +76,7 @@ flutter:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   });
 
   testUsingContext('Copies files to correct asset directory', () async {

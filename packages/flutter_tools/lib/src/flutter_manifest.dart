@@ -905,10 +905,19 @@ class AssetsEntry {
     if (other is! AssetsEntry) {
       return false;
     }
-
-    return uri == other.uri && flavors == other.flavors;
+    return uri == other.uri &&
+        listEquals(flavors, other.flavors) &&
+        listEquals(transformers, other.transformers);
   }
 
   @override
-  int get hashCode => Object.hash(uri.hashCode, flavors.hashCode);
+  int get hashCode {
+    return Object.hashAll(
+      <Object?>[
+        uri.hashCode,
+        ...flavors,
+        ...transformers,
+      ],
+    );
+  }
 }

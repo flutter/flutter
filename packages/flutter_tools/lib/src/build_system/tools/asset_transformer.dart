@@ -121,9 +121,9 @@ final class AssetTransformer {
   }) async {
     for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
       final List<String> transformerArguments = <String>[
-        ...?transformer.args,
         if (i == 0) '--input=${asset.path}' else '--input=$outputPath',
         '--output=$outputPath',
+        ...?transformer.args,
       ];
 
       final List<String> command = <String>[
