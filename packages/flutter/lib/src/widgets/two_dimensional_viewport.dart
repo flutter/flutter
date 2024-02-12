@@ -1555,26 +1555,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // This is only usable once we have sizes.
     assert(hasSize);
     assert(child.hasSize);
-    final double xOffset;
-    final double yOffset;
-    switch (verticalAxisDirection) {
-      case AxisDirection.up:
-        yOffset = viewportDimension.height - (layoutOffset.dy + child.size.height);
-      case AxisDirection.down:
-        yOffset = layoutOffset.dy;
-      case AxisDirection.right:
-      case AxisDirection.left:
-        throw Exception('This should not happen');
-    }
-    switch (horizontalAxisDirection) {
-      case AxisDirection.right:
-        xOffset = layoutOffset.dx;
-      case AxisDirection.left:
-        xOffset = viewportDimension.width - (layoutOffset.dx + child.size.width);
-      case AxisDirection.up:
-      case AxisDirection.down:
-        throw Exception('This should not happen');
-    }
+    final double xOffset = switch (horizontalAxisDirection) {
+      AxisDirection.right => layoutOffset.dx,
+      AxisDirection.left => viewportDimension.width - (layoutOffset.dx + child.size.width),
+      AxisDirection.up || AxisDirection.down => throw Exception('This should not happen'),
+    };
+    final double yOffset = switch (verticalAxisDirection) {
+      AxisDirection.up => viewportDimension.height - (layoutOffset.dy + child.size.height),
+      AxisDirection.down => layoutOffset.dy,
+      AxisDirection.right || AxisDirection.left => throw Exception('This should not happen'),
+    };
     return Offset(xOffset, yOffset);
   }
 

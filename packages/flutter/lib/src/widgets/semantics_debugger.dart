@@ -316,12 +316,10 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         effectivelabel = '${Unicode.FSI}$tooltipAndLabel${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
-        switch (data.textDirection!) {
-          case TextDirection.rtl:
-            effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDI}';
-          case TextDirection.ltr:
-            effectivelabel = tooltipAndLabel;
-        }
+        effectivelabel = switch (data.textDirection!) {
+          TextDirection.rtl => '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}',
+          TextDirection.ltr => tooltipAndLabel,
+        };
       }
       if (annotations.isEmpty) {
         message = effectivelabel;
