@@ -11,10 +11,45 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'elevated_button.dart';
+import 'filled_button.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'outlined_button.dart';
+import 'text_button.dart';
 import 'theme_data.dart';
+
+/// {@template flutter.material.ButtonStyleButton.iconAlignment}
+/// Determines the alignment of the icon within the widgets such as:
+///   - [ElevatedButton.icon],
+///   - [FilledButton.icon],
+///   - [FilledButton.tonalIcon].
+///   - [OutlinedButton.icon],
+///   - [TextButton.icon],
+///
+/// The effect of `iconAlignment` depends on [TextDirection]. If textDirection is
+/// [TextDirection.ltr] then [IconAlignment.start] and [IconAlignment.end] align the
+/// icon on the left or right respectively.  If textDirection is [TextDirection.rtl] the
+/// the alignments are reversed.
+///
+/// Defaults to [IconAlignment.start].
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
+/// or the end of the button.
+///
+/// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
+/// {@end-tool}
+///
+/// {@endtemplate}
+enum IconAlignment {
+  /// The icon is placed at the start of the button.
+  start,
+
+  /// The icon is placed at the end of the button.
+  end,
+}
 
 /// The base [StatefulWidget] class for buttons whose style is defined by a [ButtonStyle] object.
 ///
@@ -44,6 +79,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     this.statesController,
     this.isSemanticButton = true,
     required this.child,
+    this.iconAlignment = IconAlignment.start,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -116,6 +152,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
+
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
