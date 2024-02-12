@@ -947,31 +947,23 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final RenderBox box = child as RenderBox;
     final Rect rectLocal = MatrixUtils.transformRect(target.getTransformTo(child), rect);
 
-    final double targetMainAxisExtent;
     double leadingScrollOffset = offset;
+
     // The scroll offset of `rect` within `child`.
-    switch (axisDirection) {
-      case AxisDirection.up:
-        leadingScrollOffset += child.size.height - rectLocal.bottom;
-        targetMainAxisExtent = rectLocal.height;
-      case AxisDirection.right:
-        leadingScrollOffset += rectLocal.left;
-        targetMainAxisExtent = rectLocal.width;
-      case AxisDirection.down:
-        leadingScrollOffset += rectLocal.top;
-        targetMainAxisExtent = rectLocal.height;
-      case AxisDirection.left:
-        leadingScrollOffset += child.size.width - rectLocal.right;
-        targetMainAxisExtent = rectLocal.width;
-    }
+    leadingScrollOffset += switch (axisDirection) {
+      AxisDirection.up    => child.size.height - rectLocal.bottom,
+      AxisDirection.left  => child.size.width - rectLocal.right,
+      AxisDirection.right => rectLocal.left,
+      AxisDirection.down  => rectLocal.top,
+    };
 
     // The scroll offset in the viewport to `rect`.
-    final TwoDimensionalViewportParentData childParentData = parentDataOf(box);
+    final Offset paintOffset = parentDataOf(box).paintOffset!;
     leadingScrollOffset += switch (axisDirection) {
-      AxisDirection.down => childParentData.paintOffset!.dy,
-      AxisDirection.up => viewportDimension.height - childParentData.paintOffset!.dy - box.size.height,
-      AxisDirection.right => childParentData.paintOffset!.dx,
-      AxisDirection.left => viewportDimension.width - childParentData.paintOffset!.dx - box.size.width,
+      AxisDirection.up    => viewportDimension.height - paintOffset.dy - box.size.height,
+      AxisDirection.left  => viewportDimension.width - paintOffset.dx - box.size.width,
+      AxisDirection.right => paintOffset.dx,
+      AxisDirection.down  => paintOffset.dy,
     };
 
     // This step assumes the viewport's layout is up-to-date, i.e., if
@@ -980,27 +972,24 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final Matrix4 transform = target.getTransformTo(this);
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
 
-    final double mainAxisExtent = switch (axisDirectionToAxis(axisDirection)) {
-      Axis.horizontal => viewportDimension.width,
-      Axis.vertical => viewportDimension.height,
+    final double mainAxisExtentDifference = switch (axis) {
+      Axis.horizontal => viewportDimension.width - rectLocal.width,
+      Axis.vertical   => viewportDimension.height - rectLocal.height,
     };
 
-    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
 
-    final double offsetDifference = switch (axisDirectionToAxis(axisDirection)){
-      Axis.vertical => verticalOffset.pixels - targetOffset,
+    final double offsetDifference = switch (axis) {
       Axis.horizontal => horizontalOffset.pixels - targetOffset,
+      Axis.vertical   => verticalOffset.pixels - targetOffset,
     };
-    switch (axisDirection) {
-      case AxisDirection.down:
-        targetRect = targetRect.translate(0.0, offsetDifference);
-      case AxisDirection.right:
-        targetRect = targetRect.translate(offsetDifference, 0.0);
-      case AxisDirection.up:
-        targetRect = targetRect.translate(0.0, -offsetDifference);
-      case AxisDirection.left:
-        targetRect = targetRect.translate(-offsetDifference, 0.0);
-    }
+
+    targetRect = switch (axisDirection) {
+      AxisDirection.up    => targetRect.translate(0.0, -offsetDifference),
+      AxisDirection.down  => targetRect.translate(0.0,  offsetDifference),
+      AxisDirection.left  => targetRect.translate(-offsetDifference, 0.0),
+      AxisDirection.right => targetRect.translate( offsetDifference, 0.0),
+    };
 
     final RevealedOffset revealedOffset = RevealedOffset(
       offset: targetOffset,
