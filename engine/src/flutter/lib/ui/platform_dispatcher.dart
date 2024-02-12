@@ -319,7 +319,7 @@ class PlatformDispatcher {
   ///
   /// Typically, receivers of this event respond by moving the focus to the first
   /// focusable widget inside the [FlutterView] with ID 2. If a view receives
-  /// focus in the backwards direction (could be the result of pressing shift + tab),
+  /// focus in the backward direction (could be the result of pressing shift + tab),
   /// typically the last focusable widget inside that view is focused.
   ///
   /// The platform may remove focus from a [FlutterView]. For example, on the web,
@@ -2690,8 +2690,8 @@ enum ViewFocusDirection {
   /// This is typically result of the user pressing tab.
   forward,
 
-  /// Indicates the focus transition was performed in a backwards direction.
+  /// Indicates the focus transition was performed in a backward direction.
   ///
   /// This is typically result of the user pressing shift + tab.
-  backwards,
+  backward,
 }
