@@ -1523,6 +1523,57 @@ To use the PrimaryScrollController explicitly, set ScrollView.primary to true on
     );
   });
 
+  testWidgets('Scrollbars assert on multiple scroll positions', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: Row(
+              children: <Widget>[
+                RawScrollbar(
+                  controller: scrollController,
+                  child: const SingleChildScrollView(
+                    child: SizedBox(width: 10.0, height: 4000.0),
+                  ),
+                ),
+                RawScrollbar(
+                  controller: scrollController,
+                  child: const SingleChildScrollView(
+                    child: SizedBox(width: 10.0, height: 4000.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final Finder scrollViews = find.byType(SingleChildScrollView);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(scrollViews.first));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+    expect(
+      exception.message,
+      '''
+The provided ScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When the scrollbar is interactive, the associated ScrollController must only have one ScrollPosition attached.
+The provided ScrollController cannot be shared by multiple ScrollView widgets.''',
+    );
+  });
+
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
@@ -2897,7 +2948,7 @@ To use the PrimaryScrollController explicitly, set ScrollView.primary to true on
     expect(scrollController.offset, greaterThan(lastPosition));
   });
 
-  testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
+  testWidgets('The bar supports mouse wheel event', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/109659
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -2943,4 +2994,47 @@ To use the PrimaryScrollController explicitly, set ScrollView.primary to true on
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrollbar asserts a single scroll position', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                physics: NeverScrollableScrollPhysics(),
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(797.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
 }
