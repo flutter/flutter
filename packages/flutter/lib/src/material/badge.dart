@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import 'badge_theme.dart';
 import 'color_scheme.dart';
+import 'navigation_rail.dart';
+import 'text_button.dart';
 import 'theme.dart';
 
 /// A Material Design "badge".
