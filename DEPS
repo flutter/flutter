@@ -274,7 +274,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '4c8d0040fca0fff675b487618ebaa8b7a8259858',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5413806166ee3b5198b9dd1c1f684d266ad9850c',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -298,7 +298,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '37e25539ce199ecaf19fb7f7d27818716d36686d',
 
   'src/third_party/vulkan-deps':
-   Var('chromium_git') + '/vulkan-deps' + '@' + '40b75117a60b11c42a1fb87bf14c0f49bcdb8b3d',
+   Var('chromium_git') + '/vulkan-deps' + '@' + '014f44e134a1de387791bffacc32ff9d8db71176',
 
   'src/flutter/third_party/flatbuffers':
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',

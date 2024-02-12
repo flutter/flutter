@@ -396,7 +396,9 @@ void CompilerSkSL::emit_function_prototype(SPIRFunction& func,
   statement("void FLT_main()");
 }
 
-std::string CompilerSkSL::image_type_glsl(const SPIRType& type, uint32_t id) {
+std::string CompilerSkSL::image_type_glsl(const SPIRType& type,
+                                          uint32_t id,
+                                          bool member) {
   if (type.basetype != SPIRType::SampledImage || type.image.dim != Dim2D) {
     FLUTTER_CROSS_THROW("Only sampler2D uniform image types are supported.");
     return "???";
