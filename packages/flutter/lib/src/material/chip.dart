@@ -234,6 +234,12 @@ abstract interface class ChipAttributes {
   /// The default constraints ensure that the avatar is accessible.
   /// Specifying this parameter enables creation of avatar smaller than
   /// the minimum size, but it is not recommended.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to use [avatarBoxConstraints] to adjust avatar size constraints
+  ///
+  /// ** See code in examples/api/lib/material/chip/chip_attributes.avatar_box_constraints.0.dart **
+  /// {@end-tool}
   BoxConstraints? get avatarBoxConstraints;
 }
 
@@ -302,6 +308,13 @@ abstract interface class DeletableChipAttributes {
   /// The default constraints ensure that the delete icon is accessible.
   /// Specifying this parameter enables creation of delete icon smaller than
   /// the minimum size, but it is not recommended.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to use [deleteIconBoxConstraints] to adjust delete icon
+  /// size constraints.
+  ///
+  /// ** See code in examples/api/lib/material/chip/deletable_chip_attributes.delete_icon_box_constraints.0.dart **
+  /// {@end-tool}
   BoxConstraints? get deleteIconBoxConstraints;
 }
 
