@@ -587,5 +587,5 @@ enum ViewFocusState {
 enum ViewFocusDirection {
   undefined,
   forward,
-  backwards,
+  backward,
 }
