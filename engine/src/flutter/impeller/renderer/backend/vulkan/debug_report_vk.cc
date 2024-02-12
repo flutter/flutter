@@ -111,14 +111,6 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
     return Result::kContinue;
   }
 
-  // Issue in older versions of the SDK.
-  // https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/3554
-  if (data->pMessageIdName != nullptr &&
-      strstr(data->pMessageIdName, "CoreValidation-Shader-OutputNotConsumed") !=
-          nullptr) {
-    return Result::kContinue;
-  }
-
   // This is a real error but we can't fix it due to our headers being too
   // old. More more details see:
   // https://vulkan.lunarg.com/doc/view/1.3.224.1/mac/1.3-extensions/vkspec.html#VUID-VkImageViewCreateInfo-imageViewFormatSwizzle-04465
