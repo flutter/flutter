@@ -530,7 +530,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getSize(find.byType(InputChip)).width, equals(152.0));
-    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));;
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
 
     // Calculate the distance between avatar and chip edges.
     chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
