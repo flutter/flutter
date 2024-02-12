@@ -82,6 +82,50 @@
             ]
         },
         {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cores=32"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--runtime-mode",
+                "debug",
+                "--unoptimized",
+                "--prebuilt-dart-sdk",
+                "--target-dir",
+                "host_debug_unopt_impeller_tests",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "host_debug_unopt_impeller_tests",
+            "ninja": {
+                "config": "host_debug_unopt_impeller_tests",
+                "targets": [
+                    "flutter",
+                    "flutter/sky/packages"
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_debug_unopt_impeller_tests",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "host_debug_unopt_impeller_tests",
+                        "--type",
+                        "impeller",
+                        "--engine-capture-core-dump"
+                    ]
+                }
+            ]
+        },
+        {
             "drone_dimensions": [
                 "device_type=none",
                 "os=Linux"

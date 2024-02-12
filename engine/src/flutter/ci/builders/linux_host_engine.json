@@ -1,46 +1,6 @@
 {
     "builds": [
         {
-            "archives": [],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false
-            },
-            "gn": [
-                "--runtime-mode",
-                "debug",
-                "--unoptimized",
-                "--prebuilt-dart-sdk",
-                "--target-dir",
-                "host_debug_impeller_vulkan"
-            ],
-            "name": "host_debug_impeller_vulkan",
-            "ninja": {
-                "config": "host_debug_impeller_vulkan",
-                "targets": [
-                    "flutter",
-                    "flutter/sky/packages"
-                ]
-            },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_debug_impeller_vulkan",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "host_debug_impeller_vulkan",
-                        "--type",
-                        "impeller",
-                        "--engine-capture-core-dump"
-                    ]
-                }
-            ]
-        },
-        {
             "archives": [
                 {
                     "name": "host_debug",
