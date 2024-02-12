@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show Directory, Process;
+import 'dart:io' as io show Directory, Process, ProcessResult;
 
 import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
@@ -41,7 +41,7 @@ final class RunnerProgress extends RunnerEvent {
   RunnerProgress(
     super.name, super.command, super.timestamp,
     this.what, this.completed, this.total, this.done,
-  ) : percent = (completed * 1000) / total;
+  ) : percent = (completed * 100) / total;
 
   /// What a command is currently working on, for example a build target or
   /// the name of a test.
@@ -263,7 +263,6 @@ final class GlobalBuildRunner extends Runner {
         gnArgs.remove(arg.$1);
       }
     }
-
     return gnArgs;
   }();
 
@@ -289,67 +288,157 @@ final class GlobalBuildRunner extends Runner {
     return result.ok;
   }
 
-  // TODO(zanderso): This should start and stop RBE when it is an --rbe build.
-  Future<bool> _runNinja(RunnerEventHandler eventHandler) async {
-    final String ninjaPath = p.join(
-      engineSrcDir.path, 'flutter', 'third_party', 'ninja', 'ninja',
+  late final String _hostCpu = (){
+    if (platform.isWindows) {
+      return platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'x64';
+    }
+    final List<String> unameCommand = <String>['uname', '-m'];
+    final io.ProcessResult unameResult = processRunner.processManager.runSync(
+      unameCommand,
     );
-    final String outDir = p.join(engineSrcDir.path, 'out', build.ninja.config);
-    final List<String> command = <String>[
-      ninjaPath,
-      '-C', outDir,
-      if (_isGomaOrRbe) ...<String>['-j', '200'],
-      ...extraNinjaArgs,
-      ...build.ninja.targets,
+    return unameResult.exitCode == 0 ? (unameResult.stdout as String).trim() : 'x64';
+  }();
+
+  late final String _buildtoolsPath = (){
+    final String platformDir = switch (platform.operatingSystem) {
+      Platform.linux => 'linux-$_hostCpu',
+      Platform.macOS => 'mac-$_hostCpu',
+      Platform.windows => 'windows-$_hostCpu',
+      _ => '<unknown>',
+    };
+    return p.join(engineSrcDir.path, 'buildtools', platformDir);
+  }();
+
+  Future<bool> _bootstrapRbe(
+    RunnerEventHandler eventHandler, {
+    bool shutdown = false,
+  }) async {
+    final String reclientPath = p.join(_buildtoolsPath, 'reclient');
+    final String exe = platform.isWindows ? '.exe' : '';
+    final String bootstrapPath = p.join(reclientPath, 'bootstrap$exe');
+    final String reproxyPath = p.join(reclientPath, 'reproxy$exe');
+    final String reclientConfigFile = switch (platform.operatingSystem) {
+      Platform.linux => 'reclient-linux.cfg',
+      Platform.macOS => 'reclient-mac.cfg',
+      Platform.windows => 'reclient-win.cfg',
+      _ => '<unknown>',
+    };
+    final String reclientConfigPath = p.join(
+      engineSrcDir.path, 'flutter', 'build', 'rbe', reclientConfigFile,
+    );
+    final List<String> bootstrapCommand = <String>[
+      bootstrapPath,
+      '--re_proxy=$reproxyPath',
+      '--automatic_auth=true',
+      if (shutdown)
+        '--shutdown'
+      else ...<String>[
+        '--cfg=$reclientConfigPath'
+      ],
     ];
-    eventHandler(RunnerStart('${build.name}: ninja', command, DateTime.now()));
-
-    final ProcessRunnerResult processResult;
+    if (!processRunner.processManager.canRun(bootstrapPath)) {
+      eventHandler(RunnerError(
+        build.name, <String>[], DateTime.now(), '"$bootstrapPath" not found.',
+      ));
+      return false;
+    }
+    eventHandler(RunnerStart(
+      '${build.name}: RBE ${shutdown ? 'shutdown' : 'startup'}',
+      bootstrapCommand,
+      DateTime.now(),
+    ));
+    final ProcessRunnerResult bootstrapResult;
     if (dryRun) {
-      processResult = _dryRunResult;
+      bootstrapResult = _dryRunResult;
     } else {
-      final io.Process process = await processRunner.processManager.start(
-        command,
-        workingDirectory: engineSrcDir.path,
-      );
-      final List<int> stderrOutput = <int>[];
-      final Completer<void> stdoutComplete = Completer<void>();
-      final Completer<void> stderrComplete = Completer<void>();
-
-      process.stdout
-        .transform<String>(const Utf8Decoder())
-        .transform(const LineSplitter())
-        .listen(
-          (String line) {
-            _ninjaProgress(eventHandler, command, line);
-          },
-          onDone: () async => stdoutComplete.complete(),
-        );
-
-      process.stderr.listen(
-        stderrOutput.addAll,
-        onDone: () async => stderrComplete.complete(),
-      );
-
-      await Future.wait<void>(<Future<void>>[
-        stdoutComplete.future, stderrComplete.future,
-      ]);
-      final int exitCode = await process.exitCode;
-
-      processResult = ProcessRunnerResult(
-        exitCode,
-        <int>[], // stdout.
-        stderrOutput, // stderr.
-        stderrOutput, // combined,
-        pid: process.pid, // pid,
+      bootstrapResult = await processRunner.runProcess(
+        bootstrapCommand, failOk: true,
       );
     }
+    eventHandler(RunnerResult(
+      '${build.name}: RBE ${shutdown ? 'shutdown' : 'startup'}',
+      bootstrapCommand,
+      DateTime.now(),
+      bootstrapResult,
+    ));
+    return bootstrapResult.exitCode == 0;
+  }
 
-    final RunnerResult result = RunnerResult(
-      '${build.name}: ninja', command, DateTime.now(), processResult,
-    );
-    eventHandler(result);
-    return result.ok;
+  Future<bool> _runNinja(RunnerEventHandler eventHandler) async {
+    if (_isRbe) {
+      if (!await _bootstrapRbe(eventHandler)) {
+        return false;
+      }
+    }
+    bool success = false;
+    try {
+      final String ninjaPath = p.join(
+        engineSrcDir.path, 'flutter', 'third_party', 'ninja', 'ninja',
+      );
+      final String outDir = p.join(
+        engineSrcDir.path, 'out', build.ninja.config,
+      );
+      final List<String> command = <String>[
+        ninjaPath,
+        '-C', outDir,
+        if (_isGomaOrRbe) ...<String>['-j', '200'],
+        ...extraNinjaArgs,
+        ...build.ninja.targets,
+      ];
+      eventHandler(RunnerStart(
+        '${build.name}: ninja', command, DateTime.now()),
+      );
+      final ProcessRunnerResult processResult;
+      if (dryRun) {
+        processResult = _dryRunResult;
+      } else {
+        final io.Process process = await processRunner.processManager.start(
+          command,
+          workingDirectory: engineSrcDir.path,
+        );
+        final List<int> stderrOutput = <int>[];
+        final Completer<void> stdoutComplete = Completer<void>();
+        final Completer<void> stderrComplete = Completer<void>();
+
+        process.stdout
+          .transform<String>(const Utf8Decoder())
+          .transform(const LineSplitter())
+          .listen(
+            (String line) {
+              _ninjaProgress(eventHandler, command, line);
+            },
+            onDone: () async => stdoutComplete.complete(),
+          );
+
+        process.stderr.listen(
+          stderrOutput.addAll,
+          onDone: () async => stderrComplete.complete(),
+        );
+
+        await Future.wait<void>(<Future<void>>[
+          stdoutComplete.future, stderrComplete.future,
+        ]);
+        final int exitCode = await process.exitCode;
+
+        processResult = ProcessRunnerResult(
+          exitCode,
+          <int>[], // stdout.
+          stderrOutput, // stderr.
+          stderrOutput, // combined,
+          pid: process.pid, // pid,
+        );
+      }
+      eventHandler(RunnerResult(
+        '${build.name}: ninja', command, DateTime.now(), processResult,
+      ));
+      success = processResult.exitCode == 0;
+    } finally {
+      if (_isRbe) {
+        // Ignore failures to shutdown.
+        await _bootstrapRbe(eventHandler, shutdown: true);
+      }
+    }
+    return success;
   }
 
   // Parse lines of the form '[6232/6269] LINK ./accessibility_unittests'.
@@ -389,10 +478,8 @@ final class GlobalBuildRunner extends Runner {
     ));
   }
 
-  late final bool _isGoma = build.gn.contains('--goma') ||
-                            extraGnArgs.contains('--goma');
-  late final bool _isRbe = build.gn.contains('--rbe') ||
-                           extraGnArgs.contains('--rbe');
+  late final bool _isGoma = _mergedGnArgs.contains('--goma');
+  late final bool _isRbe = _mergedGnArgs.contains('--rbe');
   late final bool _isGomaOrRbe = _isGoma || _isRbe;
 
   Future<bool> _runGenerators(RunnerEventHandler eventHandler) async {

@@ -219,36 +219,6 @@ def setup_rbe(args):
   # care of starting and stopping the compiler proxy.
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
 
-  # Bootstrap reproxy if not running in CI.
-  if not running_on_luci:
-    cipd_reclient_dir = os.path.join(
-        SRC_ROOT,
-        'buildtools',
-        buildtools_dir(),
-        'reclient',
-    )
-    bootstrap_path = os.path.join(cipd_reclient_dir, 'bootstrap')
-    bootstrap_path = bootstrap_path + '.exe' if get_host_os() == 'win' else bootstrap_path
-    reproxy_path = os.path.join(cipd_reclient_dir, 'reproxy')
-    rbe_cfg_path = os.path.join(
-        SRC_ROOT,
-        'flutter',
-        'build',
-        'rbe',
-        'reclient-' + get_host_os() + '.cfg',
-    )
-    bootstrap_cmd = [
-        bootstrap_path,
-        '--re_proxy=' + reproxy_path,
-        '--automatic_auth=true',
-        '--cfg=' + rbe_cfg_path,
-    ]
-    try:
-      subprocess.call(bootstrap_cmd, cwd=SRC_ROOT)
-    except subprocess.CalledProcessError as exc:
-      print('Failed to boostrap reproxy: ', exc.returncode, exc.output)
-      return {}
-
   if args.rbe_server_address:
     rbe_gn_args['rbe_server_address'] = args.rbe_server_address
   if args.rbe_exec_strategy:
@@ -1188,7 +1158,7 @@ def parse_args(args):
 
   parser.add_argument(
       '--trace-gn',
-      default=False,
+      default=True,
       action='store_true',
       help='Write a GN trace log (gn_trace.json) in the Chromium tracing '
       'format in the build directory.'
