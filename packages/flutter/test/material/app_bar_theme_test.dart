@@ -102,7 +102,7 @@ void main() {
     expect(widget.color, theme.colorScheme.surface);
     expect(widget.elevation, 0);
     expect(widget.shadowColor, Colors.transparent);
-    expect(widget.surfaceTintColor, Colors.transparent);
+    expect(widget.surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(widget.shape, null);
     expect(iconTheme.data, IconThemeData(color: theme.colorScheme.onSurface, size: 24));
     expect(actionsIconTheme.data, IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
@@ -361,7 +361,7 @@ void main() {
     // M3 AppBar defaults for light themes:
     // - elevation: 0
     // - shadow color: Colors.transparent
-    // - surface tint color: Colors.transparent since tone-based surfaces are recommended to use now.
+    // - surface tint color: ColorScheme.surfaceTint
     // - background color: ColorScheme.surface
     // - foreground color: ColorScheme.onSurface
     // - actions text: style bodyMedium, foreground color
@@ -378,7 +378,7 @@ void main() {
     expect(widget.color, lightTheme.colorScheme.surface);
     expect(widget.elevation, 0);
     expect(widget.shadowColor, Colors.transparent);
-    expect(widget.surfaceTintColor, Colors.transparent);
+    expect(widget.surfaceTintColor, lightTheme.colorScheme.surfaceTint);
     expect(iconTheme.data.color, lightTheme.colorScheme.onSurface);
     expect(actionsIconTheme.data.color, lightTheme.colorScheme.onSurface);
     expect(actionIconText.text.style!.color, lightTheme.colorScheme.onSurface);
@@ -387,7 +387,7 @@ void main() {
     // M3 AppBar defaults for dark themes:
     // - elevation: 0
     // - shadow color: Colors.transparent
-    // - surface tint color: Colors.transparent because tone-based surfaces are recommended to use now.
+    // - surface tint color: ColorScheme.surfaceTint
     // - background color: ColorScheme.surface
     // - foreground color: ColorScheme.onSurface
     // - actions text: style bodyMedium, foreground color
@@ -405,7 +405,7 @@ void main() {
     expect(widget.color, darkTheme.colorScheme.surface);
     expect(widget.elevation, 0);
     expect(widget.shadowColor, Colors.transparent);
-    expect(widget.surfaceTintColor, Colors.transparent);
+    expect(widget.surfaceTintColor, darkTheme.colorScheme.surfaceTint);
     expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
     expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);

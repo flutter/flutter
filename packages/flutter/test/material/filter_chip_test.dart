@@ -420,7 +420,7 @@ void main() {
     );
 
     ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, null);
+    expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled FilterChip.elevated defaults.
     await tester.pumpWidget(

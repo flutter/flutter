@@ -1145,10 +1145,10 @@ class _AppBarState extends State<AppBar> {
             ?? defaults.shadowColor,
           surfaceTintColor: widget.surfaceTintColor
             ?? appBarTheme.surfaceTintColor
-            // `defaults.surfaceTint` is Colors.transparent now. It is not used
+            // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
             // here because otherwise, it will cause breaking change for
             // `scrolledUnderElevation`.
-            ?? Theme.of(context).colorScheme.surfaceTint,
+            ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
           child: Semantics(
             explicitChildNodes: true,
