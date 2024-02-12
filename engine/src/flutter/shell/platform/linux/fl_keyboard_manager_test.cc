@@ -471,7 +471,7 @@ static void fl_mock_view_set_layout(FlMockViewDelegate* self,
 static FlKeyEvent* fl_key_event_new_by_mock(bool is_press,
                                             guint keyval,
                                             guint16 keycode,
-                                            int state,
+                                            GdkModifierType state,
                                             gboolean is_modifier,
                                             guint8 group = 0) {
   FlKeyEvent* event = g_new0(FlKeyEvent, 1);
@@ -644,12 +644,14 @@ TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
   tester.recordEmbedderCallsTo(call_records);
   fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
 
   tester.respondToEmbedderCallsWith(true);
   fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
 
   tester.flushChannelMessages();
 
@@ -670,7 +672,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   // Dispatch a key event
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -687,7 +690,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   /// Test 2: Two events that are unhandled by the framework
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -698,7 +702,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   // Dispatch another key event
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_b, kKeyCodeKeyB, 0x0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_b, kKeyCodeKeyB,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -728,7 +733,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   /// redispatching only works once.
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -751,7 +757,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   // Dispatch a key event
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(call_records.size(), 1u);
@@ -767,7 +774,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   tester.respondToEmbedderCallsWithAndRecordsTo(false, call_records);
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(call_records.size(), 1u);
@@ -799,7 +807,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
 
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -819,7 +828,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   /// Test 2: All delegates respond false
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA, 0x0, false));
+      fl_key_event_new_by_mock(false, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
 
   EXPECT_EQ(manager_handled, true);
   EXPECT_EQ(redispatched.size(), 0u);
@@ -852,7 +862,8 @@ TEST(FlKeyboardManagerTest, TextInputPluginReturnsFalse) {
   // Dispatch a key event.
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   // The event was redispatched because no one handles it.
@@ -874,7 +885,8 @@ TEST(FlKeyboardManagerTest, TextInputPluginReturnsTrue) {
   // Dispatch a key event.
   manager_handled = fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
   tester.flushChannelMessages();
   EXPECT_EQ(manager_handled, true);
   // The event was not redispatched because text input plugin handles it.
@@ -891,11 +903,13 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
 
   auto sendTap = [&](guint8 keycode, guint keyval, guint8 group) {
     fl_keyboard_manager_handle_event(
-        tester.manager(),
-        fl_key_event_new_by_mock(true, keyval, keycode, 0, false, group));
+        tester.manager(), fl_key_event_new_by_mock(
+                              true, keyval, keycode,
+                              static_cast<GdkModifierType>(0), false, group));
     fl_keyboard_manager_handle_event(
-        tester.manager(),
-        fl_key_event_new_by_mock(false, keyval, keycode, 0, false, group));
+        tester.manager(), fl_key_event_new_by_mock(
+                              false, keyval, keycode,
+                              static_cast<GdkModifierType>(0), false, group));
   };
 
   /* US keyboard layout */
@@ -1021,7 +1035,8 @@ TEST(FlKeyboardManagerTest, GetPressedState) {
   // Dispatch a key event.
   fl_keyboard_manager_handle_event(
       tester.manager(),
-      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0, false));
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), false));
 
   GHashTable* pressedState =
       fl_keyboard_manager_get_pressed_state(tester.manager());

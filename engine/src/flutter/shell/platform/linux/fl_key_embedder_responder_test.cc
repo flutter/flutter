@@ -116,7 +116,7 @@ static FlKeyEvent* fl_key_event_new_by_mock(guint32 time_in_milliseconds,
                                             bool is_press,
                                             guint keyval,
                                             guint16 keycode,
-                                            int state,
+                                            GdkModifierType state,
                                             gboolean is_modifier) {
   _g_key_event.is_press = is_press;
   _g_key_event.time = time_in_milliseconds;
@@ -178,8 +178,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   // Key down
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(12345, kPress, GDK_KEY_a, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(12345, kPress, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -198,8 +198,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   // Key up
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(12346, kRelease, GDK_KEY_a, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(12346, kRelease, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -219,8 +219,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   // Key down
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(12347, kPress, GDK_KEY_q, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(12347, kPress, GDK_KEY_q, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -239,8 +239,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   // Key up
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(12348, kRelease, GDK_KEY_q, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(12348, kRelease, GDK_KEY_q, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -275,7 +275,7 @@ TEST(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(12345, kPress, GDK_KEY_ampersand, kKeyCodeDigit1,
-                               0, kIsNotModifier),
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data, kLogicalDigit1);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -309,7 +309,7 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(101, kPress, GDK_KEY_Shift_R, kKeyCodeShiftRight,
-                               0, kIsModifier),
+                               static_cast<GdkModifierType>(0), kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -326,8 +326,8 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   // Press key A
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(102, kPress, GDK_KEY_A, kKeyCodeKeyA, 0x1,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(102, kPress, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_SHIFT_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -345,7 +345,7 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(103, kRelease, GDK_KEY_Shift_R,
-                               kKeyCodeShiftRight, 0x1, kIsModifier),
+                               kKeyCodeShiftRight, GDK_SHIFT_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -362,8 +362,8 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   // Release key A
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -401,8 +401,8 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   // Press Numpad 1 (stage 0)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(101, kPress, GDK_KEY_KP_End, kKeyCodeNumpad1, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(101, kPress, GDK_KEY_KP_End, kKeyCodeNumpad1,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -420,7 +420,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(102, kPress, GDK_KEY_Num_Lock, kKeyCodeNumLock,
-                               0, kIsNotModifier),
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -438,7 +438,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(104, kRelease, GDK_KEY_KP_1, kKeyCodeNumpad1,
-                               0x10, kIsNotModifier),
+                               GDK_MOD2_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -456,7 +456,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(103, kRelease, GDK_KEY_Num_Lock, kKeyCodeNumLock,
-                               0x10, kIsModifier),
+                               GDK_MOD2_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -474,7 +474,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(101, kPress, GDK_KEY_KP_End, kKeyCodeNumpad1,
-                               0x10, kIsNotModifier),
+                               GDK_MOD2_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -492,7 +492,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(102, kPress, GDK_KEY_Num_Lock, kKeyCodeNumLock,
-                               0x10, kIsNotModifier),
+                               GDK_MOD2_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -510,7 +510,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(104, kRelease, GDK_KEY_KP_1, kKeyCodeNumpad1,
-                               0x10, kIsNotModifier),
+                               GDK_MOD2_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -528,7 +528,7 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(103, kRelease, GDK_KEY_Num_Lock, kKeyCodeNumLock,
-                               0x10, kIsModifier),
+                               GDK_MOD2_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -559,7 +559,7 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
 
   FlKeyEmbedderCallRecord* record;
 
-  guint state = 0;
+  GdkModifierType state = static_cast<GdkModifierType>(0);
 
   // Press shift left
   fl_key_responder_handle_event(
@@ -617,7 +617,7 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
   invoke_record_callback_and_verify(record, TRUE, &user_data);
   g_ptr_array_clear(g_call_records);
 
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Release digit 1, which is "1" because shift has been released.
   fl_key_responder_handle_event(
@@ -658,7 +658,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(101, kPress, GDK_KEY_Caps_Lock, kKeyCodeCapsLock,
-                               0x0, kIsModifier),
+                               static_cast<GdkModifierType>(0), kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -675,8 +675,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   // Press key A (stage 1)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(102, kPress, GDK_KEY_A, kKeyCodeKeyA, 0x2,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(102, kPress, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_LOCK_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -694,7 +694,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(103, kRelease, GDK_KEY_Caps_Lock,
-                               kKeyCodeCapsLock, 0x2, kIsModifier),
+                               kKeyCodeCapsLock, GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -711,8 +711,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   // Release key A (stage 2)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA, 0x2,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_LOCK_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -730,7 +730,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(105, kPress, GDK_KEY_Caps_Lock, kKeyCodeCapsLock,
-                               0x2, kIsModifier),
+                               GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -747,8 +747,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   // Press key A (stage 3)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(106, kPress, GDK_KEY_A, kKeyCodeKeyA, 0x2,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(106, kPress, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_LOCK_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -766,7 +766,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(107, kRelease, GDK_KEY_Caps_Lock,
-                               kKeyCodeCapsLock, 0x2, kIsModifier),
+                               kKeyCodeCapsLock, GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -783,8 +783,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   // Release key A (stage 0)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(108, kRelease, GDK_KEY_a, kKeyCodeKeyA, 0x0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(108, kRelease, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -818,8 +818,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   // Press key A (stage 0)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(101, kPress, GDK_KEY_a, kKeyCodeKeyA, 0x0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(101, kPress, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -837,7 +837,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(102, kPress, GDK_KEY_Caps_Lock, kKeyCodeCapsLock,
-                               0x2, kIsModifier),
+                               GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -855,7 +855,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(103, kRelease, GDK_KEY_Caps_Lock,
-                               kKeyCodeCapsLock, 0x2, kIsModifier),
+                               kKeyCodeCapsLock, GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -872,8 +872,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   // Release key A (stage 2)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA, 0x2,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(104, kRelease, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_LOCK_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -890,8 +890,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   // Press key A (stage 2)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(105, kPress, GDK_KEY_A, kKeyCodeKeyA, 0x2,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(105, kPress, GDK_KEY_A, kKeyCodeKeyA,
+                               GDK_LOCK_MASK, kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -909,7 +909,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(106, kPress, GDK_KEY_Caps_Lock, kKeyCodeCapsLock,
-                               0x0, kIsModifier),
+                               static_cast<GdkModifierType>(0), kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -927,7 +927,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(107, kRelease, GDK_KEY_Caps_Lock,
-                               kKeyCodeCapsLock, 0x2, kIsModifier),
+                               kKeyCodeCapsLock, GDK_LOCK_MASK, kIsModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -944,8 +944,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   // Release key A (stage 0)
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(108, kRelease, GDK_KEY_a, kKeyCodeKeyA, 0x0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(108, kRelease, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -975,8 +975,8 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   // Press KeyA
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(101, kPress, GDK_KEY_a, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(101, kPress, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -989,8 +989,8 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   g_expected_handled = false;
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(102, kPress, GDK_KEY_a, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(102, kPress, GDK_KEY_a, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -1009,8 +1009,8 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   // Release KeyA
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(103, kRelease, GDK_KEY_q, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(103, kRelease, GDK_KEY_q, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -1035,8 +1035,8 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
   g_expected_handled = true;  // The empty event is always handled.
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(103, kRelease, GDK_KEY_q, kKeyCodeKeyA, 0,
-                               kIsNotModifier),
+      fl_key_event_new_by_mock(103, kRelease, GDK_KEY_q, kKeyCodeKeyA,
+                               static_cast<GdkModifierType>(0), kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
@@ -1066,7 +1066,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   // Test 1: synthesize key down.
 
   // A key down of control left is missed.
-  guint state = GDK_CONTROL_MASK;
+  GdkModifierType state = GDK_CONTROL_MASK;
 
   // Send a ControlLeft up
   fl_key_responder_handle_event(
@@ -1098,7 +1098,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   // Test 2: synthesize key up.
 
   // Send a ControlLeft down.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
   fl_key_responder_handle_event(
       responder,
       fl_key_event_new_by_mock(102, kPress, GDK_KEY_Control_L,
@@ -1110,7 +1110,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   g_ptr_array_clear(g_call_records);
 
   // A key up of control left is missed.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Send another ControlLeft down
   fl_key_responder_handle_event(
@@ -1195,7 +1195,7 @@ TEST(FlKeyEmbedderResponderTest,
   FlKeyEmbedderCallRecord* record;
 
   // A key down of control left is missed.
-  guint state = GDK_CONTROL_MASK;
+  GdkModifierType state = GDK_CONTROL_MASK;
 
   // Send a normal event (KeyA down)
   fl_key_responder_handle_event(
@@ -1225,7 +1225,7 @@ TEST(FlKeyEmbedderResponderTest,
   g_ptr_array_clear(g_call_records);
 
   // A key up of control left is missed.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Send a normal event (KeyA up)
   fl_key_responder_handle_event(
@@ -1257,7 +1257,7 @@ TEST(FlKeyEmbedderResponderTest,
   // Test non-default key mapping.
 
   // Press a key with physical CapsLock and logical ControlLeft.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   fl_key_responder_handle_event(
       responder,
@@ -1278,7 +1278,7 @@ TEST(FlKeyEmbedderResponderTest,
   g_ptr_array_clear(g_call_records);
 
   // The key up of the control left press is missed.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Send a normal event (KeyA down).
   fl_key_responder_handle_event(
@@ -1326,7 +1326,7 @@ TEST(FlKeyEmbedderResponderTest,
   FlKeyEmbedderCallRecord* record;
 
   // Press a key with physical CapsLock and logical ControlLeft.
-  guint state = 0;
+  GdkModifierType state = static_cast<GdkModifierType>(0);
 
   fl_key_responder_handle_event(
       responder,
@@ -1347,7 +1347,7 @@ TEST(FlKeyEmbedderResponderTest,
   g_ptr_array_clear(g_call_records);
 
   // The key up of the control left press is missed.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Send a normal event (KeyA down).
   fl_key_responder_handle_event(
@@ -1394,7 +1394,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
   FlKeyEmbedderCallRecord* record;
 
   // The NumLock is desynchronized by being enabled.
-  guint state = GDK_MOD2_MASK;
+  GdkModifierType state = GDK_MOD2_MASK;
 
   // Send a normal event
   fl_key_responder_handle_event(
@@ -1424,7 +1424,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
   g_ptr_array_clear(g_call_records);
 
   // The NumLock is desynchronized by being disabled.
-  state = 0;
+  state = static_cast<GdkModifierType>(0);
 
   // Release key A
   fl_key_responder_handle_event(
@@ -1502,7 +1502,7 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
   FlKeyEmbedderCallRecord* record;
 
   // The NumLock is desynchronized by being enabled.
-  guint state = GDK_MOD2_MASK;
+  GdkModifierType state = GDK_MOD2_MASK;
 
   // NumLock down
   fl_key_responder_handle_event(
@@ -1601,7 +1601,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
   FlKeyEmbedderCallRecord* record;
 
   // The NumLock is desynchronized by being enabled, and Control is pressed.
-  guint state = GDK_MOD2_MASK | GDK_CONTROL_MASK;
+  GdkModifierType state =
+      static_cast<GdkModifierType>(GDK_MOD2_MASK | GDK_CONTROL_MASK);
 
   // Send a KeyA up event, which will be ignored.
   g_expected_handled = true;  // The ignored event is always handled.
@@ -1654,7 +1655,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   guint32 now_time = 1;
   // A convenient shorthand to simulate events.
   auto send_key_event = [responder, &now_time](bool is_press, guint keyval,
-                                               guint16 keycode, int state) {
+                                               guint16 keycode,
+                                               GdkModifierType state) {
     now_time += 1;
     int user_data = 123;  // Arbitrary user data
     fl_key_responder_handle_event(
@@ -1666,7 +1668,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
 
   FlKeyEmbedderCallRecord* record;
 
-  send_key_event(kPress, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2000000);
+  send_key_event(kPress, GDK_KEY_Shift_L, kKeyCodeShiftLeft,
+                 GDK_MODIFIER_RESERVED_25_MASK);
   EXPECT_EQ(g_call_records->len, 1u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1674,7 +1677,9 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->logical, kLogicalShiftLeft);
   EXPECT_EQ(record->event->synthesized, false);
 
-  send_key_event(kPress, GDK_KEY_Meta_R, kKeyCodeAltRight, 0x2000001);
+  send_key_event(kPress, GDK_KEY_Meta_R, kKeyCodeAltRight,
+                 static_cast<GdkModifierType>(GDK_SHIFT_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 2u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 1));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1683,7 +1688,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->synthesized, false);
 
   send_key_event(kRelease, GDK_KEY_ISO_Next_Group, kKeyCodeShiftLeft,
-                 0x2000009);
+                 static_cast<GdkModifierType>(GDK_SHIFT_MASK | GDK_MOD1_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 5u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 2));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1703,7 +1709,9 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->logical, kLogicalShiftLeft);
   EXPECT_EQ(record->event->synthesized, false);
 
-  send_key_event(kPress, GDK_KEY_ISO_Next_Group, kKeyCodeShiftLeft, 0x2000008);
+  send_key_event(kPress, GDK_KEY_ISO_Next_Group, kKeyCodeShiftLeft,
+                 static_cast<GdkModifierType>(GDK_MOD1_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 6u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 5));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1712,13 +1720,17 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->synthesized, false);
 
   send_key_event(kRelease, GDK_KEY_ISO_Level3_Shift, kKeyCodeAltRight,
-                 0x2002008);
+                 static_cast<GdkModifierType>(GDK_MOD1_MASK |
+                                              GDK_MODIFIER_RESERVED_13_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 7u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 6));
   EXPECT_EQ(record->event->physical, 0u);
   EXPECT_EQ(record->event->logical, 0u);
 
-  send_key_event(kRelease, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2002000);
+  send_key_event(kRelease, GDK_KEY_Shift_L, kKeyCodeShiftLeft,
+                 static_cast<GdkModifierType>(GDK_MODIFIER_RESERVED_13_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 9u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 7));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeUp);
@@ -1752,7 +1764,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   guint32 now_time = 1;
   // A convenient shorthand to simulate events.
   auto send_key_event = [responder, &now_time](bool is_press, guint keyval,
-                                               guint16 keycode, int state) {
+                                               guint16 keycode,
+                                               GdkModifierType state) {
     now_time += 1;
     int user_data = 123;  // Arbitrary user data
     fl_key_responder_handle_event(
@@ -1765,7 +1778,8 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   FlKeyEmbedderCallRecord* record;
 
   // ShiftLeft + AltLeft
-  send_key_event(kPress, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2000000);
+  send_key_event(kPress, GDK_KEY_Shift_L, kKeyCodeShiftLeft,
+                 GDK_MODIFIER_RESERVED_25_MASK);
   EXPECT_EQ(g_call_records->len, 1u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1773,7 +1787,9 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   EXPECT_EQ(record->event->logical, kLogicalShiftLeft);
   EXPECT_EQ(record->event->synthesized, false);
 
-  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2000001);
+  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft,
+                 static_cast<GdkModifierType>(GDK_SHIFT_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 2u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 1));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1781,12 +1797,16 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   EXPECT_EQ(record->event->logical, kLogicalMetaLeft);
   EXPECT_EQ(record->event->synthesized, false);
 
-  send_key_event(kRelease, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2002000);
-  send_key_event(kRelease, GDK_KEY_Shift_L, kKeyCodeShiftLeft, 0x2000000);
+  send_key_event(kRelease, GDK_KEY_Meta_L, kKeyCodeAltLeft,
+                 static_cast<GdkModifierType>(GDK_MODIFIER_RESERVED_13_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
+  send_key_event(kRelease, GDK_KEY_Shift_L, kKeyCodeShiftLeft,
+                 GDK_MODIFIER_RESERVED_25_MASK);
   g_ptr_array_clear(g_call_records);
 
   // ShiftRight + AltLeft
-  send_key_event(kPress, GDK_KEY_Shift_R, kKeyCodeShiftRight, 0x2000000);
+  send_key_event(kPress, GDK_KEY_Shift_R, kKeyCodeShiftRight,
+                 GDK_MODIFIER_RESERVED_25_MASK);
   EXPECT_EQ(g_call_records->len, 1u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
@@ -1794,7 +1814,9 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltLeftIsMetaLeft) {
   EXPECT_EQ(record->event->logical, kLogicalShiftRight);
   EXPECT_EQ(record->event->synthesized, false);
 
-  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft, 0x2000001);
+  send_key_event(kPress, GDK_KEY_Meta_L, kKeyCodeAltLeft,
+                 static_cast<GdkModifierType>(GDK_SHIFT_MASK |
+                                              GDK_MODIFIER_RESERVED_25_MASK));
   EXPECT_EQ(g_call_records->len, 2u);
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 1));
   EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
