@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const ResizingHeaderApp());
+  runApp(const ResizingHeaderSliverApp());
 }
 
-class ResizingHeaderApp extends StatelessWidget {
-  const ResizingHeaderApp({ super.key });
+class ResizingHeaderSliverApp extends StatelessWidget {
+  const ResizingHeaderSliverApp({ super.key });
 
   @override
   Widget build(BuildContext context) {
