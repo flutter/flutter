@@ -609,7 +609,6 @@ class _DefaultPub implements Pub {
       /// We only want to inform about existing caches on first run of a freshly
       /// downloaded Flutter SDK. Therefore it is conditioned on the existence
       /// of the .pub-preload-cache dir.
-      _informAboutExistingCaches();
       final Iterable<String> cacheFiles =
             preloadCacheDir
               .listSync()
@@ -617,50 +616,6 @@ class _DefaultPub implements Pub {
               .where((String path) => path.endsWith('.tar.gz'));
       _processManager.runSync(<String>[..._pubCommand, 'cache', 'preload', ...cacheFiles]);
       _tryDeleteDirectory(preloadCacheDir, _logger);
-    }
-  }
-
-  /// Issues a log message if there is an existing pub cache and or an existing
-  /// Dart Analysis Server cache.
-  void _informAboutExistingCaches() {
-    final String? pubCachePath = _pubCacheDefaultLocation();
-    if (pubCachePath != null) {
-      final Directory pubCacheDirectory = _fileSystem.directory(pubCachePath);
-      if (pubCacheDirectory.existsSync()) {
-        _logger.printStatus('''
-Found an existing Pub cache at $pubCachePath.
-It can be repaired by running `dart pub cache repair`.
-It can be reset by running `dart pub cache clean`.''');
-      }
-    }
-    final String? home = _platform.environment['HOME'];
-    if (home != null) {
-      final String dartServerCachePath = _fileSystem.path.join(home, '.dartServer');
-      if (_fileSystem.directory(dartServerCachePath).existsSync()) {
-        _logger.printStatus('''
-Found an existing Dart Analysis Server cache at $dartServerCachePath.
-It can be reset by deleting $dartServerCachePath.''');
-        }
-      }
-  }
-
-  /// The default location of the Pub cache if the PUB_CACHE environment variable
-  /// is not set.
-  ///
-  /// Returns null if the appropriate environment variables are unset.
-  String? _pubCacheDefaultLocation () {
-    if (_platform.isWindows) {
-      final String? localAppData = _platform.environment['LOCALAPPDATA'];
-      if (localAppData == null) {
-        return null;
-      }
-      return _fileSystem.path.join(localAppData, 'Pub', 'Cache');
-    } else {
-      final String? home = _platform.environment['HOME'];
-      if (home == null) {
-        return null;
-      }
-      return _fileSystem.path.join(home, '.pub-cache');
     }
   }
 
