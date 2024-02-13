@@ -92,6 +92,7 @@ class ChoiceChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -132,6 +133,7 @@ class ChoiceChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -192,6 +194,8 @@ class ChoiceChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -236,6 +240,7 @@ class ChoiceChip extends StatelessWidget
       selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
     );
   }
 }
