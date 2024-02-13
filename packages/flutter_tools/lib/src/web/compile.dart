@@ -207,6 +207,16 @@ enum WebRendererMode implements CliEnum {
             'FLUTTER_WEB_USE_SKWASM=true',
           ]
       };
+
+  List<String> updateDartDefines(List<String> inputDefines) {
+    final Set<String> dartDefinesSet = inputDefines.toSet();
+    if (!inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      inputDefines.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    }
+    dartDefinesSet.addAll(dartDefines);
+    return dartDefinesSet.toList();
+  }
 }
 
 /// The correct precompiled artifact to use for each build and render mode.

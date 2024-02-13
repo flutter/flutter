@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/targets/web.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -112,7 +111,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
-    final List<String> dartDefines = updateDartDefines(buildInfo.dartDefines, webRenderer);
+    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,

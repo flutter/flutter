@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -28,17 +27,6 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
-
-@visibleForTesting
-List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
-  final Set<String> dartDefinesSet = dartDefines.toSet();
-  if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
-      && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-    dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-  }
-  dartDefinesSet.addAll(webRenderer.dartDefines);
-  return dartDefinesSet.toList();
-}
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -165,9 +153,8 @@ class Dart2JSTarget extends Dart2WebTarget {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
-    final List<String> dartDefines = updateDartDefines(
+    final List<String> dartDefines = compilerConfig.renderer.updateDartDefines(
       decodeDartDefines(environment.defines, kDartDefines),
-      compilerConfig.renderer,
     );
     final List<String> sharedCommandOptions = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
@@ -269,9 +256,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
-    final List<String> dartDefines = updateDartDefines(
+    final List<String> dartDefines = compilerConfig.renderer.updateDartDefines(
       decodeDartDefines(environment.defines, kDartDefines),
-      compilerConfig.renderer,
     );
 
     final List<String> compilationArgs = <String>[
