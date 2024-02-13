@@ -31,18 +31,15 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
     return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: RawChip(
-            avatarBoxConstraints: BoxConstraints.tightForFinite(),
-            avatar: Icon(Icons.star),
-            label: SizedBox(
-              width: 150,
-              child: Text(
-                'One line text.',
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
+        RawChip(
+          avatarBoxConstraints: BoxConstraints.tightForFinite(),
+          avatar: Icon(Icons.star),
+          label: SizedBox(
+            width: 150,
+            child: Text(
+              'One line text.',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

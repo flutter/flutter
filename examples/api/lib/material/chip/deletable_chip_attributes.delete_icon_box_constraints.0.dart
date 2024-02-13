@@ -31,18 +31,15 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RawChip(
-            deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
-            onDeleted: () {},
-            label: const SizedBox(
-              width: 150,
-              child: Text(
-                'One line text.',
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
+        RawChip(
+          deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+          onDeleted: () {},
+          label: const SizedBox(
+            width: 150,
+            child: Text(
+              'One line text.',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
