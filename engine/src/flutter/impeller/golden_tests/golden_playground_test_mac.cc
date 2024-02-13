@@ -77,10 +77,7 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
 };
 
-static const std::vector<std::string> kVulkanDenyValidationTests = {
-    // TODO(https://github.com/flutter/flutter/issues/142080): remove this.
-    "impeller_Play_AiksTest_EmptySaveLayerRendersWithClear_Vulkan",
-};
+static const std::vector<std::string> kVulkanDenyValidationTests = {};
 
 namespace {
 std::string GetTestName() {
