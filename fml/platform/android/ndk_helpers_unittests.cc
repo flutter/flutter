@@ -26,6 +26,7 @@ TEST_F(NdkHelpersTest, ATrace) {
   EXPECT_FALSE(NDKHelpers::ATrace_isEnabled());
 }
 
+#if FML_ARCH_CPU_64_BITS
 TEST_F(NdkHelpersTest, AChoreographer32) {
   if (android_get_device_api_level() >= 29) {
     GTEST_SKIP() << "This test is for less than API 29.";
@@ -43,6 +44,19 @@ TEST_F(NdkHelpersTest, AChoreographer32) {
   NDKHelpers::AChoreographer_postFrameCallback(
       NDKHelpers::AChoreographer_getInstance(), &OnVsync32, nullptr);
 }
+#else
+TEST_F(NdkHelpersTest, AChoreographer32NotSupported) {
+  if (android_get_device_api_level() >= 29) {
+    GTEST_SKIP() << "This test is for less than API 29.";
+  }
+
+  // The 32 bit framecallback on 32 bit architectures does not deliver
+  // sufficient resolution. See
+  // https://github.com/flutter/engine/pull/31859#discussion_r822072987
+  EXPECT_EQ(NDKHelpers::ChoreographerSupported(),
+            ChoreographerSupportStatus::kUnsupported);
+}
+#endif  // FML_ARCH_CPU_64_BITS
 
 TEST_F(NdkHelpersTest, AChoreographer64) {
   if (android_get_device_api_level() < 29) {
