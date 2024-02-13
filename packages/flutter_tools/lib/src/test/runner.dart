@@ -151,6 +151,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
+        webRenderer: debuggingOptions.webRenderer,
       );
       testArgs
         ..add('--platform=chrome')
@@ -181,6 +182,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               logger: globals.logger,
             ),
             testTimeRecorder: testTimeRecorder,
+            webRenderer: debuggingOptions.webRenderer,
           );
         },
       );

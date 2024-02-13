@@ -39,7 +39,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         '--omit-type-checks',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      '--web-renderer=${benchmarkOptions.webRenderer}',
+      if (!benchmarkOptions.useWasm) '--web-renderer=${benchmarkOptions.webRenderer}',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
@@ -125,7 +125,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         return Response.internalServerError(body: '$error');
       }
     }).add(createBuildDirectoryHandler(
-      path.join(macrobenchmarksDirectory, 'build', benchmarkOptions.useWasm ? 'web_wasm' : 'web'),
+      path.join(macrobenchmarksDirectory, 'build', 'web'),
     ));
 
     server = await io.HttpServer.bind('localhost', benchmarkServerPort);

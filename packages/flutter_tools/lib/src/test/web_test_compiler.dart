@@ -17,6 +17,7 @@ import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
+import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
@@ -48,6 +49,7 @@ class WebTestCompiler {
     required String testOutputDir,
     required List<String> testFiles,
     required BuildInfo buildInfo,
+    required WebRendererMode webRenderer,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     late final String platformDillName;
@@ -69,7 +71,7 @@ class WebTestCompiler {
     }
 
     final String platformDillPath = _fileSystem.path.join(
-      getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,
+      _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
       platformDillName
     );
 
@@ -109,6 +111,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
+    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
@@ -124,7 +127,7 @@ class WebTestCompiler {
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
       platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
-      dartDefines: buildInfo.dartDefines,
+      dartDefines: dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
       artifacts: _artifacts,
