@@ -32,12 +32,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class TestActivity extends TestableFlutterActivity {
   static final String TAG = "Scenarios";
 
-  private Runnable resultsTask =
+  private final Runnable resultsTask =
       new Runnable() {
         @Override
         public void run() {
@@ -47,7 +48,7 @@ public abstract class TestActivity extends TestableFlutterActivity {
         }
       };
 
-  private Handler handler = new Handler();
+  private final Handler handler = new Handler();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +86,10 @@ public abstract class TestActivity extends TestableFlutterActivity {
   public void onFlutterUiDisplayed() {
     final Intent launchIntent = getIntent();
     MethodChannel channel =
-        new MethodChannel(getFlutterEngine().getDartExecutor(), "driver", JSONMethodCodec.INSTANCE);
+        new MethodChannel(
+            Objects.requireNonNull(getFlutterEngine()).getDartExecutor(),
+            "driver",
+            JSONMethodCodec.INSTANCE);
     Map<String, Object> test = new HashMap<>(2);
     if (launchIntent.hasExtra("scenario_name")) {
       test.put("name", launchIntent.getStringExtra("scenario_name"));
@@ -125,8 +129,10 @@ public abstract class TestActivity extends TestableFlutterActivity {
           AssetFileDescriptor afd = null;
           try {
             afd = getContentResolver().openAssetFileDescriptor(logFile, "w");
+            assert afd != null;
             final FileDescriptor fd = afd.getFileDescriptor();
             final FileOutputStream outputStream = new FileOutputStream(fd);
+            assert reply != null;
             outputStream.write(reply.array());
             outputStream.close();
           } catch (IOException ex) {
@@ -190,6 +196,7 @@ public abstract class TestActivity extends TestableFlutterActivity {
   private static void hideSystemBars(Window window) {
     final WindowInsetsControllerCompat insetController =
         WindowCompat.getInsetsController(window, window.getDecorView());
+    assert insetController != null;
     insetController.setSystemBarsBehavior(
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
     insetController.hide(WindowInsetsCompat.Type.systemBars());
