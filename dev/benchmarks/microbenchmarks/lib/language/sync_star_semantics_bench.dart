@@ -21,6 +21,10 @@ void main() {
       data.add(
         InlineSpanSemanticsInformation(words[i]),
       );
+    } else if (i.isEven) {
+      data.add(
+        InlineSpanSemanticsInformation(words[i], isPlaceholder: true),
+      );
     }
   }
   print(words);

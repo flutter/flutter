@@ -24,11 +24,12 @@ void main() {
     int buildCount = 0;
     for (final TimelineEvent event in await fetchTimelineEvents()) {
       if (event.json!['name'] == 'BUILD') {
-        buildCount += switch (event.json!['ph']) {
-          'B' => 1,
-          'E' => -1,
-          _ => 0,
-        };
+        final String ph = event.json!['ph'] as String;
+        if (ph == 'B') {
+          buildCount++;
+        } else if (ph == 'E') {
+          buildCount--;
+        }
       }
     }
     expect(buildCount, 0);

@@ -1168,19 +1168,13 @@ class _DecelerateCurve extends Curve {
 // BOUNCE CURVES
 
 double _bounce(double t) {
-  switch (t * 2.75) {
-    case < 1.0:
-      return 7.5625 * t * t;
-    case < 2.0:
-      t -= 1.5 / 2.75;
-      return 7.5625 * t * t + 0.75;
-    case < 2.5:
-      t -= 2.25 / 2.75;
-      return 7.5625 * t * t + 0.9375;
-    default:
-      t -= 2.625 / 2.75;
-      return 7.5625 * t * t + 0.984375;
-  }
+  final (double mulitply, double add) = switch (t * 22) {
+    < 8  => (t, 0.0),
+    < 16 => (t - 12 / 22, 0.75),
+    < 20 => (t - 18 / 22, 0.9375),
+    _    => (t - 21 / 22, 0.984375),
+  };
+  return 7.5625 * mulitply * mulitply + add;
 }
 
 /// An oscillating curve that grows in magnitude.
