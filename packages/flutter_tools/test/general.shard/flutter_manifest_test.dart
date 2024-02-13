@@ -1074,7 +1074,7 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "licenses" to be a list of files, but got foo.txt (String)\n');
+    expect(logger.errorText, 'Expected "licenses" to be a list of files, but got foo.txt (String).\n');
   });
 
   testWithoutContext('FlutterManifest validates individual list items', () async {
@@ -1095,7 +1095,8 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "licenses" to be a list of files, but element 1 was a YamlMap\n');
+    expect(logger.errorText, 'Expected "licenses" to be a list of files, but '
+      'element at index 1 was a YamlMap.\n');
   });
 
   testWithoutContext('FlutterManifest parses single deferred components', () async {
@@ -1248,7 +1249,9 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list, but got blah (String).\n');
+    expect(logger.errorText, 'Expected "libraries" key in the element at '
+      'index 0 of "deferred-components" to be a list of String, but '
+      'got blah (String).\n');
   });
 
   testWithoutContext('FlutterManifest deferred component libraries is string', () async {
@@ -1270,7 +1273,9 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of dart library Strings, but element 0 was a YamlMap\n');
+    expect(logger.errorText, 'Expected "libraries" key in the element at '
+      'index 0 of "deferred-components" to be a list of String, but '
+      'element at index 0 was a YamlMap.\n');
   });
 
   testWithoutContext('FlutterManifest deferred component assets is string', () async {
