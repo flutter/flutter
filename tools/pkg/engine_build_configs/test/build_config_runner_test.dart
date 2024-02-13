@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' as convert;
+import 'dart:ffi' as ffi;
 import 'dart:io' as io;
 
 import 'package:engine_build_configs/src/build_config.dart';
@@ -39,6 +40,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       task: generator,
       dryRun: true,
@@ -65,6 +67,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       test: test,
       dryRun: true,
@@ -93,6 +96,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       dryRun: true,
@@ -154,6 +158,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--extra-gn-arg'],
@@ -193,6 +198,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--goma'],
@@ -218,10 +224,9 @@ void main() {
     final GlobalBuildRunner buildRunner = GlobalBuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux),
       processRunner: ProcessRunner(
-        processManager: _fakeProcessManager(
-          unameResult: io.ProcessResult(1, 0, 'arm64', ''),
-        ),
+        processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--rbe'],
@@ -263,6 +268,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       runGn: false,
@@ -297,6 +303,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       runNinja: false,
@@ -338,6 +345,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       runGenerators: false,
@@ -381,6 +389,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       runTests: false,
@@ -409,10 +418,9 @@ void main() {
     final GlobalBuildRunner buildRunner = GlobalBuildRunner(
       platform: FakePlatform(operatingSystem: Platform.linux),
       processRunner: ProcessRunner(
-        processManager: _fakeProcessManager(
-          unameResult: io.ProcessResult(1, 0, 'arm64', ''),
-        ),
+        processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--no-lto', '--no-goma', '--rbe'],
@@ -448,6 +456,7 @@ void main() {
         // dryRun should not try to spawn any processes.
         processManager: _fakeProcessManager(),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       dryRun: true,
@@ -469,6 +478,7 @@ void main() {
           gnResult: io.ProcessResult(1, 1, '', ''),
         ),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
     );
@@ -495,6 +505,7 @@ void main() {
           ninjaResult: io.ProcessResult(1, 1, '', ''),
         ),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
     );
@@ -518,10 +529,10 @@ void main() {
       platform: FakePlatform(operatingSystem: Platform.linux),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(
-          unameResult: io.ProcessResult(1, 0, 'arm64', ''),
           bootstrapResult: io.ProcessResult(1, 1, '', ''),
         ),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--rbe'],
@@ -547,7 +558,6 @@ void main() {
       platform: FakePlatform(operatingSystem: Platform.linux),
       processRunner: ProcessRunner(
         processManager: _fakeProcessManager(
-          unameResult: io.ProcessResult(1, 0, 'arm64', ''),
           canRun: (Object? exe, {String? workingDirectory}) {
             if (exe is String? && exe != null && exe.endsWith('bootstrap')) {
               return false;
@@ -556,6 +566,7 @@ void main() {
           },
         ),
       ),
+      abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
       extraGnArgs: <String>['--rbe'],
@@ -568,10 +579,31 @@ void main() {
 
     expect(events[2] is RunnerError, isTrue);
   });
+
+  test('GlobalBuildRunner throws a StateError on an unsupported host cpu', () async {
+    final GlobalBuild targetBuild = buildConfig.builds[0];
+    final GlobalBuildRunner buildRunner = GlobalBuildRunner(
+      platform: FakePlatform(operatingSystem: Platform.linux),
+      processRunner: ProcessRunner(
+        processManager: _fakeProcessManager(),
+      ),
+      abi: ffi.Abi.linuxRiscv32,
+      engineSrcDir: engine.srcDir,
+      build: targetBuild,
+      extraGnArgs: <String>['--rbe'],
+    );
+
+    bool caughtError = false;
+    try {
+      await buildRunner.run((RunnerEvent event) {});
+    } on StateError catch (_) {
+      caughtError = true;
+    }
+    expect(caughtError, isTrue);
+  });
 }
 
 FakeProcessManager _fakeProcessManager({
-  io.ProcessResult? unameResult,
   io.ProcessResult? bootstrapResult,
   io.ProcessResult? gnResult,
   io.ProcessResult? ninjaResult,
@@ -587,7 +619,6 @@ FakeProcessManager _fakeProcessManager({
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
     onRun: (List<String> cmd) => switch (cmd) {
-      ['uname', ...] => unameResult ?? success,
       _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
     },
     onStart: (List<String> cmd) => switch (cmd) {
