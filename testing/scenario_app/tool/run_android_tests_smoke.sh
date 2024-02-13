@@ -12,7 +12,7 @@
 ../third_party/dart/tools/sdks/dart-sdk/bin/dart ./testing/scenario_app/bin/android_integration_tests.dart \
   --adb="../third_party/android_tools/sdk/platform-tools/adb" \
   --out-dir="../out/android_debug_unopt_arm64" \
-  --smoke-test
+  --smoke-test="dev.flutter.scenarios.EngineLaunchE2ETest"
 
 echo "Exit code: $?"
 echo "Done"

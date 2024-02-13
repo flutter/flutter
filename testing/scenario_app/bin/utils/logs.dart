@@ -25,7 +25,7 @@ void log(String msg) {
 
 final class Panic extends Error {}
 
-void panic(List<String> messages) {
+Never panic(List<String> messages) {
   for (final String message in messages) {
     stderr.writeln('$_red$message$_reset');
   }
