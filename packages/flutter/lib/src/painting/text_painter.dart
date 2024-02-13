@@ -474,7 +474,7 @@ class _TextPainterLayoutCacheWithOffset {
   List<ui.LineMetrics> get lineMetrics => _cachedLineMetrics ??= paragraph.computeLineMetrics();
   List<ui.LineMetrics>? _cachedLineMetrics;
 
-  // Used to determinne whether the caret metrics cache should be invalidated.
+  // Used to determine whether the caret metrics cache should be invalidated.
   int? _previousCaretPositionKey;
 }
 
@@ -1461,17 +1461,33 @@ class TextPainter {
     }
     if (anchorToLeadingEdge && graphemeRange.start != offset) {
       assert(graphemeRange.end > graphemeRange.start + 1);
-      // Address the case where (offset, downstream) points to a multi-code-unit
+      // Addresses the case where (offset, downstream) points to a multi-code-unit
       // character that doesn't start at `offset`.
       return _computeCaretMetrics(TextPosition(offset: graphemeRange.end));
     }
-    final TextBox box = cachedLayout.paragraph
-      .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut)
-      .single;
-    final _LineCaretMetrics metrics =_LineCaretMetrics(
-      offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
-      writingDirection: box.direction,
-    );
+
+    final _LineCaretMetrics metrics;
+    final List<TextBox> boxes = cachedLayout.paragraph
+      .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
+    if (boxes.isNotEmpty) {
+      final TextBox box = boxes.single;
+      metrics =_LineCaretMetrics(
+        offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
+        writingDirection: box.direction,
+      );
+    } else {
+      // fallback to glyphInfo. This should only happen when using the HTML renderer.
+      assert(kIsWeb && !isCanvasKit);
+      final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
+      final double dx = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,
+        TextDirection.rtl => anchorToLeadingEdge ? graphemeBounds.right : graphemeBounds.left,
+      };
+      metrics =_LineCaretMetrics(
+        offset: Offset(dx, graphemeBounds.top),
+        writingDirection: glyphInfo.writingDirection,
+      );
+    }
 
     cachedLayout._previousCaretPositionKey = caretPositionCacheKey;
     return _caretMetrics = metrics;
