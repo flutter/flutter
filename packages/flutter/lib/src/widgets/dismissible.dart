@@ -341,12 +341,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       return DismissDirection.none;
     }
     if (_directionIsXAxis) {
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          return extent < 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
-        case TextDirection.ltr:
-          return extent > 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
-      }
+      return switch (Directionality.of(context)) {
+        TextDirection.rtl when extent < 0 => DismissDirection.startToEnd,
+        TextDirection.ltr when extent > 0 => DismissDirection.startToEnd,
+        TextDirection.rtl || TextDirection.ltr => DismissDirection.endToStart,
+      };
     }
     return extent > 0 ? DismissDirection.down : DismissDirection.up;
   }

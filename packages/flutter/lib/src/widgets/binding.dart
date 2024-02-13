@@ -785,15 +785,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
-    switch (methodCall.method) {
-      case 'popRoute':
-        return handlePopRoute();
-      case 'pushRoute':
-        return handlePushRoute(methodCall.arguments as String);
-      case 'pushRouteInformation':
-        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
-    }
-    return Future<dynamic>.value();
+    return switch (methodCall.method) {
+      'popRoute' => handlePopRoute(),
+      'pushRoute' => handlePushRoute(methodCall.arguments as String),
+      'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
+      _ => Future<dynamic>.value(),
+    };
   }
 
   @override
