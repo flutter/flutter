@@ -702,8 +702,12 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     canvas.Scale(Vector2(scale, scale));
 
     if (add_circle_clip) {
-      auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
-          Point(60, 300), Point(600, 300), 20, Color::Red(), Color::Red());
+      static PlaygroundPoint circle_clip_point_a(Point(60, 300), 20,
+                                                 Color::Red());
+      static PlaygroundPoint circle_clip_point_b(Point(600, 300), 20,
+                                                 Color::Red());
+      auto [handle_a, handle_b] =
+          DrawPlaygroundLine(circle_clip_point_a, circle_clip_point_b);
 
       auto screen_to_canvas = canvas.GetCurrentTransform().Invert();
       Point point_a = screen_to_canvas * handle_a * GetContentScale();

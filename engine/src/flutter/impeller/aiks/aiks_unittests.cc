@@ -1715,8 +1715,9 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
     const auto offset = Point{25, 25};
     const auto size = Size(100, 100);
 
-    auto [b0, b1] = IMPELLER_PLAYGROUND_LINE(Point(40, 40), Point(160, 160), 10,
-                                             Color::White(), Color::White());
+    static PlaygroundPoint point_a(Point(40, 40), 10, Color::White());
+    static PlaygroundPoint point_b(Point(160, 160), 10, Color::White());
+    auto [b0, b1] = DrawPlaygroundLine(point_a, point_b);
     auto bounds = Rect::MakeLTRB(b0.x, b0.y, b1.x, b1.y);
 
     canvas.DrawRect(bounds, Paint{.color = Color::Yellow(),
