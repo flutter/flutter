@@ -537,9 +537,12 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
+      processManager: globals.processManager,
+      fileSystem: globals.fs,
+      artifacts: globals.artifacts!,
+      logger: testLogger,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -659,9 +662,12 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
       );
 
     }, overrides: <Type, Generator>{
@@ -707,9 +713,12 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
       );
 
     }, overrides: <Type, Generator>{
@@ -790,9 +799,12 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
