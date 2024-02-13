@@ -11,6 +11,7 @@
 #include "impeller/aiks/picture.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/imgui/imgui.h"
 
 namespace impeller {
 
@@ -31,6 +32,10 @@ class AiksPlayground : public PlaygroundTest {
   bool OpenPlaygroundHere(Picture picture);
 
   bool OpenPlaygroundHere(AiksPlaygroundCallback callback);
+
+  static bool ImGuiBegin(const char* name,
+                         bool* p_open,
+                         ImGuiWindowFlags flags);
 
  private:
   std::shared_ptr<TypographerContext> typographer_context_;

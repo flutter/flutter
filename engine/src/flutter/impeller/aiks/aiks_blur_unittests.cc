@@ -5,11 +5,7 @@
 #include "flutter/impeller/aiks/aiks_unittests.h"
 
 #include "impeller/aiks/canvas.h"
-#include "impeller/entity/contents/conical_gradient_contents.h"
-#include "impeller/entity/contents/filters/inputs/filter_input.h"
-#include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/render_target_cache.h"
-#include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/testing/mocks.h"
@@ -452,14 +448,14 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                    sizeof(tile_mode_names) / sizeof(char*));
+      ImGui::End();
     }
-    ImGui::End();
 
     Canvas canvas;
     Rect bounds =
@@ -556,13 +552,13 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
   Scalar freq = 0.1;
   Scalar amp = 50.0;
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("Sigma", &sigma, 0, 200);
       ImGui::SliderFloat("Frequency", &freq, 0.01, 2.0);
       ImGui::SliderFloat("Amplitude", &amp, 1, 100);
+      ImGui::End();
     }
-    ImGui::End();
 
     Canvas canvas;
     canvas.Scale(GetContentScale());
