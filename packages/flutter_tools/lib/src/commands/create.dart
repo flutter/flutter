@@ -320,7 +320,7 @@ class CreateCommand extends CreateBase {
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
     // Only channels that have prereleases should allow them.
-    final String flutterSdkVersionBounds = switch(globals.flutterVersion.channel) {
+    final String flutterSdkVersionBounds = switch (globals.flutterVersion.channel) {
       'main' || 'master' || 'beta' || kUserBranch => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0-0'",
       'stable' => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
       _ => "'^${flutterSdkVersion.major}.${flutterSdkVersion.minor}.0'",
