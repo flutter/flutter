@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.0.dart' 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverConstrainedCrossAxis example', (WidgetTester tester) async {
+  testWidgets('PinnedHeaderSliver example', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PinnedHeaderSliverApp(),
     );
