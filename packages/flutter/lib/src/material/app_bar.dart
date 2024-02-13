@@ -821,6 +821,7 @@ class _AppBarState extends State<AppBar> {
 
   @override
   Widget build(BuildContext context) {
+    throw Exception('chillers');
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
