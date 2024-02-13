@@ -15570,10 +15570,12 @@ void main() {
     int prefixTapCount = 0;
     int suffixTapCount = 0;
 
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            focusNode: focusNode,
             onTap: () { textFieldTapCount += 1; },
             decoration: InputDecoration(
               labelText: 'Label',
@@ -15590,6 +15592,10 @@ void main() {
         ),
       ),
     );
+
+    // Focus to show the prefix and suffix buttons.
+    focusNode.requestFocus();
+    await tester.pump();
 
     TestGesture gesture =
         await tester.startGesture(
@@ -15622,10 +15628,12 @@ void main() {
     int prefixTapCount = 0;
     int suffixTapCount = 0;
 
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            focusNode: focusNode,
             onTap: () { textFieldTapCount += 1; },
             decoration: InputDecoration(
               labelText: 'Label',
@@ -15642,6 +15650,10 @@ void main() {
         ),
       ),
     );
+
+    // Focus to show the prefix and suffix buttons.
+    focusNode.requestFocus();
+    await tester.pump();
 
     await tester.tap(find.text('prefix'));
     expect(textFieldTapCount, 0);
