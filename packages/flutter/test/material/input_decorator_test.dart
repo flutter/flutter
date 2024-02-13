@@ -307,6 +307,134 @@ void main() {
     //    4 - bottom padding
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
   }, variant: TargetPlatformVariant.desktop());
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139916.
+  testWidgets('Prefix ignores pointer when hidden', (WidgetTester tester) async {
+    bool tapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return TextField(
+                decoration: InputDecoration(
+                  labelText: 'label',
+                  prefix: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        tapped = true;
+                      });
+                    },
+                    child: const Icon(Icons.search),
+                  ),
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    expect(tapped, isFalse);
+
+    double prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+      of: find.byType(Icon),
+      matching: find.byType(AnimatedOpacity),
+    )).opacity;
+
+    // Initially the prefix icon should be hidden.
+    expect(prefixOpacity, 0.0);
+
+    await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
+    await tester.pump();
+
+    // The suffix icon should ignore pointer events when hidden.
+    expect(tapped, isFalse);
+
+    // Tap the text field to show the prefix icon.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+      of: find.byType(Icon),
+      matching: find.byType(AnimatedOpacity),
+    )).opacity;
+
+    // The prefix icon should be visible.
+    expect(prefixOpacity, 1.0);
+
+    // Tap the prefix icon.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+
+    // The prefix icon should be tapped.
+    expect(tapped, isTrue);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139916.
+  testWidgets('Suffix ignores pointer when hidden', (WidgetTester tester) async {
+    bool tapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return TextField(
+                decoration: InputDecoration(
+                  labelText: 'label',
+                  suffix: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        tapped = true;
+                      });
+                    },
+                    child: const Icon(Icons.search),
+                  ),
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    expect(tapped, isFalse);
+
+    double suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+      of: find.byType(Icon),
+      matching: find.byType(AnimatedOpacity),
+    )).opacity;
+
+    // Initially the suffix icon should be hidden.
+    expect(suffixOpacity, 0.0);
+
+    await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
+    await tester.pump();
+
+    // The suffix icon should ignore pointer events when hidden.
+    expect(tapped, isFalse);
+
+    // Tap the text field to show the suffix icon.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+      of: find.byType(Icon),
+      matching: find.byType(AnimatedOpacity),
+    )).opacity;
+
+    // The suffix icon should be visible.
+    expect(suffixOpacity, 1.0);
+
+    // Tap the suffix icon.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+
+    // The suffix icon should be tapped.
+    expect(tapped, isTrue);
+  });
 }
 
 void runAllM2Tests() {
