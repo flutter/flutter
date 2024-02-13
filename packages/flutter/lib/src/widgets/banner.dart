@@ -182,9 +182,9 @@ class BannerPainter extends CustomPainter {
       (TextDirection.rtl, BannerLocation.topEnd)      => 0.0,
       (TextDirection.ltr, BannerLocation.topStart)    => 0.0,
       (TextDirection.rtl, BannerLocation.bottomEnd)   => _kBottomOffset,
-      (TextDirection.ltr, BannerLocation.bottomStart) => _kBottomOffset,
-      (TextDirection.rtl, BannerLocation.bottomStart) => width - _kBottomOffset,
       (TextDirection.ltr, BannerLocation.bottomEnd)   => width - _kBottomOffset,
+      (TextDirection.rtl, BannerLocation.bottomStart) => width - _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomStart) => _kBottomOffset,
       (TextDirection.rtl, BannerLocation.topStart)    => width,
       (TextDirection.ltr, BannerLocation.topEnd)      => width,
     };
