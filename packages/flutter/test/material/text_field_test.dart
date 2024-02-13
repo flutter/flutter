@@ -7000,6 +7000,7 @@ void main() {
       includesNodeWith(flags: <SemanticsFlag>[
         SemanticsFlag.isTextField,
         SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
         SemanticsFlag.isReadOnly,
       ]),
     );

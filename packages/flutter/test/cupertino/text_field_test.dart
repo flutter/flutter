@@ -7915,8 +7915,14 @@ void main() {
         ),
       ),
     );
+
     expect(
-      find.semantics.byFlag(SemanticsFlag.isTextField).evaluate().single,
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
       matchesSemantics(
         hasEnabledState: true,
         isTextField: true,
