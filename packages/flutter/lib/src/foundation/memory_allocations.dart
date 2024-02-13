@@ -34,9 +34,7 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 /// The method is useful for creating singletons:
 ///
 /// ```dart
-/// class MyDisposableClass {}
-///
-/// final MyDisposableClass mySingleton = exemptFromRelease(() => exemptFromRelease());
+/// final MyDisposableClass mySingleton = exemptFromRelease(() => MyDisposableClass());
 /// ```
 T exemptFromRelease<T>(ObjectBuilderCallback<T> builder){
   if (kFlutterMemoryAllocationsEnabled) {
@@ -127,6 +125,8 @@ class ObjectCreated extends ObjectEvent {
 }
 
 /// Callback for creating an object of type [T].
+///
+/// Is used for [exemptFromRelease].
 typedef ObjectBuilderCallback<T> = T Function();
 
 /// An event that describes disposal of an object.
