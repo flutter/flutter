@@ -74,6 +74,8 @@ class CapabilitiesGLES final
 
   size_t GetMaxTextureUnits(ShaderStage stage) const;
 
+  bool IsANGLE() const;
+
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
@@ -121,6 +123,7 @@ class CapabilitiesGLES final
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_offscreen_msaa_ = false;
   bool supports_implicit_msaa_ = false;
+  bool is_angle_ = false;
 };
 
 }  // namespace impeller

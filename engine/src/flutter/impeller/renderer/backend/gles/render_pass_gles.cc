@@ -473,23 +473,21 @@ struct RenderPassData {
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
     std::vector<GLenum> attachments;
 
+    // TODO(jonahwilliams): discarding stencil or depth on the default fbo
+    // causes Angle to discard the entire render target. Until we know the
+    // reason, default to storing.
+    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
+
     if (pass_data.discard_color_attachment) {
       attachments.push_back(is_default_fbo ? GL_COLOR_EXT
                                            : GL_COLOR_ATTACHMENT0);
     }
-    if (pass_data.discard_depth_attachment) {
+    if (pass_data.discard_depth_attachment && angle_safe) {
       attachments.push_back(is_default_fbo ? GL_DEPTH_EXT
                                            : GL_DEPTH_ATTACHMENT);
     }
 
-// TODO(jonahwilliams): discarding the stencil on the default fbo when running
-// on Windows causes Angle to discard the entire render target. Until we know
-// the reason, default to storing.
-#ifdef FML_OS_WIN
-    if (pass_data.discard_stencil_attachment && !is_default_fbo) {
-#else
-    if (pass_data.discard_stencil_attachment) {
-#endif
+    if (pass_data.discard_stencil_attachment && angle_safe) {
       attachments.push_back(is_default_fbo ? GL_STENCIL_EXT
                                            : GL_STENCIL_ATTACHMENT);
     }
