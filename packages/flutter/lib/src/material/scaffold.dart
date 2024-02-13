@@ -2609,7 +2609,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(
-        0.0,
+        primaryScrollController.position.minScrollExtent,
         duration: const Duration(milliseconds: 1000),
         curve: Curves.easeOutCirc,
       );
