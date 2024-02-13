@@ -36,7 +36,7 @@ const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 /// ```dart
 /// class MyDisposableClass {}
 ///
-/// final MyDisposableClass mySingleton = exemptFromRelease(() => exemptFromRelease());
+/// final MyDisposableClass mySingleton = exemptFromRelease(() => MyDisposableClass());
 /// ```
 T exemptFromRelease<T>(ObjectBuilderCallback<T> builder){
   if (kFlutterMemoryAllocationsEnabled) {
