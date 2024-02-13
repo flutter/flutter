@@ -1810,7 +1810,12 @@ void main() {
     FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The PrimaryScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+If a ScrollController has not been provided, the PrimaryScrollController is used by default on mobile platforms for ScrollViews with an Axis.vertical scroll direction.
+More than one ScrollView may have tried to use the PrimaryScrollController of the current context. ScrollView.primary can override this behavior.''',
     );
 
     // Asserts when using the ScrollController provided by the user.
@@ -1829,7 +1834,11 @@ void main() {
     error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The provided ScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+The provided ScrollController cannot be shared by multiple ScrollView widgets.''',
     );
 
     scrollController.dispose();
