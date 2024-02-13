@@ -2090,7 +2090,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final _ScrollUnderFlexibleConfig config = configBuilder(context);
     // DO NOT SUBMIT: Verifying Google testing reports runtime failures.
-    assert(false != true);
+    assert(false == true);
     assert(
       config.expandedTitlePadding.isNonNegative,
       'The _ExpandedTitleWithPadding widget assumes that the expanded title padding is non-negative. '
