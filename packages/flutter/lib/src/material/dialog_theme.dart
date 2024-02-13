@@ -39,6 +39,7 @@ class DialogTheme with Diagnosticable {
     this.contentTextStyle,
     this.actionsPadding,
     this.barrierColor,
+    this.insetPadding,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -76,6 +77,9 @@ class DialogTheme with Diagnosticable {
   /// Overrides the default value for [barrierColor] in [showDialog].
   final Color? barrierColor;
 
+  /// Overrides the default value for [Dialog.insetPadding].
+  final EdgeInsets? insetPadding;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
@@ -90,6 +94,7 @@ class DialogTheme with Diagnosticable {
     TextStyle? contentTextStyle,
     EdgeInsetsGeometry? actionsPadding,
     Color? barrierColor,
+    EdgeInsets? insetPadding,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -103,6 +108,7 @@ class DialogTheme with Diagnosticable {
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       actionsPadding: actionsPadding ?? this.actionsPadding,
       barrierColor: barrierColor ?? this.barrierColor,
+      insetPadding: insetPadding ?? this.insetPadding,
     );
   }
 
@@ -130,11 +136,25 @@ class DialogTheme with Diagnosticable {
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
       barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
+      insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
     );
   }
 
   @override
-  int get hashCode => shape.hashCode;
+  int get hashCode => Object.hashAll(<Object?>[
+    backgroundColor,
+    elevation,
+    shadowColor,
+    surfaceTintColor,
+    shape,
+    alignment,
+    iconColor,
+    titleTextStyle,
+    contentTextStyle,
+    actionsPadding,
+    barrierColor,
+    insetPadding,
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -155,7 +175,8 @@ class DialogTheme with Diagnosticable {
         && other.titleTextStyle == titleTextStyle
         && other.contentTextStyle == contentTextStyle
         && other.actionsPadding == actionsPadding
-        && other.barrierColor == barrierColor;
+        && other.barrierColor == barrierColor
+        && other.insetPadding == insetPadding;
   }
 
   @override
@@ -172,5 +193,6 @@ class DialogTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
     properties.add(ColorProperty('barrierColor', barrierColor));
+    properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
   }
 }
