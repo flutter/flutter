@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/windows/testing/flutter_window_test.h"
+#include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/testing/wm_builders.h"
@@ -11,13 +11,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-using testing::_;
-using testing::AnyNumber;
-using testing::Invoke;
-using testing::Return;
-
 namespace flutter {
 namespace testing {
+
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::Invoke;
+using ::testing::Return;
 
 namespace {
 static constexpr int32_t kDefaultPointerDeviceId = 0;
@@ -110,7 +110,7 @@ class MockFlutterWindowsView : public FlutterWindowsView {
 }  // namespace
 
 TEST(FlutterWindowTest, CreateDestroy) {
-  FlutterWindowTest window(800, 600);
+  FlutterWindow window(800, 600);
   ASSERT_TRUE(TRUE);
 }
 
@@ -401,38 +401,6 @@ TEST(FlutterWindowTest, CachedLifecycleMessage) {
   win32window.SetView(&delegate);
   EXPECT_TRUE(focused);
   EXPECT_TRUE(restored);
-}
-
-TEST(FlutterWindowTest, PosthumousWindowMessage) {
-  MockWindowBindingHandlerDelegate delegate;
-  int msg_count = 0;
-  HWND hwnd;
-  EXPECT_CALL(delegate, OnWindowStateEvent)
-      .WillRepeatedly([&](HWND hwnd, WindowStateEvent event) { msg_count++; });
-
-  {
-    MockFlutterWindow win32window(false);
-    EXPECT_CALL(win32window, GetWindowHandle).WillRepeatedly([&]() {
-      return win32window.FlutterWindow::GetWindowHandle();
-    });
-    EXPECT_CALL(win32window, OnWindowStateEvent)
-        .WillRepeatedly([&](WindowStateEvent event) {
-          win32window.FlutterWindow::OnWindowStateEvent(event);
-        });
-    EXPECT_CALL(win32window, OnResize).Times(AnyNumber());
-    win32window.SetView(&delegate);
-    win32window.InitializeChild("Title", 1, 1);
-    hwnd = win32window.GetWindowHandle();
-    SendMessage(hwnd, WM_SIZE, 0, MAKEWORD(1, 1));
-    SendMessage(hwnd, WM_SETFOCUS, 0, 0);
-
-    // By setting this to zero before exiting the scope that contains
-    // win32window, and then checking its value afterwards, enforce that the
-    // window receive and process messages from its destructor without
-    // accessing out-of-bounds memory.
-    msg_count = 0;
-  }
-  EXPECT_GE(msg_count, 1);
 }
 
 TEST(FlutterWindowTest, UpdateCursor) {

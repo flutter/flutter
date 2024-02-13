@@ -149,7 +149,6 @@ FlutterWindow::FlutterWindow(
 }
 
 FlutterWindow::~FlutterWindow() {
-  OnWindowStateEvent(WindowStateEvent::kHide);
   Destroy();
 }
 
