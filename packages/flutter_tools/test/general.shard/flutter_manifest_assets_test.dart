@@ -130,7 +130,7 @@ flutter:
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(
           uri: Uri.parse('a/foo'),
-          flavors: const <String>['apple', 'strawberry'],
+          flavors: const <String>{'apple', 'strawberry'},
         ),
       ]);
     });

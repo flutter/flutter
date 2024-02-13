@@ -696,11 +696,11 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.uri,
-    this.flavors = const <String>[],
+    this.flavors = const <String>{},
   });
 
   final Uri uri;
-  final List<String> flavors;
+  final Set<String> flavors;
 
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
@@ -771,7 +771,7 @@ class AssetsEntry {
 
       final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
-        flavors: List<String>.from(flavors),
+        flavors: Set<String>.from(flavors),
       );
 
       return (entry, null);
@@ -787,13 +787,13 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && listEquals(flavors, other.flavors);
+    return uri == other.uri && setEquals(flavors, other.flavors);
   }
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
-    ...flavors,
+    Object.hashAllUnordered(flavors),
   ]);
 
   @override
