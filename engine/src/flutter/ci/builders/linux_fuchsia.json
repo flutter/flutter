@@ -193,6 +193,10 @@
                     ]
                 },
                 {
+                    "name": "run_tests test",
+                    "script": "flutter/testing/fuchsia/run_tests_test.py"
+                },
+                {
                     "name": "x64 emulator based debug tests",
                     "language": "python3",
                     "script": "flutter/tools/fuchsia/with_envs.py",
