@@ -1410,6 +1410,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     int? shardIndex,
     int? totalShards,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
     throw UnimplementedError();
   }

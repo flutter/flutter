@@ -87,6 +87,7 @@ abstract class FlutterTestRunner {
     int? shardIndex,
     int? totalShards,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   });
 }
 
@@ -601,6 +602,7 @@ class SpawnPlugin extends PlatformPlugin {
     required File sourceFile,
     required File outputDillFile,
     required TestTimeRecorder? testTimeRecorder,
+    Uri? nativeAssetsYaml,
   }) async {
     globals.printTrace('Compiling ${sourceFile.absolute.uri}');
     final Stopwatch compilerTime = Stopwatch()..start();
@@ -630,6 +632,7 @@ class SpawnPlugin extends PlatformPlugin {
       outputPath: outputDillFile.absolute.path,
       packageConfig: packageConfig,
       fs: globals.fs,
+      nativeAssetsYaml: nativeAssetsYaml,
     );
     residentCompiler.accept();
 
@@ -658,6 +661,7 @@ class SpawnPlugin extends PlatformPlugin {
     int? shardIndex,
     int? totalShards,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     assert(testFiles.length > 1);
 
@@ -743,6 +747,10 @@ class SpawnPlugin extends PlatformPlugin {
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
     );
 
+    final Uri? nativeAssetsYaml = await nativeAssetsBuilder?.build(
+      debuggingOptions.buildInfo,
+    );
+
     await _compileFile(
       debuggingOptions: debuggingOptions,
       packageConfigFile: isolateSpawningTesterPackageConfigFile,
@@ -750,6 +758,7 @@ class SpawnPlugin extends PlatformPlugin {
       sourceFile: childTestIsolateSpawnerSourceFile,
       outputDillFile: childTestIsolateSpawnerDillFile,
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsYaml: nativeAssetsYaml,
     );
 
     await _compileFile(
