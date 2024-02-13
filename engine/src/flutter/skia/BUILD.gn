@@ -542,7 +542,7 @@ optional("png_decode") {
     "SK_CODEC_DECODES_ICO",
   ]
 
-  deps = [ "//third_party/libpng" ]
+  deps = [ "//flutter/third_party/libpng" ]
   sources = [
     "$_skia_root/src/codec/SkIcoCodec.cpp",
     "$_skia_root/src/codec/SkPngCodec.cpp",
@@ -553,7 +553,7 @@ optional("png_encode") {
   enabled = skia_use_libpng_encode && !skia_use_ndk_images
   public = skia_encode_png_public
 
-  deps = [ "//third_party/libpng" ]
+  deps = [ "//flutter/third_party/libpng" ]
   sources = skia_encode_png_srcs
 }
 
