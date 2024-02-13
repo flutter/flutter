@@ -523,7 +523,7 @@ void main() async {
 
     rootTestIsolate = await Isolate.spawn(
       _loadLibraryFromKernel(
-          '${childTestIsolateSpawnerDillFile.absolute.path}'
+          r'${childTestIsolateSpawnerDillFile.absolute.path}'
               .toNativeUtf8()) as void Function(SendPort),
       port.sendPort,
     );
@@ -536,7 +536,8 @@ void main() async {
     exit(exitCode);
   } else {
     (_lookupEntryPoint(
-        'file://${childTestIsolateSpawnerSourceFile.absolute.uri.toFilePath()}'.toNativeUtf8(),
+        r'file://${childTestIsolateSpawnerSourceFile.absolute.uri.toFilePath(windows: false)}'
+            .toNativeUtf8(),
         'testMain'.toNativeUtf8()) as void Function())();
   }
 }
@@ -547,8 +548,8 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceFirst('file://', '')
       .replaceAll('.', '_')
+      .replaceAll(':', '_')
       .replaceAll('/', '_')
       .replaceAll(r'\', '_');
 }
@@ -569,7 +570,9 @@ class SpawnPlugin extends PlatformPlugin {
   Future<void> close() async {
     commandPort.send(<String>['close']);
   }
+''');
 
+    buffer.write('''
   @override
   Future<RunnerSuite> load(
     String path,
@@ -577,10 +580,11 @@ class SpawnPlugin extends PlatformPlugin {
     SuiteConfiguration suiteConfig,
     Object message,
   ) async {
-    await launchIsolate(path);
+    final String correctedPath = ${globals.platform.isWindows ? r'"/$path"' : 'path'};
+    await launchIsolate(correctedPath);
 
-    final StreamChannel<dynamic> channel = _channels[pathToImport(path)]!;
-    final RunnerSuiteController controller = deserializeSuite(path, platform,
+    final StreamChannel<dynamic> channel = _channels[pathToImport(correctedPath)]!;
+    final RunnerSuiteController controller = deserializeSuite(correctedPath, platform,
         suiteConfig, const PluginEnvironment(), channel, message);
     return controller.suite;
   }
