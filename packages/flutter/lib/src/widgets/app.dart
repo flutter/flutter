@@ -1210,8 +1210,7 @@ class WidgetsApp extends StatefulWidget {
     _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier =
-    exemptFromRelease(() => ValueNotifier<bool>(false));
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = exemptFromRelease(() => ValueNotifier<bool>(false));
 
 
   /// If false, prevents the debug banner from being visible.
