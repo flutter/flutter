@@ -185,11 +185,13 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     static float scale = 3;
     static bool add_circle_clip = true;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
-    ImGui::SliderFloat("Scale", &scale, 0, 6);
-    ImGui::Checkbox("Circle clip", &add_circle_clip);
-    ImGui::End();
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
+      ImGui::SliderFloat("Scale", &scale, 0, 6);
+      ImGui::Checkbox("Circle clip", &add_circle_clip);
+      ImGui::End();
+    }
 
     Canvas canvas;
     canvas.Scale(GetContentScale());

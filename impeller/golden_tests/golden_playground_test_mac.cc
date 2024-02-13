@@ -63,26 +63,18 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
 // If you add a new playground test to the aiks unittests and you do not want it
 // to also be a golden test, then add the test name here.
 static const std::vector<std::string> kSkipTests = {
-    IMP_AIKSTEST(CanDrawPaintMultipleTimesInteractive),
-    IMP_AIKSTEST(CanRenderLinearGradientManyColorsUnevenStops),
-    IMP_AIKSTEST(CanRenderRadialGradient),
-    IMP_AIKSTEST(CanRenderRadialGradientManyColors),
+    IMP_AIKSTEST(GaussianBlurAnimatedBackdrop),
     IMP_AIKSTEST(CanRenderBackdropBlurInteractive),
     IMP_AIKSTEST(ClippedBlurFilterRendersCorrectlyInteractive),
-    IMP_AIKSTEST(CoverageOriginShouldBeAccountedForInSubpasses),
-    IMP_AIKSTEST(GaussianBlurRotatedAndClippedInteractive),
     IMP_AIKSTEST(GradientStrokesRenderCorrectly),
-    IMP_AIKSTEST(ColorWheel),
-    IMP_AIKSTEST(SceneColorSource),
     IMP_AIKSTEST(SolidStrokesRenderCorrectly),
-    IMP_AIKSTEST(TextFrameSubpixelAlignment),
-    IMP_AIKSTEST(GaussianBlurAnimatedBackdrop),
+    IMP_AIKSTEST(GaussianBlurRotatedAndClippedInteractive),
+    IMP_AIKSTEST(CoverageOriginShouldBeAccountedForInSubpasses),
     // TextRotated is flakey and we can't seem to get it to stabilize on Skia
     // Gold.
     IMP_AIKSTEST(TextRotated),
     // Runtime stage based tests get confused with a Metal context.
     "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
-    IMP_AIKSTEST(CaptureContext),
 };
 
 static const std::vector<std::string> kVulkanDenyValidationTests = {
@@ -233,6 +225,12 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   }
 
   return SaveScreenshot(std::move(screenshot));
+}
+
+bool GoldenPlaygroundTest::ImGuiBegin(const char* name,
+                                      bool* p_open,
+                                      ImGuiWindowFlags flags) {
+  return false;
 }
 
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(

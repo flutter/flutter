@@ -13,6 +13,7 @@
 #include "flutter/impeller/renderer/render_target.h"
 #include "flutter/testing/testing.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/imgui/imgui.h"
 
 #if FML_OS_MACOSX
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
@@ -42,6 +43,10 @@ class GoldenPlaygroundTest
   bool OpenPlaygroundHere(Picture picture);
 
   bool OpenPlaygroundHere(AiksPlaygroundCallback callback);
+
+  static bool ImGuiBegin(const char* name,
+                         bool* p_open,
+                         ImGuiWindowFlags flags);
 
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,

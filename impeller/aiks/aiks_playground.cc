@@ -9,7 +9,6 @@
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
-#include "third_party/imgui/imgui.h"
 
 namespace impeller {
 
@@ -55,6 +54,13 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
         }
         return renderer.Render(*picture, render_target, true);
       });
+}
+
+bool AiksPlayground::ImGuiBegin(const char* name,
+                                bool* p_open,
+                                ImGuiWindowFlags flags) {
+  ImGui::Begin(name, p_open, flags);
+  return true;
 }
 
 }  // namespace impeller
