@@ -1723,11 +1723,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedInternalState() {
     super.changedInternalState();
-    // No need to mark dirty if this method is called during build phase.
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      setState(() { /* internal state already changed */ });
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      setState(() {/* internal state already changed */});
       _modalBarrier.markNeedsBuild();
-    }
+    });
     _modalScope.maintainState = maintainState;
   }
 
