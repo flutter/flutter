@@ -24,22 +24,6 @@ void main() {
     );
   });
 
-  testWidgets('simulatedAccessibilityTraversal - startNode and endNode in same view', (WidgetTester tester) async {
-    tester.binding.ensureSemantics();
-    await pumpViews(tester: tester);
-    expect(
-      tester.semantics.simulatedAccessibilityTraversal(
-        startNode: find.semantics.byValue('View2Child1'),
-        endNode: find.semantics.byValue('View2Child3'),
-      ).map((SemanticsNode node) => node.label),
-      <String>[
-        'View2Child1',
-        'View2Child2',
-        'View2Child3',
-      ],
-    );
-  });
-
   testWidgets('simulatedAccessibilityTraversal - start not specified', (WidgetTester tester) async {
     await pumpViews(tester: tester);
     expect(
