@@ -343,7 +343,7 @@ void main() {
       matching: find.byType(AnimatedOpacity),
     )).opacity;
 
-    // Initiially the prefix icon should be hidden.
+    // Initially the prefix icon should be hidden.
     expect(prefixOpacity, 0.0);
 
     await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
@@ -407,7 +407,7 @@ void main() {
       matching: find.byType(AnimatedOpacity),
     )).opacity;
 
-    // Initiially the suffix icon should be hidden.
+    // Initially the suffix icon should be hidden.
     expect(suffixOpacity, 0.0);
 
     await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
