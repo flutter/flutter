@@ -100,9 +100,15 @@ void InitOnceCallback() {
   LOOKUP(android, AChoreographer_getInstance);
   if (_AChoreographer_getInstance) {
     LOOKUP(android, AChoreographer_postFrameCallback64);
+// See discussion at
+// https://github.com/flutter/engine/pull/31859#discussion_r822072987
+// This method is not suitable for Flutter's use cases on 32 bit architectures,
+// and we should fall back to the Java based Choreographer.
+#if FML_ARCH_CPU_64_BITS
     if (!_AChoreographer_postFrameCallback64) {
       LOOKUP(android, AChoreographer_postFrameCallback);
     }
+#endif
   }
 
   LOOKUP(android, ASurfaceControl_createFromWindow);
