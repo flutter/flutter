@@ -128,13 +128,15 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
   }
 
   // Wait for the pool to be reclaimed.
-  auto waiter = fml::AutoResetWaitableEvent();
-  auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-  {
-    UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                            std::move(rattle));
+  for (auto i = 0u; i < 2u; i++) {
+    auto waiter = fml::AutoResetWaitableEvent();
+    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    {
+      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
+                                              std::move(rattle));
+    }
+    waiter.Wait();
   }
-  waiter.Wait();
 
   {
     // Create a second pool and command buffer, which should reused the existing
