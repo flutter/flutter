@@ -105,6 +105,7 @@ flutter:
         AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
       ]);
     });
+
     testWithoutContext('parses an asset with flavors', () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
