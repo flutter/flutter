@@ -491,6 +491,44 @@ CapProc<VertexWriter> GetCapProc(Cap stroke_cap) {
 }
 }  // namespace
 
+std::vector<SolidFillVertexShader::PerVertexData>
+StrokePathGeometry::GenerateSolidStrokeVertices(const Path::Polyline& polyline,
+                                                Scalar stroke_width,
+                                                Scalar miter_limit,
+                                                Join stroke_join,
+                                                Cap stroke_cap,
+                                                Scalar scale) {
+  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
+  auto join_proc = GetJoinProc<PositionWriter>(stroke_join);
+  auto cap_proc = GetCapProc<PositionWriter>(stroke_cap);
+  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
+                                   join_proc, cap_proc, scale);
+  PositionWriter vtx_builder;
+  stroke_generator.Generate(vtx_builder);
+  return vtx_builder.GetData();
+}
+
+std::vector<TextureFillVertexShader::PerVertexData>
+StrokePathGeometry::GenerateSolidStrokeVerticesUV(
+    const Path::Polyline& polyline,
+    Scalar stroke_width,
+    Scalar miter_limit,
+    Join stroke_join,
+    Cap stroke_cap,
+    Scalar scale,
+    Point texture_origin,
+    Size texture_size,
+    const Matrix& effect_transform) {
+  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
+  auto join_proc = GetJoinProc<PositionUVWriter>(stroke_join);
+  auto cap_proc = GetCapProc<PositionUVWriter>(stroke_cap);
+  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
+                                   join_proc, cap_proc, scale);
+  PositionUVWriter vtx_builder(texture_origin, texture_size, effect_transform);
+  stroke_generator.Generate(vtx_builder);
+  return vtx_builder.GetData();
+}
+
 StrokePathGeometry::StrokePathGeometry(const Path& path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
