@@ -1446,6 +1446,16 @@ enum FocusHighlightStrategy {
   alwaysTraditional,
 }
 
+// By extending the WidgetsBindingObserver class,
+// we can add a listener object to FocusManager as a private member.
+class _AppLifecycleListener extends WidgetsBindingObserver {
+  _AppLifecycleListener(this.onLifecycleStateChanged);
+  final void Function(AppLifecycleState) onLifecycleStateChanged;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) => onLifecycleStateChanged(state);
+}
+
 /// Manages the focus tree.
 ///
 /// The focus tree is a separate, sparser, tree from the widget tree that
@@ -1493,7 +1503,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingObserver {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1508,7 +1518,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    WidgetsBinding.instance.addObserver(this);
+    _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+    WidgetsBinding.instance.addObserver(_appLifecycleListener);
     rootScope._manager = this;
   }
 
@@ -1525,7 +1536,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(_appLifecycleListener);
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1684,12 +1695,15 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier, WidgetsBindingO
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
+  // Allows FocusManager to respond to app lifecycle state changes,
+  // temporarily suspending the primaryFocus when the app is inactive.
+  late final _AppLifecycleListener _appLifecycleListener;
+
   // Stores the node that was focused before the app lifecycle changed.
   // Will be restored as the primary focus once app is resumed.
   FocusNode? _suspendedNode;
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void _appLifecycleChange(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (_primaryFocus != rootScope) {
         assert(_focusDebug(() => 'focus changed while app was paused, ignoring $_suspendedNode'));
