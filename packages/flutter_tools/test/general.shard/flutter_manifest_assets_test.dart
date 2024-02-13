@@ -15,10 +15,10 @@ void main() {
       const String manifest = '''
 name: test
 dependencies:
+  flutter:
+    sdk: flutter
 flutter:
-  sdk: flutter
-flutter:
-assets: []
+  assets: []
 ''';
 
       final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
@@ -53,30 +53,6 @@ flutter:
         AssetsEntry(uri: Uri.parse('a/foo')),
         AssetsEntry(uri: Uri.parse('a/bar')),
       ]);
-    });
-
-    testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
-      final BufferLogger logger = BufferLogger.test();
-
-      const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/folder/
-    - path: assets/vanilla/
-      flavors:
-        - key1: value1
-          key2: value2
-''';
-      FlutterManifest.createFromString(manifest, logger: logger);
-      expect(logger.errorText, contains(
-        'Asset manifest entry is malformed. '
-        'Expected "flavors" entry to be a list of strings.',
-      ));
     });
 
     testWithoutContext('does not crash on empty entry', () {
@@ -128,6 +104,58 @@ flutter:
         AssetsEntry(uri: Uri.parse('lib/gallery/abc%3Fxyz')),
         AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
       ]);
+    });
+    testWithoutContext('parses an asset with flavors', () async {
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: a/foo
+      flavors:
+        - apple
+        - strawberry
+''';
+
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
+
+      expect(flutterManifest.assets, <AssetsEntry>[
+        AssetsEntry(
+          uri: Uri.parse('a/foo'),
+          flavors: const <String>['apple', 'strawberry'],
+        ),
+      ]);
+    });
+
+    testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
+      final BufferLogger logger = BufferLogger.test();
+
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/folder/
+    - path: assets/vanilla/
+      flavors:
+        - key1: value1
+          key2: value2
+''';
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(logger.errorText, contains(
+        'Asset manifest entry is malformed. '
+        'Expected "flavors" entry to be a list of strings.',
+      ));
     });
   });
 }

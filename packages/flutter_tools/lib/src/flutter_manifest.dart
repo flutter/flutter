@@ -788,9 +788,15 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && flavors == other.flavors;
+    return uri == other.uri && listEquals(flavors, other.flavors);
   }
 
   @override
-  int get hashCode => Object.hash(uri.hashCode, flavors.hashCode);
+  int get hashCode => Object.hashAll(<Object?>[
+    uri.hashCode,
+    ...flavors,
+  ]);
+
+  @override
+  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors)';
 }
