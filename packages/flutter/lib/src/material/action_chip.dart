@@ -109,6 +109,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -143,6 +144,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -191,6 +193,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final Color? surfaceTintColor;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
 
   @override
   bool get isEnabled => onPressed != null;
@@ -228,6 +232,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
     );
   }
 }
