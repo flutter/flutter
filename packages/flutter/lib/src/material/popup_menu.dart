@@ -571,17 +571,17 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
     super.key,
+    required this.itemKeys,
     required this.route,
     required this.semanticLabel,
     this.constraints,
-    this.itemKeys,
     required this.clipBehavior,
   });
 
+  final List<GlobalKey> itemKeys;
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
-  final List<GlobalKey>? itemKeys;
   final Clip clipBehavior;
 
   @override
@@ -612,7 +612,7 @@ class _PopupMenu<T> extends StatelessWidget {
             route.itemSizes[i] = size;
           },
           child: FadeTransition(
-            key: itemKeys?[i],
+            key: itemKeys[i],
             opacity: opacity,
             child: item,
           ),
