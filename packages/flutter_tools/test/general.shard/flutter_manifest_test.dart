@@ -136,50 +136,6 @@ flutter:
     expect(flutterManifest.generateSyntheticPackage, false);
   });
 
-  testWithoutContext('FlutterManifest has two assets', () async {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - a/foo
-    - a/bar
-''';
-
-    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
-      manifest,
-      logger: logger,
-    )!;
-
-    expect(flutterManifest.assets, <AssetsEntry>[
-      AssetsEntry(uri: Uri.parse('a/foo')),
-      AssetsEntry(uri: Uri.parse('a/bar')),
-    ]);
-  });
-
-  testWithoutContext('FlutterManifest assets entry flavor is not a string', () async {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/folder/
-    - path: assets/vanilla/
-      flavors:
-        - key1: value1
-          key2: value2
-''';
-    FlutterManifest.createFromString(manifest, logger: logger);
-    expect(logger.errorText, contains('Asset manifest entry is malformed. '
-      'Expected "flavors" entry to be a list of strings.'));
-  });
-
   testWithoutContext('FlutterManifest has one font family with one asset', () async {
     const String manifest = '''
 name: test
@@ -796,25 +752,6 @@ flutter:
     expect(flutterManifest!.fonts.length, 0);
   });
 
-  testWithoutContext('FlutterManifest ignores empty list of assets', () {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  assets: []
-''';
-
-    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
-      manifest,
-      logger: logger,
-    );
-
-    expect(flutterManifest, isNotNull);
-    expect(flutterManifest!.assets.length, 0);
-  });
-
   testWithoutContext('FlutterManifest returns proper error when font detail is '
     'not a list of maps', () {
     const String manifest = '''
@@ -885,55 +822,6 @@ flutter:
 
     expect(flutterManifest, null);
     expect(logger.errorText, contains('Expected a map.'));
-  });
-
-  testWithoutContext('FlutterManifest does not crash on empty entry', () {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - lib/gallery/example_code.dart
-    -
-''';
-
-    FlutterManifest.createFromString(
-      manifest,
-      logger: logger,
-    );
-
-    expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
-  });
-
-  testWithoutContext('FlutterManifest handles special characters in asset URIs', () {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - lib/gallery/abc#xyz
-    - lib/gallery/abc?xyz
-    - lib/gallery/aaa bbb
-''';
-
-    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
-      manifest,
-      logger: logger,
-    )!;
-    final List<AssetsEntry> assets = flutterManifest.assets;
-
-    expect(assets, hasLength(3));
-    expect(assets, <AssetsEntry>[
-      AssetsEntry(uri: Uri.parse('lib/gallery/abc%23xyz')),
-      AssetsEntry(uri: Uri.parse('lib/gallery/abc%3Fxyz')),
-      AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
-    ]);
   });
 
   testWithoutContext('FlutterManifest returns proper error when flutter is a '
