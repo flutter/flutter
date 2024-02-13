@@ -84,6 +84,7 @@ executable("geometry_benchmarks") {
   sources = [ "geometry_benchmarks.cc" ]
   deps = [
     ":geometry",
+    "../entity",
     "../tessellator",
     "//flutter/benchmarking",
   ]
