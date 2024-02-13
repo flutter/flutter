@@ -41,9 +41,15 @@ shelf.Handler createDirectoryHandler(Directory directory) {
   final mime.MimeTypeResolver resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
   return (shelf.Request request) async {
+    String uriPath = request.requestedUri.path;
+
+    // Strip any leading slashes
+    if (uriPath.startsWith('/')) {
+      uriPath = uriPath.substring(1);
+    }
     final String filePath = fileSystem.path.join(
       directory.path,
-      request.requestedUri.path,
+      uriPath,
     );
     final File file = fileSystem.file(filePath);
     if (!file.existsSync()) {
@@ -51,7 +57,7 @@ shelf.Handler createDirectoryHandler(Directory directory) {
     }
     final String? contentType = resolver.lookup(file.path);
     return shelf.Response.ok(
-      file,
+      file.openRead(),
       headers: <String, String>{
         if (contentType != null) 'Content-Type': contentType
       },
