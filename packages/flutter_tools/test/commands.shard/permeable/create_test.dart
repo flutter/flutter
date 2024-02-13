@@ -286,81 +286,68 @@ void main() {
     ),
   });
 
-  testUsingContext('creates a new project with pre-release flutter version constraint in pubspec', () async {
+  testUsingContext('creates a new app/skeleton project with pre-release flutter version constraint in pubspec', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+    final List<String> templates = <String>['app', 'skeleton'];
 
-    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-    final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
+    for (final String template in templates) {
+      final String templateProjectPath = globals.fs.path.join(projectDir.path, '${template}_project_dir');
+      final Directory templateProjectDir = globals.fs.directory(templateProjectPath);
 
-    expect(flutterVersionConstraint, isNotNull);
-    expect(flutterVersionConstraint, isA<VersionRange>());
+      await runner.run(<String>['create', '--no-pub', '--template=$template', templateProjectDir.path]);
+      final String rawPubspec = await templateProjectDir.childFile('pubspec.yaml').readAsString();
+      final Pubspec pubspec = Pubspec.parse(rawPubspec);
+      final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
 
-    final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
+      expect(flutterVersionConstraint, isNotNull);
+      expect(flutterVersionConstraint, isA<VersionRange>());
 
-    final Version flutterSdkVersion = Version.parse(globals.flutterVersion.frameworkVersion);
+      final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
 
-    expect(flutterSdkVersion, isNot(Version.none));
-
-    // The version pin should allow minor & patch releases,
-    // both of which are allowed to be pre-releases.
-    expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
-    expect(flutterVersionRange.allows(Version(1, 2, 0)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 3)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 4)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
-    expect(flutterVersionRange.allows(Version(2, 0, 0)), isFalse);
-
-    expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '10')), isFalse);
-    expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 3, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 4, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(2, 0, 0, pre: '10')), isFalse);
+      expect(flutterVersionRange.min, equals(Version(1, 2, 0, pre: '0')));
+      expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
+      expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '0')), isFalse);
+      expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isTrue);
+      expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
+      expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '0')), isTrue);
+    }
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.2.3'),
   });
 
-  testUsingContext('creates a new project with stable flutter version constraint in pubspec', () async {
+  testUsingContext('creates a new app/skeleton project with stable flutter version constraint in pubspec', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+    final List<String> templates = <String>['app', 'skeleton'];
 
-    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-    final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
+    for (final String template in templates) {
+      final String templateProjectPath = globals.fs.path.join(projectDir.path, '${template}_project_dir');
+      final Directory templateProjectDir = globals.fs.directory(templateProjectPath);
 
-    expect(flutterVersionConstraint, isNotNull);
-    expect(flutterVersionConstraint, isA<VersionRange>());
+      await runner.run(<String>['create', '--no-pub', '--template=$template', templateProjectDir.path]);
+      final String rawPubspec = await templateProjectDir.childFile('pubspec.yaml').readAsString();
+      final Pubspec pubspec = Pubspec.parse(rawPubspec);
+      final VersionConstraint? flutterVersionConstraint = pubspec.environment?['flutter'];
 
-    final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
+      expect(flutterVersionConstraint, isNotNull);
+      expect(flutterVersionConstraint, isA<VersionRange>());
 
-    final Version flutterSdkVersion = Version.parse(globals.flutterVersion.frameworkVersion);
+      final VersionRange flutterVersionRange = flutterVersionConstraint! as VersionRange;
 
-    expect(flutterSdkVersion, isNot(Version.none));
-
-    // The version pin should allow minor & patch releases.
-    expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
-    expect(flutterVersionRange.allows(Version(1, 2, 0)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 3)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 4)), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
-    expect(flutterVersionRange.allows(Version(2, 0, 0)), isFalse);
-
-    expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '10')), isFalse);
-    expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isFalse);
-    expect(flutterVersionRange.allows(Version(1, 2, 3, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 2, 4, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '10')), isTrue);
-    expect(flutterVersionRange.allows(Version(2, 0, 0, pre: '10')), isFalse);
+      expect(flutterVersionRange.min, equals(Version(1, 2, 0)));
+      expect(flutterVersionRange.allows(Version(1, 1, 0)), isFalse);
+      expect(flutterVersionRange.allows(Version(1, 1, 0, pre: '0')), isFalse);
+      expect(flutterVersionRange.allows(Version(1, 2, 0, pre: '10')), isFalse);
+      expect(flutterVersionRange.allows(Version(1, 3, 0)), isTrue);
+      expect(flutterVersionRange.allows(Version(1, 3, 0, pre: '0')), isTrue);
+    }
   }, overrides: <Type, Generator>{
     FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.2.3', branch: 'stable'),
   });
@@ -2949,17 +2936,26 @@ dependencies:
     Logger: () => logger,
   });
 
-  testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
+  testUsingContext('newly created package / plugin / module has min flutter sdk version 3.10.0', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
-    final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint?> env = pubspec.environment!;
-    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
-    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
+    final List<String> templates = <String>['plugin', 'plugin_ffi', 'package', 'module'];
+
+    for (final String template in templates) {
+      final String templateProjectPath = globals.fs.path.join(projectDir.path, '${template}_project_dir');
+      final Directory templateProjectDir = globals.fs.directory(templateProjectPath);
+
+      await runner.run(<String>['create', '--no-pub', '--template=$template', templateProjectDir.path]);
+      final String rawPubspec = await templateProjectDir.childFile('pubspec.yaml').readAsString();
+      final Pubspec pubspec = Pubspec.parse(rawPubspec);
+      final Map<String, VersionConstraint?> env = pubspec.environment!;
+
+      expect(env['flutter']!.allows(Version(3, 10, 0)), isTrue);
+      expect(env['flutter']!.allows(Version(3, 11, 0)), isTrue);
+      expect(env['flutter']!.allows(Version(3, 9, 9)), isFalse);
+    }
   });
 
   testUsingContext('newly created iOS plugins has correct min iOS version', () async {
