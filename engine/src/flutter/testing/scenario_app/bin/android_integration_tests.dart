@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -32,12 +33,21 @@ void main(List<String> args) async {
     ..addOption(
       'smoke-test',
       help: 'runs a single test to verify the setup',
-      valueHelp: 'The class to execute, defaults to dev.flutter.scenarios.EngineLaunchE2ETest',
     )
     ..addFlag(
       'use-skia-gold',
       help: 'Use Skia Gold to compare screenshots.',
       defaultsTo: isLuciEnv,
+    )
+    ..addFlag(
+      'enable-impeller',
+      help: 'Enable Impeller for the Android app.',
+    )
+    ..addOption(
+      'impeller-backend',
+      help: 'The Impeller backend to use for the Android app.',
+      allowed: <String>['vulkan', 'opengles'],
+      defaultsTo: 'vulkan',
     );
 
   runZonedGuarded(
@@ -46,15 +56,19 @@ void main(List<String> args) async {
       final Directory outDir = Directory(results['out-dir'] as String);
       final File adb = File(results['adb'] as String);
       final bool useSkiaGold = results['use-skia-gold'] as bool;
-      String? smokeTest = results['smoke-test'] as String?;
-      if (results.wasParsed('smoke-test') && smokeTest!.isEmpty) {
-        smokeTest = 'dev.flutter.scenarios.EngineLaunchE2ETest';
+      final String? smokeTest = results['smoke-test'] as String?;
+      final bool enableImpeller = results['enable-impeller'] as bool;
+      final _ImpellerBackend? impellerBackend = _ImpellerBackend.tryParse(results['impeller-backend'] as String?);
+      if (enableImpeller && impellerBackend == null) {
+        panic(<String>['invalid graphics-backend', results['impeller-backend'] as String? ?? '<null>']);
       }
       await _run(
         outDir: outDir,
         adb: adb,
         smokeTestFullPath: smokeTest,
         useSkiaGold: useSkiaGold,
+        enableImpeller: enableImpeller,
+        impellerBackend: impellerBackend,
       );
       exit(0);
     },
@@ -68,11 +82,27 @@ void main(List<String> args) async {
   );
 }
 
+enum _ImpellerBackend {
+  vulkan,
+  opengles;
+
+  static _ImpellerBackend? tryParse(String? value) {
+    for (final _ImpellerBackend backend in _ImpellerBackend.values) {
+      if (backend.name == value) {
+        return backend;
+      }
+    }
+    return null;
+  }
+}
+
 Future<void> _run({
   required Directory outDir,
   required File adb,
   required String? smokeTestFullPath,
   required bool useSkiaGold,
+  required bool enableImpeller,
+  required _ImpellerBackend? impellerBackend,
 }) async {
   const ProcessManager pm = LocalProcessManager();
 
@@ -179,11 +209,16 @@ Future<void> _run({
         panic(<String>['could not get API level of the connected device']);
       }
       final String connectedDeviceAPILevel = (apiLevelProcessResult.stdout as String).trim();
-      log('using API level $connectedDeviceAPILevel');
+      final Map<String, String> dimensions = <String, String>{
+        'AndroidAPILevel': connectedDeviceAPILevel,
+        'GraphicsBackend': enableImpeller ? 'impeller-${impellerBackend!.name}' : 'skia',
+      };
+      log('using dimensions: ${json.encode(dimensions)}');
       skiaGoldClient = SkiaGoldClient(
         outDir,
         dimensions: <String, String>{
           'AndroidAPILevel': connectedDeviceAPILevel,
+          'GraphicsBackend': enableImpeller ? 'impeller-${impellerBackend!.name}' : 'skia',
         },
       );
     });
@@ -232,6 +267,10 @@ Future<void> _run({
         if (smokeTestFullPath != null)
           '-e class $smokeTestFullPath',
         'dev.flutter.scenarios.test/dev.flutter.TestRunner',
+        if (enableImpeller)
+          '-e enable-impeller',
+        if (impellerBackend != null)
+          '-e impeller-backend ${impellerBackend.name}',
       ]);
       if (exitCode != 0) {
         panic(<String>['instrumented tests failed to run']);
