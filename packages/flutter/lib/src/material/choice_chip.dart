@@ -59,8 +59,9 @@ class ChoiceChip extends StatelessWidget
   /// Create a chip that acts like a radio button.
   ///
   /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [ChoiceChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const ChoiceChip({
     super.key,
     this.avatar,
@@ -98,8 +99,9 @@ class ChoiceChip extends StatelessWidget
   /// Create an elevated chip that acts like a radio button.
   ///
   /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [ChoiceChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const ChoiceChip.elevated({
     super.key,
     this.avatar,

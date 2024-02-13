@@ -81,7 +81,8 @@ class InputChip extends StatelessWidget
   /// Creates an [InputChip].
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
-  /// the same time.
+  /// the same time. When both [onPressed] and [onSelected] are null, the chip
+  /// will be disabled.
   ///
   /// The [pressElevation] and [elevation] must be null or non-negative.
   /// Typically, [pressElevation] is greater than [elevation].
