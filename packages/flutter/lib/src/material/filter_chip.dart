@@ -64,8 +64,9 @@ class FilterChip extends StatelessWidget
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip({
     super.key,
     this.avatar,
@@ -107,8 +108,9 @@ class FilterChip extends StatelessWidget
   /// Create an elevated chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip.elevated({
     super.key,
     this.avatar,

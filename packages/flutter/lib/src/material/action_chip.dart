@@ -81,9 +81,10 @@ enum _ChipVariant { flat, elevated }
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// When [onPressed] is null, the [ActionChip] will be disabled. The [pressElevation]
+  /// and [elevation] must be null or non-negative. Typically, [pressElevation]
+  /// is greater than [elevation].
   const ActionChip({
     super.key,
     this.avatar,
@@ -114,9 +115,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 
   /// Create an elevated chip that acts like a button.
   ///
-  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// When [onPressed] is null, the [ActionChip] will be disabled. The [pressElevation]
+  /// and [elevation] must be null or non-negative. Typically, [pressElevation]
+  /// is greater than [elevation].
   const ActionChip.elevated({
     super.key,
     this.avatar,
