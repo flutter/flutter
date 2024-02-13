@@ -215,8 +215,6 @@ executable("flutter_windows_unittests") {
     "testing/egl/mock_proc_table.h",
     "testing/egl/mock_window_surface.h",
     "testing/engine_modifier.h",
-    "testing/flutter_window_test.cc",
-    "testing/flutter_window_test.h",
     "testing/flutter_windows_engine_builder.cc",
     "testing/flutter_windows_engine_builder.h",
     "testing/mock_direct_manipulation.h",
