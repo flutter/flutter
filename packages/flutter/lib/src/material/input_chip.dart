@@ -122,6 +122,8 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -193,6 +195,10 @@ class InputChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
+  @override
+  final BoxConstraints? deleteIconBoxConstraints;
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +244,8 @@ class InputChip extends StatelessWidget
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints,
     );
   }
 }
