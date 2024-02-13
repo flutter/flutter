@@ -15,7 +15,8 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
       FlutterBackingStore backing_store,
       std::shared_ptr<impeller::AiksContext> aiks_context,
       std::unique_ptr<impeller::RenderTarget> impeller_target,
-      fml::closure on_release);
+      fml::closure on_release,
+      fml::closure framebuffer_destruction_callback);
 
   // |EmbedderRenderTarget|
   ~EmbedderRenderTargetImpeller() override;
@@ -35,6 +36,7 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
  private:
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::unique_ptr<impeller::RenderTarget> impeller_target_;
+  fml::closure framebuffer_destruction_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderRenderTargetImpeller);
 };

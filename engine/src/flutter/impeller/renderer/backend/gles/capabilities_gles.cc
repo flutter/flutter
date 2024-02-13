@@ -117,6 +117,8 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
     supports_offscreen_msaa_ = value >= 4;
   }
+
+  is_angle_ = desc->IsANGLE();
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -186,6 +188,10 @@ PixelFormat CapabilitiesGLES::GetDefaultStencilFormat() const {
 
 PixelFormat CapabilitiesGLES::GetDefaultDepthStencilFormat() const {
   return PixelFormat::kD24UnormS8Uint;
+}
+
+bool CapabilitiesGLES::IsANGLE() const {
+  return is_angle_;
 }
 
 }  // namespace impeller

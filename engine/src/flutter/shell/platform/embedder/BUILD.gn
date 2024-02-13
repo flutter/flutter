@@ -250,6 +250,7 @@ test_fixtures("fixtures") {
     "fixtures/scene_without_custom_compositor.png",
     "fixtures/scene_without_custom_compositor_with_xform.png",
     "fixtures/snapshot_large_scene.png",
+    "fixtures/solid_red.png",
     "fixtures/verifyb143464703.png",
     "fixtures/verifyb143464703_soft_noxform.png",
   ]

@@ -310,22 +310,27 @@ InferOpenGLPlatformViewCreationCallback(
       // damage are always 1. Once the function that computes damage implements
       // support for multiple damage rectangles, GLPresentInfo should also
       // contain the number of damage rectangles.
-      const size_t num_rects = 1;
 
-      std::array<FlutterRect, num_rects> frame_damage_rect = {
-          SkIRectToFlutterRect(*(gl_present_info.frame_damage))};
-      std::array<FlutterRect, num_rects> buffer_damage_rect = {
-          SkIRectToFlutterRect(*(gl_present_info.buffer_damage))};
+      std::optional<FlutterRect> frame_damage_rect;
+      if (gl_present_info.frame_damage) {
+        frame_damage_rect =
+            SkIRectToFlutterRect(*(gl_present_info.frame_damage));
+      }
+      std::optional<FlutterRect> buffer_damage_rect;
+      if (gl_present_info.buffer_damage) {
+        buffer_damage_rect =
+            SkIRectToFlutterRect(*(gl_present_info.buffer_damage));
+      }
 
       FlutterDamage frame_damage{
           .struct_size = sizeof(FlutterDamage),
-          .num_rects = frame_damage_rect.size(),
-          .damage = frame_damage_rect.data(),
+          .num_rects = frame_damage_rect ? size_t{1} : size_t{0},
+          .damage = frame_damage_rect ? &frame_damage_rect.value() : nullptr,
       };
       FlutterDamage buffer_damage{
           .struct_size = sizeof(FlutterDamage),
-          .num_rects = buffer_damage_rect.size(),
-          .damage = buffer_damage_rect.data(),
+          .num_rects = buffer_damage_rect ? size_t{1} : size_t{0},
+          .damage = buffer_damage_rect ? &buffer_damage_rect.value() : nullptr,
       };
 
       // Construct the present information concerning the frame being rendered.
@@ -981,31 +986,44 @@ MakeRenderTargetFromBackingStoreImpeller(
   color0.load_action = impeller::LoadAction::kClear;
   color0.store_action = impeller::StoreAction::kStore;
 
-  impeller::TextureDescriptor stencil0_tex;
-  stencil0_tex.type = impeller::TextureType::kTexture2D;
-  stencil0_tex.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-  stencil0_tex.size = size;
-  stencil0_tex.usage = static_cast<impeller::TextureUsageMask>(
+  impeller::TextureDescriptor depth_stencil_texture_desc;
+  depth_stencil_texture_desc.type = impeller::TextureType::kTexture2D;
+  depth_stencil_texture_desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  depth_stencil_texture_desc.size = size;
+  depth_stencil_texture_desc.usage = static_cast<impeller::TextureUsageMask>(
       impeller::TextureUsage::kRenderTarget);
-  stencil0_tex.sample_count = impeller::SampleCount::kCount1;
+  depth_stencil_texture_desc.sample_count = impeller::SampleCount::kCount1;
+
+  auto depth_stencil_tex = std::make_shared<impeller::TextureGLES>(
+      gl_context.GetReactor(), depth_stencil_texture_desc,
+      impeller::TextureGLES::IsWrapped::kWrapped);
+
+  impeller::DepthAttachment depth0;
+  depth0.clear_depth = 0;
+  depth0.texture = depth_stencil_tex;
+  depth0.load_action = impeller::LoadAction::kClear;
+  depth0.store_action = impeller::StoreAction::kDontCare;
 
   impeller::StencilAttachment stencil0;
   stencil0.clear_stencil = 0;
-  stencil0.texture = std::make_shared<impeller::TextureGLES>(
-      gl_context.GetReactor(), stencil0_tex,
-      impeller::TextureGLES::IsWrapped::kWrapped);
+  stencil0.texture = depth_stencil_tex;
   stencil0.load_action = impeller::LoadAction::kClear;
   stencil0.store_action = impeller::StoreAction::kDontCare;
 
   impeller::RenderTarget render_target_desc;
 
   render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetDepthAttachment(depth0);
   render_target_desc.SetStencilAttachment(stencil0);
+
+  fml::closure framebuffer_destruct =
+      [callback = framebuffer->destruction_callback,
+       user_data = framebuffer->user_data]() { callback(user_data); };
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release);
+      on_release, framebuffer_destruct);
 #else
   return nullptr;
 #endif
@@ -1075,7 +1093,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release);
+      on_release, fml::closure());
 #else
   return nullptr;
 #endif
