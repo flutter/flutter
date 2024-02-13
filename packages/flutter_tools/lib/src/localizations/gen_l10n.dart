@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
-import '../flutter_manifest.dart';
+import '../flutter_manifest/flutter_manifest.dart';
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';

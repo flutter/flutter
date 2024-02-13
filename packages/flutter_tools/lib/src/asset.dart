@@ -19,7 +19,7 @@ import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'flutter_manifest.dart';
+import 'flutter_manifest/flutter_manifest.dart';
 import 'license_collector.dart';
 import 'project.dart';
 

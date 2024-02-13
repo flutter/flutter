@@ -13,7 +13,7 @@ import 'base/platform.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'dart_pub_json_formatter.dart';
-import 'flutter_manifest.dart';
+import 'flutter_manifest/flutter_manifest.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
 import 'version.dart';

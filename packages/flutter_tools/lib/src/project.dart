@@ -19,7 +19,7 @@ import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'features.dart';
-import 'flutter_manifest.dart';
+import 'flutter_manifest/flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';

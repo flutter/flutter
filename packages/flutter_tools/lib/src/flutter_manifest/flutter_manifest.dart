@@ -6,12 +6,12 @@ import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
-import 'base/deferred_component.dart';
-import 'base/file_system.dart';
-import 'base/logger.dart';
-import 'base/utils.dart';
-import 'globals.dart' as globals;
-import 'plugins.dart';
+import '../base/deferred_component.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/utils.dart';
+import '../globals.dart' as globals;
+import '../plugins.dart';
 
 /// Whether or not Impeller Scene 3D model import is enabled.
 const bool kIs3dSceneSupported = true;

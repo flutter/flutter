@@ -5,7 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
-import '../flutter_manifest.dart';
+import '../flutter_manifest/flutter_manifest.dart';
 
 /// Represents a configured deferred component as defined in
 /// the app's pubspec.yaml.

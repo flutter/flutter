@@ -17,7 +17,7 @@ import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
-import '../flutter_manifest.dart';
+import '../flutter_manifest/flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';

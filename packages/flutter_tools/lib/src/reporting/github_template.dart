@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../build_system/exceptions.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../flutter_manifest.dart';
+import '../flutter_manifest/flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../project.dart';
 import '../version.dart';

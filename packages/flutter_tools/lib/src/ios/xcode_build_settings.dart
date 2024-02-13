@@ -7,7 +7,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../flutter_manifest.dart';
+import '../flutter_manifest/flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 

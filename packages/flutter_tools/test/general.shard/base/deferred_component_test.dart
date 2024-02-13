@@ -6,7 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/flutter_manifest/flutter_manifest.dart';
 
 import '../../src/common.dart';
 
