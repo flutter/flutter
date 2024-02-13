@@ -18,6 +18,9 @@ const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocation
 /// `--dart-define=flutter.memory_allocations=true`.
 const bool kFlutterMemoryAllocationsEnabled = _kMemoryAllocations || kDebugMode;
 
+// Examples can assume:
+// class MyDisposableClass {}
+
 /// Create an object with exemption from release.
 ///
 /// All objects created by [builder] will be exempt from release.
