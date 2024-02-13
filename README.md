@@ -82,6 +82,7 @@ for desktop devices.
 
 Flutter offers [stateful hot reload][Hot reload], allowing you to make changes to your code
 and see the results instantly without restarting your app or losing its state.
+This is very effective step taken by flutter.
 
 [![Hot reload animation][]][Hot reload]
 
