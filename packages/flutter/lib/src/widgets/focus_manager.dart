@@ -1450,6 +1450,7 @@ enum FocusHighlightStrategy {
 // we can add a listener object to FocusManager as a private member.
 class _AppLifecycleListener extends WidgetsBindingObserver {
   _AppLifecycleListener(this.onLifecycleStateChanged);
+
   final void Function(AppLifecycleState) onLifecycleStateChanged;
 
   @override
