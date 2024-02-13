@@ -617,6 +617,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
         }
 
         return _TreeNodeParentDataWidget(
+          hasAnimatingChildren: _currentAnimationForParent.keys.contains(node),
           animationValue: _animationValueFor(node),
           depth: node.depth!,
           child: child,
@@ -744,6 +745,14 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
 // follows the indexed order. The animationValue is used to compute the offset
 // of children that are currently coming into or out of view.
 class _TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
+  // Whether or not this node is a parent whose child nodes are currently
+  // animating.
+  //
+  // The parent and its animating children are kept alive if scrolled away while
+  // the animation is underway so that the relative positioning due to the
+  // animation can be respected.
+  bool hasAnimatingChildren = false;
+
   // The current value of the expand or collapse animation that affects this
   // node of the tree.
   //
@@ -757,11 +766,13 @@ class _TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
 
 class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
   const _TreeNodeParentDataWidget({
+    this.hasAnimatingChildren = false,
     required this.animationValue,
     required this.depth,
     required super.child,
   }) : assert(depth >= 0);
 
+  final bool hasAnimatingChildren;
   final double? animationValue;
   final int depth;
 
@@ -769,6 +780,11 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
   void applyParentData(RenderObject renderObject) {
     final _TreeNodeParentData parentData = renderObject.parentData! as _TreeNodeParentData;
     bool needsLayout = false;
+    if (parentData.hasAnimatingChildren != hasAnimatingChildren) {
+      parentData.hasAnimatingChildren = hasAnimatingChildren;
+      needsLayout = true;
+    }
+
     if (parentData.animationValue != animationValue) {
       assert(animationValue == null || animationValue! >= 0);
       parentData.animationValue = animationValue;
