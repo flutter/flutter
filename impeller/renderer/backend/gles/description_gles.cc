@@ -40,6 +40,10 @@ static bool DetermineIfES(const std::string& version) {
   return HasPrefix(version, "OpenGL ES");
 }
 
+static bool DetermineIfANGLE(const std::string& version) {
+  return version.find("ANGLE") != std::string::npos;
+}
+
 static std::optional<Version> DetermineVersion(std::string version) {
   // Format for OpenGL "OpenGL<space>ES<space><version
   // number><space><vendor-specific information>".
@@ -81,6 +85,7 @@ DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)
       gl_version_string_(GetGLString(gl, GL_VERSION)),
       sl_version_string_(GetGLString(gl, GL_SHADING_LANGUAGE_VERSION)) {
   is_es_ = DetermineIfES(gl_version_string_);
+  is_angle_ = DetermineIfANGLE(gl_version_string_);
 
   auto gl_version = DetermineVersion(gl_version_string_);
   if (!gl_version.has_value()) {
@@ -162,6 +167,10 @@ Version DescriptionGLES::GetGlVersion() const {
 
 bool DescriptionGLES::IsES() const {
   return is_es_;
+}
+
+bool DescriptionGLES::IsANGLE() const {
+  return is_angle_;
 }
 
 bool DescriptionGLES::HasExtension(const std::string& ext) const {
