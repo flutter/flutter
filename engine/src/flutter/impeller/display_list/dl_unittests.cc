@@ -184,8 +184,9 @@ TEST_P(DisplayListTest, CanDrawArc) {
         break;
     }
 
-    auto [p1, p2] = IMPELLER_PLAYGROUND_LINE(
-        Point(200, 200), Point(400, 400), 20, Color::White(), Color::White());
+    static PlaygroundPoint point_a(Point(200, 200), 20, Color::White());
+    static PlaygroundPoint point_b(Point(400, 400), 20, Color::White());
+    auto [p1, p2] = DrawPlaygroundLine(point_a, point_b);
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
@@ -676,8 +677,9 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
 
     std::optional<SkRect> bounds;
     if (use_bounds) {
-      auto [p1, p2] = IMPELLER_PLAYGROUND_LINE(
-          Point(350, 150), Point(800, 600), 20, Color::White(), Color::White());
+      static PlaygroundPoint point_a(Point(350, 150), 20, Color::White());
+      static PlaygroundPoint point_b(Point(800, 600), 20, Color::White());
+      auto [p1, p2] = DrawPlaygroundLine(point_a, point_b);
       bounds = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
     }
 
@@ -694,8 +696,8 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
                       &filter);
 
     if (draw_circle) {
-      auto circle_center =
-          IMPELLER_PLAYGROUND_POINT(Point(500, 400), 20, Color::Red());
+      static PlaygroundPoint center_point(Point(500, 400), 20, Color::Red());
+      auto circle_center = DrawPlaygroundPoint(center_point);
 
       flutter::DlPaint paint;
       paint.setDrawStyle(flutter::DlDrawStyle::kStroke);

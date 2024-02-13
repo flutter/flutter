@@ -76,8 +76,9 @@ TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
 
 TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
-    auto [a, b] = IMPELLER_PLAYGROUND_LINE(Point(50, 50), Point(300, 200), 30,
-                                           Color::White(), Color::White());
+    static PlaygroundPoint point_a(Point(50, 50), 30, Color::White());
+    static PlaygroundPoint point_b(Point(300, 200), 30, Color::White());
+    auto [a, b] = DrawPlaygroundLine(point_a, point_b);
 
     Canvas canvas;
     canvas.DrawCircle({100, 100}, 50, {.color = Color::CornflowerBlue()});
@@ -143,7 +144,9 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
 
 TEST_P(AiksTest, ClippedBlurFilterRendersCorrectlyInteractive) {
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
-    auto point = IMPELLER_PLAYGROUND_POINT(Point(400, 400), 20, Color::Green());
+    static PlaygroundPoint playground_point(Point(400, 400), 20,
+                                            Color::Green());
+    auto point = DrawPlaygroundPoint(playground_point);
 
     Canvas canvas;
     canvas.Translate(point - Point(400, 400));
@@ -465,8 +468,9 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
                        ImageFilter::MakeBlur(Sigma(20.0), Sigma(20.0),
                                              FilterContents::BlurStyle::kNormal,
                                              tile_modes[selected_tile_mode])};
-    auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
-        Point(362, 309), Point(662, 459), 20, Color::Red(), Color::Red());
+    static PlaygroundPoint point_a(Point(362, 309), 20, Color::Red());
+    static PlaygroundPoint point_b(Point(662, 459), 20, Color::Red());
+    auto [handle_a, handle_b] = DrawPlaygroundLine(point_a, point_b);
     Vector2 center = Vector2(1024, 768) / 2;
     canvas.Scale(GetContentScale());
     canvas.ClipRect(
@@ -567,8 +571,9 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
                      Point(1024 / 2 - boston->GetSize().width / 2,
                            (768 / 2 - boston->GetSize().height / 2) + y),
                      {});
-    auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
-        Point(100, 100), Point(900, 700), 20, Color::Red(), Color::Red());
+    static PlaygroundPoint point_a(Point(100, 100), 20, Color::Red());
+    static PlaygroundPoint point_b(Point(900, 700), 20, Color::Red());
+    auto [handle_a, handle_b] = DrawPlaygroundLine(point_a, point_b);
     canvas.ClipRect(
         Rect::MakeLTRB(handle_a.x, handle_a.y, handle_b.x, handle_b.y));
     canvas.ClipRect(Rect::MakeLTRB(100, 100, 900, 700));
