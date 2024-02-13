@@ -212,7 +212,7 @@ enum WebRendererMode implements CliEnum {
     final Set<String> dartDefinesSet = inputDefines.toSet();
     if (!inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
         && inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      inputDefines.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
     dartDefinesSet.addAll(dartDefines);
     return dartDefinesSet.toList();
