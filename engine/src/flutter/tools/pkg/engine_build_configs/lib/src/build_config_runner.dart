@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show Directory, Process, ProcessResult;
+import 'dart:ffi' as ffi;
+import 'dart:io' as io show Directory, Process;
 
 import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
@@ -111,13 +112,22 @@ typedef RunnerEventHandler = void Function(RunnerEvent);
 /// An abstract base clase for running the various tasks that a build config
 /// specifies. Derived classes implement the `run()` method.
 sealed class Runner {
-  Runner(this.platform, this.processRunner, this.engineSrcDir, this.dryRun);
+  Runner(
+    this.platform,
+    this.processRunner,
+    this.abi,
+    this.engineSrcDir,
+    this.dryRun,
+  );
 
   /// Information about the platform that hosts the runner.
   final Platform platform;
 
   /// Runs the subprocesses required to run the element of the build config.
   final ProcessRunner processRunner;
+
+  /// The [Abi] of the host platform.
+  final ffi.Abi abi;
 
   /// The src/ directory of the engine checkout.
   final io.Directory engineSrcDir;
@@ -162,6 +172,7 @@ final class GlobalBuildRunner extends Runner {
   GlobalBuildRunner({
     Platform? platform,
     ProcessRunner? processRunner,
+    ffi.Abi? abi,
     required io.Directory engineSrcDir,
     required this.build,
     this.extraGnArgs = const <String>[],
@@ -175,6 +186,7 @@ final class GlobalBuildRunner extends Runner {
   }) : super(
     platform ?? const LocalPlatform(),
     processRunner ?? ProcessRunner(),
+    abi ?? ffi.Abi.current(),
     engineSrcDir,
     dryRun,
   );
@@ -289,22 +301,20 @@ final class GlobalBuildRunner extends Runner {
   }
 
   late final String _hostCpu = (){
-    if (platform.isWindows) {
-      return platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'x64';
-    }
-    final List<String> unameCommand = <String>['uname', '-m'];
-    final io.ProcessResult unameResult = processRunner.processManager.runSync(
-      unameCommand,
-    );
-    return unameResult.exitCode == 0 ? (unameResult.stdout as String).trim() : 'x64';
+    return switch (abi) {
+      ffi.Abi.linuxArm64 || ffi.Abi.macosArm64 || ffi.Abi.windowsArm64 => 'arm64',
+      ffi.Abi.linuxX64 || ffi.Abi.macosX64 || ffi.Abi.windowsX64 => 'x64',
+      _ => throw StateError('This host platform "$abi" is not supported.'),
+    };
   }();
 
   late final String _buildtoolsPath = (){
-    final String platformDir = switch (platform.operatingSystem) {
+    final String os = platform.operatingSystem;
+    final String platformDir = switch (os) {
       Platform.linux => 'linux-$_hostCpu',
       Platform.macOS => 'mac-$_hostCpu',
       Platform.windows => 'windows-$_hostCpu',
-      _ => '<unknown>',
+      _ => throw StateError('This host OS "$os" is not supported.'),
     };
     return p.join(engineSrcDir.path, 'buildtools', platformDir);
   }();
@@ -317,11 +327,12 @@ final class GlobalBuildRunner extends Runner {
     final String exe = platform.isWindows ? '.exe' : '';
     final String bootstrapPath = p.join(reclientPath, 'bootstrap$exe');
     final String reproxyPath = p.join(reclientPath, 'reproxy$exe');
-    final String reclientConfigFile = switch (platform.operatingSystem) {
+    final String os = platform.operatingSystem;
+    final String reclientConfigFile = switch (os) {
       Platform.linux => 'reclient-linux.cfg',
       Platform.macOS => 'reclient-mac.cfg',
       Platform.windows => 'reclient-win.cfg',
-      _ => '<unknown>',
+      _ => throw StateError('This host OS "$os" is not supported.'),
     };
     final String reclientConfigPath = p.join(
       engineSrcDir.path, 'flutter', 'build', 'rbe', reclientConfigFile,
@@ -487,6 +498,7 @@ final class GlobalBuildRunner extends Runner {
       final BuildTaskRunner runner = BuildTaskRunner(
         processRunner: processRunner,
         platform: platform,
+        abi: abi,
         engineSrcDir: engineSrcDir,
         task: task,
         dryRun: dryRun,
@@ -503,6 +515,7 @@ final class GlobalBuildRunner extends Runner {
       final BuildTestRunner runner = BuildTestRunner(
         processRunner: processRunner,
         platform: platform,
+        abi: abi,
         engineSrcDir: engineSrcDir,
         test: test,
         extraTestArgs: extraTestArgs,
@@ -521,12 +534,14 @@ final class BuildTaskRunner extends Runner {
   BuildTaskRunner({
     Platform? platform,
     ProcessRunner? processRunner,
+    ffi.Abi? abi,
     required io.Directory engineSrcDir,
     required this.task,
     bool dryRun = false,
   }) : super(
     platform ?? const LocalPlatform(),
     processRunner ?? ProcessRunner(),
+    abi ?? ffi.Abi.current(),
     engineSrcDir,
     dryRun,
   );
@@ -571,6 +586,7 @@ final class BuildTestRunner extends Runner {
   BuildTestRunner({
     Platform? platform,
     ProcessRunner? processRunner,
+    ffi.Abi? abi,
     required io.Directory engineSrcDir,
     required this.test,
     this.extraTestArgs = const <String>[],
@@ -578,6 +594,7 @@ final class BuildTestRunner extends Runner {
   }) : super(
     platform ?? const LocalPlatform(),
     processRunner ?? ProcessRunner(),
+    abi ?? ffi.Abi.current(),
     engineSrcDir,
     dryRun,
   );
