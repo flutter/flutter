@@ -886,6 +886,10 @@ class WebDevFS implements DevFS {
           bundle.entries,
           targetPlatform: TargetPlatform.web_javascript,
           impellerStatus: ImpellerStatus.disabled,
+          processManager: globals.processManager,
+          fileSystem: globals.fs,
+          artifacts: globals.artifacts!,
+          logger: globals.logger,
         );
       }
     }

@@ -591,6 +591,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
       );
     }
   }
