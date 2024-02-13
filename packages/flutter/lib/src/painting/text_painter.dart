@@ -325,8 +325,8 @@ class _TextLayout {
   }
 
   /// The line caret metrics in the paragraph's coordinates, when the caret is
-  /// placed at the end of the text (which is typically the EOT position
-  /// (text.length, downstream), unless maxLines is set to a non-null value).
+  /// placed at the end of the text (text.length, downstream), unless maxLines is
+  /// set to a non-null value.
   ///
   /// This should not be called when the paragraph is emtpy as the implementation
   /// relies on line metrics.
@@ -478,8 +478,9 @@ class _TextPainterLayoutCacheWithOffset {
   int? _previousCaretPositionKey;
 }
 
-/// The _CaretMetrics for carets located in a non-empty line. Carets located in a
-/// non-empty line are typically associated with a glyph within the same line.
+/// The _CaretMetrics for carets located in a non-empty paragraph. Such carets
+/// are anchored to the trailing edge or the leading edge of a glyph, or a
+/// ligature component.
 final class _LineCaretMetrics {
   const _LineCaretMetrics({required this.offset, required this.writingDirection});
   /// The offset from the top left corner of the paragraph to the the caret's

@@ -7022,7 +7022,6 @@ void main() {
         ),
       );
 
-      // textOffsetToBottomLeftPosition only works for downstream affinity.
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getCenter(find.byType(EditableText)),
