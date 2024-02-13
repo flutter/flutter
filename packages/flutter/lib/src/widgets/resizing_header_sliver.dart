@@ -16,7 +16,7 @@ import 'slotted_render_object_widget.dart';
 ///
 /// The minimum and maximum sizes of this sliver are defined by [minExtentPrototype]
 /// and [maxExtentPrototype], a pair of widgets that are laid out once. You can
-/// use [SizedBox] widgets to define limits
+/// use [SizedBox] widgets to define the size limits.
 ///
 /// This sliver is preferable to the general purpose [SliverPersistentHeader]
 /// for its relatively narrow use case because there's no need to create a
