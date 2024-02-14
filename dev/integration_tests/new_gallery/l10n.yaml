@@ -3,4 +3,3 @@ output-localization-file: gallery_localizations.dart
 output-class: GalleryLocalizations
 preferred-supported-locales:
   - en
-use-deferred-loading: true

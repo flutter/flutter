@@ -1185,6 +1185,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1204,6 +1205,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1274,6 +1276,12 @@ class PerfTest {
   /// Additional flags for `--dart-define` to control the test
   final String dartDefine;
 
+  /// Platforms to specify as an argument to `flutter create`.
+  ///
+  /// Certain test applications do not require that we check in the platform
+  /// code. For these we can generate it on the fly.
+  final List<String> createPlatforms;
+
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -1294,6 +1302,15 @@ class PerfTest {
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+      if (createPlatforms.isNotEmpty) {
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
 
       bool changedPlist = false;
       bool changedManifest = false;

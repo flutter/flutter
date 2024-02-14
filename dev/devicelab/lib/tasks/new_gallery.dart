@@ -17,5 +17,6 @@ class NewGalleryPerfTest extends PerfTest {
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
+    createPlatforms: <String>['ios', 'android'],
   );
 }
