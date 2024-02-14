@@ -676,18 +676,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         isDesktop = true;
     }
 
-    double? dragAreaWidth = widget.edgeDragWidth;
-    if (widget.edgeDragWidth == null) {
-      final EdgeInsets padding = MediaQuery.paddingOf(context);
-      switch (textDirection) {
-        case TextDirection.ltr:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.left : padding.right);
-        case TextDirection.rtl:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.right : padding.left);
-      }
-    }
+    final double dragAreaWidth = widget.edgeDragWidth ?? _kEdgeDragWidth + switch ((drawerIsStart, textDirection)) {
+      (true, TextDirection.ltr) || (false, TextDirection.rtl) => MediaQuery.paddingOf(context).left,
+      (true, TextDirection.rtl) || (false, TextDirection.ltr) => MediaQuery.paddingOf(context).right,
+    };
 
     if (_controller.status == AnimationStatus.dismissed) {
       if (widget.enableOpenDragGesture && !isDesktop) {

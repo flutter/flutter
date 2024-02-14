@@ -37,14 +37,11 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
   @override
   double childCrossAxisPosition(RenderSliver child) {
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dx;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dy;
-    }
+    final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
+    return switch (constraints.axis) {
+      Axis.vertical => paintOffset.dx,
+      Axis.horizontal => paintOffset.dy,
+    };
   }
 
   @override
