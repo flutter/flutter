@@ -158,6 +158,15 @@ void CommandPoolVK::Destroy() {
 // Associates a resource with a thread and context.
 using CommandPoolMap =
     std::unordered_map<uint64_t, std::shared_ptr<CommandPoolVK>>;
+
+// CommandPoolVK Lifecycle:
+// 1. End of frame will reset the command pool (clearing this on a thread).
+//    There will still be references to the command pool from the uncompleted
+//    command buffers.
+// 2. The last reference to the command pool will be released from the fence
+//    waiter thread, which will schedule a task on the resource
+//    manager thread, which in turn will reset the command pool and make it
+//    available for reuse ("recycle").
 static thread_local std::unique_ptr<CommandPoolMap> tls_command_pool_map;
 
 // Map each context to a list of all thread-local command pools associated
