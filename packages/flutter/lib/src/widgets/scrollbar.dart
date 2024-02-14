@@ -1466,18 +1466,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ErrorHint(
             'The Scrollbar attempted to use the $controllerForError. This '
             'ScrollController should be associated with the ScrollView that '
-            'the Scrollbar is being applied to.'
-            '${tryPrimary
-              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
-                'platforms will automatically use the '
-                'PrimaryScrollController if the user has not provided a '
-                'ScrollController. To use the PrimaryScrollController '
-                'explicitly, set ScrollView.primary to true for the Scrollable '
-                'widget.'
-              : 'When providing your own ScrollController, ensure both the '
-                'Scrollbar and the Scrollable widget use the same one.'
-            }',
+            'the Scrollbar is being applied to.',
           ),
+          if (tryPrimary) ...<ErrorHint>[
+            ErrorHint(
+              'If a ScrollController has not been provided, the '
+              'PrimaryScrollController is used by default on mobile platforms '
+              'for ScrollViews with an Axis.vertical scroll direction.',
+            ),
+            ErrorHint(
+              'To use the PrimaryScrollController explicitly, '
+              'set ScrollView.primary to true on the Scrollable widget.',
+            ),
+          ]
+          else
+            ErrorHint(
+              'When providing your own ScrollController, ensure both the '
+              'Scrollbar and the Scrollable widget use the same one.',
+            ),
         ]);
       }
       return true;
@@ -1491,26 +1497,32 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
-            'The $controllerForError is currently attached to more than one '
-            'ScrollPosition.',
+            'The $controllerForError is attached to more than one ScrollPosition.',
           ),
           ErrorDescription(
             'The Scrollbar requires a single ScrollPosition in order to be painted.',
           ),
           ErrorHint(
             'When $when, the associated ScrollController must only have one '
-            'ScrollPosition attached.'
-            '${tryPrimary
-              ? 'If a ScrollController has not been provided, the '
-                'PrimaryScrollController is used by default on mobile platforms '
-                'for ScrollViews with an Axis.vertical scroll direction. More '
-                'than one ScrollView may have tried to use the '
-                'PrimaryScrollController of the current context. '
-                'ScrollView.primary can override this behavior.'
-              : 'The provided ScrollController must be unique to one '
-                'ScrollView widget.'
-            }',
+            'ScrollPosition attached.',
           ),
+          if (tryPrimary) ...<ErrorHint>[
+            ErrorHint(
+              'If a ScrollController has not been provided, the '
+              'PrimaryScrollController is used by default on mobile platforms '
+              'for ScrollViews with an Axis.vertical scroll direction.'
+            ),
+            ErrorHint(
+              'More than one ScrollView may have tried to use the '
+              'PrimaryScrollController of the current context. '
+              'ScrollView.primary can override this behavior.'
+            ),
+          ]
+          else
+            ErrorHint(
+              'The provided ScrollController cannot be shared by multiple '
+              'ScrollView widgets.'
+            ),
         ]);
       }
       return true;
