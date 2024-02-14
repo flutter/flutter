@@ -1978,8 +1978,8 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
   final File kotlinLinterFile = File('$workingDirectory/ktlint');
   kotlinLinterFile.writeAsBytesSync(response.bodyBytes);
 
-  // TODO: should this be on CIPD? Or downloaded like in packages repo, like above?
-  // TODO: Where to put the baseline file in this repo?
+  // TODO(gmackall): should this be on CIPD? Or downloaded like in packages repo, like above?
+  // TODO(gmackall): Where to put the baseline file in this repo?
   _evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
   final EvalResult lintResult = await _evalCommand(kotlinLinterFile.path,
       <String>['--baseline=$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml'],
