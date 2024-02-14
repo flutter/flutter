@@ -3956,6 +3956,59 @@ void main() {
     expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
   });
 
+  testWidgets('PopupMenuButton scrolls initial value/selected value to visible', (WidgetTester tester) async {
+    const int length = 50;
+    const int selectedValue = length - 1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: PopupMenuButton<int>(
+              itemBuilder: (BuildContext context) {
+                return List<PopupMenuEntry<int>>.generate(length, (int index) {
+                  return PopupMenuItem<int>(value: index, child: Text('item #$index'));
+                });
+              },
+              popUpAnimationStyle: AnimationStyle.noAnimation,
+              initialValue: selectedValue,
+              child: const Text('click here'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+
+    // Set up finder and verify basic widget structure.
+    final Finder item49 = find.text('item #49');
+    expect(item49, findsOneWidget);
+
+    // The initially selected menu item should be positioned on screen.
+    final RenderBox initialItem = tester.renderObject<RenderBox>(item49);
+    final Rect initialItemBounds = initialItem.localToGlobal(Offset.zero) & initialItem.size;
+    final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(initialItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+
+    // Select item 20.
+    final Finder item20 = find.text('item #20');
+    await tester.scrollUntilVisible(item20, 500);
+    expect(item20, findsOneWidget);
+    await tester.tap(item20);
+    await tester.pump();
+
+    // Open menu again.
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(item20, findsOneWidget);
+
+    // The selected menu item should be positioned on screen.
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(item20);
+    final Rect selectedItemBounds = selectedItem.localToGlobal(Offset.zero) & selectedItem.size;
+    expect(selectedItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+  });
+
   testWidgets('PopupMenuButton properly positions a constrained-size popup', (WidgetTester tester) async {
     final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
     const int length = 50;
