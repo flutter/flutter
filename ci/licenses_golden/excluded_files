@@ -1159,6 +1159,8 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.devicetree/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.platform/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.test/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia/meta.json
 ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 ../../../fuchsia/sdk/linux/data/config/symbol_index/meta.json

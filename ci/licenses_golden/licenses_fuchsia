@@ -1,4 +1,4 @@
-Signature: a20e85377cdb949701c7a7cb8df8005c
+Signature: 2576bca110867d5ddd20d862ec6bef61
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -8990,6 +8990,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/cloc
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/utc.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.platform/fuchsia.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.test/fuchsia.test.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/audio.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device_log.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -9395,6 +9396,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/clock.
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/utc.h
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.platform/fuchsia.platform.bind
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.test/fuchsia.test.bind
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/audio.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device_log.dart
@@ -9823,6 +9825,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls-next
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/testonly-syscalls.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.arm.platform/fuchsia.arm.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/fuchsia.nxp.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/fuchsia.test.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -10074,6 +10077,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls-next.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.arm.platform/fuchsia.arm.platform.bind
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/fuchsia.nxp.platform.bind
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/fuchsia.test.platform.bind
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart
@@ -11437,6 +11441,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_internal/include/lib/vfs/internal/libvfs_private.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/virtgralloc_headers/include/lib/virtgralloc/shared_metadata.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/virtgralloc_headers/include/lib/virtgralloc/virtgralloc_ioctl.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/iob.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -11530,6 +11535,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_internal/include/lib/vfs/internal/libvfs_private.h
+FILE: ../../../fuchsia/sdk/linux/pkg/virtgralloc_headers/include/lib/virtgralloc/shared_metadata.h
 FILE: ../../../fuchsia/sdk/linux/pkg/virtgralloc_headers/include/lib/virtgralloc/virtgralloc_ioctl.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/iob.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/iob.cc
