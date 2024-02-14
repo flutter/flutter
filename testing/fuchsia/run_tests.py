@@ -125,17 +125,12 @@ def _bundled_test_runner_of(target_id: str) -> _BundledTestRunner:
   log_dir = os.environ.get('FLUTTER_LOGS_DIR', '/tmp/log')
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'), 'r') as file:
     tests = yaml.safe_load(file)
-  # TODO(zijiehe-google-com): Run tests with dart aot,
-  # https://github.com/flutter/flutter/issues/140179.
-  def dart_jit(test) -> bool:
-    return 'run_with_dart_aot' not in test or test['run_with_dart_aot'] != 'true'
-
   # TODO(zijiehe-google-com): Run all tests in release build,
   # https://github.com/flutter/flutter/issues/140179.
   def variant(test) -> bool:
     return 'variant' not in test or test['variant'] == VARIANT
 
-  tests = [t for t in tests if dart_jit(t) and variant(t)]
+  tests = [t for t in tests if variant(t)]
   return _BundledTestRunner(target_id, resolve_packages(tests), build_test_cases(tests), log_dir)
 
 

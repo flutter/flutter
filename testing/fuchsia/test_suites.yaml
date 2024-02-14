@@ -54,6 +54,7 @@
   emulator_arch:
     - 'x64'
     - 'arm64'
+  variant: fuchsia_profile_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm
   packages:
     - flutter-embedder-test-0.far
