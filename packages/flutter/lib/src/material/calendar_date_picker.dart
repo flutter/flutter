@@ -394,7 +394,6 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
               label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
-              container: true,
               child: SizedBox(
                 height: _subHeaderHeight,
                 child: InkWell(
