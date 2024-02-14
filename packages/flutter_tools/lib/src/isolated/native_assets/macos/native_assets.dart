@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart'
-    show BuildResult, DryRunResult;
+    hide NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
@@ -31,12 +31,21 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.macOS);
-  final Iterable<Asset> nativeAssetPaths = await dryRunNativeAssetsMacOSInternal(fileSystem, projectUri, flutterTester, buildRunner);
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri, fileSystem);
+  final Iterable<KernelAsset> nativeAssetPaths = await dryRunNativeAssetsMacOSInternal(
+    fileSystem,
+    projectUri,
+    flutterTester,
+    buildRunner,
+  );
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+    KernelAssets(nativeAssetPaths.toList()),
+    buildUri,
+    fileSystem,
+  );
   return nativeAssetsUri;
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsMacOSInternal(
+Future<Iterable<KernelAsset>> dryRunNativeAssetsMacOSInternal(
   FileSystem fileSystem,
   Uri projectUri,
   bool flutterTester,
@@ -57,9 +66,11 @@ Future<Iterable<Asset>> dryRunNativeAssetsMacOSInternal(
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets, absolutePath);
-  final Iterable<Asset> nativeAssetPaths = assetTargetLocations.values;
-  return nativeAssetPaths;
+  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocations(
+    nativeAssets,
+    absolutePath,
+  );
+  return assetTargetLocations.values;
 }
 
 /// Builds native assets.
@@ -82,14 +93,22 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   const OS targetOS = OS.macOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   if (!await nativeBuildRequired(buildRunner)) {
-    final Uri nativeAssetsYaml = await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory ?? buildUri, fileSystem);
+    final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
+      KernelAssets(<KernelAsset>[]),
+      yamlParentDirectory ?? buildUri,
+      fileSystem,
+    );
     return (nativeAssetsYaml, <Uri>[]);
   }
 
-  final List<Target> targets = darwinArchs != null ? darwinArchs.map(_getNativeTarget).toList() : <Target>[Target.current];
-  final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
+  final List<Target> targets = darwinArchs != null
+      ? darwinArchs.map(_getNativeTarget).toList()
+      : <Target>[Target.current];
+  final native_assets_cli.BuildMode buildModeCli =
+      nativeAssetsBuildMode(buildMode);
 
-  globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
+  globals.logger
+      .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
@@ -108,8 +127,10 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets, absolutePath);
-  final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets, absolutePath);
+  final Map<Asset, KernelAsset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets, absolutePath);
+  final Map<KernelAssetPath, List<Asset>> fatAssetTargetLocations =
+      _fatAssetTargetLocations(nativeAssets, absolutePath);
   if (flutterTester) {
     await _copyNativeAssetsMacOSFlutterTester(
       buildUri,
@@ -127,7 +148,11 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       fileSystem,
     );
   }
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(assetTargetLocations.values, yamlParentDirectory ?? buildUri, fileSystem);
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+    KernelAssets(assetTargetLocations.values.toList()),
+    yamlParentDirectory ?? buildUri,
+    fileSystem,
+  );
   return (nativeAssetsUri, dependencies.toList());
 }
 
@@ -143,14 +168,15 @@ Target _getNativeTarget(DarwinArch darwinArch) {
   }
 }
 
-Map<AssetPath, List<Asset>> _fatAssetTargetLocations(
+Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(
   List<Asset> nativeAssets,
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
+  final Map<KernelAssetPath, List<Asset>> result =
+      <KernelAssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationMacOS(
+    final KernelAssetPath path = _targetLocationMacOS(
       asset,
       absolutePath,
       alreadyTakenNames,
@@ -161,28 +187,31 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(
+Map<Asset, KernelAsset> _assetTargetLocations(
   List<Asset> nativeAssets,
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <Asset, Asset>{
+  return <Asset, KernelAsset>{
     for (final Asset asset in nativeAssets)
       asset: _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
   };
 }
 
-Asset _targetLocationMacOS(
+KernelAsset _targetLocationMacOS(
   Asset asset,
   Uri? absolutePath,
   Set<String> alreadyTakenNames,
 ) {
   final AssetPath path = asset.path;
+  final KernelAssetPath kernelAssetPath;
   switch (path) {
     case AssetSystemPath _:
+      kernelAssetPath = KernelAssetSystemPath(path.uri);
     case AssetInExecutable _:
+      kernelAssetPath = KernelAssetInExecutable();
     case AssetInProcess _:
-      return asset;
+      kernelAssetPath = KernelAssetInProcess();
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
       Uri uri;
@@ -194,11 +223,18 @@ Asset _targetLocationMacOS(
         // "relative" in the context of native assets would be relative to the
         // kernel or aot snapshot.
         uri = frameworkUri(fileName, alreadyTakenNames);
-
       }
-      return asset.copyWith(path: AssetAbsolutePath(uri));
+      kernelAssetPath = KernelAssetAbsolutePath(uri);
+    default:
+      throw Exception(
+        'Unsupported asset path type ${path.runtimeType} in asset $asset',
+      );
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  return KernelAsset(
+    id: asset.id,
+    target: asset.target,
+    path: kernelAssetPath,
+  );
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -216,15 +252,18 @@ Asset _targetLocationMacOS(
 /// in macos_assemble.sh.
 Future<void> _copyNativeAssetsMacOS(
   Uri buildUri,
-  Map<AssetPath, List<Asset>> assetTargetLocations,
+  Map<KernelAssetPath, List<Asset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
   if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
+    globals.logger.printTrace(
+      'Copying native assets to ${buildUri.toFilePath()}.',
+    );
+    for (final MapEntry<KernelAssetPath, List<Asset>> assetMapping
+        in assetTargetLocations.entries) {
+      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<Uri> sources = <Uri>[
         for (final Asset source in assetMapping.value)
           (source.path as AssetAbsolutePath).uri,
@@ -273,7 +312,6 @@ Future<void> _copyNativeAssetsMacOS(
   }
 }
 
-
 /// Copies native assets for flutter tester.
 ///
 /// For `flutter run -release` a multi-architecture solution is needed. So,
@@ -284,15 +322,18 @@ Future<void> _copyNativeAssetsMacOS(
 /// Code signing is also done here.
 Future<void> _copyNativeAssetsMacOSFlutterTester(
   Uri buildUri,
-  Map<AssetPath, List<Asset>> assetTargetLocations,
+  Map<KernelAssetPath, List<Asset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
   if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    for (final MapEntry<AssetPath, List<Asset>> assetMapping in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
+    globals.logger.printTrace(
+      'Copying native assets to ${buildUri.toFilePath()}.',
+    );
+    for (final MapEntry<KernelAssetPath, List<Asset>> assetMapping
+        in assetTargetLocations.entries) {
+      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<Uri> sources = <Uri>[
         for (final Asset source in assetMapping.value)
           (source.path as AssetAbsolutePath).uri,

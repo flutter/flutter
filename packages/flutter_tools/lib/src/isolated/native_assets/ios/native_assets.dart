@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart'
-    show BuildResult, DryRunResult;
+import 'package:native_assets_builder/native_assets_builder.dart' 
+    hide NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
@@ -31,20 +31,20 @@ Future<Uri?> dryRunNativeAssetsIOS({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.iOS);
-  final Iterable<Asset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
+  final Iterable<KernelAsset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
     fileSystem,
     projectUri,
     buildRunner,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    assetTargetLocations,
+    KernelAssets(assetTargetLocations.toList()),
     buildUri,
     fileSystem,
   );
   return nativeAssetsUri;
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsIOSInternal(
+Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
   FileSystem fileSystem,
   Uri projectUri,
   NativeAssetsBuildRunner buildRunner,
@@ -61,8 +61,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsIOSInternal(
   final List<Asset> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
-  final Iterable<Asset> assetTargetLocations = _assetTargetLocations(nativeAssets).values;
-  return assetTargetLocations;
+  return _assetTargetLocations(nativeAssets).values;
 }
 
 /// Builds native assets.
@@ -77,7 +76,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   required FileSystem fileSystem,
 }) async {
   if (!await nativeBuildRequired(buildRunner)) {
-    await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory, fileSystem);
+    await writeNativeAssetsYaml(KernelAssets(<KernelAsset>[]), yamlParentDirectory, fileSystem);
     return <Uri>[];
   }
 
@@ -107,7 +106,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
+  final Map<KernelAssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
   await _copyNativeAssetsIOS(
     buildUri,
     fatAssetTargetLocations,
@@ -116,9 +115,9 @@ Future<List<Uri>> buildNativeAssetsIOS({
     fileSystem,
   );
 
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets);
+  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
-    assetTargetLocations.values,
+    KernelAssets(assetTargetLocations.values.toList()),
     yamlParentDirectory,
     fileSystem,
   );
@@ -146,40 +145,51 @@ Target _getNativeTarget(DarwinArch darwinArch) {
   }
 }
 
-Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
+Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
+  final Map<KernelAssetPath, List<Asset>> result = <KernelAssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
+    final KernelAssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) {
+Map<Asset, KernelAsset> _assetTargetLocations(List<Asset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <Asset, Asset>{
+  return <Asset, KernelAsset>{
     for (final Asset asset in nativeAssets)
       asset: _targetLocationIOS(asset, alreadyTakenNames),
   };
 }
 
-Asset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
+KernelAsset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
   final AssetPath path = asset.path;
+final KernelAssetPath kernelAssetPath;
   switch (path) {
     case AssetSystemPath _:
+      kernelAssetPath = KernelAssetSystemPath(path.uri);
     case AssetInExecutable _:
+      kernelAssetPath = KernelAssetInExecutable();
     case AssetInProcess _:
-      return asset;
+      kernelAssetPath = KernelAssetInProcess();
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
-      return asset.copyWith(
-        path: AssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames)),
+      kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(
+        fileName,
+        alreadyTakenNames,
+      ));
+    default:
+      throw Exception(
+        'Unsupported asset path type ${path.runtimeType} in asset $asset',
       );
   }
-  throw Exception(
-      'Unsupported asset path type ${path.runtimeType} in asset $asset');
+  return KernelAsset(
+    id: asset.id,
+    target: asset.target,
+    path: kernelAssetPath,
+  );
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -194,7 +204,7 @@ Asset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
 /// in xcode_backend.dart.
 Future<void> _copyNativeAssetsIOS(
   Uri buildUri,
-  Map<AssetPath, List<Asset>> assetTargetLocations,
+  Map<KernelAssetPath, List<Asset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -202,9 +212,9 @@ Future<void> _copyNativeAssetsIOS(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    for (final MapEntry<AssetPath, List<Asset>> assetMapping
+    for (final MapEntry<KernelAssetPath, List<Asset>> assetMapping
         in assetTargetLocations.entries) {
-      final Uri target = (assetMapping.key as AssetAbsolutePath).uri;
+      final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<Uri> sources = <Uri>[
         for (final Asset source in assetMapping.value)
           (source.path as AssetAbsolutePath).uri

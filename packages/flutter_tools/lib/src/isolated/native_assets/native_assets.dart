@@ -195,7 +195,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
 /// Write [assets] to `native_assets.yaml` in [yamlParentDirectory].
 Future<Uri> writeNativeAssetsYaml(
-  Iterable<Asset> assets,
+  KernelAssets assets,
   Uri yamlParentDirectory,
   FileSystem fileSystem,
 ) async {
@@ -295,7 +295,7 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 ///
 /// Therefore, ensure all `build.dart` scripts return only dynamic libraries.
 void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
-  final Iterable<Asset> staticAssets = nativeAssets.whereLinkMode(LinkMode.static);
+  final Iterable<Asset> staticAssets = nativeAssets.where((Asset e) => e.linkMode == LinkMode.static);
   if (staticAssets.isNotEmpty) {
     final String assetIds = staticAssets.map((Asset a) => a.id).toSet().join(', ');
     throwToolExit(
@@ -453,7 +453,7 @@ Future<Uri?> dryRunNativeAssetsMultipleOSes({
   }
 
   final Uri buildUri = buildUriMultiple(projectUri);
-  final Iterable<Asset> nativeAssetPaths = <Asset>[
+  final Iterable<KernelAsset> nativeAssetPaths = <KernelAsset>[
     if (targetPlatforms.contains(build_info.TargetPlatform.darwin) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.macOS))
       ...await dryRunNativeAssetsMacOSInternal(
@@ -497,7 +497,11 @@ Future<Uri?> dryRunNativeAssetsMultipleOSes({
         buildRunner,
       ),
   ];
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri, fileSystem);
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+    KernelAssets(nativeAssetPaths.toList()),
+    buildUri,
+    fileSystem,
+  );
   return nativeAssetsUri;
 }
 
@@ -524,7 +528,7 @@ Future<Uri?> dryRunNativeAssetsSingleArchitecture({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, os);
-  final Iterable<Asset> nativeAssetPaths = await dryRunNativeAssetsSingleArchitectureInternal(
+  final Iterable<KernelAsset> nativeAssetPaths = await dryRunNativeAssetsSingleArchitectureInternal(
     fileSystem,
     projectUri,
     flutterTester,
@@ -532,14 +536,14 @@ Future<Uri?> dryRunNativeAssetsSingleArchitecture({
     os,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    nativeAssetPaths,
+    KernelAssets(nativeAssetPaths.toList()),
     buildUri,
     fileSystem,
   );
   return nativeAssetsUri;
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
+Future<Iterable<KernelAsset>> dryRunNativeAssetsSingleArchitectureInternal(
   FileSystem fileSystem,
   Uri projectUri,
   bool flutterTester,
@@ -561,12 +565,11 @@ Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(
+  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(
     nativeAssets,
     absolutePath,
   );
-  final Iterable<Asset> nativeAssetPaths = assetTargetLocations.values;
-  return nativeAssetPaths;
+  return assetTargetLocations.values;
 }
 
 /// Builds native assets.
@@ -595,7 +598,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   }
   if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-      <Asset>[],
+      KernelAssets(<KernelAsset>[]),
       yamlParentDirectory ?? buildUri,
       fileSystem,
     );
@@ -619,7 +622,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $target done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(nativeAssets, absolutePath);
+  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(nativeAssets, absolutePath);
   await _copyNativeAssetsSingleArchitecture(
     buildUri,
     assetTargetLocations,
@@ -627,18 +630,18 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     fileSystem,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    assetTargetLocations.values,
+    KernelAssets(assetTargetLocations.values.toList()),
     yamlParentDirectory ?? buildUri,
     fileSystem,
   );
   return (nativeAssetsUri, dependencies.toList());
 }
 
-Map<Asset, Asset> _assetTargetLocationsSingleArchitecture(
+Map<Asset, KernelAsset> _assetTargetLocationsSingleArchitecture(
   List<Asset> nativeAssets,
   Uri? absolutePath,
 ) {
-  return <Asset, Asset>{
+  return <Asset, KernelAsset>{
     for (final Asset asset in nativeAssets)
       asset: _targetLocationSingleArchitecture(
         asset,
@@ -647,13 +650,16 @@ Map<Asset, Asset> _assetTargetLocationsSingleArchitecture(
   };
 }
 
-Asset _targetLocationSingleArchitecture(Asset asset, Uri? absolutePath) {
+KernelAsset _targetLocationSingleArchitecture(Asset asset, Uri? absolutePath) {
   final AssetPath path = asset.path;
+  final KernelAssetPath kernelAssetPath;
   switch (path) {
     case AssetSystemPath _:
+      kernelAssetPath = KernelAssetSystemPath(path.uri);
     case AssetInExecutable _:
+      kernelAssetPath = KernelAssetInExecutable();
     case AssetInProcess _:
-      return asset;
+      kernelAssetPath = KernelAssetInProcess();
     case AssetAbsolutePath _:
       final String fileName = path.uri.pathSegments.last;
       Uri uri;
@@ -666,9 +672,17 @@ Asset _targetLocationSingleArchitecture(Asset asset, Uri? absolutePath) {
         // kernel or aot snapshot.
         uri = Uri(path: fileName);
       }
-      return asset.copyWith(path: AssetAbsolutePath(uri));
+      kernelAssetPath = KernelAssetAbsolutePath(uri);
+    default:
+      throw Exception(
+        'Unsupported asset path type ${path.runtimeType} in asset $asset',
+      );
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  return KernelAsset(
+    id: asset.id,
+    target: asset.target,
+    path: kernelAssetPath,
+  );
 }
 
 /// Extract the [Target] from a [TargetPlatform].
@@ -702,7 +716,7 @@ Target _getNativeTarget(build_info.TargetPlatform targetPlatform) {
 
 Future<void> _copyNativeAssetsSingleArchitecture(
   Uri buildUri,
-  Map<Asset, Asset> assetTargetLocations,
+  Map<Asset, KernelAsset> assetTargetLocations,
   build_info.BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
@@ -712,9 +726,9 @@ Future<void> _copyNativeAssetsSingleArchitecture(
     if (!buildDir.existsSync()) {
       buildDir.createSync(recursive: true);
     }
-    for (final MapEntry<Asset, Asset> assetMapping in assetTargetLocations.entries) {
+    for (final MapEntry<Asset, KernelAsset> assetMapping in assetTargetLocations.entries) {
       final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
-      final Uri target = (assetMapping.value.path as AssetAbsolutePath).uri;
+      final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
       final Uri targetUri = buildUri.resolveUri(target);
       final String targetFullPath = targetUri.toFilePath();
       await fileSystem.file(source).copy(targetFullPath);

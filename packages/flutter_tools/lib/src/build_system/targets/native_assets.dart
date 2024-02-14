@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart' show Asset;
+import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
@@ -56,7 +56,7 @@ class NativeAssets extends Target {
     final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
     if (nativeAssetsEnvironment == 'false') {
       dependencies = <Uri>[];
-      await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+      await writeNativeAssetsYaml(KernelAssets(<KernelAsset>[]), environment.buildDir.uri, fileSystem);
     } else {
       final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
       if (targetPlatformEnvironment == null) {
@@ -145,7 +145,7 @@ class NativeAssets extends Target {
           } else {
             // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
             // Write the file we claim to have in the [outputs].
-            await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+            await writeNativeAssetsYaml(KernelAssets(<KernelAsset>[]), environment.buildDir.uri, fileSystem);
             dependencies = <Uri>[];
           }
         case TargetPlatform.android_arm:
@@ -165,7 +165,7 @@ class NativeAssets extends Target {
         case TargetPlatform.web_javascript:
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
           // Write the file we claim to have in the [outputs].
-          await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+          await writeNativeAssetsYaml(KernelAssets(<KernelAsset>[]), environment.buildDir.uri, fileSystem);
           dependencies = <Uri>[];
       }
     }
