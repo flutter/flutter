@@ -45,6 +45,8 @@ This will also occur when Flutter is upgraded (e.g. by running the `flutter
 upgrade` command).
 We can used to develop new apps.
 
+We can develop apps for web , iOS, Android using flutter.
+
 ## About Flutter
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model, whether you're targeting iOS or Android,
