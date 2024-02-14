@@ -293,7 +293,7 @@ class MenuAnchor extends StatefulWidget {
   }
 }
 
-class _MenuAnchorState extends State<MenuAnchor> {
+class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
   // This is the global key that is used later to determine the bounding rect
   // for the anchor's region that the CustomSingleChildLayout's delegate
   // uses to determine where to place the menu on the screen and to avoid the
@@ -312,6 +312,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
+  late AnimationController _animateController;
+  late CurvedAnimation _menuAnimation;
 
   @override
   void initState() {
@@ -355,6 +357,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _root._close();
     }
     _viewSize = newSize;
+    createAnimation();
   }
 
   @override
@@ -374,6 +377,39 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_menuController._anchor == this);
   }
 
+  void createAnimation() {
+    AnimationStyle animationStyle;
+    if (widget.style?.animationStyle != null) {
+      animationStyle = widget.style!.animationStyle!;
+    } else {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          animationStyle = AnimationStyle(
+            curve: Curves.easeIn,
+            reverseCurve: Curves.easeOut,
+            duration: const Duration(milliseconds: 200),
+          );
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          animationStyle = AnimationStyle.noAnimation;
+      }
+    }
+
+    _animateController = AnimationController(
+      duration: animationStyle.duration,
+      reverseDuration: animationStyle.reverseDuration,
+      vsync: this,
+    );
+    _menuAnimation = CurvedAnimation(
+      parent: _animateController,
+      curve: animationStyle.curve ?? Curves.linear,
+      reverseCurve: animationStyle.reverseCurve ?? Curves.linear,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget child = OverlayPortal(
@@ -381,6 +417,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       overlayChildBuilder: (BuildContext context) {
        return _Submenu(
           anchor: this,
+          menuAnimation: _menuAnimation,
           menuStyle: widget.style,
           alignmentOffset: widget.alignmentOffset ?? Offset.zero,
           menuPosition: _menuPosition,
@@ -567,6 +604,7 @@ _MenuAnchorState? get _previousFocusableSibling {
     _parent?._childChangedOpenState();
     _menuPosition = position;
     _overlayController.show();
+    _animateController.forward();
 
     widget.onOpen?.call();
   }
@@ -575,7 +613,7 @@ _MenuAnchorState? get _previousFocusableSibling {
   ///
   /// Call this when the menu should be closed. Has no effect if the menu is
   /// already closed.
-  void _close({bool inDispose = false}) {
+  Future<void> _close({bool inDispose = false}) async {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
@@ -584,6 +622,7 @@ _MenuAnchorState? get _previousFocusableSibling {
       FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
+    await _animateController.reverse();
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
@@ -3294,6 +3333,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 class _MenuPanel extends StatefulWidget {
   const _MenuPanel({
     required this.menuStyle,
+    this.menuAnimation,
     this.clipBehavior = Clip.none,
     required this.orientation,
     this.crossAxisUnconstrained = true,
@@ -3302,6 +3342,8 @@ class _MenuPanel extends StatefulWidget {
 
   /// The menu style that has all the attributes for this menu panel.
   final MenuStyle? menuStyle;
+
+  final Animation<double>? menuAnimation;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -3454,17 +3496,27 @@ class _MenuPanelState extends State<_MenuPanel> {
     );
 
     if (widget.crossAxisUnconstrained) {
-      menuPanel = UnconstrainedBox(
-        constrainedAxis: widget.orientation,
-        clipBehavior: Clip.hardEdge,
-        alignment: AlignmentDirectional.centerStart,
-        child: menuPanel,
+      menuPanel = SizeTransition(
+        sizeFactor: widget.menuAnimation!,
+        axisAlignment: -1,
+        fixedCrossAxisSizeFactor: 1,
+        child: UnconstrainedBox(
+          constrainedAxis: widget.orientation,
+          clipBehavior: Clip.hardEdge,
+          alignment: AlignmentDirectional.centerStart,
+          child: menuPanel,
+        ),
       );
     }
 
-    return ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: menuPanel,
+    return SizeTransition(
+      sizeFactor: widget.menuAnimation!,
+      axisAlignment: -1,
+      fixedCrossAxisSizeFactor: 1,
+      child: ConstrainedBox(
+        constraints: effectiveConstraints,
+        child: menuPanel,
+      ),
     );
   }
 
@@ -3479,6 +3531,7 @@ class _MenuPanelState extends State<_MenuPanel> {
 // A widget that defines the menu drawn in the overlay.
 class _Submenu extends StatelessWidget {
   const _Submenu({
+    required this.menuAnimation,
     required this.anchor,
     required this.menuStyle,
     required this.menuPosition,
@@ -3489,6 +3542,7 @@ class _Submenu extends StatelessWidget {
   });
 
   final _MenuAnchorState anchor;
+  final Animation<double> menuAnimation;
   final MenuStyle? menuStyle;
   final Offset? menuPosition;
   final Offset alignmentOffset;
@@ -3579,6 +3633,7 @@ class _Submenu extends StatelessWidget {
                   child: Shortcuts(
                     shortcuts: _kMenuTraversalShortcuts,
                     child: _MenuPanel(
+                      menuAnimation: menuAnimation,
                       menuStyle: menuStyle,
                       clipBehavior: clipBehavior,
                       orientation: anchor._orientation,
