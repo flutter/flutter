@@ -143,11 +143,18 @@
                 "--rbe",
                 "--no-goma"
             ],
+            "dependencies": [
+                {
+                    "dependency": "goldctl",
+                    "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
+                }
+            ],
             "name": "android_debug_x86",
             "ninja": {
                 "config": "android_debug_x86",
                 "targets": [
-                    "flutter/shell/platform/android:flutter_shell_native_unittests"
+                    "flutter/shell/platform/android:flutter_shell_native_unittests",
+                    "flutter/testing/scenario_app"
                 ]
             },
             "tests": [
@@ -173,6 +180,52 @@
                             "android_debug_x86",
                             "--type",
                             "android"
+                    ]
+                },
+
+                {
+                    "language": "bash",
+                    "name": "Android Scenario App Integration Tests (Skia, API v28)",
+                    "test_dependencies": [
+                        {
+                            "dependency": "android_virtual_device",
+                            "version": "android_28_google_apis_x86.textpb"
+                        },
+                        {
+                            "dependency": "avd_cipd_version",
+                            "version": "build_id:8759428741582061553"
+                        }
+                    ],
+                    "contexts": [
+                        "android_virtual_device"
+                    ],
+                    "script": "flutter/testing/scenario_app/run_android_tests.sh",
+                    "parameters": [
+                        "android_debug_x86",
+                        "--no-enable-impeller"
+                    ]
+                },
+                {
+                    "language": "bash",
+                    "name": "Android Scenario App Integration Tests (Impeller/OpenGLES, API v28)",
+                    "test_dependencies": [
+                        {
+                            "dependency": "android_virtual_device",
+                            "version": "android_28_google_apis_x86.textpb"
+                        },
+                        {
+                            "dependency": "avd_cipd_version",
+                            "version": "build_id:8759428741582061553"
+                        }
+                    ],
+                    "contexts": [
+                        "android_virtual_device"
+                    ],
+                    "script": "flutter/testing/scenario_app/run_android_tests.sh",
+                    "parameters": [
+                        "android_debug_x86",
+                        "--enable-impeller",
+                        "--impeller-backend=opengles"
                     ]
                 }
             ]
