@@ -13,7 +13,7 @@ class NewGalleryPerfTest extends PerfTest {
     super.timeoutSeconds,
     super.forceOpenGLES,
   }) : super(
-     '${flutterDirectory.path}/dev/benchmarks/new_gallery',
+     '${flutterDirectory.path}/dev/integration_tests/new_gallery',
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
