@@ -519,17 +519,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           _validateFonts(yamlValue, errors);
         }
       case 'licenses':
-        if (yamlValue is! YamlList) {
-          errors.add('Expected "$yamlKey" to be a list of files, but got $yamlValue (${yamlValue.runtimeType})');
-        } else if (yamlValue.isEmpty) {
-          break;
-        } else if (yamlValue.first is! String) {
-          errors.add(
-            'Expected "$yamlKey" to contain strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
-        } else {
-          _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
-        }
+        errors.addAll(_validateList<String>(yamlValue, '"$yamlKey"', 'files'));
       case 'module':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -563,15 +553,22 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-void _validateListType<T>(YamlList yamlList, List<String> errors, String context, String typeAlias) {
+List<String> _validateList<T>(Object? yamlList, String context, String typeAlias) {
+  final List<String> errors = <String>[];
+
+  if (yamlList is! YamlList) {
+    return <String>['Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).'];
+  }
+
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
-      errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
+      errors.add('Expected $context to be a list of $typeAlias, but element at index $i was a ${yamlList[i].runtimeType}.');
     }
   }
-}
 
+  return errors;
+}
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
   final Object? yamlList = kvp.value;
   if (yamlList != null && (yamlList is! YamlList || yamlList[0] is! YamlMap)) {
@@ -588,12 +585,11 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
       }
       if (valueMap.containsKey('libraries')) {
-        final Object? libraries = valueMap['libraries'];
-        if (libraries is! YamlList) {
-          errors.add('Expected "libraries" key in the $i element of "${kvp.key}" to be a list, but got $libraries (${libraries.runtimeType}).');
-        } else {
-          _validateListType<String>(libraries, errors, '"libraries" key in the $i element of "${kvp.key}"', 'dart library Strings');
-        }
+        errors.addAll(_validateList<String>(
+          valueMap['libraries'],
+          '"libraries" key in the element at index $i of "${kvp.key}"',
+          'String',
+        ));
       }
       if (valueMap.containsKey('assets')) {
         errors.addAll(_validateAssets(valueMap['assets']));
@@ -700,11 +696,11 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.uri,
-    this.flavors = const <String>[],
+    this.flavors = const <String>{},
   });
 
   final Uri uri;
-  final List<String> flavors;
+  final Set<String> flavors;
 
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
@@ -762,8 +758,11 @@ class AssetsEntry {
           'Got ${flavors.runtimeType} instead.');
       }
 
-      final List<String> flavorsListErrors = <String>[];
-      _validateListType<String>(flavors, flavorsListErrors, 'flavors list of entry "$path"', 'String');
+      final List<String> flavorsListErrors = _validateList<String>(
+        flavors,
+        'flavors list of entry "$path"',
+        'String',
+      );
       if (flavorsListErrors.isNotEmpty) {
         return (null, 'Asset manifest entry is malformed. '
           'Expected "$_flavorKey" entry to be a list of strings.\n'
@@ -772,7 +771,7 @@ class AssetsEntry {
 
       final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
-        flavors: List<String>.from(flavors),
+        flavors: Set<String>.from(flavors),
       );
 
       return (entry, null);
@@ -788,9 +787,15 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && flavors == other.flavors;
+    return uri == other.uri && setEquals(flavors, other.flavors);
   }
 
   @override
-  int get hashCode => Object.hash(uri.hashCode, flavors.hashCode);
+  int get hashCode => Object.hashAll(<Object?>[
+    uri.hashCode,
+    Object.hashAllUnordered(flavors),
+  ]);
+
+  @override
+  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors)';
 }

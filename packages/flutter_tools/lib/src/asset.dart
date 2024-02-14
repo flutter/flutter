@@ -949,7 +949,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri assetUri, {
     String? packageName,
     Package? attributedPackage,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final String directoryPath;
     try {
@@ -1000,7 +1000,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -1116,7 +1116,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1155,7 +1155,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1192,8 +1192,8 @@ class _Asset {
     required this.entryUri,
     required this.package,
     this.kind = AssetKind.regular,
-    List<String>? flavors,
-  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>[];
+    Set<String>? flavors,
+  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>{};
 
   final String baseDir;
 
@@ -1212,7 +1212,7 @@ class _Asset {
 
   final AssetKind kind;
 
-  final List<String> flavors;
+  final Set<String> flavors;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
