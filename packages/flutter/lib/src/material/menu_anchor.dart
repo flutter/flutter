@@ -336,6 +336,7 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
     _menuController._detach(this);
     _internalMenuController = null;
     _menuScopeNode.dispose();
+    _animateController.dispose();
     super.dispose();
   }
 
