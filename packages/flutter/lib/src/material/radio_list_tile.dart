@@ -452,35 +452,39 @@ class RadioListTile<T> extends StatelessWidget {
     final Widget control;
     switch (_radioType) {
       case _RadioType.material:
-        control = Radio<T>(
-          value: value,
-          groupValue: groupValue,
-          onChanged: onChanged,
-          toggleable: toggleable,
-          activeColor: activeColor,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          fillColor: fillColor,
-          mouseCursor: mouseCursor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
+        control = ExcludeFocus(
+          child: Radio<T>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+          ),
         );
       case _RadioType.adaptive:
-        control = Radio<T>.adaptive(
-          value: value,
-          groupValue: groupValue,
-          onChanged: onChanged,
-          toggleable: toggleable,
-          activeColor: activeColor,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          fillColor: fillColor,
-          mouseCursor: mouseCursor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
-          useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
+        control = ExcludeFocus(
+          child: Radio<T>.adaptive(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
+          ),
         );
     }
 

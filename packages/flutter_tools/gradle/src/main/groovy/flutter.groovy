@@ -329,8 +329,7 @@ class FlutterPlugin implements Plugin<Project> {
         // -> Kotlin migration, we should remove this complexity and perform the checks inside
         // of the main Flutter Gradle Plugin.
         // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
-        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks")
-                && project.getProperty("skipDependencyChecks");
+        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks");
         if (!shouldSkipDependencyChecks) {
             try {
                 final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
