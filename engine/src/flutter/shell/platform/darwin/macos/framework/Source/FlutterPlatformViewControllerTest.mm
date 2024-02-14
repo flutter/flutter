@@ -161,4 +161,120 @@ TEST(FlutterPlatformViewController, TestDisposeOnMissingViewId) {
   EXPECT_TRUE(errored);
 }
 
+TEST(FlutterPlatformViewController, TestAcceptGesture) {
+  FlutterPlatformViewController* platformViewController =
+      [[FlutterPlatformViewController alloc] init];
+  [platformViewController registerViewFactory:[TestFlutterPlatformViewFactory alloc]
+                                       withId:@"MockPlatformView"];
+
+  // Create the PlatformView.
+  const NSNumber* viewId = [NSNumber numberWithLongLong:2];
+  FlutterMethodCall* methodCallOnCreate = [FlutterMethodCall
+      methodCallWithMethodName:@"create"
+                     arguments:@{@"id" : viewId, @"viewType" : @"MockPlatformView"}];
+  __block bool created = false;
+  FlutterResult resultOnCreate = ^(id result) {
+    // If a platform view is successfully created, the result is nil.
+    if (result == nil) {
+      created = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallOnCreate result:resultOnCreate];
+
+  // Call acceptGesture.
+  FlutterMethodCall* methodCallAcceptGesture =
+      [FlutterMethodCall methodCallWithMethodName:@"acceptGesture" arguments:@{@"id" : viewId}];
+  __block bool acceptGestureCalled = false;
+  FlutterResult resultAcceptGesture = ^(id result) {
+    // If a acceptGesture is successful, the result is nil.
+    if (result == nil) {
+      acceptGestureCalled = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallAcceptGesture result:resultAcceptGesture];
+
+  EXPECT_TRUE(created);
+  EXPECT_TRUE(acceptGestureCalled);
+}
+
+TEST(FlutterPlatformViewController, TestAcceptGestureOnMissingViewId) {
+  FlutterPlatformViewController* platformViewController =
+      [[FlutterPlatformViewController alloc] init];
+  [platformViewController registerViewFactory:[TestFlutterPlatformViewFactory alloc]
+                                       withId:@"MockPlatformView"];
+
+  // Call rejectGesture.
+  FlutterMethodCall* methodCallAcceptGesture =
+      [FlutterMethodCall methodCallWithMethodName:@"acceptGesture" arguments:@{
+        @"id" : @20
+      }];
+  __block bool errored = false;
+  FlutterResult result = ^(id result) {
+    if ([result isKindOfClass:[FlutterError class]]) {
+      errored = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallAcceptGesture result:result];
+
+  EXPECT_TRUE(errored);
+}
+
+TEST(FlutterPlatformViewController, TestRejectGesture) {
+  FlutterPlatformViewController* platformViewController =
+      [[FlutterPlatformViewController alloc] init];
+  [platformViewController registerViewFactory:[TestFlutterPlatformViewFactory alloc]
+                                       withId:@"MockPlatformView"];
+
+  // Create the PlatformView.
+  const NSNumber* viewId = [NSNumber numberWithLongLong:2];
+  FlutterMethodCall* methodCallOnCreate = [FlutterMethodCall
+      methodCallWithMethodName:@"create"
+                     arguments:@{@"id" : viewId, @"viewType" : @"MockPlatformView"}];
+  __block bool created = false;
+  FlutterResult resultOnCreate = ^(id result) {
+    // If a platform view is successfully created, the result is nil.
+    if (result == nil) {
+      created = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallOnCreate result:resultOnCreate];
+
+  // Call rejectGesture.
+  FlutterMethodCall* methodCallRejectGesture =
+      [FlutterMethodCall methodCallWithMethodName:@"rejectGesture" arguments:@{@"id" : viewId}];
+  __block bool rejectGestureCalled = false;
+  FlutterResult resultRejectGesture = ^(id result) {
+    // If a rejectGesture is successful, the result is nil.
+    if (result == nil) {
+      rejectGestureCalled = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallRejectGesture result:resultRejectGesture];
+
+  EXPECT_TRUE(created);
+  EXPECT_TRUE(rejectGestureCalled);
+}
+
+TEST(FlutterPlatformViewController, TestRejectGestureOnMissingViewId) {
+  FlutterPlatformViewController* platformViewController =
+      [[FlutterPlatformViewController alloc] init];
+  [platformViewController registerViewFactory:[TestFlutterPlatformViewFactory alloc]
+                                       withId:@"MockPlatformView"];
+
+  // Call rejectGesture.
+  FlutterMethodCall* methodCallRejectGesture =
+      [FlutterMethodCall methodCallWithMethodName:@"rejectGesture" arguments:@{
+        @"id" : @20
+      }];
+  __block bool errored = false;
+  FlutterResult result = ^(id result) {
+    if ([result isKindOfClass:[FlutterError class]]) {
+      errored = true;
+    }
+  };
+  [platformViewController handleMethodCall:methodCallRejectGesture result:result];
+
+  EXPECT_TRUE(errored);
+}
+
 }  // namespace flutter::testing
