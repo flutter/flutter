@@ -15,6 +15,8 @@
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "impeller/typographer/rectangle_packer.h"
 #include "impeller/typographer/typographer_context.h"
+#include "include/core/SkColor.h"
+#include "include/core/SkSize.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkFont.h"
@@ -220,7 +222,9 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
 
   switch (atlas.GetType()) {
     case GlyphAtlas::Type::kAlphaBitmap:
-      image_info = SkImageInfo::MakeA8(atlas_size.width, atlas_size.height);
+      image_info =
+          SkImageInfo::MakeA8(SkISize{static_cast<int32_t>(atlas_size.width),
+                                      static_cast<int32_t>(atlas_size.height)});
       break;
     case GlyphAtlas::Type::kColorBitmap:
       image_info =
@@ -466,7 +470,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   PixelFormat format;
   switch (type) {
     case GlyphAtlas::Type::kAlphaBitmap:
-      format = PixelFormat::kA8UNormInt;
+      format = context.GetCapabilities()->GetDefaultGlyphAtlasFormat();
       break;
     case GlyphAtlas::Type::kColorBitmap:
       format = PixelFormat::kR8G8B8A8UNormInt;

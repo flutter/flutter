@@ -111,15 +111,6 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
     return Result::kContinue;
   }
 
-  // This is a real error but we can't fix it due to our headers being too
-  // old. More more details see:
-  // https://vulkan.lunarg.com/doc/view/1.3.224.1/mac/1.3-extensions/vkspec.html#VUID-VkImageViewCreateInfo-imageViewFormatSwizzle-04465
-  // This validation error currently only trips on macOS due to the use of
-  // texture swizzles.
-  if (data->messageIdNumber == static_cast<int32_t>(0x82ae5050)) {
-    return Result::kContinue;
-  }
-
   std::vector<std::pair<std::string, std::string>> items;
 
   items.emplace_back("Severity", vk::to_string(severity));

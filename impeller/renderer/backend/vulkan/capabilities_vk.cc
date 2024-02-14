@@ -484,4 +484,8 @@ bool CapabilitiesVK::HasOptionalDeviceExtension(
          optional_device_extensions_.end();
 }
 
+PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
+  return PixelFormat::kR8UNormInt;
+}
+
 }  // namespace impeller
