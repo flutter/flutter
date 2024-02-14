@@ -138,7 +138,7 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -249,7 +249,7 @@ class _Dessert {
 
 class _DessertDataSource extends DataTableSource {
   _DessertDataSource(this.context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     _desserts = <_Dessert>[
       _Dessert(
         localizations.dataTableRowFrozenYogurt,

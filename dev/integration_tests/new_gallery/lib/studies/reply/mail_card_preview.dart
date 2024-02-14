@@ -133,7 +133,7 @@ class _DismissibleContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       alignment: alignment,
-      curve: standardEasing,
+      curve: Easing.legacy,
       color: backgroundColor,
       duration: kThemeAnimationDuration,
       padding: padding,

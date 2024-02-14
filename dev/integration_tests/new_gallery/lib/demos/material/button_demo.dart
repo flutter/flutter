@@ -12,7 +12,7 @@ class ButtonDemo extends StatelessWidget {
   final ButtonDemoType type;
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     switch (type) {
       case ButtonDemoType.text:
         return localizations.demoTextButtonTitle;
@@ -58,7 +58,7 @@ class ButtonDemo extends StatelessWidget {
 class _TextButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -106,7 +106,7 @@ class _TextButtonDemo extends StatelessWidget {
 class _ElevatedButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -154,7 +154,7 @@ class _ElevatedButtonDemo extends StatelessWidget {
 class _OutlinedButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -272,7 +272,7 @@ class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
 class _FloatingActionButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

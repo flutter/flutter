@@ -48,7 +48,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
       body: SafeArea(
         child: ScopedModelDescendant<AppStateModel>(
           builder: (BuildContext context, Widget? child, AppStateModel model) {
-            final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+            final GalleryLocalizations localizations = GalleryLocalizations.of(context);
             final ExpandingBottomSheetState? expandingBottomSheet = ExpandingBottomSheet.of(context);
             return Stack(
               children: <Widget>[
@@ -155,7 +155,7 @@ class ShoppingCartSummary extends StatelessWidget {
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
     );
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Row(
       children: <Widget>[
@@ -261,7 +261,7 @@ class ShoppingCartRow extends StatelessWidget {
     );
     final ThemeData localTheme = Theme.of(context);
 
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),

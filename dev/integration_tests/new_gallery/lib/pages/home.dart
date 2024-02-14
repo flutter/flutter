@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     final Map<String, GalleryDemo> studyDemos = Demos.studies(localizations);
     final List<Widget> carouselCards = <Widget>[
       _CarouselCard(
@@ -380,7 +380,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     final bool isTestMode = GalleryOptions.of(context).isTestMode;
     return Stack(
       children: <Widget>[
@@ -585,7 +585,7 @@ class _DesktopCategoryHeader extends StatelessWidget {
               child: Semantics(
                 header: true,
                 child: SelectableText(
-                  category.displayTitle(GalleryLocalizations.of(context)!)!,
+                  category.displayTitle(GalleryLocalizations.of(context))!,
                   style: Theme.of(context).textTheme.headlineSmall!.apply(
                         color: colorScheme.onSurface,
                       ),

@@ -341,7 +341,7 @@ class _DetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return _InkWellOverlay(
       openContainer: openContainer,
@@ -533,7 +533,7 @@ class _DetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(

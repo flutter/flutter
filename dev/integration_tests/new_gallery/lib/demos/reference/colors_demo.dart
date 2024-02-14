@@ -27,7 +27,7 @@ class _Palette {
 }
 
 List<_Palette> _allPalettes(BuildContext context) {
-  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context);
   return <_Palette>[
     _Palette(
       name: localizations.colorsRed,

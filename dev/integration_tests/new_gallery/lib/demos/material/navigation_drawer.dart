@@ -14,7 +14,7 @@ class NavDrawerDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localization = GalleryLocalizations.of(context);
     final UserAccountsDrawerHeader drawerHeader = UserAccountsDrawerHeader(
       accountName: Text(
         localization.demoNavigationDrawerUserName,

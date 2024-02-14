@@ -144,7 +144,7 @@ class UserDetailData {
 /// In a real app, this might be replaced with some asynchronous service.
 class DummyDataService {
   static List<AccountData> getAccountDataList(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <AccountData>[
       AccountData(
         name: localizations.rallyAccountDataChecking,
@@ -170,7 +170,7 @@ class DummyDataService {
   }
 
   static List<UserDetailData> getAccountDetailList(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyAccountDetailDataAnnualPercentageYield,
@@ -273,7 +273,7 @@ class DummyDataService {
 
   static List<UserDetailData> getBillDetailList(BuildContext context,
       {required double dueTotal, required double paidTotal}) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyBillDetailTotalAmount,
@@ -291,7 +291,7 @@ class DummyDataService {
   }
 
   static List<BudgetData> getBudgetDataList(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <BudgetData>[
       BudgetData(
         name: localizations.rallyBudgetCategoryCoffeeShops,
@@ -318,7 +318,7 @@ class DummyDataService {
 
   static List<UserDetailData> getBudgetDetailList(BuildContext context,
       {required double capTotal, required double usedTotal}) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyBudgetDetailTotalCap,
@@ -336,7 +336,7 @@ class DummyDataService {
   }
 
   static List<String> getSettingsTitles(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <String>[
       localizations.rallySettingsManageAccounts,
       localizations.rallySettingsTaxDocuments,
@@ -351,7 +351,7 @@ class DummyDataService {
   }
 
   static List<AlertData> getAlerts(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return <AlertData>[
       AlertData(
         message: localizations.rallyAlertsMessageHeadsUpShopping(

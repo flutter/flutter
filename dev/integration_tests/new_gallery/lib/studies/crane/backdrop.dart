@@ -208,7 +208,7 @@ class _BackdropState extends State<Backdrop>
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return Material(
       color: cranePurple800,
       child: Padding(
@@ -317,7 +317,7 @@ class _CraneAppBarState extends State<CraneAppBar> {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isSmallDesktop = isDisplaySmallDesktop(context);
     final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return SafeArea(
       child: Padding(

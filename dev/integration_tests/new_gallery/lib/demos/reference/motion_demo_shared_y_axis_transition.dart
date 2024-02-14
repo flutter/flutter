@@ -64,7 +64,7 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -155,7 +155,7 @@ class _AlbumTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Random randomNumberGenerator = Random();
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Column(
       children: <Widget>[

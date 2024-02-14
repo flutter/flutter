@@ -16,7 +16,7 @@ class BottomSheetDemo extends StatelessWidget {
   final BottomSheetDemoType type;
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     switch (type) {
       case BottomSheetDemoType.persistent:
         return localizations.demoBottomSheetPersistentTitle;
@@ -72,7 +72,7 @@ class BottomSheetDemo extends StatelessWidget {
 class _BottomSheetContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
     return SizedBox(
       height: 300,
       child: Column(

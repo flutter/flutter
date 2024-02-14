@@ -213,7 +213,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   @override
   Widget build(BuildContext context) {
     const SizedBox sizedBoxSpace = SizedBox(height: 24);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Form(
       key: _formKey,

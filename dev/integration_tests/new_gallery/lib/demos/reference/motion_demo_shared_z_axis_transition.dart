@@ -19,7 +19,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
   Route _createHomeRoute() {
     return PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
         return Scaffold(
           appBar: AppBar(
@@ -82,7 +82,7 @@ class _SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     final List<_SettingsInfo> settingsList = <_SettingsInfo>[
       _SettingsInfo(
@@ -148,7 +148,7 @@ class _RecipePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     final List<_RecipeInfo> savedRecipes = <_RecipeInfo>[
       _RecipeInfo(

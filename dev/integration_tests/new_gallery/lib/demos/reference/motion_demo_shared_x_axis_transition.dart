@@ -26,7 +26,7 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -94,7 +94,7 @@ class _CoursePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
 
     return ListView(
       children: <Widget>[

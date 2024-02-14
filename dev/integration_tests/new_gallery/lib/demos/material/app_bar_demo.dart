@@ -12,7 +12,7 @@ class AppBarDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localization = GalleryLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
