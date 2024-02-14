@@ -150,6 +150,12 @@ final class BuildConfig extends BuildConfigBase {
     }
     return errors;
   }
+
+  /// Returns true if any of the [GlobalBuild]s it contains can run on
+  /// `platform`, and false otherwise.
+  bool canRunOn(Platform platform) {
+    return builds.any((GlobalBuild b) => b.canRunOn(platform));
+  }
 }
 
 /// A "build" is a dictionary with a gn command, a ninja command, zero or more
