@@ -867,76 +867,64 @@ class _DatePickerHeader extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return Semantics(
-          container: true,
-          child: SizedBox(
-            height: _datePickerHeaderPortraitHeight,
-            child: Material(
-              color: backgroundColor,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: 24,
-                  end: 12,
-                  bottom: 12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const SizedBox(height: 16),
-                    help,
-                    const Flexible(child: SizedBox(height: 38)),
-                    Row(
-                      children: <Widget>[
-                        Expanded(child: title),
-                        if (entryModeButton != null)
-                         Semantics(
-                          container: true,
-                          child: entryModeButton,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+        return SizedBox(
+          height: _datePickerHeaderPortraitHeight,
+          child: Material(
+            color: backgroundColor,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: 24,
+                end: 12,
+                bottom: 12,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 16),
+                  help,
+                  const Flexible(child: SizedBox(height: 38)),
+                  Row(
+                    children: <Widget>[
+                      Expanded(child: title),
+                      if (entryModeButton != null)
+                        entryModeButton!,
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
         );
       case Orientation.landscape:
-        return Semantics(
-          container: true,
-          child:SizedBox(
-            width: _datePickerHeaderLandscapeWidth,
-            child: Material(
-              color: backgroundColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 16),
-                  Padding(
+        return SizedBox(
+          width: _datePickerHeaderLandscapeWidth,
+          child: Material(
+            color: backgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _headerPaddingLandscape,
+                  ),
+                  child: help,
+                ),
+                SizedBox(height: isShort ? 16 : 56),
+                Expanded(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: _headerPaddingLandscape,
                     ),
-                    child: help,
+                    child: title,
                   ),
-                  SizedBox(height: isShort ? 16 : 56),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: _headerPaddingLandscape,
-                      ),
-                      child: title,
-                    ),
+                ),
+                if (entryModeButton != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: entryModeButton,
                   ),
-                  if (entryModeButton != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Semantics(
-                        container: true,
-                        child: entryModeButton,
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
         );
