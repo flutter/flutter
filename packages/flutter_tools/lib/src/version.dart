@@ -349,18 +349,7 @@ abstract class FlutterVersion {
   static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
-      final List<String> command = <String>['git', 'fetch', '--tags'];
-      final ProcessResult results = await globals.processManager.run(
-        command,
-        workingDirectory: Cache.flutterRoot,
-      );
-      if (results.exitCode != 0) {
-          throw VersionCheckError(
-          'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-          'Standard error: ${results.stderr}'
-        );
-      }
-
+      await _run(<String>['git', 'fetch', '--tags']);
       return _gitCommitDate(gitRef: kGitTrackingUpstream, workingDirectory: Cache.flutterRoot);
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
@@ -885,17 +874,27 @@ String _runSync(
 }
 
 String _runGit(String command, ProcessUtils processUtils, String? workingDirectory) {
-  try {
-    return processUtils.runSync(
-      command.split(' '),
-      workingDirectory: workingDirectory,
-    ).stdout.trim();
-  } on ProcessException catch(e) {
-    throwToolExit(
-      'Unable to run git. Make sure git is available in your path.\n'
-      'Error details: $e',
-    );
+  return processUtils.runSync(
+    command.split(' '),
+    workingDirectory: workingDirectory,
+  ).stdout.trim();
+}
+
+/// Runs [command] in the root of the Flutter installation and returns the
+/// standard output as a string.
+///
+/// If the command fails, throws a [ToolExit] exception.
+Future<String> _run(List<String> command) async {
+  final ProcessResult results = await globals.processManager.run(command, workingDirectory: Cache.flutterRoot);
+
+  if (results.exitCode == 0) {
+    return (results.stdout as String).trim();
   }
+
+  throw VersionCheckError(
+    'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+    'Standard error: ${results.stderr}'
+  );
 }
 
 String _shortGitRevision(String? revision) {
