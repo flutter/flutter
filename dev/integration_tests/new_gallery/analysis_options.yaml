@@ -1,0 +1,20 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  # In addition to the flutter_lints
+  rules:
+    - always_declare_return_types
+    - avoid_types_on_closure_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - close_sinks
+    - directives_ordering
+    - flutter_style_todos
+    - package_api_docs
+    - prefer_single_quotes
+    - test_types_in_equals
+    - throw_in_finally
+    - unawaited_futures
+    - unnecessary_statements
+    - unsafe_html
+    - use_super_parameters

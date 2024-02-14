@@ -1,0 +1,3216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file was automatically generated.
+  Please do not edit it manually.
+  It is based on lib/l10n/intl_en.arb.
+-->
+<resources>
+  <string
+    name="githubRepo"
+    description="Represents a link to a GitHub repository."
+    >{repoName} GitHub repository</string>
+  <string
+    name="aboutDialogDescription"
+    description="A description about how to view the source code for this app."
+    >To see the source code for this app, please visit the {repoLink}.</string>
+  <string
+    name="deselect"
+    description="Deselect a (selectable) item"
+    >Deselect</string>
+  <string
+    name="notSelected"
+    description="Indicates the status of a (selectable) item not being selected"
+    >Not selected</string>
+  <string
+    name="select"
+    description="Select a (selectable) item"
+    >Select</string>
+  <string
+    name="selectable"
+    description="Indicates the associated piece of UI is selectable by long pressing it"
+    >Selectable (long press)</string>
+  <string
+    name="selected"
+    description="Indicates status of a (selectable) item being selected"
+    >Selected</string>
+  <string
+    name="signIn"
+    description="Sign in label to sign into website."
+    >SIGN IN</string>
+  <string
+    name="bannerDemoText"
+    description="Password was updated on a different device and the user is required to sign in again"
+    >Your password was updated on your other device. Please sign in again.</string>
+  <string
+    name="bannerDemoResetText"
+    description="Show the Banner to the user again."
+    >Reset the banner</string>
+  <string
+    name="bannerDemoMultipleText"
+    description="When the user clicks this button the Banner will toggle multiple actions or a single action"
+    >Multiple actions</string>
+  <string
+    name="bannerDemoLeadingText"
+    description="If user clicks this button the leading icon in the Banner will disappear"
+    >Leading Icon</string>
+  <string
+    name="dismiss"
+    description="When text is pressed the banner widget will be removed from the screen."
+    >DISMISS</string>
+  <string
+    name="backToGallery"
+    description="Semantic label for back button to exit a study and return to the gallery home page."
+    >Back to Gallery</string>
+  <string
+    name="cardsDemoExplore"
+    description="Click to see more about the content in the cards demo."
+    >Explore</string>
+  <string
+    name="cardsDemoExploreSemantics"
+    description="Semantics label for Explore. Label tells user to explore the destinationName to the user. Example Explore Tamil"
+    >Explore {destinationName}</string>
+  <string
+    name="cardsDemoShareSemantics"
+    description="Semantics label for Share. Label tells user to share the destinationName to the user. Example Share Tamil"
+    >Share {destinationName}</string>
+  <string
+    name="cardsDemoTappable"
+    description="The user can tap this button"
+    >Tappable</string>
+  <string
+    name="cardsDemoTravelDestinationTitle1"
+    description="The top 10 cities that you can visit in Tamil Nadu"
+    >Top 10 Cities to Visit in Tamil Nadu</string>
+  <string
+    name="cardsDemoTravelDestinationDescription1"
+    description="Number 10"
+    >Number 10</string>
+  <string
+    name="cardsDemoTravelDestinationCity1"
+    description="Thanjavur the city"
+    >Thanjavur</string>
+  <string
+    name="cardsDemoTravelDestinationLocation1"
+    description="Thanjavur, Tamil Nadu is a location"
+    >Thanjavur, Tamil Nadu</string>
+  <string
+    name="cardsDemoTravelDestinationTitle2"
+    description="Artist that are from Southern India"
+    >Artisans of Southern India</string>
+  <string
+    name="cardsDemoTravelDestinationDescription2"
+    description="Silk Spinners"
+    >Silk Spinners</string>
+  <string
+    name="cardsDemoTravelDestinationCity2"
+    description="Chettinad the city"
+    >Chettinad</string>
+  <string
+    name="cardsDemoTravelDestinationLocation2"
+    description="Sivaganga, Tamil Nadu is a location"
+    >Sivaganga, Tamil Nadu</string>
+  <string
+    name="cardsDemoTravelDestinationTitle3"
+    description="Brihadisvara Temple"
+    >Brihadisvara Temple</string>
+  <string
+    name="cardsDemoTravelDestinationDescription3"
+    description="Temples"
+    >Temples</string>
+  <string
+    name="homeHeaderGallery"
+    description="Header title on home screen for Gallery section."
+    >Gallery</string>
+  <string
+    name="homeHeaderCategories"
+    description="Header title on home screen for Categories section."
+    >Categories</string>
+  <string
+    name="shrineDescription"
+    description="Study description for Shrine."
+    >A fashionable retail app</string>
+  <string
+    name="fortnightlyDescription"
+    description="Study description for Fortnightly."
+    >A content-focused news app</string>
+  <string
+    name="rallyDescription"
+    description="Study description for Rally."
+    >A personal finance app</string>
+  <string
+    name="replyDescription"
+    description="Study description for Reply."
+    >An efficient, focused email app</string>
+  <string
+    name="rallyAccountDataChecking"
+    description="Name for account made up by user."
+    >Checking</string>
+  <string
+    name="rallyAccountDataHomeSavings"
+    description="Name for account made up by user."
+    >Home Savings</string>
+  <string
+    name="rallyAccountDataCarSavings"
+    description="Name for account made up by user."
+    >Car Savings</string>
+  <string
+    name="rallyAccountDataVacation"
+    description="Name for account made up by user."
+    >Vacation</string>
+  <string
+    name="rallyAccountDetailDataAnnualPercentageYield"
+    description="Title for account statistics. Below a percentage such as 0.10% will be displayed."
+    >Annual Percentage Yield</string>
+  <string
+    name="rallyAccountDetailDataInterestRate"
+    description="Title for account statistics. Below a dollar amount such as $100 will be displayed."
+    >Interest Rate</string>
+  <string
+    name="rallyAccountDetailDataInterestYtd"
+    description="Title for account statistics. Below a dollar amount such as $100 will be displayed."
+    >Interest YTD</string>
+  <string
+    name="rallyAccountDetailDataInterestPaidLastYear"
+    description="Title for account statistics. Below a dollar amount such as $100 will be displayed."
+    >Interest Paid Last Year</string>
+  <string
+    name="rallyAccountDetailDataNextStatement"
+    description="Title for an account detail. Below a date for when the next account statement is released."
+    >Next Statement</string>
+  <string
+    name="rallyAccountDetailDataAccountOwner"
+    description="Title for an account detail. Below the name of the account owner will be displayed."
+    >Account Owner</string>
+  <string
+    name="rallyBillDetailTotalAmount"
+    description="Title for column where it displays the total dollar amount that the user has in bills."
+    >Total Amount</string>
+  <string
+    name="rallyBillDetailAmountPaid"
+    description="Title for column where it displays the amount that the user has paid."
+    >Amount Paid</string>
+  <string
+    name="rallyBillDetailAmountDue"
+    description="Title for column where it displays the amount that the user has due."
+    >Amount Due</string>
+  <string
+    name="rallyBudgetCategoryCoffeeShops"
+    description="Category for budget, to sort expenses / bills in."
+    >Coffee Shops</string>
+  <string
+    name="rallyBudgetCategoryGroceries"
+    description="Category for budget, to sort expenses / bills in."
+    >Groceries</string>
+  <string
+    name="rallyBudgetCategoryRestaurants"
+    description="Category for budget, to sort expenses / bills in."
+    >Restaurants</string>
+  <string
+    name="rallyBudgetCategoryClothing"
+    description="Category for budget, to sort expenses / bills in."
+    >Clothing</string>
+  <string
+    name="rallyBudgetDetailTotalCap"
+    description="Title for column where it displays the total dollar cap that the user has for its budget."
+    >Total Cap</string>
+  <string
+    name="rallyBudgetDetailAmountUsed"
+    description="Title for column where it displays the dollar amount that the user has used in its budget."
+    >Amount Used</string>
+  <string
+    name="rallyBudgetDetailAmountLeft"
+    description="Title for column where it displays the dollar amount that the user has left in its budget."
+    >Amount Left</string>
+  <string
+    name="rallySettingsManageAccounts"
+    description="Link to go to the page &apos;Manage Accounts."
+    >Manage Accounts</string>
+  <string
+    name="rallySettingsTaxDocuments"
+    description="Link to go to the page &apos;Tax Documents&apos;."
+    >Tax Documents</string>
+  <string
+    name="rallySettingsPasscodeAndTouchId"
+    description="Link to go to the page &apos;Passcode and Touch ID&apos;."
+    >Passcode and Touch ID</string>
+  <string
+    name="rallySettingsNotifications"
+    description="Link to go to the page &apos;Notifications&apos;."
+    >Notifications</string>
+  <string
+    name="rallySettingsPersonalInformation"
+    description="Link to go to the page &apos;Personal Information&apos;."
+    >Personal Information</string>
+  <string
+    name="rallySettingsPaperlessSettings"
+    description="Link to go to the page &apos;Paperless Settings&apos;."
+    >Paperless Settings</string>
+  <string
+    name="rallySettingsFindAtms"
+    description="Link to go to the page &apos;Find ATMs&apos;."
+    >Find ATMs</string>
+  <string
+    name="rallySettingsHelp"
+    description="Link to go to the page &apos;Help&apos;."
+    >Help</string>
+  <string
+    name="rallySettingsSignOut"
+    description="Link to go to the page &apos;Sign out&apos;."
+    >Sign out</string>
+  <string
+    name="rallyAccountTotal"
+    description="Title for &apos;total account value&apos; overview page, a dollar value is displayed next to it."
+    >Total</string>
+  <string
+    name="rallyBillsDue"
+    description="Title for &apos;bills due&apos; page, a dollar value is displayed next to it."
+    >Due</string>
+  <string
+    name="rallyBudgetLeft"
+    description="Title for &apos;budget left&apos; page, a dollar value is displayed next to it."
+    >Left</string>
+  <string
+    name="rallyAccounts"
+    description="Link text for accounts page."
+    >Accounts</string>
+  <string
+    name="rallyBills"
+    description="Link text for bills page."
+    >Bills</string>
+  <string
+    name="rallyBudgets"
+    description="Link text for budgets page."
+    >Budgets</string>
+  <string
+    name="rallyAlerts"
+    description="Title for alerts part of overview page."
+    >Alerts</string>
+  <string
+    name="rallySeeAll"
+    description="Link text for button to see all data for category."
+    >SEE ALL</string>
+  <string
+    name="rallyFinanceLeft"
+    description="Displayed as &apos;dollar amount left&apos;, for example $46.70 LEFT, for a budget category."
+    > LEFT</string>
+  <string
+    name="rallyTitleOverview"
+    description="The navigation link to the overview page."
+    >OVERVIEW</string>
+  <string
+    name="rallyTitleAccounts"
+    description="The navigation link to the accounts page."
+    >ACCOUNTS</string>
+  <string
+    name="rallyTitleBills"
+    description="The navigation link to the bills page."
+    >BILLS</string>
+  <string
+    name="rallyTitleBudgets"
+    description="The navigation link to the budgets page."
+    >BUDGETS</string>
+  <string
+    name="rallyTitleSettings"
+    description="The navigation link to the settings page."
+    >SETTINGS</string>
+  <string
+    name="rallyLoginLoginToRally"
+    description="Title for login page for the Rally app (Rally does not need to be translated as it is a product name)."
+    >Login to Rally</string>
+  <string
+    name="rallyLoginNoAccount"
+    description="Prompt for signing up for an account."
+    >Don&apos;t have an account?</string>
+  <string
+    name="rallyLoginSignUp"
+    description="Button text to sign up for an account."
+    >SIGN UP</string>
+  <string
+    name="rallyLoginUsername"
+    description="The username field in an login form."
+    >Username</string>
+  <string
+    name="rallyLoginPassword"
+    description="The password field in an login form."
+    >Password</string>
+  <string
+    name="rallyLoginLabelLogin"
+    description="The label text to login."
+    >Login</string>
+  <string
+    name="rallyLoginRememberMe"
+    description="Text if the user wants to stay logged in."
+    >Remember Me</string>
+  <string
+    name="rallyLoginButtonLogin"
+    description="Text for login button."
+    >LOGIN</string>
+  <string
+    name="rallyAlertsMessageHeadsUpShopping"
+    description="Alert message shown when for example, user has used more than 90% of their shopping budget."
+    >Heads up, you&apos;ve used up {percent} of your Shopping budget for this month.</string>
+  <string
+    name="rallyAlertsMessageSpentOnRestaurants"
+    description="Alert message shown when for example, user has spent $120 on Restaurants this week."
+    >You&apos;ve spent {amount} on Restaurants this week.</string>
+  <string
+    name="rallyAlertsMessageATMFees"
+    description="Alert message shown when for example, the user has spent $24 in ATM fees this month."
+    >You&apos;ve spent {amount} in ATM fees this month</string>
+  <string
+    name="rallyAlertsMessageCheckingAccount"
+    description="Alert message shown when for example, the checking account is 1% higher than last month."
+    >Good work! Your checking account is {percent} higher than last month.</string>
+  <string
+    name="rallyAlertsMessageUnassignedTransactions"
+    description="Alert message shown when you have unassigned transactions."
+    >{count, plural, =1{Increase your potential tax deduction! Assign categories to 1 unassigned transaction.}other{Increase your potential tax deduction! Assign categories to {count} unassigned transactions.}}</string>
+  <string
+    name="rallySeeAllAccounts"
+    description="Semantics label for button to see all accounts. Accounts refer to bank account here."
+    >See all accounts</string>
+  <string
+    name="rallySeeAllBills"
+    description="Semantics label for button to see all bills."
+    >See all bills</string>
+  <string
+    name="rallySeeAllBudgets"
+    description="Semantics label for button to see all budgets."
+    >See all budgets</string>
+  <string
+    name="rallyAccountAmount"
+    description="Semantics label for row with bank account name (for example checking) and its bank account number (for example 123), with how much money is deposited in it (for example $12)."
+    >{accountName} account {accountNumber} with {amount}.</string>
+  <string
+    name="rallyBillAmount"
+    description="Semantics label for row with a bill (example name is rent), when the bill is due (1/12/2019 for example) and for how much money ($12)."
+    >{billName} bill due {date} for {amount}.</string>
+  <string
+    name="rallyBudgetAmount"
+    description="Semantics label for row with a budget (housing budget for example), with how much is used of the budget (for example $5), the total budget (for example $100) and the amount left in the budget (for example $95)."
+    >{budgetName} budget with {amountUsed} used of {amountTotal}, {amountLeft} left</string>
+  <string
+    name="craneDescription"
+    description="Study description for Crane."
+    >A personalized travel app</string>
+  <string
+    name="homeCategoryReference"
+    description="Category title on home screen for styles &amp; other demos (for context, the styles demos consist of a color demo and a typography demo)."
+    >STYLES &amp; OTHER</string>
+  <string
+    name="demoInvalidURL"
+    description="Error message when opening the URL for a demo."
+    >Couldn&apos;t display URL:</string>
+  <string
+    name="demoOptionsTooltip"
+    description="Tooltip for options button in a demo."
+    >Options</string>
+  <string
+    name="demoInfoTooltip"
+    description="Tooltip for info button in a demo."
+    >Info</string>
+  <string
+    name="demoCodeTooltip"
+    description="Tooltip for demo code button in a demo."
+    >Demo Code</string>
+  <string
+    name="demoDocumentationTooltip"
+    description="Tooltip for API documentation button in a demo."
+    >API Documentation</string>
+  <string
+    name="demoFullscreenTooltip"
+    description="Tooltip for Full Screen button in a demo."
+    >Full Screen</string>
+  <string
+    name="demoCodeViewerCopyAll"
+    description="Caption for a button to copy all text."
+    >COPY ALL</string>
+  <string
+    name="demoCodeViewerCopiedToClipboardMessage"
+    description="A message displayed to the user after clicking the COPY ALL button, if the text is successfully copied to the clipboard."
+    >Copied to clipboard.</string>
+  <string
+    name="demoCodeViewerFailedToCopyToClipboardMessage"
+    description="A message displayed to the user after clicking the COPY ALL button, if the text CANNOT be copied to the clipboard."
+    >Failed to copy to clipboard: {error}</string>
+  <string
+    name="demoOptionsFeatureTitle"
+    description="Title for an alert that explains what the options button does."
+    >View options</string>
+  <string
+    name="demoOptionsFeatureDescription"
+    description="Description for an alert that explains what the options button does."
+    >Tap here to view available options for this demo.</string>
+  <string
+    name="settingsTitle"
+    description="Title for the settings screen."
+    >Settings</string>
+  <string
+    name="settingsButtonLabel"
+    description="Accessibility label for the settings button when settings are not showing."
+    >Settings</string>
+  <string
+    name="settingsButtonCloseLabel"
+    description="Accessibility label for the settings button when settings are showing."
+    >Close settings</string>
+  <string
+    name="settingsSystemDefault"
+    description="Option label to indicate the system default will be used."
+    >System</string>
+  <string
+    name="settingsTextScaling"
+    description="Title for text scaling setting."
+    >Text scaling</string>
+  <string
+    name="settingsTextScalingSmall"
+    description="Option label for small text scale setting."
+    >Small</string>
+  <string
+    name="settingsTextScalingNormal"
+    description="Option label for normal text scale setting."
+    >Normal</string>
+  <string
+    name="settingsTextScalingLarge"
+    description="Option label for large text scale setting."
+    >Large</string>
+  <string
+    name="settingsTextScalingHuge"
+    description="Option label for huge text scale setting."
+    >Huge</string>
+  <string
+    name="settingsTextDirection"
+    description="Title for text direction setting."
+    >Text direction</string>
+  <string
+    name="settingsTextDirectionLocaleBased"
+    description="Option label for locale-based text direction setting."
+    >Based on locale</string>
+  <string
+    name="settingsTextDirectionLTR"
+    description="Option label for left-to-right text direction setting."
+    >LTR</string>
+  <string
+    name="settingsTextDirectionRTL"
+    description="Option label for right-to-left text direction setting."
+    >RTL</string>
+  <string
+    name="settingsLocale"
+    description="Title for locale setting."
+    >Locale</string>
+  <string
+    name="settingsPlatformMechanics"
+    description="Title for platform mechanics (iOS, Android, macOS, etc.) setting."
+    >Platform mechanics</string>
+  <string
+    name="settingsTheme"
+    description="Title for the theme setting."
+    >Theme</string>
+  <string
+    name="settingsDarkTheme"
+    description="Title for the dark theme setting."
+    >Dark</string>
+  <string
+    name="settingsLightTheme"
+    description="Title for the light theme setting."
+    >Light</string>
+  <string
+    name="settingsSlowMotion"
+    description="Title for slow motion setting."
+    >Slow motion</string>
+  <string
+    name="settingsAbout"
+    description="Title for information button."
+    >About Flutter Gallery</string>
+  <string
+    name="settingsFeedback"
+    description="Title for feedback button."
+    >Send feedback</string>
+  <string
+    name="settingsAttribution"
+    description="Title for attribution (TOASTER is a proper name and should remain in English)."
+    >Designed by TOASTER in London</string>
+  <string
+    name="demoAppBarTitle"
+    description="Title for the material App bar component demo."
+    >App bar</string>
+  <string
+    name="demoAppBarSubtitle"
+    description="Subtitle for the material App bar component demo."
+    >Displays information and actions relating to the current screen</string>
+  <string
+    name="demoAppBarDescription"
+    description="Description for the material App bar component demo."
+    >The App bar provides content and actions related to the current screen. It&apos;s used for branding, screen titles, navigation, and actions</string>
+  <string
+    name="demoBottomAppBarTitle"
+    description="Title for the material bottom app bar component demo."
+    >Bottom app bar</string>
+  <string
+    name="demoBottomAppBarSubtitle"
+    description="Subtitle for the material bottom app bar component demo."
+    >Displays navigation and actions at the bottom</string>
+  <string
+    name="demoBottomAppBarDescription"
+    description="Description for the material bottom app bar component demo."
+    >Bottom app bars provide access to a bottom navigation drawer and up to four actions, including the floating action button.</string>
+  <string
+    name="bottomAppBarNotch"
+    description="A toggle for whether to have a notch (or cutout) in the bottom app bar demo."
+    >Notch</string>
+  <string
+    name="bottomAppBarPosition"
+    description="A setting for the position of the floating action button in the bottom app bar demo."
+    >Floating Action Button Position</string>
+  <string
+    name="bottomAppBarPositionDockedEnd"
+    description="A setting for the position of the floating action button in the bottom app bar that docks the button in the bar and aligns it at the end."
+    >Docked - End</string>
+  <string
+    name="bottomAppBarPositionDockedCenter"
+    description="A setting for the position of the floating action button in the bottom app bar that docks the button in the bar and aligns it in the center."
+    >Docked - Center</string>
+  <string
+    name="bottomAppBarPositionFloatingEnd"
+    description="A setting for the position of the floating action button in the bottom app bar that places the button above the bar and aligns it at the end."
+    >Floating - End</string>
+  <string
+    name="bottomAppBarPositionFloatingCenter"
+    description="A setting for the position of the floating action button in the bottom app bar that places the button above the bar and aligns it in the center."
+    >Floating - Center</string>
+  <string
+    name="demoBannerTitle"
+    description="Title for the material banner component demo."
+    >Banner</string>
+  <string
+    name="demoBannerSubtitle"
+    description="Subtitle for the material banner component demo."
+    >Displaying a banner within a list</string>
+  <string
+    name="demoBannerDescription"
+    description="Description for the material banner component demo."
+    >A banner displays an important, succinct message, and provides actions for users to address (or dismiss the banner). A user action is required for it to be dismissed.</string>
+  <string
+    name="demoBottomNavigationTitle"
+    description="Title for the material bottom navigation component demo."
+    >Bottom navigation</string>
+  <string
+    name="demoBottomNavigationSubtitle"
+    description="Subtitle for the material bottom navigation component demo."
+    >Bottom navigation with cross-fading views</string>
+  <string
+    name="demoBottomNavigationPersistentLabels"
+    description="Option title for bottom navigation with persistent labels."
+    >Persistent labels</string>
+  <string
+    name="demoBottomNavigationSelectedLabel"
+    description="Option title for bottom navigation with only a selected label."
+    >Selected label</string>
+  <string
+    name="demoBottomNavigationDescription"
+    description="Description for the material bottom navigation component demo."
+    >Bottom navigation bars display three to five destinations at the bottom of a screen. Each destination is represented by an icon and an optional text label. When a bottom navigation icon is tapped, the user is taken to the top-level navigation destination associated with that icon.</string>
+  <string
+    name="demoButtonTitle"
+    description="Title for the material buttons component demo."
+    >Buttons</string>
+  <string
+    name="demoButtonSubtitle"
+    description="Subtitle for the material buttons component demo."
+    >Text, elevated, outlined, and more</string>
+  <string
+    name="demoTextButtonTitle"
+    description="Title for the text button component demo."
+    >Text Button</string>
+  <string
+    name="demoTextButtonDescription"
+    description="Description for the text button component demo."
+    >A text button displays an ink splash on press but does not lift. Use text buttons on toolbars, in dialogs and inline with padding</string>
+  <string
+    name="demoElevatedButtonTitle"
+    description="Title for the elevated button component demo."
+    >Elevated Button</string>
+  <string
+    name="demoElevatedButtonDescription"
+    description="Description for the elevated button component demo."
+    >Elevated buttons add dimension to mostly flat layouts. They emphasize functions on busy or wide spaces.</string>
+  <string
+    name="demoOutlinedButtonTitle"
+    description="Title for the outlined button component demo."
+    >Outlined Button</string>
+  <string
+    name="demoOutlinedButtonDescription"
+    description="Description for the outlined button component demo."
+    >Outlined buttons become opaque and elevate when pressed. They are often paired with raised buttons to indicate an alternative, secondary action.</string>
+  <string
+    name="demoToggleButtonTitle"
+    description="Title for the toggle buttons component demo."
+    >Toggle Buttons</string>
+  <string
+    name="demoToggleButtonDescription"
+    description="Description for the toggle buttons component demo."
+    >Toggle buttons can be used to group related options. To emphasize groups of related toggle buttons, a group should share a common container</string>
+  <string
+    name="demoFloatingButtonTitle"
+    description="Title for the floating action button component demo."
+    >Floating Action Button</string>
+  <string
+    name="demoFloatingButtonDescription"
+    description="Description for the floating action button component demo."
+    >A floating action button is a circular icon button that hovers over content to promote a primary action in the application.</string>
+  <string
+    name="demoCardTitle"
+    description="Title for the material cards component demo."
+    >Cards</string>
+  <string
+    name="demoCardSubtitle"
+    description="Subtitle for the material cards component demo."
+    >Baseline cards with rounded corners</string>
+  <string
+    name="demoChipTitle"
+    description="Title for the material chips component demo."
+    >Chips</string>
+  <string
+    name="demoCardDescription"
+    description="Description for the material cards component demo."
+    >A card is a sheet of Material used to represent some related information, for example an album, a geographical location, a meal, contact details, etc.</string>
+  <string
+    name="demoChipSubtitle"
+    description="Subtitle for the material chips component demo."
+    >Compact elements that represent an input, attribute, or action</string>
+  <string
+    name="demoActionChipTitle"
+    description="Title for the action chip component demo."
+    >Action Chip</string>
+  <string
+    name="demoActionChipDescription"
+    description="Description for the action chip component demo."
+    >Action chips are a set of options which trigger an action related to primary content. Action chips should appear dynamically and contextually in a UI.</string>
+  <string
+    name="demoChoiceChipTitle"
+    description="Title for the choice chip component demo."
+    >Choice Chip</string>
+  <string
+    name="demoChoiceChipDescription"
+    description="Description for the choice chip component demo."
+    >Choice chips represent a single choice from a set. Choice chips contain related descriptive text or categories.</string>
+  <string
+    name="demoFilterChipTitle"
+    description="Title for the filter chip component demo."
+    >Filter Chip</string>
+  <string
+    name="demoFilterChipDescription"
+    description="Description for the filter chip component demo."
+    >Filter chips use tags or descriptive words as a way to filter content.</string>
+  <string
+    name="demoInputChipTitle"
+    description="Title for the input chip component demo."
+    >Input Chip</string>
+  <string
+    name="demoInputChipDescription"
+    description="Description for the input chip component demo."
+    >Input chips represent a complex piece of information, such as an entity (person, place, or thing) or conversational text, in a compact form.</string>
+  <string
+    name="demoDataTableTitle"
+    description="Title for the material data table component demo."
+    >Data Tables</string>
+  <string
+    name="demoDataTableSubtitle"
+    description="Subtitle for the material data table component demo."
+    >Rows and columns of information</string>
+  <string
+    name="demoDataTableDescription"
+    description="Description for the material data table component demo."
+    >Data tables display information in a grid-like format of rows and columns. They organize information in a way that&apos;s easy to scan, so that users can look for patterns and insights.</string>
+  <string
+    name="dataTableHeader"
+    description="Header for the data table component demo about nutrition."
+    >Nutrition</string>
+  <string
+    name="dataTableColumnDessert"
+    description="Column header for desserts."
+    >Dessert (1 serving)</string>
+  <string
+    name="dataTableColumnCalories"
+    description="Column header for number of calories."
+    >Calories</string>
+  <string
+    name="dataTableColumnFat"
+    description="Column header for number of grams of fat."
+    >Fat (g)</string>
+  <string
+    name="dataTableColumnCarbs"
+    description="Column header for number of grams of carbs."
+    >Carbs (g)</string>
+  <string
+    name="dataTableColumnProtein"
+    description="Column header for number of grams of protein."
+    >Protein (g)</string>
+  <string
+    name="dataTableColumnSodium"
+    description="Column header for number of milligrams of sodium."
+    >Sodium (mg)</string>
+  <string
+    name="dataTableColumnCalcium"
+    description="Column header for daily percentage of calcium."
+    >Calcium (%)</string>
+  <string
+    name="dataTableColumnIron"
+    description="Column header for daily percentage of iron."
+    >Iron (%)</string>
+  <string
+    name="dataTableRowFrozenYogurt"
+    description="Column row for frozen yogurt."
+    >Frozen yogurt</string>
+  <string
+    name="dataTableRowIceCreamSandwich"
+    description="Column row for Ice cream sandwich."
+    >Ice cream sandwich</string>
+  <string
+    name="dataTableRowEclair"
+    description="Column row for Eclair."
+    >Eclair</string>
+  <string
+    name="dataTableRowCupcake"
+    description="Column row for Cupcake."
+    >Cupcake</string>
+  <string
+    name="dataTableRowGingerbread"
+    description="Column row for Gingerbread."
+    >Gingerbread</string>
+  <string
+    name="dataTableRowJellyBean"
+    description="Column row for Jelly bean."
+    >Jelly bean</string>
+  <string
+    name="dataTableRowLollipop"
+    description="Column row for Lollipop."
+    >Lollipop</string>
+  <string
+    name="dataTableRowHoneycomb"
+    description="Column row for Honeycomb."
+    >Honeycomb</string>
+  <string
+    name="dataTableRowDonut"
+    description="Column row for Donut."
+    >Donut</string>
+  <string
+    name="dataTableRowApplePie"
+    description="Column row for Apple pie."
+    >Apple pie</string>
+  <string
+    name="dataTableRowWithSugar"
+    description="A dessert with sugar on it. The parameter is some type of dessert."
+    >{value} with sugar</string>
+  <string
+    name="dataTableRowWithHoney"
+    description="A dessert with honey on it. The parameter is some type of dessert."
+    >{value} with honey</string>
+  <string
+    name="demoDialogTitle"
+    description="Title for the material dialog component demo."
+    >Dialogs</string>
+  <string
+    name="demoDialogSubtitle"
+    description="Subtitle for the material dialog component demo."
+    >Simple, alert, and fullscreen</string>
+  <string
+    name="demoAlertDialogTitle"
+    description="Title for the alert dialog component demo."
+    >Alert</string>
+  <string
+    name="demoAlertDialogDescription"
+    description="Description for the alert dialog component demo."
+    >An alert dialog informs the user about situations that require acknowledgement. An alert dialog has an optional title and an optional list of actions.</string>
+  <string
+    name="demoAlertTitleDialogTitle"
+    description="Title for the alert dialog with title component demo."
+    >Alert With Title</string>
+  <string
+    name="demoSimpleDialogTitle"
+    description="Title for the simple dialog component demo."
+    >Simple</string>
+  <string
+    name="demoSimpleDialogDescription"
+    description="Description for the simple dialog component demo."
+    >A simple dialog offers the user a choice between several options. A simple dialog has an optional title that is displayed above the choices.</string>
+  <string
+    name="demoDividerTitle"
+    description="Title for the divider component demo."
+    >Divider</string>
+  <string
+    name="demoDividerSubtitle"
+    description="Subtitle for the divider component demo."
+    >A divider is a thin line that groups content in lists and layouts.</string>
+  <string
+    name="demoDividerDescription"
+    description="Description for the divider component demo."
+    >Dividers can be used in lists, drawers, and elsewhere to separate content.</string>
+  <string
+    name="demoVerticalDividerTitle"
+    description="Title for the vertical divider component demo."
+    >Vertical Divider</string>
+  <string
+    name="demoGridListsTitle"
+    description="Title for the grid lists component demo."
+    >Grid Lists</string>
+  <string
+    name="demoGridListsSubtitle"
+    description="Subtitle for the grid lists component demo."
+    >Row and column layout</string>
+  <string
+    name="demoGridListsDescription"
+    description="Description for the grid lists component demo."
+    >Grid Lists are best suited for presenting homogeneous data, typically images. Each item in a grid list is called a tile.</string>
+  <string
+    name="demoGridListsImageOnlyTitle"
+    description="Title for the grid lists image-only component demo."
+    >Image only</string>
+  <string
+    name="demoGridListsHeaderTitle"
+    description="Title for the grid lists component demo with headers on each tile."
+    >With header</string>
+  <string
+    name="demoGridListsFooterTitle"
+    description="Title for the grid lists component demo with footers on each tile."
+    >With footer</string>
+  <string
+    name="demoSlidersTitle"
+    description="Title for the sliders component demo."
+    >Sliders</string>
+  <string
+    name="demoSlidersSubtitle"
+    description="Short description for the sliders component demo."
+    >Widgets for selecting a value by swiping</string>
+  <string
+    name="demoSlidersDescription"
+    description="Description for the sliders demo."
+    >Sliders reflect a range of values along a bar, from which users may select a single value. They are ideal for adjusting settings such as volume, brightness, or applying image filters.</string>
+  <string
+    name="demoRangeSlidersTitle"
+    description="Title for the range sliders component demo."
+    >Range Sliders</string>
+  <string
+    name="demoRangeSlidersDescription"
+    description="Description for the range sliders demo."
+    >Sliders reflect a range of values along a bar. They can have icons on both ends of the bar that reflect a range of values. They are ideal for adjusting settings such as volume, brightness, or applying image filters.</string>
+  <string
+    name="demoCustomSlidersTitle"
+    description="Title for the custom sliders component demo."
+    >Custom Sliders</string>
+  <string
+    name="demoCustomSlidersDescription"
+    description="Description for the custom sliders demo."
+    >Sliders reflect a range of values along a bar, from which users may select a single value or range of values. The sliders can be themed and customized.</string>
+  <string
+    name="demoSlidersContinuousWithEditableNumericalValue"
+    description="Text to describe a slider has a continuous value with an editable numerical value."
+    >Continuous with Editable Numerical Value</string>
+  <string
+    name="demoSlidersDiscrete"
+    description="Text to describe that we have a slider with discrete values."
+    >Discrete</string>
+  <string
+    name="demoSlidersDiscreteSliderWithCustomTheme"
+    description="Text to describe that we have a slider with discrete values and a custom theme. "
+    >Discrete Slider with Custom Theme</string>
+  <string
+    name="demoSlidersContinuousRangeSliderWithCustomTheme"
+    description="Text to describe that we have a range slider with continuous values and a custom theme. "
+    >Continuous Range Slider with Custom Theme</string>
+  <string
+    name="demoSlidersContinuous"
+    description="Text to describe that we have a slider with continuous values."
+    >Continuous</string>
+  <string
+    name="demoSlidersEditableNumericalValue"
+    description="Label for input field that has an editable numerical value."
+    >Editable numerical value</string>
+  <string
+    name="demoMenuTitle"
+    description="Title for the menu component demo."
+    >Menu</string>
+  <string
+    name="demoContextMenuTitle"
+    description="Title for the context menu component demo."
+    >Context menu</string>
+  <string
+    name="demoSectionedMenuTitle"
+    description="Title for the sectioned menu component demo."
+    >Sectioned menu</string>
+  <string
+    name="demoSimpleMenuTitle"
+    description="Title for the simple menu component demo."
+    >Simple menu</string>
+  <string
+    name="demoChecklistMenuTitle"
+    description="Title for the checklist menu component demo."
+    >Checklist menu</string>
+  <string
+    name="demoMenuSubtitle"
+    description="Short description for the menu component demo."
+    >Menu buttons and simple menus</string>
+  <string
+    name="demoMenuDescription"
+    description="Description for the menu demo."
+    >A menu displays a list of choices on a temporary surface. They appear when users interact with a button, action, or other control.</string>
+  <string
+    name="demoMenuItemValueOne"
+    description="The first item in a menu."
+    >Menu item one</string>
+  <string
+    name="demoMenuItemValueTwo"
+    description="The second item in a menu."
+    >Menu item two</string>
+  <string
+    name="demoMenuItemValueThree"
+    description="The third item in a menu."
+    >Menu item three</string>
+  <string
+    name="demoMenuOne"
+    description="The number one."
+    >One</string>
+  <string
+    name="demoMenuTwo"
+    description="The number two."
+    >Two</string>
+  <string
+    name="demoMenuThree"
+    description="The number three."
+    >Three</string>
+  <string
+    name="demoMenuFour"
+    description="The number four."
+    >Four</string>
+  <string
+    name="demoMenuAnItemWithAContextMenuButton"
+    description="Label next to a button that opens a menu. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >An item with a context menu</string>
+  <string
+    name="demoMenuContextMenuItemOne"
+    description="Text label for a context menu item. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >Context menu item one</string>
+  <string
+    name="demoMenuADisabledMenuItem"
+    description="Text label for a disabled menu item. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >Disabled menu item</string>
+  <string
+    name="demoMenuContextMenuItemThree"
+    description="Text label for a context menu item three. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >Context menu item three</string>
+  <string
+    name="demoMenuAnItemWithASectionedMenu"
+    description="Label next to a button that opens a sectioned menu . A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >An item with a sectioned menu</string>
+  <string
+    name="demoMenuPreview"
+    description="Button to preview content."
+    >Preview</string>
+  <string
+    name="demoMenuShare"
+    description="Button to share content."
+    >Share</string>
+  <string
+    name="demoMenuGetLink"
+    description="Button to get link for content."
+    >Get link</string>
+  <string
+    name="demoMenuRemove"
+    description="Button to remove content."
+    >Remove</string>
+  <string
+    name="demoMenuSelected"
+    description="A text to show what value was selected."
+    >Selected: {value}</string>
+  <string
+    name="demoMenuChecked"
+    description="A text to show what value was checked."
+    >Checked: {value}</string>
+  <string
+    name="demoNavigationDrawerTitle"
+    description="Title for the material drawer component demo."
+    >Navigation Drawer</string>
+  <string
+    name="demoNavigationDrawerSubtitle"
+    description="Subtitle for the material drawer component demo."
+    >Displaying a drawer within appbar</string>
+  <string
+    name="demoNavigationDrawerDescription"
+    description="Description for the material drawer component demo."
+    >A Material Design panel that slides in horizontally from the edge of the screen to show navigation links in an application.</string>
+  <string
+    name="demoNavigationDrawerUserName"
+    description="Demo username for navigation drawer."
+    >User Name</string>
+  <string
+    name="demoNavigationDrawerUserEmail"
+    description="Demo email for navigation drawer."
+    >user.name@example.com</string>
+  <string
+    name="demoNavigationDrawerToPageOne"
+    description="Drawer Item One."
+    >Item One</string>
+  <string
+    name="demoNavigationDrawerToPageTwo"
+    description="Drawer Item Two."
+    >Item Two</string>
+  <string
+    name="demoNavigationDrawerText"
+    description="Description to open navigation drawer."
+    >Swipe from the edge or tap the upper-left icon to see the drawer</string>
+  <string
+    name="demoNavigationRailTitle"
+    description="Title for the material Navigation Rail component demo."
+    >Navigation Rail</string>
+  <string
+    name="demoNavigationRailSubtitle"
+    description="Subtitle for the material Navigation Rail component demo."
+    >Displaying a Navigation Rail within an app</string>
+  <string
+    name="demoNavigationRailDescription"
+    description="Description for the material Navigation Rail component demo."
+    >A material widget that is meant to be displayed at the left or right of an app to navigate between a small number of views, typically between three and five.</string>
+  <string
+    name="demoNavigationRailFirst"
+    description="Navigation Rail destination first label."
+    >First</string>
+  <string
+    name="demoNavigationRailSecond"
+    description="Navigation Rail destination second label."
+    >Second</string>
+  <string
+    name="demoNavigationRailThird"
+    description="Navigation Rail destination Third label."
+    >Third</string>
+  <string
+    name="demoMenuAnItemWithASimpleMenu"
+    description="Label next to a button that opens a simple menu. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >An item with a simple menu</string>
+  <string
+    name="demoMenuAnItemWithAChecklistMenu"
+    description="Label next to a button that opens a checklist menu. A menu displays a list of choices on a temporary surface. Used as an example in a demo."
+    >An item with a checklist menu</string>
+  <string
+    name="demoFullscreenDialogTitle"
+    description="Title for the fullscreen dialog component demo."
+    >Fullscreen</string>
+  <string
+    name="demoFullscreenDialogDescription"
+    description="Description for the fullscreen dialog component demo."
+    >The fullscreenDialog property specifies whether the incoming page is a fullscreen modal dialog</string>
+  <string
+    name="demoCupertinoActivityIndicatorTitle"
+    description="Title for the cupertino activity indicator component demo."
+    >Activity indicator</string>
+  <string
+    name="demoCupertinoActivityIndicatorSubtitle"
+    description="Subtitle for the cupertino activity indicator component demo."
+    >iOS-style activity indicators</string>
+  <string
+    name="demoCupertinoActivityIndicatorDescription"
+    description="Description for the cupertino activity indicator component demo."
+    >An iOS-style activity indicator that spins clockwise.</string>
+  <string
+    name="demoCupertinoButtonsTitle"
+    description="Title for the cupertino buttons component demo."
+    >Buttons</string>
+  <string
+    name="demoCupertinoButtonsSubtitle"
+    description="Subtitle for the cupertino buttons component demo."
+    >iOS-style buttons</string>
+  <string
+    name="demoCupertinoButtonsDescription"
+    description="Description for the cupertino buttons component demo."
+    >An iOS-style button. It takes in text and/or an icon that fades out and in on touch. May optionally have a background.</string>
+  <string
+    name="demoCupertinoContextMenuTitle"
+    description="Title for the cupertino context menu component demo."
+    >Context Menu</string>
+  <string
+    name="demoCupertinoContextMenuSubtitle"
+    description="Subtitle for the cupertino context menu component demo."
+    >iOS-style context menu</string>
+  <string
+    name="demoCupertinoContextMenuDescription"
+    description="Description for the cupertino context menu component demo."
+    >An iOS-style full screen contextual menu that appears when an element is long-pressed.</string>
+  <string
+    name="demoCupertinoContextMenuActionOne"
+    description="Context menu list item one"
+    >Action one</string>
+  <string
+    name="demoCupertinoContextMenuActionTwo"
+    description="Context menu list item two"
+    >Action two</string>
+  <string
+    name="demoCupertinoContextMenuActionText"
+    description="Context menu text."
+    >Tap and hold the Flutter logo to see the context menu.</string>
+  <string
+    name="demoCupertinoAlertsTitle"
+    description="Title for the cupertino alerts component demo."
+    >Alerts</string>
+  <string
+    name="demoCupertinoAlertsSubtitle"
+    description="Subtitle for the cupertino alerts component demo."
+    >iOS-style alert dialogs</string>
+  <string
+    name="demoCupertinoAlertTitle"
+    description="Title for the cupertino alert component demo."
+    >Alert</string>
+  <string
+    name="demoCupertinoAlertDescription"
+    description="Description for the cupertino alert component demo."
+    >An alert dialog informs the user about situations that require acknowledgement. An alert dialog has an optional title, optional content, and an optional list of actions. The title is displayed above the content and the actions are displayed below the content.</string>
+  <string
+    name="demoCupertinoAlertWithTitleTitle"
+    description="Title for the cupertino alert with title component demo."
+    >Alert With Title</string>
+  <string
+    name="demoCupertinoAlertButtonsTitle"
+    description="Title for the cupertino alert with buttons component demo."
+    >Alert With Buttons</string>
+  <string
+    name="demoCupertinoAlertButtonsOnlyTitle"
+    description="Title for the cupertino alert buttons only component demo."
+    >Alert Buttons Only</string>
+  <string
+    name="demoCupertinoActionSheetTitle"
+    description="Title for the cupertino action sheet component demo."
+    >Action Sheet</string>
+  <string
+    name="demoCupertinoActionSheetDescription"
+    description="Description for the cupertino action sheet component demo."
+    >An action sheet is a specific style of alert that presents the user with a set of two or more choices related to the current context. An action sheet can have a title, an additional message, and a list of actions.</string>
+  <string
+    name="demoCupertinoNavigationBarTitle"
+    description="Title for the cupertino navigation bar component demo."
+    >Navigation bar</string>
+  <string
+    name="demoCupertinoNavigationBarSubtitle"
+    description="Subtitle for the cupertino navigation bar component demo."
+    >iOS-style navigation bar</string>
+  <string
+    name="demoCupertinoNavigationBarDescription"
+    description="Description for the cupertino navigation bar component demo."
+    >An iOS-styled navigation bar. The navigation bar is a toolbar that minimally consists of a page title, in the middle of the toolbar.</string>
+  <string
+    name="demoCupertinoPickerTitle"
+    description="Title for the cupertino pickers component demo."
+    >Pickers</string>
+  <string
+    name="demoCupertinoPickerSubtitle"
+    description="Subtitle for the cupertino pickers component demo."
+    >iOS-style pickers</string>
+  <string
+    name="demoCupertinoPickerDescription"
+    description="Description for the cupertino pickers component demo."
+    >An iOS-style picker widget that can be used to select strings, dates, times, or both date and time.</string>
+  <string
+    name="demoCupertinoPickerTimer"
+    description="Label to open a countdown timer picker."
+    >Timer</string>
+  <string
+    name="demoCupertinoPicker"
+    description="Label to open an iOS picker."
+    >Picker</string>
+  <string
+    name="demoCupertinoPickerDate"
+    description="Label to open a date picker."
+    >Date</string>
+  <string
+    name="demoCupertinoPickerTime"
+    description="Label to open a time picker."
+    >Time</string>
+  <string
+    name="demoCupertinoPickerDateTime"
+    description="Label to open a date and time picker."
+    >Date and Time</string>
+  <string
+    name="demoCupertinoPullToRefreshTitle"
+    description="Title for the cupertino pull-to-refresh component demo."
+    >Pull to refresh</string>
+  <string
+    name="demoCupertinoPullToRefreshSubtitle"
+    description="Subtitle for the cupertino pull-to-refresh component demo."
+    >iOS-style pull to refresh control</string>
+  <string
+    name="demoCupertinoPullToRefreshDescription"
+    description="Description for the cupertino pull-to-refresh component demo."
+    >A widget implementing the iOS-style pull to refresh content control.</string>
+  <string
+    name="demoCupertinoSegmentedControlTitle"
+    description="Title for the cupertino segmented control component demo."
+    >Segmented control</string>
+  <string
+    name="demoCupertinoSegmentedControlSubtitle"
+    description="Subtitle for the cupertino segmented control component demo."
+    >iOS-style segmented control</string>
+  <string
+    name="demoCupertinoSegmentedControlDescription"
+    description="Description for the cupertino segmented control component demo."
+    >Used to select between a number of mutually exclusive options. When one option in the segmented control is selected, the other options in the segmented control cease to be selected.</string>
+  <string
+    name="demoCupertinoSliderTitle"
+    description="Title for the cupertino slider component demo."
+    >Slider</string>
+  <string
+    name="demoCupertinoSliderSubtitle"
+    description="Subtitle for the cupertino slider component demo."
+    >iOS-style slider</string>
+  <string
+    name="demoCupertinoSliderDescription"
+    description="Description for the cupertino slider component demo."
+    >A slider can be used to select from either a continuous or a discrete set of values.</string>
+  <string
+    name="demoCupertinoSliderContinuous"
+    description="A label for a continuous slider that indicates what value it is set to."
+    >Continuous: {value}</string>
+  <string
+    name="demoCupertinoSliderDiscrete"
+    description="A label for a discrete slider that indicates what value it is set to."
+    >Discrete: {value}</string>
+  <string
+    name="demoCupertinoSwitchSubtitle"
+    description="Subtitle for the cupertino switch component demo."
+    >iOS-style switch</string>
+  <string
+    name="demoCupertinoSwitchDescription"
+    description="Description for the cupertino switch component demo."
+    >A switch is used to toggle the on/off state of a single setting.</string>
+  <string
+    name="demoCupertinoTabBarTitle"
+    description="Title for the cupertino bottom tab bar demo."
+    >Tab bar</string>
+  <string
+    name="demoCupertinoTabBarSubtitle"
+    description="Subtitle for the cupertino bottom tab bar demo."
+    >iOS-style bottom tab bar</string>
+  <string
+    name="demoCupertinoTabBarDescription"
+    description="Description for the cupertino bottom tab bar demo."
+    >An iOS-style bottom navigation tab bar. Displays multiple tabs with one tab being active, the first tab by default.</string>
+  <string
+    name="cupertinoTabBarHomeTab"
+    description="Title for the home tab in the bottom tab bar demo."
+    >Home</string>
+  <string
+    name="cupertinoTabBarChatTab"
+    description="Title for the chat tab in the bottom tab bar demo."
+    >Chat</string>
+  <string
+    name="cupertinoTabBarProfileTab"
+    description="Title for the profile tab in the bottom tab bar demo."
+    >Profile</string>
+  <string
+    name="demoCupertinoTextFieldTitle"
+    description="Title for the cupertino text field demo."
+    >Text fields</string>
+  <string
+    name="demoCupertinoTextFieldSubtitle"
+    description="Subtitle for the cupertino text field demo."
+    >iOS-style text fields</string>
+  <string
+    name="demoCupertinoTextFieldDescription"
+    description="Description for the cupertino text field demo."
+    >A text field lets the user enter text, either with a hardware keyboard or with an onscreen keyboard.</string>
+  <string
+    name="demoCupertinoTextFieldPIN"
+    description="The placeholder for a text field where a user would enter their PIN number."
+    >PIN</string>
+  <string
+    name="demoCupertinoSearchTextFieldTitle"
+    description="Title for the cupertino search text field demo."
+    >Search text field</string>
+  <string
+    name="demoCupertinoSearchTextFieldSubtitle"
+    description="Subtitle for the cupertino search text field demo."
+    >iOS-style search text field</string>
+  <string
+    name="demoCupertinoSearchTextFieldDescription"
+    description="Description for the cupertino search text field demo."
+    >A search text field that lets the user search by entering text, and that can offer and filter suggestions.</string>
+  <string
+    name="demoCupertinoSearchTextFieldPlaceholder"
+    description="The placeholder for a search text field demo."
+    >Enter some text</string>
+  <string
+    name="demoCupertinoScrollbarTitle"
+    description="Title for the cupertino scrollbar demo."
+    >Scrollbar</string>
+  <string
+    name="demoCupertinoScrollbarSubtitle"
+    description="Subtitle for the cupertino scrollbar demo."
+    >iOS-style scrollbar</string>
+  <string
+    name="demoCupertinoScrollbarDescription"
+    description="Description for the cupertino scrollbar demo."
+    >A scrollbar that wraps the given child</string>
+  <string
+    name="demoMotionTitle"
+    description="Title for the motion demo."
+    >Motion</string>
+  <string
+    name="demoMotionSubtitle"
+    description="Subtitle for the motion demo."
+    >All of the predefined transition patterns</string>
+  <string
+    name="demoContainerTransformDemoInstructions"
+    description="Instructions for the container transform demo located in the app bar."
+    >Cards, Lists &amp; FAB</string>
+  <string
+    name="demoSharedXAxisDemoInstructions"
+    description="Instructions for the shared x axis demo located in the app bar."
+    >Next and Back Buttons</string>
+  <string
+    name="demoSharedYAxisDemoInstructions"
+    description="Instructions for the shared y axis demo located in the app bar."
+    >Sort by &quot;Recently Played&quot;</string>
+  <string
+    name="demoSharedZAxisDemoInstructions"
+    description="Instructions for the shared z axis demo located in the app bar."
+    >Settings icon button</string>
+  <string
+    name="demoFadeThroughDemoInstructions"
+    description="Instructions for the fade through demo located in the app bar."
+    >Bottom navigation</string>
+  <string
+    name="demoFadeScaleDemoInstructions"
+    description="Instructions for the fade scale demo located in the app bar."
+    >Modal and FAB</string>
+  <string
+    name="demoContainerTransformTitle"
+    description="Title for the container transform demo."
+    >Container Transform</string>
+  <string
+    name="demoContainerTransformDescription"
+    description="Description for the container transform demo."
+    >The container transform pattern is designed for transitions between UI elements that include a container. This pattern creates a visible connection between two UI elements</string>
+  <string
+    name="demoContainerTransformModalBottomSheetTitle"
+    description="Title for the container transform modal bottom sheet."
+    >Fade mode</string>
+  <string
+    name="demoContainerTransformTypeFade"
+    description="Description for container transform fade type setting."
+    >FADE</string>
+  <string
+    name="demoContainerTransformTypeFadeThrough"
+    description="Description for container transform fade through type setting."
+    >FADE THROUGH</string>
+  <string
+    name="demoMotionPlaceholderTitle"
+    description="The placeholder for the motion demos title properties."
+    >Title</string>
+  <string
+    name="demoMotionPlaceholderSubtitle"
+    description="The placeholder for the motion demos subtitle properties."
+    >Secondary text</string>
+  <string
+    name="demoMotionSmallPlaceholderSubtitle"
+    description="The placeholder for the motion demos shortened subtitle properties."
+    >Secondary</string>
+  <string
+    name="demoMotionDetailsPageTitle"
+    description="The title for the details page in the motion demos."
+    >Details Page</string>
+  <string
+    name="demoMotionListTileTitle"
+    description="The title for a list tile in the motion demos."
+    >List item</string>
+  <string
+    name="demoSharedAxisDescription"
+    description="Description for the shared y axis demo."
+    >The shared axis pattern is used for transitions between the UI elements that have a spatial or navigational relationship. This pattern uses a shared transformation on the x, y, or z axis to reinforce the relationship between elements.</string>
+  <string
+    name="demoSharedXAxisTitle"
+    description="Title for the shared x axis demo."
+    >Shared x-axis</string>
+  <string
+    name="demoSharedXAxisBackButtonText"
+    description="Button text for back button in the shared x axis demo."
+    >BACK</string>
+  <string
+    name="demoSharedXAxisNextButtonText"
+    description="Button text for the next button in the shared x axis demo."
+    >NEXT</string>
+  <string
+    name="demoSharedXAxisCoursePageTitle"
+    description="Title for course selection page in the shared x axis demo."
+    >Streamline your courses</string>
+  <string
+    name="demoSharedXAxisCoursePageSubtitle"
+    description="Subtitle for course selection page in the shared x axis demo."
+    >Bundled categories appear as groups in your feed. You can always change this later.</string>
+  <string
+    name="demoSharedXAxisArtsAndCraftsCourseTitle"
+    description="Title for the Arts &amp; Crafts course in the shared x axis demo."
+    >Arts &amp; Crafts</string>
+  <string
+    name="demoSharedXAxisBusinessCourseTitle"
+    description="Title for the Business course in the shared x axis demo."
+    >Business</string>
+  <string
+    name="demoSharedXAxisIllustrationCourseTitle"
+    description="Title for the Illustration course in the shared x axis demo."
+    >Illustration</string>
+  <string
+    name="demoSharedXAxisDesignCourseTitle"
+    description="Title for the Design course in the shared x axis demo."
+    >Design</string>
+  <string
+    name="demoSharedXAxisCulinaryCourseTitle"
+    description="Title for the Culinary course in the shared x axis demo."
+    >Culinary</string>
+  <string
+    name="demoSharedXAxisBundledCourseSubtitle"
+    description="Subtitle for a bundled course in the shared x axis demo."
+    >Bundled</string>
+  <string
+    name="demoSharedXAxisIndividualCourseSubtitle"
+    description="Subtitle for a individual course in the shared x axis demo."
+    >Shown Individually</string>
+  <string
+    name="demoSharedXAxisSignInWelcomeText"
+    description="Welcome text for sign in page in the shared x axis demo. David Park is a name and does not need to be translated."
+    >Hi David Park</string>
+  <string
+    name="demoSharedXAxisSignInSubtitleText"
+    description="Subtitle text for sign in page in the shared x axis demo."
+    >Sign in with your account</string>
+  <string
+    name="demoSharedXAxisSignInTextFieldLabel"
+    description="Label text for the sign in text field in the shared x axis demo."
+    >Email or phone number</string>
+  <string
+    name="demoSharedXAxisForgotEmailButtonText"
+    description="Button text for the forgot email button in the shared x axis demo."
+    >FORGOT EMAIL?</string>
+  <string
+    name="demoSharedXAxisCreateAccountButtonText"
+    description="Button text for the create account button in the shared x axis demo."
+    >CREATE ACCOUNT</string>
+  <string
+    name="demoSharedYAxisTitle"
+    description="Title for the shared y axis demo."
+    >Shared y-axis</string>
+  <string
+    name="demoSharedYAxisAlbumCount"
+    description="Text for album count in the shared y axis demo."
+    >268 albums</string>
+  <string
+    name="demoSharedYAxisAlphabeticalSortTitle"
+    description="Title for alphabetical sorting type in the shared y axis demo."
+    >A-Z</string>
+  <string
+    name="demoSharedYAxisRecentSortTitle"
+    description="Title for recently played sorting type in the shared y axis demo."
+    >Recently played</string>
+  <string
+    name="demoSharedYAxisAlbumTileTitle"
+    description="Title for an AlbumTile in the shared y axis demo."
+    >Album</string>
+  <string
+    name="demoSharedYAxisAlbumTileSubtitle"
+    description="Subtitle for an AlbumTile in the shared y axis demo."
+    >Artist</string>
+  <string
+    name="demoSharedYAxisAlbumTileDurationUnit"
+    description="Duration unit for an AlbumTile in the shared y axis demo."
+    >min</string>
+  <string
+    name="demoSharedZAxisTitle"
+    description="Title for the shared z axis demo."
+    >Shared z-axis</string>
+  <string
+    name="demoSharedZAxisSettingsPageTitle"
+    description="Title for the settings page in the shared z axis demo."
+    >Settings</string>
+  <string
+    name="demoSharedZAxisBurgerRecipeTitle"
+    description="Title for burger recipe tile in the shared z axis demo."
+    >Burger</string>
+  <string
+    name="demoSharedZAxisBurgerRecipeDescription"
+    description="Subtitle for the burger recipe tile in the shared z axis demo."
+    >Burger recipe</string>
+  <string
+    name="demoSharedZAxisSandwichRecipeTitle"
+    description="Title for sandwich recipe tile in the shared z axis demo."
+    >Sandwich</string>
+  <string
+    name="demoSharedZAxisSandwichRecipeDescription"
+    description="Subtitle for the sandwich recipe tile in the shared z axis demo."
+    >Sandwich recipe</string>
+  <string
+    name="demoSharedZAxisDessertRecipeTitle"
+    description="Title for dessert recipe tile in the shared z axis demo."
+    >Dessert</string>
+  <string
+    name="demoSharedZAxisDessertRecipeDescription"
+    description="Subtitle for the dessert recipe tile in the shared z axis demo."
+    >Dessert recipe</string>
+  <string
+    name="demoSharedZAxisShrimpPlateRecipeTitle"
+    description="Title for shrimp plate recipe tile in the shared z axis demo."
+    >Shrimp</string>
+  <string
+    name="demoSharedZAxisShrimpPlateRecipeDescription"
+    description="Subtitle for the shrimp plate recipe tile in the shared z axis demo."
+    >Shrimp plate recipe</string>
+  <string
+    name="demoSharedZAxisCrabPlateRecipeTitle"
+    description="Title for crab plate recipe tile in the shared z axis demo."
+    >Crab</string>
+  <string
+    name="demoSharedZAxisCrabPlateRecipeDescription"
+    description="Subtitle for the crab plate recipe tile in the shared z axis demo."
+    >Crab plate recipe</string>
+  <string
+    name="demoSharedZAxisBeefSandwichRecipeTitle"
+    description="Title for beef sandwich recipe tile in the shared z axis demo."
+    >Beef Sandwich</string>
+  <string
+    name="demoSharedZAxisBeefSandwichRecipeDescription"
+    description="Subtitle for the beef sandwich recipe tile in the shared z axis demo."
+    >Beef Sandwich recipe</string>
+  <string
+    name="demoSharedZAxisSavedRecipesListTitle"
+    description="Title for list of saved recipes in the shared z axis demo."
+    >Saved Recipes</string>
+  <string
+    name="demoSharedZAxisProfileSettingLabel"
+    description="Text label for profile setting tile in the shared z axis demo."
+    >Profile</string>
+  <string
+    name="demoSharedZAxisNotificationSettingLabel"
+    description="Text label for notifications setting tile in the shared z axis demo."
+    >Notifications</string>
+  <string
+    name="demoSharedZAxisPrivacySettingLabel"
+    description="Text label for the privacy setting tile in the shared z axis demo."
+    >Privacy</string>
+  <string
+    name="demoSharedZAxisHelpSettingLabel"
+    description="Text label for the help setting tile in the shared z axis demo."
+    >Help</string>
+  <string
+    name="demoFadeThroughTitle"
+    description="Title for the fade through demo."
+    >Fade through</string>
+  <string
+    name="demoFadeThroughDescription"
+    description="Description for the fade through demo."
+    >The fade through pattern is used for transitions between UI elements that do not have a strong relationship to each other.</string>
+  <string
+    name="demoFadeThroughAlbumsDestination"
+    description="Text for albums bottom navigation bar destination in the fade through demo."
+    >Albums</string>
+  <string
+    name="demoFadeThroughPhotosDestination"
+    description="Text for photos bottom navigation bar destination in the fade through demo."
+    >Photos</string>
+  <string
+    name="demoFadeThroughSearchDestination"
+    description="Text for search bottom navigation bar destination in the fade through demo."
+    >Search</string>
+  <string
+    name="demoFadeThroughTextPlaceholder"
+    description="Placeholder for example card title in the fade through demo."
+    >123 photos</string>
+  <string
+    name="demoFadeScaleTitle"
+    description="Title for the fade scale demo."
+    >Fade</string>
+  <string
+    name="demoFadeScaleDescription"
+    description="Description for the fade scale demo."
+    >The fade pattern is used for UI elements that enter or exit within the bounds of the screen, such as a dialog that fades in the center of the screen.</string>
+  <string
+    name="demoFadeScaleShowAlertDialogButton"
+    description="Button text to show alert dialog in the fade scale demo."
+    >SHOW MODAL</string>
+  <string
+    name="demoFadeScaleShowFabButton"
+    description="Button text to show fab in the fade scale demo."
+    >SHOW FAB</string>
+  <string
+    name="demoFadeScaleHideFabButton"
+    description="Button text to hide fab in the fade scale demo."
+    >HIDE FAB</string>
+  <string
+    name="demoFadeScaleAlertDialogHeader"
+    description="Generic header for alert dialog in the fade scale demo."
+    >Alert Dialog</string>
+  <string
+    name="demoFadeScaleAlertDialogCancelButton"
+    description="Button text for alert dialog cancel button in the fade scale demo."
+    >CANCEL</string>
+  <string
+    name="demoFadeScaleAlertDialogDiscardButton"
+    description="Button text for alert dialog discard button in the fade scale demo."
+    >DISCARD</string>
+  <string
+    name="demoColorsTitle"
+    description="Title for the colors demo."
+    >Colors</string>
+  <string
+    name="demoColorsSubtitle"
+    description="Subtitle for the colors demo."
+    >All of the predefined colors</string>
+  <string
+    name="demoColorsDescription"
+    description="Description for the colors demo. Material Design should remain capitalized."
+    >Color and color swatch constants which represent Material Design&apos;s color palette.</string>
+  <string
+    name="demoTypographyTitle"
+    description="Title for the typography demo."
+    >Typography</string>
+  <string
+    name="demoTypographySubtitle"
+    description="Subtitle for the typography demo."
+    >All of the predefined text styles</string>
+  <string
+    name="demoTypographyDescription"
+    description="Description for the typography demo. Material Design should remain capitalized."
+    >Definitions for the various typographical styles found in Material Design.</string>
+  <string
+    name="demo2dTransformationsTitle"
+    description="Title for the 2D transformations demo."
+    >2D transformations</string>
+  <string
+    name="demo2dTransformationsSubtitle"
+    description="Subtitle for the 2D transformations demo."
+    >Pan and zoom</string>
+  <string
+    name="demo2dTransformationsDescription"
+    description="Description for the 2D transformations demo."
+    >Tap to edit tiles, and use gestures to move around the scene. Drag to pan and pinch with two fingers to zoom. Press the reset button to return to the starting orientation.</string>
+  <string
+    name="demo2dTransformationsResetTooltip"
+    description="Tooltip for a button to reset the transformations (scale, translation) for the 2D transformations demo."
+    >Reset transformations</string>
+  <string
+    name="demo2dTransformationsEditTooltip"
+    description="Tooltip for a button to edit a tile."
+    >Edit tile</string>
+  <string
+    name="buttonText"
+    description="Text for a generic button."
+    >BUTTON</string>
+  <string
+    name="demoBottomSheetTitle"
+    description="Title for bottom sheet demo."
+    >Bottom sheet</string>
+  <string
+    name="demoBottomSheetSubtitle"
+    description="Description for bottom sheet demo."
+    >Persistent and modal bottom sheets</string>
+  <string
+    name="demoBottomSheetPersistentTitle"
+    description="Title for persistent bottom sheet demo."
+    >Persistent bottom sheet</string>
+  <string
+    name="demoBottomSheetPersistentDescription"
+    description="Description for persistent bottom sheet demo."
+    >A persistent bottom sheet shows information that supplements the primary content of the app. A persistent bottom sheet remains visible even when the user interacts with other parts of the app.</string>
+  <string
+    name="demoBottomSheetModalTitle"
+    description="Title for modal bottom sheet demo."
+    >Modal bottom sheet</string>
+  <string
+    name="demoBottomSheetModalDescription"
+    description="Description for modal bottom sheet demo."
+    >A modal bottom sheet is an alternative to a menu or a dialog and prevents the user from interacting with the rest of the app.</string>
+  <string
+    name="demoBottomSheetAddLabel"
+    description="Semantic label for add icon."
+    >Add</string>
+  <string
+    name="demoBottomSheetButtonText"
+    description="Button text to show bottom sheet."
+    >SHOW BOTTOM SHEET</string>
+  <string
+    name="demoBottomSheetHeader"
+    description="Generic header placeholder."
+    >Header</string>
+  <string
+    name="demoBottomSheetItem"
+    description="Generic item placeholder."
+    >Item {value}</string>
+  <string
+    name="demoListsTitle"
+    description="Title for lists demo."
+    >Lists</string>
+  <string
+    name="demoListsSubtitle"
+    description="Subtitle for lists demo."
+    >Scrolling list layouts</string>
+  <string
+    name="demoListsDescription"
+    description="Description for lists demo. This describes what a single row in a list consists of."
+    >A single fixed-height row that typically contains some text as well as a leading or trailing icon.</string>
+  <string
+    name="demoOneLineListsTitle"
+    description="Title for lists demo with only one line of text per row."
+    >One Line</string>
+  <string
+    name="demoTwoLineListsTitle"
+    description="Title for lists demo with two lines of text per row."
+    >Two Lines</string>
+  <string
+    name="demoListsSecondary"
+    description="Text that appears in the second line of a list item."
+    >Secondary text</string>
+  <string
+    name="demoProgressIndicatorTitle"
+    description="Title for progress indicators demo."
+    >Progress indicators</string>
+  <string
+    name="demoProgressIndicatorSubtitle"
+    description="Subtitle for progress indicators demo."
+    >Linear, circular, indeterminate</string>
+  <string
+    name="demoCircularProgressIndicatorTitle"
+    description="Title for circular progress indicator demo."
+    >Circular Progress Indicator</string>
+  <string
+    name="demoCircularProgressIndicatorDescription"
+    description="Description for circular progress indicator demo."
+    >A Material Design circular progress indicator, which spins to indicate that the application is busy.</string>
+  <string
+    name="demoLinearProgressIndicatorTitle"
+    description="Title for linear progress indicator demo."
+    >Linear Progress Indicator</string>
+  <string
+    name="demoLinearProgressIndicatorDescription"
+    description="Description for linear progress indicator demo."
+    >A Material Design linear progress indicator, also known as a progress bar.</string>
+  <string
+    name="demoPickersTitle"
+    description="Title for pickers demo."
+    >Pickers</string>
+  <string
+    name="demoPickersSubtitle"
+    description="Subtitle for pickers demo."
+    >Date and time selection</string>
+  <string
+    name="demoDatePickerTitle"
+    description="Title for date picker demo."
+    >Date Picker</string>
+  <string
+    name="demoDatePickerDescription"
+    description="Description for date picker demo."
+    >Shows a dialog containing a Material Design date picker.</string>
+  <string
+    name="demoTimePickerTitle"
+    description="Title for time picker demo."
+    >Time Picker</string>
+  <string
+    name="demoTimePickerDescription"
+    description="Description for time picker demo."
+    >Shows a dialog containing a Material Design time picker.</string>
+  <string
+    name="demoDateRangePickerTitle"
+    description="Title for date range picker demo."
+    >Date Range Picker</string>
+  <string
+    name="demoDateRangePickerDescription"
+    description="Description for date range picker demo."
+    >Shows a dialog containing a Material Design date range picker.</string>
+  <string
+    name="demoPickersShowPicker"
+    description="Button text to show the date or time picker in the demo."
+    >SHOW PICKER</string>
+  <string
+    name="demoTabsTitle"
+    description="Title for tabs demo."
+    >Tabs</string>
+  <string
+    name="demoTabsScrollingTitle"
+    description="Title for tabs demo with a tab bar that scrolls."
+    >Scrolling</string>
+  <string
+    name="demoTabsNonScrollingTitle"
+    description="Title for tabs demo with a tab bar that doesn&apos;t scroll."
+    >Non-scrolling</string>
+  <string
+    name="demoTabsSubtitle"
+    description="Subtitle for tabs demo."
+    >Tabs with independently scrollable views</string>
+  <string
+    name="demoTabsDescription"
+    description="Description for tabs demo."
+    >Tabs organize content across different screens, data sets, and other interactions.</string>
+  <string
+    name="demoSnackbarsTitle"
+    description="Title for snackbars demo."
+    >Snackbars</string>
+  <string
+    name="demoSnackbarsSubtitle"
+    description="Subtitle for snackbars demo."
+    >Snackbars show messages at the bottom of the screen</string>
+  <string
+    name="demoSnackbarsDescription"
+    description="Description for snackbars demo."
+    >Snackbars inform users of a process that an app has performed or will perform. They appear temporarily, towards the bottom of the screen. They shouldn&apos;t interrupt the user experience, and they don&apos;t require user input to disappear.</string>
+  <string
+    name="demoSnackbarsButtonLabel"
+    description="Label for button to show a snackbar."
+    >SHOW A SNACKBAR</string>
+  <string
+    name="demoSnackbarsText"
+    description="Text to show on a snackbar."
+    >This is a snackbar.</string>
+  <string
+    name="demoSnackbarsActionButtonLabel"
+    description="Label for action button text on the snackbar."
+    >ACTION</string>
+  <string
+    name="demoSnackbarsAction"
+    description="Text that appears when you press on a snackbars&apos; action."
+    >You pressed the snackbar action.</string>
+  <string
+    name="demoSelectionControlsTitle"
+    description="Title for selection controls demo."
+    >Selection controls</string>
+  <string
+    name="demoSelectionControlsSubtitle"
+    description="Subtitle for selection controls demo."
+    >Checkboxes, radio buttons, and switches</string>
+  <string
+    name="demoSelectionControlsCheckboxTitle"
+    description="Title for the checkbox (selection controls) demo."
+    >Checkbox</string>
+  <string
+    name="demoSelectionControlsCheckboxDescription"
+    description="Description for the checkbox (selection controls) demo."
+    >Checkboxes allow the user to select multiple options from a set. A normal checkbox&apos;s value is true or false and a tristate checkbox&apos;s value can also be null.</string>
+  <string
+    name="demoSelectionControlsRadioTitle"
+    description="Title for the radio button (selection controls) demo."
+    >Radio</string>
+  <string
+    name="demoSelectionControlsRadioDescription"
+    description="Description for the radio button (selection controls) demo."
+    >Radio buttons allow the user to select one option from a set. Use radio buttons for exclusive selection if you think that the user needs to see all available options side-by-side.</string>
+  <string
+    name="demoSelectionControlsSwitchTitle"
+    description="Title for the switches (selection controls) demo."
+    >Switch</string>
+  <string
+    name="demoSelectionControlsSwitchDescription"
+    description="Description for the switches (selection controls) demo."
+    >On/off switches toggle the state of a single settings option. The option that the switch controls, as well as the state it&apos;s in, should be made clear from the corresponding inline label.</string>
+  <string
+    name="demoBottomTextFieldsTitle"
+    description="Title for text fields demo."
+    >Text fields</string>
+  <string
+    name="demoTextFieldTitle"
+    description="Title for text fields demo."
+    >Text fields</string>
+  <string
+    name="demoTextFieldSubtitle"
+    description="Description for text fields demo."
+    >Single line of editable text and numbers</string>
+  <string
+    name="demoTextFieldDescription"
+    description="Description for text fields demo."
+    >Text fields allow users to enter text into a UI. They typically appear in forms and dialogs.</string>
+  <string
+    name="demoTextFieldShowPasswordLabel"
+    description="Label for show password icon."
+    >Show password</string>
+  <string
+    name="demoTextFieldHidePasswordLabel"
+    description="Label for hide password icon."
+    >Hide password</string>
+  <string
+    name="demoTextFieldFormErrors"
+    description="Text that shows up on form errors."
+    >Please fix the errors in red before submitting.</string>
+  <string
+    name="demoTextFieldNameRequired"
+    description="Shows up as submission error if name is not given in the form."
+    >Name is required.</string>
+  <string
+    name="demoTextFieldOnlyAlphabeticalChars"
+    description="Error that shows if non-alphabetical characters are given."
+    >Please enter only alphabetical characters.</string>
+  <string
+    name="demoTextFieldEnterUSPhoneNumber"
+    description="Error that shows up if non-valid non-US phone number is given."
+    >(###) ###-#### - Enter a US phone number.</string>
+  <string
+    name="demoTextFieldEnterPassword"
+    description="Error that shows up if password is not given."
+    >Please enter a password.</string>
+  <string
+    name="demoTextFieldPasswordsDoNotMatch"
+    description="Error that shows up, if the re-typed password does not match the already given password."
+    >The passwords don&apos;t match</string>
+  <string
+    name="demoTextFieldWhatDoPeopleCallYou"
+    description="Placeholder for name field in form."
+    >What do people call you?</string>
+  <string
+    name="demoTextFieldNameField"
+    description="The label for a name input field that is required (hence the star)."
+    >Name*</string>
+  <string
+    name="demoTextFieldWhereCanWeReachYou"
+    description="Placeholder for when entering a phone number in a form."
+    >Where can we reach you?</string>
+  <string
+    name="demoTextFieldPhoneNumber"
+    description="The label for a phone number input field that is required (hence the star)."
+    >Phone number*</string>
+  <string
+    name="demoTextFieldYourEmailAddress"
+    description="The label for an email address input field."
+    >Your email address</string>
+  <string
+    name="demoTextFieldEmail"
+    description="The label for an email address input field"
+    >Email</string>
+  <string
+    name="demoTextFieldTellUsAboutYourself"
+    description="The placeholder text for biography/life story input field."
+    >Tell us about yourself (e.g., write down what you do or what hobbies you have)</string>
+  <string
+    name="demoTextFieldKeepItShort"
+    description="Helper text for biography/life story input field."
+    >Keep it short, this is just a demo.</string>
+  <string
+    name="demoTextFieldLifeStory"
+    description="The label for biography/life story input field."
+    >Life story</string>
+  <string
+    name="demoTextFieldSalary"
+    description="The label for salary input field."
+    >Salary</string>
+  <string
+    name="demoTextFieldUSD"
+    description="US currency, used as suffix in input field for salary."
+    >USD</string>
+  <string
+    name="demoTextFieldNoMoreThan"
+    description="Helper text for password input field."
+    >No more than 8 characters.</string>
+  <string
+    name="demoTextFieldPassword"
+    description="Label for password input field, that is required (hence the star)."
+    >Password*</string>
+  <string
+    name="demoTextFieldRetypePassword"
+    description="Label for repeat password input field."
+    >Re-type password*</string>
+  <string
+    name="demoTextFieldSubmit"
+    description="The submit button text for form."
+    >SUBMIT</string>
+  <string
+    name="demoTextFieldNameHasPhoneNumber"
+    description="Text that shows up when valid phone number and name is submitted in form."
+    >{name} phone number is {phoneNumber}</string>
+  <string
+    name="demoTextFieldRequiredField"
+    description="Helper text to indicate that * means that it is a required field."
+    >* indicates required field</string>
+  <string
+    name="demoTooltipTitle"
+    description="Title for tooltip demo."
+    >Tooltips</string>
+  <string
+    name="demoTooltipSubtitle"
+    description="Subtitle for tooltip demo."
+    >Short message displayed on long press or hover</string>
+  <string
+    name="demoTooltipDescription"
+    description="Description for tooltip demo."
+    >Tooltips provide text labels that help explain the function of a button or other user interface action. Tooltips display informative text when users hover over, focus on, or long press an element.</string>
+  <string
+    name="demoTooltipInstructions"
+    description="Instructions for how to trigger a tooltip in the tooltip demo."
+    >Long press or hover to display the tooltip.</string>
+  <string
+    name="bottomNavigationCommentsTab"
+    description="Title for Comments tab of bottom navigation."
+    >Comments</string>
+  <string
+    name="bottomNavigationCalendarTab"
+    description="Title for Calendar tab of bottom navigation."
+    >Calendar</string>
+  <string
+    name="bottomNavigationAccountTab"
+    description="Title for Account tab of bottom navigation."
+    >Account</string>
+  <string
+    name="bottomNavigationAlarmTab"
+    description="Title for Alarm tab of bottom navigation."
+    >Alarm</string>
+  <string
+    name="bottomNavigationCameraTab"
+    description="Title for Camera tab of bottom navigation."
+    >Camera</string>
+  <string
+    name="bottomNavigationContentPlaceholder"
+    description="Accessibility label for the content placeholder in the bottom navigation demo"
+    >Placeholder for {title} tab</string>
+  <string
+    name="buttonTextCreate"
+    description="Tooltip text for a create button."
+    >Create</string>
+  <string
+    name="dialogSelectedOption"
+    description="Message displayed after an option is selected from a dialog"
+    >You selected: &quot;{value}&quot;</string>
+  <string
+    name="chipTurnOnLights"
+    description="A chip component to turn on the lights."
+    >Turn on lights</string>
+  <string
+    name="chipSmall"
+    description="A chip component to select a small size."
+    >Small</string>
+  <string
+    name="chipMedium"
+    description="A chip component to select a medium size."
+    >Medium</string>
+  <string
+    name="chipLarge"
+    description="A chip component to select a large size."
+    >Large</string>
+  <string
+    name="chipElevator"
+    description="A chip component to filter selection by elevators."
+    >Elevator</string>
+  <string
+    name="chipWasher"
+    description="A chip component to filter selection by washers."
+    >Washer</string>
+  <string
+    name="chipFireplace"
+    description="A chip component to filter selection by fireplaces."
+    >Fireplace</string>
+  <string
+    name="chipBiking"
+    description="A chip component to that indicates a biking selection."
+    >Biking</string>
+  <string
+    name="demo"
+    description="Used in the title of the demos."
+    >Demo</string>
+  <string
+    name="bottomAppBar"
+    description="Used as semantic label for a BottomAppBar."
+    >Bottom app bar</string>
+  <string
+    name="loading"
+    description="Indicates the loading process."
+    >Loading</string>
+  <string
+    name="dialogDiscardTitle"
+    description="Alert dialog message to discard draft."
+    >Discard draft?</string>
+  <string
+    name="dialogLocationTitle"
+    description="Alert dialog title to use location services."
+    >Use Google&apos;s location service?</string>
+  <string
+    name="dialogLocationDescription"
+    description="Alert dialog description to use location services."
+    >Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</string>
+  <string
+    name="dialogCancel"
+    description="Alert dialog cancel option."
+    >CANCEL</string>
+  <string
+    name="dialogDiscard"
+    description="Alert dialog discard option."
+    >DISCARD</string>
+  <string
+    name="dialogDisagree"
+    description="Alert dialog disagree option."
+    >DISAGREE</string>
+  <string
+    name="dialogAgree"
+    description="Alert dialog agree option."
+    >AGREE</string>
+  <string
+    name="dialogSetBackup"
+    description="Alert dialog title for setting a backup account."
+    >Set backup account</string>
+  <string
+    name="dialogAddAccount"
+    description="Alert dialog option for adding an account."
+    >Add account</string>
+  <string
+    name="dialogShow"
+    description="Button text to display a dialog."
+    >SHOW DIALOG</string>
+  <string
+    name="dialogFullscreenTitle"
+    description="Title for full screen dialog demo."
+    >Full Screen Dialog</string>
+  <string
+    name="dialogFullscreenSave"
+    description="Save button for full screen dialog demo."
+    >SAVE</string>
+  <string
+    name="dialogFullscreenDescription"
+    description="Description for full screen dialog demo."
+    >A full screen dialog demo</string>
+  <string
+    name="cupertinoButton"
+    description="Button text for a generic iOS-style button."
+    >Button</string>
+  <string
+    name="cupertinoButtonWithBackground"
+    description="Button text for a iOS-style button with a filled background."
+    >With Background</string>
+  <string
+    name="cupertinoAlertCancel"
+    description="iOS-style alert cancel option."
+    >Cancel</string>
+  <string
+    name="cupertinoAlertDiscard"
+    description="iOS-style alert discard option."
+    >Discard</string>
+  <string
+    name="cupertinoAlertLocationTitle"
+    description="iOS-style alert title for location permission."
+    >Allow &quot;Maps&quot; to access your location while you are using the app?</string>
+  <string
+    name="cupertinoAlertLocationDescription"
+    description="iOS-style alert description for location permission."
+    >Your current location will be displayed on the map and used for directions, nearby search results, and estimated travel times.</string>
+  <string
+    name="cupertinoAlertAllow"
+    description="iOS-style alert allow option."
+    >Allow</string>
+  <string
+    name="cupertinoAlertDontAllow"
+    description="iOS-style alert don&apos;t allow option."
+    >Don&apos;t Allow</string>
+  <string
+    name="cupertinoAlertFavoriteDessert"
+    description="iOS-style alert title for selecting favorite dessert."
+    >Select Favorite Dessert</string>
+  <string
+    name="cupertinoAlertDessertDescription"
+    description="iOS-style alert description for selecting favorite dessert."
+    >Please select your favorite type of dessert from the list below. Your selection will be used to customize the suggested list of eateries in your area.</string>
+  <string
+    name="cupertinoAlertCheesecake"
+    description="iOS-style alert cheesecake option."
+    >Cheesecake</string>
+  <string
+    name="cupertinoAlertTiramisu"
+    description="iOS-style alert tiramisu option."
+    >Tiramisu</string>
+  <string
+    name="cupertinoAlertApplePie"
+    description="iOS-style alert apple pie option."
+    >Apple Pie</string>
+  <string
+    name="cupertinoAlertChocolateBrownie"
+    description="iOS-style alert chocolate brownie option."
+    >Chocolate Brownie</string>
+  <string
+    name="cupertinoShowAlert"
+    description="Button text to show iOS-style alert."
+    >Show Alert</string>
+  <string
+    name="colorsRed"
+    description="Tab title for the color red."
+    >RED</string>
+  <string
+    name="colorsPink"
+    description="Tab title for the color pink."
+    >PINK</string>
+  <string
+    name="colorsPurple"
+    description="Tab title for the color purple."
+    >PURPLE</string>
+  <string
+    name="colorsDeepPurple"
+    description="Tab title for the color deep purple."
+    >DEEP PURPLE</string>
+  <string
+    name="colorsIndigo"
+    description="Tab title for the color indigo."
+    >INDIGO</string>
+  <string
+    name="colorsBlue"
+    description="Tab title for the color blue."
+    >BLUE</string>
+  <string
+    name="colorsLightBlue"
+    description="Tab title for the color light blue."
+    >LIGHT BLUE</string>
+  <string
+    name="colorsCyan"
+    description="Tab title for the color cyan."
+    >CYAN</string>
+  <string
+    name="colorsTeal"
+    description="Tab title for the color teal."
+    >TEAL</string>
+  <string
+    name="colorsGreen"
+    description="Tab title for the color green."
+    >GREEN</string>
+  <string
+    name="colorsLightGreen"
+    description="Tab title for the color light green."
+    >LIGHT GREEN</string>
+  <string
+    name="colorsLime"
+    description="Tab title for the color lime."
+    >LIME</string>
+  <string
+    name="colorsYellow"
+    description="Tab title for the color yellow."
+    >YELLOW</string>
+  <string
+    name="colorsAmber"
+    description="Tab title for the color amber."
+    >AMBER</string>
+  <string
+    name="colorsOrange"
+    description="Tab title for the color orange."
+    >ORANGE</string>
+  <string
+    name="colorsDeepOrange"
+    description="Tab title for the color deep orange."
+    >DEEP ORANGE</string>
+  <string
+    name="colorsBrown"
+    description="Tab title for the color brown."
+    >BROWN</string>
+  <string
+    name="colorsGrey"
+    description="Tab title for the color grey."
+    >GREY</string>
+  <string
+    name="colorsBlueGrey"
+    description="Tab title for the color blue grey."
+    >BLUE GREY</string>
+  <string
+    name="placeChennai"
+    description="Title for Chennai location."
+    >Chennai</string>
+  <string
+    name="placeTanjore"
+    description="Title for Tanjore location."
+    >Tanjore</string>
+  <string
+    name="placeChettinad"
+    description="Title for Chettinad location."
+    >Chettinad</string>
+  <string
+    name="placePondicherry"
+    description="Title for Pondicherry location."
+    >Pondicherry</string>
+  <string
+    name="placeFlowerMarket"
+    description="Title for Flower Market location."
+    >Flower Market</string>
+  <string
+    name="placeBronzeWorks"
+    description="Title for Bronze Works location."
+    >Bronze Works</string>
+  <string
+    name="placeMarket"
+    description="Title for Market location."
+    >Market</string>
+  <string
+    name="placeThanjavurTemple"
+    description="Title for Thanjavur Temple location."
+    >Thanjavur Temple</string>
+  <string
+    name="placeSaltFarm"
+    description="Title for Salt Farm location."
+    >Salt Farm</string>
+  <string
+    name="placeScooters"
+    description="Title for image of people riding on scooters."
+    >Scooters</string>
+  <string
+    name="placeSilkMaker"
+    description="Title for an image of a silk maker."
+    >Silk Maker</string>
+  <string
+    name="placeLunchPrep"
+    description="Title for an image of preparing lunch."
+    >Lunch Prep</string>
+  <string
+    name="placeBeach"
+    description="Title for Beach location."
+    >Beach</string>
+  <string
+    name="placeFisherman"
+    description="Title for an image of a fisherman."
+    >Fisherman</string>
+  <string
+    name="starterAppTitle"
+    description="The title and name for the starter app."
+    >Starter app</string>
+  <string
+    name="starterAppDescription"
+    description="The description for the starter app."
+    >A responsive starter layout</string>
+  <string
+    name="starterAppGenericButton"
+    description="Generic placeholder for button."
+    >BUTTON</string>
+  <string
+    name="starterAppTooltipAdd"
+    description="Tooltip on add icon."
+    >Add</string>
+  <string
+    name="starterAppTooltipFavorite"
+    description="Tooltip on favorite icon."
+    >Favorite</string>
+  <string
+    name="starterAppTooltipShare"
+    description="Tooltip on share icon."
+    >Share</string>
+  <string
+    name="starterAppTooltipSearch"
+    description="Tooltip on search icon."
+    >Search</string>
+  <string
+    name="starterAppGenericTitle"
+    description="Generic placeholder for title in app bar."
+    >Title</string>
+  <string
+    name="starterAppGenericSubtitle"
+    description="Generic placeholder for subtitle in drawer."
+    >Subtitle</string>
+  <string
+    name="starterAppGenericHeadline"
+    description="Generic placeholder for headline in drawer."
+    >Headline</string>
+  <string
+    name="starterAppGenericBody"
+    description="Generic placeholder for body text in drawer."
+    >Body</string>
+  <string
+    name="starterAppDrawerItem"
+    description="Generic placeholder drawer item."
+    >Item {value}</string>
+  <string
+    name="shrineMenuCaption"
+    description="Caption for a menu page."
+    >MENU</string>
+  <string
+    name="shrineCategoryNameAll"
+    description="A tab showing products from all categories."
+    >ALL</string>
+  <string
+    name="shrineCategoryNameAccessories"
+    description="A category of products consisting of accessories (clothing items)."
+    >ACCESSORIES</string>
+  <string
+    name="shrineCategoryNameClothing"
+    description="A category of products consisting of clothing."
+    >CLOTHING</string>
+  <string
+    name="shrineCategoryNameHome"
+    description="A category of products consisting of items used at home."
+    >HOME</string>
+  <string
+    name="shrineLogoutButtonCaption"
+    description="Label for a logout button."
+    >LOGOUT</string>
+  <string
+    name="shrineLoginUsernameLabel"
+    description="On the login screen, a label for a textfield for the user to input their username."
+    >Username</string>
+  <string
+    name="shrineLoginPasswordLabel"
+    description="On the login screen, a label for a textfield for the user to input their password."
+    >Password</string>
+  <string
+    name="shrineCancelButtonCaption"
+    description="On the login screen, the caption for a button to cancel login."
+    >CANCEL</string>
+  <string
+    name="shrineNextButtonCaption"
+    description="On the login screen, the caption for a button to proceed login."
+    >NEXT</string>
+  <string
+    name="shrineCartPageCaption"
+    description="Caption for a shopping cart page."
+    >CART</string>
+  <string
+    name="shrineProductQuantity"
+    description="A text showing the number of items for a specific product."
+    >Quantity: {quantity}</string>
+  <string
+    name="shrineProductPrice"
+    description="A text showing the unit price of each product. Used as: &apos;Quantity: 3 x $129&apos;. The currency will be handled by the formatter."
+    >x {price}</string>
+  <string
+    name="shrineCartItemCount"
+    description="A text showing the total number of items in the cart."
+    >{quantity, plural, =0{NO ITEMS} =1{1 ITEM} other{{quantity} ITEMS}}</string>
+  <string
+    name="shrineCartClearButtonCaption"
+    description="Caption for a button used to clear the cart."
+    >CLEAR CART</string>
+  <string
+    name="shrineCartTotalCaption"
+    description="Label for a text showing total price of the items in the cart."
+    >TOTAL</string>
+  <string
+    name="shrineCartSubtotalCaption"
+    description="Label for a text showing the subtotal price of the items in the cart (excluding shipping and tax)."
+    >Subtotal:</string>
+  <string
+    name="shrineCartShippingCaption"
+    description="Label for a text showing the shipping cost for the items in the cart."
+    >Shipping:</string>
+  <string
+    name="shrineCartTaxCaption"
+    description="Label for a text showing the tax for the items in the cart."
+    >Tax:</string>
+  <string
+    name="shrineProductVagabondSack"
+    description="Name of the product &apos;Vagabond sack&apos;."
+    >Vagabond sack</string>
+  <string
+    name="shrineProductStellaSunglasses"
+    description="Name of the product &apos;Stella sunglasses&apos;."
+    >Stella sunglasses</string>
+  <string
+    name="shrineProductWhitneyBelt"
+    description="Name of the product &apos;Whitney belt&apos;."
+    >Whitney belt</string>
+  <string
+    name="shrineProductGardenStrand"
+    description="Name of the product &apos;Garden strand&apos;."
+    >Garden strand</string>
+  <string
+    name="shrineProductStrutEarrings"
+    description="Name of the product &apos;Strut earrings&apos;."
+    >Strut earrings</string>
+  <string
+    name="shrineProductVarsitySocks"
+    description="Name of the product &apos;Varsity socks&apos;."
+    >Varsity socks</string>
+  <string
+    name="shrineProductWeaveKeyring"
+    description="Name of the product &apos;Weave keyring&apos;."
+    >Weave keyring</string>
+  <string
+    name="shrineProductGatsbyHat"
+    description="Name of the product &apos;Gatsby hat&apos;."
+    >Gatsby hat</string>
+  <string
+    name="shrineProductShrugBag"
+    description="Name of the product &apos;Shrug bag&apos;."
+    >Shrug bag</string>
+  <string
+    name="shrineProductGiltDeskTrio"
+    description="Name of the product &apos;Gilt desk trio&apos;."
+    >Gilt desk trio</string>
+  <string
+    name="shrineProductCopperWireRack"
+    description="Name of the product &apos;Copper wire rack&apos;."
+    >Copper wire rack</string>
+  <string
+    name="shrineProductSootheCeramicSet"
+    description="Name of the product &apos;Soothe ceramic set&apos;."
+    >Soothe ceramic set</string>
+  <string
+    name="shrineProductHurrahsTeaSet"
+    description="Name of the product &apos;Hurrahs tea set&apos;."
+    >Hurrahs tea set</string>
+  <string
+    name="shrineProductBlueStoneMug"
+    description="Name of the product &apos;Blue stone mug&apos;."
+    >Blue stone mug</string>
+  <string
+    name="shrineProductRainwaterTray"
+    description="Name of the product &apos;Rainwater tray&apos;."
+    >Rainwater tray</string>
+  <string
+    name="shrineProductChambrayNapkins"
+    description="Name of the product &apos;Chambray napkins&apos;."
+    >Chambray napkins</string>
+  <string
+    name="shrineProductSucculentPlanters"
+    description="Name of the product &apos;Succulent planters&apos;."
+    >Succulent planters</string>
+  <string
+    name="shrineProductQuartetTable"
+    description="Name of the product &apos;Quartet table&apos;."
+    >Quartet table</string>
+  <string
+    name="shrineProductKitchenQuattro"
+    description="Name of the product &apos;Kitchen quattro&apos;."
+    >Kitchen quattro</string>
+  <string
+    name="shrineProductClaySweater"
+    description="Name of the product &apos;Clay sweater&apos;."
+    >Clay sweater</string>
+  <string
+    name="shrineProductSeaTunic"
+    description="Name of the product &apos;Sea tunic&apos;."
+    >Sea tunic</string>
+  <string
+    name="shrineProductPlasterTunic"
+    description="Name of the product &apos;Plaster tunic&apos;."
+    >Plaster tunic</string>
+  <string
+    name="shrineProductWhitePinstripeShirt"
+    description="Name of the product &apos;White pinstripe shirt&apos;."
+    >White pinstripe shirt</string>
+  <string
+    name="shrineProductChambrayShirt"
+    description="Name of the product &apos;Chambray shirt&apos;."
+    >Chambray shirt</string>
+  <string
+    name="shrineProductSeabreezeSweater"
+    description="Name of the product &apos;Seabreeze sweater&apos;."
+    >Seabreeze sweater</string>
+  <string
+    name="shrineProductGentryJacket"
+    description="Name of the product &apos;Gentry jacket&apos;."
+    >Gentry jacket</string>
+  <string
+    name="shrineProductNavyTrousers"
+    description="Name of the product &apos;Navy trousers&apos;."
+    >Navy trousers</string>
+  <string
+    name="shrineProductWalterHenleyWhite"
+    description="Name of the product &apos;Walter henley (white)&apos;."
+    >Walter henley (white)</string>
+  <string
+    name="shrineProductSurfAndPerfShirt"
+    description="Name of the product &apos;Surf and perf shirt&apos;."
+    >Surf and perf shirt</string>
+  <string
+    name="shrineProductGingerScarf"
+    description="Name of the product &apos;Ginger scarf&apos;."
+    >Ginger scarf</string>
+  <string
+    name="shrineProductRamonaCrossover"
+    description="Name of the product &apos;Ramona crossover&apos;."
+    >Ramona crossover</string>
+  <string
+    name="shrineProductClassicWhiteCollar"
+    description="Name of the product &apos;Classic white collar&apos;."
+    >Classic white collar</string>
+  <string
+    name="shrineProductCeriseScallopTee"
+    description="Name of the product &apos;Cerise scallop tee&apos;."
+    >Cerise scallop tee</string>
+  <string
+    name="shrineProductShoulderRollsTee"
+    description="Name of the product &apos;Shoulder rolls tee&apos;."
+    >Shoulder rolls tee</string>
+  <string
+    name="shrineProductGreySlouchTank"
+    description="Name of the product &apos;Grey slouch tank&apos;."
+    >Grey slouch tank</string>
+  <string
+    name="shrineProductSunshirtDress"
+    description="Name of the product &apos;Sunshirt dress&apos;."
+    >Sunshirt dress</string>
+  <string
+    name="shrineProductFineLinesTee"
+    description="Name of the product &apos;Fine lines tee&apos;."
+    >Fine lines tee</string>
+  <string
+    name="shrineTooltipSearch"
+    description="The tooltip text for a search button. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Search</string>
+  <string
+    name="shrineTooltipSettings"
+    description="The tooltip text for a settings button. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Settings</string>
+  <string
+    name="shrineTooltipOpenMenu"
+    description="The tooltip text for a menu button. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Open menu</string>
+  <string
+    name="shrineTooltipCloseMenu"
+    description="The tooltip text for a button to close a menu. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Close menu</string>
+  <string
+    name="shrineTooltipCloseCart"
+    description="The tooltip text for a button to close the shopping cart page. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Close cart</string>
+  <string
+    name="shrineScreenReaderCart"
+    description="The description of a shopping cart button containing some products. Used by screen readers, such as TalkBack and VoiceOver."
+    >{quantity, plural, =0{Shopping cart, no items} =1{Shopping cart, 1 item} other{Shopping cart, {quantity} items}}</string>
+  <string
+    name="shrineScreenReaderProductAddToCart"
+    description="An announcement made by screen readers, such as TalkBack and VoiceOver to indicate the action of a button for adding a product to the cart."
+    >Add to cart</string>
+  <string
+    name="shrineScreenReaderRemoveProductButton"
+    description="A tooltip for a button to remove a product. This will be read by screen readers, such as TalkBack and VoiceOver when a product is added to the shopping cart."
+    >Remove {product}</string>
+  <string
+    name="shrineTooltipRemoveItem"
+    description="The tooltip text for a button to remove an item (a product) in a shopping cart. Also used as a semantic label, used by screen readers, such as TalkBack and VoiceOver."
+    >Remove item</string>
+  <string
+    name="craneFormDiners"
+    description="Form field label to enter the number of diners."
+    >Diners</string>
+  <string
+    name="craneFormDate"
+    description="Form field label to select a date."
+    >Select Date</string>
+  <string
+    name="craneFormTime"
+    description="Form field label to select a time."
+    >Select Time</string>
+  <string
+    name="craneFormLocation"
+    description="Form field label to select a location."
+    >Select Location</string>
+  <string
+    name="craneFormTravelers"
+    description="Form field label to select the number of travellers."
+    >Travelers</string>
+  <string
+    name="craneFormOrigin"
+    description="Form field label to choose a travel origin."
+    >Choose Origin</string>
+  <string
+    name="craneFormDestination"
+    description="Form field label to choose a travel destination."
+    >Choose Destination</string>
+  <string
+    name="craneFormDates"
+    description="Form field label to select multiple dates."
+    >Select Dates</string>
+  <string
+    name="craneHours"
+    description="Generic text for an amount of hours, abbreviated to the shortest form. For example 1h. {hours} should remain untranslated."
+    >{hours, plural, =1{1h} other{{hours}h}}</string>
+  <string
+    name="craneMinutes"
+    description="Generic text for an amount of minutes, abbreviated to the shortest form. For example 15m. {minutes} should remain untranslated."
+    >{minutes, plural, =1{1m} other{{minutes}m}}</string>
+  <string
+    name="craneFlightDuration"
+    description="A pattern to define the layout of a flight duration string. For example in English one might say 1h 15m. Translation should only rearrange the inputs. {hoursShortForm} would for example be replaced by 1h, already translated to the given locale. {minutesShortForm} would for example be replaced by 15m, already translated to the given locale."
+    >{hoursShortForm} {minutesShortForm}</string>
+  <string
+    name="craneFly"
+    description="Title for FLY tab."
+    >FLY</string>
+  <string
+    name="craneSleep"
+    description="Title for SLEEP tab."
+    >SLEEP</string>
+  <string
+    name="craneEat"
+    description="Title for EAT tab."
+    >EAT</string>
+  <string
+    name="craneFlySubhead"
+    description="Subhead for FLY tab."
+    >Explore Flights by Destination</string>
+  <string
+    name="craneSleepSubhead"
+    description="Subhead for SLEEP tab."
+    >Explore Properties by Destination</string>
+  <string
+    name="craneEatSubhead"
+    description="Subhead for EAT tab."
+    >Explore Restaurants by Destination</string>
+  <string
+    name="craneFlyStops"
+    description="Label indicating if a flight is nonstop or how many layovers it includes."
+    >{numberOfStops, plural, =0{Nonstop} =1{1 stop} other{{numberOfStops} stops}}</string>
+  <string
+    name="craneSleepProperties"
+    description="Text indicating the number of available properties (temporary rentals). Always plural."
+    >{totalProperties, plural, =0{No Available Properties} =1{1 Available Properties} other{{totalProperties} Available Properties}}</string>
+  <string
+    name="craneEatRestaurants"
+    description="Text indicating the number of restaurants. Always plural."
+    >{totalRestaurants, plural, =0{No Restaurants} =1{1 Restaurant} other{{totalRestaurants} Restaurants}}</string>
+  <string
+    name="craneFly0"
+    description="Label for city."
+    >Aspen, United States</string>
+  <string
+    name="craneFly1"
+    description="Label for city."
+    >Big Sur, United States</string>
+  <string
+    name="craneFly2"
+    description="Label for city."
+    >Khumbu Valley, Nepal</string>
+  <string
+    name="craneFly3"
+    description="Label for city."
+    >Machu Picchu, Peru</string>
+  <string
+    name="craneFly4"
+    description="Label for city."
+    >Malé, Maldives</string>
+  <string
+    name="craneFly5"
+    description="Label for city."
+    >Vitznau, Switzerland</string>
+  <string
+    name="craneFly6"
+    description="Label for city."
+    >Mexico City, Mexico</string>
+  <string
+    name="craneFly7"
+    description="Label for city."
+    >Mount Rushmore, United States</string>
+  <string
+    name="craneFly8"
+    description="Label for city."
+    >Singapore</string>
+  <string
+    name="craneFly9"
+    description="Label for city."
+    >Havana, Cuba</string>
+  <string
+    name="craneFly10"
+    description="Label for city."
+    >Cairo, Egypt</string>
+  <string
+    name="craneFly11"
+    description="Label for city."
+    >Lisbon, Portugal</string>
+  <string
+    name="craneFly12"
+    description="Label for city."
+    >Napa, United States</string>
+  <string
+    name="craneFly13"
+    description="Label for city."
+    >Bali, Indonesia</string>
+  <string
+    name="craneSleep0"
+    description="Label for city."
+    >Malé, Maldives</string>
+  <string
+    name="craneSleep1"
+    description="Label for city."
+    >Aspen, United States</string>
+  <string
+    name="craneSleep2"
+    description="Label for city."
+    >Machu Picchu, Peru</string>
+  <string
+    name="craneSleep3"
+    description="Label for city."
+    >Havana, Cuba</string>
+  <string
+    name="craneSleep4"
+    description="Label for city."
+    >Vitznau, Switzerland</string>
+  <string
+    name="craneSleep5"
+    description="Label for city."
+    >Big Sur, United States</string>
+  <string
+    name="craneSleep6"
+    description="Label for city."
+    >Napa, United States</string>
+  <string
+    name="craneSleep7"
+    description="Label for city."
+    >Porto, Portugal</string>
+  <string
+    name="craneSleep8"
+    description="Label for city."
+    >Tulum, Mexico</string>
+  <string
+    name="craneSleep9"
+    description="Label for city."
+    >Lisbon, Portugal</string>
+  <string
+    name="craneSleep10"
+    description="Label for city."
+    >Cairo, Egypt</string>
+  <string
+    name="craneSleep11"
+    description="Label for city."
+    >Taipei, Taiwan</string>
+  <string
+    name="craneEat0"
+    description="Label for city."
+    >Naples, Italy</string>
+  <string
+    name="craneEat1"
+    description="Label for city."
+    >Dallas, United States</string>
+  <string
+    name="craneEat2"
+    description="Label for city."
+    >Córdoba, Argentina</string>
+  <string
+    name="craneEat3"
+    description="Label for city."
+    >Portland, United States</string>
+  <string
+    name="craneEat4"
+    description="Label for city."
+    >Paris, France</string>
+  <string
+    name="craneEat5"
+    description="Label for city."
+    >Seoul, South Korea</string>
+  <string
+    name="craneEat6"
+    description="Label for city."
+    >Seattle, United States</string>
+  <string
+    name="craneEat7"
+    description="Label for city."
+    >Nashville, United States</string>
+  <string
+    name="craneEat8"
+    description="Label for city."
+    >Atlanta, United States</string>
+  <string
+    name="craneEat9"
+    description="Label for city."
+    >Madrid, Spain</string>
+  <string
+    name="craneEat10"
+    description="Label for city."
+    >Lisbon, Portugal</string>
+  <string
+    name="craneFly0SemanticLabel"
+    description="Semantic label for an image."
+    >Chalet in a snowy landscape with evergreen trees</string>
+  <string
+    name="craneFly1SemanticLabel"
+    description="Semantic label for an image."
+    >Tent in a field</string>
+  <string
+    name="craneFly2SemanticLabel"
+    description="Semantic label for an image."
+    >Prayer flags in front of snowy mountain</string>
+  <string
+    name="craneFly3SemanticLabel"
+    description="Semantic label for an image."
+    >Machu Picchu citadel</string>
+  <string
+    name="craneFly4SemanticLabel"
+    description="Semantic label for an image."
+    >Overwater bungalows</string>
+  <string
+    name="craneFly5SemanticLabel"
+    description="Semantic label for an image."
+    >Lake-side hotel in front of mountains</string>
+  <string
+    name="craneFly6SemanticLabel"
+    description="Semantic label for an image."
+    >Aerial view of Palacio de Bellas Artes</string>
+  <string
+    name="craneFly7SemanticLabel"
+    description="Semantic label for an image."
+    >Mount Rushmore</string>
+  <string
+    name="craneFly8SemanticLabel"
+    description="Semantic label for an image."
+    >Supertree Grove</string>
+  <string
+    name="craneFly9SemanticLabel"
+    description="Semantic label for an image."
+    >Man leaning on an antique blue car</string>
+  <string
+    name="craneFly10SemanticLabel"
+    description="Semantic label for an image."
+    >Al-Azhar Mosque towers during sunset</string>
+  <string
+    name="craneFly11SemanticLabel"
+    description="Semantic label for an image."
+    >Brick lighthouse at sea</string>
+  <string
+    name="craneFly12SemanticLabel"
+    description="Semantic label for an image."
+    >Pool with palm trees</string>
+  <string
+    name="craneFly13SemanticLabel"
+    description="Semantic label for an image."
+    >Sea-side pool with palm trees</string>
+  <string
+    name="craneSleep0SemanticLabel"
+    description="Semantic label for an image."
+    >Overwater bungalows</string>
+  <string
+    name="craneSleep1SemanticLabel"
+    description="Semantic label for an image."
+    >Chalet in a snowy landscape with evergreen trees</string>
+  <string
+    name="craneSleep2SemanticLabel"
+    description="Semantic label for an image."
+    >Machu Picchu citadel</string>
+  <string
+    name="craneSleep3SemanticLabel"
+    description="Semantic label for an image."
+    >Man leaning on an antique blue car</string>
+  <string
+    name="craneSleep4SemanticLabel"
+    description="Semantic label for an image."
+    >Lake-side hotel in front of mountains</string>
+  <string
+    name="craneSleep5SemanticLabel"
+    description="Semantic label for an image."
+    >Tent in a field</string>
+  <string
+    name="craneSleep6SemanticLabel"
+    description="Semantic label for an image."
+    >Pool with palm trees</string>
+  <string
+    name="craneSleep7SemanticLabel"
+    description="Semantic label for an image."
+    >Colorful apartments at Riberia Square</string>
+  <string
+    name="craneSleep8SemanticLabel"
+    description="Semantic label for an image."
+    >Mayan ruins on a cliff above a beach</string>
+  <string
+    name="craneSleep9SemanticLabel"
+    description="Semantic label for an image."
+    >Brick lighthouse at sea</string>
+  <string
+    name="craneSleep10SemanticLabel"
+    description="Semantic label for an image."
+    >Al-Azhar Mosque towers during sunset</string>
+  <string
+    name="craneSleep11SemanticLabel"
+    description="Semantic label for an image."
+    >Taipei 101 skyscraper</string>
+  <string
+    name="craneEat0SemanticLabel"
+    description="Semantic label for an image."
+    >Pizza in a wood-fired oven</string>
+  <string
+    name="craneEat1SemanticLabel"
+    description="Semantic label for an image."
+    >Empty bar with diner-style stools</string>
+  <string
+    name="craneEat2SemanticLabel"
+    description="Semantic label for an image."
+    >Burger</string>
+  <string
+    name="craneEat3SemanticLabel"
+    description="Semantic label for an image."
+    >Korean taco</string>
+  <string
+    name="craneEat4SemanticLabel"
+    description="Semantic label for an image."
+    >Chocolate dessert</string>
+  <string
+    name="craneEat5SemanticLabel"
+    description="Semantic label for an image."
+    >Artsy restaurant seating area</string>
+  <string
+    name="craneEat6SemanticLabel"
+    description="Semantic label for an image."
+    >Shrimp dish</string>
+  <string
+    name="craneEat7SemanticLabel"
+    description="Semantic label for an image."
+    >Bakery entrance</string>
+  <string
+    name="craneEat8SemanticLabel"
+    description="Semantic label for an image."
+    >Plate of crawfish</string>
+  <string
+    name="craneEat9SemanticLabel"
+    description="Semantic label for an image."
+    >Cafe counter with pastries</string>
+  <string
+    name="craneEat10SemanticLabel"
+    description="Semantic label for an image."
+    >Woman holding huge pastrami sandwich</string>
+  <string
+    name="fortnightlyMenuFrontPage"
+    description="Menu item for the front page of the news app."
+    >Front Page</string>
+  <string
+    name="fortnightlyMenuWorld"
+    description="Menu item for the world news section of the news app."
+    >World</string>
+  <string
+    name="fortnightlyMenuUS"
+    description="Menu item for the United States news section of the news app."
+    >US</string>
+  <string
+    name="fortnightlyMenuPolitics"
+    description="Menu item for the political news section of the news app."
+    >Politics</string>
+  <string
+    name="fortnightlyMenuBusiness"
+    description="Menu item for the business news section of the news app."
+    >Business</string>
+  <string
+    name="fortnightlyMenuTech"
+    description="Menu item for the tech news section of the news app."
+    >Tech</string>
+  <string
+    name="fortnightlyMenuScience"
+    description="Menu item for the science news section of the news app."
+    >Science</string>
+  <string
+    name="fortnightlyMenuSports"
+    description="Menu item for the sports news section of the news app."
+    >Sports</string>
+  <string
+    name="fortnightlyMenuTravel"
+    description="Menu item for the travel news section of the news app."
+    >Travel</string>
+  <string
+    name="fortnightlyMenuCulture"
+    description="Menu item for the culture news section of the news app."
+    >Culture</string>
+  <string
+    name="fortnightlyTrendingTechDesign"
+    description="Hashtag for the tech design trending topic of the news app."
+    >TechDesign</string>
+  <string
+    name="fortnightlyTrendingReform"
+    description="Hashtag for the reform trending topic of the news app."
+    >Reform</string>
+  <string
+    name="fortnightlyTrendingHealthcareRevolution"
+    description="Hashtag for the healthcare revolution trending topic of the news app."
+    >HealthcareRevolution</string>
+  <string
+    name="fortnightlyTrendingGreenArmy"
+    description="Hashtag for the green army trending topic of the news app."
+    >GreenArmy</string>
+  <string
+    name="fortnightlyTrendingStocks"
+    description="Hashtag for the stocks trending topic of the news app."
+    >Stocks</string>
+  <string
+    name="fortnightlyLatestUpdates"
+    description="Title for news section regarding the latest updates."
+    >Latest Updates</string>
+  <string
+    name="fortnightlyHeadlineHealthcare"
+    description="Headline for a news article about healthcare."
+    >The Quiet, Yet Powerful Healthcare Revolution</string>
+  <string
+    name="fortnightlyHeadlineWar"
+    description="Headline for a news article about war."
+    >Divided American Lives During War</string>
+  <string
+    name="fortnightlyHeadlineGasoline"
+    description="Headline for a news article about gasoline."
+    >The Future of Gasoline</string>
+  <string
+    name="fortnightlyHeadlineArmy"
+    description="Headline for a news article about the green army."
+    >Reforming The Green Army From Within</string>
+  <string
+    name="fortnightlyHeadlineStocks"
+    description="Headline for a news article about stocks."
+    >As Stocks Stagnate, Many Look To Currency</string>
+  <string
+    name="fortnightlyHeadlineFabrics"
+    description="Headline for a news article about fabric."
+    >Designers Use Tech To Make Futuristic Fabrics</string>
+  <string
+    name="fortnightlyHeadlineFeminists"
+    description="Headline for a news article about feminists and partisanship."
+    >Feminists Take On Partisanship</string>
+  <string
+    name="fortnightlyHeadlineBees"
+    description="Headline for a news article about bees."
+    >Farmland Bees In Short Supply</string>
+  <string
+    name="replyInboxLabel"
+    description="Text label for Inbox destination."
+    >Inbox</string>
+  <string
+    name="replyStarredLabel"
+    description="Text label for Starred destination."
+    >Starred</string>
+  <string
+    name="replySentLabel"
+    description="Text label for Sent destination."
+    >Sent</string>
+  <string
+    name="replyTrashLabel"
+    description="Text label for Trash destination."
+    >Trash</string>
+  <string
+    name="replySpamLabel"
+    description="Text label for Spam destination."
+    >Spam</string>
+  <string
+    name="replyDraftsLabel"
+    description="Text label for Drafts destination."
+    >Drafts</string>
+  <string
+    name="demoTwoPaneFoldableLabel"
+    description="Option title for TwoPane demo on foldable devices."
+    >Foldable</string>
+  <string
+    name="demoTwoPaneFoldableDescription"
+    description="Description for the foldable option configuration on the TwoPane demo."
+    >This is how TwoPane behaves on a foldable device.</string>
+  <string
+    name="demoTwoPaneSmallScreenLabel"
+    description="Option title for TwoPane demo in small screen mode. Counterpart of the foldable option."
+    >Small Screen</string>
+  <string
+    name="demoTwoPaneSmallScreenDescription"
+    description="Description for the small screen option configuration on the TwoPane demo."
+    >This is how TwoPane behaves on a small screen device.</string>
+  <string
+    name="demoTwoPaneTabletLabel"
+    description="Option title for TwoPane demo in tablet or desktop mode."
+    >Tablet / Desktop</string>
+  <string
+    name="demoTwoPaneTabletDescription"
+    description="Description for the tablet / desktop option configuration on the TwoPane demo."
+    >This is how TwoPane behaves on a larger screen like a tablet or desktop.</string>
+  <string
+    name="demoTwoPaneTitle"
+    description="Title for the TwoPane widget demo."
+    >TwoPane</string>
+  <string
+    name="demoTwoPaneSubtitle"
+    description="Subtitle for the TwoPane widget demo."
+    >Responsive layouts on foldable, large, and small screens</string>
+  <string
+    name="splashSelectDemo"
+    description="Tip for user, visible on the right side of the splash screen when Gallery runs on a foldable device."
+    >Select a demo</string>
+  <string
+    name="demoTwoPaneList"
+    description="Title of one of the panes in the TwoPane demo. It sits on top of a list of items."
+    >List</string>
+  <string
+    name="demoTwoPaneDetails"
+    description="Title of one of the panes in the TwoPane demo, which shows details of the currently selected item."
+    >Details</string>
+  <string
+    name="demoTwoPaneSelectItem"
+    description="Tip for user, visible on the right side of the TwoPane widget demo in the foldable configuration."
+    >Select an item</string>
+  <string
+    name="demoTwoPaneItem"
+    description="Generic item placeholder visible in the TwoPane widget demo."
+    >Item {value}</string>
+  <string
+    name="demoTwoPaneItemDetails"
+    description="Generic item description or details visible in the TwoPane widget demo."
+    >Item {value} details</string>
+</resources>

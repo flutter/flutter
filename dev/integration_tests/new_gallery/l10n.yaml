@@ -1,0 +1,6 @@
+template-arb-file: intl_en.arb
+output-localization-file: gallery_localizations.dart
+output-class: GalleryLocalizations
+preferred-supported-locales:
+  - en
+use-deferred-loading: true
