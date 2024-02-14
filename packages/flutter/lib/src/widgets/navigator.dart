@@ -2905,6 +2905,10 @@ class _NotAnnounced extends Route<void> {
   // change has been announced.
 }
 
+void disposeNavigationSingletons() {
+  _RouteEntry.notAnnounced.dispose();
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
