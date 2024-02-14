@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
