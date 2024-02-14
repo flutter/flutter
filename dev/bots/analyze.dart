@@ -151,7 +151,7 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Taboo words...');
   await verifyTabooDocumentation(flutterRoot);
-  
+
   printProgress('Lint Kotlin files...');
   await lintKotlinFiles(flutterRoot);
 
@@ -1981,7 +1981,9 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
   // TODO: should this be on CIPD? Or downloaded like in packages repo, like above?
   // TODO: Where to put the baseline file in this repo?
   _evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
-  final EvalResult lintResult = await _evalCommand(kotlinLinterFile.path, <String>[], workingDirectory: workingDirectory);
+  final EvalResult lintResult = await _evalCommand(kotlinLinterFile.path,
+      <String>['--baseline=$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml'],
+      workingDirectory: workingDirectory);
   if (lintResult.exitCode != 0) {
     foundError(<String>['Found lint violations in Kotlin files:\n ${lintResult.stdout}']);
   }
