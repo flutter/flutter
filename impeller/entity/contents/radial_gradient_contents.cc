@@ -70,55 +70,38 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
   using VS = RadialGradientSSBOFillPipeline::VertexShader;
   using FS = RadialGradientSSBOFillPipeline::FragmentShader;
 
-  FS::FragInfo frag_info;
-  frag_info.center = center_;
-  frag_info.radius = radius_;
-  frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
-  frag_info.decal_border_color = decal_border_color_;
-  frag_info.alpha = GetOpacityFactor();
-
-  auto& host_buffer = renderer.GetTransientsBuffer();
-  auto colors = CreateGradientColors(colors_, stops_);
-
-  frag_info.colors_length = colors.size();
-  auto color_buffer =
-      host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                          DefaultUniformAlignment());
-
   VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
-  frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
   frame_info.matrix = GetInverseEffectTransform();
 
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-  auto options = OptionsFromPassAndEntity(pass, entity);
-  if (geometry_result.prevent_overdraw) {
-    options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
-  }
-  options.primitive_type = geometry_result.type;
+  PipelineBuilderCallback pipeline_callback =
+      [&renderer](ContentContextOptions options) {
+        return renderer.GetRadialGradientSSBOFillPipeline(options);
+      };
+  return ColorSourceContents::DrawPositions<VS>(
+      renderer, entity, pass, pipeline_callback, frame_info,
+      [this, &renderer](RenderPass& pass) {
+        FS::FragInfo frag_info;
+        frag_info.center = center_;
+        frag_info.radius = radius_;
+        frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+        frag_info.decal_border_color = decal_border_color_;
+        frag_info.alpha = GetOpacityFactor();
 
-  pass.SetCommandLabel("RadialGradientSSBOFill");
-  pass.SetPipeline(renderer.GetRadialGradientSSBOFillPipeline(options));
-  pass.SetStencilReference(entity.GetClipDepth());
-  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-  FS::BindFragInfo(pass,
-                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
-  FS::BindColorData(pass, color_buffer);
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto colors = CreateGradientColors(colors_, stops_);
 
-  if (!pass.Draw().ok()) {
-    return false;
-  }
+        frag_info.colors_length = colors.size();
+        auto color_buffer =
+            host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
+                                DefaultUniformAlignment());
 
-  if (geometry_result.prevent_overdraw) {
-    auto restore = ClipRestoreContents();
-    restore.SetRestoreCoverage(GetCoverage(entity));
-    return restore.Render(renderer, entity, pass);
-  }
-  return true;
+        pass.SetCommandLabel("RadialGradientSSBOFill");
+        FS::BindFragInfo(
+            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+        FS::BindColorData(pass, color_buffer);
+
+        return true;
+      });
 }
 
 bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
@@ -134,57 +117,46 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
     return false;
   }
 
-  FS::FragInfo frag_info;
-  frag_info.center = center_;
-  frag_info.radius = radius_;
-  frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
-  frag_info.decal_border_color = decal_border_color_;
-  frag_info.texture_sampler_y_coord_scale = gradient_texture->GetYCoordScale();
-  frag_info.alpha = GetOpacityFactor();
-  frag_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
-                                 0.5 / gradient_texture->GetSize().height);
-
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-
   VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
-  frame_info.mvp = geometry_result.transform;
   frame_info.matrix = GetInverseEffectTransform();
 
-  auto options = OptionsFromPassAndEntity(pass, entity);
-  if (geometry_result.prevent_overdraw) {
-    options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
-  }
-  options.primitive_type = geometry_result.type;
-
-  SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = MinMagFilter::kLinear;
-  sampler_desc.mag_filter = MinMagFilter::kLinear;
-
-  pass.SetCommandLabel("RadialGradientFill");
-  pass.SetPipeline(renderer.GetRadialGradientFillPipeline(options));
-  pass.SetStencilReference(entity.GetClipDepth());
-  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-  FS::BindFragInfo(pass,
-                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
-  FS::BindTextureSampler(
-      pass, gradient_texture,
-      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
   VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
-  if (!pass.Draw().ok()) {
-    return false;
-  }
+  PipelineBuilderCallback pipeline_callback =
+      [&renderer](ContentContextOptions options) {
+        return renderer.GetRadialGradientFillPipeline(options);
+      };
+  return ColorSourceContents::DrawPositions<VS>(
+      renderer, entity, pass, pipeline_callback, frame_info,
+      [this, &renderer, &gradient_texture](RenderPass& pass) {
+        FS::FragInfo frag_info;
+        frag_info.center = center_;
+        frag_info.radius = radius_;
+        frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+        frag_info.decal_border_color = decal_border_color_;
+        frag_info.texture_sampler_y_coord_scale =
+            gradient_texture->GetYCoordScale();
+        frag_info.alpha = GetOpacityFactor();
+        frag_info.half_texel =
+            Vector2(0.5 / gradient_texture->GetSize().width,
+                    0.5 / gradient_texture->GetSize().height);
 
-  if (geometry_result.prevent_overdraw) {
-    auto restore = ClipRestoreContents();
-    restore.SetRestoreCoverage(GetCoverage(entity));
-    return restore.Render(renderer, entity, pass);
-  }
-  return true;
+        SamplerDescriptor sampler_desc;
+        sampler_desc.min_filter = MinMagFilter::kLinear;
+        sampler_desc.mag_filter = MinMagFilter::kLinear;
+
+        pass.SetCommandLabel("RadialGradientFill");
+
+        FS::BindFragInfo(
+            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+        FS::BindTextureSampler(
+            pass, gradient_texture,
+            renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+                sampler_desc));
+
+        return true;
+      });
 }
 
 bool RadialGradientContents::ApplyColorFilter(

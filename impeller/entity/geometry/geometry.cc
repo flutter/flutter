@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 
+#include "fml/status.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
