@@ -43,7 +43,7 @@ class {{pluginDartClass}}Bindings {
   }
 
   late final _sumPtr =
-      _lookup<ffi.NativeFunction<ffi.Int64 Function(ffi.Int64, ffi.Int64)>>(
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Int, ffi.Int)>>(
           'sum');
   late final _sum = _sumPtr.asFunction<int Function(int, int)>();
 
@@ -63,7 +63,7 @@ class {{pluginDartClass}}Bindings {
   }
 
   late final _sum_long_runningPtr =
-      _lookup<ffi.NativeFunction<ffi.Int64 Function(ffi.Int64, ffi.Int64)>>(
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Int, ffi.Int)>>(
           'sum_long_running');
   late final _sum_long_running =
       _sum_long_runningPtr.asFunction<int Function(int, int)>();
