@@ -1343,12 +1343,7 @@ void main() {
             label: 'Hour',
             value: '07',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isTextField,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isMultiline,
-            ],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
           ),
         );
         expect(
@@ -1357,12 +1352,7 @@ void main() {
             label: 'Minute',
             value: '00',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isTextField,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isMultiline,
-            ],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
           ),
         );
 
