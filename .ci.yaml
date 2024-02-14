@@ -2484,7 +2484,6 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
