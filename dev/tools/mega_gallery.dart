@@ -86,7 +86,6 @@ void main(List<String> args) {
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
   // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
-  _file(out, 'analysis_options.yaml').deleteSync();
   _file(out, 'analysis_options.yaml').writeAsStringSync(
     '''
 analyzer:
