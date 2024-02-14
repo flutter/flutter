@@ -109,7 +109,7 @@ class ObjectCreated extends ObjectEvent {
   /// Name of the instrumented class.
   final String className;
 
-  /// If true, the object is not expected too be disposed
+  /// If true, the object is not expected to be disposed
   /// and garbage collected.
   ///
   /// For example, the object is a singleton.
