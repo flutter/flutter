@@ -257,14 +257,15 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
     return Semantics(
-        container: true,
-        child: TextFormField(
+      container: true,
+      child: TextFormField(
         decoration: InputDecoration(
           hintText: widget.fieldHintText ?? localizations.dateHelpText,
           labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-        ).applyDefaults(inputTheme
-          .merge(datePickerTheme.inputDecorationTheme)
-          .copyWith(border: effectiveInputBorder),
+        ).applyDefaults(
+          inputTheme
+              .merge(datePickerTheme.inputDecorationTheme)
+              .copyWith(border: effectiveInputBorder),
         ),
         validator: _validateDate,
         keyboardType: widget.keyboardType ?? TextInputType.datetime,
