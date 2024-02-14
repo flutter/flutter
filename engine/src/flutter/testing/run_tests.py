@@ -238,11 +238,13 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     env['LD_LIBRARY_PATH'] = build_dir
     env['VK_DRIVER_FILES'] = os.path.join(build_dir, 'vk_swiftshader_icd.json')
     if os.path.exists(unstripped_exe):
+      unstripped_vulkan = os.path.join(build_dir, 'lib.unstripped', 'libvulkan.so.1')
+      if os.path.exists(unstripped_vulkan):
+        vulkan_path = unstripped_vulkan
+      else:
+        vulkan_path = os.path.join(build_dir, 'libvulkan.so.1')
       try:
-        os.symlink(
-            os.path.join(build_dir, 'lib.unstripped', 'libvulkan.so.1'),
-            os.path.join(build_dir, 'exe.unstripped', 'libvulkan.so.1')
-        )
+        os.symlink(vulkan_path, os.path.join(build_dir, 'exe.unstripped', 'libvulkan.so.1'))
       except OSError as err:
         if err.errno == errno.EEXIST:
           pass
