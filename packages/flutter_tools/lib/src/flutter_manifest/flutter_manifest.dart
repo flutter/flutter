@@ -13,6 +13,7 @@ import '../base/utils.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import 'assets_entry.dart';
+import 'parse_list.dart';
 import 'parse_result.dart';
 
 /// Whether or not Impeller Scene 3D model import is enabled.
@@ -553,31 +554,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
     }
   }
-}
-
-ParseResult<List<T>> parseList<T>(Object? yamlList, String context, String typeAlias) {
-  final List<T> result = <T>[];
-  final List<String> errors = <String>[];
-
-  if (yamlList is! YamlList) {
-    return ErrorParseResult<List<T>>(
-      <String>['Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).']
-    );
-  }
-
-  for (final (int i, Object? item) in yamlList.indexed) {
-    if (item is! T) {
-      // ignore: avoid_dynamic_calls
-      errors.add('Expected $context to be a list of $typeAlias, but element at index $i was a ${yamlList[i].runtimeType}.');
-    } else {
-      result.add(item);
-    }
-  }
-
-  if (errors.isEmpty) {
-    return ValueParseResult<List<T>>(result);
-  }
-  return ErrorParseResult<List<T>>(errors);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {

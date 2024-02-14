@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/utils.dart';
-import 'flutter_manifest.dart';
+import 'parse_list.dart';
 import 'parse_result.dart';
 
 /// Represents an entry under the `assets` section of a pubspec.
