@@ -885,7 +885,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // direction, and any modifiers specified by the ScrollBehavior taken into
   // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    late double delta;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
       // Axes are only flipped for physical mouse wheel input.
