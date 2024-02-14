@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
+import 'model/email_store.dart';
 import 'package:provider/provider.dart';
+
+import 'model/email_model.dart';
 
 class ComposePage extends StatelessWidget {
   const ComposePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var senderEmail = 'flutterfan@gmail.com';
+    const String senderEmail = 'flutterfan@gmail.com';
     String subject = '';
     String? recipient = 'Recipient';
     String recipientAvatar = 'reply/avatars/avatar_0.jpg';
 
-    final emailStore = Provider.of<EmailStore>(context);
+    final EmailStore emailStore = Provider.of<EmailStore>(context);
 
     if (emailStore.selectedEmailId >= 0) {
-      final currentEmail = emailStore.currentEmail;
+      final Email currentEmail = emailStore.currentEmail;
       subject = currentEmail.subject;
       recipient = currentEmail.sender;
       recipientAvatar = currentEmail.avatar;
@@ -32,12 +34,12 @@ class ComposePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: <Widget>[
                   _SubjectRow(
                     subject: subject,
                   ),
                   const _SectionDivider(),
-                  _SenderAddressRow(
+                  const _SenderAddressRow(
                     senderEmail: senderEmail,
                   ),
                   const _SectionDivider(),
@@ -54,7 +56,6 @@ class ComposePage extends StatelessWidget {
                       decoration: const InputDecoration.collapsed(
                         hintText: 'New Message...',
                       ),
-                      autofocus: false,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -94,14 +95,13 @@ class _SubjectRowState extends State<_SubjectRow> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           IconButton(
             key: const ValueKey('ReplyExit'),
             onPressed: () => Navigator.of(context).pop(),
@@ -113,8 +113,6 @@ class _SubjectRowState extends State<_SubjectRow> {
           Expanded(
             child: TextField(
               controller: _subjectController,
-              maxLines: 1,
-              autofocus: false,
               style: theme.textTheme.titleLarge,
               decoration: InputDecoration.collapsed(
                 hintText: 'Subject',
@@ -163,21 +161,21 @@ class __SenderAddressRowState extends State<_SenderAddressRow> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final accounts = [
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+    final List<String> accounts = <String>[
       'flutterfan@gmail.com',
       'materialfan@gmail.com',
     ];
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      onSelected: (email) {
+      onSelected: (String email) {
         setState(() {
           senderEmail = email;
         });
       },
-      itemBuilder: (context) => <PopupMenuItem<String>>[
+      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         PopupMenuItem<String>(
           value: accounts[0],
           child: Text(
@@ -201,8 +199,7 @@ class __SenderAddressRowState extends State<_SenderAddressRow> {
           bottom: 10,
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Expanded(
               child: Text(
                 senderEmail,
@@ -234,11 +231,10 @@ class _RecipientsRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Expanded(
             child: Wrap(
-              children: [
+              children: <Widget>[
                 Chip(
                   backgroundColor:
                       Theme.of(context).chipTheme.secondarySelectedColor,

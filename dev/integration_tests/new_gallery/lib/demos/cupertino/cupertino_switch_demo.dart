@@ -30,7 +30,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -44,13 +44,13 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo>
           label: localizations.demoSelectionControlsSwitchTitle,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   CupertinoSwitch(
                     value: _switchValueA.value,
-                    onChanged: (value) {
+                    onChanged: (bool value) {
                       setState(() {
                         _switchValueA.value = value;
                       });
@@ -58,7 +58,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo>
                   ),
                   CupertinoSwitch(
                     value: _switchValueB.value,
-                    onChanged: (value) {
+                    onChanged: (bool value) {
                       setState(() {
                         _switchValueB.value = value;
                       });
@@ -69,7 +69,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo>
               // Disabled switches
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   CupertinoSwitch(
                     value: _switchValueA.value,
                     onChanged: null,

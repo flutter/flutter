@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/home.dart';
-import 'package:gallery/pages/settings.dart';
-import 'package:gallery/pages/settings_icon/icon.dart' as settings_icon;
+import '../constants.dart';
+import '../data/gallery_options.dart';
+import '../layout/adaptive.dart';
+import 'home.dart';
+import 'settings.dart';
+import 'settings_icon/icon.dart' as settings_icon;
 
 const double _settingsButtonWidth = 64;
 const double _settingsButtonHeightDesktop = 56;
@@ -123,18 +123,18 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     final Widget settingsPage = ValueListenableBuilder<bool>(
       valueListenable: _isSettingsOpenNotifier,
-      builder: (context, isSettingsOpen, child) {
+      builder: (BuildContext context, bool isSettingsOpen, Widget? child) {
         return ExcludeSemantics(
           excluding: !isSettingsOpen,
           child: isSettingsOpen
               ? KeyboardListener(
                   includeSemantics: false,
                   focusNode: _settingsPageFocusNode,
-                  onKeyEvent: (event) {
+                  onKeyEvent: (KeyEvent event) {
                     if (event.logicalKey == LogicalKeyboardKey.escape) {
                       _toggleSettings();
                     }
@@ -148,7 +148,7 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
 
     final Widget homePage = ValueListenableBuilder<bool>(
       valueListenable: _isSettingsOpenNotifier,
-      builder: (context, isSettingsOpen, child) {
+      builder: (BuildContext context, bool isSettingsOpen, Widget? child) {
         return ExcludeSemantics(
           excluding: isSettingsOpen,
           child: FocusTraversalGroup(child: _homePage),
@@ -159,8 +159,8 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: GalleryOptions.of(context).resolvedSystemUiOverlayStyle(),
       child: Stack(
-        children: [
-          if (!isDesktop) ...[
+        children: <Widget>[
+          if (!isDesktop) ...<Widget>[
             // Slides the settings page up and down from the top of the
             // screen.
             PositionedTransition(
@@ -174,11 +174,11 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
               child: homePage,
             ),
           ],
-          if (isDesktop) ...[
+          if (isDesktop) ...<Widget>[
             Semantics(sortKey: const OrdinalSortKey(2), child: homePage),
             ValueListenableBuilder<bool>(
               valueListenable: _isSettingsOpenNotifier,
-              builder: (context, isSettingsOpen, child) {
+              builder: (BuildContext context, bool isSettingsOpen, Widget? child) {
                 if (isSettingsOpen) {
                   return ExcludeSemantics(
                     child: Listener(
@@ -258,8 +258,8 @@ class _SettingsIcon extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final safeAreaTopPadding = MediaQuery.of(context).padding.top;
+    final bool isDesktop = isDisplayDesktop(context);
+    final double safeAreaTopPadding = MediaQuery.of(context).padding.top;
 
     return Align(
       alignment: AlignmentDirectional.topEnd,

@@ -26,14 +26,14 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Column(
-          children: [
+          children: <Widget>[
             Text(localizations.demoSharedXAxisTitle),
             Text(
               '(${localizations.demoSharedXAxisDemoInstructions})',
@@ -47,15 +47,14 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
       ),
       body: SafeArea(
         child: Column(
-          children: [
+          children: <Widget>[
             Expanded(
               child: PageTransitionSwitcher(
-                duration: const Duration(milliseconds: 300),
                 reverse: !_isLoggedIn,
                 transitionBuilder: (
-                  child,
-                  animation,
-                  secondaryAnimation,
+                  Widget child,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
                 ) {
                   return SharedAxisTransition(
                     animation: animation,
@@ -71,7 +70,7 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                children: <Widget>[
                   TextButton(
                     onPressed: _isLoggedIn ? _toggleLoginStatus : null,
                     child: Text(localizations.demoSharedXAxisBackButtonText),
@@ -95,10 +94,10 @@ class _CoursePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return ListView(
-      children: [
+      children: <Widget>[
         const SizedBox(height: 16),
         Text(
           localizations.demoSharedXAxisCoursePageTitle,
@@ -145,8 +144,8 @@ class _CourseSwitchState extends State<_CourseSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context);
-    final subtitle = _isCourseBundled
+    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final String subtitle = _isCourseBundled
         ? localizations!.demoSharedXAxisBundledCourseSubtitle
         : localizations!.demoSharedXAxisIndividualCourseSubtitle;
 
@@ -154,7 +153,7 @@ class _CourseSwitchState extends State<_CourseSwitch> {
       title: Text(widget.course!),
       subtitle: Text(subtitle),
       value: _isCourseBundled,
-      onChanged: (newValue) {
+      onChanged: (bool newValue) {
         setState(() {
           _isCourseBundled = newValue;
         });
@@ -168,18 +167,17 @@ class _SignInPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
 
     return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxHeight = constraints.maxHeight;
-        const spacing = SizedBox(height: 10);
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double maxHeight = constraints.maxHeight;
+        const SizedBox spacing = SizedBox(height: 10);
 
         return Container(
           constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+            children: <Widget>[
               SizedBox(height: maxHeight / 10),
               Image.asset(
                 'placeholders/avatar_logo.png',
@@ -202,7 +200,7 @@ class _SignInPage extends StatelessWidget {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Padding(
                     padding: const EdgeInsetsDirectional.only(
                       top: 40,

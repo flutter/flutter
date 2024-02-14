@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/crane/model/destination.dart';
+import 'destination.dart';
 
 List<FlyDestination> getFlyDestinations(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   return <FlyDestination>[
     FlyDestination(
       id: 0,
@@ -15,7 +15,6 @@ List<FlyDestination> getFlyDestinations(BuildContext context) {
       stops: 1,
       duration: const Duration(hours: 6, minutes: 15),
       assetSemanticLabel: localizations.craneFly0SemanticLabel,
-      imageAspectRatio: 400 / 400,
     ),
     FlyDestination(
       id: 1,
@@ -125,7 +124,7 @@ List<FlyDestination> getFlyDestinations(BuildContext context) {
 }
 
 List<SleepDestination> getSleepDestinations(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   return <SleepDestination>[
     SleepDestination(
       id: 0,
@@ -214,7 +213,7 @@ List<SleepDestination> getSleepDestinations(BuildContext context) {
 }
 
 List<EatDestination> getEatDestinations(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   return <EatDestination>[
     EatDestination(
       id: 0,

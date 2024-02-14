@@ -5,8 +5,8 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/demos/cupertino/demo_types.dart';
+import '../../data/gallery_options.dart';
+import 'demo_types.dart';
 
 // BEGIN cupertinoAlertDemo
 
@@ -72,31 +72,31 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
   void initState() {
     super.initState();
     _alertDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertDemoDialog);
       },
       onComplete: _setSelectedValue,
     );
     _alertWithTitleDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertWithTitleDialog);
       },
       onComplete: _setSelectedValue,
     );
     _alertWithButtonsDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertWithButtonsDialog);
       },
       onComplete: _setSelectedValue,
     );
     _alertWithButtonsOnlyDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertWithButtonsOnlyDialog);
       },
       onComplete: _setSelectedValue,
     );
     _modalPopupRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_modalRoute);
       },
       onComplete: _setSelectedValue,
@@ -104,7 +104,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
   }
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case AlertDemoType.alert:
         return localizations.demoCupertinoAlertTitle;
@@ -123,13 +123,13 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder: (context) => ApplyTextOptions(
+      builder: (BuildContext context) => ApplyTextOptions(
         child: CupertinoAlertDialog(
           title: Text(localizations.dialogDiscardTitle),
-          actions: [
+          actions: <Widget>[
             CupertinoDialogAction(
               isDestructiveAction: true,
               onPressed: () {
@@ -162,10 +162,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder: (context) => ApplyTextOptions(
+      builder: (BuildContext context) => ApplyTextOptions(
         child: CupertinoAlertDialog(
           title: Text(
             localizations.cupertinoAlertLocationTitle,
@@ -173,7 +173,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
           content: Text(
             localizations.cupertinoAlertLocationDescription,
           ),
-          actions: [
+          actions: <Widget>[
             CupertinoDialogAction(
               onPressed: () => Navigator.of(
                 context,
@@ -204,10 +204,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder: (context) => ApplyTextOptions(
+      builder: (BuildContext context) => ApplyTextOptions(
         child: CupertinoDessertDialog(
           title: Text(
             localizations.cupertinoAlertFavoriteDessert,
@@ -226,7 +226,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
   ) {
     return CupertinoDialogRoute<String>(
       context: context,
-      builder: (context) => const ApplyTextOptions(
+      builder: (BuildContext context) => const ApplyTextOptions(
         child: CupertinoDessertDialog(),
       ),
     );
@@ -236,9 +236,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoModalPopupRoute<String>(
-      builder: (context) => ApplyTextOptions(
+      builder: (BuildContext context) => ApplyTextOptions(
         child: CupertinoActionSheet(
           title: Text(
             localizations.cupertinoAlertFavoriteDessert,
@@ -246,7 +246,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
           message: Text(
             localizations.cupertinoAlertDessertDescription,
           ),
-          actions: [
+          actions: <Widget>[
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(
                 context,
@@ -302,9 +302,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
         middle: Text(_title(context)),
       ),
       child: Builder(
-        builder: (context) {
+        builder: (BuildContext context) {
           return Column(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: Center(
                   child: CupertinoButton.filled(
@@ -312,19 +312,14 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
                       switch (widget.type) {
                         case AlertDemoType.alert:
                           _alertDialogRoute.present();
-                          break;
                         case AlertDemoType.alertTitle:
                           _alertWithTitleDialogRoute.present();
-                          break;
                         case AlertDemoType.alertButtons:
                           _alertWithButtonsDialogRoute.present();
-                          break;
                         case AlertDemoType.alertButtonsOnly:
                           _alertWithButtonsOnlyDialogRoute.present();
-                          break;
                         case AlertDemoType.actionSheet:
                           _modalPopupRoute.present();
-                          break;
                       }
                     },
                     child: Text(
@@ -363,11 +358,11 @@ class CupertinoDessertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoAlertDialog(
       title: title,
       content: content,
-      actions: [
+      actions: <Widget>[
         CupertinoDialogAction(
           onPressed: () {
             Navigator.of(

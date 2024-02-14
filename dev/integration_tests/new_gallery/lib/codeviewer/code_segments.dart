@@ -6,12 +6,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/codeviewer/code_style.dart';
+import 'code_style.dart';
 
 class CodeSegments {
   static TextSpan appbarDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -28,7 +28,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -36,7 +36,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -317,8 +317,8 @@ class CodeSegments {
   }
 
   static TextSpan bannerDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2020 The Flutter team. All rights reserved.'),
@@ -335,7 +335,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -343,7 +343,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'enum'),
@@ -429,7 +429,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027banner_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027banner_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -454,7 +454,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027display_banner\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027display_banner\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -464,7 +464,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027show_multiple_actions\u0027'),
+          text: "\u0027show_multiple_actions\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -472,7 +472,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_showLeading'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027show_leading\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027show_leading\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -992,7 +992,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027banner_demo_list_view\u0027'),
+          text: "\u0027banner_demo_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        itemCount'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -1088,8 +1088,8 @@ class CodeSegments {
   }
 
   static TextSpan bottomAppBarDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -1106,14 +1106,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/rendering.dart\u0027'),
+          text: "\u0027package:flutter/rendering.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -1121,7 +1121,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -1216,7 +1216,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027bottom_app_bar_demo\u0027'),
+          text: "\u0027bottom_app_bar_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -1240,7 +1240,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_showFab'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027show_fab\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027show_fab\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -1248,7 +1248,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_showNotch'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027show_notch\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027show_notch\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -1256,7 +1256,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_currentFabLocation'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027fab_location\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027fab_location\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -2107,8 +2107,8 @@ class CodeSegments {
   }
 
   static TextSpan bottomNavigationDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -2125,22 +2125,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
-      TextSpan(style: codeStyle.punctuationStyle, text: ';'),
-      TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
-      TextSpan(style: codeStyle.keywordStyle, text: 'import'),
-      TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(
-          style: codeStyle.stringStyle,
-          text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -2148,7 +2140,15 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
+      TextSpan(style: codeStyle.punctuationStyle, text: ';'),
+      TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
+      TextSpan(style: codeStyle.keywordStyle, text: 'import'),
+      TextSpan(style: codeStyle.baseStyle, text: ' '),
+      TextSpan(
+          style: codeStyle.stringStyle,
+          text:
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -2274,7 +2274,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027bottom_navigation_tab_index\u0027'),
+          text: "\u0027bottom_navigation_tab_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -2906,7 +2906,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                  '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027assets/demos/bottom_navigation_background.png\u0027'),
+          text: "\u0027assets/demos/bottom_navigation_background.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                  package'),
@@ -2914,7 +2914,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -3006,8 +3006,8 @@ class CodeSegments {
   }
 
   static TextSpan bottomSheetDemoModal(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -3024,7 +3024,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3032,7 +3032,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3040,7 +3040,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -3311,8 +3311,8 @@ class CodeSegments {
   }
 
   static TextSpan bottomSheetDemoPersistent(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -3329,7 +3329,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3337,7 +3337,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3345,7 +3345,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -3716,8 +3716,8 @@ class CodeSegments {
   }
 
   static TextSpan buttonDemoElevated(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -3734,7 +3734,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3742,7 +3742,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -3750,7 +3750,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -4004,8 +4004,8 @@ class CodeSegments {
   }
 
   static TextSpan buttonDemoFloating(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -4022,7 +4022,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4030,7 +4030,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4038,7 +4038,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -4180,8 +4180,8 @@ class CodeSegments {
   }
 
   static TextSpan buttonDemoOutlined(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -4198,7 +4198,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4206,7 +4206,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4214,7 +4214,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -4468,8 +4468,8 @@ class CodeSegments {
   }
 
   static TextSpan buttonDemoText(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -4486,7 +4486,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4494,7 +4494,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4502,7 +4502,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -4756,8 +4756,8 @@ class CodeSegments {
   }
 
   static TextSpan buttonDemoToggle(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -4774,7 +4774,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4782,7 +4782,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -4790,7 +4790,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -4865,7 +4865,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027toggle_button_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027toggle_button_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -4891,7 +4891,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.numberStyle, text: '0'),
       TextSpan(style: codeStyle.punctuationStyle, text: '],'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027first_item\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027first_item\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -4901,7 +4901,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.numberStyle, text: '1'),
       TextSpan(style: codeStyle.punctuationStyle, text: '],'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027second_item\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027second_item\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -4911,7 +4911,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.numberStyle, text: '2'),
       TextSpan(style: codeStyle.punctuationStyle, text: '],'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027third_item\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027third_item\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -5147,8 +5147,8 @@ class CodeSegments {
   }
 
   static TextSpan cardsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2020 The Flutter team. All rights reserved.'),
@@ -5165,7 +5165,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -5173,7 +5173,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'enum'),
@@ -5321,7 +5321,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_thanjavur_market.png\u0027'),
+          text: "\u0027places/india_thanjavur_market.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      assetPackage'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -5368,7 +5368,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_chettinad_silk_maker.png\u0027'),
+          text: "\u0027places/india_chettinad_silk_maker.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      assetPackage'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -5422,7 +5422,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_tanjore_thanjavur_temple.png\u0027'),
+          text: "\u0027places/india_tanjore_thanjavur_temple.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      assetPackage'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -5507,7 +5507,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This height will allow for all the Card\u0027s content to fit comfortably within the card.'),
+              "// This height will allow for all the Card\u0027s content to fit comfortably within the card."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: 'static'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -5613,7 +5613,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This ensures that the Card\u0027s children are clipped correctly.'),
+              "// This ensures that the Card\u0027s children are clipped correctly."),
       TextSpan(
           style: codeStyle.baseStyle,
           text: '\u000a                clipBehavior'),
@@ -5705,7 +5705,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This height will allow for all the Card\u0027s content to fit comfortably within the card.'),
+              "// This height will allow for all the Card\u0027s content to fit comfortably within the card."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: 'static'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -5809,7 +5809,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This ensures that the Card\u0027s children (including the ink splash) are clipped correctly.'),
+              "// This ensures that the Card\u0027s children (including the ink splash) are clipped correctly."),
       TextSpan(
           style: codeStyle.baseStyle,
           text: '\u000a                clipBehavior'),
@@ -5990,7 +5990,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This height will allow for all the Card\u0027s content to fit comfortably within the card.'),
+              "// This height will allow for all the Card\u0027s content to fit comfortably within the card."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: 'static'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -6120,7 +6120,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// This ensures that the Card\u0027s children (including the ink splash) are clipped correctly.'),
+              "// This ensures that the Card\u0027s children (including the ink splash) are clipped correctly."),
       TextSpan(
           style: codeStyle.baseStyle,
           text: '\u000a                clipBehavior'),
@@ -6253,7 +6253,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{destination.title}, \u0024selectedStatus\u0027'),
+          text: "\u0027\u0024{destination.title}, \u0024selectedStatus\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -7169,7 +7169,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027cards_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027cards_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -7193,7 +7193,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_isSelected'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027is_selected\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027is_selected\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -7275,7 +7275,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cards_demo_list_view\u0027'),
+          text: "\u0027cards_demo_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -7456,8 +7456,8 @@ class CodeSegments {
   }
 
   static TextSpan chipDemoAction(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -7474,7 +7474,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -7482,7 +7482,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -7490,7 +7490,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -7576,8 +7576,8 @@ class CodeSegments {
   }
 
   static TextSpan chipDemoChoice(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -7594,7 +7594,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -7602,7 +7602,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -7610,7 +7610,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -7673,7 +7673,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027choice_chip_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027choice_chip_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -7697,7 +7697,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_indexSelected'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027choice_chip\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027choice_chip\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -8117,8 +8117,8 @@ class CodeSegments {
   }
 
   static TextSpan chipDemoFilter(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -8135,7 +8135,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -8143,7 +8143,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -8151,7 +8151,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -8236,7 +8236,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027filter_chip_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027filter_chip_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -8261,7 +8261,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027selected_elevator\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027selected_elevator\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -8270,7 +8270,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027selected_washer\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027selected_washer\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -8279,7 +8279,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027selected_fireplace\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027selected_fireplace\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -8649,8 +8649,8 @@ class CodeSegments {
   }
 
   static TextSpan chipDemoInput(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -8667,7 +8667,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -8675,7 +8675,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -8683,7 +8683,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -8883,8 +8883,8 @@ class CodeSegments {
   }
 
   static TextSpan colorsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -8901,7 +8901,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -8909,7 +8909,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'const'),
@@ -9589,7 +9589,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'prefix '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '});'),
@@ -9704,7 +9704,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024prefix\u0024index\u0027'),
+          text: "\u0027\u0024prefix\u0024index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(style: codeStyle.classStyle, text: 'Flexible'),
@@ -9998,7 +9998,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a                  prefix'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027A\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027A\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -10188,8 +10188,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoActivityIndicatorDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -10206,7 +10206,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -10214,7 +10214,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -10310,8 +10310,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoAlertDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -10328,7 +10328,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -10336,21 +10336,21 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:gallery/data/gallery_options.dart\u0027'),
+          text: "\u0027package:gallery/data/gallery_options.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:gallery/demos/cupertino/demo_types.dart\u0027'),
+          text: "\u0027package:gallery/demos/cupertino/demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -10476,7 +10476,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_alert_demo\u0027'),
+          text: "\u0027cupertino_alert_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -10503,7 +10503,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027last_selected_value\u0027'),
+          text: "\u0027last_selected_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -10516,7 +10516,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_demo_dialog_route\u0027'),
+          text: "\u0027alert_demo_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -10530,7 +10530,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_with_title_press_demo_dialog_route\u0027'),
+          text: "\u0027alert_with_title_press_demo_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -10544,7 +10544,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_with_title_press_demo_dialog_route\u0027'),
+          text: "\u0027alert_with_title_press_demo_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -10558,7 +10558,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_with_title_press_demo_dialog_route\u0027'),
+          text: "\u0027alert_with_title_press_demo_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -10570,7 +10570,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027modal_popup_route\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027modal_popup_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -12334,8 +12334,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoButtonDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -12352,7 +12352,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -12360,7 +12360,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -12607,8 +12607,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoContextMenuDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -12625,14 +12625,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -12640,7 +12640,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -12939,8 +12939,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoNavigationBarDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -12957,14 +12957,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -12972,7 +12972,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -13002,7 +13002,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' homeRoute '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027/home\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027/home\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: 'static'),
@@ -13013,7 +13013,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' secondPageRoute '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027/home/item\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027/home/item\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -13035,7 +13035,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a      restorationScopeId'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027navigator\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027navigator\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      initialRoute'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -13138,7 +13138,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' arguments'),
       TextSpan(style: codeStyle.punctuationStyle, text: '['),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027pageTitle\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027pageTitle\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ']'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.keywordStyle, text: 'as'),
@@ -13336,7 +13336,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.punctuationStyle, text: '{'),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027pageTitle\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027pageTitle\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' title'),
       TextSpan(style: codeStyle.punctuationStyle, text: '},'),
@@ -13510,8 +13510,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoNavigationDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -13528,7 +13528,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -13536,7 +13536,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -13691,7 +13691,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_tab_scaffold\u0027'),
+          text: "\u0027cupertino_tab_scaffold\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        tabBar'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -13757,7 +13757,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_tab_view_\u0024index\u0027'),
+          text: "\u0027cupertino_tab_view_\u0024index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            builder'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -13915,8 +13915,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoPickersDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -13933,7 +13933,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -13941,14 +13941,14 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:intl/intl.dart\u0027'),
+          text: "\u0027package:intl/intl.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -14837,21 +14837,21 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{timer.inHours}:\u0027'),
+          text: "\u0027\u0024{timer.inHours}:\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{(timer.inMinutes % 60).toString().padLeft(2, \u0027'),
+              "\u0027\u0024{(timer.inMinutes % 60).toString().padLeft(2, \u0027"),
       TextSpan(style: codeStyle.numberStyle, text: '0'),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027)}:\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027)}:\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{(timer.inSeconds % 60).toString().padLeft(2, \u0027'),
+              "\u0027\u0024{(timer.inSeconds % 60).toString().padLeft(2, \u0027"),
       TextSpan(style: codeStyle.numberStyle, text: '0'),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027)}\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027)}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -15559,8 +15559,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoScrollbarDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -15577,7 +15577,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -15585,7 +15585,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -15726,7 +15726,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.classStyle, text: 'Text'),
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027item \u0024index\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027item \u0024index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                  style'),
@@ -15761,8 +15761,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoSearchTextFieldDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -15779,14 +15779,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -15794,7 +15794,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -15864,22 +15864,22 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.punctuationStyle, text: '['),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Android\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Android\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027iOS\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027iOS\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Windows\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Windows\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Linux\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Linux\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027MacOS\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027MacOS\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Web\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Web\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '];'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
@@ -15896,7 +15896,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' _searchPlatform '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.classStyle, text: 'List'),
@@ -15952,7 +15952,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a          _searchPlatform '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -16067,7 +16067,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027search_text_field\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027search_text_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -16296,8 +16296,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoSegmentedControlDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -16314,7 +16314,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -16322,7 +16322,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -16404,7 +16404,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_segmented_control\u0027'),
+          text: "\u0027cupertino_segmented_control\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -16429,7 +16429,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027current_segment\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027current_segment\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -16768,8 +16768,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoSliderDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -16786,7 +16786,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -16794,7 +16794,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -16881,7 +16881,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_slider_demo\u0027'),
+          text: "\u0027cupertino_slider_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -16905,7 +16905,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_value'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027value\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -16914,7 +16914,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027discrete_value\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027discrete_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -17335,8 +17335,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoSwitchDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -17353,7 +17353,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -17361,7 +17361,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -17448,7 +17448,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027cupertino_switch_demo\u0027'),
+          text: "\u0027cupertino_switch_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -17472,7 +17472,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_switchValueA'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027switch_valueA\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027switch_valueA\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -17480,7 +17480,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_switchValueB'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027switch_valueB\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027switch_valueB\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -17761,8 +17761,8 @@ class CodeSegments {
   }
 
   static TextSpan cupertinoTextFieldDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -17779,7 +17779,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/cupertino.dart\u0027'),
+          text: "\u0027package:flutter/cupertino.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -17787,7 +17787,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -17874,7 +17874,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027text_field_demo_list_view\u0027'),
+          text: "\u0027text_field_demo_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -17929,7 +17929,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027email_address_text_field\u0027'),
+          text: "\u0027email_address_text_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -18006,7 +18006,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027login_password_text_field\u0027'),
+          text: "\u0027login_password_text_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -18089,7 +18089,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027login_password_text_field_disabled\u0027'),
+          text: "\u0027login_password_text_field_disabled\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -18145,7 +18145,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027pin_number_text_field\u0027'),
+          text: "\u0027pin_number_text_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              prefix'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -18268,8 +18268,8 @@ class CodeSegments {
   }
 
   static TextSpan customSlidersDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -18284,7 +18284,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:math\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:math\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.keywordStyle, text: 'as'),
       TextSpan(style: codeStyle.baseStyle, text: ' math'),
@@ -18294,7 +18294,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -18302,7 +18302,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -18310,7 +18310,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.classStyle, text: 'Path'),
@@ -19693,7 +19693,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027custom_sliders_demo\u0027'),
+          text: "\u0027custom_sliders_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -19721,7 +19721,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027continuous_start_custom_value\u0027'),
+          text: "\u0027continuous_start_custom_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -19733,7 +19733,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027continuous_end_custom_value\u0027'),
+          text: "\u0027continuous_end_custom_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -19743,7 +19743,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027discrete_custom_value\u0027'),
+          text: "\u0027discrete_custom_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -20087,7 +20087,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{_discreteCustomValue.value.round()}\u0027'),
+          text: "\u0027\u0024{_discreteCustomValue.value.round()}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -20342,8 +20342,8 @@ class CodeSegments {
   }
 
   static TextSpan dataTableDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -20360,7 +20360,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -20368,21 +20368,21 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:gallery/data/gallery_options.dart\u0027'),
+          text: "\u0027package:gallery/data/gallery_options.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:intl/intl.dart\u0027'),
+          text: "\u0027package:intl/intl.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -20745,7 +20745,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027data_table_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027data_table_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -20771,7 +20771,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027selected_row_indices\u0027'),
+          text: "\u0027selected_row_indices\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -20780,7 +20780,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027current_row_index\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027current_row_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -20788,7 +20788,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_rowsPerPage'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027rows_per_page\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027rows_per_page\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -20797,7 +20797,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027sort_ascending\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027sort_ascending\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -20806,7 +20806,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027sort_column_index\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027sort_column_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -21294,7 +21294,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027data_table_list_view\u0027'),
+          text: "\u0027data_table_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -23381,7 +23381,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{dessert.calories}\u0027'),
+          text: "\u0027\u0024{dessert.calories}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ')),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(style: codeStyle.classStyle, text: 'DataCell'),
@@ -23403,7 +23403,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{dessert.carbs}\u0027'),
+          text: "\u0027\u0024{dessert.carbs}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ')),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(style: codeStyle.classStyle, text: 'DataCell'),
@@ -23425,7 +23425,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{dessert.sodium}\u0027'),
+          text: "\u0027\u0024{dessert.sodium}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ')),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(style: codeStyle.classStyle, text: 'DataCell'),
@@ -23554,8 +23554,8 @@ class CodeSegments {
   }
 
   static TextSpan dialogDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -23572,7 +23572,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -23580,14 +23580,14 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:gallery/data/gallery_options.dart\u0027'),
+          text: "\u0027package:gallery/data/gallery_options.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -23595,7 +23595,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -23690,7 +23690,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dialog_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dialog_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -23717,7 +23717,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_demo_dialog_route\u0027'),
+          text: "\u0027alert_demo_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -23731,7 +23731,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027alert_demo_with_title_dialog_route\u0027'),
+          text: "\u0027alert_demo_with_title_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -23744,7 +23744,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027simple_dialog_route\u0027'),
+          text: "\u0027simple_dialog_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -24419,7 +24419,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027username@gmail.com\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027username@gmail.com\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -24445,7 +24445,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027user02@gmail.com\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027user02@gmail.com\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -24574,7 +24574,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a      restorationScopeId'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027navigator\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027navigator\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      onGenerateRoute'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -25292,8 +25292,8 @@ class CodeSegments {
   }
 
   static TextSpan dividerDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -25310,7 +25310,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -25318,7 +25318,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -25326,7 +25326,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -25499,8 +25499,8 @@ class CodeSegments {
   }
 
   static TextSpan fadeScaleTransitionDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter Authors. All rights reserved.'),
@@ -25517,14 +25517,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -25532,7 +25532,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -25665,7 +25665,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// the \u0027HIDE FAB\u0027/\u0027SHOW FAB\u0027 button needs to be updated based'),
+              "// the \u0027HIDE FAB\u0027/\u0027SHOW FAB\u0027 button needs to be updated based"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          '),
       TextSpan(
           style: codeStyle.commentStyle,
@@ -25846,7 +25846,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoFadeScaleDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoFadeScaleDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -26303,8 +26303,8 @@ class CodeSegments {
   }
 
   static TextSpan fadeThroughTransitionDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter Authors. All rights reserved.'),
@@ -26321,14 +26321,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -26336,7 +26336,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -26476,7 +26476,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoFadeThroughDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoFadeThroughDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -26820,7 +26820,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a                          '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -26829,7 +26829,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                        '),
@@ -27161,14 +27161,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/avatar_logo.png\u0027'),
+          text: "\u0027placeholders/avatar_logo.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            package'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            width'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27185,7 +27185,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{localizations!.demoMotionListTileTitle} \u0024{index + 1}\u0027'),
+              "\u0027\u0024{localizations!.demoMotionListTileTitle} \u0024{index + 1}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          subtitle'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27217,8 +27217,8 @@ class CodeSegments {
   }
 
   static TextSpan gridListsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -27235,7 +27235,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -27243,7 +27243,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -27251,7 +27251,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -27318,7 +27318,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_chennai_flower_market.png\u0027'),
+          text: "\u0027places/india_chennai_flower_market.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27342,7 +27342,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_tanjore_bronze_works.png\u0027'),
+          text: "\u0027places/india_tanjore_bronze_works.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27366,7 +27366,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_tanjore_market_merchant.png\u0027'),
+          text: "\u0027places/india_tanjore_market_merchant.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27390,7 +27390,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_tanjore_thanjavur_temple.png\u0027'),
+          text: "\u0027places/india_tanjore_thanjavur_temple.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27415,7 +27415,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027places/india_tanjore_thanjavur_temple_carvings.png\u0027'),
+              "\u0027places/india_tanjore_thanjavur_temple_carvings.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27439,7 +27439,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_pondicherry_salt_farm.png\u0027'),
+          text: "\u0027places/india_pondicherry_salt_farm.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27463,7 +27463,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_chennai_highway.png\u0027'),
+          text: "\u0027places/india_chennai_highway.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27487,7 +27487,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_chettinad_silk_maker.png\u0027'),
+          text: "\u0027places/india_chettinad_silk_maker.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27511,7 +27511,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_chettinad_produce.png\u0027'),
+          text: "\u0027places/india_chettinad_produce.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27535,7 +27535,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_tanjore_market_technology.png\u0027'),
+          text: "\u0027places/india_tanjore_market_technology.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27559,7 +27559,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_pondicherry_beach.png\u0027'),
+          text: "\u0027places/india_pondicherry_beach.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27583,7 +27583,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027places/india_pondicherry_fisherman.png\u0027'),
+          text: "\u0027places/india_pondicherry_fisherman.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        title'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27658,7 +27658,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027grid_view_demo_grid_offset\u0027'),
+          text: "\u0027grid_view_demo_grid_offset\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a        crossAxisCount'),
@@ -27918,7 +27918,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027\u0024{photo.title} \u0024{photo.subtitle}\u0027'),
+          text: "\u0027\u0024{photo.title} \u0024{photo.subtitle}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      child'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -27962,7 +27962,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          fit'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -28199,8 +28199,8 @@ class CodeSegments {
   }
 
   static TextSpan listDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -28217,7 +28217,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -28225,7 +28225,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -28233,7 +28233,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -28331,7 +28331,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027list_demo_list_view\u0027'),
+          text: "\u0027list_demo_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -28388,7 +28388,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.classStyle, text: 'Text'),
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0024index\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0024index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ')),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -28450,8 +28450,8 @@ class CodeSegments {
   }
 
   static TextSpan menuDemoChecklist(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -28468,7 +28468,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -28476,7 +28476,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -28484,7 +28484,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(
@@ -28495,7 +28495,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// whose items have checked icons that reflect this app\u0027s state.'),
+              "// whose items have checked icons that reflect this app\u0027s state."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -28870,7 +28870,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027checklist_menu_demo\u0027'),
+          text: "\u0027checklist_menu_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -28895,7 +28895,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027checked_values\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027checked_values\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -29336,8 +29336,8 @@ class CodeSegments {
   }
 
   static TextSpan menuDemoContext(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -29354,7 +29354,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29362,7 +29362,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29370,7 +29370,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(
@@ -29598,8 +29598,8 @@ class CodeSegments {
   }
 
   static TextSpan menuDemoSectioned(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -29616,7 +29616,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29624,7 +29624,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29632,7 +29632,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(
@@ -29958,8 +29958,8 @@ class CodeSegments {
   }
 
   static TextSpan menuDemoSimple(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -29976,7 +29976,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29984,7 +29984,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -29992,7 +29992,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(
@@ -30007,7 +30007,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(
           style: codeStyle.commentStyle,
-          text: '// list item\u0027s center line.'),
+          text: "// list item\u0027s center line."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -30394,8 +30394,8 @@ class CodeSegments {
   }
 
   static TextSpan navDrawerDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -30412,7 +30412,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -30420,7 +30420,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(
@@ -30726,8 +30726,8 @@ class CodeSegments {
   }
 
   static TextSpan navRailDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -30744,7 +30744,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -30752,7 +30752,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -30826,7 +30826,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027nav_rail_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027nav_rail_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -30851,7 +30851,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027selected_index\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027selected_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -31250,8 +31250,8 @@ class CodeSegments {
   }
 
   static TextSpan openContainerTransformDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter Authors. All rights reserved.'),
@@ -31268,14 +31268,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -31283,7 +31283,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'const'),
@@ -31295,138 +31295,138 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \u0027'),
+              "\u0027Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim \u0027'),
+              "\u0027tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis \u0027'),
+              "\u0027suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus \u0027'),
+              "\u0027aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum \u0027'),
+              "\u0027orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla \u0027'),
+              "\u0027tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim \u0027'),
+              "\u0027at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis \u0027'),
+              "\u0027eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat \u0027'),
+              "\u0027egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit \u0027'),
+              "\u0027velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus \u0027'),
+              "\u0027gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit \u0027'),
+              "\u0027mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor \u0027'),
+              "\u0027amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027vitae.\u005cn\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027vitae.\u005cn\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u005cn\u0027'),
-      TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(
-          style: codeStyle.stringStyle,
-          text:
-              '\u0027Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u005cn\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim \u0027'),
+              "\u0027Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis \u0027'),
+              "\u0027tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus \u0027'),
+              "\u0027suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum \u0027'),
+              "\u0027aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla \u0027'),
+              "\u0027orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim \u0027'),
+              "\u0027tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis \u0027'),
+              "\u0027at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat \u0027'),
+              "\u0027eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit \u0027'),
+              "\u0027egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus \u0027'),
+              "\u0027velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit \u0027'),
+              "\u0027gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor \u0027'),
+              "\u0027mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027vitae\u0027'),
+      TextSpan(
+          style: codeStyle.stringStyle,
+          text:
+              "\u0027amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor \u0027"),
+      TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027vitae\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'const'),
@@ -31967,7 +31967,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoContainerTransformDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoContainerTransformDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                    style'),
@@ -32666,7 +32666,7 @@ class CodeSegments {
           style: codeStyle.baseStyle, text: '\u000a                          '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/avatar_logo.png\u0027'),
+          text: "\u0027placeholders/avatar_logo.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -32675,7 +32675,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -32705,7 +32705,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{localizations.demoMotionListTileTitle} \u0024{index + 1}\u0027'),
+              "\u0027\u0024{localizations.demoMotionListTileTitle} \u0024{index + 1}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                        '),
@@ -33089,7 +33089,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                  '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                  package'),
@@ -33097,7 +33097,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                  width'),
@@ -33182,11 +33182,11 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027Lorem ipsum dolor sit amet, consectetur \u0027'),
+          text: "\u0027Lorem ipsum dolor sit amet, consectetur \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027adipiscing elit, sed do eiusmod tempor.\u0027'),
+          text: "\u0027adipiscing elit, sed do eiusmod tempor.\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -33358,7 +33358,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                package'),
@@ -33366,7 +33366,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                width'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -33609,7 +33609,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                package'),
@@ -33617,7 +33617,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                width'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -33711,10 +33711,10 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                    '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027Lorem ipsum dolor sit amet, consectetur \u0027'),
+          text: "\u0027Lorem ipsum dolor sit amet, consectetur \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                    '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027adipiscing elit,\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027adipiscing elit,\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                    style'),
@@ -33958,7 +33958,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                package'),
@@ -33966,7 +33966,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -34119,8 +34119,8 @@ class CodeSegments {
   }
 
   static TextSpan pickerDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -34137,7 +34137,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -34145,7 +34145,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -34153,14 +34153,14 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:intl/intl.dart\u0027'),
+          text: "\u0027package:intl/intl.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -34497,7 +34497,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027date_picker_dialog\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027date_picker_dialog\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          initialDate'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -34629,7 +34629,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027time_picker_dialog\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027time_picker_dialog\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          initialTime'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -34695,7 +34695,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027date_rage_picker_dialog\u0027'),
+          text: "\u0027date_rage_picker_dialog\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          firstDate'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -34884,7 +34884,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027picker_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027picker_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -34908,7 +34908,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_fromDate'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027from_date\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027from_date\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -34916,7 +34916,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_fromTime'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027from_time\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027from_time\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -34924,7 +34924,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_startDate'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027start_date\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027start_date\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -34932,7 +34932,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_endDate'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027end_date\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027end_date\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -34943,7 +34943,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027date_picker_route\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027date_picker_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -34957,7 +34957,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027date_range_picker_route\u0027'),
+          text: "\u0027date_range_picker_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -34970,7 +34970,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027time_picker_route\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027time_picker_route\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
@@ -35048,7 +35048,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(style: codeStyle.keywordStyle, text: 'return'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -35120,7 +35120,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{DateFormat.yMMMd().format(_startDate.value)} - \u0024{DateFormat.yMMMd().format(_endDate.value)}\u0027'),
+              "\u0027\u0024{DateFormat.yMMMd().format(_startDate.value)} - \u0024{DateFormat.yMMMd().format(_endDate.value)}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -35355,8 +35355,8 @@ class CodeSegments {
   }
 
   static TextSpan progressIndicatorsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -35373,7 +35373,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -35381,7 +35381,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -35389,7 +35389,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -35917,8 +35917,8 @@ class CodeSegments {
   }
 
   static TextSpan rangeSlidersDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -35933,7 +35933,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:math\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:math\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.keywordStyle, text: 'as'),
       TextSpan(style: codeStyle.baseStyle, text: ' math'),
@@ -35943,7 +35943,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -35951,7 +35951,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -35959,7 +35959,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -36055,7 +36055,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027range_sliders_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027range_sliders_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -36081,7 +36081,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027continuous_start_value\u0027'),
+          text: "\u0027continuous_start_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -36091,7 +36091,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027continuous_end_value\u0027'),
+          text: "\u0027continuous_end_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -36101,7 +36101,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027discrete_start_value\u0027'),
+          text: "\u0027discrete_start_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -36110,7 +36110,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027discrete_end_value\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027discrete_end_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -36559,8 +36559,8 @@ class CodeSegments {
   }
 
   static TextSpan selectionControlsDemoCheckbox(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -36577,7 +36577,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -36585,7 +36585,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -36593,7 +36593,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -36671,7 +36671,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027checkbox_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027checkbox_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -36695,7 +36695,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'checkboxValueA'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027checkbox_a\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027checkbox_a\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -36703,7 +36703,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'checkboxValueB'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027checkbox_b\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027checkbox_b\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -36711,7 +36711,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'checkboxValueC'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027checkbox_c\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027checkbox_c\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -36999,8 +36999,8 @@ class CodeSegments {
   }
 
   static TextSpan selectionControlsDemoRadio(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -37017,7 +37017,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -37025,7 +37025,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -37033,7 +37033,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -37095,7 +37095,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027radio_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027radio_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -37119,7 +37119,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'radioValue'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027radio_value\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027radio_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -37335,8 +37335,8 @@ class CodeSegments {
   }
 
   static TextSpan selectionControlsDemoSwitches(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -37353,7 +37353,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -37361,7 +37361,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -37369,7 +37369,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -37438,7 +37438,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027switch_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027switch_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -37462,7 +37462,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'switchValueA'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027switch_value1\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027switch_value1\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -37470,7 +37470,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'switchValueB'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027switch_value2\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027switch_value2\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -37688,8 +37688,8 @@ class CodeSegments {
   }
 
   static TextSpan sharedXAxisTransitionDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter Authors. All rights reserved.'),
@@ -37706,14 +37706,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -37721,7 +37721,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -37869,7 +37869,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoSharedXAxisDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoSharedXAxisDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -38641,7 +38641,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/avatar_logo.png\u0027'),
+          text: "\u0027placeholders/avatar_logo.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                package'),
@@ -38649,7 +38649,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                width'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -38947,25 +38947,25 @@ class CodeSegments {
   }
 
   static TextSpan sharedYAxisTransitionDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:math\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:math\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -38973,7 +38973,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -39180,34 +39180,34 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.punctuationStyle, text: '['),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027A\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027A\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027B\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027B\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027C\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027C\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027D\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027D\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027E\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027E\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027F\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027F\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027G\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027G\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027H\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027H\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027I\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027I\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027J\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027J\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '];'),
@@ -39292,7 +39292,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoSharedYAxisDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoSharedYAxisDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -39835,7 +39835,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027placeholders/placeholder_image.png\u0027'),
+          text: "\u0027placeholders/placeholder_image.png\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                package'),
@@ -39843,7 +39843,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -39860,7 +39860,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{localizations.demoSharedYAxisAlbumTileTitle} \u0024_title\u0027'),
+              "\u0027\u0024{localizations.demoSharedYAxisAlbumTileTitle} \u0024_title\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -39886,12 +39886,12 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{(randomNumberGenerator.nextInt(50) + 10).toString()} \u0027'),
+              "\u0027\u0024{(randomNumberGenerator.nextInt(50) + 10).toString()} \u0027"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{localizations.demoSharedYAxisAlbumTileDurationUnit}\u0027'),
+              "\u0027\u0024{localizations.demoSharedYAxisAlbumTileDurationUnit}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -39925,20 +39925,20 @@ class CodeSegments {
   }
 
   static TextSpan sharedZAxisTransitionDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:animations/animations.dart\u0027'),
+          text: "\u0027package:animations/animations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -39946,7 +39946,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -40078,7 +40078,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027(\u0024{localizations.demoSharedZAxisDemoInstructions})\u0027'),
+              "\u0027(\u0024{localizations.demoSharedZAxisDemoInstructions})\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                  style'),
@@ -40670,7 +40670,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_2.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_2.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -40692,7 +40692,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_3.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_3.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -40714,7 +40714,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_4.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_4.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -40736,7 +40736,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_6.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_6.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -40758,7 +40758,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_8.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_8.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -40780,7 +40780,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027crane/destinations/eat_10.jpg\u0027'),
+          text: "\u0027crane/destinations/eat_10.jpg\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -41061,7 +41061,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027flutter_gallery_assets\u0027'),
+          text: "\u0027flutter_gallery_assets\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              fit'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -41128,7 +41128,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u00270\u0024{_index + 1}\u0027'),
+          text: "\u00270\u0024{_index + 1}\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a              '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -41161,8 +41161,8 @@ class CodeSegments {
   }
 
   static TextSpan slidersDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -41177,7 +41177,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:math\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:math\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.keywordStyle, text: 'as'),
       TextSpan(style: codeStyle.baseStyle, text: ' math'),
@@ -41187,7 +41187,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -41195,7 +41195,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -41203,7 +41203,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -41276,7 +41276,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' restorationId '),
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027slider_demo\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027slider_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -41301,7 +41301,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027continuous_value\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027continuous_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a    registerForRestoration'),
@@ -41310,7 +41310,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027discrete_value\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027discrete_value\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -41817,8 +41817,8 @@ class CodeSegments {
   }
 
   static TextSpan snackbarsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -41835,7 +41835,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -41843,7 +41843,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -42045,8 +42045,8 @@ class CodeSegments {
   }
 
   static TextSpan tabsNonScrollableDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -42063,7 +42063,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -42071,7 +42071,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -42079,7 +42079,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -42154,7 +42154,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027tab_non_scrollable_demo\u0027'),
+          text: "\u0027tab_non_scrollable_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -42178,7 +42178,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'tabIndex'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027tab_index\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027tab_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    _tabController'),
       TextSpan(style: codeStyle.punctuationStyle, text: '.'),
@@ -42235,7 +42235,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// When the tab controller\u0027s value is updated, make sure to update the'),
+              "// When the tab controller\u0027s value is updated, make sure to update the"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.commentStyle,
@@ -42442,8 +42442,8 @@ class CodeSegments {
   }
 
   static TextSpan tabsScrollableDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -42460,7 +42460,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -42468,7 +42468,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -42476,7 +42476,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -42549,7 +42549,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027tab_scrollable_demo\u0027'),
+          text: "\u0027tab_scrollable_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -42573,7 +42573,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: 'tabIndex'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027tab_index\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027tab_index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    _tabController'),
       TextSpan(style: codeStyle.punctuationStyle, text: '!.'),
@@ -42625,7 +42625,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// When the tab controller\u0027s value is updated, make sure to update the'),
+              "// When the tab controller\u0027s value is updated, make sure to update the"),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(
           style: codeStyle.commentStyle,
@@ -42870,8 +42870,8 @@ class CodeSegments {
   }
 
   static TextSpan textFieldDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -42888,14 +42888,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/services.dart\u0027'),
+          text: "\u0027package:flutter/services.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -42903,7 +42903,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -43024,7 +43024,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' name '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.classStyle, text: 'String'),
@@ -43032,7 +43032,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' phoneNumber '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.classStyle, text: 'String'),
@@ -43040,14 +43040,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' email '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.classStyle, text: 'String'),
       TextSpan(style: codeStyle.baseStyle, text: ' password '),
       TextSpan(style: codeStyle.punctuationStyle, text: '='),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -43278,7 +43278,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '_obscureText'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027obscure_text\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027obscure_text\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -43309,7 +43309,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027password_text_field\u0027'),
+          text: "\u0027password_text_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      obscureText'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -43631,7 +43631,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '=>'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027text_field_demo\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027text_field_demo\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a  '),
       TextSpan(style: codeStyle.keywordStyle, text: '@override'),
@@ -43656,7 +43656,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027autovalidate_mode\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027autovalidate_mode\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -43855,7 +43855,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.classStyle, text: 'RegExp'),
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
       TextSpan(
-          style: codeStyle.stringStyle, text: 'r\u0027^[A-Za-z ]+\u0024\u0027'),
+          style: codeStyle.stringStyle, text: "r\u0027^[A-Za-z ]+\u0024\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -43914,7 +43914,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              'r\u0027^\u005c(\u005cd\u005cd\u005cd\u005c) \u005cd\u005cd\u005cd\u005c-\u005cd\u005cd\u005cd\u005cd\u0024\u0027'),
+              "r\u0027^\u005c(\u005cd\u005cd\u005cd\u005c) \u005cd\u005cd\u005cd\u005c-\u005cd\u005cd\u005cd\u005cd\u0024\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -44105,7 +44105,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027text_field_demo_scroll_view\u0027'),
+          text: "\u0027text_field_demo_scroll_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -44142,7 +44142,7 @@ class CodeSegments {
           text: '\u000a                restorationId'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027name_field\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027name_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44248,7 +44248,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027phone_number_field\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027phone_number_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44309,7 +44309,7 @@ class CodeSegments {
           text: '\u000a                  prefixText'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027+1 \u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027+1 \u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -44406,7 +44406,7 @@ class CodeSegments {
           text: '\u000a                restorationId'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027email_field\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027email_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44521,7 +44521,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027disabled_email_field\u0027'),
+          text: "\u0027disabled_email_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44598,7 +44598,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027life_story_field\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027life_story_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                focusNode'),
@@ -44665,7 +44665,7 @@ class CodeSegments {
           text: '\u000a                restorationId'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027salary_field\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027salary_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44738,7 +44738,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027password_field\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027password_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle,
@@ -44821,7 +44821,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027retype_password_field\u0027'),
+          text: "\u0027retype_password_field\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(
           style: codeStyle.baseStyle, text: '\u000a                focusNode'),
@@ -45047,7 +45047,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: '.'),
       TextSpan(style: codeStyle.baseStyle, text: 'write'),
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027(\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027(\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -45084,7 +45084,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{newValue.text.substring(0, usedSubstringIndex = 3)}) \u0027'),
+              "\u0027\u0024{newValue.text.substring(0, usedSubstringIndex = 3)}) \u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -45124,7 +45124,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{newValue.text.substring(3, usedSubstringIndex = 6)}-\u0027'),
+              "\u0027\u0024{newValue.text.substring(3, usedSubstringIndex = 6)}-\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -45161,7 +45161,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027\u0024{newValue.text.substring(6, usedSubstringIndex = 10)} \u0027'),
+              "\u0027\u0024{newValue.text.substring(6, usedSubstringIndex = 10)} \u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.keywordStyle, text: 'if'),
@@ -45239,8 +45239,8 @@ class CodeSegments {
   }
 
   static TextSpan tooltipDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -45257,7 +45257,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -45265,7 +45265,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -45476,8 +45476,8 @@ class CodeSegments {
   }
 
   static TextSpan transformationsDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -45493,19 +45493,19 @@ class CodeSegments {
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
-          style: codeStyle.stringStyle, text: '\u0027dart:collection\u0027'),
+          style: codeStyle.stringStyle, text: "\u0027dart:collection\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' show '),
       TextSpan(style: codeStyle.classStyle, text: 'IterableMixin'),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:math\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:math\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:ui\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:ui\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' show '),
       TextSpan(style: codeStyle.classStyle, text: 'Vertices'),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
@@ -45514,14 +45514,14 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:vector_math/vector_math_64.dart\u0027'),
+          text: "\u0027package:vector_math/vector_math_64.dart\u0027"),
       TextSpan(style: codeStyle.baseStyle, text: ' show '),
       TextSpan(style: codeStyle.classStyle, text: 'Vector3'),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
@@ -46065,7 +46065,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.commentStyle,
           text:
-              '// translate beyond that to a visibleSize that\u0027s a bit bigger.'),
+              "// translate beyond that to a visibleSize that\u0027s a bit bigger."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a            '),
       TextSpan(style: codeStyle.keywordStyle, text: 'final'),
       TextSpan(style: codeStyle.baseStyle, text: ' viewportSize '),
@@ -46360,7 +46360,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      tooltip'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Reset\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Reset\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      color'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -46541,7 +46541,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      tooltip'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Edit\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Edit\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      color'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -47413,7 +47413,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a    '),
       TextSpan(
           style: codeStyle.commentStyle,
-          text: '// Otherwise we\u0027re just incrementing r.'),
+          text: "// Otherwise we\u0027re just incrementing r."),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.keywordStyle, text: 'return'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
@@ -48434,7 +48434,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027BoardPoint(\u0024q, \u0024r, \u0024color)\u0027'),
+          text: "\u0027BoardPoint(\u0024q, \u0024r, \u0024color)\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -48574,8 +48574,8 @@ class CodeSegments {
   }
 
   static TextSpan twoPaneDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -48590,21 +48590,21 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027dart:ui\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027dart:ui\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:dual_screen/dual_screen.dart\u0027'),
+          text: "\u0027package:dual_screen/dual_screen.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -48612,7 +48612,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'enum'),
@@ -48749,7 +48749,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027two_pane_selected_item\u0027'),
+          text: "\u0027two_pane_selected_item\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a  '),
       TextSpan(style: codeStyle.punctuationStyle, text: '}'),
@@ -49062,7 +49062,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027list_demo_list_view\u0027'),
+          text: "\u0027list_demo_list_view\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a          padding'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -49139,7 +49139,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(style: codeStyle.classStyle, text: 'Text'),
       TextSpan(style: codeStyle.punctuationStyle, text: '('),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027\u0024index\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027\u0024index\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ')),'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a                '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -49748,8 +49748,8 @@ class CodeSegments {
   }
 
   static TextSpan typographyDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -49766,7 +49766,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -49774,7 +49774,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),
@@ -49989,7 +49989,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 1\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 1\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50000,7 +50000,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Light 96sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Light 96sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50010,7 +50010,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 2\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 2\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50021,7 +50021,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Light 60sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Light 60sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50031,7 +50031,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 3\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 3\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50042,7 +50042,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 48sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 48sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50052,7 +50052,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 4\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 4\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50063,7 +50063,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 34sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 34sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50073,7 +50073,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 5\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 5\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50084,7 +50084,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 24sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 24sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50094,7 +50094,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Headline 6\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Headline 6\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50105,7 +50105,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Medium 20sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Medium 20sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50115,7 +50115,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Subtitle 1\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Subtitle 1\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50126,7 +50126,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 16sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 16sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50136,7 +50136,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Subtitle 2\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Subtitle 2\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50147,7 +50147,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Medium 14sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Medium 14sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50157,7 +50157,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Body Text 1\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Body Text 1\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50168,7 +50168,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 16sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 16sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50178,7 +50178,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Body Text 2\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Body Text 2\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50189,7 +50189,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 14sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 14sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50199,7 +50199,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Button\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Button\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50212,7 +50212,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027MEDIUM (ALL CAPS) 14sp\u0027'),
+          text: "\u0027MEDIUM (ALL CAPS) 14sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50222,7 +50222,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Caption\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Caption\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50233,7 +50233,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        text'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Regular 12sp\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Regular 12sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50243,7 +50243,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        name'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' '),
-      TextSpan(style: codeStyle.stringStyle, text: '\u0027Overline\u0027'),
+      TextSpan(style: codeStyle.stringStyle, text: "\u0027Overline\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a        style'),
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
@@ -50256,7 +50256,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027REGULAR (ALL CAPS) 10sp\u0027'),
+          text: "\u0027REGULAR (ALL CAPS) 10sp\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a      '),
       TextSpan(style: codeStyle.punctuationStyle, text: '),'),
@@ -50319,8 +50319,8 @@ class CodeSegments {
   }
 
   static TextSpan verticalDividerDemo(BuildContext context) {
-    final codeStyle = CodeStyle.of(context);
-    return TextSpan(children: [
+    final CodeStyle codeStyle = CodeStyle.of(context);
+    return TextSpan(children: <InlineSpan>[
       TextSpan(
           style: codeStyle.commentStyle,
           text: '// Copyright 2019 The Flutter team. All rights reserved.'),
@@ -50337,7 +50337,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.baseStyle, text: ' '),
       TextSpan(
           style: codeStyle.stringStyle,
-          text: '\u0027package:flutter/material.dart\u0027'),
+          text: "\u0027package:flutter/material.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -50345,7 +50345,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027'),
+              "\u0027package:flutter_gen/gen_l10n/gallery_localizations.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'import'),
@@ -50353,7 +50353,7 @@ class CodeSegments {
       TextSpan(
           style: codeStyle.stringStyle,
           text:
-              '\u0027package:gallery/demos/material/material_demo_types.dart\u0027'),
+              "\u0027package:gallery/demos/material/material_demo_types.dart\u0027"),
       TextSpan(style: codeStyle.punctuationStyle, text: ';'),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a\u000a'),
       TextSpan(style: codeStyle.keywordStyle, text: 'class'),

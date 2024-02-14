@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import '../../data/gallery_options.dart';
+import 'material_demo_types.dart';
 
 // BEGIN dialogDemo
 
@@ -60,19 +60,19 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
   void initState() {
     super.initState();
     _alertDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertDialogDemoRoute);
       },
       onComplete: _showInSnackBar,
     );
     _alertDialogWithTitleRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_alertDialogWithTitleDemoRoute);
       },
       onComplete: _showInSnackBar,
     );
     _simpleDialogRoute = RestorableRouteFuture<String>(
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(_simpleDialogDemoRoute);
       },
       onComplete: _showInSnackBar,
@@ -80,7 +80,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
   }
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case DialogDemoType.alert:
         return localizations.demoAlertDialogTitle;
@@ -97,21 +97,21 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     BuildContext context,
     Object? arguments,
   ) {
-    final theme = Theme.of(context);
-    final dialogTextStyle = theme.textTheme.titleMedium!
+    final ThemeData theme = Theme.of(context);
+    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!
         .copyWith(color: theme.textTheme.bodySmall!.color);
 
     return DialogRoute<String>(
       context: context,
-      builder: (context) {
-        final localizations = GalleryLocalizations.of(context)!;
+      builder: (BuildContext context) {
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
         return ApplyTextOptions(
             child: AlertDialog(
           content: Text(
             localizations.dialogDiscardTitle,
             style: dialogTextStyle,
           ),
-          actions: [
+          actions: <Widget>[
             _DialogButton(text: localizations.dialogCancel),
             _DialogButton(text: localizations.dialogDiscard),
           ],
@@ -124,14 +124,14 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     BuildContext context,
     Object? arguments,
   ) {
-    final theme = Theme.of(context);
-    final dialogTextStyle = theme.textTheme.titleMedium!
+    final ThemeData theme = Theme.of(context);
+    final TextStyle dialogTextStyle = theme.textTheme.titleMedium!
         .copyWith(color: theme.textTheme.bodySmall!.color);
 
     return DialogRoute<String>(
       context: context,
-      builder: (context) {
-        final localizations = GalleryLocalizations.of(context)!;
+      builder: (BuildContext context) {
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
         return ApplyTextOptions(
           child: AlertDialog(
             title: Text(localizations.dialogLocationTitle),
@@ -139,7 +139,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
               localizations.dialogLocationDescription,
               style: dialogTextStyle,
             ),
-            actions: [
+            actions: <Widget>[
               _DialogButton(text: localizations.dialogDisagree),
               _DialogButton(text: localizations.dialogAgree),
             ],
@@ -153,14 +153,14 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     BuildContext context,
     Object? arguments,
   ) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     return DialogRoute<String>(
       context: context,
-      builder: (context) => ApplyTextOptions(
+      builder: (BuildContext context) => ApplyTextOptions(
         child: SimpleDialog(
           title: Text(GalleryLocalizations.of(context)!.dialogSetBackup),
-          children: [
+          children: <Widget>[
             _DialogDemoItem(
               icon: Icons.account_circle,
               color: theme.colorScheme.primary,
@@ -187,7 +187,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     Object? arguments,
   ) {
     return MaterialPageRoute<void>(
-      builder: (context) => _FullScreenDialogDemo(),
+      builder: (BuildContext context) => _FullScreenDialogDemo(),
       fullscreenDialog: true,
     );
   }
@@ -199,10 +199,10 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
       // changing type.
       key: ValueKey(widget.type),
       restorationScopeId: 'navigator',
-      onGenerateRoute: (settings) {
+      onGenerateRoute: (RouteSettings settings) {
         return _NoAnimationMaterialPageRoute<void>(
           settings: settings,
-          builder: (context) => Scaffold(
+          builder: (BuildContext context) => Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
               title: Text(_title(context)),
@@ -213,17 +213,13 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
                   switch (widget.type) {
                     case DialogDemoType.alert:
                       _alertDialogRoute.present();
-                      break;
                     case DialogDemoType.alertTitle:
                       _alertDialogWithTitleRoute.present();
-                      break;
                     case DialogDemoType.simple:
                       _simpleDialogRoute.present();
-                      break;
                     case DialogDemoType.fullscreen:
                       Navigator.restorablePush<void>(
                           context, _fullscreenDialogRoute);
-                      break;
                   }
                 },
                 child: Text(GalleryLocalizations.of(context)!.dialogShow),
@@ -290,9 +286,7 @@ class _DialogDemoItem extends StatelessWidget {
         Navigator.of(context).pop(text);
       },
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Icon(icon, size: 36, color: color),
           Flexible(
             child: Padding(
@@ -309,8 +303,8 @@ class _DialogDemoItem extends StatelessWidget {
 class _FullScreenDialogDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final ThemeData theme = Theme.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     // Remove the MediaQuery padding because the demo is rendered inside of a
     // different page that already accounts for this padding.
@@ -322,7 +316,7 @@ class _FullScreenDialogDemo extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             title: Text(localizations.dialogFullscreenTitle),
-            actions: [
+            actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);

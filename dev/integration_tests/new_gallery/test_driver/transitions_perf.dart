@@ -15,7 +15,7 @@ import 'package:gallery/main.dart' show GalleryApp;
 Future<String> _handleMessages(String? message) async {
   switch (message) {
     case 'demoDescriptions':
-      final demoDescriptions = Demos.allDescriptions();
+      final List<String> demoDescriptions = Demos.allDescriptions();
       return const JsonEncoder.withIndent('  ').convert(demoDescriptions);
     case 'isTestingCraneOnly':
       return const String.fromEnvironment('onlyCrane', defaultValue: 'false');

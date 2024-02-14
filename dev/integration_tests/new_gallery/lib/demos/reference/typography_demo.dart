@@ -24,8 +24,7 @@ class _TextStyleItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           SizedBox(
             width: 72,
             child: Text(name, style: Theme.of(context).textTheme.bodySmall),
@@ -44,8 +43,8 @@ class TypographyDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final styleItems = [
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final List<_TextStyleItem> styleItems = <_TextStyleItem>[
       _TextStyleItem(
         name: 'Headline 1',
         style: textTheme.displayLarge!,

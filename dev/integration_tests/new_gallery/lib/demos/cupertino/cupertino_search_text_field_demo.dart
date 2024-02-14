@@ -18,7 +18,7 @@ class CupertinoSearchTextFieldDemo extends StatefulWidget {
 
 class _CupertinoSearchTextFieldDemoState
     extends State<CupertinoSearchTextFieldDemo> {
-  final List<String> platforms = [
+  final List<String> platforms = <String>[
     'Android',
     'iOS',
     'Windows',
@@ -29,7 +29,7 @@ class _CupertinoSearchTextFieldDemoState
 
   final TextEditingController _queryTextController = TextEditingController();
   String _searchPlatform = '';
-  List<String> filteredPlatforms = [];
+  List<String> filteredPlatforms = <String>[];
 
   @override
   void initState() {
@@ -51,7 +51,7 @@ class _CupertinoSearchTextFieldDemoState
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -59,7 +59,7 @@ class _CupertinoSearchTextFieldDemoState
       ),
       child: SafeArea(
         child: Column(
-          children: [
+          children: <Widget>[
             CupertinoSearchTextField(
               controller: _queryTextController,
               restorationId: 'search_text_field',
@@ -84,7 +84,7 @@ class _CupertinoSearchTextFieldDemoState
 
   Widget _buildPlatformList() {
     if (_searchPlatform.isNotEmpty) {
-      List<String> tempList = [];
+      final List<String> tempList = <String>[];
       for (int i = 0; i < filteredPlatforms.length; i++) {
         if (filteredPlatforms[i]
             .toLowerCase()
@@ -97,7 +97,7 @@ class _CupertinoSearchTextFieldDemoState
     return ListView.builder(
       itemCount: filteredPlatforms.length,
       shrinkWrap: true,
-      itemBuilder: (context, index) {
+      itemBuilder: (BuildContext context, int index) {
         return ListTile(title: Text(filteredPlatforms[index]));
       },
     );

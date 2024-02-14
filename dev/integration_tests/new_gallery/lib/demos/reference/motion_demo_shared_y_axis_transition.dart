@@ -27,23 +27,23 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
     );
   }
 
-  final _recentList = ListView(
+  final ListView _recentList = ListView(
     // Adding [UniqueKey] to make sure the widget rebuilds when transitioning.
     key: UniqueKey(),
-    children: [
+    children: <Widget>[
       for (int i = 0; i < 10; i++) _AlbumTile((i + 1).toString()),
     ],
   );
 
-  final _alphabeticalList = ListView(
+  final ListView _alphabeticalList = ListView(
     // Adding [UniqueKey] to make sure the widget rebuilds when transitioning.
     key: UniqueKey(),
-    children: [
-      for (final letter in _alphabet) _AlbumTile(letter),
+    children: <Widget>[
+      for (final String letter in _alphabet) _AlbumTile(letter),
     ],
   );
 
-  static const _alphabet = [
+  static const List<String> _alphabet = <String>[
     'A',
     'B',
     'C',
@@ -64,13 +64,13 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Column(
-          children: [
+          children: <Widget>[
             Text(localizations.demoSharedYAxisTitle),
             Text(
               '(${localizations.demoSharedYAxisDemoInstructions})',
@@ -83,11 +83,11 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
         ),
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           const SizedBox(height: 5),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(left: 15),
                 child: Text(localizations.demoSharedYAxisAlbumCount),
@@ -112,7 +112,7 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
                     });
                   },
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       Text(_isAlphabetical
                           ? localizations.demoSharedYAxisAlphabeticalSortTitle
                           : localizations.demoSharedYAxisRecentSortTitle),
@@ -131,7 +131,7 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
           Expanded(
             child: PageTransitionSwitcher(
               reverse: _isAlphabetical,
-              transitionBuilder: (child, animation, secondaryAnimation) {
+              transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
                 return SharedAxisTransition(
                   animation: animation,
                   secondaryAnimation: secondaryAnimation,
@@ -154,11 +154,11 @@ class _AlbumTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final randomNumberGenerator = Random();
-    final localizations = GalleryLocalizations.of(context)!;
+    final Random randomNumberGenerator = Random();
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Column(
-      children: [
+      children: <Widget>[
         ListTile(
           leading: Container(
             height: 60,
@@ -184,7 +184,7 @@ class _AlbumTile extends StatelessWidget {
             localizations.demoSharedYAxisAlbumTileSubtitle,
           ),
           trailing: Text(
-            '${(randomNumberGenerator.nextInt(50) + 10).toString()} '
+            '${randomNumberGenerator.nextInt(50) + 10} '
             '${localizations.demoSharedYAxisAlbumTileDurationUnit}',
           ),
         ),

@@ -12,7 +12,7 @@ class AppBarDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var localization = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -23,7 +23,7 @@ class AppBarDemo extends StatelessWidget {
         title: Text(
           localization.demoAppBarTitle,
         ),
-        actions: [
+        actions: <Widget>[
           IconButton(
             tooltip: localization.starterAppTooltipFavorite,
             icon: const Icon(
@@ -39,8 +39,8 @@ class AppBarDemo extends StatelessWidget {
             onPressed: () {},
           ),
           PopupMenuButton<Text>(
-            itemBuilder: (context) {
-              return [
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<Text>>[
                 PopupMenuItem(
                   child: Text(
                     localization.demoNavigationRailFirst,

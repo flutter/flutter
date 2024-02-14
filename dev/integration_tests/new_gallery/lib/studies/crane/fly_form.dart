@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/crane/backlayer.dart';
-import 'package:gallery/studies/crane/header_form.dart';
+import 'backlayer.dart';
+import 'header_form.dart';
 
 class FlyForm extends BackLayerItem {
   const FlyForm({super.key}) : super(index: 0);
@@ -16,10 +16,10 @@ class FlyForm extends BackLayerItem {
 }
 
 class _FlyFormState extends State<FlyForm> with RestorationMixin {
-  final travelerController = RestorableTextEditingController();
-  final countryDestinationController = RestorableTextEditingController();
-  final destinationController = RestorableTextEditingController();
-  final dateController = RestorableTextEditingController();
+  final RestorableTextEditingController travelerController = RestorableTextEditingController();
+  final RestorableTextEditingController countryDestinationController = RestorableTextEditingController();
+  final RestorableTextEditingController destinationController = RestorableTextEditingController();
+  final RestorableTextEditingController dateController = RestorableTextEditingController();
 
   @override
   String get restorationId => 'fly_form';
@@ -43,7 +43,7 @@ class _FlyFormState extends State<FlyForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return HeaderForm(
       fields: <HeaderFormField>[
         HeaderFormField(

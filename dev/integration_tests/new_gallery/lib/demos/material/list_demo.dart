@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 // BEGIN listDemo
 
@@ -16,7 +16,7 @@ class ListDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -26,7 +26,7 @@ class ListDemo extends StatelessWidget {
         child: ListView(
           restorationId: 'list_demo_list_view',
           padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
+          children: <Widget>[
             for (int index = 1; index < 21; index++)
               ListTile(
                 leading: ExcludeSemantics(

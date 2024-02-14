@@ -41,7 +41,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   // Since FloatingActionButtonLocation is not an enum, the index of the
   // selected FloatingActionButtonLocation is used for state restoration.
-  static const List<FloatingActionButtonLocation> _fabLocations = [
+  static const List<FloatingActionButtonLocation> _fabLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.endDocked,
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.endFloat,
@@ -68,7 +68,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -76,7 +76,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
       ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 88),
-        children: [
+        children: <Widget>[
           SwitchListTile(
             title: Text(
               localizations.demoFloatingButtonTitle,
@@ -156,14 +156,14 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
 
-  static final centerLocations = <FloatingActionButtonLocation>[
+  static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.centerFloat,
   ];
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Semantics(
       sortKey: const OrdinalSortKey(1),
       container: true,
@@ -173,7 +173,7 @@ class _DemoBottomAppBar extends StatelessWidget {
         child: IconTheme(
           data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
           child: Row(
-            children: [
+            children: <Widget>[
               IconButton(
                 tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
                 icon: const Icon(Icons.menu),

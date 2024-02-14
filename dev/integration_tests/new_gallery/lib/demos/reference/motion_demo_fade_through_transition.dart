@@ -19,7 +19,7 @@ class FadeThroughTransitionDemo extends StatefulWidget {
 class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
   int _pageIndex = 0;
 
-  final _pageList = <Widget>[
+  final List<Widget> _pageList = <Widget>[
     _AlbumsPage(),
     _PhotosPage(),
     _SearchPage(),
@@ -27,13 +27,13 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Column(
-          children: [
+          children: <Widget>[
             Text(localizations.demoFadeThroughTitle),
             Text(
               '(${localizations.demoFadeThroughDemoInstructions})',
@@ -47,9 +47,9 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
       ),
       body: PageTransitionSwitcher(
         transitionBuilder: (
-          child,
-          animation,
-          secondaryAnimation,
+          Widget child,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
         ) {
           return FadeThroughTransition(
             animation: animation,
@@ -61,12 +61,12 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _pageIndex,
-        onTap: (selectedIndex) {
+        onTap: (int selectedIndex) {
           setState(() {
             _pageIndex = selectedIndex;
           });
         },
-        items: [
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.photo_library),
             label: localizations.demoFadeThroughAlbumsDestination,
@@ -88,16 +88,16 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
 class _ExampleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Expanded(
       child: Card(
         child: Stack(
-          children: [
+          children: <Widget>[
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+              children: <Widget>[
                 Expanded(
                   child: Container(
                     color: Colors.black26,
@@ -116,7 +116,7 @@ class _ExampleCard extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Text(
                         localizations.demoFadeThroughTextPlaceholder,
                         style: textTheme.bodyLarge,
@@ -145,13 +145,13 @@ class _AlbumsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         ...List.generate(
           3,
-          (index) => Expanded(
+          (int index) => Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+              children: <Widget>[
                 _ExampleCard(),
                 _ExampleCard(),
               ],
@@ -167,7 +167,7 @@ class _PhotosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         _ExampleCard(),
         _ExampleCard(),
       ],
@@ -178,10 +178,10 @@ class _PhotosPage extends StatelessWidget {
 class _SearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
 
     return ListView.builder(
-      itemBuilder: (context, index) {
+      itemBuilder: (BuildContext context, int index) {
         return ListTile(
           leading: Image.asset(
             'placeholders/avatar_logo.png',

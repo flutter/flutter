@@ -21,7 +21,7 @@ class BannerDemo extends StatefulWidget {
 }
 
 class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
-  static const _itemCount = 20;
+  static const int _itemCount = 20;
 
   @override
   String get restorationId => 'banner_demo';
@@ -52,22 +52,19 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
           _displayBanner.value = true;
           _showMultipleActions.value = true;
           _showLeading.value = true;
-          break;
         case BannerDemoAction.showMultipleActions:
           _showMultipleActions.value = !_showMultipleActions.value;
-          break;
         case BannerDemoAction.showLeading:
           _showLeading.value = !_showLeading.value;
-          break;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final localizations = GalleryLocalizations.of(context)!;
-    final banner = MaterialBanner(
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final MaterialBanner banner = MaterialBanner(
       content: Text(localizations.bannerDemoText),
       leading: _showLeading.value
           ? CircleAvatar(
@@ -75,7 +72,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
               child: Icon(Icons.access_alarm, color: colorScheme.onPrimary),
             )
           : null,
-      actions: [
+      actions: <Widget>[
         TextButton(
           onPressed: () {
             setState(() {
@@ -101,10 +98,10 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(localizations.demoBannerTitle),
-        actions: [
+        actions: <Widget>[
           PopupMenuButton<BannerDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder: (context) => <PopupMenuEntry<BannerDemoAction>>[
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
               PopupMenuItem<BannerDemoAction>(
                 value: BannerDemoAction.reset,
                 child: Text(localizations.bannerDemoResetText),
@@ -127,7 +124,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
       body: ListView.builder(
         restorationId: 'banner_demo_list_view',
         itemCount: _displayBanner.value ? _itemCount + 1 : _itemCount,
-        itemBuilder: (context, index) {
+        itemBuilder: (BuildContext context, int index) {
           if (index == 0 && _displayBanner.value) {
             return banner;
           }

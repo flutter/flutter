@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gallery/main.dart';
 
 void main() {
-  testWidgets('Smoke test', (tester) async {
+  testWidgets('Smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp());
     await tester.pumpAndSettle();
     expect(find.text('Gallery'), findsOneWidget);

@@ -4,8 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
 import 'package:intl/intl.dart';
+
+import '../../data/gallery_options.dart';
 
 // BEGIN dataTableDemo
 
@@ -17,7 +18,7 @@ class DataTableDemo extends StatefulWidget {
 }
 
 class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
-  Set<int> _dessertSelections = {};
+  Set<int> _dessertSelections = <int>{};
 
   /// Returns whether or not a dessert row is selected by index.
   bool isSelected(int index) => _dessertSelections.contains(index);
@@ -25,9 +26,9 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
   /// Takes a list of [_Dessert]s and saves the row indices of selected rows
   /// into a [Set].
   void setDessertSelections(List<_Dessert> desserts) {
-    final updatedSet = <int>{};
-    for (var i = 0; i < desserts.length; i += 1) {
-      var dessert = desserts[i];
+    final Set<int> updatedSet = <int>{};
+    for (int i = 0; i < desserts.length; i += 1) {
+      final _Dessert dessert = desserts[i];
       if (dessert.selected) {
         updatedSet.add(i);
       }
@@ -41,8 +42,8 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
 
   @override
   Set<int> fromPrimitives(Object? data) {
-    final selectedItemIndices = data as List<dynamic>;
-    _dessertSelections = {
+    final List selectedItemIndices = data! as List<dynamic>;
+    _dessertSelections = <int>{
       ...selectedItemIndices.map<int>((dynamic id) => id as int),
     };
     return _dessertSelections;
@@ -81,30 +82,22 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
     _dessertsDataSource ??= _DessertDataSource(context);
     switch (_sortColumnIndex.value) {
       case 0:
-        _dessertsDataSource!._sort<String>((d) => d.name, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<String>((_Dessert d) => d.name, _sortAscending.value);
       case 1:
         _dessertsDataSource!
-            ._sort<num>((d) => d.calories, _sortAscending.value);
-        break;
+            ._sort<num>((_Dessert d) => d.calories, _sortAscending.value);
       case 2:
-        _dessertsDataSource!._sort<num>((d) => d.fat, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.fat, _sortAscending.value);
       case 3:
-        _dessertsDataSource!._sort<num>((d) => d.carbs, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.carbs, _sortAscending.value);
       case 4:
-        _dessertsDataSource!._sort<num>((d) => d.protein, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.protein, _sortAscending.value);
       case 5:
-        _dessertsDataSource!._sort<num>((d) => d.sodium, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.sodium, _sortAscending.value);
       case 6:
-        _dessertsDataSource!._sort<num>((d) => d.calcium, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.calcium, _sortAscending.value);
       case 7:
-        _dessertsDataSource!._sort<num>((d) => d.iron, _sortAscending.value);
-        break;
+        _dessertsDataSource!._sort<num>((_Dessert d) => d.iron, _sortAscending.value);
     }
     _dessertsDataSource!.updateSelectedDesserts(_dessertSelections);
     _dessertsDataSource!.addListener(_updateSelectedDessertRowListener);
@@ -145,7 +138,7 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -155,17 +148,17 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
         child: ListView(
           restorationId: 'data_table_list_view',
           padding: const EdgeInsets.all(16),
-          children: [
+          children: <Widget>[
             PaginatedDataTable(
               header: Text(localizations.dataTableHeader),
               rowsPerPage: _rowsPerPage.value,
-              onRowsPerPageChanged: (value) {
+              onRowsPerPageChanged: (int? value) {
                 setState(() {
                   _rowsPerPage.value = value!;
                 });
               },
               initialFirstRowIndex: _rowIndex.value,
-              onPageChanged: (rowIndex) {
+              onPageChanged: (int rowIndex) {
                 setState(() {
                   _rowIndex.value = rowIndex;
                 });
@@ -173,53 +166,53 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
               sortColumnIndex: _sortColumnIndex.value,
               sortAscending: _sortAscending.value,
               onSelectAll: _dessertsDataSource!._selectAll,
-              columns: [
+              columns: <DataColumn>[
                 DataColumn(
                   label: Text(localizations.dataTableColumnDessert),
-                  onSort: (columnIndex, ascending) =>
-                      _sort<String>((d) => d.name, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<String>((_Dessert d) => d.name, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalories),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.calories, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.calories, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnFat),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.fat, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.fat, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCarbs),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.carbs, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.carbs, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnProtein),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.protein, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.protein, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnSodium),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.sodium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.sodium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalcium),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.calcium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.calcium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnIron),
                   numeric: true,
-                  onSort: (columnIndex, ascending) =>
-                      _sort<num>((d) => d.iron, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) =>
+                      _sort<num>((_Dessert d) => d.iron, columnIndex, ascending),
                 ),
               ],
               source: _dessertsDataSource!,
@@ -256,7 +249,7 @@ class _Dessert {
 
 class _DessertDataSource extends DataTableSource {
   _DessertDataSource(this.context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     _desserts = <_Dessert>[
       _Dessert(
         localizations.dataTableRowFrozenYogurt,
@@ -605,9 +598,9 @@ class _DessertDataSource extends DataTableSource {
   late List<_Dessert> _desserts;
 
   void _sort<T>(Comparable<T> Function(_Dessert d) getField, bool ascending) {
-    _desserts.sort((a, b) {
-      final aValue = getField(a);
-      final bValue = getField(b);
+    _desserts.sort((_Dessert a, _Dessert b) {
+      final Comparable<T> aValue = getField(a);
+      final Comparable<T> bValue = getField(b);
       return ascending
           ? Comparable.compare(aValue, bValue)
           : Comparable.compare(bValue, aValue);
@@ -619,8 +612,8 @@ class _DessertDataSource extends DataTableSource {
 
   void updateSelectedDesserts(_RestorableDessertSelections selectedRows) {
     _selectedCount = 0;
-    for (var i = 0; i < _desserts.length; i += 1) {
-      var dessert = _desserts[i];
+    for (int i = 0; i < _desserts.length; i += 1) {
+      final _Dessert dessert = _desserts[i];
       if (selectedRows.isSelected(i)) {
         dessert.selected = true;
         _selectedCount += 1;
@@ -633,17 +626,17 @@ class _DessertDataSource extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    final format = NumberFormat.decimalPercentPattern(
+    final NumberFormat format = NumberFormat.decimalPercentPattern(
       locale: GalleryOptions.of(context).locale.toString(),
       decimalDigits: 0,
     );
     assert(index >= 0);
     if (index >= _desserts.length) return null;
-    final dessert = _desserts[index];
+    final _Dessert dessert = _desserts[index];
     return DataRow.byIndex(
       index: index,
       selected: dessert.selected,
-      onSelectChanged: (value) {
+      onSelectChanged: (bool? value) {
         if (dessert.selected != value) {
           _selectedCount += value! ? 1 : -1;
           assert(_selectedCount >= 0);
@@ -651,7 +644,7 @@ class _DessertDataSource extends DataTableSource {
           notifyListeners();
         }
       },
-      cells: [
+      cells: <DataCell>[
         DataCell(Text(dessert.name)),
         DataCell(Text('${dessert.calories}')),
         DataCell(Text(dessert.fat.toStringAsFixed(1))),
@@ -674,7 +667,7 @@ class _DessertDataSource extends DataTableSource {
   int get selectedRowCount => _selectedCount;
 
   void _selectAll(bool? checked) {
-    for (final dessert in _desserts) {
+    for (final _Dessert dessert in _desserts) {
       dessert.selected = checked ?? false;
     }
     _selectedCount = checked! ? _desserts.length : 0;

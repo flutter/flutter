@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
 import 'package:provider/provider.dart';
+
+import 'model/email_store.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -12,13 +13,12 @@ class SearchPage extends StatelessWidget {
         child: Material(
           color: Theme.of(context).colorScheme.surface,
           child: Column(
-            children: [
+            children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Row(
-                  mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  children: <Widget>[
                     BackButton(
                       key: const ValueKey('ReplyExit'),
                       onPressed: () {
@@ -47,7 +47,7 @@ class SearchPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       _SectionHeader(title: 'YESTERDAY'),
                       _SearchHistoryTile(
                         search: '481 Van Brunt Street',

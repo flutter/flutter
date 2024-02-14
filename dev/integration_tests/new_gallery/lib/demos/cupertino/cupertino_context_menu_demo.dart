@@ -13,7 +13,7 @@ class CupertinoContextMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final galleryLocalizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations galleryLocalizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -23,13 +23,13 @@ class CupertinoContextMenuDemo extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Center(
             child: SizedBox(
               width: 100,
               height: 100,
               child: CupertinoContextMenu(
-                actions: [
+                actions: <Widget>[
                   CupertinoContextMenuAction(
                     onPressed: () {
                       Navigator.pop(context);

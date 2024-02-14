@@ -4,16 +4,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/shrine/app.dart';
-import 'package:gallery/studies/shrine/colors.dart';
-import 'package:gallery/studies/shrine/model/app_state_model.dart';
-import 'package:gallery/studies/shrine/model/product.dart';
-import 'package:gallery/studies/shrine/page_status.dart';
-import 'package:gallery/studies/shrine/triangle_category_indicator.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/text_scale.dart';
+import 'app.dart';
+import 'colors.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
+import 'page_status.dart';
+import 'triangle_category_indicator.dart';
 
 double desktopCategoryMenuPageWidth({
   required BuildContext context,
@@ -49,24 +50,24 @@ class CategoryMenuPage extends StatelessWidget {
   }
 
   Widget _buildCategory(Category category, BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
-    final categoryString = category.name(context);
+    final String categoryString = category.name(context);
 
-    final selectedCategoryTextStyle = Theme.of(context)
+    final TextStyle selectedCategoryTextStyle = Theme.of(context)
         .textTheme
         .bodyLarge!
         .copyWith(fontSize: isDesktop ? 17 : 19);
 
-    final unselectedCategoryTextStyle = selectedCategoryTextStyle.copyWith(
+    final TextStyle unselectedCategoryTextStyle = selectedCategoryTextStyle.copyWith(
         color: shrineBrown900.withOpacity(0.6));
 
-    final indicatorHeight = (isDesktop ? 28 : 30) *
+    final double indicatorHeight = (isDesktop ? 28 : 30) *
         GalleryOptions.of(context).textScaleFactor(context);
-    final indicatorWidth = indicatorHeight * 34 / 28;
+    final double indicatorWidth = indicatorHeight * 34 / 28;
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (context, child, model) => Semantics(
+      builder: (BuildContext context, Widget? child, AppStateModel model) => Semantics(
         selected: model.selectedCategory == category,
         button: true,
         enabled: true,
@@ -97,9 +98,9 @@ class CategoryMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
-    final logoutTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
+    final TextStyle logoutTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
           fontSize: isDesktop ? 17 : 19,
           color: shrineBrown900.withOpacity(0.6),
         );
@@ -107,14 +108,14 @@ class CategoryMenuPage extends StatelessWidget {
     if (isDesktop) {
       return AnimatedBuilder(
         animation: PageStatus.of(context)!.cartController,
-        builder: (context, child) => ExcludeSemantics(
+        builder: (BuildContext context, Widget? child) => ExcludeSemantics(
           excluding: !menuPageIsVisible(context),
           child: Material(
             child: Container(
               color: shrinePink100,
               width: desktopCategoryMenuPageWidth(context: context),
               child: Column(
-                children: [
+                children: <Widget>[
                   const SizedBox(height: 64),
                   Image.asset(
                     'packages/shrine_images/diamond.png',
@@ -129,7 +130,7 @@ class CategoryMenuPage extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  for (final category in categories)
+                  for (final Category category in categories)
                     _buildCategory(category, context),
                   _divider(context: context),
                   Semantics(
@@ -167,17 +168,17 @@ class CategoryMenuPage extends StatelessWidget {
     } else {
       return AnimatedBuilder(
         animation: PageStatus.of(context)!.cartController,
-        builder: (context, child) => AnimatedBuilder(
+        builder: (BuildContext context, Widget? child) => AnimatedBuilder(
           animation: PageStatus.of(context)!.menuController,
-          builder: (context, child) => ExcludeSemantics(
+          builder: (BuildContext context, Widget? child) => ExcludeSemantics(
             excluding: !menuPageIsVisible(context),
             child: Center(
               child: Container(
                 padding: const EdgeInsets.only(top: 40),
                 color: shrinePink100,
                 child: ListView(
-                  children: [
-                    for (final category in categories)
+                  children: <Widget>[
+                    for (final Category category in categories)
                       _buildCategory(category, context),
                     Center(
                       child: _divider(context: context),

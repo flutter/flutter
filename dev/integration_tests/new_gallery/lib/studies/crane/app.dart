@@ -4,13 +4,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/studies/crane/backdrop.dart';
-import 'package:gallery/studies/crane/eat_form.dart';
-import 'package:gallery/studies/crane/fly_form.dart';
-import 'package:gallery/studies/crane/routes.dart' as routes;
-import 'package:gallery/studies/crane/sleep_form.dart';
-import 'package:gallery/studies/crane/theme.dart';
+
+import '../../data/gallery_options.dart';
+import 'backdrop.dart';
+import 'backlayer.dart';
+import 'eat_form.dart';
+import 'fly_form.dart';
+import 'routes.dart' as routes;
+import 'sleep_form.dart';
+import 'theme.dart';
 
 class CraneApp extends StatelessWidget {
   const CraneApp({super.key});
@@ -27,8 +29,8 @@ class CraneApp extends StatelessWidget {
       supportedLocales: GalleryLocalizations.supportedLocales,
       locale: GalleryOptions.of(context).locale,
       initialRoute: CraneApp.defaultRoute,
-      routes: {
-        CraneApp.defaultRoute: (context) => const _Home(),
+      routes: <String, WidgetBuilder>{
+        CraneApp.defaultRoute: (BuildContext context) => const _Home(),
       },
       theme: craneTheme.copyWith(
         platform: GalleryOptions.of(context).platform,
@@ -45,7 +47,7 @@ class _Home extends StatelessWidget {
     return const ApplyTextOptions(
       child: Backdrop(
         frontLayer: SizedBox(),
-        backLayerItems: [
+        backLayerItems: <BackLayerItem>[
           FlyForm(),
           SleepForm(),
           EatForm(),

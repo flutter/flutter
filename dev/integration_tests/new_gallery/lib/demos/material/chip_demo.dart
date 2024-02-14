@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class ChipDemo extends StatelessWidget {
   const ChipDemo({
@@ -15,7 +15,7 @@ class ChipDemo extends StatelessWidget {
   final ChipDemoType type;
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (type) {
       case ChipDemoType.action:
         return localizations.demoActionChipTitle;
@@ -34,16 +34,12 @@ class ChipDemo extends StatelessWidget {
     switch (type) {
       case ChipDemoType.action:
         buttons = _ActionChipDemo();
-        break;
       case ChipDemoType.choice:
         buttons = _ChoiceChipDemo();
-        break;
       case ChipDemoType.filter:
         buttons = _FilterChipDemo();
-        break;
       case ChipDemoType.input:
         buttons = _InputChipDemo();
-        break;
     }
 
     return Scaffold(
@@ -103,17 +99,17 @@ class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Wrap(
-            children: [
+            children: <Widget>[
               ChoiceChip(
                 label: Text(localizations.chipSmall),
                 selected: _indexSelected.value == 0,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     _indexSelected.value = value ? 0 : -1;
                   });
@@ -123,7 +119,7 @@ class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
               ChoiceChip(
                 label: Text(localizations.chipMedium),
                 selected: _indexSelected.value == 1,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     _indexSelected.value = value ? 1 : -1;
                   });
@@ -133,7 +129,7 @@ class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
               ChoiceChip(
                 label: Text(localizations.chipLarge),
                 selected: _indexSelected.value == 2,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     _indexSelected.value = value ? 2 : -1;
                   });
@@ -144,23 +140,20 @@ class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
           const SizedBox(height: 12),
           // Disabled chips
           Wrap(
-            children: [
+            children: <Widget>[
               ChoiceChip(
                 label: Text(localizations.chipSmall),
                 selected: _indexSelected.value == 0,
-                onSelected: null,
               ),
               const SizedBox(width: 8),
               ChoiceChip(
                 label: Text(localizations.chipMedium),
                 selected: _indexSelected.value == 1,
-                onSelected: null,
               ),
               const SizedBox(width: 8),
               ChoiceChip(
                 label: Text(localizations.chipLarge),
                 selected: _indexSelected.value == 2,
-                onSelected: null,
               ),
             ],
           ),
@@ -205,19 +198,19 @@ class _FilterChipDemoState extends State<_FilterChipDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Wrap(
             spacing: 8.0,
-            children: [
+            children: <Widget>[
               FilterChip(
                 label: Text(localizations.chipElevator),
                 selected: isSelectedElevator.value,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     isSelectedElevator.value = !isSelectedElevator.value;
                   });
@@ -226,7 +219,7 @@ class _FilterChipDemoState extends State<_FilterChipDemo>
               FilterChip(
                 label: Text(localizations.chipWasher),
                 selected: isSelectedWasher.value,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     isSelectedWasher.value = !isSelectedWasher.value;
                   });
@@ -235,7 +228,7 @@ class _FilterChipDemoState extends State<_FilterChipDemo>
               FilterChip(
                 label: Text(localizations.chipFireplace),
                 selected: isSelectedFireplace.value,
-                onSelected: (value) {
+                onSelected: (bool value) {
                   setState(() {
                     isSelectedFireplace.value = !isSelectedFireplace.value;
                   });
@@ -247,7 +240,7 @@ class _FilterChipDemoState extends State<_FilterChipDemo>
           // Disabled chips
           Wrap(
             spacing: 8.0,
-            children: [
+            children: <Widget>[
               FilterChip(
                 label: Text(localizations.chipElevator),
                 selected: isSelectedElevator.value,
@@ -281,7 +274,7 @@ class _InputChipDemo extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           InputChip(
             onPressed: () {},
             onDeleted: () {},
@@ -296,8 +289,6 @@ class _InputChipDemo extends StatelessWidget {
           const SizedBox(height: 12),
           // Disabled chip
           InputChip(
-            onPressed: null,
-            onDeleted: null,
             avatar: const Icon(
               Icons.directions_bike,
               size: 20,

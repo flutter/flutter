@@ -4,14 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/rally/tabs/accounts.dart';
-import 'package:gallery/studies/rally/tabs/bills.dart';
-import 'package:gallery/studies/rally/tabs/budgets.dart';
-import 'package:gallery/studies/rally/tabs/overview.dart';
-import 'package:gallery/studies/rally/tabs/settings.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/text_scale.dart';
+import 'tabs/accounts.dart';
+import 'tabs/bills.dart';
+import 'tabs/budgets.dart';
+import 'tabs/overview.dart';
+import 'tabs/settings.dart';
 
 const int tabCount = 5;
 const int turnsToRotateRight = 1;
@@ -59,25 +59,25 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDesktop = isDisplayDesktop(context);
+    final ThemeData theme = Theme.of(context);
+    final bool isDesktop = isDisplayDesktop(context);
     Widget tabBarView;
     if (isDesktop) {
-      final isTextDirectionRtl =
+      final bool isTextDirectionRtl =
           GalleryOptions.of(context).resolvedTextDirection() ==
               TextDirection.rtl;
-      final verticalRotation =
+      final int verticalRotation =
           isTextDirectionRtl ? turnsToRotateLeft : turnsToRotateRight;
-      final revertVerticalRotation =
+      final int revertVerticalRotation =
           isTextDirectionRtl ? turnsToRotateRight : turnsToRotateLeft;
       tabBarView = Row(
-        children: [
+        children: <Widget>[
           Container(
             width: 150 + 50 * (cappedTextScale(context) - 1),
             alignment: Alignment.topCenter,
             padding: const EdgeInsets.symmetric(vertical: 32),
             child: Column(
-              children: [
+              children: <Widget>[
                 const SizedBox(height: 24),
                 ExcludeSemantics(
                   child: SizedBox(
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage>
                     tabs: _buildTabs(
                             context: context, theme: theme, isVertical: true)
                         .map(
-                      (widget) {
+                      (Widget widget) {
                         // Revert the rotation on the tabs.
                         return RotatedBox(
                           quarterTurns: revertVerticalRotation,
@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage>
               child: TabBarView(
                 controller: _tabController,
                 children: _buildTabViews().map(
-                  (widget) {
+                  (Widget widget) {
                     // Revert the rotation on the tab views.
                     return RotatedBox(
                       quarterTurns: revertVerticalRotation,
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage>
       );
     } else {
       tabBarView = Column(
-        children: [
+        children: <Widget>[
           _RallyTabBar(
             tabs: _buildTabs(context: context, theme: theme),
             tabController: _tabController,
@@ -175,8 +175,8 @@ class _HomePageState extends State<HomePage>
       {required BuildContext context,
       required ThemeData theme,
       bool isVertical = false}) {
-    final localizations = GalleryLocalizations.of(context)!;
-    return [
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    return <Widget>[
       _RallyTab(
         theme: theme,
         iconData: Icons.pie_chart,
@@ -221,7 +221,7 @@ class _HomePageState extends State<HomePage>
   }
 
   List<Widget> _buildTabViews() {
-    return const [
+    return const <Widget>[
       OverviewView(),
       AccountsView(),
       BillsView(),
@@ -316,7 +316,7 @@ class _RallyTabState extends State<_RallyTab>
   Widget build(BuildContext context) {
     if (widget.isVertical) {
       return Column(
-        children: [
+        children: <Widget>[
           const SizedBox(height: 18),
           FadeTransition(
             opacity: _iconFadeAnimation,
@@ -326,7 +326,6 @@ class _RallyTabState extends State<_RallyTab>
           FadeTransition(
             opacity: _titleFadeAnimation,
             child: SizeTransition(
-              axis: Axis.vertical,
               axisAlignment: -1,
               sizeFactor: _titleSizeAnimation,
               child: Center(child: ExcludeSemantics(child: widget.titleText)),
@@ -341,14 +340,14 @@ class _RallyTabState extends State<_RallyTab>
     // units and dividing it into the screen width. Each unexpanded tab is 1
     // unit, and there is always 1 expanded tab which is 1 unit + any extra
     // space determined by the multiplier.
-    final width = MediaQuery.of(context).size.width;
-    const expandedTitleWidthMultiplier = 2;
-    final unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
+    final double width = MediaQuery.of(context).size.width;
+    const int expandedTitleWidthMultiplier = 2;
+    final double unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 56),
       child: Row(
-        children: [
+        children: <Widget>[
           FadeTransition(
             opacity: _iconFadeAnimation,
             child: SizedBox(

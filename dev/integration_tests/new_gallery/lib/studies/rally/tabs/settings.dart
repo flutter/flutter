@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/routes.dart' as rally_route;
+import '../../../layout/adaptive.dart';
+import '../colors.dart';
+import '../data.dart';
+import '../routes.dart' as rally_route;
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -24,9 +24,9 @@ class _SettingsViewState extends State<SettingsView> {
         child: ListView(
           restorationId: 'settings_list_view',
           shrinkWrap: true,
-          children: [
-            for (String title
-                in DummyDataService.getSettingsTitles(context)) ...[
+          children: <Widget>[
+            for (final String title
+                in DummyDataService.getSettingsTitles(context)) ...<Widget>[
               _SettingsItem(title),
               const Divider(
                 color: RallyColors.dividerColor,

@@ -1,18 +1,20 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/letter_spacing.dart';
-import 'package:gallery/studies/reply/adaptive_nav.dart';
-import 'package:gallery/studies/reply/colors.dart';
-import 'package:gallery/studies/reply/compose_page.dart';
-import 'package:gallery/studies/reply/model/email_model.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
-import 'package:gallery/studies/reply/routes.dart' as routes;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
 
-final rootNavKey = GlobalKey<NavigatorState>();
+import '../../data/gallery_options.dart';
+import '../../layout/letter_spacing.dart';
+import 'adaptive_nav.dart';
+import 'colors.dart';
+import 'compose_page.dart';
+import 'model/email_model.dart';
+import 'model/email_store.dart';
+import 'routes.dart' as routes;
+
+final GlobalKey<NavigatorState> rootNavKey = GlobalKey<NavigatorState>();
 
 class ReplyApp extends StatefulWidget {
   const ReplyApp({super.key});
@@ -22,9 +24,9 @@ class ReplyApp extends StatefulWidget {
 
   static Route createComposeRoute(RouteSettings settings) {
     return PageRouteBuilder<void>(
-      pageBuilder: (context, animation, secondaryAnimation) =>
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
           const ComposePage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return FadeThroughTransition(
           fillColor: Theme.of(context).cardColor,
           animation: animation,
@@ -59,16 +61,16 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final galleryThemeMode = GalleryOptions.of(context).themeMode;
-    final isDark = galleryThemeMode == ThemeMode.system
+    final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
+    final bool isDark = galleryThemeMode == ThemeMode.system
         ? Theme.of(context).brightness == Brightness.dark
         : galleryThemeMode == ThemeMode.dark;
 
-    final replyTheme =
+    final ThemeData replyTheme =
         isDark ? _buildReplyDarkTheme(context) : _buildReplyLightTheme(context);
 
     return MultiProvider(
-      providers: [
+      providers: <SingleChildWidget>[
         ChangeNotifierProvider<EmailStore>.value(
           value: _appState.value,
         ),
@@ -83,11 +85,11 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
         supportedLocales: GalleryLocalizations.supportedLocales,
         locale: GalleryOptions.of(context).locale,
         initialRoute: ReplyApp.homeRoute,
-        onGenerateRoute: (settings) {
+        onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case ReplyApp.homeRoute:
               return MaterialPageRoute<void>(
-                builder: (context) => const AdaptiveNav(),
+                builder: (BuildContext context) => const AdaptiveNav(),
                 settings: settings,
               );
             case ReplyApp.composeRoute:
@@ -108,21 +110,21 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 
   @override
   EmailStore fromPrimitives(Object? data) {
-    final appState = EmailStore();
-    final appData = Map<String, dynamic>.from(data as Map);
+    final EmailStore appState = EmailStore();
+    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map);
     appState.selectedEmailId = appData['selectedEmailId'] as int;
     appState.onSearchPage = appData['onSearchPage'] as bool;
 
     // The index of the MailboxPageType enum is restored.
-    final mailboxPageIndex = appData['selectedMailboxPage'] as int;
+    final int mailboxPageIndex = appData['selectedMailboxPage'] as int;
     appState.selectedMailboxPage = MailboxPageType.values[mailboxPageIndex];
 
-    final starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
-    appState.starredEmailIds = {
+    final List starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
+    appState.starredEmailIds = <int>{
       ...starredEmailIdsList.map<int>((dynamic id) => id as int),
     };
-    final trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
-    appState.trashEmailIds = {
+    final List trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
+    appState.trashEmailIds = <int>{
       ...trashEmailIdsList.map<int>((dynamic id) => id as int),
     };
     return appState;
@@ -143,7 +145,7 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final base = ThemeData.light();
+  final ThemeData base = ThemeData.light();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarTheme(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
@@ -175,12 +177,7 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
       primaryContainer: ReplyColors.blue800,
       secondary: ReplyColors.orange500,
       secondaryContainer: ReplyColors.orange400,
-      surface: ReplyColors.white50,
       error: ReplyColors.red400,
-      onPrimary: ReplyColors.white50,
-      onSecondary: ReplyColors.black900,
-      onBackground: ReplyColors.black900,
-      onSurface: ReplyColors.black900,
       onError: ReplyColors.black900,
       background: ReplyColors.blue50,
     ),
@@ -190,7 +187,7 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
 }
 
 ThemeData _buildReplyDarkTheme(BuildContext context) {
-  final base = ThemeData.dark();
+  final ThemeData base = ThemeData.dark();
   return base.copyWith(
     bottomAppBarTheme: const BottomAppBarTheme(
       color: ReplyColors.darkBottomAppBarBackground,
@@ -224,13 +221,7 @@ ThemeData _buildReplyDarkTheme(BuildContext context) {
       primaryContainer: ReplyColors.blue300,
       secondary: ReplyColors.orange300,
       secondaryContainer: ReplyColors.orange300,
-      surface: ReplyColors.black800,
       error: ReplyColors.red200,
-      onPrimary: ReplyColors.black900,
-      onSecondary: ReplyColors.black900,
-      onBackground: ReplyColors.white50,
-      onSurface: ReplyColors.white50,
-      onError: ReplyColors.black900,
       background: ReplyColors.black900Alpha087,
     ),
     textTheme: _buildReplyDarkTextTheme(base.textTheme),

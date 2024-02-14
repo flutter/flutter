@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class BottomSheetDemo extends StatelessWidget {
   const BottomSheetDemo({
@@ -16,7 +16,7 @@ class BottomSheetDemo extends StatelessWidget {
   final BottomSheetDemoType type;
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (type) {
       case BottomSheetDemoType.persistent:
         return localizations.demoBottomSheetPersistentTitle;
@@ -43,9 +43,9 @@ class BottomSheetDemo extends StatelessWidget {
       // Adding [ValueKey] to make sure that the widget gets rebuilt when
       // changing type.
       key: ValueKey(type),
-      onGenerateRoute: (settings) {
+      onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
-          builder: (context) => Scaffold(
+          builder: (BuildContext context) => Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
               title: Text(_title(context)),
@@ -72,11 +72,11 @@ class BottomSheetDemo extends StatelessWidget {
 class _BottomSheetContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return SizedBox(
       height: 300,
       child: Column(
-        children: [
+        children: <Widget>[
           SizedBox(
             height: 70,
             child: Center(
@@ -90,7 +90,7 @@ class _BottomSheetContent extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               itemCount: 21,
-              itemBuilder: (context, index) {
+              itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   title: Text(localizations.demoBottomSheetItem(index)),
                 );
@@ -111,7 +111,7 @@ class _ModalBottomSheetDemo extends StatelessWidget {
   void _showModalBottomSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return _BottomSheetContent();
       },
     );
@@ -159,7 +159,7 @@ class _PersistentBottomSheetDemoState
 
     Scaffold.of(context)
         .showBottomSheet(
-          (context) {
+          (BuildContext context) {
             return _BottomSheetContent();
           },
           elevation: 25,

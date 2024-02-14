@@ -8,18 +8,6 @@ import 'package:flutter/material.dart';
 ///
 /// Values are loosely based on Material Design specs, which are minimal.
 class Animations {
-  final AnimationController openController;
-  final AnimationController tapController;
-  final AnimationController rippleController;
-  final AnimationController dismissController;
-
-  static const backgroundMaxOpacity = 0.96;
-  static const backgroundTapRadius = 20.0;
-  static const rippleMaxOpacity = 0.75;
-  static const tapTargetToContentDistance = 20.0;
-  static const tapTargetMaxRadius = 44.0;
-  static const tapTargetMinRadius = 20.0;
-  static const tapTargetRippleRadius = 64.0;
 
   Animations(
     this.openController,
@@ -27,6 +15,18 @@ class Animations {
     this.rippleController,
     this.dismissController,
   );
+  final AnimationController openController;
+  final AnimationController tapController;
+  final AnimationController rippleController;
+  final AnimationController dismissController;
+
+  static const double backgroundMaxOpacity = 0.96;
+  static const double backgroundTapRadius = 20.0;
+  static const double rippleMaxOpacity = 0.75;
+  static const double tapTargetToContentDistance = 20.0;
+  static const double tapTargetMaxRadius = 44.0;
+  static const double tapTargetMinRadius = 20.0;
+  static const double tapTargetRippleRadius = 64.0;
 
   Animation<double> backgroundOpacity(FeatureDiscoveryStatus status) {
     switch (status) {

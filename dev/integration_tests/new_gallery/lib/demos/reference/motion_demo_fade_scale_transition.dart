@@ -28,7 +28,7 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
       duration: const Duration(milliseconds: 150),
       reverseDuration: const Duration(milliseconds: 75),
       vsync: this,
-    )..addStatusListener((status) {
+    )..addStatusListener((AnimationStatus status) {
         setState(() {
           // setState needs to be called to trigger a rebuild because
           // the 'HIDE FAB'/'SHOW FAB' button needs to be updated based
@@ -63,13 +63,13 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Column(
-          children: [
+          children: <Widget>[
             Text(localizations.demoFadeScaleTitle),
             Text(
               '(${localizations.demoFadeScaleDemoInstructions})',
@@ -83,7 +83,7 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
       ),
       floatingActionButton: AnimatedBuilder(
         animation: _controller,
-        builder: (context, child) {
+        builder: (BuildContext context, Widget? child) {
           return FadeScaleTransition(
             animation: _controller,
             child: child,
@@ -99,18 +99,18 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
       ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           const Divider(height: 0),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: <Widget>[
                 ElevatedButton(
                   onPressed: () {
                     showModal<void>(
                         context: context,
-                        builder: (context) => _showExampleAlertDialog());
+                        builder: (BuildContext context) => _showExampleAlertDialog());
                   },
                   child: Text(localizations.demoFadeScaleShowAlertDialogButton),
                 ),
@@ -141,11 +141,11 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
 class _ExampleAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return AlertDialog(
       content: Text(localizations.demoFadeScaleAlertDialogHeader),
-      actions: [
+      actions: <Widget>[
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();

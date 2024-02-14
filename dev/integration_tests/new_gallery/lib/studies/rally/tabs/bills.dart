@@ -5,10 +5,10 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/rally/charts/pie_chart.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/finance.dart';
-import 'package:gallery/studies/rally/tabs/sidebar.dart';
+import '../charts/pie_chart.dart';
+import '../data.dart';
+import '../finance.dart';
+import 'sidebar.dart';
 
 /// A page that shows a summary of bills.
 class BillsView extends StatefulWidget {
@@ -22,10 +22,10 @@ class _BillsViewState extends State<BillsView>
     with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final items = DummyDataService.getBillDataList(context);
-    final dueTotal = sumBillDataPrimaryAmount(items);
-    final paidTotal = sumBillDataPaidAmount(items);
-    final detailItems = DummyDataService.getBillDetailList(
+    final List<BillData> items = DummyDataService.getBillDataList(context);
+    final double dueTotal = sumBillDataPrimaryAmount(items);
+    final double paidTotal = sumBillDataPaidAmount(items);
+    final List<UserDetailData> detailItems = DummyDataService.getBillDetailList(
       context,
       dueTotal: dueTotal,
       paidTotal: paidTotal,
@@ -40,8 +40,8 @@ class _BillsViewState extends State<BillsView>
         wholeAmount: dueTotal,
         financialEntityCards: buildBillDataListViews(items, context),
       ),
-      sidebarItems: [
-        for (UserDetailData item in detailItems)
+      sidebarItems: <Widget>[
+        for (final UserDetailData item in detailItems)
           SidebarItem(title: item.title, value: item.value)
       ],
     );

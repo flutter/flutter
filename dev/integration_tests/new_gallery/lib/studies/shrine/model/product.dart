@@ -17,24 +17,24 @@ class Category {
 }
 
 Category categoryAll = Category(
-  name: (context) => GalleryLocalizations.of(context)!.shrineCategoryNameAll,
+  name: (BuildContext context) => GalleryLocalizations.of(context)!.shrineCategoryNameAll,
 );
 
 Category categoryAccessories = Category(
-  name: (context) =>
+  name: (BuildContext context) =>
       GalleryLocalizations.of(context)!.shrineCategoryNameAccessories,
 );
 
 Category categoryClothing = Category(
-  name: (context) =>
+  name: (BuildContext context) =>
       GalleryLocalizations.of(context)!.shrineCategoryNameClothing,
 );
 
 Category categoryHome = Category(
-  name: (context) => GalleryLocalizations.of(context)!.shrineCategoryNameHome,
+  name: (BuildContext context) => GalleryLocalizations.of(context)!.shrineCategoryNameHome,
 );
 
-List<Category> categories = [
+List<Category> categories = <Category>[
   categoryAll,
   categoryAccessories,
   categoryClothing,

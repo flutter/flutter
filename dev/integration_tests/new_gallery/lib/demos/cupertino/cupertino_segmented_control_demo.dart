@@ -36,9 +36,9 @@ class _CupertinoSegmentedControlDemoState
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    const segmentedControlMaxWidth = 500.0;
-    final children = <int, Widget>{
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    const double segmentedControlMaxWidth = 500.0;
+    final Map<int, Widget> children = <int, Widget>{
       0: Text(localizations.colorsIndigo),
       1: Text(localizations.colorsTeal),
       2: Text(localizations.colorsCyan),
@@ -58,7 +58,7 @@ class _CupertinoSegmentedControlDemoState
             .copyWith(fontSize: 13),
         child: SafeArea(
           child: ListView(
-            children: [
+            children: <Widget>[
               const SizedBox(height: 16),
               SizedBox(
                 width: segmentedControlMaxWidth,

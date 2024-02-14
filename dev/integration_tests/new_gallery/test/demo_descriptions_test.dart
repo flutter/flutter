@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gallery/data/demos.dart';
 
 bool _isUnique(List<String> list) {
-  final covered = <String>{};
-  for (final element in list) {
+  final Set<String> covered = <String>{};
+  for (final String element in list) {
     if (covered.contains(element)) {
       return false;
     } else {
@@ -19,19 +19,19 @@ bool _isUnique(List<String> list) {
   return true;
 }
 
-const _stringListEquality = ListEquality<String>();
+const ListEquality<String> _stringListEquality = ListEquality<String>();
 
 void main() {
   test('_isUnique works correctly', () {
-    expect(_isUnique(['a', 'b', 'c']), true);
-    expect(_isUnique(['a', 'c', 'a', 'b']), false);
-    expect(_isUnique(['a']), true);
-    expect(_isUnique([]), true);
+    expect(_isUnique(<String>['a', 'b', 'c']), true);
+    expect(_isUnique(<String>['a', 'c', 'a', 'b']), false);
+    expect(_isUnique(<String>['a']), true);
+    expect(_isUnique(<String>[]), true);
   });
 
   test('Demo descriptions are unique and correct', () {
-    final allDemos = Demos.all(GalleryLocalizationsEn());
-    final allDemoDescriptions = allDemos.map((d) => d.describe).toList();
+    final List<GalleryDemo> allDemos = Demos.all(GalleryLocalizationsEn());
+    final List<String> allDemoDescriptions = allDemos.map((GalleryDemo d) => d.describe).toList();
 
     expect(_isUnique(allDemoDescriptions), true);
     expect(
@@ -44,9 +44,9 @@ void main() {
   });
 
   test('Special demo descriptions are correct', () {
-    final allDemos = Demos.allDescriptions();
+    final List<String> allDemos = Demos.allDescriptions();
 
-    final specialDemos = <String>[
+    final List<String> specialDemos = <String>[
       'shrine@study',
       'rally@study',
       'crane@study',
@@ -64,7 +64,7 @@ void main() {
       'colors@other',
     ];
 
-    for (final specialDemo in specialDemos) {
+    for (final String specialDemo in specialDemos) {
       expect(allDemos.contains(specialDemo), true);
     }
   });

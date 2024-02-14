@@ -8,15 +8,15 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/rally/charts/line_chart.dart';
-import 'package:gallery/studies/rally/charts/pie_chart.dart';
-import 'package:gallery/studies/rally/charts/vertical_fraction_bar.dart';
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/formatters.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/text_scale.dart';
+import 'charts/line_chart.dart';
+import 'charts/pie_chart.dart';
+import 'charts/vertical_fraction_bar.dart';
+import 'colors.dart';
+import 'data.dart';
+import 'formatters.dart';
 
 class FinancialEntityView extends StatelessWidget {
   const FinancialEntityView({
@@ -37,10 +37,10 @@ class FinancialEntityView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxWidth = pieChartMaxSize + (cappedTextScale(context) - 1.0) * 100.0;
-    return LayoutBuilder(builder: (context, constraints) {
+    final double maxWidth = pieChartMaxSize + (cappedTextScale(context) - 1.0) * 100.0;
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Column(
-        children: [
+        children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints(
               // We decrease the max height to ensure the [RallyPieChart] does
@@ -100,7 +100,7 @@ class FinancialEntityCategoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Semantics.fromProperties(
       properties: SemanticsProperties(
         button: true,
@@ -111,23 +111,22 @@ class FinancialEntityCategoryView extends StatelessWidget {
       // TODO(x): State restoration of FinancialEntityCategoryDetailsPage on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
       child: OpenContainer(
         transitionDuration: const Duration(milliseconds: 350),
-        transitionType: ContainerTransitionType.fade,
-        openBuilder: (context, openContainer) =>
+        openBuilder: (BuildContext context, openContainer) =>
             FinancialEntityCategoryDetailsPage(),
         openColor: RallyColors.primaryBackground,
         closedColor: RallyColors.primaryBackground,
         closedElevation: 0,
-        closedBuilder: (context, openContainer) {
+        closedBuilder: (BuildContext context, openContainer) {
           return TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.black),
             onPressed: openContainer,
             child: Column(
-              children: [
+              children: <Widget>[
                 Container(
                   padding:
                       const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       Container(
                         alignment: Alignment.center,
                         height: 32 + 60 * (cappedTextScale(context) - 1),
@@ -141,11 +140,11 @@ class FinancialEntityCategoryView extends StatelessWidget {
                         child: Wrap(
                           alignment: WrapAlignment.spaceBetween,
                           crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
+                          children: <Widget>[
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                              children: <Widget>[
                                 Text(
                                   title,
                                   style: textTheme.bodyMedium!
@@ -215,8 +214,8 @@ FinancialEntityCategoryView buildFinancialEntityFromAccountData(
   int accountDataIndex,
   BuildContext context,
 ) {
-  final amount = usdWithSignFormat(context).format(model.primaryAmount);
-  final shortAccountNumber = model.accountNumber.substring(6);
+  final String amount = usdWithSignFormat(context).format(model.primaryAmount);
+  final String shortAccountNumber = model.accountNumber.substring(6);
   return FinancialEntityCategoryView(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
@@ -237,7 +236,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBillData(
   int billDataIndex,
   BuildContext context,
 ) {
-  final amount = usdWithSignFormat(context).format(model.primaryAmount);
+  final String amount = usdWithSignFormat(context).format(model.primaryAmount);
   return FinancialEntityCategoryView(
     suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
@@ -258,9 +257,9 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   int budgetDataIndex,
   BuildContext context,
 ) {
-  final amountUsed = usdWithSignFormat(context).format(model.amountUsed);
-  final primaryAmount = usdWithSignFormat(context).format(model.primaryAmount);
-  final amount =
+  final String amountUsed = usdWithSignFormat(context).format(model.amountUsed);
+  final String primaryAmount = usdWithSignFormat(context).format(model.primaryAmount);
+  final String amount =
       usdWithSignFormat(context).format(model.primaryAmount - model.amountUsed);
 
   return FinancialEntityCategoryView(
@@ -291,7 +290,7 @@ List<FinancialEntityCategoryView> buildAccountDataListViews(
 ) {
   return List<FinancialEntityCategoryView>.generate(
     items.length,
-    (i) => buildFinancialEntityFromAccountData(items[i], i, context),
+    (int i) => buildFinancialEntityFromAccountData(items[i], i, context),
   );
 }
 
@@ -301,7 +300,7 @@ List<FinancialEntityCategoryView> buildBillDataListViews(
 ) {
   return List<FinancialEntityCategoryView>.generate(
     items.length,
-    (i) => buildFinancialEntityFromBillData(items[i], i, context),
+    (int i) => buildFinancialEntityFromBillData(items[i], i, context),
   );
 }
 
@@ -323,7 +322,7 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     return ApplyTextOptions(
       child: Scaffold(
@@ -337,7 +336,7 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
           ),
         ),
         body: Column(
-          children: [
+          children: <Widget>[
             SizedBox(
               height: 200,
               width: double.infinity,
@@ -348,8 +347,8 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
                 padding: isDesktop ? const EdgeInsets.all(40) : EdgeInsets.zero,
                 child: ListView(
                   shrinkWrap: true,
-                  children: [
-                    for (DetailedEventData detailedEventData in items)
+                  children: <Widget>[
+                    for (final DetailedEventData detailedEventData in items)
                       _DetailedEventCard(
                         title: detailedEventData.title,
                         date: detailedEventData.date,
@@ -379,7 +378,7 @@ class _DetailedEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
     return TextButton(
       style: TextButton.styleFrom(
         foregroundColor: Colors.black,
@@ -387,20 +386,18 @@ class _DetailedEventCard extends StatelessWidget {
       ),
       onPressed: () {},
       child: Column(
-        children: [
+        children: <Widget>[
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             width: double.infinity,
             child: isDesktop
                 ? Row(
-                    children: [
+                    children: <Widget>[
                       Expanded(
-                        flex: 1,
                         child: _EventTitle(title: title),
                       ),
                       _EventDate(date: date),
                       Expanded(
-                        flex: 1,
                         child: Align(
                           alignment: AlignmentDirectional.centerEnd,
                           child: _EventAmount(amount: amount),
@@ -410,11 +407,11 @@ class _DetailedEventCard extends StatelessWidget {
                   )
                 : Wrap(
                     alignment: WrapAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        children: <Widget>[
                           _EventTitle(title: title),
                           _EventDate(date: date),
                         ],
@@ -442,7 +439,7 @@ class _EventAmount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       usdWithSignFormat(context).format(amount),
       style: textTheme.bodyLarge!.copyWith(
@@ -460,7 +457,7 @@ class _EventDate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       shortDateFormat(context).format(date),
       semanticsLabel: longDateFormat(context).format(date),
@@ -476,7 +473,7 @@ class _EventTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Text(
       title,
       style: textTheme.bodyMedium!.copyWith(fontSize: 16),

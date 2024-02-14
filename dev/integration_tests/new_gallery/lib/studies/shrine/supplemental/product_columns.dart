@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/studies/shrine/model/product.dart';
-import 'package:gallery/studies/shrine/supplemental/product_card.dart';
+import '../model/product.dart';
+import 'product_card.dart';
 
 class TwoProductCardColumn extends StatelessWidget {
   const TwoProductCardColumn({
@@ -24,10 +24,10 @@ class TwoProductCardColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return ListView(
         physics: const ClampingScrollPhysics(),
-        children: [
+        children: <Widget>[
           Padding(
             padding: const EdgeInsetsDirectional.only(start: horizontalPadding),
             child: top != null
@@ -70,7 +70,7 @@ class OneProductCardColumn extends StatelessWidget {
     return ListView(
       physics: const ClampingScrollPhysics(),
       reverse: reverse,
-      children: [
+      children: <Widget>[
         const SizedBox(
           height: 40,
         ),

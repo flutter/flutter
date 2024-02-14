@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/reply/mail_card_preview.dart';
-import 'package:gallery/studies/reply/model/email_model.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
 import 'package:provider/provider.dart';
+
+import '../../layout/adaptive.dart';
+import 'mail_card_preview.dart';
+import 'model/email_model.dart';
+import 'model/email_store.dart';
 
 class MailboxBody extends StatelessWidget {
   const MailboxBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final isTablet = isDisplaySmallDesktop(context);
-    final startPadding = isTablet
+    final bool isDesktop = isDisplayDesktop(context);
+    final bool isTablet = isDisplaySmallDesktop(context);
+    final double startPadding = isTablet
         ? 60.0
         : isDesktop
             ? 120.0
             : 4.0;
-    final endPadding = isTablet
+    final double endPadding = isTablet
         ? 30.0
         : isDesktop
             ? 60.0
             : 4.0;
 
     return Consumer<EmailStore>(
-      builder: (context, model, child) {
-        final destination = model.selectedMailboxPage;
-        final destinationString = destination
+      builder: (BuildContext context, EmailStore model, Widget? child) {
+        final MailboxPageType destination = model.selectedMailboxPage;
+        final String destinationString = destination
             .toString()
             .substring(destination.toString().indexOf('.') + 1);
         late List<Email> emails;
@@ -68,7 +69,7 @@ class MailboxBody extends StatelessWidget {
           bottom: false,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Expanded(
                 child: emails.isEmpty
                     ? Center(child: Text('Empty in $destinationString'))
@@ -81,17 +82,17 @@ class MailboxBody extends StatelessWidget {
                           bottom: kToolbarHeight,
                         ),
                         primary: false,
-                        separatorBuilder: (context, index) =>
+                        separatorBuilder: (BuildContext context, int index) =>
                             const SizedBox(height: 4),
-                        itemBuilder: (context, index) {
-                          var email = emails[index];
+                        itemBuilder: (BuildContext context, int index) {
+                          final Email email = emails[index];
                           return MailPreviewCard(
                             id: email.id,
                             email: email,
                             isStarred: model.isEmailStarred(email.id),
                             onDelete: () => model.deleteEmail(email.id),
                             onStar: () {
-                              int emailId = email.id;
+                              final int emailId = email.id;
                               if (model.isEmailStarred(emailId)) {
                                 model.unstarEmail(emailId);
                               } else {
@@ -104,11 +105,11 @@ class MailboxBody extends StatelessWidget {
                         },
                       ),
               ),
-              if (isDesktop) ...[
+              if (isDesktop) ...<Widget>[
                 Padding(
                   padding: const EdgeInsetsDirectional.only(top: 14),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       IconButton(
                         key: const ValueKey('ReplySearch'),
                         icon: const Icon(Icons.search),

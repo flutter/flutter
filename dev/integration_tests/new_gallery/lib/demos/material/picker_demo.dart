@@ -4,8 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
 import 'package:intl/intl.dart';
+
+import 'material_demo_types.dart';
 
 // BEGIN pickerDemo
 
@@ -62,11 +63,11 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   ) {
     return DialogRoute<DateTime>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return DatePickerDialog(
           restorationId: 'date_picker_dialog',
-          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments as int),
-          firstDate: DateTime(2015, 1),
+          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
+          firstDate: DateTime(2015),
           lastDate: DateTime(2100),
         );
       },
@@ -77,15 +78,15 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     BuildContext context,
     Object? arguments,
   ) {
-    final args = arguments as List<Object>;
-    final initialTime = TimeOfDay(
+    final List<Object> args = arguments! as List<Object>;
+    final TimeOfDay initialTime = TimeOfDay(
       hour: args[0] as int,
       minute: args[1] as int,
     );
 
     return DialogRoute<TimeOfDay>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return TimePickerDialog(
           restorationId: 'time_picker_dialog',
           initialTime: initialTime,
@@ -100,7 +101,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   ) {
     return DialogRoute<DateTimeRange>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return DateRangePickerDialog(
           restorationId: 'date_rage_picker_dialog',
           firstDate: DateTime(DateTime.now().year - 5),
@@ -115,7 +116,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     super.initState();
     _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
       onComplete: _selectDate,
-      onPresent: (navigator, arguments) {
+      onPresent: (NavigatorState navigator, Object? arguments) {
         return navigator.restorablePush(
           _datePickerRoute,
           arguments: _fromDate.value.millisecondsSinceEpoch,
@@ -125,15 +126,15 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     _restorableDateRangePickerRouteFuture =
         RestorableRouteFuture<DateTimeRange?>(
       onComplete: _selectDateRange,
-      onPresent: (navigator, arguments) =>
+      onPresent: (NavigatorState navigator, Object? arguments) =>
           navigator.restorablePush(_dateRangePickerRoute),
     );
 
     _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
       onComplete: _selectTime,
-      onPresent: (navigator, arguments) => navigator.restorablePush(
+      onPresent: (NavigatorState navigator, Object? arguments) => navigator.restorablePush(
         _timePickerRoute,
-        arguments: [_fromTime.value.hour, _fromTime.value.minute],
+        arguments: <int>[_fromTime.value.hour, _fromTime.value.minute],
       ),
     );
   }
@@ -162,7 +163,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _title {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case PickerDemoType.date:
         return localizations.demoDatePickerTitle;
@@ -189,9 +190,9 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      onGenerateRoute: (settings) {
+      onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
-          builder: (context) => Scaffold(
+          builder: (BuildContext context) => Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
               title: Text(_title),
@@ -199,7 +200,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: <Widget>[
                   Text(_labelText),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -207,13 +208,10 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
                       switch (widget.type) {
                         case PickerDemoType.date:
                           _restorableDatePickerRouteFuture.present();
-                          break;
                         case PickerDemoType.time:
                           _restorableTimePickerRouteFuture.present();
-                          break;
                         case PickerDemoType.range:
                           _restorableDateRangePickerRouteFuture.present();
-                          break;
                       }
                     },
                     child: Text(

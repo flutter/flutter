@@ -5,14 +5,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/fortnightly/routes.dart' as routes;
-import 'package:gallery/studies/fortnightly/shared.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/image_placeholder.dart';
+import '../../layout/text_scale.dart';
+import 'routes.dart' as routes;
+import 'shared.dart';
 
-const _fortnightlyTitle = 'Fortnightly';
+const String _fortnightlyTitle = 'Fortnightly';
 
 class FortnightlyApp extends StatelessWidget {
   const FortnightlyApp({super.key});
@@ -21,7 +21,7 @@ class FortnightlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final home = isDisplayDesktop(context)
+    final StatelessWidget home = isDisplayDesktop(context)
         ? const _FortnightlyHomeDesktop()
         : const _FortnightlyHomeMobile();
     return MaterialApp(
@@ -32,8 +32,8 @@ class FortnightlyApp extends StatelessWidget {
         platform: GalleryOptions.of(context).platform,
       ),
       home: ApplyTextOptions(child: home),
-      routes: {
-        FortnightlyApp.defaultRoute: (context) => ApplyTextOptions(child: home),
+      routes: <String, WidgetBuilder>{
+        FortnightlyApp.defaultRoute: (BuildContext context) => ApplyTextOptions(child: home),
       },
       initialRoute: FortnightlyApp.defaultRoute,
       // L10n settings.
@@ -68,7 +68,7 @@ class _FortnightlyHomeMobile extends StatelessWidget {
             excludeFromSemantics: true,
           ),
         ),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: GalleryLocalizations.of(context)!.shrineTooltipSearch,
@@ -79,9 +79,9 @@ class _FortnightlyHomeMobile extends StatelessWidget {
       body: SafeArea(
         child: ListView(
           restorationId: 'list_view',
-          children: [
+          children: <Widget>[
             const HashtagBar(),
-            for (final item in buildArticlePreviewItems(context))
+            for (final Widget item in buildArticlePreviewItems(context))
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: item,
@@ -98,19 +98,19 @@ class _FortnightlyHomeDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const menuWidth = 200.0;
-    const spacer = SizedBox(width: 20);
-    final headerHeight = 40 * reducedTextScale(context);
+    const double menuWidth = 200.0;
+    const SizedBox spacer = SizedBox(width: 20);
+    final double headerHeight = 40 * reducedTextScale(context);
 
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: [
+          children: <Widget>[
             SizedBox(
               height: headerHeight,
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     width: menuWidth,
                     alignment: AlignmentDirectional.centerStart,
@@ -147,7 +147,7 @@ class _FortnightlyHomeDesktop extends StatelessWidget {
             ),
             Flexible(
               child: Row(
-                children: [
+                children: <Widget>[
                   const SizedBox(
                     width: menuWidth,
                     child: NavigationMenu(),
@@ -161,10 +161,9 @@ class _FortnightlyHomeDesktop extends StatelessWidget {
                   ),
                   spacer,
                   Flexible(
-                    flex: 1,
                     fit: FlexFit.tight,
                     child: ListView(
-                      children: [
+                      children: <Widget>[
                         ...buildStockItems(context),
                         const SizedBox(height: 32),
                         ...buildVideoPreviewItems(context),

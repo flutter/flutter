@@ -5,7 +5,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 // BEGIN bottomNavigationDemo
 
@@ -42,7 +42,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   }
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case BottomNavigationDemoType.withLabels:
         return localizations.demoBottomNavigationPersistentLabels;
@@ -53,11 +53,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final localizations = GalleryLocalizations.of(context)!;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    var bottomNavigationBarItems = <BottomNavigationBarItem>[
+    List<BottomNavigationBarItem> bottomNavigationBarItems = <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: const Icon(Icons.add_comment),
         label: localizations.bottomNavigationCommentsTab,
@@ -85,7 +85,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           0, bottomNavigationBarItems.length - 2);
       _currentIndex.value = _currentIndex.value
           .clamp(0, bottomNavigationBarItems.length - 1)
-          .toInt();
+          ;
     }
 
     return Scaffold(
@@ -95,7 +95,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       ),
       body: Center(
         child: PageTransitionSwitcher(
-          transitionBuilder: (child, animation, secondaryAnimation) {
+          transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
             return FadeThroughTransition(
               animation: animation,
               secondaryAnimation: secondaryAnimation,
@@ -117,7 +117,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         type: BottomNavigationBarType.fixed,
         selectedFontSize: textTheme.bodySmall!.fontSize!,
         unselectedFontSize: textTheme.bodySmall!.fontSize!,
-        onTap: (index) {
+        onTap: (int index) {
           setState(() {
             _currentIndex.value = index;
           });
@@ -141,7 +141,7 @@ class _NavigationDestinationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
+      children: <Widget>[
         ExcludeSemantics(
           child: Center(
             child: Padding(

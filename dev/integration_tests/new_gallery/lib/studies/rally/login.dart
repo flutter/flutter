@@ -5,12 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/rally/app.dart';
-import 'package:gallery/studies/rally/colors.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/image_placeholder.dart';
+import '../../layout/text_scale.dart';
+import 'app.dart';
+import 'colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -71,12 +71,12 @@ class _MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
     List<Widget> listViewChildren;
 
     if (isDesktop) {
-      final desktopMaxWidth = 400.0 + 100.0 * (cappedTextScale(context) - 1);
-      listViewChildren = [
+      final double desktopMaxWidth = 400.0 + 100.0 * (cappedTextScale(context) - 1);
+      listViewChildren = <Widget>[
         _UsernameInput(
           maxWidth: desktopMaxWidth,
           usernameController: usernameController,
@@ -94,7 +94,7 @@ class _MainView extends StatelessWidget {
         ),
       ];
     } else {
-      listViewChildren = [
+      listViewChildren = <Widget>[
         const _SmallLogo(),
         _UsernameInput(
           usernameController: usernameController,
@@ -112,7 +112,7 @@ class _MainView extends StatelessWidget {
     }
 
     return Column(
-      children: [
+      children: <Widget>[
         if (isDesktop) const _TopBar(),
         Expanded(
           child: Align(
@@ -135,25 +135,25 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const spacing = SizedBox(width: 30);
-    final localizations = GalleryLocalizations.of(context)!;
+    const SizedBox spacing = SizedBox(width: 30);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               ExcludeSemantics(
                 child: SizedBox(
                   height: 80,
                   child: FadeInImagePlaceholder(
                     image:
                         const AssetImage('logo.png', package: 'rally_assets'),
-                    placeholder: LayoutBuilder(builder: (context, constraints) {
+                    placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                       return SizedBox(
                         width: constraints.maxHeight,
                         height: constraints.maxHeight,
@@ -174,7 +174,7 @@ class _TopBar extends StatelessWidget {
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               Text(
                 localizations.rallyLoginNoAccount,
                 style: Theme.of(context).textTheme.titleMedium,
@@ -223,11 +223,10 @@ class _UsernameInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: Container(
         constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         child: TextField(
-          autofillHints: const [AutofillHints.username],
+          autofillHints: const <String>[AutofillHints.username],
           textInputAction: TextInputAction.next,
           controller: usernameController,
           decoration: InputDecoration(
@@ -251,7 +250,6 @@ class _PasswordInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: Container(
         constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         child: TextField(
@@ -291,7 +289,7 @@ class _ThumbButtonState extends State<_ThumbButton> {
         child: GestureDetector(
           onTap: widget.onTap,
           child: Focus(
-            onKeyEvent: (node, event) {
+            onKeyEvent: (FocusNode node, KeyEvent event) {
               if (event is KeyDownEvent || event is KeyRepeatEvent) {
                 if (event.logicalKey == LogicalKeyboardKey.enter ||
                     event.logicalKey == LogicalKeyboardKey.space) {
@@ -301,7 +299,7 @@ class _ThumbButtonState extends State<_ThumbButton> {
               }
               return KeyEventResult.ignored;
             },
-            onFocusChange: (hasFocus) {
+            onFocusChange: (bool hasFocus) {
               if (hasFocus) {
                 setState(() {
                   borderDecoration = BoxDecoration(
@@ -346,12 +344,11 @@ class _LoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: Container(
         constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         padding: const EdgeInsets.symmetric(vertical: 30),
         child: Row(
-          children: [
+          children: <Widget>[
             const Icon(Icons.check_circle_outline,
                 color: RallyColors.buttonColor),
             const SizedBox(width: 12),
@@ -411,7 +408,7 @@ class _FilledButton extends StatelessWidget {
       ),
       onPressed: onTap,
       child: Row(
-        children: [
+        children: <Widget>[
           const Icon(Icons.lock),
           const SizedBox(width: 6),
           Text(text),

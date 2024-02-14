@@ -1,16 +1,17 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/reply/colors.dart';
-import 'package:gallery/studies/reply/mail_view_page.dart';
-import 'package:gallery/studies/reply/model/email_model.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
-import 'package:gallery/studies/reply/profile_avatar.dart';
 import 'package:provider/provider.dart';
 
-const _assetsPackage = 'flutter_gallery_assets';
-const _iconAssetLocation = 'reply/icons';
+import '../../layout/adaptive.dart';
+import 'colors.dart';
+import 'mail_view_page.dart';
+import 'model/email_model.dart';
+import 'model/email_store.dart';
+import 'profile_avatar.dart';
+
+const String _assetsPackage = 'flutter_gallery_assets';
+const String _iconAssetLocation = 'reply/icons';
 
 class MailPreviewCard extends StatelessWidget {
   const MailPreviewCard({
@@ -32,23 +33,23 @@ class MailPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     // TODO(x): State restoration of mail view page is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
     return OpenContainer(
-      openBuilder: (context, closedContainer) {
+      openBuilder: (BuildContext context, closedContainer) {
         return MailViewPage(id: id, email: email);
       },
       openColor: theme.cardColor,
       closedShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(0)),
+        
       ),
       closedElevation: 0,
       closedColor: theme.cardColor,
-      closedBuilder: (context, openContainer) {
-        final isDesktop = isDisplayDesktop(context);
-        final colorScheme = theme.colorScheme;
-        final mailPreview = _MailPreview(
+      closedBuilder: (BuildContext context, openContainer) {
+        final bool isDesktop = isDisplayDesktop(context);
+        final ColorScheme colorScheme = theme.colorScheme;
+        final _MailPreview mailPreview = _MailPreview(
           id: id,
           email: email,
           onTap: openContainer,
@@ -61,20 +62,18 @@ class MailPreviewCard extends StatelessWidget {
         } else {
           return Dismissible(
             key: ObjectKey(email),
-            dismissThresholds: const {
+            dismissThresholds: const <DismissDirection, double>{
               DismissDirection.startToEnd: 0.8,
               DismissDirection.endToStart: 0.4,
             },
-            onDismissed: (direction) {
+            onDismissed: (DismissDirection direction) {
               switch (direction) {
                 case DismissDirection.endToStart:
                   if (onStarredMailbox) {
                     onStar();
                   }
-                  break;
                 case DismissDirection.startToEnd:
                   onDelete();
-                  break;
                 default:
               }
             },
@@ -85,7 +84,7 @@ class MailPreviewCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               padding: const EdgeInsetsDirectional.only(start: 20),
             ),
-            confirmDismiss: (direction) async {
+            confirmDismiss: (DismissDirection direction) async {
               if (direction == DismissDirection.endToStart) {
                 if (onStarredMailbox) {
                   return true;
@@ -170,8 +169,8 @@ class _MailPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    var emailStore = Provider.of<EmailStore>(
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final EmailStore emailStore = Provider.of<EmailStore>(
       context,
       listen: false,
     );
@@ -185,7 +184,7 @@ class _MailPreview extends StatelessWidget {
         onTap();
       },
       child: LayoutBuilder(
-        builder: (context, constraints) {
+        builder: (BuildContext context, BoxConstraints constraints) {
           return ConstrainedBox(
             constraints: BoxConstraints(maxHeight: constraints.maxHeight),
             child: Padding(
@@ -193,16 +192,15 @@ class _MailPreview extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: <Widget>[
                   Row(
-                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
+                          children: <Widget>[
                             Text(
                               '${email.sender} - ${email.time}',
                               style: textTheme.bodySmall,
@@ -232,11 +230,10 @@ class _MailPreview extends StatelessWidget {
                       style: textTheme.bodyMedium,
                     ),
                   ),
-                  if (email.containsPictures) ...[
+                  if (email.containsPictures) ...<Widget>[
                     const Flexible(
-                      fit: FlexFit.loose,
                       child: Column(
-                        children: [
+                        children: <Widget>[
                           SizedBox(height: 20),
                           _PicturePreview(),
                         ],
@@ -273,7 +270,7 @@ class _PicturePreview extends StatelessWidget {
       child: ListView.builder(
         itemCount: 4,
         scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
+        itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: const EdgeInsetsDirectional.only(end: 4),
             child: Image.asset(
@@ -304,15 +301,15 @@ class _MailPreviewActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color = isDark ? ReplyColors.white50 : ReplyColors.blue600;
-    final isDesktop = isDisplayDesktop(context);
-    final starredIconColor =
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color color = isDark ? ReplyColors.white50 : ReplyColors.blue600;
+    final bool isDesktop = isDisplayDesktop(context);
+    final Color starredIconColor =
         isStarred ? Theme.of(context).colorScheme.secondary : color;
 
     return Row(
-      children: [
-        if (isDesktop) ...[
+      children: <Widget>[
+        if (isDesktop) ...<Widget>[
           IconButton(
             icon: ImageIcon(
               const AssetImage(

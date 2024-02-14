@@ -36,9 +36,9 @@ class TravelDestination {
 }
 
 List<TravelDestination> destinations(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-  return [
+  return <TravelDestination>[
     TravelDestination(
       assetName: 'places/india_thanjavur_market.png',
       assetPackage: _kGalleryAssetsPackage,
@@ -73,7 +73,7 @@ class TravelDestinationItem extends StatelessWidget {
       {super.key, required this.destination, this.shape});
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const height = 360.0;
+  static const double height = 360.0;
   final TravelDestination destination;
   final ShapeBorder? shape;
 
@@ -85,7 +85,7 @@ class TravelDestinationItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
-          children: [
+          children: <Widget>[
             SectionTitle(
                 title: GalleryLocalizations.of(context)!
                     .settingsTextScalingNormal),
@@ -116,7 +116,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
   });
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const height = 298.0;
+  static const double height = 298.0;
   final TravelDestination destination;
   final ShapeBorder? shape;
 
@@ -128,7 +128,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
-          children: [
+          children: <Widget>[
             SectionTitle(
                 title: GalleryLocalizations.of(context)!.cardsDemoTappable),
             SizedBox(
@@ -173,11 +173,11 @@ class SelectableTravelDestinationItem extends StatelessWidget {
   final VoidCallback onSelected;
 
   // This height will allow for all the Card's content to fit comfortably within the card.
-  static const height = 298.0;
+  static const double height = 298.0;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String selectedStatus = isSelected
         ? GalleryLocalizations.of(context)!.selected
         : GalleryLocalizations.of(context)!.notSelected;
@@ -188,7 +188,7 @@ class SelectableTravelDestinationItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
-          children: [
+          children: <Widget>[
             SectionTitle(title: GalleryLocalizations.of(context)!.selectable),
             SizedBox(
               height: height,
@@ -205,7 +205,7 @@ class SelectableTravelDestinationItem extends StatelessWidget {
                   // Generally, material cards do not have a highlight overlay.
                   highlightColor: Colors.transparent,
                   child: Stack(
-                    children: [
+                    children: <Widget>[
                       Container(
                         color: isSelected
                             // Generally, material cards use primary with 8% opacity for the selected state.
@@ -273,20 +273,20 @@ class TravelDestinationContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final titleStyle = theme.textTheme.headlineSmall!.copyWith(
+    final ThemeData theme = Theme.of(context);
+    final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(
       color: Colors.white,
     );
-    final descriptionStyle = theme.textTheme.titleMedium!;
-    final localizations = GalleryLocalizations.of(context)!;
+    final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         SizedBox(
           height: 184,
           child: Stack(
-            children: [
+            children: <Widget>[
               Positioned.fill(
                 // In order to have the ink splash appear above the image, you
                 // must use Ink.image. This allows the image to be painted as
@@ -332,7 +332,7 @@ class TravelDestinationContent extends StatelessWidget {
               style: descriptionStyle,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   // This array contains the three line description on each card
                   // demo.
                   Padding(
@@ -356,7 +356,7 @@ class TravelDestinationContent extends StatelessWidget {
             child: OverflowBar(
               alignment: MainAxisAlignment.start,
               spacing: 8,
-              children: [
+              children: <Widget>[
                 TextButton(
                   onPressed: () {},
                   child: Text(localizations.demoMenuShare,
@@ -412,8 +412,8 @@ class _CardsDemoState extends State<CardsDemo> with RestorationMixin {
         child: ListView(
           restorationId: 'cards_demo_list_view',
           padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
-          children: [
-            for (final destination in destinations(context))
+          children: <Widget>[
+            for (final TravelDestination destination in destinations(context))
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: (destination.cardType == CardType.standard)

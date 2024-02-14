@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class DividerDemo extends StatelessWidget {
   const DividerDemo({super.key, required this.type});
@@ -26,10 +26,8 @@ class DividerDemo extends StatelessWidget {
     switch (type) {
       case DividerDemoType.horizontal:
         dividers = _HorizontalDividerDemo();
-        break;
       case DividerDemoType.vertical:
         dividers = _VerticalDividerDemo();
-        break;
     }
 
     return Scaffold(
@@ -52,7 +50,7 @@ class _HorizontalDividerDemo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Column(
-        children: [
+        children: <Widget>[
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -92,7 +90,7 @@ class _VerticalDividerDemo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Row(
-        children: [
+        children: <Widget>[
           Expanded(
             child: Container(
               decoration: BoxDecoration(

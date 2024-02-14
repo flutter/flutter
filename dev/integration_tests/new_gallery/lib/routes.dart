@@ -5,22 +5,22 @@
 import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/deferred_widget.dart';
-import 'package:gallery/main.dart';
-import 'package:gallery/pages/demo.dart';
-import 'package:gallery/pages/home.dart';
-import 'package:gallery/studies/crane/app.dart' deferred as crane;
-import 'package:gallery/studies/crane/routes.dart' as crane_routes;
-import 'package:gallery/studies/fortnightly/app.dart' deferred as fortnightly;
-import 'package:gallery/studies/fortnightly/routes.dart' as fortnightly_routes;
-import 'package:gallery/studies/rally/app.dart' deferred as rally;
-import 'package:gallery/studies/rally/routes.dart' as rally_routes;
-import 'package:gallery/studies/reply/app.dart' as reply;
-import 'package:gallery/studies/reply/routes.dart' as reply_routes;
-import 'package:gallery/studies/shrine/app.dart' deferred as shrine;
-import 'package:gallery/studies/shrine/routes.dart' as shrine_routes;
-import 'package:gallery/studies/starter/app.dart' as starter_app;
-import 'package:gallery/studies/starter/routes.dart' as starter_app_routes;
+import 'deferred_widget.dart';
+import 'main.dart';
+import 'pages/demo.dart';
+import 'pages/home.dart';
+import 'studies/crane/app.dart' deferred as crane;
+import 'studies/crane/routes.dart' as crane_routes;
+import 'studies/fortnightly/app.dart' deferred as fortnightly;
+import 'studies/fortnightly/routes.dart' as fortnightly_routes;
+import 'studies/rally/app.dart' deferred as rally;
+import 'studies/rally/routes.dart' as rally_routes;
+import 'studies/reply/app.dart' as reply;
+import 'studies/reply/routes.dart' as reply_routes;
+import 'studies/shrine/app.dart' deferred as shrine;
+import 'studies/shrine/routes.dart' as shrine_routes;
+import 'studies/starter/app.dart' as starter_app;
+import 'studies/starter/routes.dart' as starter_app_routes;
 
 typedef PathWidgetBuilder = Widget Function(BuildContext, String?);
 
@@ -52,15 +52,14 @@ class RouteConfiguration {
   /// in the list below. As soon as there is a match, the associated builder
   /// will be returned. This means that the paths higher up in the list will
   /// take priority.
-  static List<Path> paths = [
+  static List<Path> paths = <Path>[
     Path(
       r'^' + DemoPage.baseRoute + r'/([\w-]+)$',
-      (context, match) => DemoPage(slug: match),
-      openInSecondScreen: false,
+      (BuildContext context, String? match) => DemoPage(slug: match),
     ),
     Path(
       r'^' + rally_routes.homeRoute,
-      (context, match) => StudyWrapper(
+      (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(rally.loadLibrary,
             () => rally.RallyApp()), // ignore: prefer_const_constructors
       ),
@@ -68,7 +67,7 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + shrine_routes.homeRoute,
-      (context, match) => StudyWrapper(
+      (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(shrine.loadLibrary,
             () => shrine.ShrineApp()), // ignore: prefer_const_constructors
       ),
@@ -76,7 +75,7 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + crane_routes.defaultRoute,
-      (context, match) => StudyWrapper(
+      (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(crane.loadLibrary,
             () => crane.CraneApp(), // ignore: prefer_const_constructors
             placeholder: const DeferredLoadingPlaceholder(name: 'Crane')),
@@ -85,7 +84,7 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + fortnightly_routes.defaultRoute,
-      (context, match) => StudyWrapper(
+      (BuildContext context, String? match) => StudyWrapper(
         study: DeferredWidget(
             fortnightly.loadLibrary,
             // ignore: prefer_const_constructors
@@ -96,21 +95,20 @@ class RouteConfiguration {
     Path(
       r'^' + reply_routes.homeRoute,
       // ignore: prefer_const_constructors
-      (context, match) =>
+      (BuildContext context, String? match) =>
           const StudyWrapper(study: reply.ReplyApp(), hasBottomNavBar: true),
       openInSecondScreen: true,
     ),
     Path(
       r'^' + starter_app_routes.defaultRoute,
-      (context, match) => const StudyWrapper(
+      (BuildContext context, String? match) => const StudyWrapper(
         study: starter_app.StarterApp(),
       ),
       openInSecondScreen: true,
     ),
     Path(
       r'^/',
-      (context, match) => const RootPage(),
-      openInSecondScreen: false,
+      (BuildContext context, String? match) => const RootPage(),
     ),
   ];
 
@@ -122,25 +120,25 @@ class RouteConfiguration {
     RouteSettings settings,
     bool hasHinge,
   ) {
-    for (final path in paths) {
-      final regExpPattern = RegExp(path.pattern);
+    for (final Path path in paths) {
+      final RegExp regExpPattern = RegExp(path.pattern);
       if (regExpPattern.hasMatch(settings.name!)) {
-        final firstMatch = regExpPattern.firstMatch(settings.name!)!;
-        final match = (firstMatch.groupCount == 1) ? firstMatch.group(1) : null;
+        final RegExpMatch firstMatch = regExpPattern.firstMatch(settings.name!)!;
+        final String? match = (firstMatch.groupCount == 1) ? firstMatch.group(1) : null;
         if (kIsWeb) {
           return NoAnimationMaterialPageRoute<void>(
-            builder: (context) => path.builder(context, match),
+            builder: (BuildContext context) => path.builder(context, match),
             settings: settings,
           );
         }
         if (path.openInSecondScreen && hasHinge) {
           return TwoPanePageRoute<void>(
-            builder: (context) => path.builder(context, match),
+            builder: (BuildContext context) => path.builder(context, match),
             settings: settings,
           );
         } else {
           return MaterialPageRoute<void>(
-            builder: (context) => path.builder(context, match),
+            builder: (BuildContext context) => path.builder(context, match),
             settings: settings,
           );
         }
@@ -179,8 +177,8 @@ class TwoPanePageRoute<T> extends OverlayRoute<T> {
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield OverlayEntry(builder: (context) {
-      final hinge = MediaQuery.of(context).hinge?.bounds;
+    yield OverlayEntry(builder: (BuildContext context) {
+      final Rect? hinge = MediaQuery.of(context).hinge?.bounds;
       if (hinge == null) {
         return builder.call(context);
       } else {

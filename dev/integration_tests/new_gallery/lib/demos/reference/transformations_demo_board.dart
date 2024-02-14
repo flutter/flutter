@@ -26,9 +26,9 @@ class Board extends Object with IterableMixin<BoardPoint?> {
     // Set up the positions for the center hexagon where the entire board is
     // centered on the origin.
     // Start point of hexagon (top vertex).
-    final hexStart = Point<double>(0, -hexagonRadius);
-    final hexagonRadiusPadded = hexagonRadius - hexagonMargin;
-    final centerToFlat = sqrt(3) / 2 * hexagonRadiusPadded;
+    final Point<double> hexStart = Point<double>(0, -hexagonRadius);
+    final double hexagonRadiusPadded = hexagonRadius - hexagonMargin;
+    final double centerToFlat = sqrt(3) / 2 * hexagonRadiusPadded;
     positionsForHexagonAtOrigin.addAll(<Offset>[
       Offset(hexStart.x, hexStart.y),
       Offset(hexStart.x + centerToFlat, hexStart.y + 0.5 * hexagonRadiusPadded),
@@ -45,7 +45,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
       _boardPoints.addAll(boardPoints);
     } else {
       // Generate boardPoints for a fresh board.
-      var boardPoint = _getNextBoardPoint(null);
+      BoardPoint? boardPoint = _getNextBoardPoint(null);
       while (boardPoint != null) {
         _boardPoints.add(boardPoint);
         boardPoint = _getNextBoardPoint(boardPoint);
@@ -89,7 +89,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
       return BoardPoint(-boardRadius, 0);
     }
 
-    final rRange = _getRRangeForQ(boardPoint.q);
+    final _Range rRange = _getRRangeForQ(boardPoint.q);
 
     // If at or after the last element.
     if (boardPoint.q >= boardRadius && boardPoint.r >= rRange.max) {
@@ -107,14 +107,14 @@ class Board extends Object with IterableMixin<BoardPoint?> {
 
   // Check if the board point is actually on the board.
   bool _validateBoardPoint(BoardPoint boardPoint) {
-    const center = BoardPoint(0, 0);
-    final distanceFromCenter = getDistance(center, boardPoint);
+    const BoardPoint center = BoardPoint(0, 0);
+    final int distanceFromCenter = getDistance(center, boardPoint);
     return distanceFromCenter <= boardRadius;
   }
 
   // Get the size in pixels of the entire board.
   Size get size {
-    final centerToFlat = sqrt(3) / 2 * hexagonRadius;
+    final double centerToFlat = sqrt(3) / 2 * hexagonRadius;
     return Size(
       (boardRadius * 2 + 1) * centerToFlat * 2,
       2 * (hexagonRadius + boardRadius * 1.5 * hexagonRadius),
@@ -123,8 +123,8 @@ class Board extends Object with IterableMixin<BoardPoint?> {
 
   // Get the distance between two BoardPoints.
   static int getDistance(BoardPoint a, BoardPoint b) {
-    final a3 = a.cubeCoordinates;
-    final b3 = b.cubeCoordinates;
+    final Vector3 a3 = a.cubeCoordinates;
+    final Vector3 b3 = b.cubeCoordinates;
     return ((a3.x - b3.x).abs() + (a3.y - b3.y).abs() + (a3.z - b3.z).abs()) ~/
         2;
   }
@@ -133,11 +133,11 @@ class Board extends Object with IterableMixin<BoardPoint?> {
   // the center of the board in both coordinate systems. If no BoardPoint at the
   // location, return null.
   BoardPoint? pointToBoardPoint(Offset point) {
-    final pointCentered = Offset(
+    final Offset pointCentered = Offset(
       point.dx - size.width / 2,
       point.dy - size.height / 2,
     );
-    final boardPoint = BoardPoint(
+    final BoardPoint boardPoint = BoardPoint(
       ((sqrt(3) / 3 * pointCentered.dx - 1 / 3 * pointCentered.dy) /
               hexagonRadius)
           .round(),
@@ -148,7 +148,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
       return null;
     }
 
-    return _boardPoints.firstWhere((boardPointI) {
+    return _boardPoints.firstWhere((BoardPoint boardPointI) {
       return boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r;
     });
   }
@@ -165,9 +165,9 @@ class Board extends Object with IterableMixin<BoardPoint?> {
 
   // Get Vertices that can be drawn to a Canvas for the given BoardPoint.
   Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
-    final centerOfHexZeroCenter = boardPointToPoint(boardPoint);
+    final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
 
-    final positions = positionsForHexagonAtOrigin.map((offset) {
+    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
       return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
     }).toList();
 
@@ -183,7 +183,7 @@ class Board extends Object with IterableMixin<BoardPoint?> {
     if (selected == boardPoint) {
       return this;
     }
-    final nextBoard = Board(
+    final Board nextBoard = Board(
       boardRadius: boardRadius,
       hexagonRadius: hexagonRadius,
       hexagonMargin: hexagonMargin,
@@ -195,17 +195,17 @@ class Board extends Object with IterableMixin<BoardPoint?> {
 
   // Return a new board where boardPoint has the given color.
   Board copyWithBoardPointColor(BoardPoint boardPoint, Color color) {
-    final nextBoardPoint = boardPoint.copyWithColor(color);
-    final boardPointIndex = _boardPoints.indexWhere((boardPointI) =>
+    final BoardPoint nextBoardPoint = boardPoint.copyWithColor(color);
+    final int boardPointIndex = _boardPoints.indexWhere((BoardPoint boardPointI) =>
         boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r);
 
     if (elementAt(boardPointIndex) == boardPoint && boardPoint.color == color) {
       return this;
     }
 
-    final nextBoardPoints = List<BoardPoint>.from(_boardPoints);
+    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
     nextBoardPoints[boardPointIndex] = nextBoardPoint;
-    final selectedBoardPoint =
+    final BoardPoint? selectedBoardPoint =
         boardPoint == selected ? nextBoardPoint : selected;
     return Board(
       boardRadius: boardRadius,

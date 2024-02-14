@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/data/gallery_options.dart';
 import 'package:intl/intl.dart';
+
+import '../../data/gallery_options.dart';
 
 /// Get the locale string for the context.
 String locale(BuildContext context) =>
@@ -14,7 +15,7 @@ String locale(BuildContext context) =>
 NumberFormat usdWithSignFormat(BuildContext context, {int decimalDigits = 2}) {
   return NumberFormat.currency(
     locale: locale(context),
-    name: '\$',
+    name: r'$',
     decimalDigits: decimalDigits,
   );
 }

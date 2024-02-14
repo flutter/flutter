@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 
@@ -21,11 +23,11 @@ class _TransformationsDemoState extends State<TransformationsDemo>
     with TickerProviderStateMixin {
   final GlobalKey _targetKey = GlobalKey();
   // The radius of a hexagon tile in pixels.
-  static const _kHexagonRadius = 16.0;
+  static const double _kHexagonRadius = 16.0;
   // The margin between hexagons.
-  static const _kHexagonMargin = 1.0;
+  static const double _kHexagonMargin = 1.0;
   // The radius of the entire board in hexagons, not including the center.
-  static const _kBoardRadius = 8;
+  static const int _kBoardRadius = 8;
 
   Board _board = Board(
     boardRadius: _kBoardRadius,
@@ -78,12 +80,12 @@ class _TransformationsDemoState extends State<TransformationsDemo>
   }
 
   void _onTapUp(TapUpDetails details) {
-    final renderBox =
-        _targetKey.currentContext!.findRenderObject() as RenderBox;
-    final offset =
+    final RenderBox renderBox =
+        _targetKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset offset =
         details.globalPosition - renderBox.localToGlobal(Offset.zero);
-    final scenePoint = _transformationController.toScene(offset);
-    final boardPoint = _board.pointToBoardPoint(scenePoint);
+    final Offset scenePoint = _transformationController.toScene(offset);
+    final BoardPoint? boardPoint = _board.pointToBoardPoint(scenePoint);
     setState(() {
       _board = _board.copyWithSelected(boardPoint);
     });
@@ -111,10 +113,10 @@ class _TransformationsDemoState extends State<TransformationsDemo>
       body: Container(
         color: backgroundColor,
         child: LayoutBuilder(
-          builder: (context, constraints) {
+          builder: (BuildContext context, BoxConstraints constraints) {
             // Draw the scene as big as is available, but allow the user to
             // translate beyond that to a visibleSize that's a bit bigger.
-            final viewportSize = Size(
+            final Size viewportSize = Size(
               constraints.maxWidth,
               constraints.maxHeight,
             );
@@ -159,7 +161,7 @@ class _TransformationsDemoState extends State<TransformationsDemo>
           },
         ),
       ),
-      persistentFooterButtons: [resetButton, editButton],
+      persistentFooterButtons: <Widget>[resetButton, editButton],
     );
   }
 
@@ -184,14 +186,14 @@ class _TransformationsDemoState extends State<TransformationsDemo>
         }
         showModalBottomSheet<Widget>(
             context: context,
-            builder: (context) {
+            builder: (BuildContext context) {
               return Container(
                 width: double.infinity,
                 height: 150,
                 padding: const EdgeInsets.all(12),
                 child: EditBoardPoint(
                   boardPoint: _board.selected!,
-                  onColorSelection: (color) {
+                  onColorSelection: (Color color) {
                     setState(() {
                       _board = _board.copyWithBoardPointColor(
                           _board.selected!, color);
@@ -225,10 +227,10 @@ class _BoardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     void drawBoardPoint(BoardPoint? boardPoint) {
-      final color = boardPoint!.color.withOpacity(
+      final Color color = boardPoint!.color.withOpacity(
         board.selected == boardPoint ? 0.7 : 1,
       );
-      final vertices = board.getVerticesForBoardPoint(boardPoint, color);
+      final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
     }
 

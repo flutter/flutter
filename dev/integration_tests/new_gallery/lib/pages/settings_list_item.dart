@@ -7,20 +7,17 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 
 // Common constants between SlowMotionSetting and SettingsListItem.
-final settingItemBorderRadius = BorderRadius.circular(10);
-const settingItemHeaderMargin = EdgeInsetsDirectional.fromSTEB(32, 0, 32, 8);
+final BorderRadius settingItemBorderRadius = BorderRadius.circular(10);
+const EdgeInsetsDirectional settingItemHeaderMargin = EdgeInsetsDirectional.fromSTEB(32, 0, 32, 8);
 
 class DisplayOption {
-  final String title;
-  final String? subtitle;
 
   DisplayOption(this.title, {this.subtitle});
+  final String title;
+  final String? subtitle;
 }
 
 class ToggleSetting extends StatelessWidget {
-  final String text;
-  final bool value;
-  final Function(bool) onChanged;
 
   const ToggleSetting({
     super.key,
@@ -28,11 +25,14 @@ class ToggleSetting extends StatelessWidget {
     required this.value,
     required this.onChanged,
   });
+  final String text;
+  final bool value;
+  final Function(bool) onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Semantics(
       container: true,
@@ -44,14 +44,14 @@ class ToggleSetting extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: <Widget>[
                       SelectableText(
                         text,
                         style: textTheme.titleMedium!.apply(
@@ -104,7 +104,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
     with SingleTickerProviderStateMixin {
   static final Animatable<double> _easeInTween =
       CurveTween(curve: Curves.easeIn);
-  static const _expandDuration = Duration(milliseconds: 150);
+  static const Duration _expandDuration = Duration(milliseconds: 150);
   late AnimationController _controller;
   late Animation<double> _childrenHeightFactor;
   late Animation<double> _headerChevronRotation;
@@ -173,7 +173,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
   Widget _buildHeaderWithChildren(BuildContext context, Widget? child) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         _CategoryHeader(
           margin: _headerMargin.value,
           padding: _headerPadding.value,
@@ -200,7 +200,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
   @override
   Widget build(BuildContext context) {
     _handleExpansion();
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     return AnimatedBuilder(
       animation: _controller.view,
@@ -219,13 +219,13 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: widget.isExpanded ? _options.length : 0,
-          itemBuilder: (context, index) {
-            final displayOption = _displayOptions.elementAt(index);
+          itemBuilder: (BuildContext context, int index) {
+            final DisplayOption displayOption = _displayOptions.elementAt(index);
             return RadioListTile<T?>(
               value: _options.elementAt(index),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     displayOption.title,
                     style: theme.textTheme.bodyLarge!.copyWith(
@@ -280,8 +280,8 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       margin: margin,
       child: Material(
@@ -292,14 +292,14 @@ class _CategoryHeader extends StatelessWidget {
           onTap: onTap,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Expanded(
                 child: Padding(
                   padding: padding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: <Widget>[
                       Text(
                         title,
                         style: textTheme.titleMedium!.apply(

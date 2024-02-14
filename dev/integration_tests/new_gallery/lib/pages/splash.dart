@@ -7,12 +7,12 @@ import 'dart:math';
 import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/home.dart';
+import '../constants.dart';
+import '../layout/adaptive.dart';
+import 'home.dart';
 
-const homePeekDesktop = 210.0;
-const homePeekMobile = 60.0;
+const double homePeekDesktop = 210.0;
+const double homePeekMobile = 60.0;
 
 class SplashPageAnimation extends InheritedWidget {
   const SplashPageAnimation({
@@ -47,13 +47,13 @@ class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late int _effect;
-  final _random = Random();
+  final Random _random = Random();
 
   // A map of the effect index to its duration. This duration is used to
   // determine how long to display the splash animation at launch.
   //
   // If a new effect is added, this map should be updated.
-  final _effectDurations = {
+  final Map<int, int> _effectDurations = <int, int>{
     1: 5,
     2: 4,
     3: 4,
@@ -95,7 +95,7 @@ class _SplashPageState extends State<SplashPage>
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    final height = constraints.biggest.height -
+    final double height = constraints.biggest.height -
         (isDisplayDesktop(context) ? homePeekDesktop : homePeekMobile);
     return RelativeRectTween(
       begin: const RelativeRect.fromLTRB(0, 0, 0, 0),
@@ -113,9 +113,9 @@ class _SplashPageState extends State<SplashPage>
       child: SplashPageAnimation(
         isFinished: _controller.status == AnimationStatus.dismissed,
         child: LayoutBuilder(
-          builder: (context, constraints) {
-            final animation = _getPanelAnimation(context, constraints);
-            var frontLayer = widget.child;
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Animation<RelativeRect> animation = _getPanelAnimation(context, constraints);
+            Widget frontLayer = widget.child;
             if (_isSplashVisible) {
               frontLayer = MouseRegion(
                 cursor: SystemMouseCursors.click,
@@ -124,7 +124,7 @@ class _SplashPageState extends State<SplashPage>
                   onTap: () {
                     _controller.reverse();
                   },
-                  onVerticalDragEnd: (details) {
+                  onVerticalDragEnd: (DragEndDetails details) {
                     if (details.velocity.pixelsPerSecond.dy < -200) {
                       _controller.reverse();
                     }
@@ -163,7 +163,7 @@ class _SplashPageState extends State<SplashPage>
               );
             } else {
               return Stack(
-                children: [
+                children: <Widget>[
                   _SplashBackLayer(
                     isSplashCollapsed: !_isSplashVisible,
                     effect: _effect,
@@ -198,8 +198,8 @@ class _SplashBackLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var effectAsset = 'splash_effects/splash_effect_$effect.gif';
-    final flutterLogo = Image.asset(
+    final String effectAsset = 'splash_effects/splash_effect_$effect.gif';
+    final Image flutterLogo = Image.asset(
       'assets/logo/flutter_logo.png',
       package: 'flutter_gallery_assets',
     );
@@ -225,7 +225,7 @@ class _SplashBackLayer extends StatelessWidget {
         child = Container(
           color: Theme.of(context).colorScheme.background,
           child: Stack(
-            children: [
+            children: <Widget>[
               Center(
                 child: flutterLogo,
               ),
@@ -243,7 +243,7 @@ class _SplashBackLayer extends StatelessWidget {
       }
     } else {
       child = Stack(
-        children: [
+        children: <Widget>[
           Center(
             child: Image.asset(
               effectAsset,

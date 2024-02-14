@@ -8,13 +8,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/about.dart' as about;
-import 'package:gallery/pages/home.dart';
-import 'package:gallery/pages/settings_list_item.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../constants.dart';
+import '../data/gallery_options.dart';
+import '../layout/adaptive.dart';
+import 'about.dart' as about;
+import 'home.dart';
+import 'settings_list_item.dart';
 
 enum _ExpandableSetting {
   textScale,
@@ -86,10 +87,10 @@ class _SettingsPageState extends State<SettingsPage> {
   /// native name can't be determined, it is omitted. If the locale can't be
   /// determined, the locale code is used.
   DisplayOption _getLocaleDisplayOption(BuildContext context, Locale? locale) {
-    final localeCode = locale.toString();
-    final localeName = LocaleNames.of(context)!.nameOf(localeCode);
+    final String localeCode = locale.toString();
+    final String? localeName = LocaleNames.of(context)!.nameOf(localeCode);
     if (localeName != null) {
-      final localeNativeName =
+      final String? localeNativeName =
           LocaleNamesLocalizationsDelegate.nativeLocaleNames[localeCode];
       return localeNativeName != null
           ? DisplayOption(localeNativeName, subtitle: localeName)
@@ -116,7 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
   LinkedHashMap<Locale, DisplayOption> _getLocaleOptions() {
-    var localeOptions = LinkedHashMap.of({
+    final LinkedHashMap<Locale, DisplayOption> localeOptions = LinkedHashMap.of(<Locale, DisplayOption>{
       systemLocaleOption: DisplayOption(
         GalleryLocalizations.of(context)!.settingsSystemDefault +
             (deviceLocale != null
@@ -124,16 +125,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 : ''),
       ),
     });
-    var supportedLocales =
+    final List<Locale> supportedLocales =
         List<Locale>.from(GalleryLocalizations.supportedLocales);
-    supportedLocales.removeWhere((locale) => locale == deviceLocale);
+    supportedLocales.removeWhere((Locale locale) => locale == deviceLocale);
 
-    final displayLocales = Map<Locale, DisplayOption>.fromIterable(
+    final List<MapEntry<Locale, DisplayOption>> displayLocales = Map<Locale, DisplayOption>.fromIterable(
       supportedLocales,
       value: (dynamic locale) =>
           _getLocaleDisplayOption(context, locale as Locale?),
     ).entries.toList()
-      ..sort((l1, l2) => compareAsciiUpperCase(l1.value.title, l2.value.title));
+      ..sort((MapEntry<Locale, DisplayOption> l1, MapEntry<Locale, DisplayOption> l2) => compareAsciiUpperCase(l1.value.title, l2.value.title));
 
     localeOptions.addAll(LinkedHashMap.fromEntries(displayLocales));
     return localeOptions;
@@ -141,19 +142,19 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final options = GalleryOptions.of(context);
-    final isDesktop = isDisplayDesktop(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final GalleryOptions options = GalleryOptions.of(context);
+    final bool isDesktop = isDisplayDesktop(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final settingsListItems = [
+    final List<Widget> settingsListItems = <Widget>[
       SettingsListItem<double?>(
         title: localizations.settingsTextScaling,
         selectedOption: options.textScaleFactor(
           context,
           useSentinel: true,
         ),
-        optionsMap: LinkedHashMap.of({
+        optionsMap: LinkedHashMap.of(<double?, DisplayOption>{
           systemTextScaleFactorOption: DisplayOption(
             localizations.settingsSystemDefault,
           ),
@@ -170,7 +171,7 @@ class _SettingsPageState extends State<SettingsPage> {
             localizations.settingsTextScalingHuge,
           ),
         }),
-        onOptionChanged: (newTextScale) => GalleryOptions.update(
+        onOptionChanged: (double? newTextScale) => GalleryOptions.update(
           context,
           options.copyWith(textScaleFactor: newTextScale),
         ),
@@ -180,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<CustomTextDirection?>(
         title: localizations.settingsTextDirection,
         selectedOption: options.customTextDirection,
-        optionsMap: LinkedHashMap.of({
+        optionsMap: LinkedHashMap.of(<CustomTextDirection?, DisplayOption>{
           CustomTextDirection.localeBased: DisplayOption(
             localizations.settingsTextDirectionLocaleBased,
           ),
@@ -191,7 +192,7 @@ class _SettingsPageState extends State<SettingsPage> {
             localizations.settingsTextDirectionRTL,
           ),
         }),
-        onOptionChanged: (newTextDirection) => GalleryOptions.update(
+        onOptionChanged: (CustomTextDirection? newTextDirection) => GalleryOptions.update(
           context,
           options.copyWith(customTextDirection: newTextDirection),
         ),
@@ -204,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ? systemLocaleOption
             : options.locale,
         optionsMap: _getLocaleOptions(),
-        onOptionChanged: (newLocale) {
+        onOptionChanged: (Locale? newLocale) {
           if (newLocale == systemLocaleOption) {
             newLocale = deviceLocale;
           }
@@ -219,14 +220,14 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<TargetPlatform?>(
         title: localizations.settingsPlatformMechanics,
         selectedOption: options.platform,
-        optionsMap: LinkedHashMap.of({
+        optionsMap: LinkedHashMap.of(<TargetPlatform?, DisplayOption>{
           TargetPlatform.android: DisplayOption('Android'),
           TargetPlatform.iOS: DisplayOption('iOS'),
           TargetPlatform.macOS: DisplayOption('macOS'),
           TargetPlatform.linux: DisplayOption('Linux'),
           TargetPlatform.windows: DisplayOption('Windows'),
         }),
-        onOptionChanged: (newPlatform) => GalleryOptions.update(
+        onOptionChanged: (TargetPlatform? newPlatform) => GalleryOptions.update(
           context,
           options.copyWith(platform: newPlatform),
         ),
@@ -236,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<ThemeMode?>(
         title: localizations.settingsTheme,
         selectedOption: options.themeMode,
-        optionsMap: LinkedHashMap.of({
+        optionsMap: LinkedHashMap.of(<ThemeMode?, DisplayOption>{
           ThemeMode.system: DisplayOption(
             localizations.settingsSystemDefault,
           ),
@@ -247,7 +248,7 @@ class _SettingsPageState extends State<SettingsPage> {
             localizations.settingsLightTheme,
           ),
         }),
-        onOptionChanged: (newThemeMode) => GalleryOptions.update(
+        onOptionChanged: (ThemeMode? newThemeMode) => GalleryOptions.update(
           context,
           options.copyWith(themeMode: newThemeMode),
         ),
@@ -257,7 +258,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ToggleSetting(
         text: GalleryLocalizations.of(context)!.settingsSlowMotion,
         value: options.timeDilation != 1.0,
-        onChanged: (isOn) => GalleryOptions.update(
+        onChanged: (bool isOn) => GalleryOptions.update(
           context,
           options.copyWith(timeDilation: isOn ? 5.0 : 1.0),
         ),
@@ -277,7 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
           removeTop: isDesktop,
           context: context,
           child: ListView(
-            children: [
+            children: <Widget>[
               if (isDesktop)
                 const SizedBox(height: firstHeaderDesktopTopPadding),
               Padding(
@@ -291,7 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               if (isDesktop)
                 ...settingsListItems
-              else ...[
+              else ...<Widget>[
                 _AnimateSettingsListItems(
                   animation: _staggerSettingsItemsAnimation,
                   children: settingsListItems,
@@ -337,7 +338,7 @@ class SettingsFeedback extends StatelessWidget {
       title: GalleryLocalizations.of(context)!.settingsFeedback,
       icon: Icons.feedback,
       onTap: () async {
-        final url =
+        final Uri url =
             Uri.parse('https://github.com/flutter/gallery/issues/new/choose/');
         if (await canLaunchUrl(url)) {
           await launchUrl(url);
@@ -352,8 +353,8 @@ class SettingsAttribution extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final verticalPadding = isDesktop ? 0.0 : 28.0;
+    final bool isDesktop = isDisplayDesktop(context);
+    final double verticalPadding = isDesktop ? 0.0 : 28.0;
     return MergeSemantics(
       child: Padding(
         padding: EdgeInsetsDirectional.only(
@@ -376,21 +377,21 @@ class SettingsAttribution extends StatelessWidget {
 }
 
 class _SettingsLink extends StatelessWidget {
-  final String title;
-  final IconData? icon;
-  final GestureTapCallback? onTap;
 
   const _SettingsLink({
     required this.title,
     this.icon,
     this.onTap,
   });
+  final String title;
+  final IconData? icon;
+  final GestureTapCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDesktop = isDisplayDesktop(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDesktop = isDisplayDesktop(context);
 
     return InkWell(
       onTap: onTap,
@@ -400,7 +401,7 @@ class _SettingsLink extends StatelessWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Icon(
               icon,
               color: colorScheme.onSecondary.withOpacity(0.5),
@@ -441,8 +442,8 @@ class _AnimateSettingsListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dividingPadding = 4.0;
-    final dividerTween = Tween<double>(
+    const double dividingPadding = 4.0;
+    final Tween<double> dividerTween = Tween<double>(
       begin: 0,
       end: dividingPadding,
     );
@@ -450,11 +451,11 @@ class _AnimateSettingsListItems extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
-        children: [
-          for (Widget child in children)
+        children: <Widget>[
+          for (final Widget child in children)
             AnimatedBuilder(
               animation: animation,
-              builder: (context, child) {
+              builder: (BuildContext context, Widget? child) {
                 return Padding(
                   padding: EdgeInsets.only(
                     top: dividerTween.animate(animation).value,

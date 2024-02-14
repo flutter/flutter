@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 enum SimpleValue {
   one,
@@ -43,16 +43,12 @@ class _MenuDemoState extends State<MenuDemo> {
     switch (widget.type) {
       case MenuDemoType.contextMenu:
         demo = _ContextMenuDemo(showInSnackBar: showInSnackBar);
-        break;
       case MenuDemoType.sectionedMenu:
         demo = _SectionedMenuDemo(showInSnackBar: showInSnackBar);
-        break;
       case MenuDemoType.simpleMenu:
         demo = _SimpleMenuDemo(showInSnackBar: showInSnackBar);
-        break;
       case MenuDemoType.checklistMenu:
         demo = _ChecklistMenuDemo(showInSnackBar: showInSnackBar);
-        break;
     }
 
     return Scaffold(
@@ -82,15 +78,15 @@ class _ContextMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListTile(
       title: Text(localizations.demoMenuAnItemWithAContextMenuButton),
       trailing: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
-        onSelected: (value) => showInSnackBar(
+        onSelected: (String value) => showInSnackBar(
           localizations.demoMenuSelected(value),
         ),
-        itemBuilder: (context) => <PopupMenuItem<String>>[
+        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
           PopupMenuItem<String>(
             value: localizations.demoMenuContextMenuItemOne,
             child: Text(
@@ -129,14 +125,14 @@ class _SectionedMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListTile(
       title: Text(localizations.demoMenuAnItemWithASectionedMenu),
       trailing: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
-        onSelected: (value) =>
+        onSelected: (String value) =>
             showInSnackBar(localizations.demoMenuSelected(value)),
-        itemBuilder: (context) => <PopupMenuEntry<String>>[
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
           PopupMenuItem<String>(
             value: localizations.demoMenuPreview,
             child: ListTile(
@@ -210,8 +206,8 @@ class _SimpleMenuDemoState extends State<_SimpleMenuDemo> {
   }
 
   String simpleValueToString(BuildContext context, SimpleValue value) {
-    final localizations = GalleryLocalizations.of(context)!;
-    return {
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    return <SimpleValue, String>{
       SimpleValue.one: localizations.demoMenuItemValueOne,
       SimpleValue.two: localizations.demoMenuItemValueTwo,
       SimpleValue.three: localizations.demoMenuItemValueThree,
@@ -229,8 +225,8 @@ class _SimpleMenuDemoState extends State<_SimpleMenuDemo> {
     return PopupMenuButton<SimpleValue>(
       padding: EdgeInsets.zero,
       initialValue: _simpleValue,
-      onSelected: (value) => showAndSetMenuSelection(context, value),
-      itemBuilder: (context) => <PopupMenuItem<SimpleValue>>[
+      onSelected: (SimpleValue value) => showAndSetMenuSelection(context, value),
+      itemBuilder: (BuildContext context) => <PopupMenuItem<SimpleValue>>[
         PopupMenuItem<SimpleValue>(
           value: SimpleValue.one,
           child: Text(simpleValueToString(
@@ -293,9 +289,9 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
   bool isChecked(CheckedValue value) => _checked.contains(value);
 
   Iterable<String> checkedValuesToString(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    return _checked.map((value) {
-      return {
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    return _checked.map((CheckedValue value) {
+      return <CheckedValue, String>{
         CheckedValue.one: localizations.demoMenuOne,
         CheckedValue.two: localizations.demoMenuTwo,
         CheckedValue.three: localizations.demoMenuThree,
@@ -314,11 +310,11 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
   }
 
   @override
-  Object toPrimitives() => _checked.map((value) => value.index).toList();
+  Object toPrimitives() => _checked.map((CheckedValue value) => value.index).toList();
 
   @override
   Set<CheckedValue> fromPrimitives(Object? data) {
-    final checkedValues = data as List<dynamic>;
+    final List checkedValues = data! as List<dynamic>;
     return Set.from(checkedValues.map<CheckedValue>((dynamic id) {
       return CheckedValue.values[id as int];
     }));
@@ -357,8 +353,8 @@ class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo>
   }
 
   String checkedValueToString(BuildContext context, CheckedValue value) {
-    final localizations = GalleryLocalizations.of(context)!;
-    return {
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    return <CheckedValue, String>{
       CheckedValue.one: localizations.demoMenuOne,
       CheckedValue.two: localizations.demoMenuTwo,
       CheckedValue.three: localizations.demoMenuThree,
@@ -380,8 +376,8 @@ class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo>
       ),
       trailing: PopupMenuButton<CheckedValue>(
         padding: EdgeInsets.zero,
-        onSelected: (value) => showCheckedMenuSelections(context, value),
-        itemBuilder: (context) => <PopupMenuItem<CheckedValue>>[
+        onSelected: (CheckedValue value) => showCheckedMenuSelections(context, value),
+        itemBuilder: (BuildContext context) => <PopupMenuItem<CheckedValue>>[
           CheckedPopupMenuItem<CheckedValue>(
             value: CheckedValue.one,
             checked: _checkedValues.isChecked(CheckedValue.one),

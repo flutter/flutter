@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class SelectionControlsDemo extends StatelessWidget {
   const SelectionControlsDemo({super.key, required this.type});
@@ -31,13 +31,10 @@ class SelectionControlsDemo extends StatelessWidget {
     switch (type) {
       case SelectionControlsDemoType.checkbox:
         controls = _CheckboxDemo();
-        break;
       case SelectionControlsDemoType.radio:
         controls = _RadioDemo();
-        break;
       case SelectionControlsDemoType.switches:
         controls = _SwitchDemo();
-        break;
     }
 
     return Scaffold(
@@ -84,13 +81,13 @@ class _CheckboxDemoState extends State<_CheckboxDemo> with RestorationMixin {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Checkbox(
               value: checkboxValueA.value,
-              onChanged: (value) {
+              onChanged: (bool? value) {
                 setState(() {
                   checkboxValueA.value = value;
                 });
@@ -98,7 +95,7 @@ class _CheckboxDemoState extends State<_CheckboxDemo> with RestorationMixin {
             ),
             Checkbox(
               value: checkboxValueB.value,
-              onChanged: (value) {
+              onChanged: (bool? value) {
                 setState(() {
                   checkboxValueB.value = value;
                 });
@@ -107,7 +104,7 @@ class _CheckboxDemoState extends State<_CheckboxDemo> with RestorationMixin {
             Checkbox(
               value: checkboxValueC.value,
               tristate: true,
-              onChanged: (value) {
+              onChanged: (bool? value) {
                 setState(() {
                   checkboxValueC.value = value;
                 });
@@ -118,7 +115,7 @@ class _CheckboxDemoState extends State<_CheckboxDemo> with RestorationMixin {
         // Disabled checkboxes
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Checkbox(
               value: checkboxValueA.value,
               onChanged: null,
@@ -175,10 +172,10 @@ class _RadioDemoState extends State<_RadioDemo> with RestorationMixin {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             for (int index = 0; index < 2; ++index)
               Radio<int>(
                 value: index,
@@ -190,7 +187,7 @@ class _RadioDemoState extends State<_RadioDemo> with RestorationMixin {
         // Disabled radio buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             for (int index = 0; index < 2; ++index)
               Radio<int>(
                 value: index,
@@ -237,13 +234,13 @@ class _SwitchDemoState extends State<_SwitchDemo> with RestorationMixin {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Switch(
               value: switchValueA.value,
-              onChanged: (value) {
+              onChanged: (bool value) {
                 setState(() {
                   switchValueA.value = value;
                 });
@@ -251,7 +248,7 @@ class _SwitchDemoState extends State<_SwitchDemo> with RestorationMixin {
             ),
             Switch(
               value: switchValueB.value,
-              onChanged: (value) {
+              onChanged: (bool value) {
                 setState(() {
                   switchValueB.value = value;
                 });
@@ -262,7 +259,7 @@ class _SwitchDemoState extends State<_SwitchDemo> with RestorationMixin {
         // Disabled switches
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Switch(
               value: switchValueA.value,
               onChanged: null,

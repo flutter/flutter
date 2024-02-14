@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/rally/colors.dart';
+import '../../../layout/adaptive.dart';
+import '../colors.dart';
 
 class TabWithSidebar extends StatelessWidget {
   const TabWithSidebar({
@@ -22,7 +22,7 @@ class TabWithSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isDisplayDesktop(context)) {
       return Row(
-        children: [
+        children: <Widget>[
           Flexible(
             flex: 2,
             child: SingleChildScrollView(
@@ -33,7 +33,6 @@ class TabWithSidebar extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 1,
             child: Container(
               color: RallyColors.inputBackground,
               padding: const EdgeInsetsDirectional.only(start: 24),
@@ -68,10 +67,10 @@ class SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         const SizedBox(height: 8),
         SelectableText(
           title,

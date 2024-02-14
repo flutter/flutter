@@ -6,17 +6,17 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/studies/shrine/model/product.dart';
-import 'package:gallery/studies/shrine/supplemental/product_card.dart';
+import '../model/product.dart';
+import 'product_card.dart';
 
 /// Height of the text below each product card.
-const productCardAdditionalHeight = 84.0 * 2;
+const double productCardAdditionalHeight = 84.0 * 2;
 
 /// Height of the divider between product cards.
-const productCardDividerHeight = 84.0;
+const double productCardDividerHeight = 84.0;
 
 /// Height of the space at the top of every other column.
-const columnTopSpace = 84.0;
+const double columnTopSpace = 84.0;
 
 class DesktopProductCardColumn extends StatelessWidget {
   const DesktopProductCardColumn({
@@ -40,9 +40,9 @@ class DesktopProductCardColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final currentColumnProductCount = products.length;
-      final currentColumnWidgetCount =
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      final int currentColumnProductCount = products.length;
+      final int currentColumnWidgetCount =
           max(2 * currentColumnProductCount - 1, 0);
 
       return SizedBox(
@@ -50,13 +50,13 @@ class DesktopProductCardColumn extends StatelessWidget {
         child: Column(
           crossAxisAlignment:
               alignToEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             if (lowerStart) Container(height: columnTopSpace),
-            ...List<Widget>.generate(currentColumnWidgetCount, (index) {
+            ...List<Widget>.generate(currentColumnWidgetCount, (int index) {
               Widget card;
               if (index % 2 == 0) {
                 // This is a product.
-                final productCardIndex = index ~/ 2;
+                final int productCardIndex = index ~/ 2;
                 card = DesktopProductCard(
                   product: products[productCardIndex],
                   imageWidth: startLarge

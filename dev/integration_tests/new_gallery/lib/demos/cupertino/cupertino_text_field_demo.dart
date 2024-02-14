@@ -12,7 +12,7 @@ class CupertinoTextFieldDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -22,7 +22,7 @@ class CupertinoTextFieldDemo extends StatelessWidget {
         child: ListView(
           restorationId: 'text_field_demo_list_view',
           padding: const EdgeInsets.all(16),
-          children: [
+          children: <Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: CupertinoTextField(

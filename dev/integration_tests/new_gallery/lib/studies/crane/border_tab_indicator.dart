@@ -35,11 +35,11 @@ class BorderPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    final horizontalInset = 16 - 4 * textScaleFactor;
-    final rect = Offset(offset.dx + horizontalInset,
+    final double horizontalInset = 16 - 4 * textScaleFactor;
+    final Rect rect = Offset(offset.dx + horizontalInset,
             (configuration.size!.height / 2) - indicatorHeight / 2 - 1) &
         Size(configuration.size!.width - 2 * horizontalInset, indicatorHeight);
-    final paint = Paint();
+    final Paint paint = Paint();
     paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;

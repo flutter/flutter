@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 // BEGIN gridListsDemo
 
@@ -14,8 +14,8 @@ class GridListDemo extends StatelessWidget {
   final GridListDemoType type;
 
   List<_Photo> _photos(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    return [
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    return <_Photo>[
       _Photo(
         assetName: 'places/india_chennai_flower_market.png',
         title: localizations.placeChennai,
@@ -92,8 +92,7 @@ class GridListDemo extends StatelessWidget {
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         padding: const EdgeInsets.all(8),
-        childAspectRatio: 1,
-        children: _photos(context).map<Widget>((photo) {
+        children: _photos(context).map<Widget>((_Photo photo) {
           return _GridDemoPhotoItem(
             photo: photo,
             tileStyle: type,

@@ -30,7 +30,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -40,16 +40,15 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo>
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Center(
           child: Wrap(
-            children: [
+            children: <Widget>[
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   const SizedBox(height: 32),
                   CupertinoSlider(
                     value: _value.value,
-                    min: 0.0,
                     max: 100.0,
-                    onChanged: (value) {
+                    onChanged: (double value) {
                       setState(() {
                         _value.value = value;
                       });
@@ -57,7 +56,6 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo>
                   ),
                   CupertinoSlider(
                     value: _value.value,
-                    min: 0.0,
                     max: 100.0,
                     onChanged: null,
                   ),
@@ -74,14 +72,13 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo>
               // TODO(guidezpl): See https://github.com/flutter/flutter/issues/106691
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   const SizedBox(height: 32),
                   CupertinoSlider(
                     value: _discreteValue.value,
-                    min: 0.0,
                     max: 100.0,
                     divisions: 5,
-                    onChanged: (value) {
+                    onChanged: (double value) {
                       setState(() {
                         _discreteValue.value = value;
                       });
@@ -89,7 +86,6 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo>
                   ),
                   CupertinoSlider(
                     value: _discreteValue.value,
-                    min: 0.0,
                     max: 100.0,
                     divisions: 5,
                     onChanged: null,

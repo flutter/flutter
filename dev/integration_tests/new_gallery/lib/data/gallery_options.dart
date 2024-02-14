@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
-import 'package:gallery/constants.dart';
+import '../constants.dart';
 
 enum CustomTextDirection {
   localeBased,
@@ -25,7 +25,7 @@ const List<String> rtlLanguages = <String>[
 ];
 
 // Fake locale to represent the system Locale option.
-const systemLocaleOption = Locale('system');
+const Locale systemLocaleOption = Locale('system');
 
 Locale? _deviceLocale;
 
@@ -77,7 +77,7 @@ class GalleryOptions {
   TextDirection? resolvedTextDirection() {
     switch (customTextDirection) {
       case CustomTextDirection.localeBased:
-        final language = locale?.languageCode.toLowerCase();
+        final String? language = locale?.languageCode.toLowerCase();
         if (language == null) return null;
         return rtlLanguages.contains(language)
             ? TextDirection.rtl
@@ -97,16 +97,14 @@ class GalleryOptions {
     switch (themeMode) {
       case ThemeMode.light:
         brightness = Brightness.light;
-        break;
       case ThemeMode.dark:
         brightness = Brightness.dark;
-        break;
       default:
         brightness =
             WidgetsBinding.instance.platformDispatcher.platformBrightness;
     }
 
-    final overlayStyle = brightness == Brightness.dark
+    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
 
@@ -156,13 +154,13 @@ class GalleryOptions {
       );
 
   static GalleryOptions of(BuildContext context) {
-    final scope =
+    final _ModelBindingScope scope =
         context.dependOnInheritedWidgetOfExactType<_ModelBindingScope>()!;
     return scope.modelBindingState.currentModel;
   }
 
   static void update(BuildContext context, GalleryOptions newModel) {
-    final scope =
+    final _ModelBindingScope scope =
         context.dependOnInheritedWidgetOfExactType<_ModelBindingScope>()!;
     scope.modelBindingState.updateModel(newModel);
   }
@@ -179,11 +177,11 @@ class ApplyTextOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final options = GalleryOptions.of(context);
-    final textDirection = options.resolvedTextDirection();
-    final textScaleFactor = options.textScaleFactor(context);
+    final GalleryOptions options = GalleryOptions.of(context);
+    final TextDirection? textDirection = options.resolvedTextDirection();
+    final double textScaleFactor = options.textScaleFactor(context);
 
-    Widget widget = MediaQuery(
+    final Widget widget = MediaQuery(
       data: MediaQuery.of(context).copyWith(
         // ignore: deprecated_member_use
         textScaleFactor: textScaleFactor,

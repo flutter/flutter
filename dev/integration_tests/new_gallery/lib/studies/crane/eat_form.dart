@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/crane/backlayer.dart';
-import 'package:gallery/studies/crane/header_form.dart';
+import 'backlayer.dart';
+import 'header_form.dart';
 
 class EatForm extends BackLayerItem {
   const EatForm({super.key}) : super(index: 2);
@@ -16,10 +16,10 @@ class EatForm extends BackLayerItem {
 }
 
 class _EatFormState extends State<EatForm> with RestorationMixin {
-  final dinerController = RestorableTextEditingController();
-  final dateController = RestorableTextEditingController();
-  final timeController = RestorableTextEditingController();
-  final locationController = RestorableTextEditingController();
+  final RestorableTextEditingController dinerController = RestorableTextEditingController();
+  final RestorableTextEditingController dateController = RestorableTextEditingController();
+  final RestorableTextEditingController timeController = RestorableTextEditingController();
+  final RestorableTextEditingController locationController = RestorableTextEditingController();
 
   @override
   String get restorationId => 'eat_form';
@@ -43,7 +43,7 @@ class _EatFormState extends State<EatForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return HeaderForm(
       fields: <HeaderFormField>[
         HeaderFormField(

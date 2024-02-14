@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/studies/crane/backlayer.dart';
-import 'package:gallery/studies/crane/border_tab_indicator.dart';
-import 'package:gallery/studies/crane/colors.dart';
-import 'package:gallery/studies/crane/header_form.dart';
-import 'package:gallery/studies/crane/item_cards.dart';
-import 'package:gallery/studies/crane/model/data.dart';
-import 'package:gallery/studies/crane/model/destination.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/image_placeholder.dart';
+import 'backlayer.dart';
+import 'border_tab_indicator.dart';
+import 'colors.dart';
+import 'header_form.dart';
+import 'item_cards.dart';
+import 'model/data.dart';
+import 'model/destination.dart';
 
 class _FrontLayer extends StatefulWidget {
   const _FrontLayer({
@@ -37,8 +37,8 @@ class _FrontLayer extends StatefulWidget {
 class _FrontLayerState extends State<_FrontLayer> {
   List<Destination>? destinations;
 
-  static const frontLayerBorderRadius = 16.0;
-  static const bottomPadding = EdgeInsets.only(bottom: 120);
+  static const double frontLayerBorderRadius = 16.0;
+  static const EdgeInsets bottomPadding = EdgeInsets.only(bottom: 120);
 
   @override
   void didChangeDependencies() {
@@ -71,9 +71,9 @@ class _FrontLayerState extends State<_FrontLayer> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final isSmallDesktop = isDisplaySmallDesktop(context);
-    final crossAxisCount = isDesktop ? 4 : 1;
+    final bool isDesktop = isDisplayDesktop(context);
+    final bool isSmallDesktop = isDisplaySmallDesktop(context);
+    final int crossAxisCount = isDesktop ? 4 : 1;
 
     return FocusTraversalGroup(
       policy: ReadingOrderTraversalPolicy(),
@@ -100,7 +100,7 @@ class _FrontLayerState extends State<_FrontLayer> {
                     .add(bottomPadding)
                 : const EdgeInsets.symmetric(horizontal: 20).add(bottomPadding),
             child: Column(
-              children: [
+              children: <Widget>[
                 _header(),
                 Expanded(
                   child: MasonryGridView.count(
@@ -108,7 +108,7 @@ class _FrontLayerState extends State<_FrontLayer> {
                     restorationId: widget.restorationId,
                     crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 16.0,
-                    itemBuilder: (context, index) =>
+                    itemBuilder: (BuildContext context, int index) =>
                         DestinationCard(destination: destinations![index]),
                     itemCount: destinations!.length,
                   ),
@@ -129,10 +129,6 @@ class _FrontLayerState extends State<_FrontLayer> {
 /// can make a selection. The user can also configure the titles for when the
 /// front or back layer is showing.
 class Backdrop extends StatefulWidget {
-  final Widget frontLayer;
-  final List<BackLayerItem> backLayerItems;
-  final Widget frontTitle;
-  final Widget backTitle;
 
   const Backdrop({
     super.key,
@@ -141,6 +137,10 @@ class Backdrop extends StatefulWidget {
     required this.frontTitle,
     required this.backTitle,
   });
+  final Widget frontLayer;
+  final List<BackLayerItem> backLayerItems;
+  final Widget frontTitle;
+  final Widget backTitle;
 
   @override
   State<Backdrop> createState() => _BackdropState();
@@ -156,7 +156,7 @@ class _BackdropState extends State<Backdrop>
 
   // How much the 'sleep' front layer is vertically offset relative to other
   // front layers, in pixels, with the mobile layout.
-  static const _sleepLayerTopOffset = 60.0;
+  static const double _sleepLayerTopOffset = 60.0;
 
   @override
   String get restorationId => 'tab_non_scrollable_demo';
@@ -180,7 +180,7 @@ class _BackdropState extends State<Backdrop>
     });
 
     // Offsets to create a horizontal gap between front layers.
-    final tabControllerAnimation = _tabController.animation!;
+    final Animation<double> tabControllerAnimation = _tabController.animation!;
 
     _flyLayerHorizontalOffset = tabControllerAnimation.drive(
         Tween<Offset>(begin: const Offset(0, 0), end: const Offset(-0.05, 0)));
@@ -206,9 +206,9 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final bool isDesktop = isDisplayDesktop(context);
+    final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Material(
       color: cranePurple800,
       child: Padding(
@@ -228,7 +228,7 @@ class _BackdropState extends State<Backdrop>
               ),
             ),
             body: Stack(
-              children: [
+              children: <Widget>[
                 BackLayer(
                   tabController: _tabController,
                   backLayerItems: widget.backLayerItems,
@@ -246,7 +246,7 @@ class _BackdropState extends State<Backdrop>
                   // we allow the TabBarView to overflow by an offset
                   // (doubled because it technically overflows top & bottom).
                   // The other front layers are top padded by this offset.
-                  child: LayoutBuilder(builder: (context, constraints) {
+                  child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                     return OverflowBox(
                       maxHeight:
                           constraints.maxHeight + _sleepLayerTopOffset * 2,
@@ -255,7 +255,7 @@ class _BackdropState extends State<Backdrop>
                             ? const NeverScrollableScrollPhysics()
                             : null, // use default TabBarView physics
                         controller: _tabController,
-                        children: [
+                        children: <Widget>[
                           SlideTransition(
                             position: _flyLayerHorizontalOffset,
                             child: _FrontLayer(
@@ -298,14 +298,14 @@ class _BackdropState extends State<Backdrop>
 }
 
 class CraneAppBar extends StatefulWidget {
-  final Function(int)? tabHandler;
-  final TabController tabController;
 
   const CraneAppBar({
     super.key,
     this.tabHandler,
     required this.tabController,
   });
+  final Function(int)? tabHandler;
+  final TabController tabController;
 
   @override
   State<CraneAppBar> createState() => _CraneAppBarState();
@@ -314,10 +314,10 @@ class CraneAppBar extends StatefulWidget {
 class _CraneAppBarState extends State<CraneAppBar> {
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final isSmallDesktop = isDisplaySmallDesktop(context);
-    final textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final bool isDesktop = isDisplayDesktop(context);
+    final bool isSmallDesktop = isDisplaySmallDesktop(context);
+    final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return SafeArea(
       child: Padding(
@@ -327,8 +327,7 @@ class _CraneAppBarState extends State<CraneAppBar> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          children: <Widget>[
             const ExcludeSemantics(
               child: FadeInImagePlaceholder(
                 image: AssetImage(
@@ -363,11 +362,11 @@ class _CraneAppBarState extends State<CraneAppBar> {
                     labelColor: cranePrimaryWhite,
                     physics: const BouncingScrollPhysics(),
                     unselectedLabelColor: cranePrimaryWhite.withOpacity(.6),
-                    onTap: (index) => widget.tabController.animateTo(
+                    onTap: (int index) => widget.tabController.animateTo(
                       index,
                       duration: const Duration(milliseconds: 300),
                     ),
-                    tabs: [
+                    tabs: <Widget>[
                       Tab(text: localizations.craneFly),
                       Tab(text: localizations.craneSleep),
                       Tab(text: localizations.craneEat),

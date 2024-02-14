@@ -165,7 +165,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
       _UsNumberTextInputFormatter();
 
   void _handleSubmitted() {
-    final form = _formKey.currentState!;
+    final FormState form = _formKey.currentState!;
     if (!form.validate()) {
       _autoValidateModeIndex.value =
           AutovalidateMode.always.index; // Start validating on every change.
@@ -183,7 +183,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
     if (value == null || value.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldNameRequired;
     }
-    final nameExp = RegExp(r'^[A-Za-z ]+$');
+    final RegExp nameExp = RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value)) {
       return GalleryLocalizations.of(context)!
           .demoTextFieldOnlyAlphabeticalChars;
@@ -192,7 +192,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   }
 
   String? _validatePhoneNumber(String? value) {
-    final phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
+    final RegExp phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value!)) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterUSPhoneNumber;
     }
@@ -200,7 +200,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   }
 
   String? _validatePassword(String? value) {
-    final passwordField = _passwordFieldKey.currentState!;
+    final FormFieldState<String> passwordField = _passwordFieldKey.currentState!;
     if (passwordField.value == null || passwordField.value!.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterPassword;
     }
@@ -212,8 +212,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
 
   @override
   Widget build(BuildContext context) {
-    const sizedBoxSpace = SizedBox(height: 24);
-    final localizations = GalleryLocalizations.of(context)!;
+    const SizedBox sizedBoxSpace = SizedBox(height: 24);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Form(
       key: _formKey,
@@ -223,7 +223,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
           restorationId: 'text_field_demo_scroll_view',
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            children: [
+            children: <Widget>[
               sizedBoxSpace,
               TextFormField(
                 restorationId: 'name_field',
@@ -235,7 +235,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                   hintText: localizations.demoTextFieldWhatDoPeopleCallYou,
                   labelText: localizations.demoTextFieldNameField,
                 ),
-                onSaved: (value) {
+                onSaved: (String? value) {
                   person.name = value;
                   _phoneNumber.requestFocus();
                 },
@@ -254,7 +254,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                   prefixText: '+1 ',
                 ),
                 keyboardType: TextInputType.phone,
-                onSaved: (value) {
+                onSaved: (String? value) {
                   person.phoneNumber = value;
                   _email.requestFocus();
                 },
@@ -280,7 +280,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                   labelText: localizations.demoTextFieldEmail,
                 ),
                 keyboardType: TextInputType.emailAddress,
-                onSaved: (value) {
+                onSaved: (String? value) {
                   person.email = value;
                   _lifeStory.requestFocus();
                 },
@@ -321,7 +321,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                   labelText: localizations.demoTextFieldSalary,
                   suffixText: localizations.demoTextFieldUSD,
                 ),
-                maxLines: 1,
               ),
               sizedBoxSpace,
               PasswordField(
@@ -331,7 +330,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                 fieldKey: _passwordFieldKey,
                 helperText: localizations.demoTextFieldNoMoreThan,
                 labelText: localizations.demoTextFieldPassword,
-                onFieldSubmitted: (value) {
+                onFieldSubmitted: (String value) {
                   setState(() {
                     person.password = value;
                     _retypePassword.requestFocus();
@@ -349,7 +348,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
                 maxLength: 8,
                 obscureText: true,
                 validator: _validatePassword,
-                onFieldSubmitted: (value) {
+                onFieldSubmitted: (String value) {
                   _handleSubmitted();
                 },
               ),
@@ -381,10 +380,10 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final newTextLength = newValue.text.length;
-    final newText = StringBuffer();
-    var selectionIndex = newValue.selection.end;
-    var usedSubstringIndex = 0;
+    final int newTextLength = newValue.text.length;
+    final StringBuffer newText = StringBuffer();
+    int selectionIndex = newValue.selection.end;
+    int usedSubstringIndex = 0;
     if (newTextLength >= 1) {
       newText.write('(');
       if (newValue.selection.end >= 1) selectionIndex++;

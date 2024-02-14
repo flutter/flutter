@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class ButtonDemo extends StatelessWidget {
   const ButtonDemo({super.key, required this.type});
@@ -12,7 +12,7 @@ class ButtonDemo extends StatelessWidget {
   final ButtonDemoType type;
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (type) {
       case ButtonDemoType.text:
         return localizations.demoTextButtonTitle;
@@ -33,19 +33,14 @@ class ButtonDemo extends StatelessWidget {
     switch (type) {
       case ButtonDemoType.text:
         buttons = _TextButtonDemo();
-        break;
       case ButtonDemoType.elevated:
         buttons = _ElevatedButtonDemo();
-        break;
       case ButtonDemoType.outlined:
         buttons = _OutlinedButtonDemo();
-        break;
       case ButtonDemoType.toggle:
         buttons = _ToggleButtonsDemo();
-        break;
       case ButtonDemoType.floating:
         buttons = _FloatingActionButtonDemo();
-        break;
     }
 
     return Scaffold(
@@ -63,13 +58,13 @@ class ButtonDemo extends StatelessWidget {
 class _TextButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             TextButton(
               onPressed: () {},
               child: Text(localizations.buttonText),
@@ -86,7 +81,7 @@ class _TextButtonDemo extends StatelessWidget {
         // Disabled buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             TextButton(
               onPressed: null,
               child: Text(localizations.buttonText),
@@ -111,13 +106,13 @@ class _TextButtonDemo extends StatelessWidget {
 class _ElevatedButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             ElevatedButton(
               onPressed: () {},
               child: Text(localizations.buttonText),
@@ -134,7 +129,7 @@ class _ElevatedButtonDemo extends StatelessWidget {
         // Disabled buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             ElevatedButton(
               onPressed: null,
               child: Text(localizations.buttonText),
@@ -159,13 +154,13 @@ class _ElevatedButtonDemo extends StatelessWidget {
 class _OutlinedButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             OutlinedButton(
               onPressed: () {},
               child: Text(localizations.buttonText),
@@ -182,7 +177,7 @@ class _OutlinedButtonDemo extends StatelessWidget {
         // Disabled buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             OutlinedButton(
               onPressed: null,
               child: Text(localizations.buttonText),
@@ -211,7 +206,7 @@ class _ToggleButtonsDemo extends StatefulWidget {
 
 class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
     with RestorationMixin {
-  final isSelected = [
+  final List<RestorableBool> isSelected = <RestorableBool>[
     RestorableBool(false),
     RestorableBool(true),
     RestorableBool(false),
@@ -229,7 +224,7 @@ class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
 
   @override
   void dispose() {
-    for (final restorableBool in isSelected) {
+    for (final RestorableBool restorableBool in isSelected) {
       restorableBool.dispose();
     }
     super.dispose();
@@ -240,15 +235,15 @@ class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           ToggleButtons(
-            onPressed: (index) {
+            onPressed: (int index) {
               setState(() {
                 isSelected[index].value = !isSelected[index].value;
               });
             },
-            isSelected: isSelected.map((element) => element.value).toList(),
-            children: const [
+            isSelected: isSelected.map((RestorableBool element) => element.value).toList(),
+            children: const <Widget>[
               Icon(Icons.format_bold),
               Icon(Icons.format_italic),
               Icon(Icons.format_underline),
@@ -257,9 +252,8 @@ class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
           const SizedBox(height: 12),
           // Disabled toggle buttons
           ToggleButtons(
-            onPressed: null,
-            isSelected: isSelected.map((element) => element.value).toList(),
-            children: const [
+            isSelected: isSelected.map((RestorableBool element) => element.value).toList(),
+            children: const <Widget>[
               Icon(Icons.format_bold),
               Icon(Icons.format_italic),
               Icon(Icons.format_underline),
@@ -278,11 +272,11 @@ class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
 class _FloatingActionButtonDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           FloatingActionButton(
             onPressed: () {},
             tooltip: localizations.buttonTextCreate,

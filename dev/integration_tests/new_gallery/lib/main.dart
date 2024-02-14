@@ -8,16 +8,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/pages/backdrop.dart';
-import 'package:gallery/pages/splash.dart';
-import 'package:gallery/routes.dart';
-import 'package:gallery/themes/gallery_theme_data.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'constants.dart';
+import 'data/gallery_options.dart';
 import 'layout/adaptive.dart';
+import 'pages/backdrop.dart';
+import 'pages/splash.dart';
+import 'routes.dart';
+import 'themes/gallery_theme_data.dart';
 
 export 'package:gallery/data/demos.dart' show pumpDeferredLibraries;
 
@@ -50,9 +50,9 @@ class GalleryApp extends StatelessWidget {
         isTestMode: isTestMode,
       ),
       child: Builder(
-        builder: (context) {
-          final options = GalleryOptions.of(context);
-          final hasHinge = MediaQuery.of(context).hinge?.bounds != null;
+        builder: (BuildContext context) {
+          final GalleryOptions options = GalleryOptions.of(context);
+          final bool hasHinge = MediaQuery.of(context).hinge?.bounds != null;
           return MaterialApp(
             restorationScopeId: 'rootGallery',
             title: 'Flutter Gallery',
@@ -64,18 +64,18 @@ class GalleryApp extends StatelessWidget {
             darkTheme: GalleryThemeData.darkThemeData.copyWith(
               platform: options.platform,
             ),
-            localizationsDelegates: const [
+            localizationsDelegates: const <LocalizationsDelegate>[
               ...GalleryLocalizations.localizationsDelegates,
               LocaleNamesLocalizationsDelegate()
             ],
             initialRoute: initialRoute,
             supportedLocales: GalleryLocalizations.supportedLocales,
             locale: options.locale,
-            localeListResolutionCallback: (locales, supportedLocales) {
+            localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
               deviceLocale = locales?.first;
               return basicLocaleListResolution(locales, supportedLocales);
             },
-            onGenerateRoute: (settings) =>
+            onGenerateRoute: (RouteSettings settings) =>
                 RouteConfiguration.onGenerateRoute(settings, hasHinge),
           );
         },

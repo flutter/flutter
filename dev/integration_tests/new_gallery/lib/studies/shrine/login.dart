@@ -6,15 +6,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/layout/letter_spacing.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/shrine/app.dart';
-import 'package:gallery/studies/shrine/theme.dart';
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/image_placeholder.dart';
+import '../../layout/letter_spacing.dart';
+import '../../layout/text_scale.dart';
+import 'app.dart';
+import 'theme.dart';
 
-const _horizontalPadding = 24.0;
+const double _horizontalPadding = 24.0;
 
 double desktopLoginScreenMainAreaWidth({required BuildContext context}) {
   return min(
@@ -28,19 +28,19 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     return ApplyTextOptions(
       child: isDesktop
           ? LayoutBuilder(
-              builder: (context, constraints) => Scaffold(
+              builder: (BuildContext context, BoxConstraints constraints) => Scaffold(
                 body: SafeArea(
                   child: Center(
                     child: SizedBox(
                       width: desktopLoginScreenMainAreaWidth(context: context),
                       child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: <Widget>[
                           _ShrineLogo(),
                           SizedBox(height: 40),
                           _UsernameTextField(),
@@ -64,7 +64,7 @@ class LoginPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: _horizontalPadding,
                   ),
-                  children: const [
+                  children: const <Widget>[
                     SizedBox(height: 80),
                     _ShrineLogo(),
                     SizedBox(height: 120),
@@ -87,7 +87,7 @@ class _ShrineLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExcludeSemantics(
       child: Column(
-        children: [
+        children: <Widget>[
           const FadeInImagePlaceholder(
             image: AssetImage('packages/shrine_images/diamond.png'),
             placeholder: SizedBox(
@@ -111,7 +111,7 @@ class _UsernameTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return TextField(
       textInputAction: TextInputAction.next,
@@ -132,7 +132,7 @@ class _PasswordTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return TextField(
       restorationId: 'password_text_field',
@@ -153,11 +153,11 @@ class _CancelAndNextButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
-    final buttonTextPadding = isDesktop
+    final EdgeInsets buttonTextPadding = isDesktop
         ? const EdgeInsets.symmetric(horizontal: 24, vertical: 16)
         : EdgeInsets.zero;
 
@@ -166,7 +166,7 @@ class _CancelAndNextButtons extends StatelessWidget {
       child: OverflowBar(
         spacing: isDesktop ? 0 : 8,
         alignment: MainAxisAlignment.end,
-        children: [
+        children: <Widget>[
           TextButton(
             style: TextButton.styleFrom(
               shape: const BeveledRectangleBorder(

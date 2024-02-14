@@ -64,19 +64,19 @@ const List<String> _skippedDemos = <String>[];
 List<String> _allDemos = <String>[];
 
 // SerializableFinders for scrolling actions.
-final homeList = find.byValueKey('HomeListView');
-final backButton = find.byValueKey('Back');
-final galleryHeader = find.text('Gallery');
-final categoriesHeader = find.text('Categories');
-final craneFlyList = find.byValueKey('CraneListView-0');
+final SerializableFinder homeList = find.byValueKey('HomeListView');
+final SerializableFinder backButton = find.byValueKey('Back');
+final SerializableFinder galleryHeader = find.text('Gallery');
+final SerializableFinder categoriesHeader = find.text('Categories');
+final SerializableFinder craneFlyList = find.byValueKey('CraneListView-0');
 
 // SerializableFinders for reply study actions.
-final replyFab = find.byValueKey('ReplyFab');
-final replySearch = find.byValueKey('ReplySearch');
-final replyEmail = find.byValueKey('ReplyEmail-0');
-final replyLogo = find.byValueKey('ReplyLogo');
-final replySentMailbox = find.byValueKey('Reply-Sent');
-final replyExit = find.byValueKey('ReplyExit');
+final SerializableFinder replyFab = find.byValueKey('ReplyFab');
+final SerializableFinder replySearch = find.byValueKey('ReplySearch');
+final SerializableFinder replyEmail = find.byValueKey('ReplyEmail-0');
+final SerializableFinder replyLogo = find.byValueKey('ReplyLogo');
+final SerializableFinder replySentMailbox = find.byValueKey('Reply-Sent');
+final SerializableFinder replyExit = find.byValueKey('ReplyExit');
 
 // Let overscroll animation settle on iOS after driver.scroll.
 void handleOverscrollAnimation() {
@@ -135,12 +135,12 @@ Future<void> runDemos(
   late SerializableFinder demoList;
   SerializableFinder? demoItem;
 
-  for (final demo in demos) {
+  for (final String demo in demos) {
     if (_skippedDemos.contains(demo)) continue;
 
     stdout.writeln('> $demo');
 
-    final demoCategory = demo.substring(demo.indexOf('@') + 1);
+    final String demoCategory = demo.substring(demo.indexOf('@') + 1);
     if (demoCategory != currentDemoCategory) {
       // We've switched categories.
       currentDemoCategory = demoCategory;
@@ -193,7 +193,7 @@ Future<void> runDemos(
 
     // We launch each demo twice to be able to measure and compare first and
     // subsequent builds.
-    for (var i = 0; i < 2; i += 1) {
+    for (int i = 0; i < 2; i += 1) {
       stdout.writeln('tapping demo');
       await driver.tap(demoItem); // Launch the demo
 
@@ -258,10 +258,10 @@ void main([List<String> args = const <String>[]]) {
       if (!isTestingCraneOnly) return;
 
       // Collect timeline data for just the Crane study.
-      final timeline = await driver.traceAction(
+      final Timeline timeline = await driver.traceAction(
         () async {
           await runDemos(
-            ['crane@study'],
+            <String>['crane@study'],
             driver,
             additionalActions: () async => await driver.scroll(
               craneFlyList,
@@ -278,7 +278,7 @@ void main([List<String> args = const <String>[]]) {
         ],
       );
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-crane', pretty: true);
     }, timeout: Timeout.none);
 
@@ -286,10 +286,10 @@ void main([List<String> args = const <String>[]]) {
       if (!isTestingReplyOnly) return;
 
       // Collect timeline data for just the Crane study.
-      final timeline = await driver.traceAction(
+      final Timeline timeline = await driver.traceAction(
         () async {
           await runDemos(
-            ['reply@study'],
+            <String>['reply@study'],
             driver,
             additionalActions: () async {
               // Tap compose fab to trigger open container transform/fade through
@@ -322,7 +322,7 @@ void main([List<String> args = const <String>[]]) {
         ],
       );
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-reply', pretty: true);
     }, timeout: Timeout.none);
 
@@ -330,7 +330,7 @@ void main([List<String> args = const <String>[]]) {
       if (isTestingCraneOnly || isTestingReplyOnly) return;
 
       // Collect timeline data for just a limited set of demos to avoid OOMs.
-      final timeline = await driver.traceAction(
+      final Timeline timeline = await driver.traceAction(
         () async {
           await runDemos(_profiledDemos, driver);
         },
@@ -340,11 +340,11 @@ void main([List<String> args = const <String>[]]) {
         ],
       );
 
-      final summary = TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions', pretty: true);
 
       // Execute the remaining tests.
-      final unprofiledDemos = Set<String>.from(_allDemos)
+      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)
         ..removeAll(_profiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
     }, timeout: Timeout.none);

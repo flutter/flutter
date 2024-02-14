@@ -6,12 +6,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/letter_spacing.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/formatters.dart';
+import '../../../data/gallery_options.dart';
+import '../../../layout/letter_spacing.dart';
+import '../../../layout/text_scale.dart';
+import '../colors.dart';
+import '../data.dart';
+import '../formatters.dart';
 
 /// A colored piece of the [RallyPieChart].
 class RallyPieChartSegment {
@@ -25,13 +25,13 @@ class RallyPieChartSegment {
 }
 
 /// The max height and width of the [RallyPieChart].
-const pieChartMaxSize = 500.0;
+const double pieChartMaxSize = 500.0;
 
 List<RallyPieChartSegment> buildSegmentsFromAccountItems(
     List<AccountData> items) {
   return List<RallyPieChartSegment>.generate(
     items.length,
-    (i) {
+    (int i) {
       return RallyPieChartSegment(
         color: RallyColors.accountColor(i),
         value: items[i].primaryAmount,
@@ -43,7 +43,7 @@ List<RallyPieChartSegment> buildSegmentsFromAccountItems(
 List<RallyPieChartSegment> buildSegmentsFromBillItems(List<BillData> items) {
   return List<RallyPieChartSegment>.generate(
     items.length,
-    (i) {
+    (int i) {
       return RallyPieChartSegment(
         color: RallyColors.billColor(i),
         value: items[i].primaryAmount,
@@ -56,7 +56,7 @@ List<RallyPieChartSegment> buildSegmentsFromBudgetItems(
     List<BudgetData> items) {
   return List<RallyPieChartSegment>.generate(
     items.length,
-    (i) {
+    (int i) {
       return RallyPieChartSegment(
         color: RallyColors.budgetColor(i),
         value: items[i].primaryAmount - items[i].amountUsed,
@@ -149,22 +149,22 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final labelTextStyle = textTheme.bodyMedium!.copyWith(
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle labelTextStyle = textTheme.bodyMedium!.copyWith(
       fontSize: 14,
       letterSpacing: letterSpacingOrNone(0.5),
     );
 
-    return LayoutBuilder(builder: (context, constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       // When the widget is larger, we increase the font size.
-      var headlineStyle = constraints.maxHeight >= pieChartMaxSize
+      TextStyle? headlineStyle = constraints.maxHeight >= pieChartMaxSize
           ? textTheme.headlineSmall!.copyWith(fontSize: 70)
           : textTheme.headlineSmall;
 
       // With a large text scale factor, we set a max font size.
       if (GalleryOptions.of(context).textScaleFactor(context) > 1.0) {
         headlineStyle = headlineStyle!.copyWith(
-          fontSize: (headlineStyle.fontSize! / reducedTextScale(context)),
+          fontSize: headlineStyle.fontSize! / reducedTextScale(context),
         );
       }
 
@@ -179,7 +179,7 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
           alignment: Alignment.center,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: <Widget>[
               Text(
                 centerLabel,
                 style: labelTextStyle,
@@ -234,51 +234,51 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     // Create two padded reacts to draw arcs in: one for colored arcs and one for
     // inner bg arc.
-    const strokeWidth = 4.0;
-    final outerRadius = math.min(
+    const double strokeWidth = 4.0;
+    final double outerRadius = math.min(
           configuration.size!.width,
           configuration.size!.height,
         ) /
         2;
-    final outerRect = Rect.fromCircle(
+    final Rect outerRect = Rect.fromCircle(
       center: configuration.size!.center(offset),
       radius: outerRadius - strokeWidth * 3,
     );
-    final innerRect = Rect.fromCircle(
+    final Rect innerRect = Rect.fromCircle(
       center: configuration.size!.center(offset),
       radius: outerRadius - strokeWidth * 4,
     );
 
     // Paint each arc with spacing.
-    var cumulativeSpace = 0.0;
-    var cumulativeTotal = 0.0;
-    for (final segment in segments) {
-      final paint = Paint()..color = segment.color;
-      final startAngle = _calculateStartAngle(cumulativeTotal, cumulativeSpace);
-      final sweepAngle = _calculateSweepAngle(segment.value, 0);
+    double cumulativeSpace = 0.0;
+    double cumulativeTotal = 0.0;
+    for (final RallyPieChartSegment segment in segments) {
+      final Paint paint = Paint()..color = segment.color;
+      final double startAngle = _calculateStartAngle(cumulativeTotal, cumulativeSpace);
+      final double sweepAngle = _calculateSweepAngle(segment.value, 0);
       canvas.drawArc(outerRect, startAngle, sweepAngle, true, paint);
       cumulativeTotal += segment.value;
       cumulativeSpace += spaceRadians;
     }
 
     // Paint any remaining space black (e.g. budget amount remaining).
-    final remaining = wholeAmount - cumulativeTotal;
+    final double remaining = wholeAmount - cumulativeTotal;
     if (remaining > 0) {
-      final paint = Paint()..color = Colors.black;
-      final startAngle =
+      final Paint paint = Paint()..color = Colors.black;
+      final double startAngle =
           _calculateStartAngle(cumulativeTotal, spaceRadians * segments.length);
-      final sweepAngle = _calculateSweepAngle(remaining, -spaceRadians);
+      final double sweepAngle = _calculateSweepAngle(remaining, -spaceRadians);
       canvas.drawArc(outerRect, startAngle, sweepAngle, true, paint);
     }
 
     // Paint a smaller inner circle to cover the painted arcs, so they are
     // display as segments.
-    final bgPaint = Paint()..color = RallyColors.primaryBackground;
+    final Paint bgPaint = Paint()..color = RallyColors.primaryBackground;
     canvas.drawArc(innerRect, 0, 2 * math.pi, true, bgPaint);
   }
 
   double _calculateAngle(double amount, double offset) {
-    final wholeMinusSpacesRadians =
+    final double wholeMinusSpacesRadians =
         wholeRadians - (segments.length * spaceRadians);
     return maxFraction *
         (amount / wholeAmount * wholeMinusSpacesRadians + offset);

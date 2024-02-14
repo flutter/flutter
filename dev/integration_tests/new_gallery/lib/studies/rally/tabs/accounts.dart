@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/rally/charts/pie_chart.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/finance.dart';
-import 'package:gallery/studies/rally/tabs/sidebar.dart';
+import '../charts/pie_chart.dart';
+import '../data.dart';
+import '../finance.dart';
+import 'sidebar.dart';
 
 /// A page that shows a summary of accounts.
 class AccountsView extends StatelessWidget {
@@ -16,9 +16,9 @@ class AccountsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = DummyDataService.getAccountDataList(context);
-    final detailItems = DummyDataService.getAccountDetailList(context);
-    final balanceTotal = sumAccountDataPrimaryAmount(items);
+    final List<AccountData> items = DummyDataService.getAccountDataList(context);
+    final List<UserDetailData> detailItems = DummyDataService.getAccountDetailList(context);
+    final double balanceTotal = sumAccountDataPrimaryAmount(items);
 
     return TabWithSidebar(
       restorationId: 'accounts_view',
@@ -29,8 +29,8 @@ class AccountsView extends StatelessWidget {
         wholeAmount: balanceTotal,
         financialEntityCards: buildAccountDataListViews(items, context),
       ),
-      sidebarItems: [
-        for (UserDetailData item in detailItems)
+      sidebarItems: <Widget>[
+        for (final UserDetailData item in detailItems)
           SidebarItem(title: item.title, value: item.value)
       ],
     );

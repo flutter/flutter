@@ -33,11 +33,11 @@ class _NavRailDemoState extends State<NavRailDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localization = GalleryLocalizations.of(context)!;
-    final destinationFirst = localization.demoNavigationRailFirst;
-    final destinationSecond = localization.demoNavigationRailSecond;
-    final destinationThird = localization.demoNavigationRailThird;
-    final selectedItem = <String>[
+    final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
+    final String destinationFirst = localization.demoNavigationRailFirst;
+    final String destinationSecond = localization.demoNavigationRailSecond;
+    final String destinationThird = localization.demoNavigationRailThird;
+    final List<String> selectedItem = <String>[
       destinationFirst,
       destinationSecond,
       destinationThird
@@ -49,7 +49,7 @@ class _NavRailDemoState extends State<NavRailDemo> with RestorationMixin {
         ),
       ),
       body: Row(
-        children: [
+        children: <Widget>[
           NavigationRail(
             leading: FloatingActionButton(
               onPressed: () {},
@@ -57,13 +57,13 @@ class _NavRailDemoState extends State<NavRailDemo> with RestorationMixin {
               child: const Icon(Icons.add),
             ),
             selectedIndex: _selectedIndex.value,
-            onDestinationSelected: (index) {
+            onDestinationSelected: (int index) {
               setState(() {
                 _selectedIndex.value = index;
               });
             },
             labelType: NavigationRailLabelType.selected,
-            destinations: [
+            destinations: <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: const Icon(
                   Icons.favorite_border,

@@ -5,34 +5,34 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/rally/formatters.dart';
+import 'formatters.dart';
 
 /// Calculates the sum of the primary amounts of a list of [AccountData].
 double sumAccountDataPrimaryAmount(List<AccountData> items) =>
-    sumOf<AccountData>(items, (item) => item.primaryAmount);
+    sumOf<AccountData>(items, (AccountData item) => item.primaryAmount);
 
 /// Calculates the sum of the primary amounts of a list of [BillData].
 double sumBillDataPrimaryAmount(List<BillData> items) =>
-    sumOf<BillData>(items, (item) => item.primaryAmount);
+    sumOf<BillData>(items, (BillData item) => item.primaryAmount);
 
 /// Calculates the sum of the primary amounts of a list of [BillData].
 double sumBillDataPaidAmount(List<BillData> items) => sumOf<BillData>(
-      items.where((item) => item.isPaid).toList(),
-      (item) => item.primaryAmount,
+      items.where((BillData item) => item.isPaid).toList(),
+      (BillData item) => item.primaryAmount,
     );
 
 /// Calculates the sum of the primary amounts of a list of [BudgetData].
 double sumBudgetDataPrimaryAmount(List<BudgetData> items) =>
-    sumOf<BudgetData>(items, (item) => item.primaryAmount);
+    sumOf<BudgetData>(items, (BudgetData item) => item.primaryAmount);
 
 /// Calculates the sum of the amounts used of a list of [BudgetData].
 double sumBudgetDataAmountUsed(List<BudgetData> items) =>
-    sumOf<BudgetData>(items, (item) => item.amountUsed);
+    sumOf<BudgetData>(items, (BudgetData item) => item.amountUsed);
 
 /// Utility function to sum up values in a list.
 double sumOf<T>(List<T> list, double Function(T elt) getValue) {
-  var sum = 0.0;
-  for (var elt in list) {
+  double sum = 0.0;
+  for (final elt in list) {
     sum += getValue(elt);
   }
   return sum;
@@ -144,7 +144,7 @@ class UserDetailData {
 /// In a real app, this might be replaced with some asynchronous service.
 class DummyDataService {
   static List<AccountData> getAccountDataList(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <AccountData>[
       AccountData(
         name: localizations.rallyAccountDataChecking,
@@ -170,7 +170,7 @@ class DummyDataService {
   }
 
   static List<UserDetailData> getAccountDetailList(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyAccountDetailDataAnnualPercentageYield,
@@ -273,7 +273,7 @@ class DummyDataService {
 
   static List<UserDetailData> getBillDetailList(BuildContext context,
       {required double dueTotal, required double paidTotal}) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyBillDetailTotalAmount,
@@ -291,7 +291,7 @@ class DummyDataService {
   }
 
   static List<BudgetData> getBudgetDataList(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <BudgetData>[
       BudgetData(
         name: localizations.rallyBudgetCategoryCoffeeShops,
@@ -318,7 +318,7 @@ class DummyDataService {
 
   static List<UserDetailData> getBudgetDetailList(BuildContext context,
       {required double capTotal, required double usedTotal}) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <UserDetailData>[
       UserDetailData(
         title: localizations.rallyBudgetDetailTotalCap,
@@ -336,7 +336,7 @@ class DummyDataService {
   }
 
   static List<String> getSettingsTitles(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <String>[
       localizations.rallySettingsManageAccounts,
       localizations.rallySettingsTaxDocuments,
@@ -351,7 +351,7 @@ class DummyDataService {
   }
 
   static List<AlertData> getAlerts(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <AlertData>[
       AlertData(
         message: localizations.rallyAlertsMessageHeadsUpShopping(

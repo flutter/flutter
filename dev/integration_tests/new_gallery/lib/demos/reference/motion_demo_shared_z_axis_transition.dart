@@ -10,7 +10,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      onGenerateRoute: (settings) {
+      onGenerateRoute: (RouteSettings settings) {
         return _createHomeRoute();
       },
     );
@@ -18,14 +18,14 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route _createHomeRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (context, animation, secondaryAnimation) {
-        final localizations = GalleryLocalizations.of(context)!;
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
             title: Column(
-              children: [
+              children: <Widget>[
                 Text(localizations.demoSharedZAxisTitle),
                 Text(
                   '(${localizations.demoSharedZAxisDemoInstructions})',
@@ -36,7 +36,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
                 ),
               ],
             ),
-            actions: [
+            actions: <Widget>[
               IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () {
@@ -48,7 +48,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
           body: const _RecipePage(),
         );
       },
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SharedAxisTransition(
           fillColor: Colors.transparent,
           transitionType: SharedAxisTransitionType.scaled,
@@ -62,9 +62,9 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route _createSettingsRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (context, animation, secondaryAnimation) =>
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
           const _SettingsPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SharedAxisTransition(
           fillColor: Colors.transparent,
           transitionType: SharedAxisTransitionType.scaled,
@@ -82,9 +82,9 @@ class _SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final settingsList = <_SettingsInfo>[
+    final List<_SettingsInfo> settingsList = <_SettingsInfo>[
       _SettingsInfo(
         Icons.person,
         localizations.demoSharedZAxisProfileSettingLabel,
@@ -110,8 +110,8 @@ class _SettingsPage extends StatelessWidget {
         ),
       ),
       body: ListView(
-        children: [
-          for (var setting in settingsList) _SettingsTile(setting),
+        children: <Widget>[
+          for (final _SettingsInfo setting in settingsList) _SettingsTile(setting),
         ],
       ),
     );
@@ -125,7 +125,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         ListTile(
           leading: Icon(settingData.settingIcon),
           title: Text(settingData.settingsLabel),
@@ -148,9 +148,9 @@ class _RecipePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final savedRecipes = <_RecipeInfo>[
+    final List<_RecipeInfo> savedRecipes = <_RecipeInfo>[
       _RecipeInfo(
         localizations.demoSharedZAxisBurgerRecipeTitle,
         localizations.demoSharedZAxisBurgerRecipeDescription,
@@ -185,7 +185,7 @@ class _RecipePage extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 8.0),
@@ -195,8 +195,8 @@ class _RecipePage extends StatelessWidget {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(8),
-            children: [
-              for (var recipe in savedRecipes)
+            children: <Widget>[
+              for (final _RecipeInfo recipe in savedRecipes)
                 _RecipeTile(recipe, savedRecipes.indexOf(recipe))
             ],
           ),
@@ -222,7 +222,7 @@ class _RecipeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
+      children: <Widget>[
         SizedBox(
           height: 70,
           width: 100,
@@ -238,7 +238,7 @@ class _RecipeTile extends StatelessWidget {
         const SizedBox(width: 24),
         Expanded(
           child: Column(
-            children: [
+            children: <Widget>[
               ListTile(
                 title: Text(_recipe.recipeName),
                 subtitle: Text(_recipe.recipeDescription),

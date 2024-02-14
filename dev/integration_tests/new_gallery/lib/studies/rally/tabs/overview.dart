@@ -7,13 +7,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/text_scale.dart';
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/finance.dart';
-import 'package:gallery/studies/rally/formatters.dart';
+import '../../../data/gallery_options.dart';
+import '../../../layout/adaptive.dart';
+import '../../../layout/text_scale.dart';
+import '../colors.dart';
+import '../data.dart';
+import '../finance.dart';
+import '../formatters.dart';
 
 /// A page that shows a status overview.
 class OverviewView extends StatefulWidget {
@@ -26,17 +26,17 @@ class OverviewView extends StatefulWidget {
 class _OverviewViewState extends State<OverviewView> {
   @override
   Widget build(BuildContext context) {
-    final alerts = DummyDataService.getAlerts(context);
+    final List<AlertData> alerts = DummyDataService.getAlerts(context);
 
     if (isDisplayDesktop(context)) {
-      const sortKeyName = 'Overview';
+      const String sortKeyName = 'Overview';
       return SingleChildScrollView(
         restorationId: 'overview_scroll_view',
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Flexible(
                 flex: 7,
                 child: Semantics(
@@ -67,7 +67,7 @@ class _OverviewViewState extends State<OverviewView> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
-            children: [
+            children: <Widget>[
               _AlertsView(alerts: alerts.sublist(0, 1)),
               const SizedBox(height: 12),
               const _OverviewGrid(spacing: 12),
@@ -86,28 +86,28 @@ class _OverviewGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountDataList = DummyDataService.getAccountDataList(context);
-    final billDataList = DummyDataService.getBillDataList(context);
-    final budgetDataList = DummyDataService.getBudgetDataList(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final List<AccountData> accountDataList = DummyDataService.getAccountDataList(context);
+    final List<BillData> billDataList = DummyDataService.getBillDataList(context);
+    final List<BudgetData> budgetDataList = DummyDataService.getBudgetDataList(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final textScaleFactor =
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      final double textScaleFactor =
           GalleryOptions.of(context).textScaleFactor(context);
 
       // Only display multiple columns when the constraints allow it and we
       // have a regular text scale factor.
-      const minWidthForTwoColumns = 600;
-      final hasMultipleColumns = isDisplayDesktop(context) &&
+      const int minWidthForTwoColumns = 600;
+      final bool hasMultipleColumns = isDisplayDesktop(context) &&
           constraints.maxWidth > minWidthForTwoColumns &&
           textScaleFactor <= 2;
-      final boxWidth = hasMultipleColumns
+      final double boxWidth = hasMultipleColumns
           ? constraints.maxWidth / 2 - spacing / 2
           : double.infinity;
 
       return Wrap(
         runSpacing: spacing,
-        children: [
+        children: <Widget>[
           SizedBox(
             width: boxWidth,
             child: _FinancialView(
@@ -151,14 +151,14 @@ class _AlertsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final bool isDesktop = isDisplayDesktop(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsetsDirectional.only(start: 16, top: 4, bottom: 4),
       color: RallyColors.cardBackground,
       child: Column(
-        children: [
+        children: <Widget>[
           Container(
             width: double.infinity,
             padding:
@@ -167,7 +167,7 @@ class _AlertsView extends StatelessWidget {
               child: Wrap(
                 alignment: WrapAlignment.spaceBetween,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
+                children: <Widget>[
                   Text(localizations.rallyAlerts),
                   if (!isDesktop)
                     TextButton(
@@ -181,7 +181,7 @@ class _AlertsView extends StatelessWidget {
               ),
             ),
           ),
-          for (AlertData alert in alerts!) ...[
+          for (final AlertData alert in alerts!) ...<Widget>[
             Container(color: RallyColors.primaryBackground, height: 1),
             _Alert(alert: alert),
           ]
@@ -205,7 +205,7 @@ class _Alert extends StatelessWidget {
             : null,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             Expanded(
               child: SelectableText(alert.message!),
             ),
@@ -243,18 +243,18 @@ class _FinancialView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return FocusTraversalOrder(
       order: NumericFocusOrder(order!),
       child: Container(
         color: RallyColors.cardBackground,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: <Widget>[
             MergeSemantics(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+                children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(
                       top: 16,

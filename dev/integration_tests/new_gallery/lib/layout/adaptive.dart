@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/material.dart';
 
 /// The maximum width taken up by each item on the home screen.
-const maxHomeItemWidth = 1400.0;
+const double maxHomeItemWidth = 1400.0;
 
 /// Returns a boolean value whether the window is considered medium or large size.
 ///
@@ -32,7 +34,7 @@ bool isDisplaySmallDesktop(BuildContext context) {
 /// screen into two, left and right sub-screens. Horizontal splits (top and
 /// bottom sub-screens) are ignored for this application.
 bool isDisplayFoldable(BuildContext context) {
-  final hinge = MediaQuery.of(context).hinge;
+  final DisplayFeature? hinge = MediaQuery.of(context).hinge;
   if (hinge == null) {
     return false;
   } else {

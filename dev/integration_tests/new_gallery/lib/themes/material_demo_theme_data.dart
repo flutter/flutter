@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MaterialDemoThemeData {
-  static final themeData = ThemeData(
+  static final ThemeData themeData = ThemeData(
       colorScheme: _colorScheme.copyWith(
         background: Colors.white,
       ),
@@ -28,7 +28,7 @@ class MaterialDemoThemeData {
         color: _colorScheme.primary,
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -38,7 +38,7 @@ class MaterialDemoThemeData {
         }),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -51,7 +51,7 @@ class MaterialDemoThemeData {
         behavior: SnackBarBehavior.floating,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -59,7 +59,7 @@ class MaterialDemoThemeData {
               ? _colorScheme.primary
               : null;
         }),
-        trackColor: MaterialStateProperty.resolveWith<Color?>((states) {
+        trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -69,7 +69,7 @@ class MaterialDemoThemeData {
         }),
       ));
 
-  static const _colorScheme = ColorScheme(
+  static const ColorScheme _colorScheme = ColorScheme(
     primary: Color(0xFF6200EE),
     primaryContainer: Color(0xFF6200EE),
     secondary: Color(0xFFFF5722),

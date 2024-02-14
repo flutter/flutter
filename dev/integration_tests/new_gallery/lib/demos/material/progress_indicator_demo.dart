@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 // BEGIN progressIndicatorsDemo
 
@@ -35,7 +35,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       parent: _controller,
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
-    )..addStatusListener((status) {
+    )..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.dismissed) {
           _controller.forward();
         } else if (status == AnimationStatus.completed) {
@@ -65,7 +65,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
     switch (widget.type) {
       case ProgressIndicatorDemoType.circular:
         return Column(
-          children: [
+          children: <Widget>[
             CircularProgressIndicator(
               semanticsLabel: GalleryLocalizations.of(context)!.loading,
             ),
@@ -75,7 +75,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
         );
       case ProgressIndicatorDemoType.linear:
         return Column(
-          children: [
+          children: <Widget>[
             const LinearProgressIndicator(),
             const SizedBox(height: 32),
             LinearProgressIndicator(value: _animation.value),

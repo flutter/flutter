@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/themes/gallery_theme_data.dart';
+import '../../themes/gallery_theme_data.dart';
 import 'transformations_demo_board.dart';
 import 'transformations_demo_color_picker.dart';
 
-const backgroundColor = Color(0xFF272727);
+const Color backgroundColor = Color(0xFF272727);
 
 // The panel for editing a board point.
 @immutable
@@ -23,7 +23,7 @@ class EditBoardPoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boardPointColors = <Color>{
+    final Set<Color> boardPointColors = <Color>{
       Colors.white,
       GalleryThemeData.darkColorScheme.primary,
       GalleryThemeData.darkColorScheme.primaryContainer,
@@ -33,7 +33,7 @@ class EditBoardPoint extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      children: <Widget>[
         Text(
           '${boardPoint.q}, ${boardPoint.r}',
           textAlign: TextAlign.right,

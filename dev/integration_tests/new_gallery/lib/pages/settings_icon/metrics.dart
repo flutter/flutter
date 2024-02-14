@@ -6,40 +6,40 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 // Color gradients.
-const pinkLeft = Color(0xFFFF5983);
-const pinkRight = Color(0xFFFF8383);
+const Color pinkLeft = Color(0xFFFF5983);
+const Color pinkRight = Color(0xFFFF8383);
 
-const tealLeft = Color(0xFF1CDDC8);
-const tealRight = Color(0xFF00A5B3);
+const Color tealLeft = Color(0xFF1CDDC8);
+const Color tealRight = Color(0xFF00A5B3);
 
 // Dimensions.
-const unitHeight = 1;
-const unitWidth = 1;
+const int unitHeight = 1;
+const int unitWidth = 1;
 
-const stickLength = 5 / 9;
-const stickWidth = 5 / 36;
-const stickRadius = stickWidth / 2;
-const knobDiameter = 5 / 54;
-const knobRadius = knobDiameter / 2;
-const stickGap = 5 / 54;
+const double stickLength = 5 / 9;
+const double stickWidth = 5 / 36;
+const double stickRadius = stickWidth / 2;
+const double knobDiameter = 5 / 54;
+const double knobRadius = knobDiameter / 2;
+const double stickGap = 5 / 54;
 
 // Locations.
-const knobDistanceFromCenter = stickGap / 2 + stickWidth / 2;
-const lowerKnobCenter = Offset(0, knobDistanceFromCenter);
-const upperKnobCenter = Offset(0, -knobDistanceFromCenter);
+const double knobDistanceFromCenter = stickGap / 2 + stickWidth / 2;
+const Offset lowerKnobCenter = Offset(0, knobDistanceFromCenter);
+const Offset upperKnobCenter = Offset(0, -knobDistanceFromCenter);
 
-const knobDeviation = stickLength / 2 - stickRadius;
+const double knobDeviation = stickLength / 2 - stickRadius;
 
 // Key moments in animation.
-const _colorKnobContractionBegins = 1 / 23;
-const _monoKnobExpansionEnds = 11 / 23;
-const _colorKnobContractionEnds = 14 / 23;
+const double _colorKnobContractionBegins = 1 / 23;
+const double _monoKnobExpansionEnds = 11 / 23;
+const double _colorKnobContractionEnds = 14 / 23;
 
 // Stages.
 bool isTransitionPhase(double time) => time < _colorKnobContractionEnds;
 
 // Curve easing.
-const _curve = Curves.easeInOutCubic;
+const Cubic _curve = Curves.easeInOutCubic;
 
 double _progress(
   double time, {
@@ -98,16 +98,16 @@ Offset lowerColorOffset(double time) =>
 double knobRotation(double time) => _rotationProgress(time) * pi / 4;
 
 Offset knobCenter(double time) {
-  final progress = _rotationProgress(time);
+  final double progress = _rotationProgress(time);
   if (progress == 0) {
     return lowerKnobCenter;
   } else if (progress == 1) {
     return upperKnobCenter;
   } else {
     // Calculates the current location.
-    final center = Offset(knobDistanceFromCenter / tan(pi / 8), 0);
-    final radius = (lowerKnobCenter - center).distance;
-    final angle = pi + (progress - 1 / 2) * pi / 4;
+    final Offset center = Offset(knobDistanceFromCenter / tan(pi / 8), 0);
+    final double radius = (lowerKnobCenter - center).distance;
+    final double angle = pi + (progress - 1 / 2) * pi / 4;
     return center + Offset.fromDirection(angle, radius);
   }
 }

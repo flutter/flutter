@@ -12,7 +12,7 @@ void showAboutDialog({
 }) {
   showDialog<void>(
     context: context,
-    builder: (context) {
+    builder: (BuildContext context) {
       return _AboutDialog();
     },
   );
@@ -25,20 +25,20 @@ Future<String> getVersionNumber() async {
 class _AboutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final bodyTextStyle =
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle bodyTextStyle =
         textTheme.bodyLarge!.apply(color: colorScheme.onPrimary);
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    const name = 'Flutter Gallery'; // Don't need to localize.
-    const legalese = '© 2021 The Flutter team'; // Don't need to localize.
-    final repoText = localizations.githubRepo(name);
-    final seeSource = localizations.aboutDialogDescription(repoText);
-    final repoLinkIndex = seeSource.indexOf(repoText);
-    final repoLinkIndexEnd = repoLinkIndex + repoText.length;
-    final seeSourceFirst = seeSource.substring(0, repoLinkIndex);
-    final seeSourceSecond = seeSource.substring(repoLinkIndexEnd);
+    const String name = 'Flutter Gallery'; // Don't need to localize.
+    const String legalese = '© 2021 The Flutter team'; // Don't need to localize.
+    final String repoText = localizations.githubRepo(name);
+    final String seeSource = localizations.aboutDialogDescription(repoText);
+    final int repoLinkIndex = seeSource.indexOf(repoText);
+    final int repoLinkIndexEnd = repoLinkIndex + repoText.length;
+    final String seeSourceFirst = seeSource.substring(0, repoLinkIndex);
+    final String seeSourceSecond = seeSource.substring(repoLinkIndexEnd);
 
     return AlertDialog(
       backgroundColor: colorScheme.background,
@@ -48,10 +48,10 @@ class _AboutDialog extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             FutureBuilder(
               future: getVersionNumber(),
-              builder: (context, snapshot) => SelectableText(
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) => SelectableText(
                 snapshot.hasData ? '$name ${snapshot.data}' : name,
                 style: textTheme.headlineMedium!.apply(
                   color: colorScheme.onPrimary,
@@ -61,7 +61,7 @@ class _AboutDialog extends StatelessWidget {
             const SizedBox(height: 24),
             SelectableText.rich(
               TextSpan(
-                children: [
+                children: <InlineSpan>[
                   TextSpan(
                     style: bodyTextStyle,
                     text: seeSourceFirst,
@@ -73,7 +73,7 @@ class _AboutDialog extends StatelessWidget {
                     text: repoText,
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-                        final url =
+                        final Uri url =
                             Uri.parse('https://github.com/flutter/gallery/');
                         if (await canLaunchUrl(url)) {
                           await launchUrl(url);
@@ -95,11 +95,11 @@ class _AboutDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
+      actions: <Widget>[
         TextButton(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (context) => Theme(
+              builder: (BuildContext context) => Theme(
                 data: Theme.of(context).copyWith(
                   textTheme: Typography.material2018(
                     platform: Theme.of(context).platform,

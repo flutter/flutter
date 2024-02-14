@@ -10,7 +10,7 @@ import 'package:gallery/studies/reply/search_page.dart';
 void main() {
   testWidgets(
     'State restoration test - Home Page',
-    (tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(const GalleryApp());
       // Let the splash page animations complete.
       await tester.pump(const Duration(seconds: 1));
@@ -61,7 +61,7 @@ void main() {
 
   testWidgets(
     'State restoration test -  Gallery Demo',
-    (tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(const GalleryApp());
       // Let the splash page animations complete.
       await tester.pump(const Duration(seconds: 1));
@@ -82,7 +82,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(GalleryDemoPage), findsOneWidget);
 
-      const bannerDescriptionText = 'A banner displays an important, succinct '
+      const String bannerDescriptionText = 'A banner displays an important, succinct '
           'message, and provides actions for users to address (or dismiss the '
           'banner). A user action is required for it to be dismissed.';
 
@@ -103,7 +103,7 @@ void main() {
 
   testWidgets(
     'State restoration test - Reply Study',
-    (tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(const GalleryApp());
       // Let the splash page animations complete.
       await tester.pump(const Duration(seconds: 1));

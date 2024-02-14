@@ -19,22 +19,22 @@ class CupertinoNavigationBarDemo extends StatelessWidget {
     return Navigator(
       restorationScopeId: 'navigator',
       initialRoute: CupertinoNavigationBarDemo.homeRoute,
-      onGenerateRoute: (settings) {
+      onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {
           case CupertinoNavigationBarDemo.homeRoute:
             return _NoAnimationCupertinoPageRoute<void>(
               title: GalleryLocalizations.of(context)!
                   .demoCupertinoNavigationBarTitle,
               settings: settings,
-              builder: (context) => _FirstPage(),
+              builder: (BuildContext context) => _FirstPage(),
             );
           case CupertinoNavigationBarDemo.secondPageRoute:
-            final arguments = settings.arguments as Map<dynamic, dynamic>;
-            final title = arguments['pageTitle'] as String?;
+            final Map arguments = settings.arguments! as Map<dynamic, dynamic>;
+            final String? title = arguments['pageTitle'] as String?;
             return CupertinoPageRoute<void>(
               title: title,
               settings: settings,
-              builder: (context) => _SecondPage(),
+              builder: (BuildContext context) => _SecondPage(),
             );
         }
         return null;
@@ -48,7 +48,7 @@ class _FirstPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
-        slivers: [
+        slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             automaticallyImplyLeading: false,
           ),
@@ -57,14 +57,14 @@ class _FirstPage extends StatelessWidget {
                 MediaQuery.of(context).removePadding(removeTop: true).padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final title = GalleryLocalizations.of(context)!
+                (BuildContext context, int index) {
+                  final String title = GalleryLocalizations.of(context)!
                       .starterAppDrawerItem(index + 1);
                   return ListTile(
                     onTap: () {
                       Navigator.of(context).restorablePushNamed<void>(
                         CupertinoNavigationBarDemo.secondPageRoute,
-                        arguments: {'pageTitle': title},
+                        arguments: <String, String>{'pageTitle': title},
                       );
                     },
                     title: Text(title),

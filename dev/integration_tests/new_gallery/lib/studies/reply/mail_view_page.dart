@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/studies/reply/model/email_model.dart';
-import 'package:gallery/studies/reply/model/email_store.dart';
-import 'package:gallery/studies/reply/profile_avatar.dart';
 import 'package:provider/provider.dart';
+
+import 'model/email_model.dart';
+import 'model/email_store.dart';
+import 'profile_avatar.dart';
 
 class MailViewPage extends StatelessWidget {
   const MailViewPage({
@@ -32,11 +33,11 @@ class MailViewPage extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   _MailViewHeader(email: email),
                   const SizedBox(height: 32),
                   _MailViewBody(message: email.message),
-                  if (email.containsPictures) ...[
+                  if (email.containsPictures) ...<Widget>[
                     const SizedBox(height: 28),
                     const _PictureGrid(),
                   ],
@@ -58,13 +59,13 @@ class _MailViewHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
-      children: [
+      children: <Widget>[
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             Expanded(
               child: SelectableText(
                 email.subject,
@@ -88,12 +89,12 @@ class _MailViewHeader extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
+              children: <Widget>[
                 SelectableText('${email.sender} - ${email.time}'),
                 const SizedBox(height: 4),
                 SelectableText(
@@ -156,7 +157,7 @@ class _PictureGrid extends StatelessWidget {
         mainAxisSpacing: 4,
       ),
       itemCount: 4,
-      itemBuilder: (context, index) {
+      itemBuilder: (BuildContext context, int index) {
         return Image.asset(
           'reply/attachments/paris_${index + 1}.jpg',
           gaplessPlayback: true,

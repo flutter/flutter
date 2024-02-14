@@ -4,11 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/layout/text_scale.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+
+import '../../data/gallery_options.dart';
+import '../../layout/image_placeholder.dart';
+import '../../layout/text_scale.dart';
 
 class ArticleData {
   ArticleData({
@@ -38,15 +39,15 @@ class HorizontalArticlePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               SelectableText(
                 data.category,
                 style: textTheme.titleMedium,
@@ -59,7 +60,7 @@ class HorizontalArticlePreview extends StatelessWidget {
             ],
           ),
         ),
-        if (minutes != null) ...[
+        if (minutes != null) ...<Widget>[
           SelectableText(
             GalleryLocalizations.of(context)!.craneMinutes(minutes!),
             style: textTheme.bodyLarge,
@@ -97,13 +98,13 @@ class VerticalArticlePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return SizedBox(
       width: width ?? double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           SizedBox(
             width: double.infinity,
             child: FadeInImagePlaceholder(
@@ -111,7 +112,7 @@ class VerticalArticlePreview extends StatelessWidget {
                 data.imageUrl,
                 package: 'flutter_gallery_assets',
               ),
-              placeholder: LayoutBuilder(builder: (context, constraints) {
+              placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                 return Container(
                   color: Colors.black.withOpacity(0.1),
                   width: constraints.maxWidth,
@@ -133,7 +134,7 @@ class VerticalArticlePreview extends StatelessWidget {
             data.title,
             style: headlineTextStyle ?? textTheme.headlineSmall,
           ),
-          if (showSnippet) ...[
+          if (showSnippet) ...<Widget>[
             const SizedBox(height: 4),
             SelectableText(
               data.snippet!,
@@ -147,18 +148,18 @@ class VerticalArticlePreview extends StatelessWidget {
 }
 
 List<Widget> buildArticlePreviewItems(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
-  Widget articleDivider = Container(
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+  final Widget articleDivider = Container(
     margin: const EdgeInsets.symmetric(vertical: 16),
     color: Colors.black.withOpacity(0.07),
     height: 1,
   );
-  Widget sectionDivider = Container(
+  final Widget sectionDivider = Container(
     margin: const EdgeInsets.symmetric(vertical: 16),
     color: Colors.black.withOpacity(0.2),
     height: 1,
   );
-  final textTheme = Theme.of(context).textTheme;
+  final TextTheme textTheme = Theme.of(context).textTheme;
 
   return <Widget>[
     VerticalArticlePreview(
@@ -232,22 +233,22 @@ class HashtagBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final verticalDivider = Container(
+    final Container verticalDivider = Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.black.withOpacity(0.1),
       width: 1,
     );
-    final textTheme = Theme.of(context).textTheme;
-    final height = 32 * reducedTextScale(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final double height = 32 * reducedTextScale(context);
 
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return SizedBox(
       height: height,
       child: ListView(
         restorationId: 'hashtag_bar_list_view',
         scrollDirection: Axis.horizontal,
-        children: [
+        children: <Widget>[
           const SizedBox(width: 16),
           Center(
             child: SelectableText(
@@ -297,12 +298,12 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListView(
-      children: [
+      children: <Widget>[
         if (isCloseable)
           Row(
-            children: [
+            children: <Widget>[
               IconButton(
                 icon: const Icon(Icons.close),
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
@@ -345,7 +346,7 @@ class MenuItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        children: [
+        children: <Widget>[
           Container(
             width: 32,
             alignment: Alignment.centerLeft,
@@ -380,19 +381,19 @@ class StockItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final percentFormat = NumberFormat.decimalPercentPattern(
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final NumberFormat percentFormat = NumberFormat.decimalPercentPattern(
       locale: GalleryOptions.of(context).locale.toString(),
       decimalDigits: 2,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         SelectableText(ticker, style: textTheme.titleMedium),
         const SizedBox(height: 2),
         Row(
-          children: [
+          children: <Widget>[
             Expanded(
               child: SelectableText(
                 price,
@@ -426,12 +427,12 @@ class StockItem extends StatelessWidget {
 }
 
 List<Widget> buildStockItems(BuildContext context) {
-  Widget articleDivider = Container(
+  final Widget articleDivider = Container(
     margin: const EdgeInsets.symmetric(vertical: 16),
     color: Colors.black.withOpacity(0.07),
     height: 1,
   );
-  const imageAspectRatio = 165 / 55;
+  const double imageAspectRatio = 165 / 55;
 
   return <Widget>[
     SizedBox(
@@ -441,7 +442,7 @@ List<Widget> buildStockItems(BuildContext context) {
           'fortnightly/fortnightly_chart.png',
           package: 'flutter_gallery_assets',
         ),
-        placeholder: LayoutBuilder(builder: (context, constraints) {
+        placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
           return Container(
             color: Colors.black.withOpacity(0.1),
             width: constraints.maxWidth,
@@ -499,11 +500,11 @@ class VideoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         SizedBox(
           width: double.infinity,
           child: FadeInImagePlaceholder(
@@ -511,7 +512,7 @@ class VideoPreview extends StatelessWidget {
               data.imageUrl,
               package: 'flutter_gallery_assets',
             ),
-            placeholder: LayoutBuilder(builder: (context, constraints) {
+            placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return Container(
                 color: Colors.black.withOpacity(0.1),
                 width: constraints.maxWidth,
@@ -525,7 +526,7 @@ class VideoPreview extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Row(
-          children: [
+          children: <Widget>[
             Expanded(
               child: SelectableText(
                 data.category,
@@ -544,7 +545,7 @@ class VideoPreview extends StatelessWidget {
 }
 
 List<Widget> buildVideoPreviewItems(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   return <Widget>[
     VideoPreview(
       data: ArticleData(
@@ -569,7 +570,7 @@ List<Widget> buildVideoPreviewItems(BuildContext context) {
 }
 
 ThemeData buildTheme(BuildContext context) {
-  final lightTextTheme = ThemeData.light().textTheme;
+  final TextTheme lightTextTheme = ThemeData.light().textTheme;
   return ThemeData(
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(

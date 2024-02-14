@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/layout/highlight_focus.dart';
-import 'package:gallery/layout/image_placeholder.dart';
-import 'package:gallery/studies/crane/model/destination.dart';
+import '../../layout/adaptive.dart';
+import '../../layout/highlight_focus.dart';
+import '../../layout/image_placeholder.dart';
+import 'model/destination.dart';
 
 // Width and height for thumbnail images.
-const mobileThumbnailSize = 60.0;
+const double mobileThumbnailSize = 60.0;
 
 class DestinationCard extends StatelessWidget {
   const DestinationCard({
@@ -21,17 +21,17 @@ class DestinationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final textTheme = Theme.of(context).textTheme;
+    final bool isDesktop = isDisplayDesktop(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
-    Widget card = isDesktop
+    final Widget card = isDesktop
         ? Padding(
             padding: const EdgeInsets.only(bottom: 40),
             child: Semantics(
               container: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(4)),
                     child: _DestinationImage(destination: destination),
@@ -54,7 +54,7 @@ class DestinationCard extends StatelessWidget {
           )
         : Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               ListTile(
                 contentPadding: const EdgeInsetsDirectional.only(end: 8),
                 leading: ClipRRect(
@@ -95,7 +95,7 @@ class _DestinationImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     return Semantics(
       label: destination.assetSemanticLabel,
@@ -108,7 +108,7 @@ class _DestinationImage extends StatelessWidget {
           fit: BoxFit.cover,
           width: isDesktop ? null : mobileThumbnailSize,
           height: isDesktop ? null : mobileThumbnailSize,
-          placeholder: LayoutBuilder(builder: (context, constraints) {
+          placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return Container(
               color: Colors.black.withOpacity(0.1),
               width: constraints.maxWidth,

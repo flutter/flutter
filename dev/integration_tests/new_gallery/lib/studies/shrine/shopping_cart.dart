@@ -5,17 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/layout/letter_spacing.dart';
-import 'package:gallery/studies/shrine/colors.dart';
-import 'package:gallery/studies/shrine/expanding_bottom_sheet.dart';
-import 'package:gallery/studies/shrine/model/app_state_model.dart';
-import 'package:gallery/studies/shrine/model/product.dart';
-import 'package:gallery/studies/shrine/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-const _startColumnWidth = 60.0;
-const _ordinalSortKeyName = 'shopping_cart';
+import '../../layout/letter_spacing.dart';
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
+import 'theme.dart';
+
+const double _startColumnWidth = 60.0;
+const String _ordinalSortKeyName = 'shopping_cart';
 
 class ShoppingCartPage extends StatefulWidget {
   const ShoppingCartPage({super.key});
@@ -28,7 +29,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<Widget> _createShoppingCartRows(AppStateModel model) {
     return model.productsInCart.keys
         .map(
-          (id) => ShoppingCartRow(
+          (int id) => ShoppingCartRow(
             product: model.getProductById(id),
             quantity: model.productsInCart[id],
             onPressed: () {
@@ -41,23 +42,23 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   @override
   Widget build(BuildContext context) {
-    final localTheme = Theme.of(context);
+    final ThemeData localTheme = Theme.of(context);
     return Scaffold(
       backgroundColor: shrinePink50,
       body: SafeArea(
         child: ScopedModelDescendant<AppStateModel>(
-          builder: (context, child, model) {
-            final localizations = GalleryLocalizations.of(context)!;
-            final expandingBottomSheet = ExpandingBottomSheet.of(context);
+          builder: (BuildContext context, Widget? child, AppStateModel model) {
+            final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+            final ExpandingBottomSheetState? expandingBottomSheet = ExpandingBottomSheet.of(context);
             return Stack(
-              children: [
+              children: <Widget>[
                 ListView(
-                  children: [
+                  children: <Widget>[
                     Semantics(
                       sortKey:
                           const OrdinalSortKey(0, name: _ordinalSortKeyName),
                       child: Row(
-                        children: [
+                        children: <Widget>[
                           SizedBox(
                             width: _startColumnWidth,
                             child: IconButton(
@@ -144,30 +145,29 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final smallAmountStyle =
+    final TextStyle smallAmountStyle =
         Theme.of(context).textTheme.bodyMedium!.copyWith(color: shrineBrown600);
-    final largeAmountStyle = Theme.of(context)
+    final TextStyle largeAmountStyle = Theme.of(context)
         .textTheme
         .headlineMedium!
         .copyWith(letterSpacing: letterSpacingOrNone(mediumLetterSpacing));
-    final formatter = NumberFormat.simpleCurrency(
+    final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
     );
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Row(
-      children: [
+      children: <Widget>[
         const SizedBox(width: _startColumnWidth),
         Expanded(
           child: Padding(
             padding: const EdgeInsetsDirectional.only(end: 16),
             child: Column(
-              children: [
+              children: <Widget>[
                 MergeSemantics(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
+                    children: <Widget>[
                       SelectableText(
                         localizations.shrineCartTotalCaption,
                       ),
@@ -184,7 +184,7 @@ class ShoppingCartSummary extends StatelessWidget {
                 const SizedBox(height: 16),
                 MergeSemantics(
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       SelectableText(
                         localizations.shrineCartSubtotalCaption,
                       ),
@@ -201,7 +201,7 @@ class ShoppingCartSummary extends StatelessWidget {
                 const SizedBox(height: 4),
                 MergeSemantics(
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       SelectableText(
                         localizations.shrineCartShippingCaption,
                       ),
@@ -218,7 +218,7 @@ class ShoppingCartSummary extends StatelessWidget {
                 const SizedBox(height: 4),
                 MergeSemantics(
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       SelectableText(
                         localizations.shrineCartTaxCaption,
                       ),
@@ -255,20 +255,20 @@ class ShoppingCartRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.simpleCurrency(
+    final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,
       locale: Localizations.localeOf(context).toString(),
     );
-    final localTheme = Theme.of(context);
+    final ThemeData localTheme = Theme.of(context);
 
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         key: ValueKey<int>(product.id),
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Semantics(
             container: true,
             label: localizations
@@ -290,10 +290,10 @@ class ShoppingCartRow extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsetsDirectional.only(end: 16),
               child: Column(
-                children: [
+                children: <Widget>[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Image.asset(
                         product.assetName,
                         package: product.assetPackage,
@@ -307,10 +307,10 @@ class ShoppingCartRow extends StatelessWidget {
                         child: MergeSemantics(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: <Widget>[
                               MergeSemantics(
                                 child: Row(
-                                  children: [
+                                  children: <Widget>[
                                     Expanded(
                                       child: SelectableText(
                                         localizations

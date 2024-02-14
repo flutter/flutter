@@ -6,13 +6,14 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/letter_spacing.dart';
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/home.dart';
-import 'package:gallery/studies/rally/login.dart';
-import 'package:gallery/studies/rally/routes.dart' as routes;
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../data/gallery_options.dart';
+import '../../layout/letter_spacing.dart';
+import 'colors.dart';
+import 'home.dart';
+import 'login.dart';
+import 'routes.dart' as routes;
 
 /// The RallyApp is a MaterialApp with a theme and 2 routes.
 ///
@@ -24,7 +25,7 @@ class RallyApp extends StatelessWidget {
   static const String loginRoute = routes.loginRoute;
   static const String homeRoute = routes.homeRoute;
 
-  final sharedZAxisTransitionBuilder = const SharedAxisPageTransitionsBuilder(
+  final SharedAxisPageTransitionsBuilder sharedZAxisTransitionBuilder = const SharedAxisPageTransitionsBuilder(
     fillColor: RallyColors.primaryBackground,
     transitionType: SharedAxisTransitionType.scaled,
   );
@@ -38,8 +39,8 @@ class RallyApp extends StatelessWidget {
       theme: _buildRallyTheme().copyWith(
         platform: GalleryOptions.of(context).platform,
         pageTransitionsTheme: PageTransitionsTheme(
-          builders: {
-            for (var type in TargetPlatform.values)
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            for (final TargetPlatform type in TargetPlatform.values)
               type: sharedZAxisTransitionBuilder,
           },
         ),
@@ -49,14 +50,14 @@ class RallyApp extends StatelessWidget {
       locale: GalleryOptions.of(context).locale,
       initialRoute: loginRoute,
       routes: <String, WidgetBuilder>{
-        homeRoute: (context) => const HomePage(),
-        loginRoute: (context) => const LoginPage(),
+        homeRoute: (BuildContext context) => const HomePage(),
+        loginRoute: (BuildContext context) => const LoginPage(),
       },
     );
   }
 
   ThemeData _buildRallyTheme() {
-    final base = ThemeData.dark();
+    final ThemeData base = ThemeData.dark();
     return ThemeData(
       appBarTheme: const AppBarTheme(
         systemOverlayStyle: SystemUiOverlayStyle.light,

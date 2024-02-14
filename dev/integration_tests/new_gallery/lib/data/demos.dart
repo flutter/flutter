@@ -9,34 +9,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations_en.dart'
     show GalleryLocalizationsEn;
-import 'package:gallery/codeviewer/code_displayer.dart';
-import 'package:gallery/codeviewer/code_segments.dart';
-import 'package:gallery/data/icons.dart';
-import 'package:gallery/deferred_widget.dart';
-import 'package:gallery/demos/cupertino/cupertino_demos.dart'
-    deferred as cupertino_demos;
-import 'package:gallery/demos/cupertino/demo_types.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
-import 'package:gallery/demos/material/material_demos.dart'
-    deferred as material_demos;
-import 'package:gallery/demos/reference/colors_demo.dart'
-    deferred as colors_demo;
-import 'package:gallery/demos/reference/motion_demo_container_transition.dart'
-    deferred as motion_demo_container;
-import 'package:gallery/demos/reference/motion_demo_fade_scale_transition.dart';
-import 'package:gallery/demos/reference/motion_demo_fade_through_transition.dart';
-import 'package:gallery/demos/reference/motion_demo_shared_x_axis_transition.dart';
-import 'package:gallery/demos/reference/motion_demo_shared_y_axis_transition.dart';
-import 'package:gallery/demos/reference/motion_demo_shared_z_axis_transition.dart';
-import 'package:gallery/demos/reference/transformations_demo.dart'
-    deferred as transformations_demo;
-import 'package:gallery/demos/reference/two_pane_demo.dart'
-    deferred as twopane_demo;
-import 'package:gallery/demos/reference/typography_demo.dart'
-    deferred as typography;
 
-const _docsBaseUrl = 'https://api.flutter.dev/flutter';
-const _docsAnimationsUrl =
+import '../codeviewer/code_displayer.dart';
+import '../codeviewer/code_segments.dart';
+import '../deferred_widget.dart';
+import '../demos/cupertino/cupertino_demos.dart'
+    deferred as cupertino_demos;
+import '../demos/cupertino/demo_types.dart';
+import '../demos/material/material_demo_types.dart';
+import '../demos/material/material_demos.dart'
+    deferred as material_demos;
+import '../demos/reference/colors_demo.dart'
+    deferred as colors_demo;
+import '../demos/reference/motion_demo_container_transition.dart'
+    deferred as motion_demo_container;
+import '../demos/reference/motion_demo_fade_scale_transition.dart';
+import '../demos/reference/motion_demo_fade_through_transition.dart';
+import '../demos/reference/motion_demo_shared_x_axis_transition.dart';
+import '../demos/reference/motion_demo_shared_y_axis_transition.dart';
+import '../demos/reference/motion_demo_shared_z_axis_transition.dart';
+import '../demos/reference/transformations_demo.dart'
+    deferred as transformations_demo;
+import '../demos/reference/two_pane_demo.dart'
+    deferred as twopane_demo;
+import '../demos/reference/typography_demo.dart'
+    deferred as typography;
+import 'icons.dart';
+
+const String _docsBaseUrl = 'https://api.flutter.dev/flutter';
+const String _docsAnimationsUrl =
     'https://pub.dev/documentation/animations/latest/animations';
 
 enum GalleryDemoCategory {
@@ -73,7 +74,7 @@ class GalleryDemo {
     // Parameters below are required for non-study demos.
     this.slug,
     this.icon,
-    this.configurations = const [],
+    this.configurations = const <GalleryDemoConfiguration>[],
   })  : assert(category == GalleryDemoCategory.study ||
             (slug != null && icon != null)),
         assert(slug != null || studyId != null);
@@ -107,7 +108,7 @@ class GalleryDemoConfiguration {
 
 /// Awaits all deferred libraries for tests.
 Future<void> pumpDeferredLibraries() {
-  final futures = <Future<void>>[
+  final List<Future<void>> futures = <Future<void>>[
     DeferredWidget.preload(cupertino_demos.loadLibrary),
     DeferredWidget.preload(material_demos.loadLibrary),
     DeferredWidget.preload(motion_demo_container.loadLibrary),
@@ -120,7 +121,7 @@ Future<void> pumpDeferredLibraries() {
 
 class Demos {
   static Map<String?, GalleryDemo> asSlugToDemoMap(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return LinkedHashMap<String?, GalleryDemo>.fromIterable(
       all(localizations),
       key: (dynamic demo) => demo.slug as String?,
@@ -134,7 +135,7 @@ class Demos {
       otherDemos(localizations);
 
   static List<String> allDescriptions() =>
-      all(GalleryLocalizationsEn()).map((demo) => demo.describe).toList();
+      all(GalleryLocalizationsEn()).map((GalleryDemo demo) => demo.describe).toList();
 
   static Map<String, GalleryDemo> studies(GalleryLocalizations localizations) {
     return <String, GalleryDemo>{
@@ -178,14 +179,14 @@ class Demos {
   }
 
   static List<GalleryDemo> materialDemos(GalleryLocalizations localizations) {
-    LibraryLoader materialDemosLibrary = material_demos.loadLibrary;
-    return [
+    final LibraryLoader materialDemosLibrary = material_demos.loadLibrary;
+    return <GalleryDemo>[
       GalleryDemo(
         title: localizations.demoAppBarTitle,
         icon: GalleryIcons.appbar,
         slug: 'app-bar',
         subtitle: localizations.demoAppBarSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoAppBarTitle,
             description: localizations.demoAppBarDescription,
@@ -204,7 +205,7 @@ class Demos {
         icon: GalleryIcons.listsLeaveBehind,
         slug: 'banner',
         subtitle: localizations.demoBannerSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoBannerTitle,
             description: localizations.demoBannerDescription,
@@ -224,7 +225,7 @@ class Demos {
         icon: GalleryIcons.bottomAppBar,
         slug: 'bottom-app-bar',
         subtitle: localizations.demoBottomAppBarSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoBottomAppBarTitle,
             description: localizations.demoBottomAppBarDescription,
@@ -243,7 +244,7 @@ class Demos {
         icon: GalleryIcons.bottomNavigation,
         slug: 'bottom-navigation',
         subtitle: localizations.demoBottomNavigationSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoBottomNavigationPersistentLabels,
             description: localizations.demoBottomNavigationDescription,
@@ -278,7 +279,7 @@ class Demos {
         icon: GalleryIcons.bottomSheets,
         slug: 'bottom-sheet',
         subtitle: localizations.demoBottomSheetSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoBottomSheetPersistentTitle,
             description: localizations.demoBottomSheetPersistentDescription,
@@ -309,7 +310,7 @@ class Demos {
         icon: GalleryIcons.genericButtons,
         slug: 'button',
         subtitle: localizations.demoButtonSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTextButtonTitle,
             description: localizations.demoTextButtonDescription,
@@ -361,12 +362,12 @@ class Demos {
         icon: GalleryIcons.cards,
         slug: 'card',
         subtitle: localizations.demoCardSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCardTitle,
             description: localizations.demoCardDescription,
             documentationUrl: '$_docsBaseUrl/material/Card-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.CardsDemo(),
             ),
@@ -380,12 +381,12 @@ class Demos {
         icon: GalleryIcons.chips,
         slug: 'chip',
         subtitle: localizations.demoChipSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoActionChipTitle,
             description: localizations.demoActionChipDescription,
             documentationUrl: '$_docsBaseUrl/material/ActionChip-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ChipDemo(type: ChipDemoType.action)),
             code: CodeSegments.chipDemoAction,
           ),
@@ -393,7 +394,7 @@ class Demos {
             title: localizations.demoChoiceChipTitle,
             description: localizations.demoChoiceChipDescription,
             documentationUrl: '$_docsBaseUrl/material/ChoiceChip-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ChipDemo(type: ChipDemoType.choice)),
             code: CodeSegments.chipDemoChoice,
           ),
@@ -401,7 +402,7 @@ class Demos {
             title: localizations.demoFilterChipTitle,
             description: localizations.demoFilterChipDescription,
             documentationUrl: '$_docsBaseUrl/material/FilterChip-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ChipDemo(type: ChipDemoType.filter)),
             code: CodeSegments.chipDemoFilter,
           ),
@@ -409,7 +410,7 @@ class Demos {
             title: localizations.demoInputChipTitle,
             description: localizations.demoInputChipDescription,
             documentationUrl: '$_docsBaseUrl/material/InputChip-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ChipDemo(type: ChipDemoType.input)),
             code: CodeSegments.chipDemoInput,
           ),
@@ -421,12 +422,12 @@ class Demos {
         icon: GalleryIcons.dataTable,
         slug: 'data-table',
         subtitle: localizations.demoDataTableSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoDataTableTitle,
             description: localizations.demoDataTableDescription,
             documentationUrl: '$_docsBaseUrl/material/DataTable-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.DataTableDemo(),
             ),
@@ -440,12 +441,12 @@ class Demos {
         icon: GalleryIcons.dialogs,
         slug: 'dialog',
         subtitle: localizations.demoDialogSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoAlertDialogTitle,
             description: localizations.demoAlertDialogDescription,
             documentationUrl: '$_docsBaseUrl/material/AlertDialog-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.DialogDemo(type: DialogDemoType.alert)),
             code: CodeSegments.dialogDemo,
           ),
@@ -453,7 +454,7 @@ class Demos {
             title: localizations.demoAlertTitleDialogTitle,
             description: localizations.demoAlertDialogDescription,
             documentationUrl: '$_docsBaseUrl/material/AlertDialog-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
                 materialDemosLibrary,
                 () =>
                     material_demos.DialogDemo(type: DialogDemoType.alertTitle)),
@@ -463,7 +464,7 @@ class Demos {
             title: localizations.demoSimpleDialogTitle,
             description: localizations.demoSimpleDialogDescription,
             documentationUrl: '$_docsBaseUrl/material/SimpleDialog-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.DialogDemo(type: DialogDemoType.simple)),
             code: CodeSegments.dialogDemo,
           ),
@@ -472,7 +473,7 @@ class Demos {
             description: localizations.demoFullscreenDialogDescription,
             documentationUrl:
                 '$_docsBaseUrl/widgets/PageRoute/fullscreenDialog.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
                 materialDemosLibrary,
                 () =>
                     material_demos.DialogDemo(type: DialogDemoType.fullscreen)),
@@ -486,7 +487,7 @@ class Demos {
         icon: GalleryIcons.divider,
         slug: 'divider',
         subtitle: localizations.demoDividerSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoDividerTitle,
             description: localizations.demoDividerDescription,
@@ -516,12 +517,12 @@ class Demos {
         icon: GalleryIcons.gridOn,
         slug: 'grid-lists',
         subtitle: localizations.demoGridListsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoGridListsImageOnlyTitle,
             description: localizations.demoGridListsDescription,
             documentationUrl: '$_docsBaseUrl/widgets/GridView-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
                 materialDemosLibrary,
                 () => material_demos.GridListDemo(
                     type: GridListDemoType.imageOnly)),
@@ -531,7 +532,7 @@ class Demos {
             title: localizations.demoGridListsHeaderTitle,
             description: localizations.demoGridListsDescription,
             documentationUrl: '$_docsBaseUrl/widgets/GridView-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
                 materialDemosLibrary,
                 () =>
                     material_demos.GridListDemo(type: GridListDemoType.header)),
@@ -541,7 +542,7 @@ class Demos {
             title: localizations.demoGridListsFooterTitle,
             description: localizations.demoGridListsDescription,
             documentationUrl: '$_docsBaseUrl/widgets/GridView-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
                 materialDemosLibrary,
                 () =>
                     material_demos.GridListDemo(type: GridListDemoType.footer)),
@@ -555,12 +556,12 @@ class Demos {
         icon: GalleryIcons.listAlt,
         slug: 'lists',
         subtitle: localizations.demoListsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoOneLineListsTitle,
             description: localizations.demoListsDescription,
             documentationUrl: '$_docsBaseUrl/material/ListTile-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ListDemo(type: ListDemoType.oneLine)),
             code: CodeSegments.listDemo,
           ),
@@ -568,7 +569,7 @@ class Demos {
             title: localizations.demoTwoLineListsTitle,
             description: localizations.demoListsDescription,
             documentationUrl: '$_docsBaseUrl/material/ListTile-class.html',
-            buildRoute: (context) => DeferredWidget(materialDemosLibrary,
+            buildRoute: (BuildContext context) => DeferredWidget(materialDemosLibrary,
                 () => material_demos.ListDemo(type: ListDemoType.twoLine)),
             code: CodeSegments.listDemo,
           ),
@@ -580,12 +581,12 @@ class Demos {
         icon: GalleryIcons.moreVert,
         slug: 'menu',
         subtitle: localizations.demoMenuSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoContextMenuTitle,
             description: localizations.demoMenuDescription,
             documentationUrl: '$_docsBaseUrl/material/PopupMenuItem-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.MenuDemo(type: MenuDemoType.contextMenu),
             ),
@@ -595,7 +596,7 @@ class Demos {
             title: localizations.demoSectionedMenuTitle,
             description: localizations.demoMenuDescription,
             documentationUrl: '$_docsBaseUrl/material/PopupMenuItem-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.MenuDemo(type: MenuDemoType.sectionedMenu),
             ),
@@ -606,7 +607,7 @@ class Demos {
             description: localizations.demoMenuDescription,
             documentationUrl:
                 '$_docsBaseUrl/material/CheckedPopupMenuItem-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.MenuDemo(type: MenuDemoType.checklistMenu),
             ),
@@ -616,7 +617,7 @@ class Demos {
             title: localizations.demoSimpleMenuTitle,
             description: localizations.demoMenuDescription,
             documentationUrl: '$_docsBaseUrl/material/PopupMenuItem-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.MenuDemo(type: MenuDemoType.simpleMenu),
             ),
@@ -630,12 +631,12 @@ class Demos {
         icon: GalleryIcons.menu,
         slug: 'nav_drawer',
         subtitle: localizations.demoNavigationDrawerSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoNavigationDrawerTitle,
             description: localizations.demoNavigationDrawerDescription,
             documentationUrl: '$_docsBaseUrl/material/Drawer-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.NavDrawerDemo(),
             ),
@@ -649,13 +650,13 @@ class Demos {
         icon: GalleryIcons.navigationRail,
         slug: 'nav_rail',
         subtitle: localizations.demoNavigationRailSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoNavigationRailTitle,
             description: localizations.demoNavigationRailDescription,
             documentationUrl:
                 '$_docsBaseUrl/material/NavigationRail-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.NavRailDemo(),
             ),
@@ -669,12 +670,12 @@ class Demos {
         icon: GalleryIcons.event,
         slug: 'pickers',
         subtitle: localizations.demoPickersSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoDatePickerTitle,
             description: localizations.demoDatePickerDescription,
             documentationUrl: '$_docsBaseUrl/material/showDatePicker.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.PickerDemo(type: PickerDemoType.date),
             ),
@@ -684,7 +685,7 @@ class Demos {
             title: localizations.demoTimePickerTitle,
             description: localizations.demoTimePickerDescription,
             documentationUrl: '$_docsBaseUrl/material/showTimePicker.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.PickerDemo(type: PickerDemoType.time),
             ),
@@ -694,7 +695,7 @@ class Demos {
             title: localizations.demoDateRangePickerTitle,
             description: localizations.demoDateRangePickerDescription,
             documentationUrl: '$_docsBaseUrl/material/showDateRangePicker.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.PickerDemo(type: PickerDemoType.range),
             ),
@@ -708,13 +709,13 @@ class Demos {
         icon: GalleryIcons.progressActivity,
         slug: 'progress-indicator',
         subtitle: localizations.demoProgressIndicatorSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCircularProgressIndicatorTitle,
             description: localizations.demoCircularProgressIndicatorDescription,
             documentationUrl:
                 '$_docsBaseUrl/material/CircularProgressIndicator-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.ProgressIndicatorDemo(
                 type: ProgressIndicatorDemoType.circular,
@@ -727,7 +728,7 @@ class Demos {
             description: localizations.demoLinearProgressIndicatorDescription,
             documentationUrl:
                 '$_docsBaseUrl/material/LinearProgressIndicator-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.ProgressIndicatorDemo(
                 type: ProgressIndicatorDemoType.linear,
@@ -743,12 +744,12 @@ class Demos {
         icon: GalleryIcons.checkBox,
         slug: 'selection-controls',
         subtitle: localizations.demoSelectionControlsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoSelectionControlsCheckboxTitle,
             description: localizations.demoSelectionControlsCheckboxDescription,
             documentationUrl: '$_docsBaseUrl/material/Checkbox-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SelectionControlsDemo(
                 type: SelectionControlsDemoType.checkbox,
@@ -760,7 +761,7 @@ class Demos {
             title: localizations.demoSelectionControlsRadioTitle,
             description: localizations.demoSelectionControlsRadioDescription,
             documentationUrl: '$_docsBaseUrl/material/Radio-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SelectionControlsDemo(
                 type: SelectionControlsDemoType.radio,
@@ -772,7 +773,7 @@ class Demos {
             title: localizations.demoSelectionControlsSwitchTitle,
             description: localizations.demoSelectionControlsSwitchDescription,
             documentationUrl: '$_docsBaseUrl/material/Switch-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SelectionControlsDemo(
                 type: SelectionControlsDemoType.switches,
@@ -788,12 +789,12 @@ class Demos {
         icon: GalleryIcons.sliders,
         slug: 'sliders',
         subtitle: localizations.demoSlidersSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoSlidersTitle,
             description: localizations.demoSlidersDescription,
             documentationUrl: '$_docsBaseUrl/material/Slider-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SlidersDemo(type: SlidersDemoType.sliders),
             ),
@@ -803,7 +804,7 @@ class Demos {
             title: localizations.demoRangeSlidersTitle,
             description: localizations.demoRangeSlidersDescription,
             documentationUrl: '$_docsBaseUrl/material/RangeSlider-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SlidersDemo(
                   type: SlidersDemoType.rangeSliders),
@@ -814,7 +815,7 @@ class Demos {
             title: localizations.demoCustomSlidersTitle,
             description: localizations.demoCustomSlidersDescription,
             documentationUrl: '$_docsBaseUrl/material/SliderTheme-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SlidersDemo(
                   type: SlidersDemoType.customSliders),
@@ -829,12 +830,12 @@ class Demos {
         icon: GalleryIcons.snackbar,
         slug: 'snackbars',
         subtitle: localizations.demoSnackbarsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoSnackbarsTitle,
             description: localizations.demoSnackbarsDescription,
             documentationUrl: '$_docsBaseUrl/material/SnackBar-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.SnackbarsDemo(),
             ),
@@ -848,12 +849,12 @@ class Demos {
         icon: GalleryIcons.tabs,
         slug: 'tabs',
         subtitle: localizations.demoTabsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTabsScrollingTitle,
             description: localizations.demoTabsDescription,
             documentationUrl: '$_docsBaseUrl/material/TabBar-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.TabsDemo(type: TabsDemoType.scrollable),
             ),
@@ -863,7 +864,7 @@ class Demos {
             title: localizations.demoTabsNonScrollingTitle,
             description: localizations.demoTabsDescription,
             documentationUrl: '$_docsBaseUrl/material/TabBar-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.TabsDemo(type: TabsDemoType.nonScrollable),
             ),
@@ -877,12 +878,12 @@ class Demos {
         icon: GalleryIcons.textFieldsAlt,
         slug: 'text-field',
         subtitle: localizations.demoTextFieldSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTextFieldTitle,
             description: localizations.demoTextFieldDescription,
             documentationUrl: '$_docsBaseUrl/material/TextField-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.TextFieldDemo(),
             ),
@@ -896,12 +897,12 @@ class Demos {
         icon: GalleryIcons.tooltip,
         slug: 'tooltip',
         subtitle: localizations.demoTooltipSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTooltipTitle,
             description: localizations.demoTooltipDescription,
             documentationUrl: '$_docsBaseUrl/material/Tooltip-class.html',
-            buildRoute: (context) => DeferredWidget(
+            buildRoute: (BuildContext context) => DeferredWidget(
               materialDemosLibrary,
               () => material_demos.TooltipDemo(),
             ),
@@ -914,14 +915,14 @@ class Demos {
   }
 
   static List<GalleryDemo> cupertinoDemos(GalleryLocalizations localizations) {
-    LibraryLoader cupertinoLoader = cupertino_demos.loadLibrary;
-    return [
+    final LibraryLoader cupertinoLoader = cupertino_demos.loadLibrary;
+    return <GalleryDemo>[
       GalleryDemo(
         title: localizations.demoCupertinoActivityIndicatorTitle,
         icon: GalleryIcons.cupertinoProgress,
         slug: 'cupertino-activity-indicator',
         subtitle: localizations.demoCupertinoActivityIndicatorSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoActivityIndicatorTitle,
             description:
@@ -942,7 +943,7 @@ class Demos {
         icon: GalleryIcons.dialogs,
         slug: 'cupertino-alerts',
         subtitle: localizations.demoCupertinoAlertsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoAlertTitle,
             description: localizations.demoCupertinoAlertDescription,
@@ -1006,7 +1007,7 @@ class Demos {
         icon: GalleryIcons.genericButtons,
         slug: 'cupertino-buttons',
         subtitle: localizations.demoCupertinoButtonsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoButtonsTitle,
             description: localizations.demoCupertinoButtonsDescription,
@@ -1026,7 +1027,7 @@ class Demos {
         icon: GalleryIcons.moreVert,
         slug: 'cupertino-context-menu',
         subtitle: localizations.demoCupertinoContextMenuSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoContextMenuTitle,
             description: localizations.demoCupertinoContextMenuDescription,
@@ -1046,7 +1047,7 @@ class Demos {
         icon: GalleryIcons.bottomSheetPersistent,
         slug: 'cupertino-navigation-bar',
         subtitle: localizations.demoCupertinoNavigationBarSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoNavigationBarTitle,
             description: localizations.demoCupertinoNavigationBarDescription,
@@ -1066,7 +1067,7 @@ class Demos {
         icon: GalleryIcons.listAlt,
         slug: 'cupertino-picker',
         subtitle: localizations.demoCupertinoPickerSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoPickerTitle,
             description: localizations.demoCupertinoPickerDescription,
@@ -1086,7 +1087,7 @@ class Demos {
         icon: GalleryIcons.listAlt,
         slug: 'cupertino-scrollbar',
         subtitle: localizations.demoCupertinoScrollbarSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoScrollbarTitle,
             description: localizations.demoCupertinoScrollbarDescription,
@@ -1106,7 +1107,7 @@ class Demos {
         icon: GalleryIcons.tabs,
         slug: 'cupertino-segmented-control',
         subtitle: localizations.demoCupertinoSegmentedControlSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoSegmentedControlTitle,
             description: localizations.demoCupertinoSegmentedControlDescription,
@@ -1126,7 +1127,7 @@ class Demos {
         icon: GalleryIcons.sliders,
         slug: 'cupertino-slider',
         subtitle: localizations.demoCupertinoSliderSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoSliderTitle,
             description: localizations.demoCupertinoSliderDescription,
@@ -1146,7 +1147,7 @@ class Demos {
         icon: GalleryIcons.cupertinoSwitch,
         slug: 'cupertino-switch',
         subtitle: localizations.demoCupertinoSwitchSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoSelectionControlsSwitchTitle,
             description: localizations.demoCupertinoSwitchDescription,
@@ -1166,7 +1167,7 @@ class Demos {
         icon: GalleryIcons.bottomNavigation,
         slug: 'cupertino-tab-bar',
         subtitle: localizations.demoCupertinoTabBarSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoTabBarTitle,
             description: localizations.demoCupertinoTabBarDescription,
@@ -1186,7 +1187,7 @@ class Demos {
         icon: GalleryIcons.textFieldsAlt,
         slug: 'cupertino-text-field',
         subtitle: localizations.demoCupertinoTextFieldSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoTextFieldTitle,
             description: localizations.demoCupertinoTextFieldDescription,
@@ -1206,7 +1207,7 @@ class Demos {
         icon: GalleryIcons.search,
         slug: 'cupertino-search-text-field',
         subtitle: localizations.demoCupertinoSearchTextFieldSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoCupertinoSearchTextFieldTitle,
             description: localizations.demoCupertinoSearchTextFieldDescription,
@@ -1225,13 +1226,13 @@ class Demos {
   }
 
   static List<GalleryDemo> otherDemos(GalleryLocalizations localizations) {
-    return [
+    return <GalleryDemo>[
       GalleryDemo(
         title: localizations.demoTwoPaneTitle,
         icon: GalleryIcons.bottomSheetPersistent,
         slug: 'two-pane',
         subtitle: localizations.demoTwoPaneSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTwoPaneFoldableLabel,
             description: localizations.demoTwoPaneFoldableDescription,
@@ -1282,7 +1283,7 @@ class Demos {
         icon: GalleryIcons.animation,
         slug: 'motion',
         subtitle: localizations.demoMotionSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoContainerTransformTitle,
             description: localizations.demoContainerTransformDescription,
@@ -1341,7 +1342,7 @@ class Demos {
         icon: GalleryIcons.colors,
         slug: 'colors',
         subtitle: localizations.demoColorsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoColorsTitle,
             description: localizations.demoColorsDescription,
@@ -1360,7 +1361,7 @@ class Demos {
         icon: GalleryIcons.customTypography,
         slug: 'typography',
         subtitle: localizations.demoTypographySubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demoTypographyTitle,
             description: localizations.demoTypographyDescription,
@@ -1379,7 +1380,7 @@ class Demos {
         icon: GalleryIcons.gridOn,
         slug: '2d-transformations',
         subtitle: localizations.demo2dTransformationsSubtitle,
-        configurations: [
+        configurations: <GalleryDemoConfiguration>[
           GalleryDemoConfiguration(
             title: localizations.demo2dTransformationsTitle,
             description: localizations.demo2dTransformationsDescription,

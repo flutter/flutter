@@ -5,10 +5,10 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/rally/charts/pie_chart.dart';
-import 'package:gallery/studies/rally/data.dart';
-import 'package:gallery/studies/rally/finance.dart';
-import 'package:gallery/studies/rally/tabs/sidebar.dart';
+import '../charts/pie_chart.dart';
+import '../data.dart';
+import '../finance.dart';
+import 'sidebar.dart';
 
 class BudgetsView extends StatefulWidget {
   const BudgetsView({super.key});
@@ -21,10 +21,10 @@ class _BudgetsViewState extends State<BudgetsView>
     with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final items = DummyDataService.getBudgetDataList(context);
-    final capTotal = sumBudgetDataPrimaryAmount(items);
-    final usedTotal = sumBudgetDataAmountUsed(items);
-    final detailItems = DummyDataService.getBudgetDetailList(
+    final List<BudgetData> items = DummyDataService.getBudgetDataList(context);
+    final double capTotal = sumBudgetDataPrimaryAmount(items);
+    final double usedTotal = sumBudgetDataAmountUsed(items);
+    final List<UserDetailData> detailItems = DummyDataService.getBudgetDetailList(
       context,
       capTotal: capTotal,
       usedTotal: usedTotal,
@@ -39,8 +39,8 @@ class _BudgetsViewState extends State<BudgetsView>
         wholeAmount: capTotal,
         financialEntityCards: buildBudgetDataListViews(items, context),
       ),
-      sidebarItems: [
-        for (UserDetailData item in detailItems)
+      sidebarItems: <Widget>[
+        for (final UserDetailData item in detailItems)
           SidebarItem(title: item.title, value: item.value)
       ],
     );

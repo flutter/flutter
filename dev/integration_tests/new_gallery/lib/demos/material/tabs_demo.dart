@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class TabsDemo extends StatelessWidget {
   const TabsDemo({super.key, required this.type});
@@ -17,7 +17,6 @@ class TabsDemo extends StatelessWidget {
     switch (type) {
       case TabsDemoType.scrollable:
         tabs = _TabsScrollableDemo();
-        break;
       case TabsDemoType.nonScrollable:
         tabs = _TabsNonScrollableDemo();
     }
@@ -50,7 +49,6 @@ class __TabsScrollableDemoState extends State<_TabsScrollableDemo>
   @override
   void initState() {
     _tabController = TabController(
-      initialIndex: 0,
       length: 12,
       vsync: this,
     );
@@ -73,8 +71,8 @@ class __TabsScrollableDemoState extends State<_TabsScrollableDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    final tabs = [
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final List<String> tabs = <String>[
       localizations.colorsRed,
       localizations.colorsOrange,
       localizations.colorsGreen,
@@ -96,15 +94,15 @@ class __TabsScrollableDemoState extends State<_TabsScrollableDemo>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          tabs: [
-            for (final tab in tabs) Tab(text: tab),
+          tabs: <Widget>[
+            for (final String tab in tabs) Tab(text: tab),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          for (final tab in tabs)
+        children: <Widget>[
+          for (final String tab in tabs)
             Center(
               child: Text(tab),
             ),
@@ -142,7 +140,6 @@ class __TabsNonScrollableDemoState extends State<_TabsNonScrollableDemo>
   void initState() {
     super.initState();
     _tabController = TabController(
-      initialIndex: 0,
       length: 3,
       vsync: this,
     );
@@ -164,8 +161,8 @@ class __TabsNonScrollableDemoState extends State<_TabsNonScrollableDemo>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    final tabs = [
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final List<String> tabs = <String>[
       localizations.colorsRed,
       localizations.colorsOrange,
       localizations.colorsGreen,
@@ -179,16 +176,15 @@ class __TabsNonScrollableDemoState extends State<_TabsNonScrollableDemo>
         ),
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: false,
-          tabs: [
-            for (final tab in tabs) Tab(text: tab),
+          tabs: <Widget>[
+            for (final String tab in tabs) Tab(text: tab),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          for (final tab in tabs)
+        children: <Widget>[
+          for (final String tab in tabs)
             Center(
               child: Text(tab),
             ),

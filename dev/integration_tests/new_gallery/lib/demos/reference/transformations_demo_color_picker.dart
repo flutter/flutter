@@ -22,7 +22,7 @@ class ColorPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: colors.map((color) {
+      children: colors.map((Color color) {
         return _ColorPickerSwatch(
           color: color,
           selected: color == selectedColor,

@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/studies/crane/model/formatters.dart';
+import '../../../data/gallery_options.dart';
+import 'formatters.dart';
 
 abstract class Destination {
   const Destination({
@@ -49,13 +49,13 @@ class FlyDestination extends Destination {
 
   @override
   String subtitle(BuildContext context) {
-    final stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
+    final String stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
 
     if (duration == null) {
       return stopsText;
     } else {
-      final textDirection = GalleryOptions.of(context).resolvedTextDirection();
-      final durationText =
+      final TextDirection? textDirection = GalleryOptions.of(context).resolvedTextDirection();
+      final String durationText =
           formattedDuration(context, duration!, abbreviated: true);
       return textDirection == TextDirection.ltr
           ? '$stopsText · $durationText'
@@ -65,12 +65,12 @@ class FlyDestination extends Destination {
 
   @override
   String subtitleSemantics(BuildContext context) {
-    final stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
+    final String stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
 
     if (duration == null) {
       return stopsText;
     } else {
-      final durationText =
+      final String durationText =
           formattedDuration(context, duration!, abbreviated: false);
       return '$stopsText, $durationText';
     }

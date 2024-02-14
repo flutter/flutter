@@ -12,7 +12,7 @@ class CupertinoScrollbarDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
@@ -25,7 +25,7 @@ class CupertinoScrollbarDemo extends StatelessWidget {
         radiusWhileDragging: Radius.zero,
         child: ListView.builder(
           itemCount: 120,
-          itemBuilder: (context, index) {
+          itemBuilder: (BuildContext context, int index) {
             return Center(
               child: Text('item $index',
                   style: CupertinoTheme.of(context).textTheme.textStyle),

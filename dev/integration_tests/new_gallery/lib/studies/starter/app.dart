@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/studies/starter/home.dart';
-import 'package:gallery/studies/starter/routes.dart' as routes;
+import '../../data/gallery_options.dart';
+import 'home.dart';
+import 'routes.dart' as routes;
 
-const _primaryColor = Color(0xFF6200EE);
+const Color _primaryColor = Color(0xFF6200EE);
 
 class StarterApp extends StatelessWidget {
   const StarterApp({super.key});
@@ -25,8 +25,8 @@ class StarterApp extends StatelessWidget {
       supportedLocales: GalleryLocalizations.supportedLocales,
       locale: GalleryOptions.of(context).locale,
       initialRoute: StarterApp.defaultRoute,
-      routes: {
-        StarterApp.defaultRoute: (context) => const _Home(),
+      routes: <String, WidgetBuilder>{
+        StarterApp.defaultRoute: (BuildContext context) => const _Home(),
       },
       theme: ThemeData(
         highlightColor: Colors.transparent,

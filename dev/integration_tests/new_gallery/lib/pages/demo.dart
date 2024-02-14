@@ -7,18 +7,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/codeviewer/code_displayer.dart';
-import 'package:gallery/codeviewer/code_style.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/demos.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/feature_discovery/feature_discovery.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/splash.dart';
-import 'package:gallery/themes/gallery_theme_data.dart';
-import 'package:gallery/themes/material_demo_theme_data.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+import '../codeviewer/code_displayer.dart';
+import '../codeviewer/code_style.dart';
+import '../constants.dart';
+import '../data/demos.dart';
+import '../data/gallery_options.dart';
+import '../feature_discovery/feature_discovery.dart';
+import '../layout/adaptive.dart';
+import '../themes/gallery_theme_data.dart';
+import '../themes/material_demo_theme_data.dart';
+import 'splash.dart';
 
 enum _DemoState {
   normal,
@@ -142,7 +143,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
   }
 
   void _handleTap(_DemoState newState) {
-    var newStateIndex = newState.index;
+    final int newStateIndex = newState.index;
 
     // Do not allow normal state for desktop.
     if (_demoStateIndex.value == newStateIndex && isDisplayDesktop(context)) {
@@ -163,17 +164,17 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
   }
 
   Future<void> _showDocumentation(BuildContext context) async {
-    final url = _currentConfig.documentationUrl;
+    final String url = _currentConfig.documentationUrl;
 
     if (await canLaunchUrlString(url)) {
       await launchUrlString(url);
     } else if (context.mounted) {
       await showDialog<void>(
         context: context,
-        builder: (context) {
+        builder: (BuildContext context) {
           return SimpleDialog(
             title: Text(GalleryLocalizations.of(context)!.demoInvalidURL),
-            children: [
+            children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(url),
@@ -186,8 +187,8 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
   }
 
   void _resolveState(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final isFoldable = isDisplayFoldable(context);
+    final bool isDesktop = isDisplayDesktop(context);
+    final bool isFoldable = isDisplayFoldable(context);
     if (_DemoState.values[_demoStateIndex.value] == _DemoState.fullscreen &&
         !isDesktop) {
       // Do not allow fullscreen state for mobile.
@@ -208,19 +209,19 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
 
   @override
   Widget build(BuildContext context) {
-    final isFoldable = isDisplayFoldable(context);
-    final isDesktop = isDisplayDesktop(context);
+    final bool isFoldable = isDisplayFoldable(context);
+    final bool isDesktop = isDisplayDesktop(context);
     _resolveState(context);
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final iconColor = colorScheme.onSurface;
-    final selectedIconColor = colorScheme.primary;
-    final appBarPadding = isDesktop ? 20.0 : 0.0;
-    final currentDemoState = _DemoState.values[_demoStateIndex.value];
-    final localizations = GalleryLocalizations.of(context)!;
-    final options = GalleryOptions.of(context);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color iconColor = colorScheme.onSurface;
+    final Color selectedIconColor = colorScheme.primary;
+    final double appBarPadding = isDesktop ? 20.0 : 0.0;
+    final _DemoState currentDemoState = _DemoState.values[_demoStateIndex.value];
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryOptions options = GalleryOptions.of(context);
 
-    final appBar = AppBar(
+    final AppBar appBar = AppBar(
       systemOverlayStyle: options.resolvedSystemUiOverlayStyle(),
       backgroundColor: Colors.transparent,
       leading: Padding(
@@ -234,7 +235,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
           },
         ),
       ),
-      actions: [
+      actions: <Widget>[
         if (_hasOptions)
           IconButton(
             icon: FeatureDiscovery(
@@ -288,15 +289,15 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
       ],
     );
 
-    final mediaQuery = MediaQuery.of(context);
-    final bottomSafeArea = mediaQuery.padding.bottom;
-    final contentHeight = mediaQuery.size.height -
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final double bottomSafeArea = mediaQuery.padding.bottom;
+    final double contentHeight = mediaQuery.size.height -
         mediaQuery.padding.top -
         mediaQuery.padding.bottom -
         appBar.preferredSize.height;
-    final maxSectionHeight = isDesktop ? contentHeight : contentHeight - 64;
-    final horizontalPadding = isDesktop ? mediaQuery.size.width * 0.12 : 0.0;
-    const maxSectionWidth = 420.0;
+    final double maxSectionHeight = isDesktop ? contentHeight : contentHeight - 64;
+    final double horizontalPadding = isDesktop ? mediaQuery.size.width * 0.12 : 0.0;
+    const double maxSectionWidth = 420.0;
 
     Widget section;
     switch (currentDemoState) {
@@ -306,7 +307,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
           maxWidth: maxSectionWidth,
           configurations: widget.demo.configurations,
           configIndex: _configIndex.value,
-          onConfigChanged: (index) {
+          onConfigChanged: (int index) {
             setStateAndUpdate(() {
               _configIndex.value = index;
               if (!isDesktop) {
@@ -315,7 +316,6 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
             });
           },
         );
-        break;
       case _DemoState.info:
         section = _DemoSectionInfo(
           maxHeight: maxSectionHeight,
@@ -323,9 +323,8 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
           title: _currentConfig.title,
           description: _currentConfig.description,
         );
-        break;
       case _DemoState.code:
-        final codeTheme = GoogleFonts.robotoMono(
+        final TextStyle codeTheme = GoogleFonts.robotoMono(
           fontSize: 12 * options.textScaleFactor(context),
         );
         section = CodeStyle(
@@ -344,7 +343,6 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
             ),
           ),
         );
-        break;
       default:
         section = Container();
         break;
@@ -358,10 +356,10 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
       ),
     );
     if (isDesktop) {
-      final isFullScreen = currentDemoState == _DemoState.fullscreen;
+      final bool isFullScreen = currentDemoState == _DemoState.fullscreen;
       final Widget sectionAndDemo = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           if (!isFullScreen) Expanded(child: section),
           SizedBox(width: !isFullScreen ? 48.0 : 0),
           Expanded(child: demoContent),
@@ -390,7 +388,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
         child: section,
       );
 
-      final isDemoNormal = currentDemoState == _DemoState.normal;
+      final bool isDemoNormal = currentDemoState == _DemoState.normal;
       // Add a tap gesture to collapse the currently opened section.
       demoContent = Semantics(
         label:
@@ -419,7 +417,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
           // Use a non-scrollable ListView to enable animation of shifting the
           // demo offscreen.
           physics: const NeverScrollableScrollPhysics(),
-          children: [
+          children: <Widget>[
             section,
             demoContent,
             // Fake the safe area to ensure the animation looks correct.
@@ -434,19 +432,16 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
     if (isDesktop || isFoldable) {
       page = AnimatedBuilder(
           animation: _codeBackgroundColorController,
-          builder: (context, child) {
+          builder: (BuildContext context, Widget? child) {
             Brightness themeBrightness;
 
             switch (GalleryOptions.of(context).themeMode) {
               case ThemeMode.system:
                 themeBrightness = MediaQuery.of(context).platformBrightness;
-                break;
               case ThemeMode.light:
                 themeBrightness = Brightness.light;
-                break;
               case ThemeMode.dark:
                 themeBrightness = Brightness.dark;
-                break;
             }
 
             Widget contents = Container(
@@ -463,7 +458,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
             if (themeBrightness == Brightness.light) {
               // If it is currently in light mode, add a
               // dark background for code.
-              Widget codeBackground = SafeArea(
+              final Widget codeBackground = SafeArea(
                 child: Container(
                   padding: const EdgeInsets.only(top: 56),
                   child: Container(
@@ -476,7 +471,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
               );
 
               contents = Stack(
-                children: [
+                children: <Widget>[
                   codeBackground,
                   contents,
                 ],
@@ -533,8 +528,8 @@ class _DemoSectionOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Align(
       alignment: AlignmentDirectional.topStart,
@@ -543,7 +538,7 @@ class _DemoSectionOptions extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Padding(
               padding: const EdgeInsetsDirectional.only(
                 start: 24,
@@ -567,8 +562,8 @@ class _DemoSectionOptions extends StatelessWidget {
             Flexible(
               child: ListView(
                 shrinkWrap: true,
-                children: [
-                  for (final configuration in configurations)
+                children: <Widget>[
+                  for (final GalleryDemoConfiguration configuration in configurations)
                     _DemoSectionOptionsItem(
                       title: configuration.title,
                       isSelected: configuration == configurations[configIndex],
@@ -600,7 +595,7 @@ class _DemoSectionOptionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: isSelected ? colorScheme.surface : null,
@@ -637,8 +632,8 @@ class _DemoSectionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Align(
       alignment: AlignmentDirectional.topStart,
@@ -654,7 +649,7 @@ class _DemoSectionInfo extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               SelectableText(
                 title,
                 style: textTheme.headlineMedium!.apply(
@@ -727,7 +722,7 @@ class _DemoSectionCode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     return Theme(
       data: GalleryThemeData.darkThemeData,
@@ -751,10 +746,10 @@ class CodeDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
-    final richTextCode = code(context);
-    final plainTextCode = richTextCode.toPlainText();
+    final TextSpan richTextCode = code(context);
+    final String plainTextCode = richTextCode.toPlainText();
 
     void showSnackBarOnCopySuccess(dynamic result) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -780,7 +775,7 @@ class CodeDisplayPage extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Padding(
           padding: isDesktop
               ? const EdgeInsets.only(bottom: 8)

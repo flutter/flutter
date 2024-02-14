@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/demos.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/demo.dart';
+import '../constants.dart';
+import '../data/demos.dart';
+import '../layout/adaptive.dart';
+import 'demo.dart';
 
 typedef CategoryHeaderTapCallback = Function(bool shouldOpenList);
 
@@ -17,7 +17,7 @@ class CategoryListItem extends StatefulWidget {
     this.restorationId,
     required this.category,
     required this.imageString,
-    this.demos = const [],
+    this.demos = const <GalleryDemo>[],
     this.initiallyExpanded = false,
     this.onTap,
   });
@@ -37,7 +37,7 @@ class _CategoryListItemState extends State<CategoryListItem>
     with SingleTickerProviderStateMixin {
   static final Animatable<double> _easeInTween =
       CurveTween(curve: Curves.easeIn);
-  static const _expandDuration = Duration(milliseconds: 200);
+  static const Duration _expandDuration = Duration(milliseconds: 200);
   late AnimationController _controller;
   late Animation<double> _childrenHeightFactor;
   late Animation<double> _headerChevronOpacity;
@@ -52,7 +52,7 @@ class _CategoryListItemState extends State<CategoryListItem>
     super.initState();
 
     _controller = AnimationController(duration: _expandDuration, vsync: this);
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((AnimationStatus status) {
       setState(() {});
     });
 
@@ -118,7 +118,7 @@ class _CategoryListItemState extends State<CategoryListItem>
   Widget _buildHeaderWithChildren(BuildContext context, Widget? child) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         _CategoryHeader(
           margin: _headerMargin.value,
           imagePadding: _headerImagePadding.value,
@@ -180,7 +180,7 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: margin,
       child: Material(
@@ -194,11 +194,11 @@ class _CategoryHeader extends StatelessWidget {
             key: ValueKey('${category.name}CategoryHeader'),
             onTap: onTap,
             child: Row(
-              children: [
+              children: <Widget>[
                 Expanded(
                   child: Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
+                    children: <Widget>[
                       Padding(
                         padding: imagePadding,
                         child: FadeInImage(
@@ -266,8 +266,8 @@ class _ExpandedCategoryDemos extends StatelessWidget {
     return Column(
       // Makes integration tests possible.
       key: ValueKey('${category.name}DemoList'),
-      children: [
-        for (final demo in demos)
+      children: <Widget>[
+        for (final GalleryDemo demo in demos)
           CategoryDemoItem(
             demo: demo,
           ),
@@ -284,8 +284,8 @@ class CategoryDemoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Material(
       // Makes integration tests possible.
       key: ValueKey(demo.describe),
@@ -305,7 +305,7 @@ class CategoryDemoItem extends StatelessWidget {
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Icon(
                   demo.icon,
                   color: colorScheme.primary,
@@ -314,7 +314,7 @@ class CategoryDemoItem extends StatelessWidget {
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Text(
                         demo.title,
                         style: textTheme.titleMedium!

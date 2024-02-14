@@ -48,7 +48,7 @@ class TwoPaneDemoState extends State<TwoPaneDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    var panePriority = TwoPanePriority.both;
+    TwoPanePriority panePriority = TwoPanePriority.both;
     if (widget.type == TwoPaneDemoType.smallScreen) {
       panePriority = _currentIndex.value == -1
           ? TwoPanePriority.start
@@ -61,7 +61,7 @@ class TwoPaneDemoState extends State<TwoPaneDemo> with RestorationMixin {
         panePriority: panePriority,
         startPane: ListPane(
           selectedIndex: _currentIndex.value,
-          onSelect: (index) {
+          onSelect: (int index) {
             setState(() {
               _currentIndex.value = index;
             });
@@ -83,14 +83,14 @@ class TwoPaneDemoState extends State<TwoPaneDemo> with RestorationMixin {
 }
 
 class ListPane extends StatelessWidget {
-  final ValueChanged<int> onSelect;
-  final int selectedIndex;
 
   const ListPane({
     super.key,
     required this.onSelect,
     required this.selectedIndex,
   });
+  final ValueChanged<int> onSelect;
+  final int selectedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +103,7 @@ class ListPane extends StatelessWidget {
         child: ListView(
           restorationId: 'list_demo_list_view',
           padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
+          children: <Widget>[
             for (int index = 1; index < 21; index++)
               ListTile(
                 onTap: () {
@@ -125,14 +125,14 @@ class ListPane extends StatelessWidget {
 }
 
 class DetailsPane extends StatelessWidget {
-  final VoidCallback? onClose;
-  final int selectedIndex;
 
   const DetailsPane({
     super.key,
     required this.selectedIndex,
     this.onClose,
   });
+  final VoidCallback? onClose;
+  final int selectedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -195,11 +195,11 @@ class SimulateScreen extends StatelessWidget {
               : type == TwoPaneDemoType.tablet
                   ? tabletAspectRatio
                   : singleScreenAspectRatio,
-          child: LayoutBuilder(builder: (context, constraints) {
-            final size = Size(constraints.maxWidth, constraints.maxHeight);
-            final hingeSize = Size(size.width * hingeProportion, size.height);
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            final Size size = Size(constraints.maxWidth, constraints.maxHeight);
+            final Size hingeSize = Size(size.width * hingeProportion, size.height);
             // Position the hinge in the middle of the display
-            final hingeBounds = Rect.fromLTWH(
+            final Rect hingeBounds = Rect.fromLTWH(
               (size.width - hingeSize.width) / 2,
               0,
               hingeSize.width,
@@ -208,7 +208,7 @@ class SimulateScreen extends StatelessWidget {
             return MediaQuery(
               data: MediaQueryData(
                 size: size,
-                displayFeatures: [
+                displayFeatures: <DisplayFeature>[
                   if (type == TwoPaneDemoType.foldable)
                     DisplayFeature(
                       bounds: hingeBounds,

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gallery/main.dart';
 
 void main() {
-  testWidgets('Home page hides settings semantics when closed', (tester) async {
+  testWidgets('Home page hides settings semantics when closed', (WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp());
 
     await tester.pump(const Duration(seconds: 1));
@@ -24,11 +24,11 @@ void main() {
     expect(find.bySemanticsLabel('Close settings'), findsOneWidget);
   });
 
-  testWidgets('Home page list view is the primary list view', (tester) async {
+  testWidgets('Home page list view is the primary list view', (WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp());
     await tester.pumpAndSettle();
 
-    ListView listview =
+    final ListView listview =
         tester.widget(find.byKey(const ValueKey('HomeListView')));
 
     expect(listview.primary, true);

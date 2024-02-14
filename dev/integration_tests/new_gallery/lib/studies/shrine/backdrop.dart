@@ -7,13 +7,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/studies/shrine/category_menu_page.dart';
-import 'package:gallery/studies/shrine/page_status.dart';
+import 'category_menu_page.dart';
+import 'page_status.dart';
 
 const Cubic _accelerateCurve = Cubic(0.548, 0, 0.757, 0.464);
 const Cubic _decelerateCurve = Cubic(0.23, 0.94, 0.41, 1);
-const _peakVelocityTime = 0.248210;
-const _peakVelocityProgress = 0.379146;
+const double _peakVelocityTime = 0.248210;
+const double _peakVelocityProgress = 0.379146;
 
 class _FrontLayer extends StatelessWidget {
   const _FrontLayer({
@@ -42,9 +42,8 @@ class _FrontLayer extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          onTap != null
-              ? MouseRegion(
+        children: <Widget>[
+          if (onTap != null) MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -53,8 +52,7 @@ class _FrontLayer extends StatelessWidget {
                     onTap: onTap,
                     child: pageTopArea,
                   ),
-                )
-              : pageTopArea,
+                ) else pageTopArea,
           Expanded(
             child: child,
           ),
@@ -83,13 +81,13 @@ class _BackdropTitle extends AnimatedWidget {
       curve: const Interval(0, 0.78),
     );
 
-    final textDirectionScalar =
+    final int textDirectionScalar =
         Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    const slantedMenuIcon =
+    const ImageIcon slantedMenuIcon =
         ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png'));
 
-    final directionalSlantedMenuIcon =
+    final Widget directionalSlantedMenuIcon =
         Directionality.of(context) == TextDirection.ltr
             ? slantedMenuIcon
             : Transform(
@@ -98,7 +96,7 @@ class _BackdropTitle extends AnimatedWidget {
                 child: slantedMenuIcon,
               );
 
-    final menuButtonTooltip = animation.isCompleted
+    final String? menuButtonTooltip = animation.isCompleted
         ? GalleryLocalizations.of(context)!.shrineTooltipOpenMenu
         : animation.isDismissed
             ? GalleryLocalizations.of(context)!.shrineTooltipCloseMenu
@@ -108,7 +106,7 @@ class _BackdropTitle extends AnimatedWidget {
       style: Theme.of(context).primaryTextTheme.titleLarge!,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
-      child: Row(children: [
+      child: Row(children: <Widget>[
         // branded icon
         SizedBox(
           width: 72,
@@ -118,7 +116,7 @@ class _BackdropTitle extends AnimatedWidget {
               padding: const EdgeInsetsDirectional.only(end: 8),
               onPressed: onPress,
               tooltip: menuButtonTooltip,
-              icon: Stack(children: [
+              icon: Stack(children: <Widget>[
                 Opacity(
                   opacity: animation.value,
                   child: directionalSlantedMenuIcon,
@@ -139,7 +137,7 @@ class _BackdropTitle extends AnimatedWidget {
         // Here, we do a custom cross fade between backTitle and frontTitle.
         // This makes a smooth animation between the two texts.
         Stack(
-          children: [
+          children: <Widget>[
             Opacity(
               opacity: CurvedAnimation(
                 parent: ReverseAnimation(animation),
@@ -212,7 +210,7 @@ class _BackdropState extends State<Backdrop>
   }
 
   bool get _frontLayerVisible {
-    final status = _controller.status;
+    final AnimationStatus status = _controller.status;
     return status == AnimationStatus.completed ||
         status == AnimationStatus.forward;
   }
@@ -253,7 +251,7 @@ class _BackdropState extends State<Backdrop>
     }
 
     return TweenSequence<RelativeRect>(
-      [
+      <TweenSequenceItem<RelativeRect>>[
         TweenSequenceItem<RelativeRect>(
           tween: RelativeRectTween(
             begin: RelativeRect.fromLTRB(
@@ -288,15 +286,15 @@ class _BackdropState extends State<Backdrop>
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const layerTitleHeight = 48;
-    final layerSize = constraints.biggest;
-    final layerTop = layerSize.height - layerTitleHeight;
+    const int layerTitleHeight = 48;
+    final Size layerSize = constraints.biggest;
+    final double layerTop = layerSize.height - layerTitleHeight;
 
     _layerAnimation = _getLayerAnimation(layerSize, layerTop);
 
     return Stack(
       key: _backdropKey,
-      children: [
+      children: <Widget>[
         ExcludeSemantics(
           excluding: _frontLayerVisible,
           child: widget.backLayer,
@@ -307,9 +305,9 @@ class _BackdropState extends State<Backdrop>
             excluding: !_frontLayerVisible,
             child: AnimatedBuilder(
               animation: PageStatus.of(context)!.cartController,
-              builder: (context, child) => AnimatedBuilder(
+              builder: (BuildContext context, Widget? child) => AnimatedBuilder(
                 animation: PageStatus.of(context)!.menuController,
-                builder: (context, child) => _FrontLayer(
+                builder: (BuildContext context, Widget? child) => _FrontLayer(
                   onTap: menuPageIsVisible(context)
                       ? _toggleBackdropLayerVisibility
                       : null,
@@ -325,7 +323,7 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
+    final AppBar appBar = AppBar(
       automaticallyImplyLeading: false,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 0,
@@ -336,7 +334,7 @@ class _BackdropState extends State<Backdrop>
         frontTitle: widget.frontTitle,
         backTitle: widget.backTitle,
       ),
-      actions: [
+      actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.search),
           tooltip: GalleryLocalizations.of(context)!.shrineTooltipSearch,
@@ -351,7 +349,7 @@ class _BackdropState extends State<Backdrop>
     );
     return AnimatedBuilder(
       animation: PageStatus.of(context)!.cartController,
-      builder: (context, child) => ExcludeSemantics(
+      builder: (BuildContext context, Widget? child) => ExcludeSemantics(
         excluding: cartPageIsVisible(context),
         child: Scaffold(
           appBar: appBar,
@@ -377,7 +375,7 @@ class DesktopBackdrop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
+      children: <Widget>[
         backLayer,
         Padding(
           padding: EdgeInsetsDirectional.only(

@@ -4,11 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:gallery/feature_discovery/animation.dart';
-import 'package:gallery/feature_discovery/overlay.dart';
 import 'package:get_storage/get_storage.dart';
 
-const _featureHighlightShownKey = 'feature_highlight_shown';
+import 'animation.dart';
+import 'overlay.dart';
+
+const String _featureHighlightShownKey = 'feature_highlight_shown';
 
 /// [Widget] to enforce a global lock system for [FeatureDiscovery] widgets.
 ///
@@ -18,12 +19,12 @@ const _featureHighlightShownKey = 'feature_highlight_shown';
 /// Users wanting to use [FeatureDiscovery] need to put this controller
 /// above [FeatureDiscovery] widgets in the widget tree.
 class FeatureDiscoveryController extends StatefulWidget {
-  final Widget child;
 
   const FeatureDiscoveryController(this.child, {super.key});
+  final Widget child;
 
   static _FeatureDiscoveryControllerState _of(BuildContext context) {
-    final matchResult =
+    final _FeatureDiscoveryControllerState? matchResult =
         context.findAncestorStateOfType<_FeatureDiscoveryControllerState>();
     if (matchResult != null) {
       return matchResult;
@@ -83,6 +84,17 @@ class _FeatureDiscoveryControllerState
 /// This widget loosely follows the guidelines set forth in the Material Specs:
 /// https://material.io/archive/guidelines/growth-communications/feature-discovery.html.
 class FeatureDiscovery extends StatefulWidget {
+
+  const FeatureDiscovery({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.child,
+    required this.showOverlay,
+    this.onDismiss,
+    this.onTap,
+    this.color,
+  });
   /// Title to be displayed in the overlay.
   final String title;
 
@@ -106,21 +118,10 @@ class FeatureDiscovery extends StatefulWidget {
   final Color? color;
 
   @visibleForTesting
-  static const overlayKey = Key('overlay key');
+  static const Key overlayKey = Key('overlay key');
 
   @visibleForTesting
-  static const gestureDetectorKey = Key('gesture detector key');
-
-  const FeatureDiscovery({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.child,
-    required this.showOverlay,
-    this.onDismiss,
-    this.onTap,
-    this.color,
-  });
+  static const Key gestureDetectorKey = Key('gesture detector key');
 
   @override
   State<FeatureDiscovery> createState() => _FeatureDiscoveryState();
@@ -143,15 +144,15 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
     debugCheckHasMediaQuery(ctx);
     debugCheckHasDirectionality(ctx);
 
-    final deviceSize = MediaQuery.of(ctx).size;
-    final color = widget.color ?? Theme.of(ctx).colorScheme.primary;
+    final Size deviceSize = MediaQuery.of(ctx).size;
+    final Color color = widget.color ?? Theme.of(ctx).colorScheme.primary;
 
     // Wrap in transparent [Material] to enable widgets that require one.
     return Material(
       key: FeatureDiscovery.overlayKey,
       type: MaterialType.transparency,
       child: Stack(
-        children: [
+        children: <Widget>[
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -221,7 +222,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (ctx, _) {
+    return LayoutBuilder(builder: (BuildContext ctx, _) {
       if (overlay != null) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           // [OverlayEntry] needs to be explicitly rebuilt when necessary.
@@ -229,7 +230,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
         });
       } else {
         if (showOverlay && !FeatureDiscoveryController._of(ctx).isLocked) {
-          final entry = OverlayEntry(
+          final OverlayEntry entry = OverlayEntry(
             builder: (_) => buildOverlay(ctx, getOverlayCenter(ctx)),
           );
 
@@ -255,10 +256,10 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
 
   /// Compute the center position of the overlay.
   Offset getOverlayCenter(BuildContext parentCtx) {
-    final box = parentCtx.findRenderObject() as RenderBox;
-    final size = box.size;
-    final topLeftPosition = box.localToGlobal(Offset.zero);
-    final centerPosition = Offset(
+    final RenderBox box = parentCtx.findRenderObject()! as RenderBox;
+    final Size size = box.size;
+    final Offset topLeftPosition = box.localToGlobal(Offset.zero);
+    final Offset centerPosition = Offset(
       topLeftPosition.dx + size.width / 2,
       topLeftPosition.dy + size.height / 2,
     );
@@ -272,8 +273,8 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
     initAnimationControllers();
     initAnimations();
 
-    final localStorage = GetStorage();
-    final featureHiglightShown =
+    final GetStorage localStorage = GetStorage();
+    final bool featureHiglightShown =
         localStorage.read<bool>(_featureHighlightShownKey) ?? false;
     localStorage.write(_featureHighlightShownKey, true);
     showOverlay = widget.showOverlay && !featureHiglightShown;
@@ -290,7 +291,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((animationStatus) {
+      ..addStatusListener((AnimationStatus animationStatus) {
         if (animationStatus == AnimationStatus.forward) {
           setState(() => status = FeatureDiscoveryStatus.open);
         } else if (animationStatus == AnimationStatus.completed) {
@@ -305,7 +306,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((animationStatus) {
+      ..addStatusListener((AnimationStatus animationStatus) {
         if (animationStatus == AnimationStatus.forward) {
           setState(() => status = FeatureDiscoveryStatus.ripple);
         } else if (animationStatus == AnimationStatus.completed) {
@@ -320,7 +321,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((animationStatus) {
+      ..addStatusListener((AnimationStatus animationStatus) {
         if (animationStatus == AnimationStatus.forward) {
           setState(() => status = FeatureDiscoveryStatus.tap);
         } else if (animationStatus == AnimationStatus.completed) {
@@ -336,7 +337,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((animationStatus) {
+      ..addStatusListener((AnimationStatus animationStatus) {
         if (animationStatus == AnimationStatus.forward) {
           setState(() => status = FeatureDiscoveryStatus.dismiss);
         } else if (animationStatus == AnimationStatus.completed) {

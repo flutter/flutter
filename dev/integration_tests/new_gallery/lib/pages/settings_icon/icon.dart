@@ -4,7 +4,7 @@
 
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:gallery/pages/settings_icon/metrics.dart';
+import 'metrics.dart';
 
 class SettingsIcon extends StatelessWidget {
   const SettingsIcon(this.time, {super.key});
@@ -54,14 +54,14 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// A rectangle with a fixed location, used to locate gradients.
   Rect get _fixedRect {
-    final topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
-    final bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
+    final Offset topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
+    final Offset bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
     return Rect.fromPoints(topLeft, bottomRight);
   }
 
   /// Black or white paint, depending on brightness.
   Paint get _monoPaint {
-    final monoColor =
+    final Color monoColor =
         Theme.of(context).colorScheme.brightness == Brightness.light
             ? Colors.black
             : Colors.white;
@@ -70,8 +70,8 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Pink paint with horizontal gradient.
   Paint get _pinkPaint {
-    const shader = LinearGradient(colors: [pinkLeft, pinkRight]);
-    final shaderRect = _fixedRect.translate(
+    const LinearGradient shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
+    final Rect shaderRect = _fixedRect.translate(
       _size(-(stickLength - colorLength(time)) / 2),
       0,
     );
@@ -81,8 +81,8 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Teal paint with horizontal gradient.
   Paint get _tealPaint {
-    const shader = LinearGradient(colors: [tealLeft, tealRight]);
-    final shaderRect = _fixedRect.translate(
+    const LinearGradient shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
+    final Rect shaderRect = _fixedRect.translate(
       _size((stickLength - colorLength(time)) / 2),
       0,
     );
@@ -105,20 +105,20 @@ class _SettingsIconPainter extends CustomPainter {
 
     // Paint.
     width = min(width, length);
-    final stretch = length / 2;
-    final radius = width / 2;
+    final double stretch = length / 2;
+    final double radius = width / 2;
 
     _canvas.save();
 
     _canvas.translate(center.dx, center.dy);
     _canvas.rotate(angle);
 
-    final leftOval = Rect.fromCircle(
+    final Rect leftOval = Rect.fromCircle(
       center: Offset(-stretch + radius, 0),
       radius: radius,
     );
 
-    final rightOval = Rect.fromCircle(
+    final Rect rightOval = Rect.fromCircle(
       center: Offset(stretch - radius, 0),
       radius: radius,
     );
@@ -187,5 +187,5 @@ class _SettingsIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) =>
-      oldDelegate is! _SettingsIconPainter || (oldDelegate).time != time;
+      oldDelegate is! _SettingsIconPainter || oldDelegate.time != time;
 }

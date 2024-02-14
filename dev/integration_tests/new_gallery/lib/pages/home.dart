@@ -8,30 +8,31 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/constants.dart';
-import 'package:gallery/data/demos.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/pages/category_list_item.dart';
-import 'package:gallery/pages/settings.dart';
-import 'package:gallery/pages/splash.dart';
-import 'package:gallery/studies/crane/colors.dart';
-import 'package:gallery/studies/crane/routes.dart' as crane_routes;
-import 'package:gallery/studies/fortnightly/routes.dart' as fortnightly_routes;
-import 'package:gallery/studies/rally/colors.dart';
-import 'package:gallery/studies/rally/routes.dart' as rally_routes;
-import 'package:gallery/studies/reply/routes.dart' as reply_routes;
-import 'package:gallery/studies/shrine/colors.dart';
-import 'package:gallery/studies/shrine/routes.dart' as shrine_routes;
-import 'package:gallery/studies/starter/routes.dart' as starter_app_routes;
 import 'package:url_launcher/url_launcher.dart';
 
-const _horizontalPadding = 32.0;
-const _horizontalDesktopPadding = 81.0;
-const _carouselHeightMin = 240.0;
-const _carouselItemDesktopMargin = 8.0;
-const _carouselItemMobileMargin = 4.0;
-const _carouselItemWidth = 296.0;
+import '../constants.dart';
+import '../data/demos.dart';
+import '../data/gallery_options.dart';
+import '../layout/adaptive.dart';
+import '../studies/crane/colors.dart';
+import '../studies/crane/routes.dart' as crane_routes;
+import '../studies/fortnightly/routes.dart' as fortnightly_routes;
+import '../studies/rally/colors.dart';
+import '../studies/rally/routes.dart' as rally_routes;
+import '../studies/reply/routes.dart' as reply_routes;
+import '../studies/shrine/colors.dart';
+import '../studies/shrine/routes.dart' as shrine_routes;
+import '../studies/starter/routes.dart' as starter_app_routes;
+import 'category_list_item.dart';
+import 'settings.dart';
+import 'splash.dart';
+
+const double _horizontalPadding = 32.0;
+const double _horizontalDesktopPadding = 81.0;
+const double _carouselHeightMin = 240.0;
+const double _carouselItemDesktopMargin = 8.0;
+const double _carouselItemMobileMargin = 4.0;
+const double _carouselItemWidth = 296.0;
 
 class ToggleSplashNotification extends Notification {}
 
@@ -40,10 +41,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final localizations = GalleryLocalizations.of(context)!;
-    final studyDemos = Demos.studies(localizations);
-    final carouselCards = <Widget>[
+    final bool isDesktop = isDisplayDesktop(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final Map<String, GalleryDemo> studyDemos = Demos.studies(localizations);
+    final List<Widget> carouselCards = <Widget>[
       _CarouselCard(
         demo: studyDemos['reply'],
         asset: const AssetImage(
@@ -137,7 +138,7 @@ class HomePage extends StatelessWidget {
 
     if (isDesktop) {
       // Desktop layout
-      final desktopCategoryItems = <_DesktopCategoryItem>[
+      final List<_DesktopCategoryItem> desktopCategoryItems = <_DesktopCategoryItem>[
         _DesktopCategoryItem(
           category: GalleryDemoCategory.material,
           asset: const AssetImage(
@@ -172,7 +173,7 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsetsDirectional.only(
             top: firstHeaderDesktopTopPadding,
           ),
-          children: [
+          children: <Widget>[
             _DesktopHomeItem(child: _GalleryHeader()),
             _DesktopCarousel(
               height: _carouselHeight(0.7, context),
@@ -183,7 +184,6 @@ class HomePage extends StatelessWidget {
               height: 585,
               child: _DesktopHomeItem(
                 child: Row(
-                  mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: spaceBetween(28, desktopCategoryItems),
                 ),
@@ -192,12 +192,12 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 81),
             _DesktopHomeItem(
               child: Row(
-                children: [
+                children: <Widget>[
                   MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: GestureDetector(
                       onTap: () async {
-                        final url = Uri.parse('https://flutter.dev');
+                        final Uri url = Uri.parse('https://flutter.dev');
                         if (await canLaunchUrl(url)) {
                           await launchUrl(url);
                         }
@@ -223,7 +223,7 @@ class HomePage extends StatelessWidget {
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       alignment: WrapAlignment.end,
-                      children: [
+                      children: <Widget>[
                         SettingsAbout(),
                         SettingsFeedback(),
                         SettingsAttribution(),
@@ -251,8 +251,8 @@ class HomePage extends StatelessWidget {
   }
 
   List<Widget> spaceBetween(double paddingBetween, List<Widget> children) {
-    return [
-      for (int index = 0; index < children.length; index++) ...[
+    return <Widget>[
+      for (int index = 0; index < children.length; index++) ...<Widget>[
         Flexible(
           child: children[index],
         ),
@@ -380,16 +380,16 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
-    final isTestMode = GalleryOptions.of(context).isTestMode;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final bool isTestMode = GalleryOptions.of(context).isTestMode;
     return Stack(
-      children: [
+      children: <Widget>[
         ListView(
           // Makes integration tests possible.
           key: const ValueKey('HomeListView'),
           primary: true,
           restorationId: 'home_list_view',
-          children: [
+          children: <Widget>[
             const SizedBox(height: 8),
             Container(
               margin:
@@ -419,7 +419,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
                   demos: Demos.materialDemos(localizations),
                   initiallyExpanded:
                       _isMaterialListExpanded.value || isTestMode,
-                  onTap: (shouldOpenList) {
+                  onTap: (bool shouldOpenList) {
                     _isMaterialListExpanded.value = shouldOpenList;
                   }),
             ),
@@ -436,7 +436,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
                   demos: Demos.cupertinoDemos(localizations),
                   initiallyExpanded:
                       _isCupertinoListExpanded.value || isTestMode,
-                  onTap: (shouldOpenList) {
+                  onTap: (bool shouldOpenList) {
                     _isCupertinoListExpanded.value = shouldOpenList;
                   }),
             ),
@@ -452,7 +452,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
                   imageString: 'assets/icons/reference/reference.png',
                   demos: Demos.otherDemos(localizations),
                   initiallyExpanded: _isOtherListExpanded.value || isTestMode,
-                  onTap: (shouldOpenList) {
+                  onTap: (bool shouldOpenList) {
                     _isOtherListExpanded.value = shouldOpenList;
                   }),
             ),
@@ -461,7 +461,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
         Align(
           alignment: Alignment.topCenter,
           child: GestureDetector(
-            onVerticalDragEnd: (details) {
+            onVerticalDragEnd: (DragEndDetails details) {
               if (details.velocity.pixelsPerSecond.dy > 200) {
                 ToggleSplashNotification().dispatch(context);
               }
@@ -488,7 +488,6 @@ class _DesktopHomeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: Container(
         constraints: const BoxConstraints(maxWidth: maxHomeItemWidth),
         padding: const EdgeInsets.symmetric(
@@ -513,7 +512,7 @@ class _DesktopCategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Material(
       borderRadius: BorderRadius.circular(10),
       clipBehavior: Clip.antiAlias,
@@ -523,7 +522,7 @@ class _DesktopCategoryItem extends StatelessWidget {
         child: FocusTraversalGroup(
           policy: WidgetOrderTraversalPolicy(),
           child: Column(
-            children: [
+            children: <Widget>[
               _DesktopCategoryHeader(
                 category: category,
                 asset: asset,
@@ -538,7 +537,7 @@ class _DesktopCategoryItem extends StatelessWidget {
                   // Makes integration tests possible.
                   key: ValueKey('${category.name}DemoList'),
                   primary: false,
-                  itemBuilder: (context, index) =>
+                  itemBuilder: (BuildContext context, int index) =>
                       CategoryDemoItem(demo: demos[index]),
                   itemCount: demos.length,
                 ),
@@ -562,13 +561,13 @@ class _DesktopCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Material(
       // Makes integration tests possible.
       key: ValueKey('${category.name}CategoryHeader'),
       color: colorScheme.onBackground,
       child: Row(
-        children: [
+        children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10),
             child: FadeInImage(
@@ -630,7 +629,7 @@ class _AnimatedCategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return Padding(
           padding: EdgeInsets.only(top: topPaddingAnimation.value),
           child: child,
@@ -666,13 +665,13 @@ class _AnimatedCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Stack(
-        children: [
+        children: <Widget>[
           SizedBox(height: _carouselHeight(.4, context)),
           AnimatedBuilder(
             animation: controller,
-            builder: (context, child) {
+            builder: (BuildContext context, Widget? child) {
               return PositionedDirectional(
                 start: constraints.maxWidth * startPositionAnimation.value,
                 child: child!,
@@ -717,7 +716,7 @@ class _AnimatedCarouselCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return Padding(
           padding: EdgeInsetsDirectional.only(
             start: startPaddingAnimation.value,
@@ -764,8 +763,8 @@ class _MobileCarouselState extends State<_MobileCarousel>
     super.didChangeDependencies();
     // The viewPortFraction is calculated as the width of the device minus the
     // padding.
-    final width = MediaQuery.of(context).size.width;
-    const padding = (_carouselItemMobileMargin * 2);
+    final double width = MediaQuery.of(context).size.width;
+    const double padding = _carouselItemMobileMargin * 2;
     _controller = PageController(
       initialPage: _currentPage.value,
       viewportFraction: (_carouselItemWidth + padding) / width,
@@ -780,9 +779,9 @@ class _MobileCarouselState extends State<_MobileCarousel>
   }
 
   Widget builder(int index) {
-    final carouselCard = AnimatedBuilder(
+    final AnimatedBuilder carouselCard = AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         double value;
         if (_controller.position.haveDimensions) {
           value = _controller.page! - index;
@@ -796,7 +795,6 @@ class _MobileCarouselState extends State<_MobileCarousel>
 
         return Transform.scale(
           scale: value,
-          alignment: Alignment.center,
           child: child,
         );
       },
@@ -821,7 +819,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
       child: PageView.builder(
         // Makes integration tests possible.
         key: const ValueKey('studyDemoList'),
-        onPageChanged: (value) {
+        onPageChanged: (int value) {
           setState(() {
             _currentPage.value = value;
           });
@@ -829,7 +827,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
         controller: _controller,
         pageSnapping: false,
         itemCount: widget.children.length,
-        itemBuilder: (context, index) => builder(index),
+        itemBuilder: (BuildContext context, int index) => builder(index),
         allowImplicitScrolling: true,
       ),
     );
@@ -871,8 +869,8 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    var showPreviousButton = false;
-    var showNextButton = true;
+    bool showPreviousButton = false;
+    bool showNextButton = true;
     // Only check this after the _controller has been attached to the ListView.
     if (_controller.hasClients) {
       showPreviousButton = _controller.offset > 0;
@@ -880,15 +878,14 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
           _controller.offset < _controller.position.maxScrollExtent;
     }
 
-    final isDesktop = isDisplayDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
 
     return Align(
-      alignment: Alignment.center,
       child: Container(
         height: widget.height,
         constraints: const BoxConstraints(maxWidth: maxHomeItemWidth),
         child: Stack(
-          children: [
+          children: <Widget>[
             ListView.builder(
               padding: EdgeInsets.symmetric(
                 horizontal: isDesktop
@@ -901,7 +898,7 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
               controller: _controller,
               itemExtent: _carouselItemWidth,
               itemCount: widget.children.length,
-              itemBuilder: (context, index) => Padding(
+              itemBuilder: (BuildContext context, int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: widget.children[index],
               ),
@@ -948,8 +945,8 @@ class _SnappingScrollPhysics extends ScrollPhysics {
     Tolerance tolerance,
     double velocity,
   ) {
-    final itemWidth = position.viewportDimension / 4;
-    var item = position.pixels / itemWidth;
+    final double itemWidth = position.viewportDimension / 4;
+    double item = position.pixels / itemWidth;
     if (velocity < -tolerance.velocity) {
       item -= 0.5;
     } else if (velocity > tolerance.velocity) {
@@ -970,8 +967,8 @@ class _SnappingScrollPhysics extends ScrollPhysics {
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
     }
-    final tolerance = toleranceFor(position);
-    final target = _getTargetPixels(position, tolerance, velocity);
+    final Tolerance tolerance = toleranceFor(position);
+    final double target = _getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {
       return ScrollSpringSimulation(
         spring,
@@ -999,8 +996,8 @@ class _DesktopPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const buttonSize = 58.0;
-    const padding = _horizontalDesktopPadding - buttonSize / 2;
+    const double buttonSize = 58.0;
+    const double padding = _horizontalDesktopPadding - buttonSize / 2;
     return ExcludeSemantics(
       child: Align(
         alignment: isEnd
@@ -1057,12 +1054,12 @@ class _CarouselCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
-    final asset = isDark ? assetDark : this.asset;
-    final assetColor = isDark ? assetDarkColor : this.assetColor;
-    final textColor = isDark ? Colors.white.withOpacity(0.87) : this.textColor;
-    final isDesktop = isDisplayDesktop(context);
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final bool isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
+    final ImageProvider<Object>? asset = isDark ? assetDark : this.asset;
+    final Color? assetColor = isDark ? assetDarkColor : this.assetColor;
+    final Color? textColor = isDark ? Colors.white.withOpacity(0.87) : this.textColor;
+    final bool isDesktop = isDisplayDesktop(context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -1081,7 +1078,7 @@ class _CarouselCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
-          children: [
+          children: <Widget>[
             if (asset != null)
               FadeInImage(
                 image: asset,
@@ -1095,7 +1092,7 @@ class _CarouselCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
+                children: <Widget>[
                   Text(
                     demo!.title,
                     style: textTheme.bodySmall!.apply(color: textColor),
@@ -1117,7 +1114,7 @@ class _CarouselCard extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     Navigator.of(context)
-                        .popUntil((route) => route.settings.name == '/');
+                        .popUntil((Route route) => route.settings.name == '/');
                     Navigator.of(context).restorablePushNamed(studyRoute);
                   },
                 ),
@@ -1157,11 +1154,11 @@ class StudyWrapper extends StatefulWidget {
 class _StudyWrapperState extends State<StudyWrapper> {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     return ApplyTextOptions(
       child: Stack(
-        children: [
+        children: <Widget>[
           Semantics(
             sortKey: const OrdinalSortKey(1),
             child: RestorationScope(
@@ -1190,7 +1187,7 @@ class _StudyWrapperState extends State<StudyWrapper> {
                       key: const ValueKey('Back'),
                       onPressed: () {
                         Navigator.of(context)
-                            .popUntil((route) => route.settings.name == '/');
+                            .popUntil((Route route) => route.settings.name == '/');
                       },
                       icon: IconTheme(
                         data: IconThemeData(color: colorScheme.onPrimary),

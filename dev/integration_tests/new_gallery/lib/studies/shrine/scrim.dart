@@ -11,20 +11,20 @@ class Scrim extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
+    final Size deviceSize = MediaQuery.of(context).size;
     return ExcludeSemantics(
       child: AnimatedBuilder(
         animation: controller,
-        builder: (context, child) {
-          final color =
+        builder: (BuildContext context, Widget? child) {
+          final Color color =
               const Color(0xFFFFF0EA).withOpacity(controller.value * 0.87);
 
           final Widget scrimRectangle = Container(
               width: deviceSize.width, height: deviceSize.height, color: color);
 
-          final ignorePointer =
+          final bool ignorePointer =
               (controller.status == AnimationStatus.dismissed);
-          final tapToRevert = (controller.status == AnimationStatus.completed);
+          final bool tapToRevert = (controller.status == AnimationStatus.completed);
 
           if (tapToRevert) {
             return MouseRegion(

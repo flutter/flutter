@@ -4,21 +4,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/data/gallery_options.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/shrine/backdrop.dart';
-import 'package:gallery/studies/shrine/category_menu_page.dart';
-import 'package:gallery/studies/shrine/expanding_bottom_sheet.dart';
-import 'package:gallery/studies/shrine/home.dart';
-import 'package:gallery/studies/shrine/login.dart';
-import 'package:gallery/studies/shrine/model/app_state_model.dart';
-import 'package:gallery/studies/shrine/model/product.dart';
-import 'package:gallery/studies/shrine/page_status.dart';
-import 'package:gallery/studies/shrine/routes.dart' as routes;
-import 'package:gallery/studies/shrine/scrim.dart';
-import 'package:gallery/studies/shrine/supplemental/layout_cache.dart';
-import 'package:gallery/studies/shrine/theme.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import '../../data/gallery_options.dart';
+import '../../layout/adaptive.dart';
+import 'backdrop.dart';
+import 'category_menu_page.dart';
+import 'expanding_bottom_sheet.dart';
+import 'home.dart';
+import 'login.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
+import 'page_status.dart';
+import 'routes.dart' as routes;
+import 'scrim.dart';
+import 'supplemental/layout_cache.dart';
+import 'theme.dart';
 
 class ShrineApp extends StatefulWidget {
   const ShrineApp({super.key});
@@ -42,7 +43,7 @@ class _ShrineAppState extends State<ShrineApp>
   final _RestorableAppStateModel _model = _RestorableAppStateModel();
   final RestorableDouble _expandingTabIndex = RestorableDouble(0);
   final RestorableDouble _tabIndex = RestorableDouble(1);
-  final Map<String, List<List<int>>> _layouts = {};
+  final Map<String, List<List<int>>> _layouts = <String, List<List<int>>>{};
 
   @override
   String get restorationId => 'shrine_app_state';
@@ -69,7 +70,7 @@ class _ShrineAppState extends State<ShrineApp>
     );
     // Save state restoration animation values only when the cart page
     // fully opens or closes.
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) {
         _tabIndex.value = _controller.value;
@@ -81,7 +82,7 @@ class _ShrineAppState extends State<ShrineApp>
     );
     // Save state restoration animation values only when the menu page
     // fully opens or closes.
-    _expandingController.addStatusListener((status) {
+    _expandingController.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) {
         _expandingTabIndex.value = _expandingController.value;
@@ -117,7 +118,7 @@ class _ShrineAppState extends State<ShrineApp>
 
   // Closes the bottom sheet if it is open.
   Future<bool> _onWillPop() async {
-    final status = _expandingController.status;
+    final AnimationStatus status = _expandingController.status;
     if (status == AnimationStatus.completed ||
         status == AnimationStatus.forward) {
       await _expandingController.reverse();
@@ -135,7 +136,7 @@ class _ShrineAppState extends State<ShrineApp>
         menuController: _controller,
         cartController: _expandingController,
         child: LayoutBuilder(
-          builder: (context, constraints) => HomePage(
+          builder: (BuildContext context, BoxConstraints constraints) => HomePage(
             backdrop: isDisplayDesktop(context)
                 ? desktopBackdrop()
                 : mobileBackdrop(),
@@ -165,9 +166,9 @@ class _ShrineAppState extends State<ShrineApp>
           title: 'Shrine',
           debugShowCheckedModeBanner: false,
           initialRoute: ShrineApp.loginRoute,
-          routes: {
-            ShrineApp.loginRoute: (context) => const LoginPage(),
-            ShrineApp.homeRoute: (context) => home,
+          routes: <String, WidgetBuilder>{
+            ShrineApp.loginRoute: (BuildContext context) => const LoginPage(),
+            ShrineApp.homeRoute: (BuildContext context) => home,
           },
           theme: shrineTheme.copyWith(
             platform: GalleryOptions.of(context).platform,
@@ -188,15 +189,15 @@ class _RestorableAppStateModel extends RestorableListenable<AppStateModel> {
 
   @override
   AppStateModel fromPrimitives(Object? data) {
-    final appState = AppStateModel()..loadProducts();
-    final appData = Map<String, dynamic>.from(data as Map);
+    final AppStateModel appState = AppStateModel()..loadProducts();
+    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map);
 
     // Reset selected category.
-    final categoryIndex = appData['category_index'] as int;
+    final int categoryIndex = appData['category_index'] as int;
     appState.setCategory(categories[categoryIndex]);
 
     // Reset cart items.
-    final cartItems = appData['cart_data'] as Map<dynamic, dynamic>;
+    final Map cartItems = appData['cart_data'] as Map<dynamic, dynamic>;
     cartItems.forEach((dynamic id, dynamic quantity) {
       appState.addMultipleProductsToCart(id as int, quantity as int);
     });

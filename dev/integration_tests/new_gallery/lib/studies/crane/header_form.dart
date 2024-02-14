@@ -3,18 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/layout/adaptive.dart';
-import 'package:gallery/studies/crane/colors.dart';
+import '../../layout/adaptive.dart';
+import 'colors.dart';
 
-const textFieldHeight = 60.0;
-const appPaddingLarge = 120.0;
-const appPaddingSmall = 24.0;
+const double textFieldHeight = 60.0;
+const double appPaddingLarge = 120.0;
+const double appPaddingSmall = 24.0;
 
 class HeaderFormField {
-  final int index;
-  final IconData iconData;
-  final String title;
-  final TextEditingController textController;
 
   const HeaderFormField({
     required this.index,
@@ -22,17 +18,21 @@ class HeaderFormField {
     required this.title,
     required this.textController,
   });
+  final int index;
+  final IconData iconData;
+  final String title;
+  final TextEditingController textController;
 }
 
 class HeaderForm extends StatelessWidget {
-  final List<HeaderFormField> fields;
 
   const HeaderForm({super.key, required this.fields});
+  final List<HeaderFormField> fields;
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = isDisplayDesktop(context);
-    final isSmallDesktop = isDisplaySmallDesktop(context);
+    final bool isDesktop = isDisplayDesktop(context);
+    final bool isSmallDesktop = isDisplaySmallDesktop(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -40,18 +40,18 @@ class HeaderForm extends StatelessWidget {
             isDesktop && !isSmallDesktop ? appPaddingLarge : appPaddingSmall,
       ),
       child: isDesktop
-          ? LayoutBuilder(builder: (context, constraints) {
-              var crossAxisCount = isSmallDesktop ? 2 : 4;
+          ? LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              int crossAxisCount = isSmallDesktop ? 2 : 4;
               if (fields.length < crossAxisCount) {
                 crossAxisCount = fields.length;
               }
-              final itemWidth = constraints.maxWidth / crossAxisCount;
+              final double itemWidth = constraints.maxWidth / crossAxisCount;
               return GridView.count(
                 crossAxisCount: crossAxisCount,
                 childAspectRatio: itemWidth / textFieldHeight,
                 physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (final field in fields)
+                children: <Widget>[
+                  for (final HeaderFormField field in fields)
                     if ((field.index + 1) % crossAxisCount == 0)
                       _HeaderTextField(field: field)
                     else
@@ -64,8 +64,8 @@ class HeaderForm extends StatelessWidget {
             })
           : Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final field in fields)
+              children: <Widget>[
+                for (final HeaderFormField field in fields)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: _HeaderTextField(field: field),
@@ -77,9 +77,9 @@ class HeaderForm extends StatelessWidget {
 }
 
 class _HeaderTextField extends StatelessWidget {
-  final HeaderFormField field;
 
   const _HeaderTextField({required this.field});
+  final HeaderFormField field;
 
   @override
   Widget build(BuildContext context) {

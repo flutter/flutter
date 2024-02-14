@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 
-import 'package:gallery/studies/crane/backlayer.dart';
-import 'package:gallery/studies/crane/header_form.dart';
+import 'backlayer.dart';
+import 'header_form.dart';
 
 class SleepForm extends BackLayerItem {
   const SleepForm({super.key}) : super(index: 1);
@@ -16,9 +16,9 @@ class SleepForm extends BackLayerItem {
 }
 
 class _SleepFormState extends State<SleepForm> with RestorationMixin {
-  final travelerController = RestorableTextEditingController();
-  final dateController = RestorableTextEditingController();
-  final locationController = RestorableTextEditingController();
+  final RestorableTextEditingController travelerController = RestorableTextEditingController();
+  final RestorableTextEditingController dateController = RestorableTextEditingController();
+  final RestorableTextEditingController locationController = RestorableTextEditingController();
 
   @override
   String get restorationId => 'sleep_form';
@@ -40,7 +40,7 @@ class _SleepFormState extends State<SleepForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return HeaderForm(
       fields: <HeaderFormField>[

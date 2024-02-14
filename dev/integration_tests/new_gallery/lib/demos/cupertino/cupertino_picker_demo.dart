@@ -30,10 +30,10 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedWeekday = 0;
 
   static List<String> getDaysOfWeek([String? locale]) {
-    final now = DateTime.now();
-    final firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    return List.generate(7, (index) => index)
-        .map((value) => DateFormat(DateFormat.WEEKDAY, locale)
+    final DateTime now = DateTime.now();
+    final DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    return List.generate(7, (int index) => index)
+        .map((int value) => DateFormat(DateFormat.WEEKDAY, locale)
             .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
   }
@@ -42,15 +42,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     required BuildContext context,
     required Widget child,
   }) {
-    final themeData = CupertinoTheme.of(context);
-    final dialogBody = CupertinoTheme(
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final CupertinoTheme dialogBody = CupertinoTheme(
       data: themeData,
       child: child,
     );
 
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (context) => dialogBody,
+      builder: (BuildContext context) => dialogBody,
     );
   }
 
@@ -67,7 +67,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                     CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
-                onDateTimeChanged: (newDateTime) {
+                onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => date = newDateTime);
                 },
               ),
@@ -75,7 +75,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           );
         },
         child: _Menu(
-          children: [
+          children: <Widget>[
             Text(GalleryLocalizations.of(context)!.demoCupertinoPickerDate),
             Text(
               DateFormat.yMMMMd().format(date),
@@ -100,7 +100,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                     CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
-                onDateTimeChanged: (newDateTime) {
+                onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => time = newDateTime);
                 },
               ),
@@ -108,7 +108,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           );
         },
         child: _Menu(
-          children: [
+          children: <Widget>[
             Text(GalleryLocalizations.of(context)!.demoCupertinoPickerTime),
             Text(
               DateFormat.jm().format(time),
@@ -131,9 +131,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               child: CupertinoDatePicker(
                 backgroundColor:
                     CupertinoColors.systemBackground.resolveFrom(context),
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
-                onDateTimeChanged: (newDateTime) {
+                onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);
                 },
               ),
@@ -141,7 +140,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           );
         },
         child: _Menu(
-          children: [
+          children: <Widget>[
             Text(GalleryLocalizations.of(context)!.demoCupertinoPickerDateTime),
             Flexible(
               child: Text(
@@ -167,7 +166,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 backgroundColor:
                     CupertinoColors.systemBackground.resolveFrom(context),
                 initialTimerDuration: timer,
-                onTimerDurationChanged: (newTimer) {
+                onTimerDurationChanged: (Duration newTimer) {
                   setState(() => timer = newTimer);
                 },
               ),
@@ -175,7 +174,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           );
         },
         child: _Menu(
-          children: [
+          children: <Widget>[
             Text(GalleryLocalizations.of(context)!.demoCupertinoPickerTimer),
             Text(
               '${timer.inHours}:'
@@ -190,8 +189,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildPicker(BuildContext context) {
-    final locale = GalleryLocalizations.of(context)?.localeName;
-    final daysOfWeek = getDaysOfWeek(locale);
+    final String? locale = GalleryLocalizations.of(context)?.localeName;
+    final List<String> daysOfWeek = getDaysOfWeek(locale);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -207,12 +206,12 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 squeeze: 1.2,
                 useMagnifier: true,
                 // This is called when selected item is changed.
-                onSelectedItemChanged: (selectedItem) {
+                onSelectedItemChanged: (int selectedItem) {
                   setState(() {
                     _selectedWeekday = selectedItem;
                   });
                 },
-                children: List<Widget>.generate(daysOfWeek.length, (index) {
+                children: List<Widget>.generate(daysOfWeek.length, (int index) {
                   return Center(
                     child: Text(
                       daysOfWeek[index],
@@ -224,7 +223,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           );
         },
         child: _Menu(
-          children: [
+          children: <Widget>[
             Text(GalleryLocalizations.of(context)!.demoCupertinoPicker),
             Text(
               daysOfWeek[_selectedWeekday],
@@ -247,7 +246,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: ListView(
-          children: [
+          children: <Widget>[
             const SizedBox(height: 32),
             _buildDatePicker(context),
             _buildTimePicker(context),

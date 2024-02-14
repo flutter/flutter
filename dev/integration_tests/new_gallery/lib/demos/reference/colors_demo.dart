@@ -27,8 +27,8 @@ class _Palette {
 }
 
 List<_Palette> _allPalettes(BuildContext context) {
-  final localizations = GalleryLocalizations.of(context)!;
-  return [
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+  return <_Palette>[
     _Palette(
       name: localizations.colorsRed,
       primary: Colors.red,
@@ -165,8 +165,7 @@ class _ColorItem extends StatelessWidget {
         color: color,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Text('$prefix$index'),
             Flexible(child: Text(_colorString)),
           ],
@@ -180,7 +179,7 @@ class _PaletteTabView extends StatelessWidget {
   const _PaletteTabView({required this.colors});
 
   final _Palette colors;
-  static const primaryKeys = <int>[
+  static const List<int> primaryKeys = <int>[
     50,
     100,
     200,
@@ -192,28 +191,28 @@ class _PaletteTabView extends StatelessWidget {
     800,
     900
   ];
-  static const accentKeys = <int>[100, 200, 400, 700];
+  static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final whiteTextStyle = textTheme.bodyMedium!.copyWith(
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle whiteTextStyle = textTheme.bodyMedium!.copyWith(
       color: Colors.white,
     );
-    final blackTextStyle = textTheme.bodyMedium!.copyWith(
+    final TextStyle blackTextStyle = textTheme.bodyMedium!.copyWith(
       color: Colors.black,
     );
     return Scrollbar(
       child: ListView(
         itemExtent: kColorItemHeight,
-        children: [
-          for (final key in primaryKeys)
+        children: <Widget>[
+          for (final int key in primaryKeys)
             DefaultTextStyle(
               style: key > colors.threshold ? whiteTextStyle : blackTextStyle,
               child: _ColorItem(index: key, color: colors.primary[key]!),
             ),
           if (colors.accent != null)
-            for (final key in accentKeys)
+            for (final int key in accentKeys)
               DefaultTextStyle(
                 style: key > colors.threshold ? whiteTextStyle : blackTextStyle,
                 child: _ColorItem(
@@ -233,7 +232,7 @@ class ColorsDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palettes = _allPalettes(context);
+    final List<_Palette> palettes = _allPalettes(context);
     return DefaultTabController(
       length: palettes.length,
       child: Scaffold(
@@ -242,15 +241,15 @@ class ColorsDemo extends StatelessWidget {
           title: Text(GalleryLocalizations.of(context)!.demoColorsTitle),
           bottom: TabBar(
             isScrollable: true,
-            tabs: [
-              for (final palette in palettes) Tab(text: palette.name),
+            tabs: <Widget>[
+              for (final _Palette palette in palettes) Tab(text: palette.name),
             ],
             labelColor: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
         body: TabBarView(
-          children: [
-            for (final palette in palettes) _PaletteTabView(colors: palette),
+          children: <Widget>[
+            for (final _Palette palette in palettes) _PaletteTabView(colors: palette),
           ],
         ),
       ),

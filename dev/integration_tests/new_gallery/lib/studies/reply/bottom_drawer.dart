@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/studies/reply/colors.dart';
+import 'colors.dart';
 
 class BottomDrawer extends StatelessWidget {
   const BottomDrawer({
@@ -17,7 +17,7 @@ class BottomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -32,7 +32,7 @@ class BottomDrawer extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(12),
           physics: const NeverScrollableScrollPhysics(),
-          children: [
+          children: <Widget>[
             const SizedBox(height: 28),
             leading,
             const SizedBox(height: 8),

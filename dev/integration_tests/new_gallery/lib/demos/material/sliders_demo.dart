@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/demos/material/material_demo_types.dart';
+import 'material_demo_types.dart';
 
 class SlidersDemo extends StatelessWidget {
   const SlidersDemo({super.key, required this.type});
@@ -14,7 +14,7 @@ class SlidersDemo extends StatelessWidget {
   final SlidersDemoType type;
 
   String _title(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (type) {
       case SlidersDemoType.sliders:
         return localizations.demoSlidersTitle;
@@ -31,10 +31,8 @@ class SlidersDemo extends StatelessWidget {
     switch (type) {
       case SlidersDemoType.sliders:
         sliders = _Sliders();
-        break;
       case SlidersDemoType.rangeSliders:
         sliders = _RangeSliders();
-        break;
       case SlidersDemoType.customSliders:
         sliders = _CustomSliders();
     }
@@ -76,15 +74,15 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               Semantics(
                 label: localizations.demoSlidersEditableNumericalValue,
                 child: SizedBox(
@@ -92,8 +90,8 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
                   height: 48,
                   child: TextField(
                     textAlign: TextAlign.center,
-                    onSubmitted: (value) {
-                      final newValue = double.tryParse(value);
+                    onSubmitted: (String value) {
+                      final double? newValue = double.tryParse(value);
                       if (newValue != null &&
                           newValue != _continuousValue.value) {
                         setState(() {
@@ -111,9 +109,8 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
               ),
               Slider(
                 value: _continuousValue.value,
-                min: 0,
                 max: 100,
-                onChanged: (value) {
+                onChanged: (double value) {
                   setState(() {
                     _continuousValue.value = value;
                   });
@@ -122,7 +119,6 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
               // Disabled slider
               Slider(
                 value: _continuousValue.value,
-                min: 0,
                 max: 100,
                 onChanged: null,
               ),
@@ -133,14 +129,13 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
           const SizedBox(height: 80),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               Slider(
                 value: _discreteValue.value,
-                min: 0,
                 max: 200,
                 divisions: 5,
                 label: _discreteValue.value.round().toString(),
-                onChanged: (value) {
+                onChanged: (double value) {
                   setState(() {
                     _discreteValue.value = value;
                   });
@@ -149,7 +144,6 @@ class _SlidersState extends State<_Sliders> with RestorationMixin {
               // Disabled slider
               Slider(
                 value: _discreteValue.value,
-                min: 0,
                 max: 200,
                 divisions: 5,
                 label: _discreteValue.value.round().toString(),
@@ -201,11 +195,11 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final continuousValues = RangeValues(
+    final RangeValues continuousValues = RangeValues(
       _continuousStartValue.value,
       _continuousEndValue.value,
     );
-    final discreteValues = RangeValues(
+    final RangeValues discreteValues = RangeValues(
       _discreteStartValue.value,
       _discreteEndValue.value,
     );
@@ -214,15 +208,14 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               RangeSlider(
                 values: continuousValues,
-                min: 0,
                 max: 100,
-                onChanged: (values) {
+                onChanged: (RangeValues values) {
                   setState(() {
                     _continuousStartValue.value = values.start;
                     _continuousEndValue.value = values.end;
@@ -232,7 +225,6 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
               // Disabled range slider
               RangeSlider(
                 values: continuousValues,
-                min: 0,
                 max: 100,
                 onChanged: null,
               ),
@@ -242,17 +234,16 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
           const SizedBox(height: 80),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               RangeSlider(
                 values: discreteValues,
-                min: 0,
                 max: 200,
                 divisions: 5,
                 labels: RangeLabels(
                   discreteValues.start.round().toString(),
                   discreteValues.end.round().toString(),
                 ),
-                onChanged: (values) {
+                onChanged: (RangeValues values) {
                   setState(() {
                     _discreteStartValue.value = values.start;
                     _discreteEndValue.value = values.end;
@@ -262,7 +253,6 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
               // Disabled range slider
               RangeSlider(
                 values: discreteValues,
-                min: 0,
                 max: 200,
                 divisions: 5,
                 labels: RangeLabels(
@@ -285,11 +275,11 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
 // BEGIN customSlidersDemo
 
 Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final thumbPath = Path();
-  final height = math.sqrt(3) / 2;
-  final centerHeight = size * height / 3;
-  final halfSize = size / 2;
-  final sign = invert ? -1 : 1;
+  final Path thumbPath = Path();
+  final double height = math.sqrt(3) / 2;
+  final double centerHeight = size * height / 3;
+  final double halfSize = size / 2;
+  final int sign = invert ? -1 : 1;
   thumbPath.moveTo(
       thumbCenter.dx - halfSize, thumbCenter.dy + sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2 * sign * centerHeight);
@@ -300,9 +290,9 @@ Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
 }
 
 Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final thumbPath = Path();
-  final halfSize = size / 2;
-  final sign = invert ? -1 : 1;
+  final Path thumbPath = Path();
+  final double halfSize = size / 2;
+  final int sign = invert ? -1 : 1;
   thumbPath.moveTo(thumbCenter.dx + halfSize * sign, thumbCenter.dy);
   thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy - size);
   thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy + size);
@@ -348,35 +338,29 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     Thumb? thumb,
     bool? isPressed,
   }) {
-    final canvas = context.canvas;
-    final colorTween = ColorTween(
+    final Canvas canvas = context.canvas;
+    final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
 
-    final size = _thumbSize * sizeTween.evaluate(enableAnimation);
+    final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     Path thumbPath;
     switch (textDirection!) {
       case TextDirection.rtl:
         switch (thumb!) {
           case Thumb.start:
             thumbPath = _rightTriangle(size, center);
-            break;
           case Thumb.end:
             thumbPath = _leftTriangle(size, center);
-            break;
         }
-        break;
       case TextDirection.ltr:
         switch (thumb!) {
           case Thumb.start:
             thumbPath = _leftTriangle(size, center);
-            break;
           case Thumb.end:
             thumbPath = _rightTriangle(size, center);
-            break;
         }
-        break;
     }
     canvas.drawPath(
       thumbPath,
@@ -418,13 +402,13 @@ class _CustomThumbShape extends SliderComponentShape {
     double? textScaleFactor,
     Size? sizeWithOverflow,
   }) {
-    final canvas = context.canvas;
-    final colorTween = ColorTween(
+    final Canvas canvas = context.canvas;
+    final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
-    final size = _thumbSize * sizeTween.evaluate(enableAnimation);
-    final thumbPath = _downTriangle(size, thumbCenter);
+    final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
+    final Path thumbPath = _downTriangle(size, thumbCenter);
     canvas.drawPath(
       thumbPath,
       Paint()..color = colorTween.evaluate(enableAnimation)!,
@@ -464,20 +448,20 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     double? textScaleFactor,
     Size? sizeWithOverflow,
   }) {
-    final canvas = context.canvas;
-    final enableColor = ColorTween(
+    final Canvas canvas = context.canvas;
+    final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
-    final slideUpTween = Tween<double>(
+    final Tween<double> slideUpTween = Tween<double>(
       begin: 0,
       end: _slideUpHeight,
     );
-    final size = _indicatorSize * sizeTween.evaluate(enableAnimation);
-    final slideUpOffset =
+    final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
+    final Offset slideUpOffset =
         Offset(0, -slideUpTween.evaluate(activationAnimation));
-    final thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
-    final paintColor = enableColor
+    final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
+    final Color paintColor = enableColor
         .evaluate(enableAnimation)!
         .withAlpha((255 * activationAnimation.value).round());
     canvas.drawPath(
@@ -532,20 +516,20 @@ class _CustomSlidersState extends State<_CustomSliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final customRangeValue = RangeValues(
+    final RangeValues customRangeValue = RangeValues(
       _continuousStartCustomValue.value,
       _continuousEndCustomValue.value,
     );
-    final theme = Theme.of(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final ThemeData theme = Theme.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               SliderTheme(
                 data: theme.sliderTheme.copyWith(
                   trackHeight: 2,
@@ -566,13 +550,12 @@ class _CustomSlidersState extends State<_CustomSliders> with RestorationMixin {
                 ),
                 child: Slider(
                   value: _discreteCustomValue.value,
-                  min: 0,
                   max: 200,
                   divisions: 5,
-                  semanticFormatterCallback: (value) =>
+                  semanticFormatterCallback: (double value) =>
                       value.round().toString(),
                   label: '${_discreteCustomValue.value.round()}',
-                  onChanged: (value) {
+                  onChanged: (double value) {
                     setState(() {
                       _discreteCustomValue.value = value;
                     });
@@ -585,7 +568,7 @@ class _CustomSlidersState extends State<_CustomSliders> with RestorationMixin {
           const SizedBox(height: 80),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               SliderTheme(
                 data: const SliderThemeData(
                   trackHeight: 2,
@@ -600,9 +583,8 @@ class _CustomSlidersState extends State<_CustomSliders> with RestorationMixin {
                 ),
                 child: RangeSlider(
                   values: customRangeValue,
-                  min: 0,
                   max: 200,
-                  onChanged: (values) {
+                  onChanged: (RangeValues values) {
                     setState(() {
                       _continuousStartCustomValue.value = values.start;
                       _continuousEndCustomValue.value = values.end;

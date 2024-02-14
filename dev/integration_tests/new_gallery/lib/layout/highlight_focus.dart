@@ -56,12 +56,12 @@ class _HighlightFocusState extends State<HighlightFocus> {
 
   @override
   Widget build(BuildContext context) {
-    final highlightColor = widget.highlightColor ??
+    final Color highlightColor = widget.highlightColor ??
         Theme.of(context).colorScheme.primary.withOpacity(0.5);
-    final borderColor =
+    final Color borderColor =
         widget.borderColor ?? Theme.of(context).colorScheme.onPrimary;
 
-    final highlightedDecoration = BoxDecoration(
+    final BoxDecoration highlightedDecoration = BoxDecoration(
       color: highlightColor,
       border: Border.all(
         color: borderColor,
@@ -73,12 +73,12 @@ class _HighlightFocusState extends State<HighlightFocus> {
     return Focus(
       canRequestFocus: widget.hasFocus,
       debugLabel: widget.debugLabel,
-      onFocusChange: (newValue) {
+      onFocusChange: (bool newValue) {
         setState(() {
           isFocused = newValue;
         });
       },
-      onKeyEvent: (node, event) {
+      onKeyEvent: (FocusNode node, KeyEvent event) {
         if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
             (event.logicalKey == LogicalKeyboardKey.space ||
                 event.logicalKey == LogicalKeyboardKey.enter ||

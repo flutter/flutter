@@ -5,27 +5,27 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:gallery/layout/adaptive.dart';
+import '../../layout/adaptive.dart';
 
-const appBarDesktopHeight = 128.0;
+const double appBarDesktopHeight = 128.0;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDesktop = isDisplayDesktop(context);
-    final localizations = GalleryLocalizations.of(context)!;
-    final body = SafeArea(
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isDesktop = isDisplayDesktop(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final SafeArea body = SafeArea(
       child: Padding(
         padding: isDesktop
             ? const EdgeInsets.symmetric(horizontal: 72, vertical: 48)
             : const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             SelectableText(
               localizations.starterAppGenericHeadline,
               style: textTheme.displaySmall!.copyWith(
@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
 
     if (isDesktop) {
       return Row(
-        children: [
+        children: <Widget>[
           const ListDrawer(),
           const VerticalDivider(width: 1),
           Expanded(
@@ -106,8 +106,8 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = Theme.of(context);
-    final localizations = GalleryLocalizations.of(context)!;
+    final ThemeData themeData = Theme.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return AppBar(
       automaticallyImplyLeading: !isDesktop,
       title: isDesktop
@@ -128,7 +128,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             )
           : null,
-      actions: [
+      actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.share),
           tooltip: localizations.starterAppTooltipShare,
@@ -157,18 +157,18 @@ class ListDrawer extends StatefulWidget {
 }
 
 class _ListDrawerState extends State<ListDrawer> {
-  static const numItems = 9;
+  static const int numItems = 9;
 
   int selectedItem = 0;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final localizations = GalleryLocalizations.of(context)!;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Drawer(
       child: SafeArea(
         child: ListView(
-          children: [
+          children: <Widget>[
             ListTile(
               title: SelectableText(
                 localizations.starterAppTitle,
@@ -180,9 +180,8 @@ class _ListDrawerState extends State<ListDrawer> {
               ),
             ),
             const Divider(),
-            ...Iterable<int>.generate(numItems).toList().map((i) {
+            ...Iterable<int>.generate(numItems).toList().map((int i) {
               return ListTile(
-                enabled: true,
                 selected: i == selectedItem,
                 leading: const Icon(Icons.favorite),
                 title: Text(
