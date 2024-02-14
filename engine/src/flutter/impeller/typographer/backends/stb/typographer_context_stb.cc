@@ -516,11 +516,12 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
   PixelFormat format;
   switch (type) {
     case GlyphAtlas::Type::kAlphaBitmap:
-      format = PixelFormat::kA8UNormInt;
+      format = context.GetCapabilities()->GetDefaultGlyphAtlasFormat();
       break;
     case GlyphAtlas::Type::kColorBitmap:
-      format = DISABLE_COLOR_FONT_SUPPORT ? PixelFormat::kA8UNormInt
-                                          : PixelFormat::kR8G8B8A8UNormInt;
+      format = DISABLE_COLOR_FONT_SUPPORT
+                   ? context.GetCapabilities()->GetDefaultGlyphAtlasFormat()
+                   : PixelFormat::kR8G8B8A8UNormInt;
       break;
   }
   auto texture = UploadGlyphTextureAtlas(context.GetResourceAllocator(), bitmap,

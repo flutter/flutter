@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
 namespace impeller {
@@ -102,6 +103,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     num_shader_binary_formats = value;
   }
 
+  if (desc->IsES()) {
+    default_glyph_atlas_format_ = PixelFormat::kA8UNormInt;
+  } else {
+    default_glyph_atlas_format_ = PixelFormat::kR8UNormInt;
+  }
+
   supports_framebuffer_fetch_ = desc->HasExtension(kFramebufferFetchExt);
 
   if (desc->HasExtension(kTextureBorderClampExt) ||
@@ -192,6 +199,10 @@ PixelFormat CapabilitiesGLES::GetDefaultDepthStencilFormat() const {
 
 bool CapabilitiesGLES::IsANGLE() const {
   return is_angle_;
+}
+
+PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
+  return default_glyph_atlas_format_;
 }
 
 }  // namespace impeller

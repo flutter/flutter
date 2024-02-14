@@ -354,6 +354,7 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
   FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
   FLT_FORWARD(mock_capabilities, old_capabilities,
               SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
   ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
 
   auto texture = std::make_shared<Image>(CreateTextureForFixture("boston.jpg"));

@@ -404,7 +404,11 @@ ContentContext::ContentContext(
                                                  options_trianglestrip);
   srgb_to_linear_filter_pipelines_.CreateDefault(*context_,
                                                  options_trianglestrip);
-  glyph_atlas_pipelines_.CreateDefault(*context_, options);
+  glyph_atlas_pipelines_.CreateDefault(
+      *context_, options,
+      {static_cast<Scalar>(
+          GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
+          PixelFormat::kA8UNormInt)});
   glyph_atlas_color_pipelines_.CreateDefault(*context_, options);
   geometry_color_pipelines_.CreateDefault(*context_, options);
   yuv_to_rgb_filter_pipelines_.CreateDefault(*context_, options_trianglestrip);
