@@ -32,5 +32,5 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation-jvm:1.7.1'
+    implementation fileTree(include: ["*.jar"], dir: "../../../../third_party/android_embedding_dependencies/lib/")
 }
