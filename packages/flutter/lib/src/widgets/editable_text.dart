@@ -178,6 +178,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
+///
 /// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
@@ -198,6 +199,24 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
+  ///
+  /// The initial selection is `TextSelection.collapsed(offset: -1)`.
+  /// This indicates that there is no selection at all ([TextSelection.isValid]
+  /// is false in this case). When a text field is built with a controller whose
+  /// selection is not valid, the text field will update the selection when it
+  /// is focused (the selection will be an empty selection positioned at the
+  /// end of the text).
+  //
+  /// Consider using [TextEditingController.fromValue] to initialize both the
+  /// text and the selection.
+  ///
+  /// {@tool dartpad}
+  /// This example creates a [TextField] with a [TextEditingController] whose
+  /// initial selection is empty (collapsed) and positioned at the beginning
+  /// of the text (offset is 0).
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/text_editing_controller.1.dart **
+  /// {@end-tool}
   TextEditingController({ String? text })
     : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
