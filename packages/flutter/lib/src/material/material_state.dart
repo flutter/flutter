@@ -760,6 +760,10 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// [MaterialState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
+///
+/// When calling `setState` in a [MaterialStatesController] listener, use the
+/// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
+/// the build phase while [update] is being called.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
