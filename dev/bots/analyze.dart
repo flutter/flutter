@@ -151,6 +151,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Taboo words...');
   await verifyTabooDocumentation(flutterRoot);
+  
+  printProgress('Lint Kotlin files...');
+  await lintKotlinFiles(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
