@@ -242,6 +242,9 @@ void main() {
   buffer.write('''
   });
 ''');
+  buffer
+    ..writeln("  registerTestPackageRootServiceExtension('$packageRootFileUri');")
+    ..writeln();
   if (integrationTest) {
     buffer.write('''
   final callback = (method, params) async {
@@ -252,7 +255,6 @@ void main() {
   };
 
   developer.registerExtension('$kIntegrationTestMethod', callback);
-  registerTestPackageRootServiceExtension(packageRootFileUri);
 
   testChannel.stream.listen((x) {
     developer.postEvent(
