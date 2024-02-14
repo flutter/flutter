@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart'
-  hide NativeAssetsBuildRunner;
+    hide NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     as native_assets_cli;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
@@ -38,7 +38,7 @@ Future<Uri?> dryRunNativeAssetsAndroid({
     buildRunner,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    KernelAssets(nativeAssetPaths.toList()),
+    KernelAssets(nativeAssetPaths),
     buildUri_,
     fileSystem,
   );
@@ -84,7 +84,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
   if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-      KernelAssets(<KernelAsset>[]),
+      KernelAssets(),
       yamlParentDirectory ?? buildUri_,
       fileSystem,
     );
@@ -119,7 +119,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       _assetTargetLocations(nativeAssets);
   await _copyNativeAssetsAndroid(buildUri_, assetTargetLocations, fileSystem);
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-      KernelAssets(assetTargetLocations.values.toList()),
+      KernelAssets(assetTargetLocations.values),
       yamlParentDirectory ?? buildUri_,
       fileSystem);
   return (nativeAssetsUri, dependencies.toList());

@@ -37,7 +37,7 @@ Future<Uri?> dryRunNativeAssetsIOS({
     buildRunner,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    KernelAssets(assetTargetLocations.toList()),
+    KernelAssets(assetTargetLocations),
     buildUri,
     fileSystem,
   );
@@ -76,7 +76,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   required FileSystem fileSystem,
 }) async {
   if (!await nativeBuildRequired(buildRunner)) {
-    await writeNativeAssetsYaml(KernelAssets(<KernelAsset>[]), yamlParentDirectory, fileSystem);
+    await writeNativeAssetsYaml(KernelAssets(), yamlParentDirectory, fileSystem);
     return <Uri>[];
   }
 
@@ -117,7 +117,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
 
   final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
-    KernelAssets(assetTargetLocations.values.toList()),
+    KernelAssets(assetTargetLocations.values),
     yamlParentDirectory,
     fileSystem,
   );

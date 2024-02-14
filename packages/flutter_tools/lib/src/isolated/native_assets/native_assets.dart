@@ -498,7 +498,7 @@ Future<Uri?> dryRunNativeAssetsMultipleOSes({
       ),
   ];
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    KernelAssets(nativeAssetPaths.toList()),
+    KernelAssets(nativeAssetPaths),
     buildUri,
     fileSystem,
   );
@@ -598,7 +598,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   }
   if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-      KernelAssets(<KernelAsset>[]),
+      KernelAssets(),
       yamlParentDirectory ?? buildUri,
       fileSystem,
     );

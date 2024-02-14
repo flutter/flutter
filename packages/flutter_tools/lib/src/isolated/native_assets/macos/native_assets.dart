@@ -38,7 +38,7 @@ Future<Uri?> dryRunNativeAssetsMacOS({
     buildRunner,
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    KernelAssets(nativeAssetPaths.toList()),
+    KernelAssets(nativeAssetPaths),
     buildUri,
     fileSystem,
   );
@@ -94,7 +94,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-      KernelAssets(<KernelAsset>[]),
+      KernelAssets(),
       yamlParentDirectory ?? buildUri,
       fileSystem,
     );
@@ -149,7 +149,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
     );
   }
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-    KernelAssets(assetTargetLocations.values.toList()),
+    KernelAssets(assetTargetLocations.values),
     yamlParentDirectory ?? buildUri,
     fileSystem,
   );
