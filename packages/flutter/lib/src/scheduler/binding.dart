@@ -1026,11 +1026,11 @@ mixin SchedulerBinding on BindingBase {
     }
     final bool hadScheduledFrame = _hasScheduledFrame;
     PlatformDispatcher.instance.scheduleWarmUpFrame(
-      () {
+      beginFrame: () {
         assert(_warmUpFrame);
         handleBeginFrame(null);
       },
-      () {
+      drawFrame: () {
         assert(_warmUpFrame);
         handleDrawFrame();
         // We call resetEpoch after this frame so that, in the hot reload case,
