@@ -13,6 +13,7 @@ import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -1964,6 +1965,21 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
       '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
+  }
+}
+
+Future<void> lintKotlinFiles(String workingDirectory) async {
+  final Uri kotlinLinterUrl = Uri.https('github.com',
+      '/pinterest/ktlint/releases/download/1.1.1/ktlint');
+  final http.Response response = await http.get(kotlinLinterUrl);
+  final File kotlinLinterFile = File('$workingDirectory/ktlint');
+  kotlinLinterFile.writeAsBytesSync(response.bodyBytes);
+
+  // TODO: should this be on CIPD? Or downloaded like in packages repo, like above?
+  // TODO: Where to put the baseline file in this repo?
+  final EvalResult lintResult = await _evalCommand(kotlinLinterFile.path, <String>[], workingDirectory: workingDirectory);
+  if (lintResult.exitCode != 0) {
+    foundError(<String>['Found lint violations in Kotlin files:\n ${lintResult.stdout}']);
   }
 }
 
