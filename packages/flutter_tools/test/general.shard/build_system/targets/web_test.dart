@@ -1056,8 +1056,8 @@ void main() {
         '-O2',
         '--no-name-section',
         '-o',
+        environment.buildDir.childFile('main.dart.wasm').absolute.path,
         environment.buildDir.childFile('main.dart').absolute.path,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
       onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
