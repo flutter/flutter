@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -1124,6 +1125,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;
