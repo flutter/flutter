@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'model/email_store.dart';
 import 'package:provider/provider.dart';
 
 import 'model/email_model.dart';
+import 'model/email_store.dart';
 
 class ComposePage extends StatelessWidget {
   const ComposePage({super.key});
