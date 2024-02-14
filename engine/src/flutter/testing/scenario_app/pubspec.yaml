@@ -16,6 +16,7 @@ environment:
 # relative to this directory into //third_party/dart, or //third_party/pkg
 dependencies:
   args: any
+  engine_repo_tools: any
   path: any
   process: any
   sky_engine: any

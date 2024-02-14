@@ -8,9 +8,7 @@ captured and compared using Skia Gold (if available, for example on CI).
 ## Usage
 
 ```sh
-dart bin/android_integration_tests.dart \
-  --adb ../third_party/android_tools/sdk/platform-tools/adb \
-  --out-dir ../out/android_debug_unopt_arm64
+dart bin/android_integration_tests.dart
 ```
 
 ## Debugging
@@ -21,17 +19,20 @@ by class name, which can be useful to verify the setup.
 For example, to run the `EngineLaunchE2ETest` test:
 
 ```sh
-dart bin/android_integration_tests.dart \
-  --adb ../third_party/android_tools/sdk/platform-tools/adb \
-  --out-dir ../out/android_debug_unopt_arm64 \
-  --smoke-test dev.flutter.scenarios.EngineLaunchE2ETest
+dart bin/android_integration_tests.dart --smoke-test dev.flutter.scenarios.EngineLaunchE2ETest
 ```
 
 ## Additional arguments
 
+- `--adb`: The path to the `adb` tool. Defaults to
+  `third_party/android_tools/sdk/platform-tools/adb`.
+
+- `--out-dir`: The directory containing the build artifacts. Defaults to the
+  last updated build directory in `out/` that starts with `android_`.
+
 - `--use-skia-gold`: Use Skia Gold to compare screenshots. Defaults to true
   when running on CI, and false otherwise (i.e. when running locally). If
-  set to true, [isSkiaGoldClientAvailable] must be true.
+  set to true, `isSkiaGoldClientAvailable` must be true.
 
 - `--enable-impeller`: Enable Impeller for the Android app. Defaults to
   false, which means that the app will use Skia as the graphics backend.
