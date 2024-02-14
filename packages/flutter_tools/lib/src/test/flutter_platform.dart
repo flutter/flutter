@@ -115,6 +115,9 @@ FlutterPlatform installHook({
 ///
 /// The [host] argument specifies the address at which the test harness is
 /// running.
+/// 
+/// The [packageRootFileUri] argument specifies the package root containing this
+/// test.
 ///
 /// If [testConfigFile] is specified, it must follow the conventions of test
 /// configuration files as outlined in the [flutter_test] library. By default,
@@ -131,6 +134,7 @@ FlutterPlatform installHook({
 String generateTestBootstrap({
   required Uri testUrl,
   required InternetAddress host,
+  required String packageRootFileUri,
   File? testConfigFile,
   bool updateGoldens = false,
   String languageVersionHeader = '',
@@ -164,6 +168,7 @@ import 'dart:developer' as developer;
   }
   buffer.write('''
 import 'package:test_api/backend.dart';
+import 'package:test_api/service_extensions.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -247,6 +252,7 @@ void main() {
   };
 
   developer.registerExtension('$kIntegrationTestMethod', callback);
+  registerTestPackageRootServiceExtension(packageRootFileUri);
 
   testChannel.stream.listen((x) {
     developer.postEvent(
@@ -638,9 +644,11 @@ class FlutterPlatform extends PlatformPlugin {
       packageConfig[flutterProject!.manifest.appName],
       Cache.flutterRoot!,
     );
+    final String packageRootFileUri = Uri.file(flutterProject!.directory.absolute.path).toString();
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      packageRootFileUri: packageRootFileUri,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
