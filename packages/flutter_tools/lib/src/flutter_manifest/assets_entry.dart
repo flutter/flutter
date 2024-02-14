@@ -24,11 +24,11 @@ class AssetsEntry {
 
   static ParseResult<AssetsEntry?> parseFromYaml(Object? yaml) {
 
-    (Uri?, String?) tryParseUri(String uri) {
+    ParseResult<Uri> tryParseUri(String uri) {
       try {
-        return (Uri(pathSegments: uri.split('/')), null);
+        return ValueParseResult<Uri>(Uri(pathSegments: uri.split('/')));
       } on FormatException {
-        return (null, 'Asset manifest contains invalid uri: $uri.');
+        return ErrorParseResult<Uri>(<String>['Asset manifest contains invalid uri: $uri.']);
       }
     }
 
@@ -37,11 +37,11 @@ class AssetsEntry {
     }
 
     if (yaml is String) {
-      final (Uri? uri, String? error) = tryParseUri(yaml);
-      if (uri == null) {
-        return ErrorParseResult<AssetsEntry>(<String>[error!]);
-      }
-      return ValueParseResult<AssetsEntry>(AssetsEntry(uri: uri));
+      final ParseResult<Uri> uriParseResult = tryParseUri(yaml);
+      return switch (uriParseResult) {
+        ValueParseResult<Uri>() => ValueParseResult<AssetsEntry>(AssetsEntry(uri: uriParseResult.value)),
+        ErrorParseResult<Uri>() => ErrorParseResult<AssetsEntry>(uriParseResult.errors),
+      };
     }
 
     if (yaml is Map) {
