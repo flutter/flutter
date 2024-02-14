@@ -148,12 +148,23 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
 
-  bool get runWasmOpt =>
-      wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;
+  List<String> toCommandOptions() {
+    // -O1: Optimizes
+    // -O2: Same as -O1 but also minifies (still semantics preserving)
+    // -O3: Same as -O2 but also omits implicit type checks.
+    // -O4: Same as -O3 but also omits explicit type checks.
+    //      (NOTE: This differs from dart2js -O4 semantics atm.)
 
-  List<String> toCommandOptions() => <String>[
-        if (omitTypeChecks) '--omit-type-checks',
-      ];
+    // Ortogonal: The name section is always kept by default and we emit it only
+    // in [WasmOptLevel.full] mode (similar to `--strip` of static symbols in
+    // AOT mode).
+    final String level = !omitTypeChecks ? '-O2' : '-O4';
+    return switch (wasmOpt) {
+      WasmOptLevel.none => <String>['-O0'],
+      WasmOptLevel.debug => <String>[level, '--no-minify'],
+      WasmOptLevel.full => <String>[level, '--no-name-section'],
+    };
+  }
 
   @override
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
