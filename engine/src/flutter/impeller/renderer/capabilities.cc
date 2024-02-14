@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/capabilities.h"
+#include "impeller/core/formats.h"
 
 namespace impeller {
 
@@ -74,8 +75,14 @@ class StandardCapabilities final : public Capabilities {
     return default_depth_stencil_format_;
   }
 
+  // |Capabilities|
   bool SupportsDeviceTransientTextures() const override {
     return supports_device_transient_textures_;
+  }
+
+  // |Capabilities|
+  PixelFormat GetDefaultGlyphAtlasFormat() const override {
+    return default_glyph_atlas_format_;
   }
 
  private:
@@ -91,7 +98,8 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_device_transient_textures,
                        PixelFormat default_color_format,
                        PixelFormat default_stencil_format,
-                       PixelFormat default_depth_stencil_format)
+                       PixelFormat default_depth_stencil_format,
+                       PixelFormat default_glyph_atlas_format)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_buffer_to_texture_blits_(supports_buffer_to_texture_blits),
@@ -105,7 +113,8 @@ class StandardCapabilities final : public Capabilities {
         supports_device_transient_textures_(supports_device_transient_textures),
         default_color_format_(default_color_format),
         default_stencil_format_(default_stencil_format),
-        default_depth_stencil_format_(default_depth_stencil_format) {}
+        default_depth_stencil_format_(default_depth_stencil_format),
+        default_glyph_atlas_format_(default_glyph_atlas_format) {}
 
   friend class CapabilitiesBuilder;
 
@@ -122,6 +131,7 @@ class StandardCapabilities final : public Capabilities {
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
   PixelFormat default_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
+  PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -207,6 +217,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsDeviceTransientTextures(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultGlyphAtlasFormat(
+    PixelFormat value) {
+  default_glyph_atlas_format_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(  //
       supports_offscreen_msaa_,                                           //
@@ -221,7 +237,8 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_device_transient_textures_,                                //
       default_color_format_.value_or(PixelFormat::kUnknown),              //
       default_stencil_format_.value_or(PixelFormat::kUnknown),            //
-      default_depth_stencil_format_.value_or(PixelFormat::kUnknown)       //
+      default_depth_stencil_format_.value_or(PixelFormat::kUnknown),      //
+      default_glyph_atlas_format_.value_or(PixelFormat::kUnknown)         //
       ));
 }
 

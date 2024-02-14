@@ -117,7 +117,7 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
   lazy_atlas.AddTextFrame(*frame, 1.0f);
 
-  // Creates different atlases for color and alpha bitmap.
+  // Creates different atlases for color and red bitmap.
   auto color_atlas = lazy_atlas.CreateOrGetGlyphAtlas(
       *GetContext(), GlyphAtlas::Type::kColorBitmap);
 

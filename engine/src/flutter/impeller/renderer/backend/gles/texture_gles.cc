@@ -130,6 +130,11 @@ struct TexImage2DData {
         external_format = GL_ALPHA;
         type = GL_UNSIGNED_BYTE;
         break;
+      case PixelFormat::kR8UNormInt:
+        internal_format = GL_RED;
+        external_format = GL_RED;
+        type = GL_UNSIGNED_BYTE;
+        break;
       case PixelFormat::kR8G8B8A8UNormInt:
       case PixelFormat::kB8G8R8A8UNormInt:
       case PixelFormat::kR8G8B8A8UNormIntSRGB:
@@ -161,7 +166,6 @@ struct TexImage2DData {
         break;
       case PixelFormat::kUnknown:
       case PixelFormat::kD32FloatS8UInt:
-      case PixelFormat::kR8UNormInt:
       case PixelFormat::kR8G8UNormInt:
       case PixelFormat::kB10G10R10XRSRGB:
       case PixelFormat::kB10G10R10XR:

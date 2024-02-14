@@ -31,30 +31,39 @@ CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 
 TEST(CapabilitiesTest, DefaultColorFormat) {
   auto defaults = CapabilitiesBuilder().Build();
-  ASSERT_EQ(defaults->GetDefaultColorFormat(), PixelFormat::kUnknown);
+  EXPECT_EQ(defaults->GetDefaultColorFormat(), PixelFormat::kUnknown);
   auto mutated = CapabilitiesBuilder()
                      .SetDefaultColorFormat(PixelFormat::kB10G10R10A10XR)
                      .Build();
-  ASSERT_EQ(mutated->GetDefaultColorFormat(), PixelFormat::kB10G10R10A10XR);
+  EXPECT_EQ(mutated->GetDefaultColorFormat(), PixelFormat::kB10G10R10A10XR);
 }
 
 TEST(CapabilitiesTest, DefaultStencilFormat) {
   auto defaults = CapabilitiesBuilder().Build();
-  ASSERT_EQ(defaults->GetDefaultStencilFormat(), PixelFormat::kUnknown);
+  EXPECT_EQ(defaults->GetDefaultStencilFormat(), PixelFormat::kUnknown);
   auto mutated = CapabilitiesBuilder()
                      .SetDefaultStencilFormat(PixelFormat::kS8UInt)
                      .Build();
-  ASSERT_EQ(mutated->GetDefaultStencilFormat(), PixelFormat::kS8UInt);
+  EXPECT_EQ(mutated->GetDefaultStencilFormat(), PixelFormat::kS8UInt);
 }
 
 TEST(CapabilitiesTest, DefaultDepthStencilFormat) {
   auto defaults = CapabilitiesBuilder().Build();
-  ASSERT_EQ(defaults->GetDefaultDepthStencilFormat(), PixelFormat::kUnknown);
+  EXPECT_EQ(defaults->GetDefaultDepthStencilFormat(), PixelFormat::kUnknown);
   auto mutated = CapabilitiesBuilder()
                      .SetDefaultDepthStencilFormat(PixelFormat::kD32FloatS8UInt)
                      .Build();
-  ASSERT_EQ(mutated->GetDefaultDepthStencilFormat(),
+  EXPECT_EQ(mutated->GetDefaultDepthStencilFormat(),
             PixelFormat::kD32FloatS8UInt);
+}
+
+TEST(CapabilitiesTest, DefaultGlyphAtlasFormat) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_EQ(defaults->GetDefaultGlyphAtlasFormat(), PixelFormat::kUnknown);
+  auto mutated = CapabilitiesBuilder()
+                     .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
+                     .Build();
+  EXPECT_EQ(mutated->GetDefaultGlyphAtlasFormat(), PixelFormat::kA8UNormInt);
 }
 
 }  // namespace testing

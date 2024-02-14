@@ -8,6 +8,7 @@
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/capabilities.h"
@@ -118,12 +119,16 @@ class CapabilitiesGLES final
   // |Capabilities|
   PixelFormat GetDefaultDepthStencilFormat() const override;
 
+  // |Capabilities|
+  PixelFormat GetDefaultGlyphAtlasFormat() const override;
+
  private:
   bool supports_framebuffer_fetch_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_offscreen_msaa_ = false;
   bool supports_implicit_msaa_ = false;
   bool is_angle_ = false;
+  PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 
 }  // namespace impeller

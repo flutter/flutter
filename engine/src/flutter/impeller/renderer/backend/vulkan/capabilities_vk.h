@@ -100,6 +100,9 @@ class CapabilitiesVK final : public Capabilities,
   // |Capabilities|
   PixelFormat GetDefaultDepthStencilFormat() const override;
 
+  // |Capabilities|
+  PixelFormat GetDefaultGlyphAtlasFormat() const override;
+
  private:
   bool validations_enabled_ = false;
   std::map<std::string, std::set<std::string>> exts_;
