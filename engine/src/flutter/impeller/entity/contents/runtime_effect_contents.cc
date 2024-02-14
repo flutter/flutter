@@ -13,7 +13,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/runtime_effect.vert.h"
 #include "impeller/renderer/capabilities.h"
@@ -82,17 +81,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
 
   //--------------------------------------------------------------------------
-  /// Resolve geometry and content context options.
+  /// Resolve runtime stage function.
   ///
-
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-  auto options = OptionsFromPassAndEntity(pass, entity);
-  if (geometry_result.prevent_overdraw) {
-    options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
-  }
-  options.primitive_type = geometry_result.type;
 
   if (function && runtime_stage_->IsDirty()) {
     renderer.ClearCachedRuntimeEffectPipeline(runtime_stage_->GetEntrypoint());
@@ -145,194 +135,187 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 
   using VS = RuntimeEffectVertexShader;
 
-  pass.SetCommandLabel("RuntimeEffectContents");
-  pass.SetStencilReference(entity.GetClipDepth());
-  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-
-  //--------------------------------------------------------------------------
-  /// Vertex stage uniforms.
-  ///
-
-  VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
-  frame_info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
-
   //--------------------------------------------------------------------------
   /// Fragment stage uniforms.
   ///
 
-  size_t minimum_sampler_index = 100000000;
-  size_t buffer_index = 0;
-  size_t buffer_offset = 0;
-
   std::vector<DescriptorSetLayout> descriptor_set_layouts;
 
-  for (const auto& uniform : runtime_stage_->GetUniforms()) {
-    std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
+  BindFragmentCallback bind_callback = [this, &renderer, &context,
+                                        &descriptor_set_layouts](
+                                           RenderPass& pass) {
+    size_t minimum_sampler_index = 100000000;
+    size_t buffer_index = 0;
+    size_t buffer_offset = 0;
 
-    switch (uniform.type) {
-      case kSampledImage: {
-        // Sampler uniforms are ordered in the IPLR according to their
-        // declaration and the uniform location reflects the correct offset to
-        // be mapped to - except that it may include all proceeding float
-        // uniforms. For example, a float sampler that comes after 4 float
-        // uniforms may have a location of 4. To convert to the actual offset we
-        // need to find the largest location assigned to a float uniform and
-        // then subtract this from all uniform locations. This is more or less
-        // the same operation we previously performed in the shader compiler.
-        minimum_sampler_index =
-            std::min(minimum_sampler_index, uniform.location);
-        break;
-      }
-      case kFloat: {
-        FML_DCHECK(renderer.GetContext()->GetBackendType() !=
-                   Context::BackendType::kVulkan)
-            << "Uniform " << uniform.name
-            << " had unexpected type kFloat for Vulkan backend.";
-        size_t alignment =
-            std::max(uniform.bit_width / 8, DefaultUniformAlignment());
-        auto buffer_view = renderer.GetTransientsBuffer().Emplace(
-            uniform_data_->data() + buffer_offset, uniform.GetSize(),
-            alignment);
+    for (const auto& uniform : runtime_stage_->GetUniforms()) {
+      std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
 
-        ShaderUniformSlot uniform_slot;
-        uniform_slot.name = uniform.name.c_str();
-        uniform_slot.ext_res_0 = uniform.location;
-        pass.BindResource(ShaderStage::kFragment,
-                          DescriptorType::kUniformBuffer, uniform_slot,
-                          metadata, buffer_view);
-        buffer_index++;
-        buffer_offset += uniform.GetSize();
-        break;
-      }
-      case kStruct: {
-        FML_DCHECK(renderer.GetContext()->GetBackendType() ==
-                   Context::BackendType::kVulkan);
-        descriptor_set_layouts.emplace_back(DescriptorSetLayout{
-            static_cast<uint32_t>(uniform.location),
-            DescriptorType::kUniformBuffer,
-            ShaderStage::kFragment,
-        });
-        ShaderUniformSlot uniform_slot;
-        uniform_slot.name = uniform.name.c_str();
-        uniform_slot.binding = uniform.location;
+      switch (uniform.type) {
+        case kSampledImage: {
+          // Sampler uniforms are ordered in the IPLR according to their
+          // declaration and the uniform location reflects the correct offset to
+          // be mapped to - except that it may include all proceeding float
+          // uniforms. For example, a float sampler that comes after 4 float
+          // uniforms may have a location of 4. To convert to the actual offset
+          // we need to find the largest location assigned to a float uniform
+          // and then subtract this from all uniform locations. This is more or
+          // less the same operation we previously performed in the shader
+          // compiler.
+          minimum_sampler_index =
+              std::min(minimum_sampler_index, uniform.location);
+          break;
+        }
+        case kFloat: {
+          FML_DCHECK(renderer.GetContext()->GetBackendType() !=
+                     Context::BackendType::kVulkan)
+              << "Uniform " << uniform.name
+              << " had unexpected type kFloat for Vulkan backend.";
+          size_t alignment =
+              std::max(uniform.bit_width / 8, DefaultUniformAlignment());
+          auto buffer_view = renderer.GetTransientsBuffer().Emplace(
+              uniform_data_->data() + buffer_offset, uniform.GetSize(),
+              alignment);
 
-        std::vector<float> uniform_buffer;
-        uniform_buffer.reserve(uniform.struct_layout.size());
-        size_t uniform_byte_index = 0u;
-        for (const auto& byte_type : uniform.struct_layout) {
-          if (byte_type == 0) {
-            uniform_buffer.push_back(0.f);
-          } else if (byte_type == 1) {
-            uniform_buffer.push_back(reinterpret_cast<float*>(
-                uniform_data_->data())[uniform_byte_index++]);
-          } else {
-            FML_UNREACHABLE();
+          ShaderUniformSlot uniform_slot;
+          uniform_slot.name = uniform.name.c_str();
+          uniform_slot.ext_res_0 = uniform.location;
+          pass.BindResource(ShaderStage::kFragment,
+                            DescriptorType::kUniformBuffer, uniform_slot,
+                            metadata, buffer_view);
+          buffer_index++;
+          buffer_offset += uniform.GetSize();
+          break;
+        }
+        case kStruct: {
+          FML_DCHECK(renderer.GetContext()->GetBackendType() ==
+                     Context::BackendType::kVulkan);
+          descriptor_set_layouts.emplace_back(DescriptorSetLayout{
+              static_cast<uint32_t>(uniform.location),
+              DescriptorType::kUniformBuffer,
+              ShaderStage::kFragment,
+          });
+          ShaderUniformSlot uniform_slot;
+          uniform_slot.name = uniform.name.c_str();
+          uniform_slot.binding = uniform.location;
+
+          std::vector<float> uniform_buffer;
+          uniform_buffer.reserve(uniform.struct_layout.size());
+          size_t uniform_byte_index = 0u;
+          for (const auto& byte_type : uniform.struct_layout) {
+            if (byte_type == 0) {
+              uniform_buffer.push_back(0.f);
+            } else if (byte_type == 1) {
+              uniform_buffer.push_back(reinterpret_cast<float*>(
+                  uniform_data_->data())[uniform_byte_index++]);
+            } else {
+              FML_UNREACHABLE();
+            }
           }
+
+          size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
+                                      DefaultUniformAlignment());
+
+          auto buffer_view = renderer.GetTransientsBuffer().Emplace(
+              reinterpret_cast<const void*>(uniform_buffer.data()),
+              sizeof(float) * uniform_buffer.size(), alignment);
+          pass.BindResource(ShaderStage::kFragment,
+                            DescriptorType::kUniformBuffer, uniform_slot,
+                            ShaderMetadata{}, buffer_view);
         }
-
-        size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
-                                    DefaultUniformAlignment());
-
-        auto buffer_view = renderer.GetTransientsBuffer().Emplace(
-            reinterpret_cast<const void*>(uniform_buffer.data()),
-            sizeof(float) * uniform_buffer.size(), alignment);
-        pass.BindResource(ShaderStage::kFragment,
-                          DescriptorType::kUniformBuffer, uniform_slot,
-                          ShaderMetadata{}, buffer_view);
       }
     }
-  }
 
-  size_t sampler_index = 0;
-  for (const auto& uniform : runtime_stage_->GetUniforms()) {
-    std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
+    size_t sampler_index = 0;
+    for (const auto& uniform : runtime_stage_->GetUniforms()) {
+      std::shared_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
 
-    switch (uniform.type) {
-      case kSampledImage: {
-        FML_DCHECK(sampler_index < texture_inputs_.size());
-        auto& input = texture_inputs_[sampler_index];
+      switch (uniform.type) {
+        case kSampledImage: {
+          FML_DCHECK(sampler_index < texture_inputs_.size());
+          auto& input = texture_inputs_[sampler_index];
 
-        const std::unique_ptr<const Sampler>& sampler =
-            context->GetSamplerLibrary()->GetSampler(input.sampler_descriptor);
+          const std::unique_ptr<const Sampler>& sampler =
+              context->GetSamplerLibrary()->GetSampler(
+                  input.sampler_descriptor);
 
-        SampledImageSlot image_slot;
-        image_slot.name = uniform.name.c_str();
+          SampledImageSlot image_slot;
+          image_slot.name = uniform.name.c_str();
 
-        uint32_t sampler_binding_location = 0u;
-        if (!descriptor_set_layouts.empty()) {
-          sampler_binding_location = descriptor_set_layouts.back().binding + 1;
+          uint32_t sampler_binding_location = 0u;
+          if (!descriptor_set_layouts.empty()) {
+            sampler_binding_location =
+                descriptor_set_layouts.back().binding + 1;
+          }
+
+          descriptor_set_layouts.emplace_back(DescriptorSetLayout{
+              sampler_binding_location,
+              DescriptorType::kSampledImage,
+              ShaderStage::kFragment,
+          });
+
+          image_slot.binding = sampler_binding_location;
+          image_slot.texture_index = uniform.location - minimum_sampler_index;
+          pass.BindResource(ShaderStage::kFragment,
+                            DescriptorType::kSampledImage, image_slot,
+                            *metadata, input.texture, sampler);
+
+          sampler_index++;
+          break;
         }
-
-        descriptor_set_layouts.emplace_back(DescriptorSetLayout{
-            sampler_binding_location,
-            DescriptorType::kSampledImage,
-            ShaderStage::kFragment,
-        });
-
-        image_slot.binding = sampler_binding_location;
-        image_slot.texture_index = uniform.location - minimum_sampler_index;
-        pass.BindResource(ShaderStage::kFragment, DescriptorType::kSampledImage,
-                          image_slot, *metadata, input.texture, sampler);
-
-        sampler_index++;
-        break;
+        default:
+          continue;
       }
-      default:
-        continue;
     }
-  }
-
-  /// Now that the descriptor set layouts are known, get the pipeline.
-  auto create_callback =
-      [&]() -> std::shared_ptr<Pipeline<PipelineDescriptor>> {
-    PipelineDescriptor desc;
-    desc.SetLabel("Runtime Stage");
-    desc.AddStageEntrypoint(
-        library->GetFunction(VS::kEntrypointName, ShaderStage::kVertex));
-    desc.AddStageEntrypoint(library->GetFunction(
-        runtime_stage_->GetEntrypoint(), ShaderStage::kFragment));
-    auto vertex_descriptor = std::make_shared<VertexDescriptor>();
-    vertex_descriptor->SetStageInputs(VS::kAllShaderStageInputs,
-                                      VS::kInterleavedBufferLayout);
-    vertex_descriptor->RegisterDescriptorSetLayouts(VS::kDescriptorSetLayouts);
-    vertex_descriptor->RegisterDescriptorSetLayouts(
-        descriptor_set_layouts.data(), descriptor_set_layouts.size());
-    desc.SetVertexDescriptor(std::move(vertex_descriptor));
-    desc.SetColorAttachmentDescriptor(
-        0u, {.format = color_attachment_format, .blending_enabled = true});
-
-    desc.SetStencilAttachmentDescriptors(StencilAttachmentDescriptor{});
-    desc.SetStencilPixelFormat(stencil_attachment_format);
-
-    desc.SetDepthStencilAttachmentDescriptor(DepthAttachmentDescriptor{});
-    desc.SetDepthPixelFormat(stencil_attachment_format);
-
-    options.ApplyToPipelineDescriptor(desc);
-    auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
-    if (!pipeline) {
-      VALIDATION_LOG << "Failed to get or create runtime effect pipeline.";
-      return nullptr;
-    }
-
-    return pipeline;
+    return true;
   };
 
-  pass.SetPipeline(renderer.GetCachedRuntimeEffectPipeline(
-      runtime_stage_->GetEntrypoint(), options, create_callback));
+  /// Now that the descriptor set layouts are known, get the pipeline.
 
-  if (!pass.Draw().ok()) {
-    return false;
-  }
+  PipelineBuilderCallback pipeline_callback = [&](ContentContextOptions
+                                                      options) {
+    // Pipeline creation callback for the cache handler to call.
+    auto create_callback =
+        [&]() -> std::shared_ptr<Pipeline<PipelineDescriptor>> {
+      PipelineDescriptor desc;
+      desc.SetLabel("Runtime Stage");
+      desc.AddStageEntrypoint(
+          library->GetFunction(VS::kEntrypointName, ShaderStage::kVertex));
+      desc.AddStageEntrypoint(library->GetFunction(
+          runtime_stage_->GetEntrypoint(), ShaderStage::kFragment));
+      auto vertex_descriptor = std::make_shared<VertexDescriptor>();
+      vertex_descriptor->SetStageInputs(VS::kAllShaderStageInputs,
+                                        VS::kInterleavedBufferLayout);
+      vertex_descriptor->RegisterDescriptorSetLayouts(
+          VS::kDescriptorSetLayouts);
+      vertex_descriptor->RegisterDescriptorSetLayouts(
+          descriptor_set_layouts.data(), descriptor_set_layouts.size());
+      desc.SetVertexDescriptor(std::move(vertex_descriptor));
+      desc.SetColorAttachmentDescriptor(
+          0u, {.format = color_attachment_format, .blending_enabled = true});
 
-  if (geometry_result.prevent_overdraw) {
-    auto restore = ClipRestoreContents();
-    restore.SetRestoreCoverage(GetCoverage(entity));
-    return restore.Render(renderer, entity, pass);
-  }
-  return true;
+      desc.SetStencilAttachmentDescriptors(StencilAttachmentDescriptor{});
+      desc.SetStencilPixelFormat(stencil_attachment_format);
+
+      desc.SetDepthStencilAttachmentDescriptor(DepthAttachmentDescriptor{});
+      desc.SetDepthPixelFormat(stencil_attachment_format);
+
+      options.ApplyToPipelineDescriptor(desc);
+      auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+      if (!pipeline) {
+        VALIDATION_LOG << "Failed to get or create runtime effect pipeline.";
+        return nullptr;
+      }
+
+      return pipeline;
+    };
+    return renderer.GetCachedRuntimeEffectPipeline(
+        runtime_stage_->GetEntrypoint(), options, create_callback);
+  };
+
+  return ColorSourceContents::DrawPositions<VS>(renderer, entity, pass,
+                                                pipeline_callback,
+                                                VS::FrameInfo{}, bind_callback);
 }
 
 }  // namespace impeller
