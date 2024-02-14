@@ -28,19 +28,19 @@ class AssetsEntry {
       try {
         return ValueParseResult<Uri>(Uri(pathSegments: uri.split('/')));
       } on FormatException {
-        return ErrorParseResult<Uri>(<String>['Asset manifest contains invalid uri: $uri.']);
+        return ErrorParseResult.single('Asset manifest contains invalid uri: $uri.');
       }
     }
 
     if (yaml == null || yaml == '') {
-      return const ErrorParseResult<AssetsEntry>(<String>['Asset manifest contains a null or empty uri.']);
+      return ErrorParseResult.single('Asset manifest contains a null or empty uri.');
     }
 
     if (yaml is String) {
       final ParseResult<Uri> uriParseResult = tryParseUri(yaml);
       return switch (uriParseResult) {
         ValueParseResult<Uri>() => ValueParseResult<AssetsEntry>(AssetsEntry(uri: uriParseResult.value)),
-        ErrorParseResult<Uri>() => ErrorParseResult<AssetsEntry>(uriParseResult.errors),
+        ErrorParseResult<Uri>() => uriParseResult.cast<AssetsEntry>(),
       };
     }
 
@@ -53,10 +53,11 @@ class AssetsEntry {
       final Object? flavorsYaml = yaml[_flavorKey];
 
       if (path == null || path is! String) {
-        final String message = 'Asset manifest entry is malformed. '
-          'Expected asset entry to be either a string or a map '
-          'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.';
-        return ErrorParseResult<AssetsEntry>(<String>[message]);
+        return ErrorParseResult.single(
+          'Asset manifest entry is malformed. Expected asset entry to be '
+          'either a string or a map containing a "$_pathKey" entry. '
+          'Got ${path.runtimeType} instead.',
+        );
       }
 
       final Uri uri = Uri(pathSegments: path.split('/'));
@@ -87,9 +88,10 @@ class AssetsEntry {
       return ValueParseResult<AssetsEntry>(entry);
     }
 
-    final String message = 'Assets entry had unexpected shape. '
-      'Expected a string or an object. Got ${yaml.runtimeType} instead.';
-    return ErrorParseResult<AssetsEntry>(<String>[message]);
+    return ErrorParseResult.single(
+      'Assets entry had unexpected shape. Expected a string or an object. '
+      'Got ${yaml.runtimeType} instead.',
+    );
   }
 
   @override
