@@ -104,7 +104,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
   }
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case AlertDemoType.alert:
         return localizations.demoCupertinoAlertTitle;
@@ -123,7 +123,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
       builder: (BuildContext context) => ApplyTextOptions(
@@ -162,7 +162,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
       builder: (BuildContext context) => ApplyTextOptions(
@@ -204,7 +204,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
       builder: (BuildContext context) => ApplyTextOptions(
@@ -236,7 +236,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
     BuildContext context,
     Object? arguments,
   ) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoModalPopupRoute<String>(
       builder: (BuildContext context) => ApplyTextOptions(
         child: CupertinoActionSheet(
@@ -358,7 +358,7 @@ class CupertinoDessertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoAlertDialog(
       title: title,
       content: content,

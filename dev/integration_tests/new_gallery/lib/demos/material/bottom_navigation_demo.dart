@@ -42,7 +42,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   }
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case BottomNavigationDemoType.withLabels:
         return localizations.demoBottomNavigationPersistentLabels;
@@ -55,7 +55,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     List<BottomNavigationBarItem> bottomNavigationBarItems = <BottomNavigationBarItem>[
       BottomNavigationBarItem(

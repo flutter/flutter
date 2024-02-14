@@ -14,7 +14,7 @@ class GridListDemo extends StatelessWidget {
   final GridListDemoType type;
 
   List<_Photo> _photos(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <_Photo>[
       _Photo(
         assetName: 'places/india_chennai_flower_market.png',

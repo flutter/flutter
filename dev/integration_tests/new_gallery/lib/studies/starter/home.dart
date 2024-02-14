@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isDesktop = isDisplayDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final SafeArea body = SafeArea(
       child: Padding(
         padding: isDesktop
@@ -107,7 +107,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return AppBar(
       automaticallyImplyLeading: !isDesktop,
       title: isDesktop
@@ -164,7 +164,7 @@ class _ListDrawerState extends State<ListDrawer> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Drawer(
       child: SafeArea(
         child: ListView(

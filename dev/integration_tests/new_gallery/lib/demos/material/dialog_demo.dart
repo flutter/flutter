@@ -80,7 +80,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
   }
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case DialogDemoType.alert:
         return localizations.demoAlertDialogTitle;
@@ -104,7 +104,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     return DialogRoute<String>(
       context: context,
       builder: (BuildContext context) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
         return ApplyTextOptions(
             child: AlertDialog(
           content: Text(
@@ -131,7 +131,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     return DialogRoute<String>(
       context: context,
       builder: (BuildContext context) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
         return ApplyTextOptions(
           child: AlertDialog(
             title: Text(localizations.dialogLocationTitle),
@@ -304,7 +304,7 @@ class _FullScreenDialogDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     // Remove the MediaQuery padding because the demo is rendered inside of a
     // different page that already accounts for this padding.

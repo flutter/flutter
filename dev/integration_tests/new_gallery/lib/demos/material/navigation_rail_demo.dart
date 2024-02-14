@@ -33,7 +33,7 @@ class _NavRailDemoState extends State<NavRailDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localization = GalleryLocalizations.of(context);
+    final GalleryLocalizations localization = GalleryLocalizations.of(context)!;
     final String destinationFirst = localization.demoNavigationRailFirst;
     final String destinationSecond = localization.demoNavigationRailSecond;
     final String destinationThird = localization.demoNavigationRailThird;

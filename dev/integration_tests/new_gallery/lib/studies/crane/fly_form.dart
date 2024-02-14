@@ -43,7 +43,7 @@ class _FlyFormState extends State<FlyForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return HeaderForm(
       fields: <HeaderFormField>[
         HeaderFormField(

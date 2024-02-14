@@ -78,7 +78,7 @@ class _ContextMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListTile(
       title: Text(localizations.demoMenuAnItemWithAContextMenuButton),
       trailing: PopupMenuButton<String>(
@@ -125,7 +125,7 @@ class _SectionedMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListTile(
       title: Text(localizations.demoMenuAnItemWithASectionedMenu),
       trailing: PopupMenuButton<String>(
@@ -206,7 +206,7 @@ class _SimpleMenuDemoState extends State<_SimpleMenuDemo> {
   }
 
   String simpleValueToString(BuildContext context, SimpleValue value) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <SimpleValue, String>{
       SimpleValue.one: localizations.demoMenuItemValueOne,
       SimpleValue.two: localizations.demoMenuItemValueTwo,
@@ -289,7 +289,7 @@ class _RestorableCheckedValues extends RestorableProperty<Set<CheckedValue>> {
   bool isChecked(CheckedValue value) => _checked.contains(value);
 
   Iterable<String> checkedValuesToString(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return _checked.map((CheckedValue value) {
       return <CheckedValue, String>{
         CheckedValue.one: localizations.demoMenuOne,
@@ -353,7 +353,7 @@ class _ChecklistMenuDemoState extends State<_ChecklistMenuDemo>
   }
 
   String checkedValueToString(BuildContext context, CheckedValue value) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <CheckedValue, String>{
       CheckedValue.one: localizations.demoMenuOne,
       CheckedValue.two: localizations.demoMenuTwo,

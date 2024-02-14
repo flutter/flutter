@@ -218,7 +218,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
     final Color selectedIconColor = colorScheme.primary;
     final double appBarPadding = isDesktop ? 20.0 : 0.0;
     final _DemoState currentDemoState = _DemoState.values[_demoStateIndex.value];
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final GalleryOptions options = GalleryOptions.of(context);
 
     final AppBar appBar = AppBar(

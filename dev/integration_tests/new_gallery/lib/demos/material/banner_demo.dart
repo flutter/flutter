@@ -63,7 +63,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final MaterialBanner banner = MaterialBanner(
       content: Text(localizations.bannerDemoText),
       leading: _showLeading.value

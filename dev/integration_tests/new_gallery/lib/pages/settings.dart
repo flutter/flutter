@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final GalleryOptions options = GalleryOptions.of(context);
     final bool isDesktop = isDisplayDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     final List<Widget> settingsListItems = <Widget>[
       SettingsListItem<double?>(

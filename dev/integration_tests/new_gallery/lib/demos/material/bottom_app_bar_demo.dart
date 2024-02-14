@@ -68,7 +68,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -163,7 +163,7 @@ class _DemoBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Semantics(
       sortKey: const OrdinalSortKey(1),
       container: true,

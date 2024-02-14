@@ -148,7 +148,7 @@ class VerticalArticlePreview extends StatelessWidget {
 }
 
 List<Widget> buildArticlePreviewItems(BuildContext context) {
-  final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   final Widget articleDivider = Container(
     margin: const EdgeInsets.symmetric(vertical: 16),
     color: Colors.black.withOpacity(0.07),
@@ -241,7 +241,7 @@ class HashtagBar extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final double height = 32 * reducedTextScale(context);
 
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return SizedBox(
       height: height,
@@ -298,7 +298,7 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return ListView(
       children: <Widget>[
         if (isCloseable)
@@ -545,7 +545,7 @@ class VideoPreview extends StatelessWidget {
 }
 
 List<Widget> buildVideoPreviewItems(BuildContext context) {
-  final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+  final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
   return <Widget>[
     VideoPreview(
       data: ArticleData(

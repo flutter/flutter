@@ -71,7 +71,7 @@ class __TabsScrollableDemoState extends State<_TabsScrollableDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final List<String> tabs = <String>[
       localizations.colorsRed,
       localizations.colorsOrange,
@@ -161,7 +161,7 @@ class __TabsNonScrollableDemoState extends State<_TabsNonScrollableDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     final List<String> tabs = <String>[
       localizations.colorsRed,
       localizations.colorsOrange,
