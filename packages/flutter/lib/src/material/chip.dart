@@ -2041,7 +2041,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       Brightness.light => Colors.white,
       Brightness.dark  => Colors.black,
     };
-    return ColorTween(begin: color.withAlpha(_kDisabledAlpha), end: color).enableTween.evaluate(enableAnimation)!;
+    return ColorTween(begin: color.withAlpha(_kDisabledAlpha), end: color).evaluate(enableAnimation)!;
   }
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
