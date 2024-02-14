@@ -114,15 +114,13 @@ void main() {
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
 
-    final File flutterToolsPackageConfigFile = fs.file(
+    final File flutterToolsPackageConfigFile = fs.directory(
       fs.path.join(
         getFlutterRoot(),
         'packages',
-        'flutter_tools/'
-        '.dart_tool/'
-        'package_config.json'
+        'flutter_tools'
       ),
-    );
+    ).childDirectory('.dart_tool').childFile('package_config.json');
     flutterToolsPackageConfigFile.createSync(recursive: true);
     flutterToolsPackageConfigFile.writeAsStringSync(
       _flutterToolsPackageConfigContents,
@@ -547,8 +545,8 @@ dev_dependencies:
         '--no-pub',
         '--experimental-faster-testing',
         '--',
-        'fake_test.dart',
-        'fake_test_2.dart',
+        'test/fake_test.dart',
+        'test/fake_test_2.dart',
       ]),
       onError: (Object error) async {
         expect(error, isA<ToolExit>());
@@ -559,14 +557,12 @@ dev_dependencies:
         );
         caughtToolExit = true;
 
-        final File isolateSpawningTesterPackageConfigFile = fs.file(
+        final File isolateSpawningTesterPackageConfigFile = fs.directory(
           fs.path.join(
             'build',
             'isolate_spawning_tester',
-            '.dart_tool',
-            'package_config.json',
           ),
-        );
+        ).childDirectory('.dart_tool').childFile('package_config.json');
         expect(isolateSpawningTesterPackageConfigFile.existsSync(), true);
         // We expect [isolateSpawningTesterPackageConfigFile] to contain the
         // union of the packages in [_packageConfigContents] and
@@ -625,8 +621,8 @@ dev_dependencies:
         '--total-shards=1',
         '--shard-index=1',
         '--',
-        'fake_test.dart',
-        'fake_test_2.dart',
+        'test/fake_test.dart',
+        'test/fake_test_2.dart',
       ]),
       onError: (Object error) async {
         expect(error, isA<ToolExit>());
@@ -637,13 +633,12 @@ dev_dependencies:
         );
         caughtToolExit = true;
 
-        final File childTestIsolateSpawnerSourceFile = fs.file(
+        final File childTestIsolateSpawnerSourceFile = fs.directory(
           fs.path.join(
             'build',
-            'isolate_spawning_tester/'
-            'child_test_isolate_spawner.dart',
+            'isolate_spawning_tester',
           ),
-        );
+        ).childFile('child_test_isolate_spawner.dart');
         expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
         expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
 const List<String> packageTestArgs = <String>[
@@ -690,8 +685,8 @@ const List<String> packageTestArgs = <String>[
         '--no-pub',
         '--experimental-faster-testing',
         '--',
-        'fake_test.dart',
-        'fake_test_2.dart',
+        'test/fake_test.dart',
+        'test/fake_test_2.dart',
       ]),
       onError: (Object error) async {
         expect(error, isA<ToolExit>());
@@ -702,13 +697,12 @@ const List<String> packageTestArgs = <String>[
         );
         caughtToolExit = true;
 
-        final File childTestIsolateSpawnerSourceFile = fs.file(
+        final File childTestIsolateSpawnerSourceFile = fs.directory(
           fs.path.join(
             'build',
-            'isolate_spawning_tester/'
-            'child_test_isolate_spawner.dart',
+            'isolate_spawning_tester',
           ),
-        );
+        ).childFile('child_test_isolate_spawner.dart');
         expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
         expect(childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
 const List<String> packageTestArgs = <String>[

@@ -273,11 +273,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     required FlutterProject flutterProject,
     required File isolateSpawningTesterPackageConfigFile,
   }) async {
-    final File projectPackageConfigFile = globals.fs.file(globals.fs.path.join(
+    final File projectPackageConfigFile = globals.fs.directory(
       flutterProject.directory.path,
-      '.dart_tool/'
-      'package_config.json'
-    ));
+    ).childDirectory('.dart_tool').childFile('package_config.json');
     final PackageConfig projectPackageConfig = PackageConfig.parseBytes(
       projectPackageConfigFile.readAsBytesSync(),
       projectPackageConfigFile.uri,
@@ -285,15 +283,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
-    final File flutterToolsPackageConfigFile = globals.fs.file(
+    final File flutterToolsPackageConfigFile = globals.fs.directory(
       globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',
-        'flutter_tools/'
-        '.dart_tool/'
-        'package_config.json'
+        'flutter_tools',
       ),
-    );
+    ).childDirectory('.dart_tool').childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
       flutterToolsPackageConfigFile.readAsBytesSync(),
       flutterToolsPackageConfigFile.uri,
@@ -357,7 +353,14 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
       final String sanitizedImport = pathToImport(sanitizedPath);
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
-      final File? testConfigFile = findTestConfigFile(globals.fs.file(sanitizedPath), globals.logger);
+      final File? testConfigFile = findTestConfigFile(
+        globals.fs.file(
+          globals.platform.isWindows
+              ? sanitizedPath.replaceAll('/', r'\').replaceFirst(r'\', '')
+              : sanitizedPath,
+        ),
+        globals.logger,
+      );
       if (testConfigFile != null) {
         final String sanitizedTestConfigImport = pathToImport(testConfigFile.path);
         testConfigPaths[sanitizedImport] = sanitizedTestConfigImport;
