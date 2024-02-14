@@ -16,8 +16,7 @@ import 'utils/logs.dart';
 import 'utils/process_manager_extension.dart';
 import 'utils/screenshot_transformer.dart';
 
-const int tcpPort = 3001;
-
+// If you update the arguments, update the documentation in the README.md file.
 void main(List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(
@@ -82,6 +81,8 @@ void main(List<String> args) async {
   );
 }
 
+const int _tcpPort = 3001;
+
 enum _ImpellerBackend {
   vulkan,
   opengles;
@@ -137,7 +138,7 @@ Future<void> _run({
   late  ServerSocket server;
   final List<Future<void>> pendingComparisons = <Future<void>>[];
   await step('Starting server...', () async {
-    server = await ServerSocket.bind(InternetAddress.anyIPv4, tcpPort);
+    server = await ServerSocket.bind(InternetAddress.anyIPv4, _tcpPort);
     stdout.writeln('listening on host ${server.address.address}:${server.port}');
     server.listen((Socket client) {
       stdout.writeln('client connected ${client.remoteAddress.address}:${client.remotePort}');
@@ -237,7 +238,7 @@ Future<void> _run({
     });
 
     await step('Reverse port...', () async {
-      final int exitCode = await pm.runAndForward(<String>[adb.path, 'reverse', 'tcp:3000', 'tcp:$tcpPort']);
+      final int exitCode = await pm.runAndForward(<String>[adb.path, 'reverse', 'tcp:3000', 'tcp:$_tcpPort']);
       if (exitCode != 0) {
         panic(<String>['could not forward port']);
       }
