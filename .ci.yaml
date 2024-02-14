@@ -273,20 +273,12 @@ platform_properties:
         }
   windows:
     properties:
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows-10
       device_type: none
   windows_arm64:
     properties:
       # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
       arch: arm
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows
       cpu: arm64
   windows_android:
@@ -294,7 +286,6 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "certs", "version": "version:9563bb"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
