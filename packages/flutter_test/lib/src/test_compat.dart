@@ -19,7 +19,6 @@ import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
 
-// ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;
 
 Declarer? _localDeclarer;
