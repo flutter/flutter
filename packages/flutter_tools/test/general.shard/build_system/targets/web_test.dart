@@ -30,24 +30,12 @@ const List<String> _kDart2jsLinuxArgs = <String>[
 ];
 
 const List<String> _kDart2WasmLinuxArgs = <String> [
-  'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
-  'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+  'compile',
+  'wasm',
   '--packages=.dart_tool/package_config.json',
-  '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-  '--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
-];
-
-const List<String> _kWasmOptLinuxArgrs = <String> [
-  'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
-  '--all-features',
-  '--closed-world',
-  '--traps-never-happen',
-  '-O3',
-  '--type-ssa',
-  '--gufa',
-  '-O3',
-  '--type-merging',
+  '--extra-compiler-option=--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
+  '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
 ];
 
 void main() {
@@ -920,7 +908,7 @@ void main() {
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
@@ -929,20 +917,14 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
-        '--depfile=${depFile.absolute.path}',
-        environment.buildDir.childFile('main.dart').absolute.path,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-      ],
-      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
-    );
-
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        ..._kWasmOptLinuxArgrs,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+        '-O2',
+        '--no-name-section',
         '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
-      ])
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ],
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     await Dart2WasmTarget(
@@ -951,10 +933,7 @@ void main() {
       )
     ).build(environment);
 
-    expect(outputJsFile.existsSync(), isFalse);
-    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
-    expect(movedJsFile.existsSync(), isTrue);
-    expect(movedJsFile.readAsStringSync(), 'foo');
+    expect(outputJsFile.existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -966,28 +945,21 @@ void main() {
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
-        '--omit-type-checks',
-        '--depfile=${depFile.absolute.path}',
-        environment.buildDir.childFile('main.dart').absolute.path,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-      ],
-      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
-    );
-
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        ..._kWasmOptLinuxArgrs,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+        '-O4',
+        '--no-name-section',
         '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
-      ])
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ],
+      onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
     await Dart2WasmTarget(
@@ -997,10 +969,7 @@ void main() {
       )
     ).build(environment);
 
-    expect(outputJsFile.existsSync(), isFalse);
-    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
-    expect(movedJsFile.existsSync(), isTrue);
-    expect(movedJsFile.readAsStringSync(), 'foo');
+    expect(outputJsFile.existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -1011,26 +980,20 @@ void main() {
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
-        '--depfile=${depFile.absolute.path}',
+        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+        '-O2',
+        '--no-minify',
+        '-o',
+        environment.buildDir.childFile('main.dart.wasm').absolute.path,
         environment.buildDir.childFile('main.dart').absolute.path,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
-
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          ..._kWasmOptLinuxArgrs,
-          '--debuginfo',
-          environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-          '-o',
-          environment.buildDir.childFile('main.dart.wasm').absolute.path,
-        ]));
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
@@ -1039,10 +1002,7 @@ void main() {
       )
     ).build(environment);
 
-    expect(outputJsFile.existsSync(), isFalse);
-    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
-    expect(movedJsFile.existsSync(), isTrue);
-    expect(movedJsFile.readAsStringSync(), 'foo');
+    expect(outputJsFile.existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -1060,9 +1020,11 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
-        '--depfile=${depFile.absolute.path}',
-        environment.buildDir.childFile('main.dart').absolute.path,
+        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+        '-O0',
+        '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
+        environment.buildDir.childFile('main.dart').absolute.path,
       ], onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo')));
 
     await Dart2WasmTarget(
@@ -1080,31 +1042,26 @@ void main() {
     environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.defaultValue.name;
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
+        '--extra-compiler-option=--import-shared-memory',
+        '--extra-compiler-option=--shared-memory-max-pages=32768',
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=false',
         '-DFLUTTER_WEB_USE_SKWASM=true',
-        '--import-shared-memory',
-        '--shared-memory-max-pages=32768',
-        '--depfile=${depFile.absolute.path}',
+        '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+        '-O2',
+        '--no-name-section',
+        '-o',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
       ],
       onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
     );
 
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        ..._kWasmOptLinuxArgrs,
-        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-        '-o',
-        environment.buildDir.childFile('main.dart.wasm').absolute.path,
-      ])
-    );
 
     await Dart2WasmTarget(
       const WasmCompilerConfig(
