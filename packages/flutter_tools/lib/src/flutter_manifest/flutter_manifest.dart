@@ -12,6 +12,8 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
+import 'assets_entry.dart';
+import 'parse_result.dart';
 
 /// Whether or not Impeller Scene 3D model import is enabled.
 const bool kIs3dSceneSupported = true;
@@ -519,7 +521,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           _validateFonts(yamlValue, errors);
         }
       case 'licenses':
-        errors.addAll(_validateList<String>(yamlValue, '"$yamlKey"', 'files'));
+        errors.addAll(parseList<String>(yamlValue, '"$yamlKey"', 'files').errors);
       case 'module':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -553,22 +555,31 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-List<String> _validateList<T>(Object? yamlList, String context, String typeAlias) {
+ParseResult<List<T>> parseList<T>(Object? yamlList, String context, String typeAlias) {
+  final List<T> result = <T>[];
   final List<String> errors = <String>[];
 
   if (yamlList is! YamlList) {
-    return <String>['Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).'];
+    return ErrorParseResult<List<T>>(
+      <String>['Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).']
+    );
   }
 
-  for (int i = 0; i < yamlList.length; i++) {
-    if (yamlList[i] is! T) {
+  for (final (int i, Object? item) in yamlList.indexed) {
+    if (item is! T) {
       // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element at index $i was a ${yamlList[i].runtimeType}.');
+    } else {
+      result.add(item);
     }
   }
 
-  return errors;
+  if (errors.isEmpty) {
+    return ValueParseResult<List<T>>(result);
+  }
+  return ErrorParseResult<List<T>>(errors);
 }
+
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
   final Object? yamlList = kvp.value;
   if (yamlList != null && (yamlList is! YamlList || yamlList[0] is! YamlMap)) {
@@ -585,11 +596,13 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
       }
       if (valueMap.containsKey('libraries')) {
-        errors.addAll(_validateList<String>(
-          valueMap['libraries'],
-          '"libraries" key in the element at index $i of "${kvp.key}"',
-          'String',
-        ));
+        errors.addAll(
+          parseList<String>(
+            valueMap['libraries'],
+            '"libraries" key in the element at index $i of "${kvp.key}"',
+            'String',
+          ).errors,
+        );
       }
       if (valueMap.containsKey('assets')) {
         errors.addAll(_validateAssets(valueMap['assets']));
@@ -618,12 +631,15 @@ List<String> _validateAssets(Object? yaml) {
   final List<AssetsEntry> results = <AssetsEntry>[];
   final List<String> errors = <String>[];
   for (final Object? rawAssetEntry in yaml) {
-    final (AssetsEntry? parsed, String? error) = AssetsEntry.parseFromYamlSafe(rawAssetEntry);
-    if (parsed != null) {
-      results.add(parsed);
-    }
-    if (error != null) {
-      errors.add(error);
+    final ParseResult<AssetsEntry?> parseResult = AssetsEntry.parseFromYaml(rawAssetEntry);
+    switch (parseResult) {
+      case ValueParseResult<AssetsEntry?>():
+      final AssetsEntry? value = parseResult.value;
+        if (value != null) {
+          results.add(value);
+        }
+      case ErrorParseResult<AssetsEntry?>():
+        errors.addAll(parseResult.errors);
     }
   }
   return (results, errors);
@@ -632,7 +648,7 @@ List<String> _validateAssets(Object? yaml) {
 List<AssetsEntry> _computeAssets(Object? assetsSection) {
   final (List<AssetsEntry> result, List<String> errors) = _computeAssetsSafe(assetsSection);
   if (errors.isNotEmpty) {
-    throw Exception('Uncaught error(s) in assets section: '
+    throw Exception('Unexpected error(s) in assets section: '
       '${errors.join('\n')}');
   }
   return result;
@@ -689,113 +705,4 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       }
     }
   }
-}
-
-/// Represents an entry under the `assets` section of a pubspec.
-@immutable
-class AssetsEntry {
-  const AssetsEntry({
-    required this.uri,
-    this.flavors = const <String>{},
-  });
-
-  final Uri uri;
-  final Set<String> flavors;
-
-  static const String _pathKey = 'path';
-  static const String _flavorKey = 'flavors';
-
-  static AssetsEntry? parseFromYaml(Object? yaml) {
-    final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
-    if (error != null) {
-      throw Exception('Unexpected error when parsing assets entry');
-    }
-    return value!;
-  }
-
-  static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
-
-    (Uri?, String?) tryParseUri(String uri) {
-      try {
-        return (Uri(pathSegments: uri.split('/')), null);
-      } on FormatException {
-        return (null, 'Asset manifest contains invalid uri: $uri.');
-      }
-    }
-
-    if (yaml == null || yaml == '') {
-      return (null, 'Asset manifest contains a null or empty uri.');
-    }
-
-    if (yaml is String) {
-      final (Uri? uri, String? error) = tryParseUri(yaml);
-      return uri == null ? (null, error) : (AssetsEntry(uri: uri), null);
-    }
-
-    if (yaml is Map) {
-      if (yaml.keys.isEmpty) {
-        return (null, null);
-      }
-
-      final Object? path = yaml[_pathKey];
-      final Object? flavors = yaml[_flavorKey];
-
-      if (path == null || path is! String) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected asset entry to be either a string or a map '
-          'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
-      }
-
-      final Uri uri = Uri(pathSegments: path.split('/'));
-
-      if (flavors == null) {
-        return (AssetsEntry(uri: uri), null);
-      }
-
-      if (flavors is! YamlList) {
-        return(null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings. '
-          'Got ${flavors.runtimeType} instead.');
-      }
-
-      final List<String> flavorsListErrors = _validateList<String>(
-        flavors,
-        'flavors list of entry "$path"',
-        'String',
-      );
-      if (flavorsListErrors.isNotEmpty) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings.\n'
-          '${flavorsListErrors.join('\n')}');
-      }
-
-      final AssetsEntry entry = AssetsEntry(
-        uri: Uri(pathSegments: path.split('/')),
-        flavors: Set<String>.from(flavors),
-      );
-
-      return (entry, null);
-    }
-
-    return (null, 'Assets entry had unexpected shape. '
-      'Expected a string or an object. Got ${yaml.runtimeType} instead.');
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! AssetsEntry) {
-      return false;
-    }
-
-    return uri == other.uri && setEquals(flavors, other.flavors);
-  }
-
-  @override
-  int get hashCode => Object.hashAll(<Object?>[
-    uri.hashCode,
-    Object.hashAllUnordered(flavors),
-  ]);
-
-  @override
-  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors)';
 }

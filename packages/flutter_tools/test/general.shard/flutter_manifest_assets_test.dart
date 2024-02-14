@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/flutter_manifest/assets_entry.dart';
 import 'package:flutter_tools/src/flutter_manifest/flutter_manifest.dart';
 
 import '../src/common.dart';
@@ -154,8 +155,8 @@ flutter:
 ''';
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(logger.errorText, contains(
-        'Asset manifest entry is malformed. '
-        'Expected "flavors" entry to be a list of strings.',
+        'Expected flavors list of assets entry "assets/vanilla/" to be a list of '
+        'String, but element at index 0 was a YamlMap.\n',
       ));
     });
   });
