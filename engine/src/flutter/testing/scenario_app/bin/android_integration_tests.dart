@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart';
 import 'package:process/process.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
@@ -18,16 +19,34 @@ import 'utils/screenshot_transformer.dart';
 
 // If you update the arguments, update the documentation in the README.md file.
 void main(List<String> args) async {
+  final Engine? engine = Engine.tryFindWithin();
   final ArgParser parser = ArgParser()
+    ..addFlag(
+      'help',
+      help: 'Prints usage information',
+      negatable: false,
+    )
     ..addOption(
       'adb',
       help: 'Absolute path to the adb tool',
-      mandatory: true,
+      defaultsTo: engine != null ? join(
+        engine.srcDir.path,
+        'third_party',
+        'android_tools',
+        'sdk',
+        'platform-tools',
+        'adb',
+      ) : null,
     )
     ..addOption(
       'out-dir',
       help: 'Out directory',
-      mandatory: true,
+      defaultsTo:
+        engine?.
+        outputs().
+        where((Output o) => basename(o.path.path).startsWith('android_')).
+        firstOrNull?.
+        path.path,
     )
     ..addOption(
       'smoke-test',
@@ -52,6 +71,18 @@ void main(List<String> args) async {
   runZonedGuarded(
     () async {
       final ArgResults results = parser.parse(args);
+      if (results['help'] as bool) {
+        stdout.writeln(parser.usage);
+        return;
+      }
+
+      if (results['out-dir'] == null) {
+        panic(<String>['--out-dir is required']);
+      }
+      if (results['adb'] == null) {
+        panic(<String>['--adb is required']);
+      }
+
       final Directory outDir = Directory(results['out-dir'] as String);
       final File adb = File(results['adb'] as String);
       final bool useSkiaGold = results['use-skia-gold'] as bool;
