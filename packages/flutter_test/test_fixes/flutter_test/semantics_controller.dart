@@ -10,7 +10,7 @@ void main() {
   finders.FinderBase<Element> theEnd;
 
   testWidgets('simulatedAccessibilityTraversal', (WidgetTester tester) async {
-    // Changes made in TBD
+    // Changes made in https://github.com/flutter/flutter/pull/143386
     tester.semantics.simulatedAccessibilityTraversal();
     tester.semantics.simulatedAccessibilityTraversal(start: theStart);
     tester.semantics.simulatedAccessibilityTraversal(end: theEnd);
