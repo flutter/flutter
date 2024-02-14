@@ -352,7 +352,6 @@ void main() {
           false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
@@ -1327,7 +1326,6 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
@@ -1960,7 +1958,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
@@ -2040,7 +2037,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {

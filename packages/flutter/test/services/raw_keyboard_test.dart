@@ -1013,7 +1013,6 @@ void main() {
         false);
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
@@ -2154,7 +2153,6 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {

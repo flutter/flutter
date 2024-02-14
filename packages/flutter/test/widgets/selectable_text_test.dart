@@ -1688,7 +1688,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -1701,7 +1700,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
@@ -1714,7 +1712,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
@@ -1733,7 +1730,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
@@ -1785,7 +1781,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
   });
 
@@ -1846,7 +1841,6 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Select all test', (WidgetTester tester) async {
@@ -1882,7 +1876,6 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 31);
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
@@ -1930,7 +1923,6 @@ void main() {
       expect(newSelection!.extentOffset, i + 1);
       newSelection = null;
     }
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
@@ -2022,7 +2014,6 @@ void main() {
     c1 = editableTextWidget.controller;
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
@@ -2093,7 +2084,6 @@ void main() {
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
