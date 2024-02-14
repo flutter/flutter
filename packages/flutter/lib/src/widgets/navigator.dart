@@ -2946,7 +2946,7 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static Route<dynamic> get notAnnounced => _notAnnounced ?? _NotAnnounced();
+  static Route<dynamic> get notAnnounced => _notAnnounced ??= _NotAnnounced();
   static Route<dynamic>? _notAnnounced = _NotAnnounced();
 
   _RouteLifecycle currentState;
