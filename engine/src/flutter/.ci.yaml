@@ -61,6 +61,7 @@ targets:
     timeout: 60
     runIf:
       - .ci.yaml
+      - ci/builders/linux_android_emulator.json
       - DEPS
       - lib/ui/**
       - shell/platform/android/**
@@ -82,6 +83,7 @@ targets:
     timeout: 60
     runIf:
       - .ci.yaml
+      - ci/builders/linux_android_emulator_api_33.json
       - DEPS
       - lib/ui/**
       - shell/platform/android/**
