@@ -22,76 +22,68 @@ class AssetsEntry {
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
 
-  static ParseResult<AssetsEntry?> parseFromYaml(Object? yaml) {
+  static ParseResult<AssetsEntry> parseFromYaml(Object? yaml) {
 
     ParseResult<Uri> tryParseUri(String uri) {
       try {
-        return ValueParseResult<Uri>(Uri(pathSegments: uri.split('/')));
+        return ParseResult<Uri>.value(Uri(pathSegments: uri.split('/')));
       } on FormatException {
-        return ErrorParseResult.single('Asset manifest contains invalid uri: $uri.');
+        return ParseResult<Uri>.error('Asset manifest contains invalid uri: $uri.');
       }
     }
 
     if (yaml == null || yaml == '') {
-      return ErrorParseResult.single('Asset manifest contains a null or empty uri.');
+      return ParseResult<AssetsEntry>.error('Asset manifest contains a null or empty uri.');
     }
 
     if (yaml is String) {
       final ParseResult<Uri> uriParseResult = tryParseUri(yaml);
-      return switch (uriParseResult) {
-        ValueParseResult<Uri>() => ValueParseResult<AssetsEntry>(AssetsEntry(uri: uriParseResult.value)),
-        ErrorParseResult<Uri>() => uriParseResult.cast<AssetsEntry>(),
-      };
+      if (uriParseResult.hasValue) {
+        return ParseResult<AssetsEntry>.value(AssetsEntry(uri: uriParseResult.value()));
+      }
+      return ParseResult<AssetsEntry>.errors(uriParseResult.errors);
     }
 
-    if (yaml is Map) {
-      if (yaml.keys.isEmpty) {
-        return const ValueParseResult<AssetsEntry?>(null);
-      }
-
-      final Object? path = yaml[_pathKey];
-      final Object? flavorsYaml = yaml[_flavorKey];
-
-      if (path == null || path is! String) {
-        return ErrorParseResult.single(
-          'Asset manifest entry is malformed. Expected asset entry to be '
-          'either a string or a map containing a "$_pathKey" entry. '
-          'Got ${path.runtimeType} instead.',
-        );
-      }
-
-      final Uri uri = Uri(pathSegments: path.split('/'));
-
-      if (flavorsYaml == null) {
-        return ValueParseResult<AssetsEntry>(AssetsEntry(uri: uri));
-      }
-
-      final ParseResult<List<String>> flavorsParseResult = parseList<String>(
-        flavorsYaml,
-        'flavors list of assets entry "$path"',
-        'String',
-      );
-
-      late Set<String> flavors;
-      switch (flavorsParseResult) {
-        case ValueParseResult<List<String>>():
-          flavors = Set<String>.from(flavorsParseResult.value);
-        case ErrorParseResult<List<String>>():
-          return ErrorParseResult<AssetsEntry>(flavorsParseResult.errors);
-      }
-
-      final AssetsEntry entry = AssetsEntry(
-        uri: Uri(pathSegments: path.split('/')),
-        flavors: flavors,
-      );
-
-      return ValueParseResult<AssetsEntry>(entry);
+    if (yaml is! Map) {
+      return ParseResult<AssetsEntry>.error(
+        'Assets entry had unexpected shape. Expected a string or an object. '
+        'Got ${yaml.runtimeType} instead.',
+       );
     }
 
-    return ErrorParseResult.single(
-      'Assets entry had unexpected shape. Expected a string or an object. '
-      'Got ${yaml.runtimeType} instead.',
+    final Object? path = yaml[_pathKey];
+    final Object? flavorsYaml = yaml[_flavorKey];
+
+    if (path == null || path is! String) {
+      return ParseResult<AssetsEntry>.error(
+        'Asset manifest entry is malformed. Expected asset entry to be '
+        'either a string or a map containing a "$_pathKey" entry. '
+        'Got ${path.runtimeType} instead.',
+      );
+    }
+
+    final Uri uri = Uri(pathSegments: path.split('/'));
+
+    if (flavorsYaml == null) {
+      return ParseResult<AssetsEntry>.value(AssetsEntry(uri: uri));
+    }
+
+    final ParseResult<List<String>> flavorsParseResult = parseList<String>(
+      flavorsYaml,
+      'flavors list of assets entry "$path"',
+      'String',
     );
+
+    if (flavorsParseResult.hasErrors) {
+      return ParseResult<AssetsEntry>.errors(flavorsParseResult.errors);
+    }
+
+    final AssetsEntry entry = AssetsEntry(
+      uri: Uri(pathSegments: path.split('/')),
+      flavors: Set<String>.from(flavorsParseResult.value()),
+    );
+
+    return ParseResult<AssetsEntry>.value(entry);
   }
 
   @override

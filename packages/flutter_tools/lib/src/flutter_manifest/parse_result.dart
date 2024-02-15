@@ -2,39 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-sealed class ParseResult<T> {
-  const ParseResult();
+final class ParseResult<T> {
+  factory ParseResult.value(T value) {
+    return ParseResult<T>._(_ParseResultValue<T>(value), <String>[]);
+  }
 
-  List<String> get errors;
-}
+  factory ParseResult.error(String error) {
+    return ParseResult<T>._(null, <String>[error]);
+  }
 
-final class ValueParseResult<T> extends ParseResult<T> {
-  const ValueParseResult(this.value);
-  final T value;
+  factory ParseResult.errors(List<String> errors) {
+    return ParseResult<T>._(null, errors);
+  }
 
-  // Defining `errors` here allows callers only interested in validation (and not
-  // getting the parsed value) to simply call `errors` without having to `switch`
-  // on this object's type.
-  @override
-  List<String> get errors => const <String>[];
-}
+  ParseResult._(this._value, this.errors);
 
-final class ErrorParseResult<T> extends ParseResult<T> {
-  const ErrorParseResult(this.errors);
-
-  @override
+  final _ParseResultValue<T>? _value;
   final List<String> errors;
 
-  // Convenience factory method for generating an error result that contains
-  // only one error. This is useful because callers can write
-  // ErrorParseResult.single(my_string) instead of
-  // ErrorParseResult<MyTypeParameter>(<String>['my_string']) and also avoid
-  // violating the no_adjacent_strings_in_list lint.
-  static ErrorParseResult<S> single<S>(String error) {
-    return ErrorParseResult<S>(<String>[error]);
-  }
+  bool get hasValue => _value != null;
+  bool get hasErrors => errors.isNotEmpty;
 
-  ErrorParseResult<S> cast<S>() {
-    return ErrorParseResult<S>(errors);
+  /// Will throw if this result contains no value.
+  T value() {
+    if (_value == null) {
+      throw Exception('Cannot read value from result that has no value.');
+    }
+
+    return _value.value;
   }
+}
+
+final class _ParseResultValue<T> {
+  _ParseResultValue(this.value);
+
+  final T value;
 }

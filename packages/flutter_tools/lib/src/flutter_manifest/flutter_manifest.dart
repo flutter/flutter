@@ -607,15 +607,11 @@ List<String> _validateAssets(Object? yaml) {
   final List<AssetsEntry> results = <AssetsEntry>[];
   final List<String> errors = <String>[];
   for (final Object? rawAssetEntry in yaml) {
-    final ParseResult<AssetsEntry?> parseResult = AssetsEntry.parseFromYaml(rawAssetEntry);
-    switch (parseResult) {
-      case ValueParseResult<AssetsEntry?>():
-      final AssetsEntry? value = parseResult.value;
-        if (value != null) {
-          results.add(value);
-        }
-      case ErrorParseResult<AssetsEntry?>():
-        errors.addAll(parseResult.errors);
+    final ParseResult<AssetsEntry> parseResult = AssetsEntry.parseFromYaml(rawAssetEntry);
+    if (parseResult.hasValue) {
+      results.add(parseResult.value());
+    } else {
+      errors.addAll(parseResult.errors);
     }
   }
   return (results, errors);
