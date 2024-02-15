@@ -56,6 +56,17 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebResourcesCdnFlag();
 
     //
+    // Common compilation options among JavaScript and Wasm
+    //
+    argParser.addOption('optimization-level',
+      abbr: 'O',
+      help: 'Sets the optimization level used for Dart compilation to JavaScript/Wasm. '
+          'Valid values range from 1 to 4.',
+      defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
+      allowed: const <String>['1', '2', '3', '4'],
+    );
+
+    //
     // JavaScript compilation options
     //
     argParser.addSeparator('JavaScript compilation options');
@@ -72,8 +83,8 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
-          'Valid values range from O1 to O4.',
-      defaultsTo: JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+          'Valid values range from O1 to O4. '
+          '(Deprecated: Please use -O/--optimization-level.)',
       allowed: const <String>['O1', 'O2', 'O3', 'O4'],
     );
     argParser.addFlag('dump-info', negatable: false,
@@ -98,19 +109,9 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
-      'omit-type-checks',
-      help: 'Omit type checks in Wasm output.\n'
-          'Reduces code size and improves performance, but may affect runtime correctness. Use with care.',
-      negatable: false,
-      hide: !featureFlags.isFlutterWebWasmEnabled,
-    );
-    argParser.addOption(
-      'wasm-opt',
-      help:
-          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.',
-      defaultsTo: WasmOptLevel.defaultValue.cliName,
-      allowed: WasmOptLevel.values.map<String>((WasmOptLevel e) => e.cliName),
-      allowedHelp: CliEnum.allowedHelp(WasmOptLevel.values),
+      'strip-wasm',
+      help: 'Whether to strip the resulting wasm file of static symbol names.',
+      defaultsTo: true,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
   }
@@ -138,6 +139,10 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
+    final int wasmOptimizationLevel = int.parse(stringArg('optimization-level')!);
+    final int jsOptimizationLevel =  int.parse(stringArg('dart2js-optimization')
+        ?? stringArg('optimization-level')!);
+
     final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
       if (!featureFlags.isFlutterWebWasmEnabled) {
@@ -155,13 +160,13 @@ class BuildWebCommand extends BuildSubCommand {
 
       compilerConfigs = <WebCompilerConfig>[
         WasmCompilerConfig(
-          omitTypeChecks: boolArg('omit-type-checks'),
-          wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
+          optimizationLevel: wasmOptimizationLevel,
+          stripWasm: boolArg('strip-wasm'),
           renderer: WebRendererMode.skwasm,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
-          optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+          optimizationLevel: jsOptimizationLevel,
           dumpInfo: boolArg('dump-info'),
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
@@ -175,7 +180,7 @@ class BuildWebCommand extends BuildSubCommand {
       }
       compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
         csp: boolArg('csp'),
-        optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+        optimizationLevel: jsOptimizationLevel,
         dumpInfo: boolArg('dump-info'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
