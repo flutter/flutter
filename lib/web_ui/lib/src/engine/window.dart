@@ -15,6 +15,7 @@ import 'configuration.dart';
 import 'display.dart';
 import 'dom.dart';
 import 'initialization.dart';
+import 'js_interop/js_app.dart';
 import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
@@ -50,7 +51,9 @@ base class EngineFlutterView implements ui.FlutterView {
   /// the Flutter view will be rendered.
   factory EngineFlutterView(
     EnginePlatformDispatcher platformDispatcher,
-    DomElement hostElement,
+    DomElement hostElement, {
+      JsViewConstraints? viewConstraints,
+    }
   ) = _EngineFlutterViewImpl;
 
   EngineFlutterView._(
@@ -59,8 +62,11 @@ base class EngineFlutterView implements ui.FlutterView {
     // This is nullable to accommodate the legacy `EngineFlutterWindow`. In
     // multi-view mode, the host element is required for each view (as reflected
     // by the public `EngineFlutterView` constructor).
-    DomElement? hostElement,
-  )   : embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
+    DomElement? hostElement, {
+      JsViewConstraints? viewConstraints,
+    }
+  )   : _jsViewConstraints = viewConstraints,
+        embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
         dimensionsProvider = DimensionsProvider.create(hostElement: hostElement) {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
@@ -117,7 +123,9 @@ base class EngineFlutterView implements ui.FlutterView {
   @override
   void render(ui.Scene scene, {ui.Size? size}) {
     assert(!isDisposed, 'Trying to render a disposed EngineFlutterView.');
-    // TODO(goderbauer): Respect the provided size when "physicalConstraints" are not always tight. See TODO on "physicalConstraints".
+    if (size != null) {
+      resize(size);
+    }
     platformDispatcher.render(scene, this);
   }
 
@@ -145,15 +153,68 @@ base class EngineFlutterView implements ui.FlutterView {
 
   late final PointerBinding pointerBinding;
 
-  // TODO(goderbauer): Provide API to configure constraints. See also TODO in "render".
   @override
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  ViewConstraints get physicalConstraints {
+    final double dpr = devicePixelRatio;
+    final ui.Size currentLogicalSize = physicalSize / dpr;
+    return ViewConstraints.fromJs(_jsViewConstraints, currentLogicalSize) * dpr;
+  }
+
+  final JsViewConstraints? _jsViewConstraints;
 
   late final EngineSemanticsOwner semantics = EngineSemanticsOwner(dom.semanticsHost);
 
   @override
   ui.Size get physicalSize {
     return _physicalSize ??= _computePhysicalSize();
+  }
+
+  /// Resizes the `rootElement` to `newPhysicalSize` by changing its CSS style.
+  ///
+  /// This is used by the [render] method, when the framework sends new dimensions
+  /// for the current Flutter View.
+  ///
+  /// Dimensions from the framework are constrained by the [physicalConstraints]
+  /// that can be configured by the user when adding a view to the app.
+  ///
+  /// In practice, this method changes the size of the `rootElement` of the app
+  /// so it can push/shrink inside its `hostElement`. That way, a Flutter app
+  /// can change the layout of the container page.
+  ///
+  /// ```
+  /// <p>Some HTML content...</p>
+  /// +--- (div) hostElement ------------------------------------+
+  /// | +--- rootElement ---------------------+                  |
+  /// | |                                     |                  |
+  /// | |                                     |    container     |
+  /// | |    size applied to *this*           |    must be able  |
+  /// | |                                     |    to reflow     |
+  /// | |                                     |                  |
+  /// | +-------------------------------------+                  |
+  /// +----------------------------------------------------------+
+  /// <p>More HTML content...</p>
+  /// ```
+  ///
+  /// The `hostElement` needs to be styled in a way that allows its size to flow
+  /// with its contents. Things like `max-height: 100px; overflow: hidden` will
+  /// work as expected (by hiding the overflowing part of the flutter app), but
+  /// if in that case flutter is not made aware of that max-height with
+  /// `physicalConstraints`, it will end up rendering more pixels that are visible
+  /// on the screen, with a possible hit to performance.
+  ///
+  /// TL;DR: The `viewConstraints` of a Flutter view, must take into consideration
+  /// the CSS box-model restrictions imposed on its `hostElement` (especially when
+  /// hiding `overflow`). Flutter does not attempt to interpret the styles of
+  /// `hostElement` to compute its `physicalConstraints`, only its current size.
+  void resize(ui.Size newPhysicalSize) {
+    // The browser uses CSS, and CSS operates in logical sizes.
+    final ui.Size logicalSize = newPhysicalSize / devicePixelRatio;
+    dom.rootElement.style
+      ..width = '${logicalSize.width}px'
+      ..height = '${logicalSize.height}px';
+
+    // Force an update of the physicalSize so it's ready for the renderer.
+    _computePhysicalSize();
   }
 
   /// Lazily populated and cleared at the end of the frame.
@@ -278,8 +339,10 @@ base class EngineFlutterView implements ui.FlutterView {
 final class _EngineFlutterViewImpl extends EngineFlutterView {
   _EngineFlutterViewImpl(
     EnginePlatformDispatcher platformDispatcher,
-    DomElement hostElement,
-  ) : super._(_nextViewId++, platformDispatcher, hostElement);
+    DomElement hostElement, {
+      JsViewConstraints? viewConstraints,
+    }
+  ) : super._(_nextViewId++, platformDispatcher, hostElement, viewConstraints: viewConstraints);
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
@@ -708,6 +771,27 @@ class ViewConstraints implements ui.ViewConstraints {
       minHeight = size.height,
       maxHeight = size.height;
 
+  /// Converts JsViewConstraints into ViewConstraints.
+  ///
+  /// Since JsViewConstraints are expressed by the user, in logical pixels, this
+  /// conversion uses logical pixels for the current size as well.
+  ///
+  /// The resulting ViewConstraints object will be multiplied by devicePixelRatio
+  /// later to compute the physicalViewConstraints, which is what the framework
+  /// uses.
+  factory ViewConstraints.fromJs(
+    JsViewConstraints? constraints, ui.Size currentLogicalSize) {
+    if (constraints == null) {
+      return ViewConstraints.tight(currentLogicalSize);
+    }
+    return ViewConstraints(
+      minWidth: _computeMinConstraintValue(constraints.minWidth, currentLogicalSize.width),
+      minHeight: _computeMinConstraintValue(constraints.minHeight, currentLogicalSize.height),
+      maxWidth: _computeMaxConstraintValue(constraints.maxWidth, currentLogicalSize.width),
+      maxHeight: _computeMaxConstraintValue(constraints.maxHeight, currentLogicalSize.height),
+    );
+  }
+
   @override
   final double minWidth;
   @override
@@ -725,6 +809,15 @@ class ViewConstraints implements ui.ViewConstraints {
 
   @override
   bool get isTight => minWidth >= maxWidth && minHeight >= maxHeight;
+
+  ViewConstraints operator*(double factor) {
+    return ViewConstraints(
+      minWidth: minWidth * factor,
+      maxWidth: maxWidth * factor,
+      minHeight: minHeight * factor,
+      maxHeight: maxHeight * factor,
+    );
+  }
 
   @override
   ViewConstraints operator/(double factor) {
@@ -773,4 +866,32 @@ class ViewConstraints implements ui.ViewConstraints {
     final String height = describe(minHeight, maxHeight, 'h');
     return 'ViewConstraints($width, $height)';
   }
+}
+
+// Computes the "min" value for a constraint that takes into account user `desired`
+// configuration and the actual available value.
+//
+// Returns the `desired` value unless it is `null`, in which case it returns the
+// `available` value.
+double _computeMinConstraintValue(double? desired, double available) {
+  assert(desired == null || desired >= 0, 'Minimum constraint must be >= 0 if set.');
+  assert(desired == null || desired.isFinite, 'Minimum constraint must be finite.');
+  return desired ?? available;
+}
+
+// Computes the "max" value for a constraint that takes into account user `desired`
+// configuration and the `available` size.
+//
+// Returns the `desired` value unless it is `null`, in which case it returns the
+// `available` value.
+//
+// A `desired` value of `Infinity` or `Number.POSITIVE_INFINITY` (from JS) means
+// "unconstrained".
+//
+// This method allows returning values larger than `available`, so the Flutter
+// app is able to stretch its container up to a certain value, without being
+// fully unconstrained.
+double _computeMaxConstraintValue(double? desired, double available) {
+  assert(desired == null || desired >= 0, 'Maximum constraint must be >= 0 if set.');
+  return desired ?? available;
 }
