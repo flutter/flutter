@@ -155,8 +155,8 @@ if (use_system_libsrtp) {
     }
 
     if (use_srtp_boringssl) {
-      deps = [ "//third_party/boringssl:boringssl" ]
-      public_deps = [ "//third_party/boringssl:boringssl" ]
+      deps = [ "//flutter/third_party/boringssl:boringssl" ]
+      public_deps = [ "//flutter/third_party/boringssl:boringssl" ]
       sources -= [
         "srtp/crypto/cipher/aes_cbc.c",
         "srtp/crypto/cipher/aes_icm.c",

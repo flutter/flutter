@@ -990,6 +990,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   static final RegExp _licenseNamePattern = RegExp(r'^(?!.*\.py$)(?!.*(?:no|update)-copyright)(?!.*mh-bsd-gcc).*\b_*(?:license(?!\.html)|copying|copyright|notice|l?gpl|GPLv2|bsd|mit|mpl?|ftl|Apache)_*\b', caseSensitive: false);
 
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
+    '/flutter/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
     '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
     '/flutter/third_party/libjpeg-turbo/src/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/README.ijg': _RepositoryReadmeIjgFile.new,
@@ -998,7 +999,6 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/flutter/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
-    '/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
     '/third_party/dart/LICENSE': _RepositoryDartLicenseFile.new,
     '/third_party/freetype2/LICENSE.TXT': _RepositoryFreetypeLicenseFile.new,
     '/third_party/icu/LICENSE': _RepositoryIcuLicenseFile.new,
@@ -1440,9 +1440,6 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
 
   @override
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'boringssl') {
-      return _RepositoryBoringSSLDirectory(this, entry);
-    }
     if (entry.name == 'expat') {
       return _RepositoryExpatDirectory(this, entry);
     }
@@ -1762,6 +1759,9 @@ class _RepositoryFlutterThirdPartyDirectory extends _RepositoryGenericThirdParty
 
   @override
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'boringssl') {
+      return _RepositoryBoringSSLDirectory(this, entry);
+    }
     if (entry.name == 'expat') {
       return _RepositoryExpatDirectory(this, entry);
     }
