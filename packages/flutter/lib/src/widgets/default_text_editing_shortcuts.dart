@@ -472,20 +472,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return _androidShortcuts;
-      case TargetPlatform.fuchsia:
-        return _fuchsiaShortcuts;
-      case TargetPlatform.iOS:
-        return _iOSShortcuts;
-      case TargetPlatform.linux:
-        return _linuxShortcuts;
-      case TargetPlatform.macOS:
-        return _macShortcuts;
-      case TargetPlatform.windows:
-        return _windowsShortcuts;
-    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => _androidShortcuts,
+      TargetPlatform.fuchsia => _fuchsiaShortcuts,
+      TargetPlatform.iOS     => _iOSShortcuts,
+      TargetPlatform.linux   => _linuxShortcuts,
+      TargetPlatform.macOS   => _macShortcuts,
+      TargetPlatform.windows => _windowsShortcuts,
+    };
   }
 
   Map<ShortcutActivator, Intent>? _getDisablingShortcut() {

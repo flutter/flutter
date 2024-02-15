@@ -2813,16 +2813,11 @@ class UnconstrainedBox extends StatelessWidget {
   final Widget? child;
 
   BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
-    if (constrainedAxis != null) {
-      switch (constrainedAxis) {
-        case Axis.horizontal:
-          return ConstraintsTransformBox.heightUnconstrained;
-        case Axis.vertical:
-          return ConstraintsTransformBox.widthUnconstrained;
-      }
-    } else {
-      return ConstraintsTransformBox.unconstrained;
-    }
+    return switch (constrainedAxis) {
+      Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
+      Axis.vertical   => ConstraintsTransformBox.widthUnconstrained,
+      null            => ConstraintsTransformBox.unconstrained,
+    };
   }
 
   @override
@@ -4263,16 +4258,10 @@ class Positioned extends ParentDataWidget<StackParentData> {
     double? height,
     required Widget child,
   }) {
-    double? left;
-    double? right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (double? left, double? right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return Positioned(
       key: key,
       left: left,
