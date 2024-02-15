@@ -53,7 +53,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     );
   }
 
-  tearDown(() => disposeFlutterSingletons());
+  tearDownAll(() => disposeFlutterSingletons());
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
