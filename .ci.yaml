@@ -2171,22 +2171,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
-  # TODO(https://github.com/flutter/flutter/issues/142178): Remove this.
-  # In the process of (a) renaming this "external_textures" and (b) making it
-  # an emulator test instead of a physical device.
-  - name: Linux_pixel_7pro external_ui_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_textures_integration_test
-
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
