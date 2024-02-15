@@ -1362,6 +1362,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    debugPrint('start of handle select paragraph ${paragraph.text.toPlainText()}');
     final SelectionResult result = _handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -1402,11 +1403,12 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     for (int index = 0; index < selectables.length; index += 1) {
       if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index])) {
         if (foundStart) {
-          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], SelectAllSelectionEvent());
+          final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
           if (selectables.length - 1 == index) {
             currentSelectionEndIndex = index;
             _flushInactiveSelections();
-            return result;
+            return result;//maybe should return SelectionResult.end since a paragraph will not extend outside a text container.
           }
         }
         continue;
@@ -1414,7 +1416,12 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       final SelectionGeometry existingGeometry = selectables[index].value;
       lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
       if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-        return SelectionResult.next;
+        if (foundStart) {
+          currentSelectionEndIndex = index;
+        } else {
+          currentSelectionStartIndex = currentSelectionEndIndex = index;
+        }
+        return SelectionResult.next;//maybe should return end here since a paragraph wont extend out of text container.
       }
       if (lastSelectionResult == SelectionResult.next) {
         if (selectables[index].value == existingGeometry && !foundStart) {
@@ -1431,7 +1438,8 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
             startIndex = lastNextIndex == null ? 0 : index;
           }
           for (int i = startIndex; i < index; i += 1) {
-            dispatchSelectionEventToChild(selectables[i], SelectAllSelectionEvent());
+            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
           }
           currentSelectionStartIndex = startIndex;
           foundStart = true;
@@ -1439,12 +1447,13 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
         continue;
       }
       if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-        return SelectionResult.previous;
+        return SelectionResult.previous;// return end?
       }
       if (selectables[index].value != existingGeometry) {
         currentSelectionEndIndex = index;
         // Geometry has changed as a result of select paragraph, need to clear the
         // selection of other selectables to keep selection in sync.
+        debugPrint('paragraph $currentSelectionStartIndex $currentSelectionEndIndex');
         _flushInactiveSelections();
       }
       return SelectionResult.end;
@@ -1764,7 +1773,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       (false, false, true) => currentSelectionEndIndex,
       (false, false, false) => 0,
     };
-    debugPrint('adjust start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex');
+    debugPrint('adjust start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex $isEnd');
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
@@ -1782,34 +1791,34 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      if (!paragraph.selectables!.contains(selectables[newIndex])){
-        debugPrint('woahskip');
-        if (forward == null) {
-          final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-          if (!forwardSelection) {
-            if (newIndex == 0) {
-              debugPrint('end by placeholder2');
-              finalResult = SelectionResult.previous;
-              continue;
-            }
-            newIndex -= 1;
-          } else {
-            newIndex += 1;
-          }
-          continue;
-        }
-        if (forward) {
-          newIndex += 1;
-        } else {
-          if (newIndex == 0) {
-            debugPrint('end by placeholder');
-            finalResult = SelectionResult.previous;
-            continue;
-          }
-          newIndex -= 1;
-        }
-        continue;
-      }
+      // if (!paragraph.selectables!.contains(selectables[newIndex])){
+      //   debugPrint('woahskip');
+      //   if (forward == null) {
+      //     final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+      //     if (!forwardSelection) {
+      //       if (newIndex == 0) {
+      //         debugPrint('end by placeholder2');
+      //         finalResult = SelectionResult.previous;
+      //         continue;
+      //       }
+      //       newIndex -= 1;
+      //     } else {
+      //       newIndex += 1;
+      //     }
+      //     continue;
+      //   }
+      //   if (forward) {
+      //     newIndex += 1;
+      //   } else {
+      //     if (newIndex == 0) {
+      //       debugPrint('end by placeholder');
+      //       finalResult = SelectionResult.previous;
+      //       continue;
+      //     }
+      //     newIndex -= 1;
+      //   }
+      //   continue;
+      // }
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
@@ -1843,7 +1852,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
     }
     if (isEnd) {
       final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-      debugPrint('is inverted $forwardSelection');
+      debugPrint('is forward selection $forwardSelection');
       // if (!forwardSelection && (!(forward ?? false) ?? false)) {
       //   currentSelectionStartIndex = currentSelectionEndIndex;
       // }
@@ -1861,6 +1870,7 @@ class _SelectableTextContainerDelegate extends SelectionContainerDelegate with C
       currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
+      debugPrint('adjusting start $newIndex');
     }
     _flushInactiveSelections();
     debugPrint('adjustEnd $currentSelectionStartIndex $currentSelectionEndIndex ${finalResult!}');
