@@ -13,7 +13,7 @@ void main() {
   late String flutterBin;
   late Directory exampleAppDir;
   late Directory pluginDir;
-  final RegExp compileSdkVersionMatch = RegExp(r'compileSdk [\w.]+');
+  final RegExp compileSdkVersionMatch = RegExp(r'compileSdk\s*=?\s*[\w.]+');
   final String builtApkPath = <String>['build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk']
       .join(platform.pathSeparator);
 
@@ -47,10 +47,10 @@ void main() {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkVersion as `android-UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkVersion "android-UpsideDownCake"'),
+        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkVersion = "android-UpsideDownCake"'),
         flush: true
       );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-UpsideDownCake"'));
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion = "android-UpsideDownCake"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -75,10 +75,10 @@ void main() {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview "UpsideDownCake"'),
+        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview = "UpsideDownCake"'),
         flush: true
       );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview "UpsideDownCake"'));
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview = "UpsideDownCake"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -103,10 +103,10 @@ void main() {
       final File appBuildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
       // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       appBuildGradleFile.writeAsStringSync(
-          appBuildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview "UpsideDownCake"'),
+          appBuildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview = "UpsideDownCake"'),
           flush: true
       );
-      expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview "UpsideDownCake"'));
+      expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview = "UpsideDownCake"'));
 
       final File pluginBuildGradleFile = pluginDir.childDirectory('android').childFile('build.gradle');
       // change the plugin build.gradle to use a preview compile sdk version
