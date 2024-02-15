@@ -10,29 +10,26 @@ application_snapshot("kernel_compiler") {
 
   deps = [ "../flutter/kernel:kernel_platform_files($host_toolchain)" ]
 
-  package_config =
-      rebase_path("//third_party/dart/.dart_tool/package_config.json")
+  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
 
   training_args = [
     "--train",
     rebase_path(main_dart),
   ]
 
-  kernel_compiler_files =
-      exec_script("//third_party/dart/tools/list_dart_files.py",
-                  [
-                    "absolute",
-                    rebase_path("."),
-                  ],
-                  "list lines")
+  kernel_compiler_files = exec_script("$dart_src/tools/list_dart_files.py",
+                                      [
+                                        "absolute",
+                                        rebase_path("."),
+                                      ],
+                                      "list lines")
 
-  kernel_compiler_files +=
-      exec_script("//third_party/dart/tools/list_dart_files.py",
-                  [
-                    "absolute",
-                    rebase_path("//third_party/dart/pkg"),
-                  ],
-                  "list lines")
+  kernel_compiler_files += exec_script("$dart_src/tools/list_dart_files.py",
+                                       [
+                                         "absolute",
+                                         rebase_path("$dart_src/pkg"),
+                                       ],
+                                       "list lines")
 
   inputs = kernel_compiler_files
 }
@@ -40,18 +37,16 @@ application_snapshot("kernel_compiler") {
 application_snapshot("_list_libraries_kernel") {
   visibility = [ ":*" ]
   snapshot_kind = "kernel"
-  main_dart = "//third_party/dart/pkg/vm/bin/list_libraries.dart"
-  package_config =
-      rebase_path("//third_party/dart/.dart_tool/package_config.json")
+  main_dart = "$dart_src/pkg/vm/bin/list_libraries.dart"
+  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
   training_args = []
   output = "$target_gen_dir/list_libraries.dart.dill"
 }
 
 application_snapshot("list_libraries") {
   deps = [ ":_list_libraries_kernel" ]
-  main_dart = "//third_party/dart/pkg/vm/bin/list_libraries.dart"
-  package_config =
-      rebase_path("//third_party/dart/.dart_tool/package_config.json")
+  main_dart = "$dart_src/pkg/vm/bin/list_libraries.dart"
+  package_config = rebase_path("$dart_src/.dart_tool/package_config.json")
   training_args = [
     # train against the dill file which is generated for this snapshot.
     rebase_path("$target_gen_dir/list_libraries.dart.dill"),
@@ -59,7 +54,7 @@ application_snapshot("list_libraries") {
 }
 
 dart_library("async_helper") {
-  package_root = "//third_party/dart/pkg/async_helper"
+  package_root = "$dart_src/pkg/async_helper"
   package_name = "async_helper"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -73,7 +68,7 @@ dart_library("async_helper") {
 }
 
 dart_library("meta") {
-  package_root = "//third_party/dart/pkg/meta"
+  package_root = "$dart_src/pkg/meta"
   package_name = "meta"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -88,7 +83,7 @@ dart_library("meta") {
 }
 
 dart_library("expect") {
-  package_root = "//third_party/dart/pkg/expect"
+  package_root = "$dart_src/pkg/expect"
   package_name = "expect"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -126,7 +121,7 @@ dart_library("litetest") {
 }
 
 dart_library("args") {
-  package_root = "//third_party/dart/third_party/pkg/args"
+  package_root = "$dart_src/third_party/pkg/args"
   package_name = "args"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -150,7 +145,7 @@ dart_library("args") {
 }
 
 dart_library("collection") {
-  package_root = "//third_party/dart/third_party/pkg/collection"
+  package_root = "$dart_src/third_party/pkg/collection"
   package_name = "collection"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -190,7 +185,7 @@ dart_library("collection") {
 }
 
 dart_library("logging") {
-  package_root = "//third_party/dart/third_party/pkg/logging"
+  package_root = "$dart_src/third_party/pkg/logging"
   package_name = "logging"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -206,7 +201,7 @@ dart_library("logging") {
 }
 
 dart_library("path") {
-  package_root = "//third_party/dart/third_party/pkg/path"
+  package_root = "$dart_src/third_party/pkg/path"
   package_name = "path"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -231,7 +226,7 @@ dart_library("path") {
 }
 
 dart_library("stack_trace") {
-  package_root = "//third_party/dart/third_party/pkg/stack_trace"
+  package_root = "$dart_src/third_party/pkg/stack_trace"
   package_name = "stack_trace"
 
   pubspec = "$package_root/pubspec.yaml"
@@ -253,7 +248,7 @@ dart_library("stack_trace") {
 }
 
 dart_library("matcher") {
-  package_root = "//third_party/dart/third_party/pkg/matcher"
+  package_root = "$dart_src/third_party/pkg/matcher"
   package_name = "matcher"
 
   pubspec = "$package_root/pubspec.yaml"

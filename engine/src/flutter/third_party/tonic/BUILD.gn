@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
+
 config("config") {
   include_dirs = [
     "//flutter/third_party",
@@ -86,7 +88,7 @@ source_set("tonic") {
     ]
   }
 
-  public_deps = [ "//third_party/dart/runtime:dart_api" ]
+  public_deps = [ "$dart_src/runtime:dart_api" ]
 
   public_configs = [ ":config" ]
 }

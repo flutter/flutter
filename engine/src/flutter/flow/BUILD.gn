@@ -187,6 +187,7 @@ if (enable_unittests) {
       ":flow",
       ":flow_fixtures",
       ":flow_testing",
+      "$dart_src/runtime:libdart_jit",  # for tracing
       "//flutter/common/graphics",
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/fml",
@@ -194,7 +195,6 @@ if (enable_unittests) {
       "//flutter/skia",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
-      "//third_party/dart/runtime:libdart_jit",  # for tracing
       "//third_party/googletest:gtest",
     ]
 

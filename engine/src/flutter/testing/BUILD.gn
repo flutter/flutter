@@ -74,12 +74,12 @@ source_set("dart") {
 
   public_deps = [
     ":testing_lib",
+    "$dart_src/runtime/bin:elf_loader",
     "//flutter/common",
     "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/skia",
     "//flutter/third_party/tonic",
-    "//third_party/dart/runtime/bin:elf_loader",
   ]
 }
 

@@ -6,9 +6,9 @@ import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/lib/web_ui/flutter_js/sources.gni")
 import("//flutter/web_sdk/web_sdk.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
+import("$dart_src/build/dart/dart_action.gni")
 
-web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
+web_ui_sources = exec_script("$dart_src/tools/list_dart_files.py",
                              [
                                "absolute",
                                rebase_path("//flutter/lib/web_ui/lib"),
@@ -139,13 +139,13 @@ template("_dartdevc") {
       forward_variables_from(invoker, "*")
 
       deps = web_engine_libraries + [
-               "//third_party/dart:create_sdk",
-               "//third_party/dart/pkg:pkg_files_stamp",
-               "//third_party/dart/utils/ddc:ddc_files_stamp",
-               "//third_party/dart/utils/ddc:ddc_sdk_patch_stamp",
+               "$dart_src:create_sdk",
+               "$dart_src/pkg:pkg_files_stamp",
+               "$dart_src/utils/ddc:ddc_files_stamp",
+               "$dart_src/utils/ddc:ddc_sdk_patch_stamp",
              ]
 
-      script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
+      script = "$dart_src/pkg/dev_compiler/bin/dartdevc.dart"
 
       pool = "//flutter/build/dart:dart_pool"
     }
@@ -190,13 +190,13 @@ template("_kernel_worker") {
       forward_variables_from(invoker, "*")
 
       deps = web_engine_libraries + [
-               "//third_party/dart:create_sdk",
-               "//third_party/dart/pkg:pkg_files_stamp",
-               "//third_party/dart/utils/ddc:ddc_files_stamp",
-               "//third_party/dart/utils/ddc:ddc_sdk_patch_stamp",
+               "$dart_src:create_sdk",
+               "$dart_src/pkg:pkg_files_stamp",
+               "$dart_src/utils/ddc:ddc_files_stamp",
+               "$dart_src/utils/ddc:ddc_sdk_patch_stamp",
              ]
 
-      script = "//third_party/dart/utils/bazel/kernel_worker.dart"
+      script = "$dart_src/utils/bazel/kernel_worker.dart"
 
       pool = "//flutter/build/dart:dart_pool"
     }

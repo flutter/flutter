@@ -16,7 +16,7 @@ dart_library("matcher") {
 
   language_version = "2.12"
 
-  deps = [ "//third_party/dart/third_party/pkg/stack_trace" ]
+  deps = [ "$dart_src/third_party/pkg/stack_trace" ]
 
   sources = [
     "expect.dart",

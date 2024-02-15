@@ -113,7 +113,7 @@ source_set("fml") {
   ]
 
   deps = [
-    "//third_party/dart/runtime:dart_api",
+    "$dart_src/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.
     "//third_party/icu",

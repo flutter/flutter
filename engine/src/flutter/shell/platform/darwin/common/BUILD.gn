@@ -128,9 +128,9 @@ executable("framework_common_unittests") {
   deps = [
     ":framework_common",
     ":framework_common_fixtures",
+    "$dart_src/runtime:libdart_jit",
     "//flutter/testing",
     "//flutter/third_party/ocmock:ocmock",
-    "//third_party/dart/runtime:libdart_jit",
   ]
 
   public_configs = [ "//flutter:config" ]

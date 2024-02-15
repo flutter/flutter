@@ -16,7 +16,7 @@ dart_library("stack_trace") {
 
   language_version = "2.12"
 
-  deps = [ "//third_party/dart/third_party/pkg/path" ]
+  deps = [ "$dart_src/third_party/pkg/path" ]
 
   sources = [
     "src/chain.dart",

@@ -2,13 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-gen_snapshot = "//third_party/dart/runtime/bin:gen_snapshot"
-gen_snapshot_product = "//third_party/dart/runtime/bin:gen_snapshot_product"
+import("//flutter/build/dart/dart.gni")
 
-prebuilt_dart = "//third_party/dart/tools/sdks/dart-sdk/bin/dart"
+gen_snapshot = "$dart_src/runtime/bin:gen_snapshot"
+gen_snapshot_product = "$dart_src/runtime/bin:gen_snapshot_product"
 
-observatory_target =
-    "//third_party/dart/runtime/observatory:observatory_archive"
+prebuilt_dart = "$dart_src/tools/sdks/dart-sdk/bin/dart"
+
+observatory_target = "$dart_src/runtime/observatory:observatory_archive"
 observatory_archive_dir = get_label_info(observatory_target, "target_gen_dir")
 observatory_archive_name = get_label_info(observatory_target, "name")
 observatory_archive_file =

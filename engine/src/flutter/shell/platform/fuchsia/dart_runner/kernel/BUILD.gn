@@ -6,7 +6,7 @@ import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/tools/fuchsia/dart.gni")
-import("//third_party/dart/utils/compile_platform.gni")
+import("$dart_src/utils/compile_platform.gni")
 
 compile_platform("kernel_platform_files") {
   single_root_scheme = "org-dartlang-sdk"

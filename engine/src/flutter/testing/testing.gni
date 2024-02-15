@@ -106,7 +106,7 @@ template("dart_snapshot_aot") {
   compiled_action(target_name) {
     testonly = true
 
-    tool = "//third_party/dart/runtime/bin:gen_snapshot"
+    tool = "$dart_src/runtime/bin:gen_snapshot"
 
     pool = "//flutter/build/dart:dart_pool"
 

@@ -6,29 +6,27 @@ import("//build/fuchsia/sdk.gni")
 import("//flutter/build/dart/rules.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/web_sdk/web_sdk.gni")
-import("//third_party/dart/sdk/lib/_http/http_sources.gni")
-import(
-    "//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
-import("//third_party/dart/sdk/lib/_internal/js_shared/js_types_sources.gni")
-import("//third_party/dart/sdk/lib/_internal/vm/lib/vm_internal.gni")
-import("//third_party/dart/sdk/lib/async/async_sources.gni")
-import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
-import("//third_party/dart/sdk/lib/convert/convert_sources.gni")
-import("//third_party/dart/sdk/lib/core/core_sources.gni")
-import("//third_party/dart/sdk/lib/developer/developer_sources.gni")
-import("//third_party/dart/sdk/lib/ffi/ffi_sources.gni")
-import("//third_party/dart/sdk/lib/html/html_sources.gni")
-import("//third_party/dart/sdk/lib/internal/internal_sources.gni")
-import("//third_party/dart/sdk/lib/io/io_sources.gni")
-import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
-import("//third_party/dart/sdk/lib/js/js_annotations_sources.gni")
-import("//third_party/dart/sdk/lib/js/js_sources.gni")
-import("//third_party/dart/sdk/lib/js_interop/js_interop_sources.gni")
-import(
-    "//third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe_sources.gni")
-import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
-import("//third_party/dart/sdk/lib/math/math_sources.gni")
-import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
+import("$dart_src/sdk/lib/_http/http_sources.gni")
+import("$dart_src/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
+import("$dart_src/sdk/lib/_internal/js_shared/js_types_sources.gni")
+import("$dart_src/sdk/lib/_internal/vm/lib/vm_internal.gni")
+import("$dart_src/sdk/lib/async/async_sources.gni")
+import("$dart_src/sdk/lib/collection/collection_sources.gni")
+import("$dart_src/sdk/lib/convert/convert_sources.gni")
+import("$dart_src/sdk/lib/core/core_sources.gni")
+import("$dart_src/sdk/lib/developer/developer_sources.gni")
+import("$dart_src/sdk/lib/ffi/ffi_sources.gni")
+import("$dart_src/sdk/lib/html/html_sources.gni")
+import("$dart_src/sdk/lib/internal/internal_sources.gni")
+import("$dart_src/sdk/lib/io/io_sources.gni")
+import("$dart_src/sdk/lib/isolate/isolate_sources.gni")
+import("$dart_src/sdk/lib/js/js_annotations_sources.gni")
+import("$dart_src/sdk/lib/js/js_sources.gni")
+import("$dart_src/sdk/lib/js_interop/js_interop_sources.gni")
+import("$dart_src/sdk/lib/js_interop_unsafe/js_interop_unsafe_sources.gni")
+import("$dart_src/sdk/lib/js_util/js_util_sources.gni")
+import("$dart_src/sdk/lib/math/math_sources.gni")
+import("$dart_src/sdk/lib/typed_data/typed_data_sources.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {
@@ -38,7 +36,7 @@ if (!is_fuchsia) {
   }
 }
 
-dart_sdk_lib_path = rebase_path("//third_party/dart/sdk/lib")
+dart_sdk_lib_path = rebase_path("$dart_src/sdk/lib")
 
 copy("async") {
   lib_path = rebase_path("async", "", dart_sdk_lib_path)
@@ -196,7 +194,7 @@ web_ui_ui_web_with_output("copy_dart_ui_web") {
 }
 
 copy("copy_allowed_experiments") {
-  sources = [ "//third_party/dart/sdk/lib/_internal/allowed_experiments.json" ]
+  sources = [ "$dart_src/sdk/lib/_internal/allowed_experiments.json" ]
 
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_internal/allowed_experiments.json",
@@ -288,7 +286,7 @@ dart_pkg("sky_engine") {
     deps += [ ":copy_sky_engine_authors" ]
   }
 
-  service_isolate_dir = "//third_party/dart/sdk/lib/_internal/vm/bin/"
+  service_isolate_dir = "$dart_src/sdk/lib/_internal/vm/bin/"
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
   sdk_ext_files = [
     "$service_isolate_dir/vmservice_io.dart",

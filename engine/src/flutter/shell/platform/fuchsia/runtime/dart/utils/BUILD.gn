@@ -61,7 +61,7 @@ action("generate_build_info_cc_file") {
     "build_info_in.cc",
     "//flutter/.git/logs/HEAD",
     "//fuchsia/sdk/$host_os/meta/manifest.json",
-    "//third_party/dart/.git/logs/HEAD",
+    "$dart_src/.git/logs/HEAD",
   ]
   outputs = [ "$target_gen_dir/build_info.cc" ]
 
@@ -77,7 +77,7 @@ action("generate_build_info_cc_file") {
 }
 
 make_utils("utils") {
-  deps = [ "//third_party/dart/runtime/bin:elf_loader" ]
+  deps = [ "$dart_src/runtime/bin:elf_loader" ]
 }
 
 test_fixtures("utils_fixtures") {
@@ -99,14 +99,14 @@ executable("dart_utils_unittests") {
   deps = [
     ":utils",
     ":utils_fixtures",
+    "$dart_src/runtime:libdart_jit",
+    "$dart_src/runtime/bin:dart_io_api",
     "$fuchsia_sdk_root/pkg:inspect_component_cpp",
     "$fuchsia_sdk_root/pkg:sys_cpp",
     "//flutter/testing",
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/bin:dart_io_api",
   ]
 }
 
 make_utils("utils_product") {
-  deps = [ "//third_party/dart/runtime/bin:elf_loader_product" ]
+  deps = [ "$dart_src/runtime/bin:elf_loader_product" ]
 }

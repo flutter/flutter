@@ -5,7 +5,7 @@
 import("//build/compiled_action.gni")
 import("//flutter/common/fuchsia_config.gni")
 import("//flutter/tools/fuchsia/dart_kernel.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
+import("$dart_src/build/dart/dart_action.gni")
 
 dart_kernel("shim_kernel") {
   main_dart = "shim.dart"

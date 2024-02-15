@@ -8,7 +8,7 @@ import("//flutter/build/bin_to_obj.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//third_party/dart/utils/compile_platform.gni")
+import("$dart_src/utils/compile_platform.gni")
 
 # Generates the Dart/Flutter core platform files and tools.
 #
@@ -39,8 +39,7 @@ group("generate_snapshot_bins") {
 
   # Build analyze_snapshot for 64-bit target CPUs.
   if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
-    deps +=
-        [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+    deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
   }
 }
 
@@ -65,10 +64,10 @@ compiled_action("generate_snapshot_bin") {
     # By default Dart will create a 32-bit gen_snapshot host binary if the target
     # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
     # targets because some host platforms may not support 32-bit binaries.
-    tool = "//third_party/dart/runtime/bin:gen_snapshot_host_targeting_host"
+    tool = "$dart_src/runtime/bin:gen_snapshot_host_targeting_host"
     toolchain = "//build/toolchain/$host_os:clang_x64"
   } else {
-    tool = "//third_party/dart/runtime/bin:gen_snapshot"
+    tool = "$dart_src/runtime/bin:gen_snapshot"
   }
 
   platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
@@ -159,9 +158,9 @@ if (host_os == "mac" && target_os != "mac" &&
   copy("create_arm_gen_snapshot") {
     # The toolchain-specific output directory. For cross-compiles, this is a
     # clang-x64 or clang-arm64 subdirectory of the top-level build directory.
-    host_output_dir = get_label_info(
-            "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
-            "root_out_dir")
+    host_output_dir =
+        get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
+                       "root_out_dir")
 
     # Determine suffixed output gen_snapshot name.
     target_cpu_suffix = target_cpu
@@ -171,7 +170,7 @@ if (host_os == "mac" && target_os != "mac" &&
 
     sources = [ "${host_output_dir}/gen_snapshot" ]
     outputs = [ "${host_output_dir}/gen_snapshot_${target_cpu_suffix}" ]
-    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
     visibility = [ ":*" ]
   }
 }
@@ -187,13 +186,13 @@ if (host_os == "mac" && target_os == "mac") {
   copy("create_macos_gen_snapshots") {
     # The toolchain-specific output directory. For cross-compiles, this is a
     # clang-x64 or clang-arm64 subdirectory of the top-level build directory.
-    host_output_dir = get_label_info(
-            "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
-            "root_out_dir")
+    host_output_dir =
+        get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
+                       "root_out_dir")
 
     sources = [ "${host_output_dir}/gen_snapshot" ]
     outputs = [ "${root_out_dir}/gen_snapshot_${target_cpu}" ]
-    deps = [ "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)" ]
+    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
   }
 }
 

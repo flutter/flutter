@@ -2,8 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
 import("//flutter/testing/rules/runtime_mode.gni")
-import("//third_party/dart/build/dart/copy_tree.gni")
+
+import("$dart_src/build/dart/copy_tree.gni")
 
 _app_framework_dir = "$root_out_dir/scenario_app/Scenarios/App.framework"
 
