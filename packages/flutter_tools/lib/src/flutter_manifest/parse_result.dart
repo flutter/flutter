@@ -35,6 +35,6 @@ final class ErrorParseResult<T> extends ParseResult<T> {
   }
 
   ErrorParseResult<S> cast<S>() {
-    return this as ErrorParseResult<S>;
+    return ErrorParseResult<S>(errors);
   }
 }
