@@ -128,7 +128,7 @@ def _bundled_test_runner_of(target_id: str) -> _BundledTestRunner:
   # TODO(zijiehe-google-com): Run all tests in release build,
   # https://github.com/flutter/flutter/issues/140179.
   def variant(test) -> bool:
-    return 'variant' not in test or test['variant'] == VARIANT
+    return 'variant' not in test or test['variant'] in VARIANT
 
   tests = [t for t in tests if variant(t)]
   return _BundledTestRunner(target_id, resolve_packages(tests), build_test_cases(tests), log_dir)
@@ -142,6 +142,8 @@ if __name__ == '__main__':
   logging.basicConfig(level=logging.INFO)
   logging.info('Running tests in %s', OUT_DIR)
   sys.argv.append('--out-dir=' + OUT_DIR)
+  if VARIANT.endswith('_arm64'):
+    sys.argv.append('--product=terminal.qemu-arm64')
   # The 'flutter-test-type' is a place holder and has no specific meaning; the
   # _get_test_runner is overrided.
   sys.argv.append('flutter-test-type')
