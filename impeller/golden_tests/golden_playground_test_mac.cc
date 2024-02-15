@@ -92,14 +92,19 @@ std::string GetGoldenFilename() {
 
 bool SaveScreenshot(std::unique_ptr<testing::Screenshot> screenshot) {
   if (!screenshot || !screenshot->GetBytes()) {
+    FML_LOG(ERROR) << "Failed to collect screenshot for test " << GetTestName();
     return false;
   }
   std::string test_name = GetTestName();
   std::string filename = GetGoldenFilename();
   testing::GoldenDigest::Instance()->AddImage(
       test_name, filename, screenshot->GetWidth(), screenshot->GetHeight());
-  return screenshot->WriteToPNG(
-      testing::WorkingDirectory::Instance()->GetFilenamePath(filename));
+  if (!screenshot->WriteToPNG(
+          testing::WorkingDirectory::Instance()->GetFilenamePath(filename))) {
+    FML_LOG(ERROR) << "Failed to write screenshot to " << filename;
+    return false;
+  }
+  return true;
 }
 
 bool ShouldTestHaveVulkanValidations() {
