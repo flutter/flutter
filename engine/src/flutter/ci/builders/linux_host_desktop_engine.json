@@ -17,13 +17,16 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "debug",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug",
             "ninja": {
@@ -50,14 +53,17 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_profile",
             "ninja": {
@@ -84,13 +90,16 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--enable-fontconfig",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_release",
             "ninja": {
