@@ -662,8 +662,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   Widget _buildDrawer(BuildContext context) {
-    final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final TextDirection textDirection = Directionality.of(context);
     final bool isDesktop;
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
@@ -676,9 +674,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         isDesktop = true;
     }
 
-    final double dragAreaWidth = widget.edgeDragWidth ?? _kEdgeDragWidth + switch ((drawerIsStart, textDirection)) {
-      (true, TextDirection.ltr) || (false, TextDirection.rtl) => MediaQuery.paddingOf(context).left,
-      (true, TextDirection.rtl) || (false, TextDirection.ltr) => MediaQuery.paddingOf(context).right,
+    final double dragAreaWidth = widget.edgeDragWidth ?? _kEdgeDragWidth + switch ((widget.alignment, Directionality.of(context))) {
+      (DrawerAlignment.start, TextDirection.ltr) => MediaQuery.paddingOf(context).left,
+      (DrawerAlignment.end,   TextDirection.rtl) => MediaQuery.paddingOf(context).left,
+      (DrawerAlignment.start, TextDirection.rtl) => MediaQuery.paddingOf(context).right,
+      (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
     };
 
     if (_controller.status == AnimationStatus.dismissed) {
