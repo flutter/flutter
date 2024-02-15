@@ -5,7 +5,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../../layout/adaptive.dart';

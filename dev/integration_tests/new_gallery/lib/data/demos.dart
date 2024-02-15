@@ -6,9 +6,8 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations_en.dart'
-    show GalleryLocalizationsEn;
+import 'package:gallery/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations_en.dart';
 
 import '../codeviewer/code_displayer.dart';
 import '../deferred_widget.dart';

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import 'material_demo_types.dart';
 
 class ButtonDemo extends StatelessWidget {

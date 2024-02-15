@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';

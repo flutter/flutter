@@ -5,7 +5,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/gallery_options.dart';

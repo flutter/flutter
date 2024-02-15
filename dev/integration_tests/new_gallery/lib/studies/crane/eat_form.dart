@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import 'backlayer.dart';
 import 'header_form.dart';
 

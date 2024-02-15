@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
+import 'package:gallery/gallery_localizations.dart';
 import '../../data/gallery_options.dart';
 import '../../layout/adaptive.dart';
 import '../../layout/image_placeholder.dart';
