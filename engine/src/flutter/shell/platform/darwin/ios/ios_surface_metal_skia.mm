@@ -8,6 +8,10 @@
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
 
+@protocol FlutterMetalDrawable <MTLDrawable>
+- (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
+@end
+
 namespace flutter {
 
 static IOSContextMetalSkia* CastToMetalContext(const std::shared_ptr<IOSContext>& context) {
@@ -80,10 +84,16 @@ bool IOSSurfaceMetalSkia::PresentDrawable(GrMTLHandle drawable) const {
 
   auto command_buffer =
       fml::scoped_nsprotocol<id<MTLCommandBuffer>>([[command_queue_ commandBuffer] retain]);
+
+  id<CAMetalDrawable> metal_drawable = reinterpret_cast<id<CAMetalDrawable>>(drawable);
+  if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
+    [(id<FlutterMetalDrawable>)metal_drawable flutterPrepareForPresent:command_buffer.get()];
+  }
+
   [command_buffer.get() commit];
   [command_buffer.get() waitUntilScheduled];
 
-  [reinterpret_cast<id<CAMetalDrawable>>(drawable) present];
+  [metal_drawable present];
   return true;
 }
 

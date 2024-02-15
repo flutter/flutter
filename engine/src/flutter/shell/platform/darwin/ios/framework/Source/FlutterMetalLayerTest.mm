@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <Metal/Metal.h>
+#import <OCMock/OCMock.h>
 #import <QuartzCore/QuartzCore.h>
 #import <XCTest/XCTest.h>
 
@@ -232,6 +233,39 @@
   [d2 present];
   id<CAMetalDrawable> d6 = [layer nextDrawable];
   XCTAssertNotNil(d6);
+
+  [self removeMetalLayer:layer];
+}
+
+- (void)testTimeout {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+
+  id<CAMetalDrawable> drawable = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(drawable);
+
+  __block MTLCommandBufferHandler handler;
+
+  id<MTLCommandBuffer> mockCommandBuffer = OCMProtocolMock(@protocol(MTLCommandBuffer));
+  OCMStub([mockCommandBuffer addCompletedHandler:OCMOCK_ANY]).andDo(^(NSInvocation* invocation) {
+    MTLCommandBufferHandler handlerOnStack;
+    [invocation getArgument:&handlerOnStack atIndex:2];
+    // Required to copy stack block to heap.
+    handler = handlerOnStack;
+  });
+
+  [(id<FlutterMetalDrawable>)drawable flutterPrepareForPresent:mockCommandBuffer];
+  [drawable present];
+  [compositor commitTransaction];
+
+  // Drawable will not be available until the command buffer completes.
+  drawable = [layer nextDrawable];
+  XCTAssertNil(drawable);
+
+  handler(mockCommandBuffer);
+
+  drawable = [layer nextDrawable];
+  XCTAssertNotNil(drawable);
 
   [self removeMetalLayer:layer];
 }

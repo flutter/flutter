@@ -28,4 +28,16 @@
 
 @end
 
+@protocol MTLCommandBuffer;
+
+@protocol FlutterMetalDrawable <CAMetalDrawable>
+
+/// In order for FlutterMetalLayer to provide back pressure it must have access
+/// to the command buffer that is used to render into the drawable to schedule
+/// a completion handler.
+/// This method must be called before the command buffer is committed.
+- (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
+
+@end
+
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERMETALLAYER_H_
