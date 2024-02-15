@@ -53,6 +53,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     );
   }
 
+  // TODO(polina-c): convert to `tearDown` once the fix for https://github.com/flutter/flutter/issues/143522 [leaks-to-clean]
   tearDownAll(() => disposeFlutterSingletons());
 
   // Enable golden file testing using Skia Gold.
