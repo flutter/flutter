@@ -74,8 +74,7 @@ void main() {
       ServiceWorkerStrategy.offlineFirst,
       compilerConfigs: <WebCompilerConfig>[
         const WasmCompilerConfig(
-          optimizationLevel: 0,
-          stripWasm: false,
+          wasmOpt: WasmOptLevel.none,
           renderer: WebRendererMode.skwasm,
         ),
         const JsCompilerConfig.run(
@@ -104,8 +103,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
-
+                  'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
       ),
           ),
         ],
@@ -118,7 +116,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'RunWasmOpt: none; WasmOmitTypeChecks: false; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
