@@ -162,8 +162,8 @@ if (enable_unittests) {
     deps = [
       ":common_cpp_core",
       ":common_cpp_core_fixtures",
+      "$dart_src/runtime:libdart_jit",
       "//flutter/testing",
-      "//third_party/dart/runtime:libdart_jit",
     ]
 
     public_configs = [ "//flutter:config" ]

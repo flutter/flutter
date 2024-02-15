@@ -29,11 +29,11 @@ group("libdart") {
   public_deps = []
 
   if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
-    public_deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
+    public_deps += [ "$dart_src/runtime:libdart_precompiled_runtime" ]
   } else {
     public_deps += [
+      "$dart_src/runtime:libdart_jit",
       "//flutter/lib/snapshot",
-      "//third_party/dart/runtime:libdart_jit",
     ]
   }
 }
@@ -44,9 +44,9 @@ source_set("dart_plugin_registrant") {
     "dart_plugin_registrant.h",
   ]
   deps = [
+    "$dart_src/runtime:dart_api",
     "//flutter/fml",
     "//flutter/third_party/tonic",
-    "//third_party/dart/runtime:dart_api",
   ]
 }
 
@@ -103,6 +103,8 @@ source_set("runtime") {
   deps = [
     ":dart_plugin_registrant",
     ":test_font",
+    "$dart_src/runtime:dart_api",
+    "$dart_src/runtime/bin:dart_io_api",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -112,16 +114,12 @@ source_set("runtime") {
     "//flutter/skia",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
-    "//third_party/dart/runtime:dart_api",
-    "//third_party/dart/runtime/bin:dart_io_api",
   ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {
     # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
     # instead puts Observatory into the runner's package.
-    deps += [
-      "//third_party/dart/runtime/observatory:embedded_observatory_archive",
-    ]
+    deps += [ "$dart_src/runtime/observatory:embedded_observatory_archive" ]
   }
 }
 
@@ -147,6 +145,7 @@ if (enable_unittests) {
       ":libdart",
       ":runtime",
       ":runtime_fixtures",
+      "$dart_src/runtime/bin:elf_loader",
       "//flutter/common",
       "//flutter/fml",
       "//flutter/lib/snapshot",
@@ -155,7 +154,6 @@ if (enable_unittests) {
       "//flutter/testing:dart",
       "//flutter/testing:fixture_test",
       "//flutter/third_party/tonic",
-      "//third_party/dart/runtime/bin:elf_loader",
     ]
   }
 

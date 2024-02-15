@@ -2,8 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
 import("//flutter/tools/fuchsia/clang.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
+
+import("$dart_src/build/dart/dart_action.gni")
 
 template("generate_dart_profiler_symbols") {
   assert(defined(invoker.library_label), "Must define 'library_label'")
@@ -17,7 +19,7 @@ template("generate_dart_profiler_symbols") {
 
     script = "dart_profiler_symbols.dart"
 
-    packages = rebase_path("//third_party/dart/.dart_tool/package_config.json")
+    packages = rebase_path("$dart_src/.dart_tool/package_config.json")
 
     args = [
       "--nm",

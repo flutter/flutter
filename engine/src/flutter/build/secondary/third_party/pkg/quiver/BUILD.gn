@@ -18,8 +18,8 @@ dart_library("quiver") {
   language_version = "2.0"
 
   deps = [
-    "//third_party/dart/pkg/meta",
-    "//third_party/dart/third_party/pkg/matcher",
+    "$dart_src/pkg/meta",
+    "$dart_src/third_party/pkg/matcher",
   ]
 
   sources = [

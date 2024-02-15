@@ -6,9 +6,11 @@
 
 import("//build/compiled_action.gni")
 import("//build/module_args/dart.gni")
+import("//flutter/build/dart/dart.gni")
 import("//flutter/common/config.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
-import("//third_party/dart/sdk_args.gni")
+
+import("$dart_src/build/dart/dart_action.gni")
+import("$dart_src/sdk_args.gni")
 
 # Generates a Dart kernel snapshot using flutter_frontend_server.
 #
@@ -108,7 +110,7 @@ template("flutter_frontend_server") {
                              [ "pool" ])
       deps = common_deps
       pool = "//flutter/build/dart:dart_pool"
-      script = "//third_party/dart/pkg/frontend_server/bin/frontend_server_starter.dart"
+      script = "$dart_src/pkg/frontend_server/bin/frontend_server_starter.dart"
       inputs = [ invoker.main_dart ]
       outputs = [ invoker.kernel_output ]
       depfile = snapshot_depfile
@@ -179,10 +181,10 @@ template("flutter_snapshot") {
       # By default Dart will create a 32-bit gen_snapshot host binary if the target
       # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
       # targets because some host platforms may not support 32-bit binaries.
-      tool = "//third_party/dart/runtime/bin:gen_snapshot_host_targeting_host"
+      tool = "$dart_src/runtime/bin:gen_snapshot_host_targeting_host"
       toolchain = "//build/toolchain/$host_os:clang_x64"
     } else {
-      tool = "//third_party/dart/runtime/bin:gen_snapshot"
+      tool = "$dart_src/runtime/bin:gen_snapshot"
     }
 
     inputs = [ kernel_output ]

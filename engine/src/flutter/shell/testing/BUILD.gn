@@ -33,6 +33,8 @@ executable("testing") {
   }
 
   deps = [
+    "$dart_src/runtime:libdart_jit",
+    "$dart_src/runtime/bin:dart_io_api",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -43,8 +45,6 @@ executable("testing") {
     "//flutter/skia",
     "//flutter/third_party/tonic",
     "//third_party/abseil-cpp/absl/base:no_destructor",
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/bin:dart_io_api",
   ]
 
   if (impeller_supports_rendering) {

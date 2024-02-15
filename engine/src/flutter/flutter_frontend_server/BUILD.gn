@@ -9,7 +9,7 @@ copy("frontend_server") {
     snapshot =
         "$host_prebuilt_dart_sdk/bin/snapshots/frontend_server.dart.snapshot"
   } else {
-    deps = [ "//third_party/dart/utils/kernel-service:frontend_server" ]
+    deps = [ "$dart_src/utils/kernel-service:frontend_server" ]
     snapshot = "$root_out_dir/frontend_server.dart.snapshot"
   }
 

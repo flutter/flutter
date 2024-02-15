@@ -288,7 +288,7 @@ zip_bundle("flutter_gtk") {
   deps = [
     ":flutter_linux_gtk",
     ":publish_headers_linux",
-    "//third_party/dart/runtime/bin:gen_snapshot",
+    "$dart_src/runtime/bin:gen_snapshot",
   ]
   sources = get_target_outputs(":publish_headers_linux")
   tmp_files = []

@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
+
 # Generates an assembly file defining a given symbol with the bytes from a
 # binary file. Places the symbol in a text section if 'executable' is true,
 # otherwise places the symbol in a read-only data section.
@@ -13,7 +15,7 @@ template("bin_to_assembly") {
 
   action(target_name) {
     deps = invoker.deps
-    script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
+    script = "$dart_src/runtime/tools/bin_to_assembly.py"
     output = "$target_gen_dir/${invoker.input}.S"
     args = [
       "--input",
@@ -57,7 +59,7 @@ template("bin_to_coff") {
 
   action(target_name) {
     deps = invoker.deps
-    script = "//third_party/dart/runtime/tools/bin_to_coff.py"
+    script = "$dart_src/runtime/tools/bin_to_coff.py"
     output = "$target_gen_dir/${invoker.input}.o"
     args = [
       "--input",
