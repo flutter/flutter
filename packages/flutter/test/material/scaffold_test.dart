@@ -507,7 +507,9 @@ void main() {
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  Widget buildStatusBarTestApp(TargetPlatform? platform) {
+  Widget buildStatusBarTestApp(TargetPlatform? platform, [Widget? insertAboveCenterSliver]) {
+    const Key center = Key('center');
+
     return MaterialApp(
       theme: ThemeData(platform: platform),
       home: MediaQuery(
@@ -515,8 +517,12 @@ void main() {
         child: Scaffold(
           body: CustomScrollView(
             primary: true,
+            center: center,
             slivers: <Widget>[
+              if (insertAboveCenterSliver != null)
+                insertAboveCenterSliver,
               const SliverAppBar(
+                key: center,
                 title: Text('Title'),
               ),
               SliverList(
@@ -568,6 +574,22 @@ void main() {
 
     // Finally stops at the top.
     expect(scrollable.position.pixels, equals(0.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Tapping the status bar scrolls to top with below-zero min scroll offset', (WidgetTester tester) async {
+    const Widget insertAboveCenterSliver = SliverToBoxAdapter(
+      child: SizedBox(
+        height: 42.0,
+      ),
+    );
+
+    await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride, insertAboveCenterSliver));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, equals(-42.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
