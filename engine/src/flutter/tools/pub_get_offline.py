@@ -34,6 +34,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'api_check'),
     os.path.join(ENGINE_DIR, 'tools', 'build_bucket_golden_scraper'),
     os.path.join(ENGINE_DIR, 'tools', 'clang_tidy'),
+    os.path.join(ENGINE_DIR, 'tools', 'compare_goldens'),
     os.path.join(ENGINE_DIR, 'tools', 'const_finder'),
     os.path.join(ENGINE_DIR, 'tools', 'engine_tool'),
     os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
