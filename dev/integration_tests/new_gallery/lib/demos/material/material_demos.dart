@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 export 'package:gallery/demos/material/app_bar_demo.dart';
 export 'package:gallery/demos/material/banner_demo.dart';
 export 'package:gallery/demos/material/bottom_app_bar_demo.dart';

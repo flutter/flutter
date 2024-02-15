@@ -8,7 +8,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart' show WebCompileTest;
-import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
@@ -24,27 +23,18 @@ class NewGalleryWebCompileTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('flutter_gallery_v2_web_compile.');
-    final Directory galleryDir =
-        Directory(path.join(galleryParentDir.path, 'gallery'));
-
-    await getNewGallery(galleryVersion, galleryDir);
-
     final Map<String, Object> metrics = await inDirectory<Map<String, int>>(
-      galleryDir,
+      'dev/integration_tests/new_gallery',
       () async {
         await flutter('doctor');
 
         return WebCompileTest.runSingleBuildTest(
-          directory: galleryDir.path,
+          directory: 'dev/integration_tests/new_gallery',
           metric: metricKeyPrefix,
           measureBuildTime: true,
         );
       },
     );
-
-    rmTree(galleryParentDir);
 
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }

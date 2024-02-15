@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 export 'package:gallery/demos/cupertino/cupertino_activity_indicator_demo.dart';
 export 'package:gallery/demos/cupertino/cupertino_alert_demo.dart';
 export 'package:gallery/demos/cupertino/cupertino_button_demo.dart';
