@@ -927,10 +927,11 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginDependencies == null) {
             Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
             if (meta == null) {
-                return []
+                pluginDependencies = []
+            } else {
+                assert(meta.dependencyGraph instanceof List<Map>)
+                pluginDependencies = meta.dependencyGraph as List<Map<String, Object>>
             }
-            assert(meta.dependencyGraph instanceof List<Map>)
-            pluginDependencies = meta.dependencyGraph as List<Map<String, Object>>
         }
         return pluginDependencies
     }
