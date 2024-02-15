@@ -234,6 +234,13 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// Creates a series of one or more initial routes.
 typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
 
+/// Disposes navigation related singletons.
+void disposeFlutterSingletons() {
+  disposeNavigationSingletons();
+  WidgetsApp._debugShowWidgetInspectorOverrideNotifier?.dispose();
+  WidgetsApp._debugShowWidgetInspectorOverrideNotifier = null;
+}
+
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -1204,13 +1211,14 @@ class WidgetsApp extends StatefulWidget {
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
   static bool get debugShowWidgetInspectorOverride {
-    return _debugShowWidgetInspectorOverrideNotifier.value;
+    return _getDebugShowWidgetInspectorOverrideNotifier.value;
   }
   static set debugShowWidgetInspectorOverride(bool value) {
-    _debugShowWidgetInspectorOverrideNotifier.value = value;
+    _getDebugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
+  static ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifier;
+  static final ValueNotifier<bool> _getDebugShowWidgetInspectorOverrideNotifier = _debugShowWidgetInspectorOverrideNotifier ??= ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1760,7 +1768,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(() {
       result = ValueListenableBuilder<bool>(
-        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
+        valueListenable: WidgetsApp._getDebugShowWidgetInspectorOverrideNotifier,
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(

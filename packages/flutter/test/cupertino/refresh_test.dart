@@ -10,11 +10,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   late FakeBuilder mockHelper;
-  LeakTesting.settings = LeakTesting.settings.withIgnored(testHelperExceptions: <RegExp>[RegExp('uiTestGroup')]);
 
   setUp(() {
     mockHelper = FakeBuilder();
@@ -36,10 +34,7 @@ void main() {
   }
 
   void uiTestGroup() {
-    testWidgets("doesn't invoke anything without user interaction",
-    // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(

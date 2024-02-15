@@ -15,18 +15,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
-    testWidgets('properties',
-    // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
-    //experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
-      addTearDown(image1.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -55,7 +50,6 @@ void main() {
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
-      addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
       const double height = 1;
@@ -313,10 +307,7 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgets('Semantics can set attributed Text',
-    // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets('Semantics can set attributed Text', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(

@@ -2905,6 +2905,12 @@ class _NotAnnounced extends Route<void> {
   // change has been announced.
 }
 
+/// Disposes navigation related singletons.
+void disposeNavigationSingletons() {
+  _RouteEntry._notAnnounced?.dispose();
+  _RouteEntry._notAnnounced = null;
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2940,7 +2946,8 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final Route<dynamic> notAnnounced = _NotAnnounced();
+  static Route<dynamic> get notAnnounced => _notAnnounced ??= _NotAnnounced();
+  static Route<dynamic>? _notAnnounced = _NotAnnounced();
 
   _RouteLifecycle currentState;
   Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
