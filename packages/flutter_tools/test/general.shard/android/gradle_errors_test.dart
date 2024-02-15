@@ -797,8 +797,11 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         usesAndroidX: true,
         line: '',
       );
+      final File gradleFile = fileSystem.currentDirectory
+        .childDirectory('android')
+        .childFile('build.gradle');
 
-      expect(testLogger.statusText, contains('To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle'));
+      expect(testLogger.statusText, contains('To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -806,19 +809,22 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       ProcessManager: () => processManager,
     });
 
-    group('windows', () {
+    group('Windows', () {
       setUp(() {
         fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       });
 
-      testUsingContext('generates correct gradle command for Windows environment', () async {
+      testUsingContext('generates correct gradle command', () async {
         await lockFileDepMissingHandler.handler(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
       );
+        final File gradleFile = fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('build.gradle');
 
-        expect(testLogger.statusText, contains(r'To regenerate the lockfiles run: `.\gradlew.bat :generateLockfiles` in C:\android\build.gradle'));
+        expect(testLogger.statusText, contains('To regenerate the lockfiles run: `.\\gradlew.bat :generateLockfiles` in ${gradleFile.path}'));
       }, overrides: <Type, Generator>{
         GradleUtils: () => FakeGradleUtils(),
         Platform: () => fakePlatform('windows'),
