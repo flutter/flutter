@@ -763,7 +763,11 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 ///
 /// When calling `setState` in a [MaterialStatesController] listener, use the
 /// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
-/// the build phase while [update] is being called.
+/// the frame has been rendered. It's generally prudent to use the
+/// [SchedulerBinding.addPostFrameCallback], however, some of the widgets that
+/// depend on [MaterialStatesController] may call [update] in their build method.
+/// In such cases, listener's `setState` could be called during the build phase,
+/// which will result in an error.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
