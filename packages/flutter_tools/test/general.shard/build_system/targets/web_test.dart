@@ -615,7 +615,6 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[WebCompilerConfig.kOptimizationLevel] = 'O3';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2jsLinuxArgs,
@@ -902,13 +901,11 @@ void main() {
   }));
 
   for (final WebRendererMode renderer in <WebRendererMode>[WebRendererMode.canvaskit, WebRendererMode.skwasm]) {
-      for (int level = 1; level <= 4; level++) {
-        for (final bool strip in <bool>[true, false]) {
-          for (final List<String> defines in const <List<String>>[<String>[], <String>['FOO=bar', 'BAZ=qux']]) {
-          test('Dart2WasmTarget invokes dart2wasm with -O$level with stripping=$strip and defines=$defines', () => testbed.run(() async {
+    for (int level = 1; level <= 4; level++) {
+      for (final bool strip in <bool>[true, false]) {
+        for (final List<String> defines in const <List<String>>[<String>[], <String>['FOO=bar', 'BAZ=qux']]) {
+          test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines', () => testbed.run(() async {
             environment.defines[kBuildMode] = 'release';
-            environment.defines[WebCompilerConfig.kOptimizationLevel] = '$level';
-            environment.defines[WasmCompilerConfig.kDart2WasmStripWasm] = '$strip';
             environment.defines[kDartDefines] = encodeDartDefines(defines);
 
             final File depFile = environment.buildDir.childFile('dart2wasm.d');

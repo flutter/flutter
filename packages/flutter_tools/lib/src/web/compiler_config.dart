@@ -31,7 +31,7 @@ sealed class WebCompilerConfig {
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    kOptimizationLevel: optimizationLevel,
+    'optimizationLevel': optimizationLevel,
   };
 
 
@@ -132,12 +132,12 @@ class JsCompilerConfig extends WebCompilerConfig {
 class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
-    this.stripWasm = false,
+    this.stripWasm = true,
     super.renderer = WebRendererMode.auto,
   });
 
   /// Build environment for [stripWasm].
-  static const String kDart2WasmStripWasm = 'Dart2WasmStripWasm';
+  static const String kStripWasm = 'StripWasm';
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
@@ -153,18 +153,11 @@ class WasmCompilerConfig extends WebCompilerConfig {
   }
 
   @override
-  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    ...super.buildEventAnalyticsValues,
-    kDart2WasmStripWasm: stripWasm.toString(),
-  };
-
-  @override
   String get buildKey {
     final Map<String, dynamic> settings = <String, dynamic>{
       ...super._buildKeyMap,
-      'wasmStripWasm': stripWasm,
+      'stripWasm': stripWasm,
     };
     return jsonEncode(settings);
   }
 }
-

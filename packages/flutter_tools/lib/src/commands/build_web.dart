@@ -58,10 +58,11 @@ class BuildWebCommand extends BuildSubCommand {
     //
     // Common compilation options among JavaScript and Wasm
     //
-    argParser.addOption('optimization-level',
+    argParser.addOption(
+      'optimization-level',
       abbr: 'O',
-      help: 'Sets the optimization level used for Dart compilation to JavaScript/Wasm. '
-          'Valid values range from 1 to 4.',
+      help:
+          'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
       defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
       allowed: const <String>['1', '2', '3', '4'],
     );
@@ -83,10 +84,9 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
-          'Valid values range from O1 to O4. '
-          '(Deprecated: Please use -O/--optimization-level.)',
-      allowed: const <String>['O1', 'O2', 'O3', 'O4'],
-    );
+            'Deprecated: Please use "-O=<level>" / "--optimization-level=<level>".',
+       allowed: const <String>['O1', 'O2', 'O3', 'O4'],
+     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
           'information about the generated code is a .js.info.json file.'
