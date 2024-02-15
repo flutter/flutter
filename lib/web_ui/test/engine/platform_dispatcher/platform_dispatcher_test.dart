@@ -22,6 +22,16 @@ void testMain() {
   });
 
   group('PlatformDispatcher', () {
+    late EnginePlatformDispatcher dispatcher;
+
+    setUp(() {
+      dispatcher = EnginePlatformDispatcher();
+    });
+
+    tearDown(() {
+      dispatcher.dispose();
+    });
+
     test('reports at least one display', () {
       expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
     });
@@ -30,15 +40,16 @@ void testMain() {
       final MockHighContrastSupport mockHighContrast =
           MockHighContrastSupport();
       HighContrastSupport.instance = mockHighContrast;
-      final EnginePlatformDispatcher engineDispatcher =
+
+      final EnginePlatformDispatcher dispatcher =
           EnginePlatformDispatcher();
 
-      expect(engineDispatcher.accessibilityFeatures.highContrast, isTrue);
+      expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
       mockHighContrast.isEnabled = false;
       mockHighContrast.invokeListeners(mockHighContrast.isEnabled);
-      expect(engineDispatcher.accessibilityFeatures.highContrast, isFalse);
+      expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
 
-      engineDispatcher.dispose();
+      dispatcher.dispose();
     });
 
     test('AppLifecycleState transitions through all states', () {
@@ -295,7 +306,6 @@ void testMain() {
     });
 
     test('disposes all its views', () {
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
       final EngineFlutterView view1 =
           EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final EngineFlutterView view2 =
@@ -319,7 +329,6 @@ void testMain() {
     });
 
     test('connects view disposal to metrics changed event', () {
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
       final EngineFlutterView view1 =
           EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final EngineFlutterView view2 =
@@ -347,7 +356,6 @@ void testMain() {
     });
 
     test('disconnects view disposal event on dispose', () {
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
       final EngineFlutterView view1 =
           EngineFlutterView(dispatcher, createDomHTMLDivElement());
 
@@ -367,7 +375,6 @@ void testMain() {
     });
 
     test('invokeOnViewFocusChange calls onViewFocusChange', () {
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
       final List<ui.ViewFocusEvent> dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
       const ui.ViewFocusEvent viewFocusEvent = ui.ViewFocusEvent(
         viewId: 0,
@@ -383,7 +390,6 @@ void testMain() {
     });
 
     test('invokeOnViewFocusChange preserves the zone', () {
-      final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
       final Zone zone1 = Zone.current.fork();
       final Zone zone2 = Zone.current.fork();
       const ui.ViewFocusEvent viewFocusEvent = ui.ViewFocusEvent(
@@ -401,6 +407,15 @@ void testMain() {
       zone2.runGuarded(() {
         dispatcher.invokeOnViewFocusChange(viewFocusEvent);
       });
+    });
+
+    test('appends an accesibility placeholder', () {
+      expect(dispatcher.accessibilityPlaceholder.isConnected, isTrue);
+    });
+
+    test('removes the accesibility placeholder', () {
+      dispatcher.dispose();
+      expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
     });
   });
 }

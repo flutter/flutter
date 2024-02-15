@@ -39,11 +39,10 @@ void doTests() {
       expect(rootChildren[3].tagName, equalsIgnoringCase('style'));
 
       final List<DomElement> shadowChildren = domManager.renderingHost.childNodes.cast<DomElement>().toList();
-      expect(shadowChildren.length, 4);
-      expect(shadowChildren[0].tagName, equalsIgnoringCase('flt-semantics-placeholder'));
-      expect(shadowChildren[1], domManager.sceneHost);
-      expect(shadowChildren[2], domManager.announcementsHost);
-      expect(shadowChildren[3].tagName, equalsIgnoringCase('style'));
+      expect(shadowChildren.length, 3);
+      expect(shadowChildren[0], domManager.sceneHost);
+      expect(shadowChildren[1], domManager.announcementsHost);
+      expect(shadowChildren[2].tagName, equalsIgnoringCase('style'));
     });
 
     test('hide placeholder text for textfield', () {
