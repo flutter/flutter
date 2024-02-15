@@ -249,7 +249,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get rallyLoginLoginToRally => 'Login to Rally';
 
   @override
-  String get rallyLoginNoAccount => 'Don\'t have an account?';
+  String get rallyLoginNoAccount => "Don't have an account?";
 
   @override
   String get rallyLoginSignUp => 'SIGN UP';
@@ -271,17 +271,17 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String rallyAlertsMessageHeadsUpShopping(Object percent) {
-    return 'Heads up, you\'ve used up $percent of your Shopping budget for this month.';
+    return "Heads up, you've used up $percent of your Shopping budget for this month.";
   }
 
   @override
   String rallyAlertsMessageSpentOnRestaurants(Object amount) {
-    return 'You\'ve spent $amount on Restaurants this week.';
+    return "You've spent $amount on Restaurants this week.";
   }
 
   @override
   String rallyAlertsMessageATMFees(Object amount) {
-    return 'You\'ve spent $amount in ATM fees this month';
+    return "You've spent $amount in ATM fees this month";
   }
 
   @override
@@ -291,7 +291,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String rallyAlertsMessageUnassignedTransactions(num count) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: 'Increase your potential tax deduction! Assign categories to $count unassigned transactions.',
@@ -331,7 +331,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get homeCategoryReference => 'STYLES & OTHER';
 
   @override
-  String get demoInvalidURL => 'Couldn\'t display URL:';
+  String get demoInvalidURL => "Couldn't display URL:";
 
   @override
   String get demoOptionsTooltip => 'Options';
@@ -438,7 +438,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoAppBarSubtitle => 'Displays information and actions relating to the current screen';
 
   @override
-  String get demoAppBarDescription => 'The App bar provides content and actions related to the current screen. It\'s used for branding, screen titles, navigation, and actions';
+  String get demoAppBarDescription => "The App bar provides content and actions related to the current screen. It's used for branding, screen titles, navigation, and actions";
 
   @override
   String get demoBottomAppBarTitle => 'Bottom app bar';
@@ -573,7 +573,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoDataTableSubtitle => 'Rows and columns of information';
 
   @override
-  String get demoDataTableDescription => 'Data tables display information in a grid-like format of rows and columns. They organize information in a way that\'s easy to scan, so that users can look for patterns and insights.';
+  String get demoDataTableDescription => "Data tables display information in a grid-like format of rows and columns. They organize information in a way that's easy to scan, so that users can look for patterns and insights.";
 
   @override
   String get dataTableHeader => 'Nutrition';
@@ -1290,7 +1290,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoColorsSubtitle => 'All of the predefined colors';
 
   @override
-  String get demoColorsDescription => 'Color and color swatch constants which represent Material Design\'s color palette.';
+  String get demoColorsDescription => "Color and color swatch constants which represent Material Design's color palette.";
 
   @override
   String get demoTypographyTitle => 'Typography';
@@ -1436,7 +1436,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoSnackbarsSubtitle => 'Snackbars show messages at the bottom of the screen';
 
   @override
-  String get demoSnackbarsDescription => 'Snackbars inform users of a process that an app has performed or will perform. They appear temporarily, towards the bottom of the screen. They shouldn\'t interrupt the user experience, and they don\'t require user input to disappear.';
+  String get demoSnackbarsDescription => "Snackbars inform users of a process that an app has performed or will perform. They appear temporarily, towards the bottom of the screen. They shouldn't interrupt the user experience, and they don't require user input to disappear.";
 
   @override
   String get demoSnackbarsButtonLabel => 'SHOW A SNACKBAR';
@@ -1460,7 +1460,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoSelectionControlsCheckboxTitle => 'Checkbox';
 
   @override
-  String get demoSelectionControlsCheckboxDescription => 'Checkboxes allow the user to select multiple options from a set. A normal checkbox\'s value is true or false and a tristate checkbox\'s value can also be null.';
+  String get demoSelectionControlsCheckboxDescription => "Checkboxes allow the user to select multiple options from a set. A normal checkbox's value is true or false and a tristate checkbox's value can also be null.";
 
   @override
   String get demoSelectionControlsRadioTitle => 'Radio';
@@ -1472,7 +1472,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoSelectionControlsSwitchTitle => 'Switch';
 
   @override
-  String get demoSelectionControlsSwitchDescription => 'On/off switches toggle the state of a single settings option. The option that the switch controls, as well as the state it\'s in, should be made clear from the corresponding inline label.';
+  String get demoSelectionControlsSwitchDescription => "On/off switches toggle the state of a single settings option. The option that the switch controls, as well as the state it's in, should be made clear from the corresponding inline label.";
 
   @override
   String get demoBottomTextFieldsTitle => 'Text fields';
@@ -1508,7 +1508,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get demoTextFieldEnterPassword => 'Please enter a password.';
 
   @override
-  String get demoTextFieldPasswordsDoNotMatch => 'The passwords don\'t match';
+  String get demoTextFieldPasswordsDoNotMatch => "The passwords don't match";
 
   @override
   String get demoTextFieldWhatDoPeopleCallYou => 'What do people call you?';
@@ -1640,7 +1640,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get dialogDiscardTitle => 'Discard draft?';
 
   @override
-  String get dialogLocationTitle => 'Use Google\'s location service?';
+  String get dialogLocationTitle => "Use Google's location service?";
 
   @override
   String get dialogLocationDescription => 'Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.';
@@ -1697,7 +1697,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
   String get cupertinoAlertAllow => 'Allow';
 
   @override
-  String get cupertinoAlertDontAllow => 'Don\'t Allow';
+  String get cupertinoAlertDontAllow => "Don't Allow";
 
   @override
   String get cupertinoAlertFavoriteDessert => 'Select Favorite Dessert';
@@ -2100,7 +2100,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String craneHours(num hours) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       hours,
       locale: localeName,
       other: '${hours}h',
@@ -2111,7 +2111,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String craneMinutes(num minutes) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
       other: '${minutes}m',
@@ -2145,7 +2145,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String craneFlyStops(num numberOfStops) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       numberOfStops,
       locale: localeName,
       other: '$numberOfStops stops',
@@ -2157,7 +2157,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String craneSleepProperties(num totalProperties) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       totalProperties,
       locale: localeName,
       other: '$totalProperties Available Properties',
@@ -2169,7 +2169,7 @@ class GalleryLocalizationsEn extends GalleryLocalizations {
 
   @override
   String craneEatRestaurants(num totalRestaurants) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       totalRestaurants,
       locale: localeName,
       other: '$totalRestaurants Restaurants',
@@ -2785,7 +2785,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get rallyLoginLoginToRally => 'Log in to Rally';
 
   @override
-  String get rallyLoginNoAccount => 'Don\'t have an account?';
+  String get rallyLoginNoAccount => "Don't have an account?";
 
   @override
   String get rallyLoginSignUp => 'SIGN UP';
@@ -2807,17 +2807,17 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String rallyAlertsMessageHeadsUpShopping(Object percent) {
-    return 'Heads up: you\'ve used up $percent of your shopping budget for this month.';
+    return "Heads up: you've used up $percent of your shopping budget for this month.";
   }
 
   @override
   String rallyAlertsMessageSpentOnRestaurants(Object amount) {
-    return 'You\'ve spent $amount on restaurants this week.';
+    return "You've spent $amount on restaurants this week.";
   }
 
   @override
   String rallyAlertsMessageATMFees(Object amount) {
-    return 'You\'ve spent $amount in ATM fees this month';
+    return "You've spent $amount in ATM fees this month";
   }
 
   @override
@@ -2827,7 +2827,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String rallyAlertsMessageUnassignedTransactions(num count) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: 'Increase your potential tax deduction! Assign categories to $count unassigned transactions.',
@@ -2867,7 +2867,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get homeCategoryReference => 'STYLES AND OTHER';
 
   @override
-  String get demoInvalidURL => 'Couldn\'t display URL:';
+  String get demoInvalidURL => "Couldn't display URL:";
 
   @override
   String get demoOptionsTooltip => 'Options';
@@ -2974,7 +2974,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoAppBarSubtitle => 'Displays information and actions relating to the current screen';
 
   @override
-  String get demoAppBarDescription => 'The app bar provides content and actions related to the current screen. It\'s used for branding, screen titles, navigation and actions';
+  String get demoAppBarDescription => "The app bar provides content and actions related to the current screen. It's used for branding, screen titles, navigation and actions";
 
   @override
   String get demoBottomAppBarTitle => 'Bottom app bar';
@@ -3109,7 +3109,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoDataTableSubtitle => 'Rows and columns of information';
 
   @override
-  String get demoDataTableDescription => 'Data tables display information in a grid-like format of rows and columns. They organise information in a way that\'s easy to scan, so that users can look for patterns and insights.';
+  String get demoDataTableDescription => "Data tables display information in a grid-like format of rows and columns. They organise information in a way that's easy to scan, so that users can look for patterns and insights.";
 
   @override
   String get dataTableHeader => 'Nutrition';
@@ -3604,7 +3604,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoSharedXAxisDemoInstructions => 'Next and back buttons';
 
   @override
-  String get demoSharedYAxisDemoInstructions => 'Sort by \'Recently played\'';
+  String get demoSharedYAxisDemoInstructions => "Sort by 'Recently played'";
 
   @override
   String get demoSharedZAxisDemoInstructions => 'Settings icon button';
@@ -3826,7 +3826,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoColorsSubtitle => 'All of the predefined colours';
 
   @override
-  String get demoColorsDescription => 'Colour and colour swatch constants which represent Material Design\'s colour palette.';
+  String get demoColorsDescription => "Colour and colour swatch constants which represent Material Design's colour palette.";
 
   @override
   String get demoTypographyTitle => 'Typography';
@@ -3972,7 +3972,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoSnackbarsSubtitle => 'Snackbars show messages at the bottom of the screen';
 
   @override
-  String get demoSnackbarsDescription => 'Snackbars inform users of a process that an app has performed or will perform. They appear temporarily, towards the bottom of the screen. They shouldn\'t interrupt the user experience, and they don\'t require user input to disappear.';
+  String get demoSnackbarsDescription => "Snackbars inform users of a process that an app has performed or will perform. They appear temporarily, towards the bottom of the screen. They shouldn't interrupt the user experience, and they don't require user input to disappear.";
 
   @override
   String get demoSnackbarsButtonLabel => 'SHOW A SNACKBAR';
@@ -3996,7 +3996,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoSelectionControlsCheckboxTitle => 'Tick box';
 
   @override
-  String get demoSelectionControlsCheckboxDescription => 'Tick boxes allow the user to select multiple options from a set. A normal tick box\'s value is true or false and a tristate tick box\'s value can also be null.';
+  String get demoSelectionControlsCheckboxDescription => "Tick boxes allow the user to select multiple options from a set. A normal tick box's value is true or false and a tristate tick box's value can also be null.";
 
   @override
   String get demoSelectionControlsRadioTitle => 'Radio';
@@ -4008,7 +4008,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoSelectionControlsSwitchTitle => 'Switch';
 
   @override
-  String get demoSelectionControlsSwitchDescription => 'On/off switches toggle the state of a single settings option. The option that the switch controls, as well as the state it\'s in, should be made clear from the corresponding inline label.';
+  String get demoSelectionControlsSwitchDescription => "On/off switches toggle the state of a single settings option. The option that the switch controls, as well as the state it's in, should be made clear from the corresponding inline label.";
 
   @override
   String get demoBottomTextFieldsTitle => 'Text fields';
@@ -4044,7 +4044,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get demoTextFieldEnterPassword => 'Please enter a password.';
 
   @override
-  String get demoTextFieldPasswordsDoNotMatch => 'The passwords don\'t match';
+  String get demoTextFieldPasswordsDoNotMatch => "The passwords don't match";
 
   @override
   String get demoTextFieldWhatDoPeopleCallYou => 'What do people call you?';
@@ -4136,7 +4136,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String dialogSelectedOption(Object value) {
-    return 'You selected: \'$value\'';
+    return "You selected: '$value'";
   }
 
   @override
@@ -4176,7 +4176,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get dialogDiscardTitle => 'Discard draft?';
 
   @override
-  String get dialogLocationTitle => 'Use Google\'s location service?';
+  String get dialogLocationTitle => "Use Google's location service?";
 
   @override
   String get dialogLocationDescription => 'Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.';
@@ -4224,7 +4224,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get cupertinoAlertDiscard => 'Discard';
 
   @override
-  String get cupertinoAlertLocationTitle => 'Allow \'Maps\' to access your location while you are using the app?';
+  String get cupertinoAlertLocationTitle => "Allow 'Maps' to access your location while you are using the app?";
 
   @override
   String get cupertinoAlertLocationDescription => 'Your current location will be displayed on the map and used for directions, nearby search results and estimated travel times.';
@@ -4233,7 +4233,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
   String get cupertinoAlertAllow => 'Allow';
 
   @override
-  String get cupertinoAlertDontAllow => 'Don\'t allow';
+  String get cupertinoAlertDontAllow => "Don't allow";
 
   @override
   String get cupertinoAlertFavoriteDessert => 'Select Favourite Dessert';
@@ -4438,7 +4438,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String shrineCartItemCount(num quantity) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       quantity,
       locale: localeName,
       other: '$quantity ITEMS',
@@ -4591,7 +4591,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String shrineScreenReaderCart(num quantity) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       quantity,
       locale: localeName,
       other: 'Shopping basket, $quantity items',
@@ -4638,7 +4638,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String craneHours(num hours) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       hours,
       locale: localeName,
       other: '${hours}h',
@@ -4649,7 +4649,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String craneMinutes(num minutes) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
       other: '${minutes}m',
@@ -4683,7 +4683,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String craneFlyStops(num numberOfStops) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       numberOfStops,
       locale: localeName,
       other: '$numberOfStops stops',
@@ -4695,7 +4695,7 @@ class GalleryLocalizationsEnIs extends GalleryLocalizationsEn {
 
   @override
   String craneSleepProperties(num totalProperties) {
-    String temp0 = intl.Intl.pluralLogic(
+    final String temp0 = intl.Intl.pluralLogic(
       totalProperties,
       locale: localeName,
       other: '$totalProperties available properties',

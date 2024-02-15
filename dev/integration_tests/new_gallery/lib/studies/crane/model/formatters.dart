@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../../gallery_localizations.dart';
 
 // Duration of time (e.g. 16h 12m)
 String formattedDuration(BuildContext context, Duration duration,

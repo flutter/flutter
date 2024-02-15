@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../../../gallery_localizations.dart';
 import '../../../layout/adaptive.dart';
 import '../../../layout/image_placeholder.dart';
 import '../model/app_state_model.dart';

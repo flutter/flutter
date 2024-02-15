@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoScrollbarDemo
 

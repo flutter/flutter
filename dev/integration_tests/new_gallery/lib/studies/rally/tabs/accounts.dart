@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/gallery_localizations.dart';
+import '../../../gallery_localizations.dart';
 import '../charts/pie_chart.dart';
 import '../data.dart';
 import '../finance.dart';

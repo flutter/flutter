@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import '../../layout/adaptive.dart';
 import '../../layout/image_placeholder.dart';
 import 'backlayer.dart';

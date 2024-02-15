@@ -1,6 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 
 // BEGIN sharedZAxisTransitionDemo
 

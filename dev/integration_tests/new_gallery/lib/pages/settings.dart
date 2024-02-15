@@ -6,12 +6,12 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
 import '../data/gallery_options.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import 'about.dart' as about;
 import 'home.dart';

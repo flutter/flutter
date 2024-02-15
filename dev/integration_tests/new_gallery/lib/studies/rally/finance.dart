@@ -7,8 +7,9 @@ import 'dart:math' as math;
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery/gallery_localizations.dart';
+
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import '../../layout/adaptive.dart';
 import '../../layout/text_scale.dart';
 import 'charts/line_chart.dart';

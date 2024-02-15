@@ -6,7 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 import 'category_menu_page.dart';
 import 'page_status.dart';
 

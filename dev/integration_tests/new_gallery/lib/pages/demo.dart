@@ -6,7 +6,6 @@ import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -16,6 +15,7 @@ import '../constants.dart';
 import '../data/demos.dart';
 import '../data/gallery_options.dart';
 import '../feature_discovery/feature_discovery.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import '../themes/gallery_theme_data.dart';
 import '../themes/material_demo_theme_data.dart';

@@ -4,10 +4,10 @@ import 'dart:ui' as ui;
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import '../../layout/adaptive.dart';
 import 'app.dart';
 import 'bottom_drawer.dart';

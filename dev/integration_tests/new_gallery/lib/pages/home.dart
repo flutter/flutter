@@ -7,12 +7,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
 import '../data/demos.dart';
 import '../data/gallery_options.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import '../studies/crane/colors.dart';
 import '../studies/crane/routes.dart' as crane_routes;

@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import '../../layout/image_placeholder.dart';
 import '../../layout/text_scale.dart';
 

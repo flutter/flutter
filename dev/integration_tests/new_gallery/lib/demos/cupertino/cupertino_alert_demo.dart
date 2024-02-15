@@ -4,8 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-import 'package:gallery/gallery_localizations.dart';
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import 'demo_types.dart';
 
 // BEGIN cupertinoAlertDemo

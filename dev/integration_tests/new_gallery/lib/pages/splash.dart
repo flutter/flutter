@@ -6,8 +6,9 @@ import 'dart:math';
 
 import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
+
 import '../constants.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import 'home.dart';
 

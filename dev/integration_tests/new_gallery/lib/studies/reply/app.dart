@@ -1,11 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import '../../layout/letter_spacing.dart';
 import 'adaptive_nav.dart';
 import 'colors.dart';

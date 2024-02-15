@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 
 import '../../../data/gallery_options.dart';
+import '../../../gallery_localizations.dart';
 import 'formatters.dart';
 
 abstract class Destination {

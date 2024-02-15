@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 
 // BEGIN bottomAppBarDemo
 

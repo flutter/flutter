@@ -6,8 +6,6 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
-import 'package:gallery/gallery_localizations_en.dart';
 
 import '../codeviewer/code_displayer.dart';
 import '../deferred_widget.dart';
@@ -32,6 +30,8 @@ import '../demos/reference/two_pane_demo.dart'
     deferred as twopane_demo;
 import '../demos/reference/typography_demo.dart'
     deferred as typography;
+import '../gallery_localizations.dart';
+import '../gallery_localizations_en.dart';
 import 'icons.dart';
 
 const String _docsBaseUrl = 'https://api.flutter.dev/flutter';

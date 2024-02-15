@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/gallery_localizations.dart';
 import '../../data/gallery_options.dart';
+import '../../gallery_localizations.dart';
 import 'material_demo_types.dart';
 
 // BEGIN dialogDemo

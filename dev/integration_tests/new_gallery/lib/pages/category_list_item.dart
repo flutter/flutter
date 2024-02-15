@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
+
 import '../constants.dart';
 import '../data/demos.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import 'demo.dart';
 

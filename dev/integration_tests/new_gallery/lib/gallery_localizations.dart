@@ -59,7 +59,7 @@ import 'gallery_localizations_en.dart';
 /// be consistent with the languages listed in the GalleryLocalizations.supportedLocales
 /// property.
 abstract class GalleryLocalizations {
-  GalleryLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  GalleryLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
 
   final String localeName;
 

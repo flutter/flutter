@@ -5,9 +5,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../../gallery_localizations.dart';
 import '../../layout/adaptive.dart';
 import '../../layout/text_scale.dart';
 import 'colors.dart';

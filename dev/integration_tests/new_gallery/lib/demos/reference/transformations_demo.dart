@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 
 import 'transformations_demo_board.dart';
 import 'transformations_demo_edit_board_point.dart';

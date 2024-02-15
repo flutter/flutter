@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:gallery/gallery_localizations.dart';
+import '../../gallery_localizations.dart';
 import 'formatters.dart';
 
 /// Calculates the sum of the primary amounts of a list of [AccountData].

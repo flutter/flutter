@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../../gallery_localizations.dart';
 import '../../layout/letter_spacing.dart';
 import 'colors.dart';
 import 'expanding_bottom_sheet.dart';

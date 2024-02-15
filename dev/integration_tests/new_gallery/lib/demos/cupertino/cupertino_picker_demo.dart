@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:gallery/gallery_localizations.dart';
 import 'package:intl/intl.dart';
+
+import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoPickersDemo
 

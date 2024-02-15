@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery/gallery_localizations.dart';
+
 import '../constants.dart';
 import '../data/gallery_options.dart';
+import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import 'home.dart';
 import 'settings.dart';
