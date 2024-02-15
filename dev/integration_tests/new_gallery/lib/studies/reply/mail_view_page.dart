@@ -73,7 +73,7 @@ class _MailViewHeader extends StatelessWidget {
               ),
             ),
             IconButton(
-              key: const ValueKey('ReplyExit'),
+              key: const ValueKey<String>('ReplyExit'),
               icon: const Icon(Icons.keyboard_arrow_down),
               onPressed: () {
                 Provider.of<EmailStore>(
@@ -141,7 +141,10 @@ class _PictureGrid extends StatelessWidget {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
         return true;
-      default:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return false;
     }
   }

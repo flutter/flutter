@@ -30,7 +30,6 @@ class BottomSheetDemo extends StatelessWidget {
       case BottomSheetDemoType.persistent:
         return _PersistentBottomSheetDemo();
       case BottomSheetDemoType.modal:
-      default:
         return _ModalBottomSheetDemo();
     }
   }
@@ -42,7 +41,7 @@ class BottomSheetDemo extends StatelessWidget {
     return Navigator(
       // Adding [ValueKey] to make sure that the widget gets rebuilt when
       // changing type.
-      key: ValueKey(type),
+      key: ValueKey<BottomSheetDemoType>(type),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           builder: (BuildContext context) => Scaffold(

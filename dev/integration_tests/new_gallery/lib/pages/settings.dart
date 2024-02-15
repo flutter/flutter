@@ -117,7 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
   LinkedHashMap<Locale, DisplayOption> _getLocaleOptions() {
-    final LinkedHashMap<Locale, DisplayOption> localeOptions = LinkedHashMap.of(<Locale, DisplayOption>{
+    final LinkedHashMap<Locale, DisplayOption> localeOptions = LinkedHashMap<Locale, DisplayOption>.of(<Locale, DisplayOption>{
       systemLocaleOption: DisplayOption(
         GalleryLocalizations.of(context)!.settingsSystemDefault +
             (deviceLocale != null
@@ -136,7 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ).entries.toList()
       ..sort((MapEntry<Locale, DisplayOption> l1, MapEntry<Locale, DisplayOption> l2) => compareAsciiUpperCase(l1.value.title, l2.value.title));
 
-    localeOptions.addAll(LinkedHashMap.fromEntries(displayLocales));
+    localeOptions.addAll(LinkedHashMap<Locale, DisplayOption>.fromEntries(displayLocales));
     return localeOptions;
   }
 
@@ -154,7 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
           context,
           useSentinel: true,
         ),
-        optionsMap: LinkedHashMap.of(<double?, DisplayOption>{
+        optionsMap: LinkedHashMap<double?, DisplayOption>.of(<double?, DisplayOption>{
           systemTextScaleFactorOption: DisplayOption(
             localizations.settingsSystemDefault,
           ),
@@ -181,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<CustomTextDirection?>(
         title: localizations.settingsTextDirection,
         selectedOption: options.customTextDirection,
-        optionsMap: LinkedHashMap.of(<CustomTextDirection?, DisplayOption>{
+        optionsMap: LinkedHashMap<CustomTextDirection?, DisplayOption>.of(<CustomTextDirection?, DisplayOption>{
           CustomTextDirection.localeBased: DisplayOption(
             localizations.settingsTextDirectionLocaleBased,
           ),
@@ -220,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<TargetPlatform?>(
         title: localizations.settingsPlatformMechanics,
         selectedOption: options.platform,
-        optionsMap: LinkedHashMap.of(<TargetPlatform?, DisplayOption>{
+        optionsMap: LinkedHashMap<TargetPlatform?, DisplayOption>.of(<TargetPlatform?, DisplayOption>{
           TargetPlatform.android: DisplayOption('Android'),
           TargetPlatform.iOS: DisplayOption('iOS'),
           TargetPlatform.macOS: DisplayOption('macOS'),
@@ -237,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<ThemeMode?>(
         title: localizations.settingsTheme,
         selectedOption: options.themeMode,
-        optionsMap: LinkedHashMap.of(<ThemeMode?, DisplayOption>{
+        optionsMap: LinkedHashMap<ThemeMode?, DisplayOption>.of(<ThemeMode?, DisplayOption>{
           ThemeMode.system: DisplayOption(
             localizations.settingsSystemDefault,
           ),

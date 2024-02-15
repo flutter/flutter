@@ -98,7 +98,7 @@ class _SplashPageState extends State<SplashPage>
     final double height = constraints.biggest.height -
         (isDisplayDesktop(context) ? homePeekDesktop : homePeekMobile);
     return RelativeRectTween(
-      begin: const RelativeRect.fromLTRB(0, 0, 0, 0),
+      begin: RelativeRect.fill,
       end: RelativeRect.fromLTRB(0, height, 0, 0),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
@@ -222,7 +222,7 @@ class _SplashBackLayer extends StatelessWidget {
         );
       }
       if (isDisplayFoldable(context)) {
-        child = Container(
+        child = ColoredBox(
           color: Theme.of(context).colorScheme.background,
           child: Stack(
             children: <Widget>[

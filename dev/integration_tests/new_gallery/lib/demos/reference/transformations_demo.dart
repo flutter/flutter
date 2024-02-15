@@ -110,7 +110,7 @@ class _TransformationsDemoState extends State<TransformationsDemo>
         title:
             Text(GalleryLocalizations.of(context)!.demo2dTransformationsTitle),
       ),
-      body: Container(
+      body: ColoredBox(
         color: backgroundColor,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {

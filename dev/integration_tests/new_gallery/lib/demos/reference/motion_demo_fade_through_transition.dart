@@ -99,7 +99,7 @@ class _ExampleCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Expanded(
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.black26,
                     child: Padding(
                       padding: const EdgeInsets.all(30),
@@ -146,7 +146,7 @@ class _AlbumsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ...List.generate(
+        ...List<Widget>.generate(
           3,
           (int index) => Expanded(
             child: Row(

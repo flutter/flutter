@@ -188,7 +188,7 @@ class _DesktopNavState extends State<_DesktopNav>
                                   for (final _Destination destination in widget.destinations)
                                     NavigationRailDestination(
                                       icon: Material(
-                                        key: ValueKey(
+                                        key: ValueKey<String>(
                                           'Reply-${destination.textLabel}',
                                         ),
                                         color: Colors.transparent,
@@ -271,7 +271,7 @@ class _NavigationRailHeader extends StatelessWidget {
                   children: <Widget>[
                     const SizedBox(width: 6),
                     InkWell(
-                      key: const ValueKey('ReplyLogo'),
+                      key: const ValueKey<String>('ReplyLogo'),
                       borderRadius: const BorderRadius.all(Radius.circular(16)),
                       onTap: () {
                         extended.value = !extended.value;
@@ -491,20 +491,20 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
 
     _drawerCurve = CurvedAnimation(
       parent: _drawerController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
 
     _dropArrowCurve = CurvedAnimation(
       parent: _dropArrowController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
 
     _bottomAppBarCurve = CurvedAnimation(
       parent: _bottomAppBarController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
   }
 
@@ -524,8 +524,8 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
 
   void _toggleBottomDrawerVisibility() {
     if (_drawerController.value < 0.4) {
-      _drawerController.animateTo(0.4, curve: standardEasing);
-      _dropArrowController.animateTo(0.35, curve: standardEasing);
+      _drawerController.animateTo(0.4, curve: Easing.legacy);
+      _dropArrowController.animateTo(0.35, curve: Easing.legacy);
       return;
     }
 
@@ -596,7 +596,7 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
 
     final Animation<RelativeRect> drawerAnimation = RelativeRectTween(
       begin: RelativeRect.fromLTRB(0.0, drawerTop, 0.0, 0.0),
-      end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+      end: RelativeRect.fill,
     ).animate(_drawerCurve);
 
     return Stack(
@@ -716,7 +716,7 @@ class _AnimatedBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> fadeOut = Tween<double>(begin: 1, end: -1).animate(
-      drawerController.drive(CurveTween(curve: standardEasing)),
+      drawerController.drive(CurveTween(curve: Easing.legacy)),
     );
 
     return Selector<EmailStore, bool>(
@@ -739,14 +739,14 @@ class _AnimatedBottomAppBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     InkWell(
-                      key: const ValueKey('navigation_button'),
+                      key: const ValueKey<String>('navigation_button'),
                       borderRadius: const BorderRadius.all(Radius.circular(16)),
                       onTap: toggleBottomDrawerVisibility,
                       child: Row(
                         children: <Widget>[
                           const SizedBox(width: 16),
                           RotationTransition(
-                            turns: Tween(
+                            turns: Tween<double>(
                               begin: 0.0,
                               end: 1.0,
                             ).animate(dropArrowCurve),
@@ -781,7 +781,7 @@ class _AnimatedBottomAppBar extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.transparent,
                         child: _BottomAppBarActionItems(
                           drawerVisible: bottomDrawerVisible,
@@ -834,7 +834,7 @@ class _BottomAppBarActionItems extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         IconButton(
-                          key: const ValueKey('star_email_button'),
+                          key: const ValueKey<String>('star_email_button'),
                           icon: ImageIcon(
                             const AssetImage(
                               '$_iconAssetLocation/twotone_star.png',
@@ -884,7 +884,7 @@ class _BottomAppBarActionItems extends StatelessWidget {
                   : Align(
                       alignment: Alignment.centerRight,
                       child: IconButton(
-                        key: const ValueKey('ReplySearch'),
+                        key: const ValueKey<String>('ReplySearch'),
                         icon: const Icon(Icons.search),
                         color: ReplyColors.white50,
                         onPressed: () {
@@ -925,11 +925,11 @@ class _BottomDrawerDestinations extends StatelessWidget {
       final _Destination destination = destinations[index];
       destinationButtons.add(
         InkWell(
-          key: ValueKey('Reply-${destination.textLabel}'),
+          key: ValueKey<String>('Reply-${destination.textLabel}'),
           onTap: () {
             drawerController.reverse();
             dropArrowController.forward();
-            Future.delayed(
+            Future<void>.delayed(
               Duration(
                 milliseconds: (drawerController.value == 1 ? 300 : 120) *
                     GalleryOptions.of(context).timeDilation.toInt(),
@@ -1111,7 +1111,7 @@ class _ReplyFabState extends State<_ReplyFab>
     // a ComposePage onto our navigator. We return true at the end
     // so nothing is popped.
     desktopMailNavKey.currentState!.popUntil(
-      (Route route) {
+      (Route<void> route) {
         final String? currentRoute = route.settings.name;
         if (currentRoute != ReplyApp.composeRoute && !onSearchPage) {
           desktopMailNavKey.currentState!
@@ -1156,14 +1156,14 @@ class _ReplyFabState extends State<_ReplyFab>
             child: animation.value == 0
                 ? FloatingActionButton(
                     tooltip: tooltip,
-                    key: const ValueKey('ReplyFab'),
+                    key: const ValueKey<String>('ReplyFab'),
                     onPressed: onPressed,
                     child: fabSwitcher,
                   )
                 : Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: FloatingActionButton.extended(
-                      key: const ValueKey('ReplyFab'),
+                      key: const ValueKey<String>('ReplyFab'),
                       label: Row(
                         children: <Widget>[
                           fabSwitcher,
@@ -1191,18 +1191,18 @@ class _ReplyFabState extends State<_ReplyFab>
         } else {
           // TODO(x): State restoration of compose page on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
           return OpenContainer(
-            openBuilder: (BuildContext context, closedContainer) {
+            openBuilder: (BuildContext context, void Function() closedContainer) {
               return const ComposePage();
             },
             openColor: theme.cardColor,
             closedShape: circleFabBorder,
             closedColor: theme.colorScheme.secondary,
             closedElevation: 6,
-            closedBuilder: (BuildContext context, openContainer) {
+            closedBuilder: (BuildContext context, void Function() openContainer) {
               return Tooltip(
                 message: tooltip,
                 child: InkWell(
-                  key: const ValueKey('ReplyFab'),
+                  key: const ValueKey<String>('ReplyFab'),
                   customBorder: circleFabBorder,
                   onTap: openContainer,
                   child: SizedBox(

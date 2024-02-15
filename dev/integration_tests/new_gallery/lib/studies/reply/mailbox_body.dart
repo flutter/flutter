@@ -111,7 +111,7 @@ class MailboxBody extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       IconButton(
-                        key: const ValueKey('ReplySearch'),
+                        key: const ValueKey<String>('ReplySearch'),
                         icon: const Icon(Icons.search),
                         onPressed: () {
                           Provider.of<EmailStore>(

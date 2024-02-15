@@ -35,6 +35,7 @@ set deviceLocale(Locale? locale) {
   _deviceLocale ??= locale;
 }
 
+@immutable
 class GalleryOptions {
   const GalleryOptions({
     required this.themeMode,
@@ -78,13 +79,15 @@ class GalleryOptions {
     switch (customTextDirection) {
       case CustomTextDirection.localeBased:
         final String? language = locale?.languageCode.toLowerCase();
-        if (language == null) return null;
+        if (language == null) {
+          return null;
+        }
         return rtlLanguages.contains(language)
             ? TextDirection.rtl
             : TextDirection.ltr;
       case CustomTextDirection.rtl:
         return TextDirection.rtl;
-      default:
+      case CustomTextDirection.ltr:
         return TextDirection.ltr;
     }
   }
@@ -99,7 +102,7 @@ class GalleryOptions {
         brightness = Brightness.light;
       case ThemeMode.dark:
         brightness = Brightness.dark;
-      default:
+      case ThemeMode.system:
         brightness =
             WidgetsBinding.instance.platformDispatcher.platformBrightness;
     }

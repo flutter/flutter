@@ -85,7 +85,7 @@ void handleOverscrollAnimation() {
 
 /// Scroll to the top of the app, given the current demo. Works with both mobile
 /// and desktop layouts.
-Future scrollToTop(SerializableFinder demoItem, FlutterDriver driver) async {
+Future<void> scrollToTop(SerializableFinder demoItem, FlutterDriver driver) async {
   stdout.writeln('scrolling to top');
 
   // Scroll to the Categories header.
@@ -136,7 +136,9 @@ Future<void> runDemos(
   SerializableFinder? demoItem;
 
   for (final String demo in demos) {
-    if (_skippedDemos.contains(demo)) continue;
+    if (_skippedDemos.contains(demo)) {
+      continue;
+    }
 
     stdout.writeln('> $demo');
 
@@ -148,7 +150,9 @@ Future<void> runDemos(
 
       // We may want to return to the previous category later.
       // Reset its scroll (matters for desktop layout).
-      if (demoItem != null) await scrollToTop(demoItem, driver);
+      if (demoItem != null) {
+        await scrollToTop(demoItem, driver);
+      }
 
       // Scroll to the category list.
       if (demoCategory != 'study') {
@@ -199,7 +203,9 @@ Future<void> runDemos(
 
       sleep(const Duration(milliseconds: 500));
 
-      if (additionalActions != null) await additionalActions();
+      if (additionalActions != null) {
+        await additionalActions();
+      }
 
       if (_unsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<void>(() async {
@@ -212,7 +218,9 @@ Future<void> runDemos(
     stdout.writeln('< Success');
   }
 
-  if (scrollToTopWhenDone) await scrollToTop(demoItem!, driver);
+  if (scrollToTopWhenDone) {
+    await scrollToTop(demoItem!, driver);
+  }
 }
 
 void main([List<String> args = const <String>[]]) {
@@ -229,7 +237,9 @@ void main([List<String> args = const <String>[]]) {
       _allDemos = List<String>.from(json.decode(
         await driver.requestData('demoDescriptions'),
       ) as List<dynamic>);
-      if (_allDemos.isEmpty) throw 'no demo names found';
+      if (_allDemos.isEmpty) {
+        throw 'no demo names found';
+      }
 
       // See _handleMessages() in transitions_perf.dart.
       isTestingCraneOnly =
@@ -255,7 +265,9 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('only Crane', () async {
-      if (!isTestingCraneOnly) return;
+      if (!isTestingCraneOnly) {
+        return;
+      }
 
       // Collect timeline data for just the Crane study.
       final Timeline timeline = await driver.traceAction(
@@ -263,7 +275,7 @@ void main([List<String> args = const <String>[]]) {
           await runDemos(
             <String>['crane@study'],
             driver,
-            additionalActions: () async => await driver.scroll(
+            additionalActions: () async => driver.scroll(
               craneFlyList,
               0,
               -1000,
@@ -283,7 +295,9 @@ void main([List<String> args = const <String>[]]) {
     }, timeout: Timeout.none);
 
     test('only Reply', () async {
-      if (!isTestingReplyOnly) return;
+      if (!isTestingReplyOnly) {
+        return;
+      }
 
       // Collect timeline data for just the Crane study.
       final Timeline timeline = await driver.traceAction(
@@ -327,7 +341,9 @@ void main([List<String> args = const <String>[]]) {
     }, timeout: Timeout.none);
 
     test('all demos', () async {
-      if (isTestingCraneOnly || isTestingReplyOnly) return;
+      if (isTestingCraneOnly || isTestingReplyOnly) {
+        return;
+      }
 
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(

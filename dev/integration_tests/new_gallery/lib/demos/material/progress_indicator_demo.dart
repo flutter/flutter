@@ -81,8 +81,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
             LinearProgressIndicator(value: _animation.value),
           ],
         );
-      default:
-        return Container();
     }
   }
 

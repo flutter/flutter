@@ -227,7 +227,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
       leading: Padding(
         padding: EdgeInsetsDirectional.only(start: appBarPadding),
         child: IconButton(
-          key: const ValueKey('Back'),
+          key: const ValueKey<String>('Back'),
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () {
@@ -343,9 +343,9 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
             ),
           ),
         );
-      default:
+      case _DemoState.normal:
+      case _DemoState.fullscreen:
         section = Container();
-        break;
     }
 
     Widget body;
@@ -478,13 +478,13 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
               );
             }
 
-            return Container(
+            return ColoredBox(
               color: colorScheme.background,
               child: contents,
             );
           });
     } else {
-      page = Container(
+      page = ColoredBox(
         color: colorScheme.background,
         child: ApplyTextOptions(
           child: Scaffold(

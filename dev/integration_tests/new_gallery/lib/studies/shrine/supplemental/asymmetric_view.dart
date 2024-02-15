@@ -71,7 +71,7 @@ class MobileAsymmetricView extends StatelessWidget {
       return List<SizedBox>.generate(_listItemCount(products.length), (int index) {
         double width = _cardToScreenWidthRatio * MediaQuery.of(context).size.width;
         Widget column;
-        if (index % 2 == 0) {
+        if (index.isEven) {
           /// Even cases
           final int bottom = _evenCasesIndex(index);
           column = TwoProductCardColumn(
@@ -255,9 +255,9 @@ class DesktopColumns extends StatelessWidget {
     final List<DesktopProductCardColumn> productCardColumns = List<DesktopProductCardColumn>.generate(
       columnCount,
       (int column) {
-        final bool alignToEnd = (column % 2 == 1) || (column == columnCount - 1);
-        final bool startLarge = (column % 2 == 1);
-        final bool lowerStart = (column % 2 == 1);
+        final bool alignToEnd = (column.isOdd) || (column == columnCount - 1);
+        final bool startLarge = column.isOdd;
+        final bool lowerStart = column.isOdd;
         return DesktopProductCardColumn(
           alignToEnd: alignToEnd,
           startLarge: startLarge,
@@ -280,7 +280,7 @@ class DesktopColumns extends StatelessWidget {
             ...List<Widget>.generate(
               2 * columnCount - 1,
               (int generalizedColumnIndex) {
-                if (generalizedColumnIndex % 2 == 0) {
+                if (generalizedColumnIndex.isEven) {
                   return productCardColumns[generalizedColumnIndex ~/ 2];
                 } else {
                   return gap;

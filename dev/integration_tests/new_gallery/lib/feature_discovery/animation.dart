@@ -50,7 +50,7 @@ class Animations {
           parent: dismissController,
           curve: const Interval(0.2, 1.0, curve: Curves.ease),
         ));
-      default:
+      case FeatureDiscoveryStatus.ripple:
         return const AlwaysStoppedAnimation<double>(backgroundMaxOpacity);
     }
   }
@@ -82,7 +82,7 @@ class Animations {
           parent: dismissController,
           curve: Curves.ease,
         ));
-      default:
+      case FeatureDiscoveryStatus.ripple:
         return AlwaysStoppedAnimation<double>(backgroundRadiusMax);
     }
   }
@@ -110,7 +110,7 @@ class Animations {
           parent: dismissController,
           curve: Curves.ease,
         ));
-      default:
+      case FeatureDiscoveryStatus.ripple:
         return AlwaysStoppedAnimation<Offset>(end);
     }
   }
@@ -134,7 +134,7 @@ class Animations {
           parent: dismissController,
           curve: const Interval(0, 0.4, curve: Curves.ease),
         ));
-      default:
+      case FeatureDiscoveryStatus.ripple:
         return const AlwaysStoppedAnimation<double>(1.0);
     }
   }
@@ -147,7 +147,10 @@ class Animations {
           parent: rippleController,
           curve: const Interval(0.3, 0.8, curve: Curves.ease),
         ));
-      default:
+      case FeatureDiscoveryStatus.closed:
+      case FeatureDiscoveryStatus.open:
+      case FeatureDiscoveryStatus.tap:
+      case FeatureDiscoveryStatus.dismiss:
         return const AlwaysStoppedAnimation<double>(0);
     }
   }
@@ -163,7 +166,10 @@ class Animations {
           ));
         }
         return const AlwaysStoppedAnimation<double>(tapTargetMaxRadius);
-      default:
+      case FeatureDiscoveryStatus.closed:
+      case FeatureDiscoveryStatus.open:
+      case FeatureDiscoveryStatus.tap:
+      case FeatureDiscoveryStatus.dismiss:
         return const AlwaysStoppedAnimation<double>(0);
     }
   }
@@ -187,7 +193,7 @@ class Animations {
           parent: dismissController,
           curve: const Interval(0.2, 0.8, curve: Curves.ease),
         ));
-      default:
+      case FeatureDiscoveryStatus.ripple:
         return const AlwaysStoppedAnimation<double>(1.0);
     }
   }
@@ -231,8 +237,6 @@ class Animations {
           parent: dismissController,
           curve: Curves.ease,
         ));
-      default:
-        return const AlwaysStoppedAnimation<double>(tapTargetMaxRadius);
     }
   }
 }

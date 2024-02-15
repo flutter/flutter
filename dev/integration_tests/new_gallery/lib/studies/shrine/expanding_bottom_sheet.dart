@@ -477,13 +477,13 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
     _cartOpacityAnimation = _getCartOpacityAnimation();
     _gapAnimation = isDesktop
         ? _getDesktopGapAnimation(116)
-        : const AlwaysStoppedAnimation(0);
+        : const AlwaysStoppedAnimation<double>(0);
 
     final Widget child = SizedBox(
       width: _widthAnimation.value,
       height: _heightAnimation.value,
       child: Material(
-        animationDuration: const Duration(),
+        animationDuration: Duration.zero,
         shape: BeveledRectangleBorder(
           borderRadius: BorderRadiusDirectional.only(
             topStart: Radius.circular(_topStartShapeAnimation.value),
@@ -534,7 +534,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
       _slideAnimation = _getEmphasizedEasingAnimation(
         begin: Offset(1.0 * textDirectionScalar, 0.0),
         peak: Offset(_peakVelocityProgress * textDirectionScalar, 0),
-        end: const Offset(0, 0),
+        end: Offset.zero,
         isForward: widget.hideController.status == AnimationStatus.forward,
         parent: widget.hideController,
       );

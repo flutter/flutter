@@ -222,7 +222,7 @@ List<List<Product>> balancedLayout({
     data: productHeights,
     biases: List<double>.generate(
       columnCount,
-      (int column) => (column % 2 == 0 ? 0 : columnTopSpace),
+      (int column) => (column.isEven ? 0 : columnTopSpace),
     ),
   );
 

@@ -47,9 +47,15 @@ class _FrontLayerState extends State<_FrontLayer> {
     // InheritedWidget (for localization). However, we don't need to get
     // destinations again when, say, resizing the window.
     if (destinations == null) {
-      if (widget.index == 0) destinations = getFlyDestinations(context);
-      if (widget.index == 1) destinations = getSleepDestinations(context);
-      if (widget.index == 2) destinations = getEatDestinations(context);
+      if (widget.index == 0) {
+        destinations = getFlyDestinations(context);
+      }
+      if (widget.index == 1) {
+        destinations = getSleepDestinations(context);
+      }
+      if (widget.index == 2) {
+        destinations = getEatDestinations(context);
+      }
     }
   }
 
@@ -104,7 +110,7 @@ class _FrontLayerState extends State<_FrontLayer> {
                 _header(),
                 Expanded(
                   child: MasonryGridView.count(
-                    key: ValueKey('CraneListView-${widget.index}'),
+                    key: ValueKey<String>('CraneListView-${widget.index}'),
                     restorationId: widget.restorationId,
                     crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 16.0,
@@ -183,10 +189,10 @@ class _BackdropState extends State<Backdrop>
     final Animation<double> tabControllerAnimation = _tabController.animation!;
 
     _flyLayerHorizontalOffset = tabControllerAnimation.drive(
-        Tween<Offset>(begin: const Offset(0, 0), end: const Offset(-0.05, 0)));
+        Tween<Offset>(begin: Offset.zero, end: const Offset(-0.05, 0)));
 
     _sleepLayerHorizontalOffset = tabControllerAnimation.drive(
-        Tween<Offset>(begin: const Offset(0.05, 0), end: const Offset(0, 0)));
+        Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero));
 
     _eatLayerHorizontalOffset = tabControllerAnimation.drive(Tween<Offset>(
         begin: const Offset(0.10, 0), end: const Offset(0.05, 0)));
@@ -304,7 +310,7 @@ class CraneAppBar extends StatefulWidget {
     this.tabHandler,
     required this.tabController,
   });
-  final Function(int)? tabHandler;
+  final void Function(int)? tabHandler;
   final TabController tabController;
 
   @override

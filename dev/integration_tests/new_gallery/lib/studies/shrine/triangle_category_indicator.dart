@@ -30,7 +30,7 @@ class TriangleCategoryIndicator extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Path myPath = Path()
       ..addPolygon(
-        List.from(_vertices.map<Offset>((Offset vertex) {
+        List<Offset>.from(_vertices.map<Offset>((Offset vertex) {
           return Offset(size.width, size.height) / 2 +
               Offset(vertex.dx * triangleWidth / 34,
                   vertex.dy * triangleHeight / 28);

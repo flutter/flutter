@@ -61,7 +61,7 @@ class _OpenContainerTransformDemoState
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, setModalState) {
+          builder: (BuildContext context, void Function(void Function()) setModalState) {
             return Container(
               height: 125,
               padding: const EdgeInsets.all(15),
@@ -122,7 +122,7 @@ class _OpenContainerTransformDemoState
     return Navigator(
       // Adding [ValueKey] to make sure that the widget gets rebuilt when
       // changing type.
-      key: ValueKey(_transitionType),
+      key: ValueKey<ContainerTransitionType>(_transitionType),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
           builder: (BuildContext context) => Scaffold(
@@ -159,14 +159,14 @@ class _OpenContainerTransformDemoState
               children: <Widget>[
                 _OpenContainerWrapper(
                   transitionType: _transitionType,
-                  closedBuilder: (BuildContext context, openContainer) {
+                  closedBuilder: (BuildContext context, void Function() openContainer) {
                     return _DetailsCard(openContainer: openContainer);
                   },
                 ),
                 const SizedBox(height: 16),
                 _OpenContainerWrapper(
                   transitionType: _transitionType,
-                  closedBuilder: (BuildContext context, openContainer) {
+                  closedBuilder: (BuildContext context, void Function() openContainer) {
                     return _DetailsListTile(openContainer: openContainer);
                   },
                 ),
@@ -178,7 +178,7 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, openContainer) {
+                        closedBuilder: (BuildContext context, void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle:
@@ -193,7 +193,7 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, openContainer) {
+                        closedBuilder: (BuildContext context, void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle:
@@ -212,7 +212,7 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, openContainer) {
+                        closedBuilder: (BuildContext context, void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -227,7 +227,7 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, openContainer) {
+                        closedBuilder: (BuildContext context, void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -242,7 +242,7 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, openContainer) {
+                        closedBuilder: (BuildContext context, void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -256,15 +256,15 @@ class _OpenContainerTransformDemoState
                 const SizedBox(
                   height: 16,
                 ),
-                ...List.generate(10, (int index) {
+                ...List<OpenContainer<bool>>.generate(10, (int index) {
                   return OpenContainer<bool>(
                     transitionType: _transitionType,
-                    openBuilder: (BuildContext context, openContainer) =>
+                    openBuilder: (BuildContext context, void Function() openContainer) =>
                         const _DetailsPage(),
                     tappable: false,
                     closedShape: const RoundedRectangleBorder(),
                     closedElevation: 0,
-                    closedBuilder: (BuildContext context, openContainer) {
+                    closedBuilder: (BuildContext context, void Function() openContainer) {
                       return ListTile(
                         leading: Image.asset(
                           'placeholders/avatar_logo.png',
@@ -286,7 +286,7 @@ class _OpenContainerTransformDemoState
             ),
             floatingActionButton: OpenContainer(
               transitionType: _transitionType,
-              openBuilder: (BuildContext context, openContainer) => const _DetailsPage(),
+              openBuilder: (BuildContext context, void Function() openContainer) => const _DetailsPage(),
               closedElevation: 6,
               closedShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
@@ -294,7 +294,7 @@ class _OpenContainerTransformDemoState
                 ),
               ),
               closedColor: colorScheme.secondary,
-              closedBuilder: (BuildContext context, openContainer) {
+              closedBuilder: (BuildContext context, void Function() openContainer) {
                 return SizedBox(
                   height: _fabDimension,
                   width: _fabDimension,
@@ -327,7 +327,7 @@ class _OpenContainerWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return OpenContainer<bool>(
       transitionType: transitionType,
-      openBuilder: (BuildContext context, openContainer) => const _DetailsPage(),
+      openBuilder: (BuildContext context, void Function() openContainer) => const _DetailsPage(),
       tappable: false,
       closedBuilder: closedBuilder,
     );
@@ -350,7 +350,7 @@ class _DetailsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(
-            child: Container(
+            child: ColoredBox(
               color: Colors.black38,
               child: Center(
                 child: Image.asset(

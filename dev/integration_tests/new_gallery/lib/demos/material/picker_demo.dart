@@ -171,8 +171,6 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
         return localizations.demoTimePickerTitle;
       case PickerDemoType.range:
         return localizations.demoDateRangePickerTitle;
-      default:
-        return '';
     }
   }
 

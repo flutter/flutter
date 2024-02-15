@@ -16,7 +16,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
     );
   }
 
-  Route _createHomeRoute() {
+  Route<void> _createHomeRoute() {
     return PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
@@ -60,7 +60,7 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
     );
   }
 
-  Route _createSettingsRoute() {
+  Route<void> _createSettingsRoute() {
     return PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
           const _SettingsPage(),

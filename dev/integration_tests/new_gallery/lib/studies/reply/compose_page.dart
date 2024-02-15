@@ -103,7 +103,7 @@ class _SubjectRowState extends State<_SubjectRow> {
       child: Row(
         children: <Widget>[
           IconButton(
-            key: const ValueKey('ReplyExit'),
+            key: const ValueKey<String>('ReplyExit'),
             onPressed: () => Navigator.of(context).pop(),
             icon: Icon(
               Icons.close,

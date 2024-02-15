@@ -134,7 +134,7 @@ class RallyLineChartPainter extends CustomPainter {
       final int numItemsPerGroup = amounts.length ~/ numGroups;
 
       // For each group we calculate the median value.
-      final List<double> medians = List.generate(
+      final List<double> medians = List<double>.generate(
         numGroups,
         (int i) {
           final int middleIndex = i * numItemsPerGroup + numItemsPerGroup ~/ 2;
@@ -148,7 +148,7 @@ class RallyLineChartPainter extends CustomPainter {
 
       // Return a list of [CustomPainterSemantics] with the length of
       // [numGroups], all have the same width with the median amount as label.
-      return List.generate(numGroups, (int i) {
+      return List<CustomPainterSemantics>.generate(numGroups, (int i) {
         return CustomPainterSemantics(
           rect: Offset((i / numGroups) * size.width, 0) &
               Size(size.width / numGroups, size.height),

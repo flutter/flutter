@@ -27,7 +27,7 @@ class ToggleSetting extends StatelessWidget {
   });
   final String text;
   final bool value;
-  final Function(bool) onChanged;
+  final void Function(bool) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class SettingsListItem<T> extends StatefulWidget {
   final String title;
   final T selectedOption;
   final ValueChanged<T> onOptionChanged;
-  final Function onTapSetting;
+  final void Function() onTapSetting;
   final bool isExpanded;
 
   @override
@@ -162,7 +162,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
     if (widget.isExpanded) {
       _controller.forward();
     } else {
-      _controller.reverse().then<void>((value) {
+      _controller.reverse().then<void>((void value) {
         if (!mounted) {
           return;
         }
@@ -246,7 +246,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
                 ],
               ),
               groupValue: widget.selectedOption,
-              onChanged: (newOption) => widget.onOptionChanged(newOption),
+              onChanged: (T? newOption) => widget.onOptionChanged(newOption),
               activeColor: Theme.of(context).colorScheme.primary,
               dense: true,
             );

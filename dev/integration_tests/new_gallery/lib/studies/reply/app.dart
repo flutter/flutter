@@ -22,7 +22,7 @@ class ReplyApp extends StatefulWidget {
   static const String homeRoute = routes.homeRoute;
   static const String composeRoute = routes.composeRoute;
 
-  static Route createComposeRoute(RouteSettings settings) {
+  static Route<void> createComposeRoute(RouteSettings settings) {
     return PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
           const ComposePage(),
@@ -111,7 +111,7 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
   @override
   EmailStore fromPrimitives(Object? data) {
     final EmailStore appState = EmailStore();
-    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map);
+    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
     appState.selectedEmailId = appData['selectedEmailId'] as int;
     appState.onSearchPage = appData['onSearchPage'] as bool;
 
@@ -119,11 +119,11 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
     final int mailboxPageIndex = appData['selectedMailboxPage'] as int;
     appState.selectedMailboxPage = MailboxPageType.values[mailboxPageIndex];
 
-    final List starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
+    final List<dynamic> starredEmailIdsList = appData['starredEmailIds'] as List<dynamic>;
     appState.starredEmailIds = <int>{
       ...starredEmailIdsList.map<int>((dynamic id) => id as int),
     };
-    final List trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
+    final List<dynamic> trashEmailIdsList = appData['trashEmailIds'] as List<dynamic>;
     appState.trashEmailIds = <int>{
       ...trashEmailIdsList.map<int>((dynamic id) => id as int),
     };

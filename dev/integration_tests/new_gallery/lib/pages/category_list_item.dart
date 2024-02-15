@@ -9,7 +9,7 @@ import '../data/demos.dart';
 import '../layout/adaptive.dart';
 import 'demo.dart';
 
-typedef CategoryHeaderTapCallback = Function(bool shouldOpenList);
+typedef CategoryHeaderTapCallback = void Function(bool shouldOpenList);
 
 class CategoryListItem extends StatefulWidget {
   const CategoryListItem({
@@ -191,7 +191,7 @@ class _CategoryHeader extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           child: InkWell(
             // Makes integration tests possible.
-            key: ValueKey('${category.name}CategoryHeader'),
+            key: ValueKey<String>('${category.name}CategoryHeader'),
             onTap: onTap,
             child: Row(
               children: <Widget>[
@@ -265,7 +265,7 @@ class _ExpandedCategoryDemos extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       // Makes integration tests possible.
-      key: ValueKey('${category.name}DemoList'),
+      key: ValueKey<String>('${category.name}DemoList'),
       children: <Widget>[
         for (final GalleryDemo demo in demos)
           CategoryDemoItem(
@@ -288,7 +288,7 @@ class CategoryDemoItem extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Material(
       // Makes integration tests possible.
-      key: ValueKey(demo.describe),
+      key: ValueKey<String>(demo.describe),
       color: Theme.of(context).colorScheme.surface,
       child: MergeSemantics(
         child: InkWell(

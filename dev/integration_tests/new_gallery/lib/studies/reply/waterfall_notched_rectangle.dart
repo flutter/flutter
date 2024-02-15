@@ -26,7 +26,9 @@ class WaterfallNotchedRectangle extends NotchedShape {
   /// the guest circle.
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null || !host.overlaps(guest)) return Path()..addRect(host);
+    if (guest == null || !host.overlaps(guest)) {
+      return Path()..addRect(host);
+    }
 
     // The guest's shape is a circle bounded by the guest rectangle.
     // So the guest's radius is half the guest width.

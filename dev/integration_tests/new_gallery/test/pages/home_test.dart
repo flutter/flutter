@@ -29,7 +29,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ListView listview =
-        tester.widget(find.byKey(const ValueKey('HomeListView')));
+        tester.widget(find.byKey(const ValueKey<String>('HomeListView')));
 
     expect(listview.primary, true);
   });

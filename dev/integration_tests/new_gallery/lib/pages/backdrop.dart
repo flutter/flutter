@@ -54,7 +54,7 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
     );
     _settingsPageFocusNode = FocusNode();
-    _isSettingsOpenNotifier = ValueNotifier(false);
+    _isSettingsOpenNotifier = ValueNotifier<bool>(false);
     _settingsPage = widget.settingsPage ??
         SettingsPage(
           animationController: _settingsPanelController,
@@ -87,7 +87,7 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
       BoxConstraints constraints) {
     return RelativeRectTween(
       begin: RelativeRect.fromLTRB(0, -constraints.maxHeight, 0, 0),
-      end: const RelativeRect.fromLTRB(0, 0, 0, 0),
+      end: RelativeRect.fill,
     ).animate(
       CurvedAnimation(
         parent: _settingsPanelController,
@@ -103,7 +103,7 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
   Animation<RelativeRect> _slideDownHomePageAnimation(
       BoxConstraints constraints) {
     return RelativeRectTween(
-      begin: const RelativeRect.fromLTRB(0, 0, 0, 0),
+      begin: RelativeRect.fill,
       end: RelativeRect.fromLTRB(
         0,
         constraints.biggest.height - galleryHeaderHeight,

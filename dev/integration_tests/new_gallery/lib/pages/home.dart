@@ -168,7 +168,7 @@ class HomePage extends StatelessWidget {
       return Scaffold(
         body: ListView(
           // Makes integration tests possible.
-          key: const ValueKey('HomeListView'),
+          key: const ValueKey<String>('HomeListView'),
           primary: true,
           padding: const EdgeInsetsDirectional.only(
             top: firstHeaderDesktopTopPadding,
@@ -386,7 +386,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
       children: <Widget>[
         ListView(
           // Makes integration tests possible.
-          key: const ValueKey('HomeListView'),
+          key: const ValueKey<String>('HomeListView'),
           primary: true,
           restorationId: 'home_list_view',
           children: <Widget>[
@@ -535,7 +535,7 @@ class _DesktopCategoryItem extends StatelessWidget {
               Flexible(
                 child: ListView.builder(
                   // Makes integration tests possible.
-                  key: ValueKey('${category.name}DemoList'),
+                  key: ValueKey<String>('${category.name}DemoList'),
                   primary: false,
                   itemBuilder: (BuildContext context, int index) =>
                       CategoryDemoItem(demo: demos[index]),
@@ -564,7 +564,7 @@ class _DesktopCategoryHeader extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Material(
       // Makes integration tests possible.
-      key: ValueKey('${category.name}CategoryHeader'),
+      key: ValueKey<String>('${category.name}CategoryHeader'),
       color: colorScheme.onBackground,
       child: Row(
         children: <Widget>[
@@ -607,7 +607,7 @@ class _AnimatedCategoryItem extends StatelessWidget {
     required double startDelayFraction,
     required this.controller,
     required this.child,
-  }) : topPaddingAnimation = Tween(
+  }) : topPaddingAnimation = Tween<double>(
           begin: 60.0,
           end: 0.0,
         ).animate(
@@ -645,7 +645,7 @@ class _AnimatedCarousel extends StatelessWidget {
   _AnimatedCarousel({
     required this.child,
     required this.controller,
-  }) : startPositionAnimation = Tween(
+  }) : startPositionAnimation = Tween<double>(
           begin: 1.0,
           end: 0.0,
         ).animate(
@@ -694,7 +694,7 @@ class _AnimatedCarouselCard extends StatelessWidget {
   _AnimatedCarouselCard({
     required this.child,
     required this.controller,
-  }) : startPaddingAnimation = Tween(
+  }) : startPaddingAnimation = Tween<double>(
           begin: _horizontalPadding,
           end: 0.0,
         ).animate(
@@ -818,7 +818,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
       controller: widget.animationController,
       child: PageView.builder(
         // Makes integration tests possible.
-        key: const ValueKey('studyDemoList'),
+        key: const ValueKey<String>('studyDemoList'),
         onPageChanged: (int value) {
           setState(() {
             _currentPage.value = value;
@@ -1071,7 +1071,7 @@ class _CarouselCard extends StatelessWidget {
       width: _carouselItemWidth,
       child: Material(
         // Makes integration tests possible.
-        key: ValueKey(demo!.describe),
+        key: ValueKey<String>(demo!.describe),
         color: assetColor,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1114,7 +1114,7 @@ class _CarouselCard extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     Navigator.of(context)
-                        .popUntil((Route route) => route.settings.name == '/');
+                        .popUntil((Route<void> route) => route.settings.name == '/');
                     Navigator.of(context).restorablePushNamed(studyRoute);
                   },
                 ),
@@ -1184,10 +1184,10 @@ class _StudyWrapperState extends State<StudyWrapper> {
                     excludeSemantics: true,
                     child: FloatingActionButton.extended(
                       heroTag: _BackButtonHeroTag(),
-                      key: const ValueKey('Back'),
+                      key: const ValueKey<String>('Back'),
                       onPressed: () {
                         Navigator.of(context)
-                            .popUntil((Route route) => route.settings.name == '/');
+                            .popUntil((Route<void> route) => route.settings.name == '/');
                       },
                       icon: IconTheme(
                         data: IconThemeData(color: colorScheme.onPrimary),

@@ -62,7 +62,7 @@ class GalleryApp extends StatelessWidget {
             darkTheme: GalleryThemeData.darkThemeData.copyWith(
               platform: options.platform,
             ),
-            localizationsDelegates: const <LocalizationsDelegate>[
+            localizationsDelegates: const <LocalizationsDelegate<Object?>>[
               ...GalleryLocalizations.localizationsDelegates,
               LocaleNamesLocalizationsDelegate()
             ],
@@ -82,7 +82,9 @@ class GalleryApp extends StatelessWidget {
   }
 }
 
+// ignore: unreachable_from_main
 class RootPage extends StatelessWidget {
+  // ignore: unreachable_from_main
   const RootPage({
     super.key,
   });

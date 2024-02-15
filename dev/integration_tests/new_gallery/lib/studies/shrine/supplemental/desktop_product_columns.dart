@@ -54,16 +54,16 @@ class DesktopProductCardColumn extends StatelessWidget {
             if (lowerStart) Container(height: columnTopSpace),
             ...List<Widget>.generate(currentColumnWidgetCount, (int index) {
               Widget card;
-              if (index % 2 == 0) {
+              if (index.isEven) {
                 // This is a product.
                 final int productCardIndex = index ~/ 2;
                 card = DesktopProductCard(
                   product: products[productCardIndex],
                   imageWidth: startLarge
-                      ? ((productCardIndex % 2 == 0)
+                      ? ((productCardIndex.isEven)
                           ? largeImageWidth
                           : smallImageWidth)
-                      : ((productCardIndex % 2 == 0)
+                      : ((productCardIndex.isEven)
                           ? smallImageWidth
                           : largeImageWidth),
                 );

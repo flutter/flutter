@@ -92,10 +92,7 @@ class _HeaderTextField extends StatelessWidget {
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.all(16),
         fillColor: cranePurple700,

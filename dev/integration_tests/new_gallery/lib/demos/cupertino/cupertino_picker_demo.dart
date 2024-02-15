@@ -16,7 +16,7 @@ class CupertinoPickerDemo extends StatefulWidget {
 }
 
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
-  Duration timer = const Duration();
+  Duration timer = Duration.zero;
 
   // Value that is shown in the date picker in date mode.
   DateTime date = DateTime.now();
@@ -32,7 +32,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   static List<String> getDaysOfWeek([String? locale]) {
     final DateTime now = DateTime.now();
     final DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    return List.generate(7, (int index) => index)
+    return List<int>.generate(7, (int index) => index)
         .map((int value) => DateFormat(DateFormat.WEEKDAY, locale)
             .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();

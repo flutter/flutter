@@ -41,17 +41,17 @@ class AppBarDemo extends StatelessWidget {
           PopupMenuButton<Text>(
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<Text>>[
-                PopupMenuItem(
+                PopupMenuItem<Text>(
                   child: Text(
                     localization.demoNavigationRailFirst,
                   ),
                 ),
-                PopupMenuItem(
+                PopupMenuItem<Text>(
                   child: Text(
                     localization.demoNavigationRailSecond,
                   ),
                 ),
-                PopupMenuItem(
+                PopupMenuItem<Text>(
                   child: Text(
                     localization.demoNavigationRailThird,
                   ),

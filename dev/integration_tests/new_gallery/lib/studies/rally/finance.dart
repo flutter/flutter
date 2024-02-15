@@ -111,12 +111,12 @@ class FinancialEntityCategoryView extends StatelessWidget {
       // TODO(x): State restoration of FinancialEntityCategoryDetailsPage on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
       child: OpenContainer(
         transitionDuration: const Duration(milliseconds: 350),
-        openBuilder: (BuildContext context, openContainer) =>
+        openBuilder: (BuildContext context, void Function() openContainer) =>
             FinancialEntityCategoryDetailsPage(),
         openColor: RallyColors.primaryBackground,
         closedColor: RallyColors.primaryBackground,
         closedElevation: 0,
-        closedBuilder: (BuildContext context, openContainer) {
+        closedBuilder: (BuildContext context, void Function() openContainer) {
           return TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.black),
             onPressed: openContainer,

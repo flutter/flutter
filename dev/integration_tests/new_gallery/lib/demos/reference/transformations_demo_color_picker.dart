@@ -48,7 +48,7 @@ class _ColorPickerSwatch extends StatelessWidget {
 
   final Color color;
   final bool selected;
-  final Function? onTap;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {

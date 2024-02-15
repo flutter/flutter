@@ -17,30 +17,30 @@ void main() {
       expect(find.byType(HomePage), findsOneWidget);
 
       // Test state restoration for carousel cards.
-      expect(find.byKey(const ValueKey('reply@study')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('reply@study')), findsOneWidget);
 
       // Move two carousel cards over.
       await tester.fling(
-        find.byKey(const ValueKey('reply@study')),
+        find.byKey(const ValueKey<String>('reply@study')),
         const Offset(-200, 0),
         1000,
       );
       await tester.pumpAndSettle();
       await tester.fling(
-        find.byKey(const ValueKey('shrine@study')),
+        find.byKey(const ValueKey<String>('shrine@study')),
         const Offset(-200, 0),
         1000,
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('rally@study')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('rally@study')), findsOneWidget);
 
       await tester.restartAndRestore();
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byKey(const ValueKey('rally@study')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('rally@study')), findsOneWidget);
 
       // Test state restoration for category list.
-      expect(find.byKey(const ValueKey('app-bar@material')), findsNothing);
+      expect(find.byKey(const ValueKey<String>('app-bar@material')), findsNothing);
 
       // Open material samples list view.
       await tester.tap(find.byKey(
@@ -48,11 +48,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('app-bar@material')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('app-bar@material')), findsOneWidget);
 
       await tester.restartAndRestore();
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byKey(const ValueKey('app-bar@material')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('app-bar@material')), findsOneWidget);
     },
     variant: const TargetPlatformVariant(
       <TargetPlatform>{TargetPlatform.android},
@@ -73,7 +73,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('banner@material')));
+      await tester.tap(find.byKey(const ValueKey<String>('banner@material')));
       await tester.pumpAndSettle();
 
       // Should be on Material Banner demo page.
@@ -110,7 +110,7 @@ void main() {
 
       expect(find.byType(HomePage), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('reply@study')));
+      await tester.tap(find.byKey(const ValueKey<String>('reply@study')));
       await tester.pumpAndSettle();
 
       // Should be on the reply study.
@@ -144,10 +144,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Star an item
-      await tester.tap(find.byKey(const ValueKey('star_email_button')));
+      await tester.tap(find.byKey(const ValueKey<String>('star_email_button')));
 
       // Navigate to starred mailbox
-      await tester.tap(find.byKey(const ValueKey('navigation_button')));
+      await tester.tap(find.byKey(const ValueKey<String>('navigation_button')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Starred'));
       await tester.pumpAndSettle();
@@ -161,7 +161,7 @@ void main() {
       // Should still by on the starred email page.
       expect(find.text('Free money'), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('ReplySearch')));
+      await tester.tap(find.byKey(const ValueKey<String>('ReplySearch')));
       await tester.pumpAndSettle();
 
       // Open search page.
@@ -173,7 +173,7 @@ void main() {
       // Should still by on the search page.
       expect(find.byType(SearchPage), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('ReplyExit')));
+      await tester.tap(find.byKey(const ValueKey<String>('ReplyExit')));
       await tester.pumpAndSettle();
 
       // Should be on the starred email page instead of any other.

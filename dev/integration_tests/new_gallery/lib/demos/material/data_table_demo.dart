@@ -42,7 +42,7 @@ class _RestorableDessertSelections extends RestorableProperty<Set<int>> {
 
   @override
   Set<int> fromPrimitives(Object? data) {
-    final List selectedItemIndices = data! as List<dynamic>;
+    final List<dynamic> selectedItemIndices = data! as List<dynamic>;
     _dessertSelections = <int>{
       ...selectedItemIndices.map<int>((dynamic id) => id as int),
     };
@@ -631,7 +631,9 @@ class _DessertDataSource extends DataTableSource {
       decimalDigits: 0,
     );
     assert(index >= 0);
-    if (index >= _desserts.length) return null;
+    if (index >= _desserts.length) {
+      return null;
+    }
     final _Dessert dessert = _desserts[index];
     return DataRow.byIndex(
       index: index,

@@ -49,7 +49,7 @@ class _AboutDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            FutureBuilder(
+            FutureBuilder<String>(
               future: getVersionNumber(),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) => SelectableText(
                 snapshot.hasData ? '$name ${snapshot.data}' : name,

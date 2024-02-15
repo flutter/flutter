@@ -37,16 +37,16 @@ class MailPreviewCard extends StatelessWidget {
 
     // TODO(x): State restoration of mail view page is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
     return OpenContainer(
-      openBuilder: (BuildContext context, closedContainer) {
+      openBuilder: (BuildContext context, void Function() closedContainer) {
         return MailViewPage(id: id, email: email);
       },
       openColor: theme.cardColor,
       closedShape: const RoundedRectangleBorder(
-        
+
       ),
       closedElevation: 0,
       closedColor: theme.cardColor,
-      closedBuilder: (BuildContext context, openContainer) {
+      closedBuilder: (BuildContext context, void Function() openContainer) {
         final bool isDesktop = isDisplayDesktop(context);
         final ColorScheme colorScheme = theme.colorScheme;
         final _MailPreview mailPreview = _MailPreview(
@@ -74,7 +74,12 @@ class MailPreviewCard extends StatelessWidget {
                   }
                 case DismissDirection.startToEnd:
                   onDelete();
-                default:
+                case DismissDirection.vertical:
+                case DismissDirection.horizontal:
+                case DismissDirection.up:
+                case DismissDirection.down:
+                case DismissDirection.none:
+                  break;
               }
             },
             background: _DismissibleContainer(
@@ -133,7 +138,7 @@ class _DismissibleContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       alignment: alignment,
-      curve: standardEasing,
+      curve: Easing.legacy,
       color: backgroundColor,
       duration: kThemeAnimationDuration,
       padding: padding,
@@ -258,7 +263,10 @@ class _PicturePreview extends StatelessWidget {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
         return true;
-      default:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return false;
     }
   }

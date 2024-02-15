@@ -197,7 +197,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
     return Navigator(
       // Adding [ValueKey] to make sure that the widget gets rebuilt when
       // changing type.
-      key: ValueKey(widget.type),
+      key: ValueKey<DialogDemoType>(widget.type),
       restorationScopeId: 'navigator',
       onGenerateRoute: (RouteSettings settings) {
         return _NoAnimationMaterialPageRoute<void>(

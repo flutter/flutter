@@ -146,7 +146,7 @@ class DetailsPane extends StatelessWidget {
           GalleryLocalizations.of(context)!.demoTwoPaneDetails,
         ),
       ),
-      body: Container(
+      body: ColoredBox(
         color: const Color(0xfffafafa),
         child: Center(
           child: Text(
