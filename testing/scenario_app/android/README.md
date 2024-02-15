@@ -10,10 +10,10 @@ run:
 
 ```sh
 # From the root of the engine repository
-$ ./testing/run_android_tests.sh android_debug_unopt
+$ ./testing/scenario_app/run_android_tests.sh android_debug_unopt
 
 # Or, for arm64
-$ ./testing/run_android_tests.sh android_debug_unopt_arm64
+$ ./testing/scenario_app/run_android_tests.sh android_debug_unopt_arm64
 ```
 
 ## CI Configuration
