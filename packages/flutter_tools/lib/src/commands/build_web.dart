@@ -139,9 +139,12 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final int wasmOptimizationLevel = int.parse(stringArg('optimization-level')!);
-    final int jsOptimizationLevel =  int.parse(stringArg('dart2js-optimization')
-        ?? stringArg('optimization-level')!);
+    final int optimizationLevel = int.parse(stringArg('optimization-level')!);
+
+    final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
+    final int jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
+        ? int.parse(dart2jsOptimizationLevelValue.substring(1))
+        : optimizationLevel;
 
     final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
@@ -160,7 +163,7 @@ class BuildWebCommand extends BuildSubCommand {
 
       compilerConfigs = <WebCompilerConfig>[
         WasmCompilerConfig(
-          optimizationLevel: wasmOptimizationLevel,
+          optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
           renderer: WebRendererMode.skwasm,
         ),
