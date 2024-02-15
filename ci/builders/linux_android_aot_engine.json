@@ -19,12 +19,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--android",
                 "--android-cpu",
-                "arm"
+                "arm",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_profile",
             "ninja": {
@@ -56,12 +61,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--android-cpu",
-                "arm"
+                "arm",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_release",
             "ninja": {
@@ -94,12 +104,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--android-cpu",
-                "arm64"
+                "arm64",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_release_arm64",
             "ninja": {
@@ -143,12 +158,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--runtime-mode",
                 "profile",
                 "--android-cpu",
-                "arm64"
+                "arm64",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_profile_arm64",
             "ninja": {
@@ -174,7 +194,7 @@
                         "--variant",
                         "android_profile_arm64"
                     ],
-		    "test_if": "main"
+                    "test_if": "main"
                 }
             ]
         },
@@ -198,12 +218,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--android",
                 "--android-cpu",
-                "x64"
+                "x64",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_profile_x64",
             "ninja": {
@@ -236,12 +261,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--android-cpu",
-                "x64"
+                "x64",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_release_x64",
             "ninja": {
