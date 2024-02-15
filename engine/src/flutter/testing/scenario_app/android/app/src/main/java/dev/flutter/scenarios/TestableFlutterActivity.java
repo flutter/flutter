@@ -10,11 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
 
 public abstract class TestableFlutterActivity extends FlutterActivity {
-  private Object flutterUiRenderedLock = new Object();
-  private AtomicBoolean isScenarioReady = new AtomicBoolean(false);
+  private final CountDownLatch flutterUiRenderedLatch = new CountDownLatch(1);
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -40,22 +39,12 @@ public abstract class TestableFlutterActivity extends FlutterActivity {
   }
 
   protected void notifyFlutterRendered() {
-    synchronized (flutterUiRenderedLock) {
-      isScenarioReady.set(true);
-      flutterUiRenderedLock.notifyAll();
-    }
+    flutterUiRenderedLatch.countDown();
   }
 
   public void waitUntilFlutterRendered() {
     try {
-      if (isScenarioReady.get()) {
-        return;
-      }
-      synchronized (flutterUiRenderedLock) {
-        flutterUiRenderedLock.wait();
-      }
-      // Reset the lock.
-      flutterUiRenderedLock = new Object();
+      flutterUiRenderedLatch.await();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
