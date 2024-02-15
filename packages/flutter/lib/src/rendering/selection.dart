@@ -384,10 +384,12 @@ class SelectWordSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of a triple click to select.
 class SelectParagraphSelectionEvent extends SelectionEvent {
   /// Creates a select paragraph event at the [globalPosition].
-  const SelectParagraphSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectParagraph);
+  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false}): super._(SelectionEventType.selectParagraph);
 
   /// The position in global coordinates to select paragraph at.
   final Offset globalPosition;
+
+  final bool absorb;
 }
 
 /// Updates a selection edge.
