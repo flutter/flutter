@@ -706,22 +706,6 @@ String jsonEncode(dynamic data) {
   return '$jsonValue\n';
 }
 
-Future<void> getNewGallery(String revision, Directory galleryDir) async {
-  section('Get New Flutter Gallery!');
-
-  if (exists(galleryDir)) {
-    galleryDir.deleteSync(recursive: true);
-  }
-
-  await inDirectory<void>(galleryDir.parent, () async {
-    await exec('git', <String>['clone', 'https://github.com/flutter/gallery.git']);
-  });
-
-  await inDirectory<void>(galleryDir, () async {
-    await exec('git', <String>['checkout', revision]);
-  });
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {required String from}) {
   return from.split('\n').where((String line) {
