@@ -44,8 +44,6 @@ enum Artifact {
   dart2jsSnapshot,
   /// The dart snapshot of the dart2wasm compiler.
   dart2wasmSnapshot,
-  /// The wasm-opt binary that ships with the dart-sdk
-  wasmOptBinary,
 
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
@@ -194,8 +192,6 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'dart2js.dart.snapshot';
     case Artifact.dart2wasmSnapshot:
       return 'dart2wasm_product.snapshot';
-    case Artifact.wasmOptBinary:
-      return 'wasm-opt$exe';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server_aot.dart.snapshot';
     case Artifact.linuxDesktopPath:
@@ -566,7 +562,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -608,7 +603,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
@@ -668,7 +662,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
@@ -706,11 +699,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _dartSdkPath(_cache), 'bin', 'snapshots',
-          _artifactToFileName(artifact, _platform),
-        );
-      case Artifact.wasmOptBinary:
-        return _fileSystem.path.join(
-          _dartSdkPath(_cache), 'bin', 'utils',
           _artifactToFileName(artifact, _platform),
         );
       case Artifact.flutterTester:
@@ -1039,8 +1027,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
-      case Artifact.wasmOptBinary:
-        return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'utils', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
       case Artifact.flutterPreviewDevice:
@@ -1176,11 +1162,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.frontendServerSnapshotForEngineDartSdk:
           return _fileSystem.path.join(
             _getDartSdkPath(), 'bin', 'snapshots',
-            _artifactToFileName(artifact, _platform, mode),
-          );
-        case Artifact.wasmOptBinary:
-          return _fileSystem.path.join(
-            _getDartSdkPath(), 'bin', 'utils',
             _artifactToFileName(artifact, _platform, mode),
           );
         case Artifact.genSnapshot:
