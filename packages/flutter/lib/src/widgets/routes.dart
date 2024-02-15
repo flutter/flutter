@@ -334,6 +334,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // TODO(justinmc): This is what you've been looking for. Route being animated
   // on top of.
   void _updateSecondaryAnimation(Route<dynamic>? nextRoute) {
+    print('justin _updateSecondaryAnimation');
     // There is an existing train hopping in progress. Unfortunately, we cannot
     // dispose current train hopping animation until we replace it with a new
     // animation.
@@ -342,6 +343,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       if (nextRoute is MyMBSRoute) {
+        print('justin yes mbs');
+        // TODO(justinmc): Can I set some kind of flag here or something, then
+        // read it in _ModalScope where buildTransitions is called and instead
+        // call MBS.buildMBSTransitions? Something like that...
       }
       final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
