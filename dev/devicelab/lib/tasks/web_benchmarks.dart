@@ -34,9 +34,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     await evalFlutter('build', options: <String>[
       'web',
       if (benchmarkOptions.useWasm) ...<String>[
-        '--O4',
         '--wasm',
-        '--no-strip-wasm',
+        '--wasm-opt=debug',
+        '--omit-type-checks',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       if (!benchmarkOptions.useWasm) '--web-renderer=${benchmarkOptions.webRenderer}',
