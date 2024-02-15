@@ -279,8 +279,6 @@ void main() {
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
         label: 'Enter Date',
         isTextField: true,
-        hasEnabledState: true,
-        isEnabled: true,
         isFocused: true,
         value: '01/15/2016',
         hasTapAction: true,

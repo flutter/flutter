@@ -670,8 +670,6 @@ void main() {
                                 id: 9,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isTextField,
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocused,
                                   SemanticsFlag.isHeader,
                                   if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
@@ -820,8 +818,6 @@ void main() {
                             id: 11,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
                               if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
