@@ -775,6 +775,7 @@ class ToggleButtons extends StatelessWidget {
             style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll<Color?>(effectiveFillColor),
               foregroundColor: MaterialStatePropertyAll<Color?>(currentColor),
+              iconColor: MaterialStatePropertyAll<Color?>(currentColor),
               overlayColor: _ToggleButtonDefaultOverlay(
                 selected:  onPressed != null && isSelected[index],
                 unselected: onPressed != null && !isSelected[index],

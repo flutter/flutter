@@ -571,6 +571,7 @@ void main() {
             child: TextButton.icon(
               style: ButtonStyle(
                 foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
               ),
               key: buttonKey,
               icon: const Icon(Icons.add),

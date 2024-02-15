@@ -709,6 +709,7 @@ void main() {
               data: FilledButtonThemeData(
                 style: ButtonStyle(
                   foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                  iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
                 ),
               ),
               child: Builder(
@@ -1288,8 +1289,8 @@ void main() {
     expect(paddingRect.left, iconRect.left - 16);
     // Use the taller widget to check the top and bottom padding.
     final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
-    expect(paddingRect.top, tallerWidget.top - 5);
-    expect(paddingRect.bottom, tallerWidget.bottom + 12);
+    expect(paddingRect.top, tallerWidget.top - 6.5);
+    expect(paddingRect.bottom, tallerWidget.bottom + 13.5);
   });
 
   group('Default FilledButton padding for textScaleFactor, textDirection', () {

@@ -708,7 +708,7 @@ void main() {
             child: OutlinedButton.icon(
               key: buttonKey,
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                iconColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
               ),
               icon: const Icon(Icons.add),
               label: const Text('OutlinedButton'),
