@@ -90,8 +90,6 @@ abstract class PlatformDispatcher {
 
   void scheduleFrame();
 
-  Future<void> render(Scene scene, [FlutterView view]);
-
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;

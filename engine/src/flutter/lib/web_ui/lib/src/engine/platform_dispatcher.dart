@@ -797,27 +797,25 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  @override
   Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
-    assert(view != null || implicitView != null,
-        'Calling render without a FlutterView');
-    if (view == null && implicitView == null) {
+    final EngineFlutterView? target = (view ?? implicitView) as EngineFlutterView?;
+    assert(target != null, 'Calling render without a FlutterView');
+    if (target == null) {
       // If there is no view to render into, then this is a no-op.
       return;
     }
-    final ui.FlutterView viewToRender = view ?? implicitView!;
 
     // Only render in an `onDrawFrame` or `onBeginFrame` scope. This is checked
     // by checking if the `_viewsRenderedInCurrentFrame` is non-null and this
     // view hasn't been rendered already in this scope.
     final bool shouldRender =
-        _viewsRenderedInCurrentFrame?.add(viewToRender) ?? false;
+        _viewsRenderedInCurrentFrame?.add(target) ?? false;
     // TODO(harryterkelsen): HTML renderer needs to violate the render rule in
     // order to perform golden tests in Flutter framework because on the HTML
     // renderer, golden tests render to DOM and then take a browser screenshot,
     // https://github.com/flutter/flutter/issues/137073.
     if (shouldRender || renderer.rendererTag == 'html') {
-      await renderer.renderScene(scene, viewToRender);
+      await renderer.renderScene(scene, target);
     }
   }
 
