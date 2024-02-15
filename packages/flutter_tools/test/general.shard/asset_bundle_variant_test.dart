@@ -3,22 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
-
 import 'package:flutter_tools/src/project.dart';
-import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
+import 'asset_bundle_test.dart';
 
 void main() {
 
@@ -30,13 +27,6 @@ void main() {
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     return parsedManifest;
-  }
-
-  Future<Map<Object?, Object?>> extractAssetManifestSmcBinFromBundle(ManifestAssetBundle bundle) async {
-    final List<int> manifest = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
-    final ByteData asByteData = ByteData.view(Uint8List.fromList(manifest).buffer);
-    final Map<Object?, Object?> decoded = const StandardMessageCodec().decodeMessage(asByteData)! as Map<Object?, Object?>;
-    return decoded;
   }
 
   group('AssetBundle asset variants (with Unix-style paths)', () {
@@ -104,7 +94,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
         image: <Map<String, Object>>[
@@ -163,7 +153,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       expect(jsonManifest[topLevelImage], equals(<String>[topLevelImage]));
       expect(jsonManifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
 
-      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
         topLevelImage: <Map<String, Object>>[
@@ -215,7 +205,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
         image: <Map<String, Object>>[
@@ -269,7 +259,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         ],
       };
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       expect(jsonManifest, equals(_assetManifestBinToJson(expectedManifest)));
       expect(smcBinManifest, equals(expectedManifest));
@@ -354,7 +344,7 @@ flutter:
       };
 
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));

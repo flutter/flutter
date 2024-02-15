@@ -3,19 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import 'asset_bundle_test.dart';
 
 void main() {
   String fixPath(String path) {
@@ -92,18 +89,12 @@ $assetsSection
       }
     }
 
-    final Map<Object?, Object?> assetManifest = const StandardMessageCodec().decodeMessage(
-      ByteData.sublistView(
-        Uint8List.fromList(
-          await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
-        )
-      )
-    ) as Map<Object?, Object?>;
-
     expect(
       json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
       assetManifestBinToJson(expectedAssetManifest),
     );
+
+    final Map<Object?, Object?> assetManifest = await extractAssetManifestBinFromBundle(bundle);
     expect(
       assetManifest,
       expectedAssetManifest

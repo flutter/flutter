@@ -24,6 +24,13 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+Future<Map<Object?, Object?>> extractAssetManifestBinFromBundle(AssetBundle bundle) async {
+  final List<int> manifest = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
+  final ByteData asByteData = ByteData.view(Uint8List.fromList(manifest).buffer);
+  final dynamic decoded = const StandardMessageCodec().decodeMessage(asByteData);
+  return decoded! as Map<Object?, Object?>;
+}
+
 void main() {
   const String shaderLibDir = '/./shader_lib';
 
@@ -64,7 +71,7 @@ void main() {
         expectedJsonAssetManifest,
       );
       expect(
-        const StandardMessageCodec().decodeMessage(ByteData.sublistView(Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()))),
+        extractAssetManifestBinFromBundle(bundle),
         expectedBinAssetManifest
       );
 
