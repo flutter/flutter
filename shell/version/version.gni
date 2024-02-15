@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
+
 declare_args() {
   engine_version = ""
 
@@ -39,7 +41,7 @@ if (dart_version == "") {
       exec_script("//flutter/build/git_revision.py",
                   [
                     "--repository",
-                    rebase_path("//third_party/dart", "", _flutter_root),
+                    rebase_path("$dart_src", "", _flutter_root),
                   ],
                   "list lines")
   dart_version = dart_version_lines[0]

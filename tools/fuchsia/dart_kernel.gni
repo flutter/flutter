@@ -4,7 +4,7 @@
 
 import("//flutter/common/fuchsia_config.gni")
 import("//flutter/tools/fuchsia/dart.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
+import("$dart_src/build/dart/dart_action.gni")
 
 template("dart_kernel") {
   prebuilt_dart_action(target_name) {
@@ -16,11 +16,10 @@ template("dart_kernel") {
 
     deps = [ invoker.kernel_platform_files ]
 
-    gen_kernel_script = "//third_party/dart/pkg/vm/bin/gen_kernel.dart"
+    gen_kernel_script = "$dart_src/pkg/vm/bin/gen_kernel.dart"
     platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
 
-    dot_packages =
-        rebase_path("//third_party/dart/.dart_tool/package_config.json")
+    dot_packages = rebase_path("$dart_src/.dart_tool/package_config.json")
 
     inputs = [
       platform_dill,

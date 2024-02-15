@@ -16,7 +16,7 @@ import("//flutter/tools/fuchsia/flutter/internal/flutter_dart_component.gni")
 # dart_library("lib") {
 #   package_name = "my_library"
 #   sources = [ "main.dart" ]
-#   deps = [ "//third_party/dart-pkg/git/flutter/packages/flutter" ]
+#   deps = [ "$dart_src-pkg/git/flutter/packages/flutter" ]
 # }
 # ```
 #

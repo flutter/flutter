@@ -255,8 +255,8 @@ flutter_runner("jit") {
   product = false
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/platform:libdart_platform_jit",
+    "$dart_src/runtime:libdart_jit",
+    "$dart_src/runtime/platform:libdart_platform_jit",
   ]
 }
 
@@ -265,8 +265,8 @@ flutter_runner("jit_product") {
   product = true
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/platform:libdart_platform_jit",
+    "$dart_src/runtime:libdart_jit",
+    "$dart_src/runtime/platform:libdart_platform_jit",
   ]
 }
 
@@ -275,8 +275,8 @@ flutter_runner("aot") {
   product = false
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_precompiled_runtime",
-    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_precompiled_runtime",
+    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
   ]
 }
 
@@ -285,8 +285,8 @@ flutter_runner("aot_product") {
   product = true
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_precompiled_runtime",
-    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
+    "$dart_src/runtime:libdart_precompiled_runtime",
+    "$dart_src/runtime/platform:libdart_platform_precompiled_runtime",
   ]
 }
 
@@ -510,13 +510,13 @@ if (enable_unittests) {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_deps = [
+      "$dart_src/runtime:libdart_jit",
+      "$dart_src/runtime/platform:libdart_platform_jit",
       "//flutter/assets:assets",
       "//flutter/common/graphics",
       "//flutter/flow",
       "//flutter/lib/ui",
       "//flutter/shell/common",
-      "//third_party/dart/runtime:libdart_jit",
-      "//third_party/dart/runtime/platform:libdart_platform_jit",
     ]
 
     deps = [
@@ -543,10 +543,10 @@ if (enable_unittests) {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_deps = [
+      "$dart_src/runtime:libdart_jit",
+      "$dart_src/runtime/platform:libdart_platform_jit",
       "//flutter/lib/ui",
       "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
-      "//third_party/dart/runtime:libdart_jit",
-      "//third_party/dart/runtime/platform:libdart_platform_jit",
     ]
 
     deps = [
@@ -569,10 +569,10 @@ if (enable_unittests) {
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
     flutter_deps = [
+      "$dart_src/runtime:libdart_jit",
+      "$dart_src/runtime/platform:libdart_platform_jit",
       "//flutter/lib/ui",
       "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
-      "//third_party/dart/runtime:libdart_jit",
-      "//third_party/dart/runtime/platform:libdart_platform_jit",
     ]
 
     deps = [

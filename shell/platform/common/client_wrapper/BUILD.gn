@@ -62,7 +62,7 @@ executable("client_wrapper_unittests") {
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.
     # https://github.com/flutter/flutter/issues/41414.
-    "//third_party/dart/runtime:libdart_jit",
+    "$dart_src/runtime:libdart_jit",
   ]
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]

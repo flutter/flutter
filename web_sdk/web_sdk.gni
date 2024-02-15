@@ -2,10 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/build/dart/dart.gni")
 import("//flutter/common/config.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
 
-dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
+import("$dart_src/build/dart/dart_action.gni")
+
+dart_sdk_package_config = "$dart_src/.dart_tool/package_config.json"
 
 template("sdk_rewriter") {
   ui = defined(invoker.ui) && invoker.ui
@@ -16,7 +18,7 @@ template("sdk_rewriter") {
   assert(defined(invoker.input_dir), "Must pass 'input_dir'")
   assert(defined(invoker.output_dir), "Must pass 'output_dir'")
 
-  source_dart_files = exec_script("//third_party/dart/tools/list_dart_files.py",
+  source_dart_files = exec_script("$dart_src/tools/list_dart_files.py",
                                   [
                                     "absolute",
                                     rebase_path(invoker.input_dir),

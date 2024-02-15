@@ -8,7 +8,7 @@ import("//flutter/examples/examples.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
-import("//third_party/dart/build/dart/copy_tree.gni")
+import("$dart_src/build/dart/copy_tree.gni")
 
 # Whether to build the dartdevc sdk, libraries, and source files
 # required for the flutter web sdk.
@@ -104,7 +104,7 @@ group("flutter") {
         # This must be listed explicitly for desktop cross-builds since
         # //flutter/lib/snapshot:generate_snapshot_bin will only build
         # gen_snapshot for the host and not the target.
-        "//third_party/dart/runtime/bin:gen_snapshot",
+        "$dart_src/runtime/bin:gen_snapshot",
 
         # Impeller artifacts - compiler and libtessellator
         "//flutter/impeller/compiler:impellerc",
@@ -117,7 +117,7 @@ group("flutter") {
       if (host_os == "linux") {
         public_deps += [
           # Built alongside gen_snapshot for 64 bit targets
-          "//third_party/dart/runtime/bin:analyze_snapshot",
+          "$dart_src/runtime/bin:analyze_snapshot",
         ]
       }
 
@@ -300,8 +300,7 @@ if (is_fuchsia && enable_unittests) {
 # Dart tree, and is less ambiguous than specifying the binary to build since
 # we can specify the toolchain to use, too.
 if (host_os == "win") {
-  _gen_snapshot_target =
-      "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)"
+  _gen_snapshot_target = "$dart_src/runtime/bin:gen_snapshot($host_toolchain)"
   copy("gen_snapshot") {
     deps = [ _gen_snapshot_target ]
 

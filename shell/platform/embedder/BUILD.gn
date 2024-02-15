@@ -100,6 +100,8 @@ template("embedder_source_set") {
     public_deps = [ ":embedder_headers" ]
     deps = [
       ":embedder_gpu_configuration",
+      "$dart_src/runtime/bin:dart_io_api",
+      "$dart_src/runtime/bin:elf_loader",
       "//flutter/assets",
       "//flutter/common",
       "//flutter/common/graphics",
@@ -110,8 +112,6 @@ template("embedder_source_set") {
       "//flutter/shell/common",
       "//flutter/skia",
       "//flutter/third_party/tonic",
-      "//third_party/dart/runtime/bin:dart_io_api",
-      "//third_party/dart/runtime/bin:elf_loader",
     ]
 
     if (embedder_enable_gl) {
@@ -291,6 +291,7 @@ if (enable_unittests) {
       ":embedder",
       ":embedder_gpu_configuration",
       ":fixtures",
+      "$dart_src/runtime/bin:elf_loader",
       "//flutter/flow",
       "//flutter/lib/snapshot",
       "//flutter/lib/ui",
@@ -300,7 +301,6 @@ if (enable_unittests) {
       "//flutter/testing:dart",
       "//flutter/testing:skia",
       "//flutter/third_party/tonic",
-      "//third_party/dart/runtime/bin:elf_loader",
     ]
 
     if (test_enable_gl) {
@@ -416,7 +416,7 @@ if (enable_unittests) {
       #"//flutter/testing:dart",
       #"//flutter/testing:skia",
       #"//flutter/third_party/tonic",
-      #"//third_party/dart/runtime/bin:elf_loader",
+      #"$dart_src/runtime/bin:elf_loader",
       #"//flutter/skia",
     ]
   }

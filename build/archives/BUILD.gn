@@ -24,13 +24,13 @@ generated_file("artifacts_entitlement_config") {
 if (build_engine_artifacts && !is_android) {
   zip_bundle("artifacts") {
     deps = [
+      "$dart_src/runtime/bin:gen_snapshot",
       "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
       "//flutter/tools/path_ops:path_ops",
-      "//third_party/dart/runtime/bin:gen_snapshot",
     ]
     if (is_mac) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
@@ -196,7 +196,7 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
 # If there is no prebuilt sdk, create the dart sdk archive from the built sdk.
 if (build_engine_artifacts && !flutter_prebuilt_dart_sdk) {
   zip_bundle_from_file("dart_sdk_archive") {
-    deps = [ "//third_party/dart:create_sdk" ]
+    deps = [ "$dart_src:create_sdk" ]
     output = "dart-sdk-$full_target_platform_name.zip"
     files = [
       {
