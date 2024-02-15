@@ -153,7 +153,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return !(nextRoute is CupertinoRouteTransitionMixin && nextRoute.fullscreenDialog);
   }
 
   @override
@@ -487,10 +487,17 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    return SlideTransition(
-      position: _secondaryPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
+    return DelegatedTransition(
+      context: context,
+      animation: widget.secondaryRouteAnimation,
+      builder: (BuildContext context, Widget? child) {
+        return SlideTransition(
+          position: _secondaryPositionAnimation,
+          textDirection: textDirection,
+          transformHitTests: false,
+          child: child,
+        );
+      },
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,
