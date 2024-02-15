@@ -131,7 +131,7 @@ constexpr TSize<T> operator*(U s, const TSize<T>& p) {
 
 template <class T, class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
 constexpr TSize<T> operator/(U s, const TSize<T>& p) {
-  return {static_cast<T>(s) / p.x, static_cast<T>(s) / p.y};
+  return {static_cast<T>(s) / p.width, static_cast<T>(s) / p.height};
 }
 
 using Size = TSize<Scalar>;
