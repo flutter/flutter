@@ -4,12 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:get_storage/get_storage.dart';
 
 import 'animation.dart';
 import 'overlay.dart';
-
-const String _featureHighlightShownKey = 'feature_highlight_shown';
 
 /// [Widget] to enforce a global lock system for [FeatureDiscovery] widgets.
 ///
@@ -266,6 +263,8 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
     return centerPosition;
   }
 
+  static bool _featureHighlightShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -273,13 +272,9 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
     initAnimationControllers();
     initAnimations();
 
-    final GetStorage localStorage = GetStorage();
-    final bool featureHiglightShown =
-        localStorage.read<bool>(_featureHighlightShownKey) ?? false;
-    localStorage.write(_featureHighlightShownKey, true);
-    showOverlay = widget.showOverlay && !featureHiglightShown;
+    showOverlay = widget.showOverlay && !_featureHighlightShown;
     if (showOverlay) {
-      localStorage.write(_featureHighlightShownKey, true);
+      _featureHighlightShown = true;
     }
   }
 

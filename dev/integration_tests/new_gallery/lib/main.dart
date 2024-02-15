@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_gen/gen_l10n/gallery_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'constants.dart';
@@ -23,7 +22,6 @@ export 'package:gallery/data/demos.dart' show pumpDeferredLibraries;
 
 void main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
-  await GetStorage.init();
   runApp(const GalleryApp());
 }
 
