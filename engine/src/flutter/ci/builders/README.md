@@ -295,6 +295,7 @@ configuration.
 "tests": [
    {
        "language": "python3",
+       "test_timeout_secs": 600,
        "name": "Host Tests for host_debug_impeller_vulkan",
        "parameters": [
            "--variant",
@@ -316,6 +317,8 @@ In general any executable found in the path can be used as language. The
 default is empty which means no interpreter will be used to run the script
 and it is assumed the script is already an executable with the right
 permissions to run in the target platform.
+* **test_timeout_secs** - the timeout in seconds for the step running the test. This value overrides the
+default 1 hour timeout. When debugging, or if a third-party program is known to misbehave, it is recommended to add timeouts to allow LUCI services to collect logs.
 * **name** - the name of the step running the script.
 * **parameters** - flags or parameters passed to the script. Parameters
 accept magic environment variables(placeholders replaced before executing
@@ -488,7 +491,8 @@ Engine test example:
               "--shard-variants=host_debug"
             ],
             "max_attempts": 1,
-            "script": "flutter/ci/clang_tidy.sh"
+            "script": "flutter/ci/clang_tidy.sh",
+            "test_timeout_secs": 600,
          }
        ]
     }
@@ -535,6 +539,8 @@ The property's description is as follows:
 * **parameters** a list of parameters passed to the script execution.
 * **max_attempts** an integer with the maximum number of runs in case of failure.
 * **script** the path relative to checkout/src/ to run.
+* **test_timeout_secs** - the timeout in seconds for the step running the test. This value overrides the
+default 1 hour timeout. When debugging, or if a third-party program is known to misbehave, it is recommended to add timeouts to allow LUCI services to collect logs.
 
 ### Global Generators
 
