@@ -17,10 +17,15 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu=x86",
-                "--runtime-mode=jit_release"
+                "--runtime-mode=jit_release",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_jit_release_x86",
             "ninja": {
@@ -69,10 +74,15 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu=arm",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_debug",
             "ninja": {
@@ -120,33 +130,17 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gn": [
-                "--android",
-                "--android-cpu=arm64",
-                "--no-lto"
-            ],
-            "name": "android_debug_arm64",
-            "ninja": {
-                "config": "android_debug_arm64",
-                "targets": [
-                    "flutter",
-                    "flutter/shell/platform/android:abi_jars"
-                ]
-            }
-        },
-        {
-            "cas_archive": false,
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--enable-vulkan-validation-layers"
+                "--rbe",
+                "--no-goma"
             ],
-            "name": "android_debug_arm64_validation_layers",
+            "name": "android_debug_arm64",
             "ninja": {
                 "config": "android_debug_arm64",
                 "targets": [
@@ -173,10 +167,15 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu=x86",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_debug_x86",
             "ninja": {
@@ -205,10 +204,15 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu=x64",
-                "--no-lto"
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_debug_x64",
             "ninja": {

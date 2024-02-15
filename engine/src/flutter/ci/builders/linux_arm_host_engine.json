@@ -17,7 +17,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
@@ -25,7 +26,9 @@
                 "--no-lto",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "linux_profile_arm64",
             "ninja": {
@@ -55,14 +58,17 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "debug",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "linux_debug_arm64",
             "ninja": {
@@ -92,14 +98,17 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--prebuilt-dart-sdk"
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "linux_release_arm64",
             "ninja": {
