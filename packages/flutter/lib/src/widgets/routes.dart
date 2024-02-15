@@ -2276,3 +2276,64 @@ abstract class PopEntry {
     return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
   }
 }
+
+// TODO(justinmc): Should be derived from generic controllable route.
+class MyMBSRoute<T> extends ModalRoute<T> {
+  MyMBSRoute({
+    // TODO(justinmc): Should be builder?
+    required this.page,
+  });
+
+  final Route<T> page;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    // TODO(justinmc): Probably need a navigatorBuilder at some level, because
+    // users may have specific desires for routing and stuff.
+    return Navigator(
+      initialRoute: 'nested_navigators/one',
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case 'nested_navigators/one':
+            return page;
+          default:
+            throw Exception('Invalid route: ${settings.name}');
+        }
+      },
+    );
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    const Offset begin = Offset(0.0, 1.0);
+    const Offset end = Offset(0.0, 0.1);
+    const Curve curve = Curves.ease;
+
+    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  }
+
+  @override
+  Color? get barrierColor => const Color(0xff00ff00);
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => 'Stacked card appearance for modal bottom sheet';
+
+  // TODO(justinmc): Might be more complicated than this for multiple sheets.
+  @override
+  bool get maintainState => true;
+
+  // TODO(justinmc): Obscures routes older than the previous route, though...
+  @override
+  bool get opaque => false;
+
+  @override
+  Duration get transitionDuration => const Duration(seconds: 1);
+}
