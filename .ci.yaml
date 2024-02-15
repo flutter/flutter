@@ -2192,7 +2192,7 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: external_textures_integration_test
 
-  - name: Linux_android_emu external_ui_integration_test
+  - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
     # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
     bringup: true
@@ -2206,7 +2206,6 @@ targets:
     properties:
       tags: >
         ["devicelab", "linux"]
-      # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
       task_name: external_textures_integration_test
 
   # linux motog4 benchmark
@@ -2485,7 +2484,6 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

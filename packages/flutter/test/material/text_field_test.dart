@@ -746,7 +746,7 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,
@@ -1856,12 +1856,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isTextField,
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isFocused,
-            ],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter,
@@ -5194,8 +5189,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
         ),
         TestSemantics.rootChild(
@@ -6537,7 +6530,7 @@ void main() {
         ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
 
     semantics.dispose();
   });
@@ -6951,7 +6944,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
       maxValueLength: 10,
       currentValueLength: 0,
     ));
@@ -6966,12 +6959,7 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[
-        SemanticsFlag.isTextField,
-        SemanticsFlag.hasEnabledState,
-        SemanticsFlag.isEnabled,
-        SemanticsFlag.isFocused,
-      ],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
       maxValueLength: 10,
       currentValueLength: 3,
     ));
@@ -6997,12 +6985,7 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[
-        SemanticsFlag.isTextField,
-        SemanticsFlag.hasEnabledState,
-        SemanticsFlag.isEnabled,
-        SemanticsFlag.isReadOnly,
-      ]),
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly]),
     );
 
     semantics.dispose();
@@ -7093,9 +7076,6 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -7114,9 +7094,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
@@ -7134,9 +7111,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
@@ -7164,9 +7138,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
@@ -7223,9 +7194,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
@@ -7246,9 +7214,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
@@ -7326,9 +7291,6 @@ void main() {
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7382,9 +7344,6 @@ void main() {
     expect(find.text(clipboardContent), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7464,9 +7423,6 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7518,9 +7474,6 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7575,9 +7528,6 @@ void main() {
     expect(find.text(expected2), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7673,9 +7623,6 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7753,9 +7700,6 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -8067,8 +8011,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8088,8 +8030,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8115,8 +8055,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8145,8 +8083,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8174,8 +8110,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8201,8 +8135,6 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8218,8 +8150,6 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
-          SemanticsFlag.hasEnabledState,
-          SemanticsFlag.isEnabled,
           SemanticsFlag.isObscured,
         ],
       )
@@ -8235,8 +8165,6 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8279,8 +8207,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8316,8 +8242,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8344,8 +8268,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8376,8 +8298,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8427,8 +8347,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8477,8 +8395,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8515,7 +8431,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
             actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
@@ -8535,8 +8451,6 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
@@ -8590,7 +8504,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
             actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
@@ -8610,8 +8524,6 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
@@ -8792,8 +8704,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8829,8 +8739,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
           children: <TestSemantics>[
@@ -8888,8 +8796,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8937,8 +8843,6 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
