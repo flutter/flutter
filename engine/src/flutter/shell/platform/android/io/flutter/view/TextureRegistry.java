@@ -69,12 +69,6 @@ public interface TextureRegistry {
   /** Uses a Surface to populate the texture. */
   @Keep
   interface SurfaceProducer extends TextureEntry {
-    /** @return The identity of this texture. */
-    long id();
-
-    /** Deregisters and releases all resources . */
-    void release();
-
     /** Specify the size of this texture in physical pixels */
     void setSize(int width, int height);
 
@@ -101,12 +95,6 @@ public interface TextureRegistry {
   /** A registry entry for a managed SurfaceTexture. */
   @Keep
   interface SurfaceTextureEntry extends TextureEntry {
-    /** @return The identity of this texture. */
-    long id();
-
-    /** Deregisters and releases all resources . */
-    void release();
-
     /** @return The managed SurfaceTexture. */
     @NonNull
     SurfaceTexture surfaceTexture();
@@ -120,12 +108,6 @@ public interface TextureRegistry {
 
   @Keep
   interface ImageTextureEntry extends TextureEntry {
-    /** @return the identity of this ImageTextureEntry */
-    long id();
-
-    /** Deregisters and releases all resources. */
-    void release();
-
     /**
      * Next paint will update texture to use the contents of image.
      *
