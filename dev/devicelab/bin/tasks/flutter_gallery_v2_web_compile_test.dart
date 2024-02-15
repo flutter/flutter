@@ -21,19 +21,19 @@ class NewGalleryWebCompileTest {
   /// Runs the test.
   Future<TaskResult> run() async {
     final Map<String, Object> metrics = await inDirectory<Map<String, int>>(
-      'dev/integration_tests/new_gallery',
+      '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
       () async {
         await flutter('doctor');
 
-      await flutter('create', options: <String>[
+        await flutter('create', options: <String>[
           '--platforms',
-          'web',
+          'web,android,ios',
           '--no-overwrite',
           '.'
         ]);
 
         return WebCompileTest.runSingleBuildTest(
-          directory: 'dev/integration_tests/new_gallery',
+          directory: '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
           metric: metricKeyPrefix,
           measureBuildTime: true,
         );

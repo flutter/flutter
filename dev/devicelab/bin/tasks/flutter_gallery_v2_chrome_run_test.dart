@@ -32,15 +32,15 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final TaskResult result = await inDirectory<TaskResult>('dev/integration_tests/new_gallery', () async {
-      await flutter('doctor');
-      await flutter('packages', options: <String>['get']);
+    final TaskResult result = await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/new_gallery/', () async {
       await flutter('create', options: <String>[
         '--platforms',
-        'web',
+        'web,android,ios',
         '--no-overwrite',
         '.'
       ]);
+      await flutter('doctor');
+      await flutter('packages', options: <String>['get']);
 
       await flutter('build', options: <String>[
         'web',

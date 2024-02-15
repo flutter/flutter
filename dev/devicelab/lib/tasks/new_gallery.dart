@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../framework/utils.dart';
 import 'perf_tests.dart';
 
 class NewGalleryPerfTest extends PerfTest {
@@ -12,10 +13,10 @@ class NewGalleryPerfTest extends PerfTest {
     super.timeoutSeconds,
     super.forceOpenGLES,
   }) : super(
-    'dev/integration_tests/new_gallery',
+    '${flutterDirectory.path}/dev/integration_tests/new_gallery',
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
-    createPlatforms: ['android', 'ios', 'web']
+    createPlatforms: <String>['android', 'ios', 'web']
   );
 }
