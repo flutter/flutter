@@ -6,13 +6,14 @@
 #define GRADIENT_GLSL_
 
 #include <impeller/texture.glsl>
+#include <impeller/transform.glsl>
 
 mat3 IPMapToUnitX(vec2 p0, vec2 p1) {
   // Returns a matrix that maps [p0, p1] to [(0, 0), (1, 0)]. Results are
   // undefined if p0 = p1.
   return mat3(0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0) *
-         inverse(mat3(p1.y - p0.y, p0.x - p1.x, 0.0, p1.x - p0.x, p1.y - p0.y,
-                      0.0, p0.x, p0.y, 1.0));
+         IPMat3Inverse(mat3(p1.y - p0.y, p0.x - p1.x, 0.0, p1.x - p0.x,
+                            p1.y - p0.y, 0.0, p0.x, p0.y, 1.0));
 }
 
 /// Compute the t value for a conical gradient at point `p` between the 2
