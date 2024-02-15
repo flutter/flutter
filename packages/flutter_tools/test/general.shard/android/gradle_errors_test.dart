@@ -797,7 +797,8 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         usesAndroidX: true,
         line: '',
       );
-      expect(testLogger.statusText, contains('./gradlew'));
+
+      expect(testLogger.statusText, contains('To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -805,19 +806,26 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('generates correct gradle command for Windows environment', () async {
-      await lockFileDepMissingHandler.handler(
-      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      usesAndroidX: true,
-      line: '',
-    );
-      expect(testLogger.statusText, contains(r'.\gradlew.bat'));
-    }, overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('windows'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    }, testOn: 'windows');
+    group('windows', () {
+      setUp(() {
+        fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      });
+
+      testUsingContext('generates correct gradle command for Windows environment', () async {
+        await lockFileDepMissingHandler.handler(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+      );
+
+        expect(testLogger.statusText, contains(r'To regenerate the lockfiles run: `.\gradlew.bat :generateLockfiles` in C:\android\build.gradle'));
+      }, overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('windows'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      });
+    });
   });
 
   group('Incompatible Kotlin version', () {
