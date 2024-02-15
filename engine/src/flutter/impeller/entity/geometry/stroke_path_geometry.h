@@ -66,7 +66,9 @@ class StrokePathGeometry final : public Geometry {
                                 Point texture_origin,
                                 Size texture_size,
                                 const Matrix& effect_transform);
+
   friend class ImpellerBenchmarkAccessor;
+  friend class ImpellerEntityUnitTestAccessor;
 
   bool SkipRendering() const;
 
