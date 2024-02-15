@@ -913,12 +913,10 @@ class TextSelectionOverlay {
       return TextSelectionHandleType.collapsed;
     }
 
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return ltrType;
-      case TextDirection.rtl:
-        return rtlType;
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => ltrType,
+      TextDirection.rtl => rtlType,
+    };
   }
 }
 
@@ -989,19 +987,18 @@ class SelectionOverlay {
   final ValueNotifier<MagnifierInfo> _magnifierInfo =
       ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
 
-  /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
-  /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
-  /// call [showMagnifier] or [hideMagnifier]. This is because the magnifier needs to orchestrate
-  /// with other properties in [SelectionOverlay].
+  // [MagnifierController.show] and [MagnifierController.hide] should not be
+  // called directly, except from inside [showMagnifier] and [hideMagnifier]. If
+  // it is desired to show or hide the magnifier, call [showMagnifier] or
+  // [hideMagnifier]. This is because the magnifier needs to orchestrate with
+  // other properties in [SelectionOverlay].
   final MagnifierController _magnifierController = MagnifierController();
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
+  /// The configuration for the magnifier.
   ///
   /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
@@ -1047,11 +1044,12 @@ class SelectionOverlay {
     }
 
     _magnifierController.show(
-        context: context,
-        below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
-            ? null
-            : _handles?.start,
-        builder: (_) => builtMagnifier);
+      context: context,
+      below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
+          ? null
+          : _handles?.start,
+      builder: (_) => builtMagnifier,
+    );
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideMagnifier}

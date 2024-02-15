@@ -12556,7 +12556,6 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 0);
     }
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
