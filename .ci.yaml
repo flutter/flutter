@@ -2192,7 +2192,7 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: external_textures_integration_test
 
-  - name: Linux_android_emu external_ui_integration_test
+  - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
     # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
     bringup: true
@@ -2206,7 +2206,6 @@ targets:
     properties:
       tags: >
         ["devicelab", "linux"]
-      # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
       task_name: external_textures_integration_test
 
   # linux motog4 benchmark
@@ -2485,7 +2484,6 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3193,6 +3191,7 @@ targets:
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3211,6 +3210,7 @@ targets:
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3229,6 +3229,7 @@ targets:
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3247,6 +3248,7 @@ targets:
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -4785,6 +4787,7 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -5235,6 +5238,7 @@ targets:
 
   - name: Windows_arm64 hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5318,6 +5322,7 @@ targets:
 
   - name: Windows_arm64 platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5386,6 +5391,7 @@ targets:
 
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5423,6 +5429,7 @@ targets:
   - name: Windows_arm64 run_debug_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5459,6 +5466,7 @@ targets:
   - name: Windows_arm64 run_release_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5715,6 +5723,7 @@ targets:
 
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5742,6 +5751,7 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5769,6 +5779,7 @@ targets:
   - name: Windows_arm64 flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5795,6 +5806,7 @@ targets:
   - name: Windows_arm64 flutter_gallery_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5821,6 +5833,7 @@ targets:
   - name: Windows_arm64 complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5847,6 +5860,7 @@ targets:
   - name: Windows_arm64 flutter_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5873,6 +5887,7 @@ targets:
   - name: Windows_arm64 platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5925,7 +5940,6 @@ targets:
 
   # windows motog4 benchmark
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/142608
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5983,6 +5997,7 @@ targets:
   - name: Windows_arm64 windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6005,6 +6020,7 @@ targets:
   - name: Windows_arm64 flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >

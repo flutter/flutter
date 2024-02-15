@@ -64,8 +64,9 @@ class FilterChip extends StatelessWidget
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip({
     super.key,
     this.avatar,
@@ -100,6 +101,8 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -107,8 +110,9 @@ class FilterChip extends StatelessWidget
   /// Create an elevated chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [FilterChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const FilterChip.elevated({
     super.key,
     this.avatar,
@@ -143,6 +147,8 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -211,6 +217,10 @@ class FilterChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
+  @override
+  final BoxConstraints? deleteIconBoxConstraints;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -260,6 +270,8 @@ class FilterChip extends StatelessWidget
       checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints,
     );
   }
 }

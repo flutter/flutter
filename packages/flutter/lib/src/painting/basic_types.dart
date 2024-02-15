@@ -47,10 +47,8 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
-  // TODO(werainkhatri): remove these after their deprecation period in engine
-  // https://github.com/flutter/flutter/pull/99505
-  hashList, // ignore: deprecated_member_use
-  hashValues; // ignore: deprecated_member_use
+  hashList,
+  hashValues;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

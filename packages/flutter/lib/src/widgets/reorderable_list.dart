@@ -972,12 +972,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   Widget _itemBuilder(BuildContext context, int index) {
     if (_dragInfo != null && index >= widget.itemCount) {
-      switch (_scrollDirection) {
-        case Axis.horizontal:
-          return SizedBox(width: _dragInfo!.itemExtent);
-        case Axis.vertical:
-          return SizedBox(height: _dragInfo!.itemExtent);
-      }
+      return switch (_scrollDirection) {
+        Axis.horizontal => SizedBox(width: _dragInfo!.itemExtent),
+        Axis.vertical   => SizedBox(height: _dragInfo!.itemExtent),
+      };
     }
     final Widget child = widget.itemBuilder(context, index);
     assert(child.key != null, 'All list items must have a key');
@@ -1500,39 +1498,31 @@ class _DragItemProxy extends StatelessWidget {
 }
 
 double _sizeExtent(Size size, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return size.width;
-    case Axis.vertical:
-      return size.height;
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => size.width,
+    Axis.vertical   => size.height,
+  };
 }
 
 double _offsetExtent(Offset offset, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return offset.dx;
-    case Axis.vertical:
-      return offset.dy;
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => offset.dx,
+    Axis.vertical   => offset.dy,
+  };
 }
 
 Offset _extentOffset(double extent, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Offset(extent, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, extent);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Offset(extent, 0.0),
+    Axis.vertical   => Offset(0.0, extent),
+  };
 }
 
 Offset _restrictAxis(Offset offset, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Offset(offset.dx, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, offset.dy);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Offset(offset.dx, 0.0),
+    Axis.vertical   => Offset(0.0, offset.dy),
+  };
 }
 
 // A global key that takes its identity from the object and uses a value of a
