@@ -19,8 +19,10 @@ import 'focus_traversal.dart';
 import 'framework.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
+import 'navigator_pop_handler.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
+import 'pop_scope.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
@@ -329,6 +331,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // caller must reset this property to null after it is called.
   VoidCallback? _trainHoppingListenerRemover;
 
+  // TODO(justinmc): This is what you've been looking for. Route being animated
+  // on top of.
   void _updateSecondaryAnimation(Route<dynamic>? nextRoute) {
     // There is an existing train hopping in progress. Unfortunately, we cannot
     // dispose current train hopping animation until we replace it with a new
@@ -337,6 +341,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _trainHoppingListenerRemover = null;
 
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
+      if (nextRoute is MyMBSRoute) {
+      }
       final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
         final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
@@ -944,6 +950,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: AnimatedBuilder(
                           animation: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
+                            // TODO(justinmc): I can detect a MyMBSRoute here,
+                            // but I really care about the outgoing route.
                             return widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
@@ -2277,30 +2285,36 @@ abstract class PopEntry {
   }
 }
 
+typedef NavigatorBuilder = Navigator Function(BuildContext context);
+
+// TODO(justinmc): Users of this have to know that they can't pop the first
+// route. They have to call pop on the Navigator above navigatorBuilder.
 // TODO(justinmc): Should be derived from generic controllable route.
 class MyMBSRoute<T> extends ModalRoute<T> {
   MyMBSRoute({
-    // TODO(justinmc): Should be builder?
-    required this.page,
+    required this.navigatorBuilder,
   });
 
-  final Route<T> page;
+  // TODO(justinmc): Enforce must build with transitionsAreControlled to true,
+  // or something.
+  final NavigatorBuilder navigatorBuilder;
+
+  static Widget buildParentRouteTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    const Offset begin = Offset(0.0, 0.1);
+    const Offset end = Offset(0.0, 1.0);
+    const Curve curve = Curves.ease;
+
+    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    // TODO(justinmc): Probably need a navigatorBuilder at some level, because
-    // users may have specific desires for routing and stuff.
-    return Navigator(
-      initialRoute: 'nested_navigators/one',
-      onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          case 'nested_navigators/one':
-            return page;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-      },
-    );
+    return navigatorBuilder(context);
   }
 
   @override
