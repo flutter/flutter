@@ -626,6 +626,7 @@ void main() {
     const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
 
     final TextEditingController controller = TextEditingController(text: 'Some text.');
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -7828,9 +7829,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
@@ -7865,9 +7863,6 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
@@ -10033,7 +10028,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+  testWidgets('text selection toolbar is hidden on tap down on desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -10076,7 +10071,7 @@ void main() {
     expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
   },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+    variant: TargetPlatformVariant.all(excluding: TargetPlatformVariant.mobile().values),
   );
 
   testWidgets('Does not shrink in height when enters text when there is large single-line placeholder', (WidgetTester tester) async {

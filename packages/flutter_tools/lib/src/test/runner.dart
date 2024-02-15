@@ -7,6 +7,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 import '../web/memory_fs.dart';
@@ -53,6 +54,7 @@ abstract class FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   });
 }
 
@@ -91,6 +93,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -148,6 +151,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
+        webRenderer: debuggingOptions.webRenderer,
       );
       testArgs
         ..add('--platform=chrome')
@@ -178,6 +182,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               logger: globals.logger,
             ),
             testTimeRecorder: testTimeRecorder,
+            webRenderer: debuggingOptions.webRenderer,
           );
         },
       );
@@ -210,6 +215,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
 
     try {

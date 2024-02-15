@@ -87,7 +87,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      // TODO(fujino): make this FakeProcessManager.empty()
+      // TODO(fujino): re-use fakeProcessManager
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
@@ -1352,6 +1352,51 @@ invalid JSON
 
         await deviceControl.getCoreDevices();
         expect(logger.errorText, contains('Error executing devicectl: ProcessException'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('Handles json file mysteriously disappearing', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0');
+        final File tempFile = tempDir.childFile('core_device_list.json');
+        final List<String> args = <String>[
+          'xcrun',
+          'devicectl',
+          'list',
+          'devices',
+          '--timeout',
+          '5',
+          '--json-output',
+          tempFile.path,
+        ];
+        fakeProcessManager.addCommand(FakeCommand(
+          command: args,
+          onRun: (_) {
+            // Simulate that this command deleted tempFile, did not create a
+            // new one, and exited successfully
+            expect(tempFile, exists);
+            tempFile.deleteSync();
+            expect(tempFile, isNot(exists));
+          },
+        ));
+
+        await expectLater(
+          () => deviceControl.getCoreDevices(),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('Expected the file ${tempFile.path} to exist but it did not'),
+            ),
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains('After running the command xcrun devicectl list devices '
+            '--timeout 5 --json-output ${tempFile.path} the file\n'
+            '${tempFile.path} was expected to exist, but it did not',
+          ),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 

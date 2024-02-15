@@ -16,11 +16,10 @@ Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: theme,
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery.withClampedTextScaling(
@@ -40,6 +39,10 @@ Widget selectedInputChip({
     label: const Text('InputChip'),
     selected: true,
     isEnabled: enabled,
+    // When [enabled] is true we also need to provide one of the chip
+    // callbacks, otherwise the chip would have a 'disabled'
+    // [MaterialState], which is not the intention.
+    onSelected: enabled ? (_) {} : null,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
   );
@@ -50,13 +53,11 @@ Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
   required Widget chip,
   Color? themeColor,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
-      useMaterial3: useMaterial3,
-      brightness: brightness,
+      theme: theme,
       child: Builder(
         builder: (BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
@@ -92,6 +93,15 @@ RenderBox getMaterialBox(WidgetTester tester) {
     find.descendant(
       of: find.byType(InputChip),
       matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(InputChip),
+      matching: find.byType(Material),
     ),
   );
 }
@@ -304,41 +314,42 @@ void main() {
     focusNode2.dispose();
   });
 
-  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      useMaterial3: false,
+      theme: ThemeData(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
   });
 
-  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    await pumpCheckmarkChip(tester, chip: selectedInputChip());
+  testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
 
-    expectCheckmarkColor(find.byType(InputChip), Colors.black.withAlpha(0xde));
+    expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
-  testWidgets('Material2 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Material2 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      brightness: Brightness.dark,
-      useMaterial3: false,
+      theme: ThemeData.dark(useMaterial3: false),
     );
 
     expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
   });
 
-  testWidgets('Material3 - Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Material3 - Input chip disabled check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.dark();
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      brightness: Brightness.dark,
+      theme: theme,
     );
 
-    expectCheckmarkColor(find.byType(InputChip), Colors.white.withAlpha(0xde));
+    expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
   });
 
   testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
@@ -380,32 +391,35 @@ void main() {
   });
 
   testWidgets('Material3 - Input chip has correct selected color when enabled', (WidgetTester tester) async {
-    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    final ThemeData theme = ThemeData();
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(enabled: true),
-      useMaterial3: true,
+      theme: theme,
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..rrect(color: material3ChipDefaults.backgroundColor));
+    expect(materialBox, paints..rrect(color: theme.colorScheme.secondaryContainer));
   });
 
   testWidgets('Material3 - Input chip has correct selected color when disabled', (WidgetTester tester) async {
-    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    final ThemeData theme = ThemeData();
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
-      useMaterial3: true,
+      theme: theme,
     );
 
     final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
+    expect(materialBox, paints..path(color: theme.colorScheme.onSurface));
   });
 
   testWidgets('InputChip uses provided iconTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
+        theme: theme,
         home: Material(
           child: InputChip(
             iconTheme: iconTheme,
@@ -419,7 +433,7 @@ void main() {
     // Test default icon theme.
     await tester.pumpWidget(buildChip());
 
-    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+    expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
 
     // Test provided icon theme.
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
@@ -470,5 +484,119 @@ void main() {
 
     // Delete button tooltip should not be visible.
     expect(findTooltipContainer('Delete'), findsNothing);
+  });
+
+  testWidgets('InputChip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: InputChip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(InputChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distnance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(InputChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distnance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('InputChip delete icon layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: InputChip(
+            deleteIconBoxConstraints: deleteIconBoxConstraints,
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default delete icon layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(InputChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.clear));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (labelSize.width / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (labelSize.width / 2) - labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(
+      deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+    ));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(InputChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(InputChip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
   });
 }

@@ -7,6 +7,7 @@
 // To regenerate these files, run `find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart`
 
 import 'dart:io';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -37,6 +38,15 @@ void main(List<String> arguments) {
     final File settingsGradle = androidDirectory.childFile('settings.gradle');
     if (!settingsGradle.existsSync()) {
       print('${settingsGradle.path} does not exist - skipping');
+      continue;
+    }
+
+    final File wrapperGradle = androidDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    if (!wrapperGradle.existsSync()) {
+      print('${wrapperGradle.path} does not exist - skipping');
       continue;
     }
 
@@ -78,6 +88,7 @@ void main(List<String> arguments) {
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
+    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
@@ -139,23 +150,6 @@ const String rootGradleFileContent = r'''
 // To update all the build.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-
-    configurations.classpath {
-        resolutionStrategy.activateDependencyLocking()
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -205,12 +199,33 @@ pluginManagement {
 
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
-    plugins {
-        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
-include ":app"
+buildscript {
+    dependencyLocking {
+        lockFile = file("${rootProject.projectDir}/buildscript-gradle.lockfile")
+        lockAllConfigurations()
+    }
+}
 
-apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "7.3.0" apply false
+    id "org.jetbrains.kotlin.android" version "1.7.10" apply false
+}
+
+include ":app"
+''';
+
+const String wrapperGradleFileContent = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip
 ''';

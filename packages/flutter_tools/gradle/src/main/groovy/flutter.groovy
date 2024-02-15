@@ -67,7 +67,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    String source
+    String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -113,7 +113,8 @@ buildscript {
     }
     dependencies {
         // When bumping, also update:
-        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/flutter.groovy
+        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+        //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts
         //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
         //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
         classpath("com.android.tools.build:gradle:7.3.0")
@@ -320,6 +321,27 @@ class FlutterPlugin implements Plugin<Project> {
 
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile()
+
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range.
+        // TODO(gmackall) Dependency version checking is currently implemented as an additional
+        // Gradle plugin because we can't import it from Groovy code. As part of the Groovy
+        // -> Kotlin migration, we should remove this complexity and perform the checks inside
+        // of the main Flutter Gradle Plugin.
+        // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
+        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks");
+        if (!shouldSkipDependencyChecks) {
+            try {
+                final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
+                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
+                        "dependency_version_checker.gradle.kts")
+                project.apply from: dependencyCheckerPluginPath
+            } catch (Exception ignored) {
+                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                        + ignored)
+            }
+        }
 
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
@@ -762,11 +784,20 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Returns `true` if the given path contains an `android/build.gradle` file.
+     * Returns `true` if the given path contains an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
      */
     private Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-        return editableAndroidProject.exists()
+        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
+        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+        if (buildGradle.exists() && buildGradleKts.exists()) {
+            logger.error(
+                "Both build.gradle and build.gradle.kts exist, so " +
+                "build.gradle.kts is ignored. This is likely a mistake."
+            )
+        }
+
+        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /**
@@ -802,7 +833,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Properties getPluginList() {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        File pluginsFile = new File(getFlutterSourceDirectory(), '.flutter-plugins')
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
@@ -839,7 +870,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
+        File pluginsDependencyFile = new File(getFlutterSourceDirectory(), '.flutter-plugins-dependencies')
         if (pluginsDependencyFile.exists()) {
             def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
             assert(object instanceof Map)
@@ -1506,6 +1537,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
 
+    @Optional @Input
+    Boolean skipDependencyChecks
     @Optional @Input
     String flavor
 

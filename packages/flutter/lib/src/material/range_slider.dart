@@ -558,16 +558,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // thumb selection is determined by the direction of the dx. The left thumb
     // is chosen for negative dx, and the right thumb is chosen for positive dx.
     if (inStartTouchTarget && inEndTouchTarget) {
-      final bool towardsStart;
-      final bool towardsEnd;
-      switch (textDirection) {
-        case TextDirection.ltr:
-          towardsStart = dx < 0;
-          towardsEnd = dx > 0;
-        case TextDirection.rtl:
-          towardsStart = dx > 0;
-          towardsEnd = dx < 0;
-      }
+      final (bool towardsStart, bool towardsEnd) = switch (textDirection) {
+        TextDirection.ltr => (dx < 0, dx > 0),
+        TextDirection.rtl => (dx > 0, dx < 0),
+      };
       if (towardsStart) {
         return Thumb.start;
       }
@@ -1102,16 +1096,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   bool get showValueIndicator {
-    switch (_sliderTheme.showValueIndicator!) {
-      case ShowValueIndicator.onlyForDiscrete:
-        return isDiscrete;
-      case ShowValueIndicator.onlyForContinuous:
-        return !isDiscrete;
-      case ShowValueIndicator.always:
-        return true;
-      case ShowValueIndicator.never:
-        return false;
-    }
+    return switch (_sliderTheme.showValueIndicator!) {
+      ShowValueIndicator.onlyForDiscrete   => isDiscrete,
+      ShowValueIndicator.onlyForContinuous => !isDiscrete,
+      ShowValueIndicator.always => true,
+      ShowValueIndicator.never  => false,
+    };
   }
 
   Size get _thumbSize => _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
@@ -1142,16 +1132,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       return;
     }
 
-    final String text;
-    final TextPainter labelPainter;
-    switch (thumb) {
-      case Thumb.start:
-        text = labels.start;
-        labelPainter = _startLabelPainter;
-      case Thumb.end:
-        text = labels.end;
-        labelPainter = _endLabelPainter;
-    }
+    final (String text, TextPainter labelPainter) = switch (thumb) {
+      Thumb.start => (labels.start, _startLabelPainter),
+      Thumb.end   => (labels.end, _endLabelPainter),
+    };
 
     labelPainter
       ..text = TextSpan(
@@ -1205,12 +1189,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _getValueFromVisualPosition(double visualPosition) {
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return 1.0 - visualPosition;
-      case TextDirection.ltr:
-        return visualPosition;
-    }
+    return switch (textDirection) {
+      TextDirection.rtl => 1.0 - visualPosition,
+      TextDirection.ltr => visualPosition,
+    };
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
@@ -1399,16 +1381,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     // The visual position is the position of the thumb from 0 to 1 from left
     // to right. In left to right, this is the same as the value, but it is
     // reversed for right to left text.
-    final double startVisualPosition;
-    final double endVisualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        startVisualPosition = 1.0 - startValue;
-        endVisualPosition = 1.0 - endValue;
-      case TextDirection.ltr:
-        startVisualPosition = startValue;
-        endVisualPosition = endValue;
-    }
+    final (double startVisualPosition, double endVisualPosition) = switch (textDirection) {
+      TextDirection.rtl => (1.0 - startValue, 1.0 - endValue),
+      TextDirection.ltr => (startValue, endValue),
+    };
 
     final Rect trackRect = _sliderTheme.rangeTrackShape!.getPreferredRect(
         parentBox: this,
@@ -1585,15 +1561,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         labelPainter: _endLabelPainter,
         textScaleFactor: textScaleFactor,
       ).width / 2;
-      double innerOverflow = startHalfWidth + endHalfWidth;
-      switch (textDirection) {
-        case TextDirection.ltr:
-          innerOverflow += startOffset;
-          innerOverflow -= endOffset;
-        case TextDirection.rtl:
-          innerOverflow -= startOffset;
-          innerOverflow += endOffset;
-      }
+      final double innerOverflow = startHalfWidth + endHalfWidth + switch (textDirection) {
+        TextDirection.ltr => startOffset - endOffset,
+        TextDirection.rtl => endOffset - startOffset,
+      };
 
       _state.paintTopValueIndicator = (PaintingContext context, Offset offset) {
         if (attached) {

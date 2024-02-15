@@ -15,19 +15,17 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
-/// {@template flutter.widgets.magnifier.MagnifierBuilder}
 /// Signature for a builder that builds a [Widget] with a [MagnifierController].
 ///
-/// Consuming [MagnifierController] or [ValueNotifier]<[MagnifierInfo]> is not
-/// required, although if a Widget intends to have entry or exit animations, it should take
-/// [MagnifierController] and provide it an [AnimationController], so that [MagnifierController]
-/// can wait before removing it from the overlay.
-/// {@endtemplate}
+/// The builder is called exactly once per magnifier.
 ///
-/// See also:
+/// If the `controller` parameter's [MagnifierController.animationController]
+/// field is set (by the builder) to an [AnimationController], the
+/// [MagnifierController] will drive the animation during entry and exit.
 ///
-/// - [MagnifierInfo], the data class that updates the
-///   magnifier.
+/// The `magnifierInfo` parameter is updated with new [MagnifierInfo] instances
+/// during the lifetime of the built magnifier, e.g. as the user moves their
+/// finger around the text field.
 typedef MagnifierBuilder = Widget? Function(
     BuildContext context,
     MagnifierController controller,
@@ -57,9 +55,9 @@ class MagnifierInfo {
   /// The offset of the gesture position that the magnifier should be shown at.
   final Offset globalGesturePosition;
 
-  /// The rect of the current line the magnifier should be shown at,
-  /// without taking into account any padding of the field; only the position
-  /// of the first and last character.
+  /// The rect of the current line the magnifier should be shown at, without
+  /// taking into account any padding of the field; only the position of the
+  /// first and last character.
   final Rect currentLineBoundaries;
 
   /// The rect of the handle that the magnifier should follow.
@@ -89,48 +87,45 @@ class MagnifierInfo {
   );
 }
 
-/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-/// A configuration object for a magnifier.
-/// {@endtemplate}
+/// A configuration object for a magnifier (e.g. in a text field).
 ///
-/// {@macro flutter.widgets.magnifier.intro}
-///
-/// {@template flutter.widgets.magnifier.TextMagnifierConfiguration.details}
-/// In general, most features of the magnifier can be configured through
-/// [MagnifierBuilder]. [TextMagnifierConfiguration] is used to configure
-/// the magnifier's behavior through the [SelectionOverlay].
-/// {@endtemplate}
+/// In general, most features of the magnifier can be configured by controlling
+/// the widgets built by the [magnifierBuilder].
 class TextMagnifierConfiguration {
   /// Constructs a [TextMagnifierConfiguration] from parts.
   ///
   /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
-  /// that never builds a magnifier.
+  /// that does not build a magnifier.
   const TextMagnifierConfiguration({
     MagnifierBuilder? magnifierBuilder,
-    this.shouldDisplayHandlesInMagnifier = true
+    this.shouldDisplayHandlesInMagnifier = true,
   }) : _magnifierBuilder = magnifierBuilder;
 
-  /// The passed in [MagnifierBuilder].
-  ///
-  /// This is nullable because [disabled] needs to be static const,
-  /// so that it can be used as a default parameter. If left null,
-  /// the [magnifierBuilder] getter will be a function that always returns
-  /// null.
+  /// The builder callback that creates the widget that renders the magnifier.
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? _none;
   final MagnifierBuilder? _magnifierBuilder;
 
-  /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
-  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
+  static Widget? _none(
+    BuildContext context,
+    MagnifierController controller,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
+  ) => null;
 
-  /// Determines whether a magnifier should show the text editing handles or not.
+  /// Whether a magnifier should show the text editing handles or not.
+  ///
+  /// This flag is used by [SelectionOverlay.showMagnifier] to control the order
+  /// of layers in the rendering; specifically, whether to place the layer
+  /// containing the handles above or below the layer containing the magnifier
+  /// in the [Overlay].
   final bool shouldDisplayHandlesInMagnifier;
 
-  /// A constant for a [TextMagnifierConfiguration] that is disabled.
-  ///
-  /// In particular, this [TextMagnifierConfiguration] is considered disabled
-  /// because it never builds anything, regardless of platform.
+  /// A constant for a [TextMagnifierConfiguration] that is disabled, meaning it
+  /// never builds anything, regardless of platform.
   static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
 }
 
+/// A controller for a magnifier.
+///
 /// [MagnifierController]'s main benefit over holding a raw [OverlayEntry] is that
 /// [MagnifierController] will handle logic around waiting for a magnifier to animate in or out.
 ///
@@ -156,11 +151,11 @@ class MagnifierController {
 
   /// The magnifier's [OverlayEntry], if currently in the overlay.
   ///
-  /// This is public in case other overlay entries need to be positioned
-  /// above or below this [overlayEntry]. Anything in the paint order after
-  /// the [RawMagnifier] will not be displayed in the magnifier; this means that if it
-  /// is desired for an overlay entry to be displayed in the magnifier,
-  /// it _must_ be positioned below the magnifier.
+  /// This is exposed so that other overlay entries can be positioned above or
+  /// below this [overlayEntry]. Anything in the paint order after the
+  /// [RawMagnifier] in this [OverlayEntry] will not be displayed in the
+  /// magnifier; if it is desired for an overlay entry to be displayed in the
+  /// magnifier, it _must_ be positioned below the magnifier.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -198,20 +193,22 @@ class MagnifierController {
   /// ```
   /// {@end-tool}
   ///
-  /// A null check on [overlayEntry] will not suffice to check if a magnifier is in the
-  /// overlay or not; instead, you should check [shown]. This is because it is possible,
-  /// such as in cases where [hide] was called with `removeFromOverlay` false, that the magnifier
-  /// is not shown, but the entry is not null.
+  /// To check if a magnifier is in the overlay, use [shown]. The [overlayEntry]
+  /// field may be non-null even when the magnifier is not visible.
   OverlayEntry? get overlayEntry => _overlayEntry;
   OverlayEntry? _overlayEntry;
 
-  /// If the magnifier is shown or not.
+  /// Whether the magnifier is currently being shown.
   ///
-  /// [shown] is:
-  /// - false when nothing is in the overlay.
-  /// - false when [animationController] is [AnimationStatus.dismissed].
-  /// - false when [animationController] is animating out.
-  /// and true in all other circumstances.
+  /// This is false when nothing is in the overlay, when the
+  /// [animationController] is in the [AnimationStatus.dismissed] state, or when
+  /// the [animationController] is animating out (i.e. in the
+  /// [AnimationStatus.reverse] state).
+  ///
+  /// It is true in the opposite cases, i.e. when the overlay is not empty, and
+  /// either the [animationController] is null, in the
+  /// [AnimationStatus.completed] state, or in the [AnimationStatus.forward]
+  /// state.
   bool get shown {
     if (overlayEntry == null) {
       return false;
@@ -225,17 +222,17 @@ class MagnifierController {
     return true;
   }
 
-  /// Shows the [RawMagnifier] that this controller controls.
+  /// Displays the magnifier.
   ///
   /// Returns a future that completes when the magnifier is fully shown, i.e. done
   /// with its entry animation.
   ///
-  /// To control what overlays are shown in the magnifier, utilize [below]. See
-  /// [overlayEntry] for more details on how to utilize [below].
+  /// To control what overlays are shown in the magnifier, use `below`. See
+  /// [overlayEntry] for more details on how to utilize `below`.
   ///
-  /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show] will
-  /// override the old overlay and not play an exit animation. Consider awaiting [hide]
-  /// first, to guarantee
+  /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show]
+  /// will replace the old overlay without playing an exit animation. Consider
+  /// awaiting [hide] first, to animate from the old magnifier to the new one.
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
