@@ -8,7 +8,6 @@ import '../configuration.dart';
 import '../dom.dart';
 import '../platform_views/content_manager.dart';
 import '../safe_browser_api.dart';
-import '../semantics/semantics.dart';
 import 'style_manager.dart';
 
 /// Manages DOM elements and the DOM structure for a [ui.FlutterView].
@@ -71,11 +70,6 @@ class DomManager {
 
     // Rendering host (shadow root) children.
 
-    final DomElement accessibilityPlaceholder = EngineSemantics
-        .instance.semanticsHelper
-        .prepareAccessibilityPlaceholder();
-
-    renderingHost.append(accessibilityPlaceholder);
     renderingHost.append(sceneHost);
     renderingHost.append(announcementsHost);
 

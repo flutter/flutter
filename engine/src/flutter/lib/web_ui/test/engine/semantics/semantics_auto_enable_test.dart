@@ -31,11 +31,7 @@ Future<void> testMain() async {
             .instance.accessibilityFeatures.accessibleNavigation,
         isFalse);
 
-    final DomShadowRoot renderingHost =
-        EnginePlatformDispatcher.instance.implicitView!.dom.renderingHost;
-
-    final DomElement placeholder =
-        renderingHost.querySelector('flt-semantics-placeholder')!;
+    final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
 
     expect(placeholder.isConnected, isTrue);
 
