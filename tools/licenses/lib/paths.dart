@@ -30,6 +30,10 @@ final Set<String> skippedPaths = <String>{
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
   r'flutter/third_party/benchmark', // only used by tests
+  r'flutter/third_party/boringssl/src/crypto/err/err_data_generate.go',
+  r'flutter/third_party/boringssl/src/fuzz', // testing tools, not shipped
+  r'flutter/third_party/boringssl/src/rust', // rust-related code is not shipped
+  r'flutter/third_party/boringssl/src/util', // code generators, not shipped
   r'flutter/third_party/depot_tools', // only used for the Windows build system.
   r'flutter/third_party/expat/expat/doc',
   r'flutter/third_party/expat/expat/win32/expat.iss',
@@ -130,10 +134,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/angle/third_party', // Unused by Flutter: BUILD files with forwarding targets (but no code).
   r'third_party/angle/tools', // These are build-time tools, and aren't shipped.
   r'third_party/angle/util',
-  r'third_party/boringssl/src/crypto/err/err_data_generate.go',
-  r'third_party/boringssl/src/fuzz', // testing tools, not shipped
-  r'third_party/boringssl/src/rust', // rust-related code is not shipped
-  r'third_party/boringssl/src/util', // code generators, not shipped
   r'third_party/dart/benchmarks', // not shipped in binary
   r'third_party/dart/build', // not shipped in binary
   r'third_party/dart/docs', // not shipped in binary
@@ -459,11 +459,11 @@ final List<Pattern> skippedFilePatterns = <Pattern>[
   RegExp(r'^flutter/(?:.+/)*[^/]+_unittests?\.[^/]+$'),
   RegExp(r'^flutter/lib/web_ui/lib/assets/ahem\.ttf$', expectNoMatch: true), // this gitignored file exists only for testing purposes
   RegExp(r'^flutter/sky/packages/sky_engine/LICENSE$'), // that is the output of this script
+  RegExp(r'^flutter/third_party/boringssl/(?:.+/)*[^/]+_test\.[^/]+$'),
+  RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/bn/[^/]+.go$'),
+  RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/ec/[^/]+.go$'),
   RegExp(r'^third_party/abseil-cpp/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^third_party/angle/(?:.+/)*[^/]+_unittest\.[^/]+$'),
-  RegExp(r'^third_party/boringssl/(?:.+/)*[^/]+_test\.[^/]+$'),
-  RegExp(r'^third_party/boringssl/src/crypto/fipsmodule/bn/[^/]+.go$'),
-  RegExp(r'^third_party/boringssl/src/crypto/fipsmodule/ec/[^/]+.go$'),
   RegExp(r'^third_party/dart/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^third_party/freetype2/docs/(?!FTL\.TXT$).+'), // ignore all documentation except the license
   RegExp(r'^third_party/zlib/(?:.+/)*[^/]+_unittest\.[^/]+$'),

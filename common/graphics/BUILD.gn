@@ -27,8 +27,8 @@ source_set("graphics") {
     "//flutter/shell/common:base64",
     "//flutter/shell/version:version",
     "//flutter/skia",
+    "//flutter/third_party/boringssl",
     "//flutter/third_party/rapidjson",
-    "//third_party/boringssl",
   ]
 
   public_configs = [ "//flutter:config" ]
