@@ -26,11 +26,9 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
         @Override
         public void onTrimMemory(int level) {
           // When a memory pressure warning is received and the level equal {@code
-          // ComponentCallbacks2.TRIM_MEMORY_COMPLETE}, the Android system releases the
-          // underlying
-          // surface. If we continue to use the surface (e.g., call lockHardwareCanvas), a
-          // crash
-          // occurs, and we found that this crash appeared on Android10 and above.
+          // ComponentCallbacks2.TRIM_MEMORY_COMPLETE}, the Android system releases the underlying
+          // surface. If we continue to use the surface (e.g., call lockHardwareCanvas), a crash
+          // occurs, and we found that this crash appeared on Android 10 and above.
           // See https://github.com/flutter/flutter/issues/103870 for more details.
           //
           // Here our workaround is to recreate the surface before using it.

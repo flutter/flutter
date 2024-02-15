@@ -302,19 +302,15 @@ public class FlutterRenderer implements TextureRegistry {
             scheduleEngineFrame();
           };
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        // The callback relies on being executed on the UI thread (unsynchronised read
-        // of
-        // mNativeView
-        // and also the engine code check for platform thread in
-        // Shell::OnPlatformViewMarkTextureFrameAvailable),
-        // so we explicitly pass a Handler for the current thread.
+        // The callback relies on being executed on the UI thread (unsynchronised read of
+        // mNativeView and also the engine code check for platform thread in
+        // Shell::OnPlatformViewMarkTextureFrameAvailable), so we explicitly pass a Handler for the
+        // current thread.
         this.surfaceTexture().setOnFrameAvailableListener(onFrameListener, new Handler());
       } else {
-        // Android documentation states that the listener can be called on an arbitrary
-        // thread.
-        // But in practice, versions of Android that predate the newer API will call the
-        // listener
-        // on the thread where the SurfaceTexture was constructed.
+        // Android documentation states that the listener can be called on an arbitrary thread. But
+        // in practice, versions of Android that predate the newer API will call the listener on the
+        // thread where the SurfaceTexture was constructed.
         this.surfaceTexture().setOnFrameAvailableListener(onFrameListener);
       }
     }
@@ -762,15 +758,11 @@ public class FlutterRenderer implements TextureRegistry {
       // Allow for double buffering.
       builder.setMaxImages(MAX_IMAGES);
       // Use PRIVATE image format so that we can support video decoding.
-      // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our
-      // ability to read back texture data. If we don't always want to use it, how do
-      // we
-      // decide when to use it or not? Perhaps PlatformViews can indicate if they may
-      // contain
-      // DRM'd content.
-      // I need to investigate how PRIVATE impacts our ability to take screenshots or
-      // capture
-      // the output of Flutter application.
+      // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our ability to read
+      // back texture data. If we don't always want to use it, how do we decide when to use it or
+      // not? Perhaps PlatformViews can indicate if they may contain DRM'd content. I need to
+      // investigate how PRIVATE impacts our ability to take screenshots or capture the output of
+      // Flutter application.
       builder.setImageFormat(ImageFormat.PRIVATE);
       // Hint that consumed images will only be read by GPU.
       builder.setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
@@ -960,11 +952,10 @@ public class FlutterRenderer implements TextureRegistry {
    */
   public void startRenderingToSurface(@NonNull Surface surface, boolean onlySwap) {
     if (!onlySwap) {
-      // Stop rendering to the surface releases the associated native resources, which
-      // causes a glitch when toggling between rendering to an image view (hybrid
-      // composition) and
-      // rendering directly to a Surface or Texture view. For more,
-      // https://github.com/flutter/flutter/issues/95343
+      // Stop rendering to the surface releases the associated native resources, which causes a
+      // glitch when toggling between rendering to an image view (hybrid composition) and rendering
+      // directly to a Surface or Texture view.
+      // For more, https://github.com/flutter/flutter/issues/95343
       stopRenderingToSurface();
     }
 
@@ -1015,13 +1006,10 @@ public class FlutterRenderer implements TextureRegistry {
     if (surface != null) {
       flutterJNI.onSurfaceDestroyed();
 
-      // TODO(mattcarroll): the source of truth for this call should be FlutterJNI,
-      // which is where
-      // the call to onFlutterUiDisplayed() comes from. However, no such native
-      // callback exists yet,
-      // so until the engine and FlutterJNI are configured to call us back when
-      // rendering stops,
-      // we will manually monitor that change here.
+      // TODO(mattcarroll): the source of truth for this call should be FlutterJNI, which is where
+      // the call to onFlutterUiDisplayed() comes from. However, no such native callback exists yet,
+      // so until the engine and FlutterJNI are configured to call us back when rendering stops, we
+      // will manually monitor that change here.
       if (isDisplayingFlutterUi) {
         flutterUiDisplayListener.onFlutterUiNoLongerDisplayed();
       }

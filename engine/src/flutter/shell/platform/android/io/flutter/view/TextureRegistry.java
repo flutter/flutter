@@ -135,7 +135,7 @@ public interface TextureRegistry {
   }
 
   @Keep
-  interface ImageConsumer extends TextureEntry {
+  interface ImageConsumer {
     /**
      * Retrieve the last Image produced. Drops all previously produced images.
      *
@@ -148,7 +148,7 @@ public interface TextureRegistry {
   }
 
   @Keep
-  interface GLTextureConsumer extends TextureEntry {
+  interface GLTextureConsumer {
     /**
      * Retrieve the last GL texture produced.
      *
