@@ -243,7 +243,7 @@ void main() {
 
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), exists);
-    expect(assetDirectory.childFile('AssetManifest.json'), exists);
+    expect(assetDirectory.childFile('AssetManifest.bin'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), exists);
     expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
     expect(assetDirectory.childFile('io.flutter.shaders.json'), exists);

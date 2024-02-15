@@ -106,7 +106,7 @@ void main() {
   testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
     bool responded = false;
     // The particular asset does not matter, as long as it exists.
-    rootBundle.load('AssetManifest.json').then((ByteData data) {
+    rootBundle.load('AssetManifest.bin').then((ByteData data) {
       responded = true;
     });
     expect(responded, true);

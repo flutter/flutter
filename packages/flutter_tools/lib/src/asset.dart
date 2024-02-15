@@ -193,7 +193,6 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime? _lastBuildTimestamp;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
-  static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
   static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
   static const String _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
 
@@ -261,10 +260,6 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
-        DevFSStringContent('{}'),
-        kind: AssetKind.regular,
-      );
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
       entries[_kAssetManifestBinFilename] = AssetBundleEntry(
@@ -482,7 +477,6 @@ class ManifestAssetBundle implements AssetBundle {
     final Map<String, List<String>> assetManifest =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
-    final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -506,7 +500,6 @@ class ManifestAssetBundle implements AssetBundle {
         _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
     _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     // Create .bin.json on web builds.
     if (targetPlatform == TargetPlatform.web_javascript) {

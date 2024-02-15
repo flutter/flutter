@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -18,16 +16,6 @@ import '../src/common.dart';
 import 'asset_bundle_test.dart';
 
 void main() {
-
-  Future<Map<String, List<String>>> extractAssetManifestJsonFromBundle(ManifestAssetBundle bundle) async {
-    final String manifestJson = utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes());
-    final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
-    final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
-    };
-    return parsedManifest;
-  }
 
   group('AssetBundle asset variants (with Unix-style paths)', () {
     late Platform platform;
@@ -93,7 +81,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
@@ -114,7 +101,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       };
 
       expect(smcBinManifest, equals(expectedAssetManifest));
-      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
     });
 
     testWithoutContext('Asset directories have their subdirectories searched for asset variants', () async {
@@ -148,11 +134,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-      expect(jsonManifest, hasLength(2));
-      expect(jsonManifest[topLevelImage], equals(<String>[topLevelImage]));
-      expect(jsonManifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
-
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
@@ -171,7 +152,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
           },
         ],
       };
-      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
@@ -204,7 +184,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
       final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
@@ -219,7 +198,6 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         ],
       };
 
-      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
@@ -258,10 +236,8 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
           },
         ],
       };
-      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
-      expect(jsonManifest, equals(_assetManifestBinToJson(expectedManifest)));
       expect(smcBinManifest, equals(expectedManifest));
     });
   });
@@ -343,10 +319,8 @@ flutter:
         ],
       };
 
-      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestBinFromBundle(bundle);
 
-      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
   });

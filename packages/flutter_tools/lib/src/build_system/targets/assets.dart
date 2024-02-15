@@ -23,7 +23,7 @@ import 'icon_tree_shaker.dart';
 /// Throws [Exception] if [AssetBundle.build] returns a non-zero exit code.
 ///
 /// [additionalContent] may contain additional DevFS entries that will be
-/// included in the final bundle, but not the AssetManifest.json file.
+/// included in the final bundle, but not the AssetManifest.bin file.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(

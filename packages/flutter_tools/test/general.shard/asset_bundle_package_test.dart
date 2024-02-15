@@ -89,11 +89,6 @@ $assetsSection
       }
     }
 
-    expect(
-      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
-      assetManifestBinToJson(expectedAssetManifest),
-    );
-
     final Map<Object?, Object?> assetManifest = await extractAssetManifestBinFromBundle(bundle);
     expect(
       assetManifest,
@@ -131,11 +126,10 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
-      const String expectedAssetManifest = '{}';
+        <String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']));
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-        expectedAssetManifest,
+        await extractAssetManifestBinFromBundle(bundle),
+        <Object?, Object?>{},
       );
       expect(
         utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
@@ -157,12 +151,8 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
-      const String expectedAssetManifest = '{}';
-      expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-        expectedAssetManifest,
-      );
+        <String>['NOTICES.Z', 'AssetManifest.bin', 'FontManifest.json']));
+      expect(await extractAssetManifestBinFromBundle(bundle), <Object?, Object?>{});
       expect(
         utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
@@ -611,8 +601,8 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
 
-      expect(bundle.entries['AssetManifest.json'], isNull,
-        reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
+      expect(bundle.entries['AssetManifest.bin'], isNull,
+        reason: 'Invalid pubspec.yaml should not generate AssetManifest.bin');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
