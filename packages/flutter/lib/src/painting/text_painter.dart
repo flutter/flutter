@@ -324,9 +324,11 @@ class _TextLayout {
     };
   }
 
-  /// The line caret metrics in the paragraph's coordinates, when the caret is
-  /// placed at the end of the text (text.length, downstream), unless maxLines is
-  /// set to a non-null value.
+  /// The line caret metrics representing the end of text location.
+  ///
+  /// This is usually used when the caret is placed at the end of the text
+  /// (text.length, downstream), unless maxLines is set to a non-null value, in
+  /// which case the caret is placed at the visual end of the last visible line.
   ///
   /// This should not be called when the paragraph is emtpy as the implementation
   /// relies on line metrics.
@@ -334,7 +336,7 @@ class _TextLayout {
   /// When the last bidi level run in the paragraph and the parargraph's bidi
   /// levels have opposite parities (which implies opposite writing directions),
   /// this makes sure the caret is placed at the same "end" of the line as if the
-  /// line was ended with a line feed.
+  /// line ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
     final int lastLineIndex = _paragraph.numberOfLines - 1;
@@ -343,8 +345,9 @@ class _TextLayout {
     // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
     // spaces don't contribute to the line width thus require special handling
     // when they're present.
-    // Luckily they have the same bidi embedding level as the paragraph:
-    // https://unicode.org/reports/tr9/#L1
+    // Luckily they have the same bidi embedding level as the paragraph as per
+    // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
+    // last logical trailing space.
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
       0x9 ||        // horizontal tab
       0x20 => true, // space
@@ -354,6 +357,8 @@ class _TextLayout {
     final double baseline = lineMetrics.baseline;
     final double dx;
     late final ui.GlyphInfo? lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1);
+    // TODO(LongCatIsLooong): handle the case where maxLine is set to non-null
+    // and the last line ends with trailing whitespaces.
     if (hasTrailingSpaces && lastGlyph != null) {
       final Rect glyphBounds = lastGlyph.graphemeClusterLayoutBounds;
       assert(!glyphBounds.isEmpty);
@@ -1010,8 +1015,6 @@ class TextPainter {
   List<PlaceholderDimensions>? _placeholderDimensions;
 
   ui.ParagraphStyle _createParagraphStyle([ TextAlign? defaultTextAlign ]) {
-    // The defaultTextDirection argument is used for preferredLineHeight in case
-    // textDirection hasn't yet been set.
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text!.style?.getParagraphStyle(
       textAlign: defaultTextAlign ?? textAlign,
@@ -1372,24 +1375,23 @@ class TextPainter {
   // The cache implementation assumes there's only one cursor at any given time.
   late _LineCaretMetrics _caretMetrics;
 
-  // This function turns a TextPosition into a _LineCaretMetrics that represents
-  // the location to render the caret, or null if the paragraph is empty.
+  // This function returns the caret's offset and height for the given
+  // `position` in the text, or null if the paragraph is empty.
   //
-  // Typically, when the TextAffinity is downstream, the I-beam is anchored to
-  // the leading edge of the `offset`-th character. When the TextAffinity is
-  // upstream, the I-beam is then anchored to the trailing edge of the preceding
-  // character, except for a few edge cases:
+  // For a TextPosition, typically when its TextAffinity is downstream, the
+  // corresponding I-beam caret is anchored to the leading edge of the
+  // `offset`-th character in the text. When the TextAffinity is upstream, the
+  // I-beam is then anchored to the trailing edge of the preceding character,
+  // except for a few edge cases:
   //
-  // 1. empty paragraph: returns null.
+  // 1. empty paragraph: this method returns null and the caller handles this
+  //    case.
   //
   // 2. (textLength, downstream), the end-of-text caret when the text is not
   //    empty: it's placed next to the trailing edge of the last line of the
   //    text, in case the text and its last bidi run have different writing
-  //    directions. If a paragraph ends with a line break character then the end
-  //    of line caret is automatically placed next to the trailing edge of that
-  //    line regardless of the writing direction of its last run before the line
-  //    break, no special handling needed thanks to the presence of the line
-  //    break character.
+  //    directions. See the `_computeEndOfTextCaretAnchorOffset` method for more
+  //    details.
   //
   // 3. (0, upstream), which isn't a valid position, but it's not a conventional
   //    "invalid" caret location either (the offset isn't negative). For
@@ -1406,12 +1408,12 @@ class TextPainter {
   //    to draw the caret at the location that makes the most sense when the
   //    user wants to backspace (which also means it's left-arrow-key-biased):
   //
-  //     * downstream: show the caret at the leading edge of the grapheme only if
+  //     * downstream: show the caret at the leading edge of the character only if
   //       x points to the start of the grapheme. Otherwise show the caret at the
   //       leading edge of the next logical character.
-  //     * upstream: show the caret at the trailing edge of the previous grapheme
+  //     * upstream: show the caret at the trailing edge of the previous character
   //       only if x points to the start of the grapheme. Otherwise place the
-  //       caret at the trailing edge of the grapheme.
+  //       caret at the trailing edge of the character.
   _LineCaretMetrics? _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
@@ -1441,10 +1443,9 @@ class TextPainter {
     final ui.GlyphInfo? glyphInfo = cachedLayout.paragraph.getGlyphInfoAt(offset);
 
     if (glyphInfo == null) {
-      // If the glyph isn't laid out, it's either the position is (textLength,
-      // downstream), or the position argument is invalid. Use the EOT caret.
+      // If the glyph isn't laid out, then the position points to a character
+      // that is not laid out. Use the EOT caret.
       // TODO(LongCatIsLooong): assert when an invalid position is given.
-
       final ui.Paragraph template = _getOrCreateLayoutTemplate();
       assert(template.numberOfLines == 1);
       final double baselineOffset = template.getLineMetricsAt(0)!.baseline;
@@ -1462,8 +1463,8 @@ class TextPainter {
     }
     if (anchorToLeadingEdge && graphemeRange.start != offset) {
       assert(graphemeRange.end > graphemeRange.start + 1);
-      // Addresses the case where (offset, downstream) points to a multi-code-unit
-      // character that doesn't start at `offset`.
+      // Addresses the case where `offset` points to a multi-code-unit grapheme
+      // that doesn't start at `offset`.
       return _computeCaretMetrics(TextPosition(offset: graphemeRange.end));
     }
 
