@@ -283,10 +283,6 @@ platform_properties:
     properties:
       # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
       arch: arm
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows
       cpu: arm64
   windows_android:
