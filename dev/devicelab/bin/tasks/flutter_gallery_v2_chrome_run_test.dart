@@ -9,8 +9,6 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:flutter_devicelab/versions/gallery.dart' show galleryVersion;
-import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
@@ -34,16 +32,15 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
-    final Directory galleryDir =
-        Directory(path.join(galleryParentDir.path, 'gallery'));
-
-    await getNewGallery(galleryVersion, galleryDir);
-
-    final TaskResult result = await inDirectory<TaskResult>(galleryDir, () async {
+    final TaskResult result = await inDirectory<TaskResult>('dev/integration_tests/new_gallery', () async {
       await flutter('doctor');
       await flutter('packages', options: <String>['get']);
+      await flutter('create', options: <String>[
+        '--platforms',
+        'web',
+        '--no-overwrite',
+        '.'
+      ]);
 
       await flutter('build', options: <String>[
         'web',
@@ -104,8 +101,6 @@ class NewGalleryChromeRunTest {
         return TaskResult.failure('An exception was thrown.');
       }
     });
-
-    rmTree(galleryParentDir);
 
     return result;
   }
