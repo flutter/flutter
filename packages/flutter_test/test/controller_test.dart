@@ -920,6 +920,42 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
+      testWidgets('simulatedAccessibilityTraversal end Index supports empty traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Center(
+            child: Column(), // No nodes!
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal().map((SemanticsNode node) => node.label),
+          <String>[],
+        );
+      });
+
+      testWidgets('starts traversal at semantics node for `startNode`', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            startNode: find.semantics.byLabel('Child1'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child1',
+            'Child2',
+            'Child3',
+            'Child4',
+          ],
+        );
+      });
+
       testWidgets('throws StateError if `start` not found in traversal', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
@@ -927,6 +963,23 @@ void main() {
         // important for accessibility, so it won't show up in the traversal
         expect(
           () => tester.semantics.simulatedAccessibilityTraversal(start: find.byType(SingleChildScrollView)),
+          throwsA(isA<StateError>()),
+        );
+      });
+
+      testWidgets('throws StateError if `startNode` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(startNode: find.semantics.byLabel('Child20')),
           throwsA(isA<StateError>()),
         );
       });
@@ -942,6 +995,28 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
+      testWidgets('ends traversal at semantics node for `endNode`', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            endNode: find.semantics.byLabel('Child1'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child0',
+            'Child1',
+          ],
+        );
+      });
+
       testWidgets('throws StateError if `end` not found in traversal', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
@@ -949,6 +1024,23 @@ void main() {
         // important for semantics, so it won't show up in the traversal
         expect(
           () => tester.semantics.simulatedAccessibilityTraversal(end: find.byType(SingleChildScrollView)),
+          throwsA(isA<StateError>()),
+        );
+      });
+
+      testWidgets('throws StateError if `endNode` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(endNode: find.semantics.byLabel('Child20')),
           throwsA(isA<StateError>()),
         );
       });
@@ -965,6 +1057,30 @@ void main() {
             end: find.byType(Slider),
           ),
           orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('returns traversal between `startNode` and `endNode` if both are provided', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                for (int c = 0; c < 5; c++)
+                  Semantics(container: true, child: Text('Child$c')),
+              ]
+            ),
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            startNode: find.semantics.byLabel('Child1'),
+            endNode: find.semantics.byLabel('Child3'),
+          ).map((SemanticsNode node) => node.label),
+          <String>[
+            'Child1',
+            'Child2',
+            'Child3',
+          ],
+        );
       });
 
       testWidgets('can do fuzzy traversal match with `containsAllInOrder`', (WidgetTester tester) async {
