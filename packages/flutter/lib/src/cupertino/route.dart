@@ -153,7 +153,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return !(nextRoute is CupertinoRouteTransitionMixin && nextRoute.fullscreenDialog);
   }
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
@@ -465,7 +465,7 @@ class CupertinoPageTransition extends StatelessWidget {
   CupertinoPageTransition({
     super.key,
     required Animation<double> primaryRouteAnimation,
-    required Animation<double> secondaryRouteAnimation,
+    required this.secondaryRouteAnimation,
     required this.child,
     required bool linearTransition,
   }) : _primaryPositionAnimation =
@@ -501,17 +501,47 @@ class CupertinoPageTransition extends StatelessWidget {
   final Animation<Offset> _secondaryPositionAnimation;
   final Animation<Decoration> _primaryShadowAnimation;
 
+  /// Animation
+  final Animation<double> secondaryRouteAnimation;
+
   /// The widget below this widget in the tree.
   final Widget child;
+
+  /// The delegated transition.
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    // return (BuildContext context, Widget? child) {
+      final Animation<Offset> delegatedPositionAnimation =
+        CurvedAnimation(
+                  parent: secondaryAnimation,
+                  curve: Curves.linearToEaseOut,
+                  reverseCurve: Curves.easeInToLinear,
+                ).drive(_kMiddleLeftTween);
+      assert(debugCheckHasDirectionality(context));
+      final TextDirection textDirection = Directionality.of(context);
+      return SlideTransition(
+          position: delegatedPositionAnimation,
+          textDirection: textDirection,
+          transformHitTests: false,
+          child: child,
+        );
+    // };
+  }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    return SlideTransition(
-      position: _secondaryPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
+    return DelegatedTransition(
+      context: context,
+      animation: secondaryRouteAnimation,
+      builder: (BuildContext context, Widget? child) {
+        return SlideTransition(
+          position: _secondaryPositionAnimation,
+          textDirection: textDirection,
+          transformHitTests: false,
+          child: child,
+        );
+      },
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,

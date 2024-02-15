@@ -76,6 +76,38 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   // Used by all of the transition animations.
   static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
 
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: _transitionCurve,
+        reverseCurve: _transitionCurve.flipped,
+      ),
+    );
+
+    final CurvedAnimation primaryAnimation = CurvedAnimation(
+      parent: ReverseAnimation(secondaryAnimation),
+      curve: _transitionCurve,
+      reverseCurve: _transitionCurve.flipped,
+    );
+
+    final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
+
+    return AnimatedBuilder(
+      animation: secondaryAnimation,
+      child: FractionalTranslation(
+        translation: secondaryTranslationAnimation.value,
+        child: child,
+      ),
+      builder: (BuildContext context, Widget? child) {
+        return FractionalTranslation(
+          translation: secondaryTranslationAnimation.value,
+          child: child,
+        );
+      },
+    );
+  }
+
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
   final Widget child;
@@ -127,19 +159,26 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
               ),
             );
           },
-          child: AnimatedBuilder(
+          child: DelegatedTransition(
+            context: context,
             animation: secondaryAnimation,
-            child: FractionalTranslation(
-              translation: primaryTranslationAnimation.value,
-              child: child,
-            ),
             builder: (BuildContext context, Widget? child) {
-              return FractionalTranslation(
-                translation: secondaryTranslationAnimation.value,
-                child: child,
+              return AnimatedBuilder(
+                animation: secondaryAnimation,
+                child: FractionalTranslation(
+                  translation: primaryTranslationAnimation.value,
+                  child: child,
+                ),
+                builder: (BuildContext context, Widget? child) {
+                  return FractionalTranslation(
+                    translation: secondaryTranslationAnimation.value,
+                    child: child,
+                  );
+                },
               );
             },
-          ),
+            child: child,
+          )
         );
       },
     );
@@ -249,28 +288,35 @@ class _ZoomPageTransition extends StatelessWidget {
           child: child,
         );
       },
-      child: DualTransitionBuilder(
-        animation: ReverseAnimation(secondaryAnimation),
-        forwardBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomEnterTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
-            reverse: true,
-            child: child,
-          );
-        },
-        reverseBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomExitTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting,
+      child: DelegatedTransition(
+        context: context,
+        animation: secondaryAnimation,
+        builder: (BuildContext context, Widget? child) {
+          return DualTransitionBuilder(
+            animation: ReverseAnimation(secondaryAnimation),
+            forwardBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Widget? child,
+            ) {
+              return _ZoomEnterTransition(
+                animation: animation,
+                allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
+                reverse: true,
+                child: child,
+              );
+            },
+            reverseBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Widget? child,
+            ) {
+              return _ZoomExitTransition(
+                animation: animation,
+                allowSnapshotting: allowSnapshotting,
+                child: child,
+              );
+            },
             child: child,
           );
         },
@@ -578,6 +624,11 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
 
+  /// Delegate animation
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    return _OpenUpwardsPageTransition.delegateTransition(context, child, secondaryAnimation);
+  }
+
   @override
   Widget buildTransitions<T>(
     PageRoute<T>? route,
@@ -653,6 +704,37 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   // intended to allow us to profile and fix the underlying performance issues
   // for the Impeller backend.
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
+
+  /// The delegated transition.
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    return DualTransitionBuilder(
+      animation: ReverseAnimation(secondaryAnimation),
+      forwardBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomEnterTransition(
+          animation: animation,
+          allowSnapshotting: true ,
+          reverse: true,
+          child: child,
+        );
+      },
+      reverseBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomExitTransition(
+          animation: animation,
+          allowSnapshotting: true,
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
 
   @override
   Widget buildTransitions<T>(
