@@ -34,7 +34,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     await evalFlutter('build', options: <String>[
       'web',
       if (benchmarkOptions.useWasm) ...<String>[
-        '--O4',
+        '-O4',
         '--wasm',
         '--no-strip-wasm',
       ],
