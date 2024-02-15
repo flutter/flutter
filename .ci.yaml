@@ -283,10 +283,6 @@ platform_properties:
     properties:
       # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
       arch: arm
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows
       cpu: arm64
   windows_android:
@@ -2484,7 +2480,6 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
