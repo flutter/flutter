@@ -13,6 +13,10 @@
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/render_target.h"
 
+@protocol FlutterMetalDrawable <MTLDrawable>
+- (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
+@end
+
 namespace impeller {
 
 #pragma GCC diagnostic push
@@ -254,6 +258,14 @@ bool SurfaceMTL::Present() const {
     id<MTLCommandBuffer> command_buffer =
         ContextMTL::Cast(context.get())
             ->CreateMTLCommandBuffer("Present Waiter Command Buffer");
+
+    id<CAMetalDrawable> metal_drawable =
+        reinterpret_cast<id<CAMetalDrawable>>(drawable_);
+    if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
+      [(id<FlutterMetalDrawable>)metal_drawable
+          flutterPrepareForPresent:command_buffer];
+    }
+
     // If the threads have been merged, or there is a pending frame capture,
     // then block on cmd buffer scheduling to ensure that the
     // transaction/capture work correctly.
