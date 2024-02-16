@@ -866,17 +866,9 @@ final class AssetTransformerEntry {
       return (null, <String>['Expected "package" to be a String. Found ${package.runtimeType} instead.']);
     }
 
-    final Object? argsYaml = yaml['args'];
-    late final List<String> args;
-    if (argsYaml != null) {
-      final (List<String>? parsedArgs, List<String> argsErrors) = _parseList(yaml['args'], 'args', 'String');
-
-      if (argsErrors.isNotEmpty) {
-        return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
-      }
-      args = parsedArgs!;
-    } else {
-      args = <String>[];
+    final (List<String>? args, List<String> argsErrors) = _parseArgsSection(yaml['args']);
+    if (argsErrors.isNotEmpty) {
+      return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
     }
 
     return (
@@ -886,6 +878,13 @@ final class AssetTransformerEntry {
       ),
       <String>[],
     );
+  }
+
+  static (List<String>? args, List<String> errors) _parseArgsSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+    return _parseList(yaml, 'args', 'String');
   }
 
   @override
