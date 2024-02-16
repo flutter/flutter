@@ -23,6 +23,7 @@ dependencies:
   engine_repo_tools:
     path: ../pkg/engine_repo_tools
   file: any
+  logging: any
   meta: any
   path: any
   platform: any
@@ -51,6 +52,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
   litetest:
     path: ../../testing/litetest
+  logging:
+    path: ../../../third_party/dart/third_party/pkg/logging
   meta:
     path: ../../../third_party/dart/pkg/meta
   path:

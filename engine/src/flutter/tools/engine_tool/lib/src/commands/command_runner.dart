@@ -43,10 +43,10 @@ final class ToolCommandRunner extends CommandRunner<int> {
     try{
       return await runCommand(parse(args)) ?? 1;
     } on FormatException catch (e) {
-      environment.stderr.writeln(e);
+      environment.logger.error(e);
       return 1;
     } on UsageException catch (e) {
-      environment.stderr.writeln(e);
+      environment.logger.error(e);
       return 1;
     }
   }
