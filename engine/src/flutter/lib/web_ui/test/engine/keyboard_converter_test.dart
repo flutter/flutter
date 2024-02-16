@@ -1142,6 +1142,21 @@ void testMain() {
     );
     keyDataList.clear();
   });
+
+  test('Ignore DOM event when event.key is null', () {
+    // Regression test for https://github.com/flutter/flutter/issues/114620.
+    final List<ui.KeyData> keyDataList = <ui.KeyData>[];
+    final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
+      keyDataList.add(key);
+      return true;
+    }, OperatingSystem.linux);
+
+    converter.handleEvent(keyDownEvent(null, null));
+    converter.handleEvent(keyUpEvent(null, null));
+
+    // Invalid key events are ignored.
+    expect(keyDataList, isEmpty);
+  });
 }
 
 // Flags used for the `modifiers` argument of `key***Event` functions.
@@ -1153,7 +1168,7 @@ const int kMeta = 0x8;
 // Utility functions to make code more concise.
 //
 // To add timeStamp , use syntax `..timeStamp = `.
-MockKeyboardEvent keyDownEvent(String code, String key, [int modifiers = 0, int location = 0]) {
+MockKeyboardEvent keyDownEvent(String? code, String? key, [int modifiers = 0, int location = 0]) {
   return MockKeyboardEvent(
     type: 'keydown',
     code: code,
@@ -1166,7 +1181,7 @@ MockKeyboardEvent keyDownEvent(String code, String key, [int modifiers = 0, int 
   );
 }
 
-MockKeyboardEvent keyUpEvent(String code, String key, [int modifiers = 0, int location = 0]) {
+MockKeyboardEvent keyUpEvent(String? code, String? key, [int modifiers = 0, int location = 0]) {
   return MockKeyboardEvent(
     type: 'keyup',
     code: code,
