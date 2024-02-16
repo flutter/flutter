@@ -1024,7 +1024,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     final bool highContrast = _isHighContrastDependent
       && (MediaQuery.maybeHighContrastOf(context) ?? false);
 
-
     final Color resolved = switch ((brightness, level, highContrast)) {
       (Brightness.light, CupertinoUserInterfaceLevelData.base,     false) => color,
       (Brightness.light, CupertinoUserInterfaceLevelData.base,     true)  => highContrastColor,
