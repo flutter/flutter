@@ -103,6 +103,13 @@ std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
   return context;
 }
 
+// static
+size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
+  // Never create more than 4 worker threads. Attempt to use up to
+  // half of the available concurrency.
+  return std::clamp(hardware_concurrency / 2ull, /*lo=*/1ull, /*hi=*/4ull);
+}
+
 namespace {
 thread_local uint64_t tls_context_count = 0;
 uint64_t CalculateHash(void* ptr) {
@@ -133,7 +140,7 @@ void ContextVK::Setup(Settings settings) {
   }
 
   raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
-      std::min(4u, std::thread::hardware_concurrency()));
+      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
   raster_message_loop_->PostTaskToAllWorkers([]() {
     // Currently we only use the worker task pool for small parts of a frame
     // workload, if this changes this setting may need to be adjusted.
