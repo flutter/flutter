@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+import '../impeller_test_helpers.dart';
 import 'widget_inspector_test_utils.dart';
 
 // Start of block of code where widget creation location line numbers and
@@ -4551,7 +4552,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    });
+    }, skip: impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
 
     group('layout explorer', () {
       const String group = 'test-group';

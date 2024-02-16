@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../impeller_test_helpers.dart';
+
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
 const String _expText = 'Éxp'; // renders in the test font as:
 
@@ -38,7 +40,7 @@ void main() {
         const Offset(799, 599): const Color(0x00000000), // the background
       },
     );
-  }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
 
   testWidgets('Default text color', (WidgetTester tester) async {
     await tester.pumpWidget(const ColoredBox(
@@ -63,7 +65,7 @@ void main() {
         const Offset(799, 599): const Color(0xFFABCDEF), // the background
       },
     );
-  }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
 
   testWidgets('Default text selection color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -118,7 +120,7 @@ void main() {
         const Offset(799, 599): const Color(0xFFFFFFFF), // the background
       },
     );
-  }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
 }
 
 Color _getPixel(ByteData bytes, int x, int y, int width) {
