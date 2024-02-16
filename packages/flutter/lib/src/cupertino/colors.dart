@@ -1031,10 +1031,10 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       (Brightness.light, CupertinoUserInterfaceLevelData.base,     true)  => highContrastColor,
       (Brightness.light, CupertinoUserInterfaceLevelData.elevated, false) => elevatedColor,
       (Brightness.light, CupertinoUserInterfaceLevelData.elevated, true)  => highContrastElevatedColor,
-      (Brigntness.dark,  CupertinoUserInterfaceLevelData.base,     false) => darkColor,
-      (Brigntness.dark,  CupertinoUserInterfaceLevelData.base,     true)  => darkHighContrastColor,
-      (Brigntness.dark,  CupertinoUserInterfaceLevelData.elevated, false) => darkElevatedColor,
-      (Brigntness.dark,  CupertinoUserInterfaceLevelData.elevated, true)  => darkHighContrastElevatedColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.base,     false) => darkColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.base,     true)  => darkHighContrastColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.elevated, false) => darkElevatedColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.elevated, true)  => darkHighContrastElevatedColor,
     };
 
     Element? debugContext;
