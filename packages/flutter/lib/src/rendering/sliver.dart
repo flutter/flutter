@@ -1729,22 +1729,11 @@ abstract class RenderSliver extends RenderObject {
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
 mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
-    bool rightWayUp;
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        rightWayUp = false;
-      case AxisDirection.down:
-      case AxisDirection.right:
-        rightWayUp = true;
-    }
-    switch (constraints.growthDirection) {
-      case GrowthDirection.forward:
-        break;
-      case GrowthDirection.reverse:
-        rightWayUp = !rightWayUp;
-    }
-    return rightWayUp;
+    final bool reversed = axisDirectionIsReversed(constraints.axisDirection);
+    return switch (constraints.growthDirection) {
+      GrowthDirection.forward => !reversed,
+      GrowthDirection.reverse => reversed,
+    };
   }
 
   /// Utility function for [hitTestChildren] for use when the children are

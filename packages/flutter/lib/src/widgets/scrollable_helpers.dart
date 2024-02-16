@@ -426,49 +426,11 @@ class ScrollAction extends ContextAction<ScrollIntent> {
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
   static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = _calculateScrollIncrement(state, type: intent.type);
-    switch (intent.direction) {
-      case AxisDirection.down:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return -increment;
-          case AxisDirection.down:
-            return increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.up:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return increment;
-          case AxisDirection.down:
-            return -increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.left:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return -increment;
-          case AxisDirection.left:
-            return increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
-      case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return increment;
-          case AxisDirection.left:
-            return -increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
+    if (axisDirectionToAxis(intent.direction) == axisDirectionToAxis(state.axisDirection)) {
+      final double increment = _calculateScrollIncrement(state, type: intent.type);
+      return intent.direction == state.axisDirection ? increment : -increment;
     }
+    return 0.0;
   }
 
   @override

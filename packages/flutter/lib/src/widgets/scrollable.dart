@@ -885,7 +885,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // direction, and any modifiers specified by the ScrollBehavior taken into
   // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    late double delta;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
       // Axes are only flipped for physical mouse wheel input.
@@ -896,21 +895,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       // axis.
       event.kind == PointerDeviceKind.mouse;
 
-    switch (widget.axis) {
-      case Axis.horizontal:
-        delta = flipAxes
-          ? event.scrollDelta.dy
-          : event.scrollDelta.dx;
-      case Axis.vertical:
-        delta = flipAxes
-          ? event.scrollDelta.dx
-          : event.scrollDelta.dy;
-    }
+    final Axis axis = flipAxes ? flipAxis(widget.axis) : widget.axis;
+    final double delta = switch (axis) {
+      Axis.horizontal => event.scrollDelta.dx,
+      Axis.vertical   => event.scrollDelta.dy,
+    };
 
-    if (axisDirectionIsReversed(widget.axisDirection)) {
-      delta *= -1;
-    }
-    return delta;
+    return axisDirectionIsReversed(widget.axisDirection) ? -delta : delta;
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
