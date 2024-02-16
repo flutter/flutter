@@ -194,6 +194,12 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   bool _hasTerminal = true;
 
   @override
+  String get lineTerminator => '\n';
+  set lineTerminator(String value) {
+    throw UnimplementedError('Setting the line terminator is not supported');
+  }
+
+  @override
   io.IOSink get nonBlocking => this;
 
   @override
