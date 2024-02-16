@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:watcher/src/watch_event.dart';
+import 'package:watcher/watcher.dart';
 
 import 'environment.dart';
 import 'exceptions.dart';

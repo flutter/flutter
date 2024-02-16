@@ -9,7 +9,7 @@ import 'dart:math' as math;
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
-import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_api/backend.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
