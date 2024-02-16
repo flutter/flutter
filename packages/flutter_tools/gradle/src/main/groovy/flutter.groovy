@@ -67,7 +67,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
-    String source
+    String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -324,8 +324,12 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
         // supported range.
-        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks")
-                && project.getProperty("skipDependencyChecks");
+        // TODO(gmackall) Dependency version checking is currently implemented as an additional
+        // Gradle plugin because we can't import it from Groovy code. As part of the Groovy
+        // -> Kotlin migration, we should remove this complexity and perform the checks inside
+        // of the main Flutter Gradle Plugin.
+        // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
+        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks");
         if (!shouldSkipDependencyChecks) {
             try {
                 final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
@@ -829,7 +833,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Properties getPluginList() {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        File pluginsFile = new File(getFlutterSourceDirectory(), '.flutter-plugins')
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
@@ -866,7 +870,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
+        File pluginsDependencyFile = new File(getFlutterSourceDirectory(), '.flutter-plugins-dependencies')
         if (pluginsDependencyFile.exists()) {
             def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
             assert(object instanceof Map)

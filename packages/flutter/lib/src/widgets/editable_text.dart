@@ -178,6 +178,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
+///
 /// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
@@ -198,6 +199,24 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
+  ///
+  /// The initial selection is `TextSelection.collapsed(offset: -1)`.
+  /// This indicates that there is no selection at all ([TextSelection.isValid]
+  /// is false in this case). When a text field is built with a controller whose
+  /// selection is not valid, the text field will update the selection when it
+  /// is focused (the selection will be an empty selection positioned at the
+  /// end of the text).
+  //
+  /// Consider using [TextEditingController.fromValue] to initialize both the
+  /// text and the selection.
+  ///
+  /// {@tool dartpad}
+  /// This example creates a [TextField] with a [TextEditingController] whose
+  /// initial selection is empty (collapsed) and positioned at the beginning
+  /// of the text (offset is 0).
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/text_editing_controller.1.dart **
+  /// {@end-tool}
   TextEditingController({ String? text })
     : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
@@ -4166,7 +4185,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
-  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
+  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled && !renderEditable.floatingCursorOn;
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
@@ -4230,7 +4249,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
-    _cursorBlinkOpacityController.value = 0.0;
+    // If the cursor is animating, stop the animation, and we always
+    // want the cursor to be visible when the floating cursor is enabled.
+    _cursorBlinkOpacityController.value = renderEditable.floatingCursorOn ? 1.0 : 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     if (resetCharTicks) {

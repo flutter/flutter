@@ -1686,17 +1686,11 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 
   @override
   String toString() {
-    String? extra;
-    switch (_writers) {
-      case 0:
-        extra = ', orphan';
-      case 1:
-        // normal case
-        break;
-      default:
-        extra = ', $_writers WRITERS ASSIGNED';
-        break;
-    }
+    final String? extra = switch (_writers) {
+      0 => ', orphan',
+      1 => null, // normal case
+      _ => ', $_writers WRITERS ASSIGNED',
+    };
     return '${objectRuntimeType(this, 'SliverOverlapAbsorberHandle')}($layoutExtent$extra)';
   }
 }
