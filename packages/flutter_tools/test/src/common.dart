@@ -17,6 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
+// ignore: implementation_imports
 import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 

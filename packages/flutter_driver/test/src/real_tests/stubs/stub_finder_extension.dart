@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore: implementation_imports
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/src/common/find.dart';
+// ignore: implementation_imports
 import 'package:flutter_test/src/finders.dart';
 
 import 'stub_finder.dart';

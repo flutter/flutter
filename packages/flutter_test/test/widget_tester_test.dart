@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/expect.dart' as matcher;
+// ignore: implementation_imports
 import 'package:matcher/src/expect/async_matcher.dart';
 
 import 'multi_view_testing.dart';

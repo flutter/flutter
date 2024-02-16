@@ -5,6 +5,7 @@
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/driver/web_driver.dart';
+// ignore: implementation_imports
 import 'package:webdriver/src/common/log.dart';
 
 import '../../common.dart';

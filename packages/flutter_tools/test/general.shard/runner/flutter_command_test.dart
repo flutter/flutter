@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+// ignore: implementation_imports
 import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 

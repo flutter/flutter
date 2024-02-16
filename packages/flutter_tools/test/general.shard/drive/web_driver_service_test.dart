@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+// ignore: implementation_imports
 import 'package:file/src/interface/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';

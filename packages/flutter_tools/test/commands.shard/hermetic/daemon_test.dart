@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
+// ignore: implementation_imports
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';

@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+// ignore: implementation_imports
 import 'package:crypto/src/digest_sink.dart';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;

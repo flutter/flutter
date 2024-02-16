@@ -5,6 +5,7 @@
 import 'dart:convert' show jsonEncode;
 import 'dart:io' show Directory, File;
 
+// ignore: implementation_imports
 import 'package:coverage/src/hitmap.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart' show FileSystem;
