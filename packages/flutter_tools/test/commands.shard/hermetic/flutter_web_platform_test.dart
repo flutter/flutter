@@ -130,7 +130,7 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        extraFrontEndOptions: ['--dartdevc-module-format=ddc'],
+        extraFrontEndOptions: <String>['--dartdevc-module-format=ddc'],
       ),
       webMemoryFS: WebMemoryFS(),
       fileSystem: fileSystem,
