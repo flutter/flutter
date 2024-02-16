@@ -10868,6 +10868,7 @@ void main() {
         expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
+        final double lineHeight = findRenderEditable(tester).preferredLineHeight;
 
         // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
         final TestGesture gesture = await tester.startGesture(
@@ -10902,35 +10903,35 @@ void main() {
 
         // Drag, down after the triple tap, to select line by line.
         // Moving down will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 35);
 
         // Moving down will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 54);
 
         // Moving down will extend the selection to the last line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 40.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 4));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 72);
 
         // Moving up will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 54);
 
         // Moving up will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 1));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
@@ -10969,6 +10970,7 @@ void main() {
         expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
+        final double lineHeight = findRenderEditable(tester).preferredLineHeight;
 
         // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
         final TestGesture gesture = await tester.startGesture(
@@ -11003,35 +11005,35 @@ void main() {
 
         // Drag, down after the triple tap, to select paragraph by paragraph.
         // Moving down will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 36);
 
         // Moving down will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 55);
 
         // Moving down will extend the selection to the last line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 40.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 4));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 72);
 
         // Moving up will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 55);
 
         // Moving up will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
