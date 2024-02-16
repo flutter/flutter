@@ -80,6 +80,7 @@ vars = {
   'dart_pub_rev': '4ab2e3663f0a98be40427e004e789caebf3ea72e',
   'dart_tools_rev': '2ef7673ca4c8eb346debe6d628f0196788fc3c66',
   'dart_watcher_rev': '21858a41da1482922e03ee65cdf2169d01d59a67',
+  "dart_web_rev": "a54a1f0447979f9a3ea220199eca849ffb214e91",
   'dart_webdev_rev': '629c63214466a77d0994e9b8003120f48af9ef1d',
   'dart_webkit_inspection_protocol_rev': '07295b9a5a1f1851666269128e95a9644d65107a',
   'dart_yaml_edit_rev': '2a9a11bee120d507d61d501c34585440be8c12b6',
@@ -497,7 +498,10 @@ deps = {
   'src/third_party/dart/third_party/pkg/watcher':
    Var('dart_git') + '/watcher.git' + '@' + Var('dart_watcher_rev'),
 
-  'src/third_party/dart/third_party/pkg/web_socket_channel':
+  'src/third_party/dart/third_party/pkg/web':
+   Var('dart_git') + '/web.git' + '@' + Var('dart_web_rev'),
+
+   'src/third_party/dart/third_party/pkg/web_socket_channel':
    Var('dart_git') + '/web_socket_channel.git@5241175e7c66271850d6e75fb9ec90068f9dd3c4',
 
   'src/third_party/dart/third_party/pkg/webdev':
