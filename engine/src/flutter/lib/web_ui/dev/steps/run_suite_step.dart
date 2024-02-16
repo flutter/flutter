@@ -180,6 +180,11 @@ class RunSuiteStep implements PipelineStep {
       // do not collect goldens.
       return null;
     }
+    if (suite.runConfig.browser == BrowserName.safari) {
+      // Goldens from Safari produce too many diffs, disabled for now.
+      // See https://github.com/flutter/flutter/issues/143591
+      return null;
+    }
     final Renderer renderer = suite.testBundle.compileConfigs.first.renderer;
     final CanvasKitVariant? variant = suite.runConfig.variant;
     final io.Directory workDirectory = getSkiaGoldDirectoryForSuite(suite);
