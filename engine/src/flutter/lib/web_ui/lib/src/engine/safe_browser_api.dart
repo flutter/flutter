@@ -24,9 +24,6 @@ import 'display.dart';
 import 'dom.dart';
 import 'vector_math.dart';
 
-export 'package:js/js_util.dart' show allowInterop;
-
-
 /// Returns true if [object] has property [name], false otherwise.
 ///
 /// This is equivalent to writing `name in object` in plain JavaScript.
