@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_api/backend.dart';
 
 import 'browser.dart';
 import 'browser_process.dart';
