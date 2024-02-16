@@ -1469,13 +1469,7 @@ class Navigator extends StatefulWidget {
     this.requestFocus = true,
     this.restorationScopeId,
     this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
-    this.transitionsAreControlled = false,
   });
-
-  // TODO(justinmc): Maybe don't need this because it's actually the top Navigator
-  // that cares? And it can see if MBSRoute was pushed?
-  // TODO(justinmc): Must be nested when this is true?
-  final bool transitionsAreControlled;
 
   /// The list of pages with which to populate the history.
   ///

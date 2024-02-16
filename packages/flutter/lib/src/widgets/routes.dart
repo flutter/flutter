@@ -332,7 +332,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   VoidCallback? _trainHoppingListenerRemover;
 
   void _updateSecondaryAnimation(Route<dynamic>? nextRoute) {
-    print('justin _updateSecondaryAnimation');
     // There is an existing train hopping in progress. Unfortunately, we cannot
     // dispose current train hopping animation until we replace it with a new
     // animation.
