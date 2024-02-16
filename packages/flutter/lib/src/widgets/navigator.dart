@@ -67,6 +67,9 @@ typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, Obje
 /// Signature for the [Navigator.popUntil] predicate argument.
 typedef RoutePredicate = bool Function(Route<dynamic> route);
 
+/// Convenience function for passing around a builder for a transiton's secondary animation.
+typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Widget? child, Animation<double> animation);
+
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
@@ -4847,7 +4850,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
-  Future<T?> push<T extends Object?>(Route<T> route, [Widget Function(BuildContext context, Widget? child, Animation<double> animation)? delegateBuilder]) {
+  Future<T?> push<T extends Object?>(Route<T> route, [DelegatedTransitionBuilder? delegateBuilder]) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
     delegateTransitionBuilder = delegateBuilder;
     return route.popped;
@@ -5518,13 +5521,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final ValueNotifier<bool> userGestureInProgressNotifier = ValueNotifier<bool>(false);
 
   /// Notifies its listeners if there is a delegate transition from the top route.
-  final ValueNotifier<Widget Function(BuildContext context, Widget? child, Animation<double> animation)?> delegateTransitionBuilderNotifier = ValueNotifier<Widget Function(BuildContext context, Widget? child, Animation<double> animation)?>(null);
+  final ValueNotifier<DelegatedTransitionBuilder?> delegateTransitionBuilderNotifier = ValueNotifier<Widget Function(BuildContext context, Widget? child, Animation<double> animation)?>(null);
 
   /// Sets the delegate transition.
-  set delegateTransitionBuilder(Widget Function(BuildContext context, Widget? child, Animation<double> animation)? builder) => delegateTransitionBuilderNotifier.value = builder;
+  set delegateTransitionBuilder(DelegatedTransitionBuilder? builder) => delegateTransitionBuilderNotifier.value = builder;
 
   /// Gets the delegate transition.
-  Widget Function(BuildContext context, Widget? child, Animation<double> animation)? get delegateTransitionBuilder => delegateTransitionBuilderNotifier.value;
+  DelegatedTransitionBuilder? get delegateTransitionBuilder => delegateTransitionBuilderNotifier.value;
 
   /// The navigator is being controlled by a user gesture.
   ///
