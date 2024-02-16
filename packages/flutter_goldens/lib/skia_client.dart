@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:ffi' show Abi;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
@@ -487,8 +488,11 @@ class SkiaGoldClient {
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
   String _getKeysJSON() {
+    final Abi abi = Abi.current();
+    print(abi.toString());
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -560,6 +564,7 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
+    final Abi abi = Abi.current();
     final Map<String, Object?> keys = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
@@ -567,6 +572,7 @@ class SkiaGoldClient {
         'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
