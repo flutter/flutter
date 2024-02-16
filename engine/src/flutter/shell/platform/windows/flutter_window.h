@@ -194,6 +194,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual void OnWindowStateEvent(WindowStateEvent event);
 
  protected:
+  // Base constructor for mocks.
+  FlutterWindow();
+
   // Win32's DefWindowProc.
   //
   // Used as the fallback behavior of HandleMessage. Exposed for dependency
@@ -321,7 +324,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
-  WindowBindingHandlerDelegate* binding_handler_delegate_;
+  WindowBindingHandlerDelegate* binding_handler_delegate_ = nullptr;
 
   // The last cursor set by Flutter. Defaults to the arrow cursor.
   HCURSOR current_cursor_;
