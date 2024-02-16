@@ -764,7 +764,7 @@ class AssetsEntry {
         '$_flavorKey list of entry "$path"',
         'String',
       );
-      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) = parseTransformersSection(yaml[_transformersKey]);
+      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) = _parseTransformersSection(yaml[_transformersKey]);
       final List<String> errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
         ...transformersErrors.map((String e) => 'In $_transformersKey section of asset "$path": $e'),
@@ -794,12 +794,8 @@ class AssetsEntry {
       'Expected a string or an object. Got ${yaml.runtimeType} instead.');
   }
 
-  static (List<AssetTransformerEntry>?, List<String> errors)
-      parseTransformersSection(Object? yaml) {
-    if (yaml == null) {
-      return (null, <String>[]);
-    }
-    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateList<YamlMap>(
+  static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(Object? yaml) {
+    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateListNullable<YamlMap>(
       yaml,
       '$_transformersKey list',
       'Map',
