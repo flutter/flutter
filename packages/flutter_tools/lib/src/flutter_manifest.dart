@@ -795,7 +795,10 @@ class AssetsEntry {
   }
 
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(Object? yaml) {
-    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateListNullable<YamlMap>(
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateList<YamlMap>(
       yaml,
       '$_transformersKey list',
       'Map',
