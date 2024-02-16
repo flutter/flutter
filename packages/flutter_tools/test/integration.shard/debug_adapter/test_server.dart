@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dds/src/dap/logging.dart';
+import 'package:dds/dap.dart' show Logger;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/server.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
