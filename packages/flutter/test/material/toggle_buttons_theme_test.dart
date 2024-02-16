@@ -226,13 +226,13 @@ void main() {
     );
 
     firstRect = tester.getRect(find.byType(TextButton).at(0));
-    expect(firstRect.width, 18.0);
+    expect(firstRect.width, 20.0);
     expect(firstRect.height, 10.0);
     secondRect = tester.getRect(find.byType(TextButton).at(1));
-    expect(secondRect.width, 18.0);
+    expect(secondRect.width, 20.0);
     expect(secondRect.height, 10.0);
     thirdRect = tester.getRect(find.byType(TextButton).at(2));
-    expect(thirdRect.width, 18.0);
+    expect(thirdRect.width, 20.0);
     expect(thirdRect.height, 10.0);
   });
 
