@@ -41,3 +41,10 @@ viewport.
 
 Then set the scenario from the Android or iOS app by calling `set_scenario` on
 platform channel `driver`.
+
+## Output validation
+
+When using `//flutter/testing/scenario_app/run_android_tests.sh` the generated
+output will be checked against a golden file at
+`//flutter/testing/scenario_app_android_output.txt` to make sure all output was
+generated. A patch will be printed to stdout if they don't match.

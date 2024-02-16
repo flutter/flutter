@@ -16,6 +16,7 @@ environment:
 # relative to this directory into //third_party/dart, or //third_party/pkg
 dependencies:
   args: any
+  dir_contents_diff: any
   engine_repo_tools: any
   path: any
   process: any
@@ -30,6 +31,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/collection
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
+  dir_contents_diff:
+    path: ../../tools/dir_contents_diff
   engine_repo_tools:
     path: ../../tools/pkg/engine_repo_tools
   file:
