@@ -872,7 +872,7 @@ final class AssetTransformerEntry {
     final (List<String>? args, List<String> argsErrors) = _parseNullableList(yaml['args'], 'args', 'String');
 
     if (argsErrors.isNotEmpty) {
-      return (null, argsErrors.map((String e) => 'In args section of transformer $package: $e').toList());
+      return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
     }
 
     return (

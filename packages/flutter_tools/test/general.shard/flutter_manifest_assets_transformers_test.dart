@@ -158,8 +158,8 @@ flutter:
         logger.errorText,
         'Unable to parse assets section.\n'
         'In transformers section of asset "asset/hello.txt": In args section '
-        'of transformer my_transformer: Expected args to be a list of String, '
-        'but got hello (String).\n',
+        'of transformer using package "my_transformer": Expected args to be a '
+        'list of String, but got hello (String).\n',
       );
     });
   });
