@@ -354,6 +354,7 @@ void main([List<String> args = const <String>[]]) {
           TimelineStream.dart,
           TimelineStream.embedder,
         ],
+        retainPriorEvents: true,
       );
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
