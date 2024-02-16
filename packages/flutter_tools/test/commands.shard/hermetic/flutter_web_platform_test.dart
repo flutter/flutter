@@ -50,12 +50,18 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
 
     for (final HostArtifact artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-      HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
-      HostArtifact.webPrecompiledCanvaskitSoundSdk,
-      HostArtifact.webPrecompiledCanvaskitSdk,
-      HostArtifact.webPrecompiledSoundSdk,
-      HostArtifact.webPrecompiledSdk,
+      HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
+      HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
+      HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
+      HostArtifact.webPrecompiledAmdCanvaskitSdk,
+      HostArtifact.webPrecompiledAmdSoundSdk,
+      HostArtifact.webPrecompiledAmdSdk,
+      HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk,
+      HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk,
+      HostArtifact.webPrecompiledDdcCanvaskitSoundSdk,
+      HostArtifact.webPrecompiledDdcCanvaskitSdk,
+      HostArtifact.webPrecompiledDdcSoundSdk,
+      HostArtifact.webPrecompiledDdcSdk,
     ]) {
       final File artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
@@ -63,7 +69,7 @@ void main() {
     }
   });
 
-  testUsingContext('FlutterWebPlatform serves the correct dart_sdk.js for the passed web renderer', () async {
+  testUsingContext('FlutterWebPlatform serves the correct dart_sdk.js (amd module system) for the passed web renderer', () async {
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -99,7 +105,52 @@ void main() {
       Uri.parse('http://localhost/dart_sdk.js'),
     ));
     final String contents = await response.readAsString();
-    expect(contents, HostArtifact.webPrecompiledCanvaskitSoundSdk.name);
+    expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSoundSdk.name);
+    await webPlatform.close();
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Logger: () => logger,
+  });
+
+  testUsingContext('FlutterWebPlatform serves the correct dart_sdk.js (ddc module system) for the passed web renderer', () async {
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+    );
+    final MockServer server = MockServer();
+    fileSystem.directory('/test').createSync();
+    final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+      'ProjectRoot',
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: ['--dartdevc-module-format=ddc'],
+      ),
+      webMemoryFS: WebMemoryFS(),
+      fileSystem: fileSystem,
+      logger: logger,
+      chromiumLauncher: chromiumLauncher,
+      artifacts: artifacts,
+      processManager: processManager,
+      webRenderer: WebRendererMode.canvaskit,
+      serverFactory: () async => server,
+      testPackageUri: Uri.parse('test'),
+    );
+    final shelf.Handler? handler = server.mountedHandler;
+    expect(handler, isNotNull);
+    handler!;
+    final shelf.Response response = await handler(shelf.Request(
+      'GET',
+      Uri.parse('http://localhost/dart_sdk.js'),
+    ));
+    final String contents = await response.readAsString();
+    expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSoundSdk.name);
     await webPlatform.close();
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
