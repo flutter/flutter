@@ -920,6 +920,18 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
+      testWidgets('simulatedAccessibilityTraversal end Index supports empty traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(
+          home: Center(
+            child: Column(), // No nodes!
+          ),
+        ));
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal().map((SemanticsNode node) => node.label),
+          <String>[],
+        );
+      });
+
       testWidgets('starts traversal at semantics node for `startNode`', (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Center(
