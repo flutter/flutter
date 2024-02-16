@@ -519,7 +519,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           _validateFonts(yamlValue, errors);
         }
       case 'licenses':
-        final (_, List<String> filesErrors) = _validateList<String>(yamlValue, '"$yamlKey"', 'files');
+        final (_, List<String> filesErrors) = _parseList<String>(yamlValue, '"$yamlKey"', 'files');
         errors.addAll(filesErrors);
       case 'module':
         if (yamlValue is! YamlMap) {
@@ -554,7 +554,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-(List<T>? result, List<String> errors) _validateList<T>(Object? yamlList, String context, String typeAlias) {
+(List<T>? result, List<String> errors) _parseList<T>(Object? yamlList, String context, String typeAlias) {
   final List<String> errors = <String>[];
 
   if (yamlList is! YamlList) {
@@ -572,11 +572,11 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   return errors.isEmpty ? (List<T>.from(yamlList), <String>[]) : (null, errors);
 }
 
-(List<T>? result, List<String> errors) _validateListNullable<T>(Object? yamlList, String context, String typeAlias) {
+(List<T>? result, List<String> errors) _parseNullableList<T>(Object? yamlList, String context, String typeAlias) {
   if (yamlList == null) {
     return (null, <String>[]);
   }
-  return _validateList<T>(yamlList, context, typeAlias);
+  return _parseList<T>(yamlList, context, typeAlias);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
@@ -595,7 +595,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
       }
       if (valueMap.containsKey('libraries')) {
-        final (_, List<String> librariesErrors) = _validateList<String>(
+        final (_, List<String> librariesErrors) = _parseList<String>(
           valueMap['libraries'],
           '"libraries" key in the element at index $i of "${kvp.key}"',
           'String',
@@ -759,7 +759,7 @@ class AssetsEntry {
           'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
       }
 
-      final (List<String>? flavors, List<String> flavorsErrors) = _validateListNullable<String>(
+      final (List<String>? flavors, List<String> flavorsErrors) = _parseNullableList<String>(
         yaml[_flavorKey],
         '$_flavorKey list of entry "$path"',
         'String',
@@ -798,7 +798,7 @@ class AssetsEntry {
     if (yaml == null) {
       return (null, <String>[]);
     }
-    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateList<YamlMap>(
+    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _parseList<YamlMap>(
       yaml,
       '$_transformersKey list',
       'Map',
@@ -869,7 +869,7 @@ final class AssetTransformerEntry {
       return (null, <String>['Expected "package" to be a String. Found ${package.runtimeType} instead.']);
     }
 
-    final (List<String>? args, List<String> argsErrors) = _validateListNullable(yaml['args'], 'args', 'String');
+    final (List<String>? args, List<String> argsErrors) = _parseNullableList(yaml['args'], 'args', 'String');
 
     if (argsErrors.isNotEmpty) {
       return (null, argsErrors.map((String e) => 'In args section of transformer $package: $e').toList());
