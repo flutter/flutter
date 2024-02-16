@@ -161,7 +161,7 @@ class DelegatedTransition extends AnimatedBuilder {
   @override
   Widget build(BuildContext context) {
     final NavigatorState navigatorState = Navigator.of(context);
-    final Widget Function(BuildContext context, Widget? child, Animation<double> animation)? delegateTransitionBuilder = navigatorState.delegateTransitionBuilder;
+    final DelegatedTransitionBuilder? delegateTransitionBuilder = navigatorState.delegateTransitionBuilder;
     if (delegateTransitionBuilder == null) {
       return builder(context, child);
     }
