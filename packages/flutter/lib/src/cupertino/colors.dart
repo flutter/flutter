@@ -1013,24 +1013,28 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base]
   /// elevation level).
   CupertinoDynamicColor resolveFrom(BuildContext context) {
-    final bool darkTheme = _isPlatformBrightnessDependent
-      && CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
-
-    final bool elevated = _isInterfaceElevationDependent
-      && CupertinoUserInterfaceLevel.maybeOf(context) == CupertinoUserInterfaceLevelData.elevated;
+    Brightness brightness = Brightness.light;
+    if (_isPlatformBrightnessDependent) {
+      brightness = CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
+    }
 
     final bool highContrast = _isHighContrastDependent
       && (MediaQuery.maybeHighContrastOf(context) ?? false);
 
-    final Color resolved = switch ((darkTheme, elevated, highContrast)) {
-      (false, false, false) => color,
-      (false, false, true)  => highContrastColor,
-      (false, true, false)  => elevatedColor,
-      (false, true, true)   => highContrastElevatedColor,
-      (true, false, false)  => darkColor,
-      (true, false, true)   => darkHighContrastColor,
-      (true, true, false)   => darkElevatedColor,
-      (true, true, true)    => darkHighContrastElevatedColor,
+    final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
+      ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
+      : CupertinoUserInterfaceLevelData.base;
+
+
+    final Color resolved = switch ((brightness, level, highContrast)) {
+      (Brightness.light, CupertinoUserInterfaceLevelData.base,     false) => color,
+      (Brightness.light, CupertinoUserInterfaceLevelData.base,     true)  => highContrastColor,
+      (Brightness.light, CupertinoUserInterfaceLevelData.elevated, false) => elevatedColor,
+      (Brightness.light, CupertinoUserInterfaceLevelData.elevated, true)  => highContrastElevatedColor,
+      (Brigntness.dark,  CupertinoUserInterfaceLevelData.base,     false) => darkColor,
+      (Brigntness.dark,  CupertinoUserInterfaceLevelData.base,     true)  => darkHighContrastColor,
+      (Brigntness.dark,  CupertinoUserInterfaceLevelData.elevated, false) => darkElevatedColor,
+      (Brigntness.dark,  CupertinoUserInterfaceLevelData.elevated, true)  => darkHighContrastElevatedColor,
     };
 
     Element? debugContext;
