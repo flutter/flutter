@@ -1,4 +1,4 @@
-Signature: c01c112ffbd7427f87e0b1a8fbdf8776
+Signature: eb7d8463adce463df7f29f7a0403ee1c
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8829,7 +8829,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/base/SkTime.h + ../../../flutter/t
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlitMask.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlitMask_opts.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9121,7 +9120,6 @@ FILE: ../../../flutter/third_party/skia/src/base/SkTime.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts.cpp
-FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBlitMask.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBlitMask_opts.cpp
