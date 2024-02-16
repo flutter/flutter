@@ -154,7 +154,7 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBarAction] falls back to [Colors.transparent].
   final Color? actionBackgroundColor;
 
-  /// Overrides default value for [SnackBarAction.].
+  /// Overrides default value for [SnackBarAction.disabledBackgroundColor].
   ///
   /// If null, [SnackBarAction] falls back to [Colors.transparent].
   final Color? disabledActionBackgroundColor;
