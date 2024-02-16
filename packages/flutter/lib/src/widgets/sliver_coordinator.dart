@@ -63,13 +63,15 @@ class _SliverCoordinatorScope extends InheritedWidget {
 /// layout information for each [CoordinatedSliver] contained by the scroll view.
 ///
 /// This widget is intended for triggering animations or auto-scrolls in reaction to
-/// scroll notifications and changes in [CoordinatedSliver]s. It cannot be used to
-/// change sliver layouts. Typical use cases:
+/// scroll notifications and the concomittant layout changes in the scroll view's
+/// [CoordinatedSliver]s. It cannot be used to change sliver layouts. Typical use cases:
 ///
 /// - When a drag gesture ends: auto-scrolling a widget that overlaps the top
 /// or bottom of the viewport so that it's completely visible.
 /// - When a sliver scrolls under a pinned header, change the header's
 /// content or elevation with an animated transition.
+/// - Show an indicator while a special sliver is visible or when its
+/// visibility changes.
 ///
 /// {@tool dartpad}
 /// This example contains one [CoordinatedSliver] which is
@@ -201,7 +203,7 @@ class CoordinatedSliver extends SingleChildRenderObjectWidget {
     return data._get<_SliverLayoutInfo>(this)!.constraints;
   }
 
-  /// The [SliverGeometrys] computed for this sliver in the most recent
+  /// The [SliverGeometry] computed for this sliver in the most recent
   /// [CustomScrollView] layout.
   SliverGeometry getSliverGeometry(SliverCoordinatorData data) {
     assert(hasLayoutInfo(data));
