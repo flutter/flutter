@@ -187,6 +187,7 @@ class MemoryIOSink implements IOSink {
 
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
+  // ignore: override_on_non_overriding_member
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
     _hasTerminal = value;
