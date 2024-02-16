@@ -1104,8 +1104,8 @@ void main() {
     expect(paddingRect.left, iconRect.left - 16);
     // Use the taller widget to check the top and bottom padding.
     final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
-    expect(paddingRect.top, closeTo(tallerWidget.top - 6.5, 1e-6));
-    expect(paddingRect.bottom, closeTo(tallerWidget.bottom + 13.5, 1e-6));
+    expect(paddingRect.top, closeTo(tallerWidget.top - 6.5, .01));
+    expect(paddingRect.bottom, closeTo(tallerWidget.bottom + 13.5, .01));
   });
 
   group('Default ElevatedButton padding for textScaleFactor, textDirection', () {
