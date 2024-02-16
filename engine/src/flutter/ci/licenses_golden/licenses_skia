@@ -1,4 +1,4 @@
-Signature: eb7d8463adce463df7f29f7a0403ee1c
+Signature: c6f3926a6849858dcd3f332ff4c57481
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5063,7 +5063,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/base/SkTDArray.cpp + ../../../flut
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkEncodedInfo.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkParseEncodedOrigin.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkWuffsCodec.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/codec/SkWuffsCodec.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCanvasPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorSpaceXformSteps.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorSpaceXformSteps.h + ../../../flutter/third_party/skia/LICENSE
@@ -5279,7 +5278,6 @@ FILE: ../../../flutter/third_party/skia/src/base/SkTDArray.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkParseEncodedOrigin.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkWuffsCodec.cpp
-FILE: ../../../flutter/third_party/skia/src/codec/SkWuffsCodec.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkColorSpaceXformSteps.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkColorSpaceXformSteps.h
