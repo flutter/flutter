@@ -774,7 +774,7 @@ class AssetsEntry {
         return (
           null,
           <String>[
-            'Unable to parse the assets section in the pubspec.yaml file.',
+            'Unable to parse assets section.',
             ...errors
           ].join('\n'),
         );

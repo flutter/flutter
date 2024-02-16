@@ -85,7 +85,7 @@ flutter:
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(
         logger.errorText,
-        'Unable to parse the assets section in the pubspec.yaml file.\n'
+        'Unable to parse assets section.\n'
         'In transformers section of asset "asset/hello.txt": Expected '
         'transformers list to be a list of Map, but element at index 0 was a String.\n',
       );
@@ -109,7 +109,7 @@ flutter:
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(
         logger.errorText,
-        'Unable to parse the assets section in the pubspec.yaml file.\n'
+        'Unable to parse assets section.\n'
         'In transformers section of asset "asset/hello.txt": '
         'Expected "package" to be a String. Found YamlMap instead.\n',
       );
@@ -132,7 +132,7 @@ flutter:
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(
         logger.errorText,
-        'Unable to parse the assets section in the pubspec.yaml file.\n'
+        'Unable to parse assets section.\n'
         'In transformers section of asset "asset/hello.txt": Expected "package" to be a '
         'String. Found Null instead.\n',
       );
@@ -156,7 +156,7 @@ flutter:
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(
         logger.errorText,
-        'Unable to parse the assets section in the pubspec.yaml file.\n'
+        'Unable to parse assets section.\n'
         'In transformers section of asset "asset/hello.txt": In args section '
         'of transformer my_transformer: Expected args to be a list of String, '
         'but got hello (String).\n',

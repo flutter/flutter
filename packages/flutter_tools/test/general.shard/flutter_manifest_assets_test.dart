@@ -154,7 +154,7 @@ flutter:
 ''';
       FlutterManifest.createFromString(manifest, logger: logger);
       expect(logger.errorText, contains(
-        'Unable to parse the assets section in the pubspec.yaml file.\n'
+        'Unable to parse assets section.\n'
         'In flavors section of asset "assets/vanilla/": Expected flavors '
         'list of entry "assets/vanilla/" to be a list of String, but element '
         'at index 0 was a YamlMap.\n'
