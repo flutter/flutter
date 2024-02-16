@@ -983,7 +983,7 @@ dev_dependencies:
     ]);
 
     final String fileContent = fs.file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt')).readAsStringSync();
-    expect(fileContent, "2");
+    expect(fileContent, '2');
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.empty(),
