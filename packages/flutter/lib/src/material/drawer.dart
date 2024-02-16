@@ -676,8 +676,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
     final double dragAreaWidth = widget.edgeDragWidth ?? _kEdgeDragWidth + switch ((widget.alignment, Directionality.of(context))) {
       (DrawerAlignment.start, TextDirection.ltr) => MediaQuery.paddingOf(context).left,
-      (DrawerAlignment.end,   TextDirection.rtl) => MediaQuery.paddingOf(context).left,
       (DrawerAlignment.start, TextDirection.rtl) => MediaQuery.paddingOf(context).right,
+      (DrawerAlignment.end,   TextDirection.rtl) => MediaQuery.paddingOf(context).left,
       (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
     };
 
