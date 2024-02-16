@@ -761,7 +761,7 @@ class AssetsEntry {
 
       final (List<String>? flavors, List<String> flavorsErrors) = _parseNullableList<String>(
         yaml[_flavorKey],
-        '$_flavorKey list of entry "$path"',
+        _flavorKey,
         'String',
       );
       final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) = _parseTransformersSection(yaml[_transformersKey]);
