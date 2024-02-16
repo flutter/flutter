@@ -3041,8 +3041,7 @@ extension DomScreenOrientationExtension on DomScreenOrientation {
 
 // A helper class for managing a subscription. On construction it will add an
 // event listener of the requested type to the target. Calling [cancel] will
-// remove the listener. Caller is still responsible for calling [allowInterop]
-// on the listener before creating the subscription.
+// remove the listener.
 class DomSubscription {
   DomSubscription(
       this.target, String typeString, DartDomEventListener dartListener)
@@ -3268,9 +3267,6 @@ abstract class DomTrustedTypePolicyOptions {
   ///
   /// `createScriptURL` is a callback function that contains code to run when
   /// creating a TrustedScriptURL object.
-  ///
-  /// The following properties need to be manually wrapped in [allowInterop]
-  /// before being passed to this constructor: [createScriptURL].
   external factory DomTrustedTypePolicyOptions({
     JSFunction? createScriptURL,
   });
