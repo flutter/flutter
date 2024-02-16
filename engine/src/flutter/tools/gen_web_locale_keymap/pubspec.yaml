@@ -33,3 +33,5 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/term_glyph
   typed_data:
     path: ../../../third_party/dart/third_party/pkg/typed_data
+  web:
+    path: ../../../third_party/dart/third_party/pkg/web
