@@ -12,6 +12,19 @@
 namespace impeller {
 namespace testing {
 
+TEST(ContextVKTest, CommonHardwareConcurrencyConfigurations) {
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(100u), 4u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(9u), 4u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(8u), 4u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(7u), 3u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(6u), 3u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(5u), 2u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(4u), 2u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(3u), 1u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(2u), 1u);
+  EXPECT_EQ(ContextVK::ChooseThreadCountForWorkers(1u), 1u);
+}
+
 TEST(ContextVKTest, DeletesCommandPools) {
   std::weak_ptr<ContextVK> weak_context;
   std::weak_ptr<CommandPoolVK> weak_pool;
