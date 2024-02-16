@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Felfelé nézés",
   "searchWebButtonLabel": "Keresés az interneten",
   "shareButtonLabel": "Megosztás…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
