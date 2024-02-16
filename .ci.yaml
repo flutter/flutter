@@ -515,7 +515,6 @@ targets:
       task_name: abstract_method_smoke_test
       physical_devices: >-
         [
-          "--device", "model=shiba,version=34",
           "--device", "model=panther,version=33",
           "--device", "model=redfin,version=30"
         ]
@@ -530,7 +529,8 @@ targets:
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
+          "--device", "model=MediumPhone.arm,version=34"
         ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
