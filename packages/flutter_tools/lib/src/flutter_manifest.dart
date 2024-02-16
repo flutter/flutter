@@ -519,7 +519,8 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           _validateFonts(yamlValue, errors);
         }
       case 'licenses':
-        errors.addAll(_validateList<String>(yamlValue, '"$yamlKey"', 'files'));
+        final (_, List<String> filesErrors) = _validateList<String>(yamlValue, '"$yamlKey"', 'files');
+        errors.addAll(filesErrors);
       case 'module':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -553,11 +554,12 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-List<String> _validateList<T>(Object? yamlList, String context, String typeAlias) {
+(List<T>? result, List<String> errors) _validateList<T>(Object? yamlList, String context, String typeAlias) {
   final List<String> errors = <String>[];
 
   if (yamlList is! YamlList) {
-    return <String>['Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).'];
+    final String message = 'Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).';
+    return (null, <String>[message]);
   }
 
   for (int i = 0; i < yamlList.length; i++) {
@@ -567,8 +569,16 @@ List<String> _validateList<T>(Object? yamlList, String context, String typeAlias
     }
   }
 
-  return errors;
+  return errors.isEmpty ? (List<T>.from(yamlList), <String>[]) : (null, errors);
 }
+
+(List<T>? result, List<String> errors) _validateListNullable<T>(Object? yamlList, String context, String typeAlias) {
+  if (yamlList == null) {
+    return (null, <String>[]);
+  }
+  return _validateList<T>(yamlList, context, typeAlias);
+}
+
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
   final Object? yamlList = kvp.value;
   if (yamlList != null && (yamlList is! YamlList || yamlList[0] is! YamlMap)) {
@@ -585,11 +595,12 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
       }
       if (valueMap.containsKey('libraries')) {
-        errors.addAll(_validateList<String>(
+        final (_, List<String> librariesErrors) = _validateList<String>(
           valueMap['libraries'],
           '"libraries" key in the element at index $i of "${kvp.key}"',
           'String',
-        ));
+        );
+        errors.addAll(librariesErrors);
       }
       if (valueMap.containsKey('assets')) {
         errors.addAll(_validateAssets(valueMap['assets']));
@@ -697,13 +708,16 @@ class AssetsEntry {
   const AssetsEntry({
     required this.uri,
     this.flavors = const <String>{},
+    this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final Set<String> flavors;
+  final List<AssetTransformerEntry> transformers;
 
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
+  static const String _transformersKey = 'transformers';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
     final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
@@ -738,7 +752,6 @@ class AssetsEntry {
       }
 
       final Object? path = yaml[_pathKey];
-      final Object? flavors = yaml[_flavorKey];
 
       if (path == null || path is! String) {
         return (null, 'Asset manifest entry is malformed. '
@@ -746,39 +759,71 @@ class AssetsEntry {
           'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
       }
 
-      final Uri uri = Uri(pathSegments: path.split('/'));
-
-      if (flavors == null) {
-        return (AssetsEntry(uri: uri), null);
-      }
-
-      if (flavors is! YamlList) {
-        return(null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings. '
-          'Got ${flavors.runtimeType} instead.');
-      }
-
-      final List<String> flavorsListErrors = _validateList<String>(
-        flavors,
-        'flavors list of entry "$path"',
+      final (List<String>? flavors, List<String> flavorsErrors) = _validateListNullable<String>(
+        yaml[_flavorKey],
+        '$_flavorKey list of entry "$path"',
         'String',
       );
-      if (flavorsListErrors.isNotEmpty) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings.\n'
-          '${flavorsListErrors.join('\n')}');
+      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) = parseTransformersSection(yaml[_transformersKey]);
+      final List<String> errors = <String>[
+        ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
+        ...transformersErrors.map((String e) => 'In $_transformersKey section of asset "$path": $e'),
+      ];
+
+      if (errors.isNotEmpty) {
+        return (
+          null,
+          <String>[
+            'Unable to parse the assets section in the pubspec.yaml file.',
+            ...errors
+          ].join('\n'),
+        );
       }
 
-      final AssetsEntry entry = AssetsEntry(
-        uri: Uri(pathSegments: path.split('/')),
-        flavors: Set<String>.from(flavors),
+      return (
+        AssetsEntry(
+          uri: Uri(pathSegments: path.split('/')),
+          flavors: Set<String>.from(flavors ?? <String>[]),
+          transformers: transformers ?? <AssetTransformerEntry>[],
+        ),
+        null,
       );
-
-      return (entry, null);
     }
 
     return (null, 'Assets entry had unexpected shape. '
       'Expected a string or an object. Got ${yaml.runtimeType} instead.');
+  }
+
+  static (List<AssetTransformerEntry>?, List<String> errors)
+      parseTransformersSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+    final (List<YamlMap>? yamlObjects, List<String> listErrors) = _validateList<YamlMap>(
+      yaml,
+      '$_transformersKey list',
+      'Map',
+    );
+
+    if (listErrors.isNotEmpty) {
+      return (null, listErrors);
+    }
+
+    final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
+    final List<String> errors = <String>[];
+    for (final YamlMap yaml in yamlObjects!) {
+      final (AssetTransformerEntry? transformerEntry, List<String> transformerErrors) = AssetTransformerEntry.tryParse(yaml);
+      if (transformerEntry != null) {
+        transformers.add(transformerEntry);
+      } else {
+        errors.addAll(transformerErrors);
+      }
+    }
+
+    if (errors.isEmpty) {
+      return (transformers, errors);
+    }
+    return (null, errors);
   }
 
   @override
@@ -798,4 +843,86 @@ class AssetsEntry {
 
   @override
   String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors)';
+}
+
+
+/// Represents an entry in the "transformers" section of an asset.
+@immutable
+final class AssetTransformerEntry {
+  const AssetTransformerEntry({
+    required this.package,
+    required List<String>? args,
+  }): args = args ?? const <String>[];
+
+  final String package;
+  final List<String>? args;
+
+  static (AssetTransformerEntry? entry, List<String> errors) tryParse(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>['Transformer entry is null.']);
+    }
+    if (yaml is! YamlMap) {
+      return (null, <String>['Expected entry to be a map. Found ${yaml.runtimeType} instead']);
+    }
+
+    final Object? package = yaml['package'];
+    if (package is! String || package.isEmpty) {
+      return (null, <String>['Expected "package" to be a String. Found ${package.runtimeType} instead.']);
+    }
+
+    final (List<String>? args, List<String> argsErrors) = _validateListNullable(yaml['args'], 'args', 'String');
+
+    if (argsErrors.isNotEmpty) {
+      return (null, argsErrors.map((String e) => 'In args section of transformer $package: $e').toList());
+    }
+
+    return (
+      AssetTransformerEntry(
+        package: package,
+        args: args ?? <String>[],
+      ),
+      <String>[],
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! AssetTransformerEntry) {
+      return false;
+    }
+
+    final bool argsAreEqual = (() {
+      if (args == null && other.args == null) {
+        return true;
+      }
+      if (args?.length != other.args?.length) {
+        return false;
+      }
+
+      for (int index = 0; index < args!.length; index += 1) {
+        if (args![index] != other.args![index]) {
+          return false;
+        }
+      }
+      return true;
+    })();
+
+    return package == other.package && argsAreEqual;
+  }
+
+  @override
+  int get hashCode => Object.hashAll(
+    <Object?>[
+      package.hashCode,
+      args?.map((String e) => e.hashCode),
+    ],
+  );
+
+  @override
+  String toString() {
+    return 'AssetTransformerEntry(package: $package, args: $args)';
+  }
 }
