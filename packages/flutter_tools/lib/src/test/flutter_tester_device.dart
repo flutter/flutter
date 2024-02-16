@@ -147,8 +147,6 @@ class FlutterTesterTestDevice extends TestDevice {
         'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
-      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
-        'IMPELLER_ENABLED': 'true'
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');

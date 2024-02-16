@@ -15,5 +15,5 @@ bool get impellerEnabled {
   if (kIsWeb) {
     return false;
   }
-  return io.Platform.environment.containsKey('IMPELLER_ENABLED');
+  return io.Platform.environment.containsKey('FLUTTER_TEST_IMPELLER');
 }
