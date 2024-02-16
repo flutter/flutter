@@ -1377,10 +1377,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       }
     }
 
-    final (double leadingDiff, double trailingDiff) = (
-      tileHeight - leadingSize.height,
-      tileHeight - trailingSize.height,
-    );
+    final double leadingDiff = tileHeight - leadingSize.height;
+    final double trailingDiff = tileHeight - trailingSize.height;
 
     final (double leadingY, double trailingY) = switch (titleAlignment) {
       ListTileTitleAlignment.threeLine when isThreeLine => (_minVerticalPadding, _minVerticalPadding),
