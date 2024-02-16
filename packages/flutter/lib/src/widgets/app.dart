@@ -235,10 +235,12 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
 
 /// Disposes navigation related singletons.
+@visibleForTesting
 void disposeFlutterSingletons() {
+  // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
   disposeNavigationSingletons();
-  WidgetsApp._debugShowWidgetInspectorOverrideNotifier?.dispose();
-  WidgetsApp._debugShowWidgetInspectorOverrideNotifier = null;
+  WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+  WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject = null;
 }
 
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -1211,14 +1213,14 @@ class WidgetsApp extends StatefulWidget {
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
   static bool get debugShowWidgetInspectorOverride {
-    return _getDebugShowWidgetInspectorOverrideNotifier.value;
+    return _debugShowWidgetInspectorOverrideNotifier.value;
   }
   static set debugShowWidgetInspectorOverride(bool value) {
-    _getDebugShowWidgetInspectorOverrideNotifier.value = value;
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static ValueNotifier<bool> get _getDebugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifier ??= ValueNotifier<bool>(false);
-  static ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifier;
+  static ValueNotifier<bool> get _debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
+  static ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1768,7 +1770,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(() {
       result = ValueListenableBuilder<bool>(
-        valueListenable: WidgetsApp._getDebugShowWidgetInspectorOverrideNotifier,
+        valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(

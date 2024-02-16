@@ -2906,6 +2906,7 @@ class _NotAnnounced extends Route<void> {
 }
 
 /// Disposes navigation related singletons.
+@visibleForTesting
 void disposeNavigationSingletons() {
   _RouteEntry._notAnnounced?.dispose();
   _RouteEntry._notAnnounced = null;
