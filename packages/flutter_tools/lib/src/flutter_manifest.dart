@@ -569,14 +569,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
     }
   }
 
-  return errors.isEmpty ? (List<T>.from(yamlList), <String>[]) : (null, errors);
-}
-
-(List<T>? result, List<String> errors) _parseNullableList<T>(Object? yamlList, String context, String typeAlias) {
-  if (yamlList == null) {
-    return (null, <String>[]);
-  }
-  return _parseList<T>(yamlList, context, typeAlias);
+  return errors.isEmpty ? (List<T>.from(yamlList), errors) : (null, errors);
 }
 
 void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
@@ -759,17 +752,13 @@ class AssetsEntry {
           'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
       }
 
-      final (List<String>? flavors, List<String> flavorsErrors) = _parseNullableList<String>(
-        yaml[_flavorKey],
-        _flavorKey,
-        'String',
-      );
+      final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(yaml[_flavorKey]);
       final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) = _parseTransformersSection(yaml[_transformersKey]);
+
       final List<String> errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
         ...transformersErrors.map((String e) => 'In $_transformersKey section of asset "$path": $e'),
       ];
-
       if (errors.isNotEmpty) {
         return (
           null,
@@ -792,6 +781,14 @@ class AssetsEntry {
 
     return (null, 'Assets entry had unexpected shape. '
       'Expected a string or an object. Got ${yaml.runtimeType} instead.');
+  }
+
+  static (List<String>? flavors, List<String> errors) _parseFlavorsSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+
+    return _parseList<String>(yaml, _flavorKey, 'String');
   }
 
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(Object? yaml) {
@@ -869,16 +866,23 @@ final class AssetTransformerEntry {
       return (null, <String>['Expected "package" to be a String. Found ${package.runtimeType} instead.']);
     }
 
-    final (List<String>? args, List<String> argsErrors) = _parseNullableList(yaml['args'], 'args', 'String');
+    final Object? argsYaml = yaml['args'];
+    late final List<String> args;
+    if (argsYaml != null) {
+      final (List<String>? parsedArgs, List<String> argsErrors) = _parseList(yaml['args'], 'args', 'String');
 
-    if (argsErrors.isNotEmpty) {
-      return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
+      if (argsErrors.isNotEmpty) {
+        return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
+      }
+      args = parsedArgs!;
+    } else {
+      args = <String>[];
     }
 
     return (
       AssetTransformerEntry(
         package: package,
-        args: args ?? <String>[],
+        args: args,
       ),
       <String>[],
     );
