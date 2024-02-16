@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' as ffi show Abi;
-import 'dart:io' as io show Directory, exitCode, stderr, stdout;
+import 'dart:io' as io show Directory, exitCode, stderr;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
@@ -13,6 +13,7 @@ import 'package:process_runner/process_runner.dart';
 
 import 'src/commands/command_runner.dart';
 import 'src/environment.dart';
+import 'src/logger.dart';
 
 void main(List<String> args) async {
   // Find the engine repo.
@@ -55,8 +56,7 @@ void main(List<String> args) async {
       engine: engine,
       platform: const LocalPlatform(),
       processRunner: ProcessRunner(),
-      stderr: io.stderr,
-      stdout: io.stdout,
+      logger: Logger(),
     ),
     configs: configs,
   );

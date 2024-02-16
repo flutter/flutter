@@ -63,12 +63,6 @@ final class QueryCommand extends CommandBase {
   @override
   String get description => 'Provides information about build configurations '
                             'and tests.';
-
-  @override
-  Future<int> run() async {
-    environment.stdout.write(usage);
-    return 0;
-  }
 }
 
 /// The 'query builds' command.
@@ -97,10 +91,10 @@ final class QueryBuildsCommand extends CommandBase {
     final String? builderName = parent!.argResults![_builderFlag] as String?;
     final bool verbose = parent!.argResults![_verboseFlag] as bool;
     if (!verbose) {
-      environment.stdout.writeln(
+      environment.logger.status(
         'Add --verbose to see detailed information about each builder',
       );
-      environment.stdout.writeln();
+      environment.logger.status('');
     }
     for (final String key in configs.keys) {
       if (builderName != null && key != builderName) {
@@ -112,23 +106,23 @@ final class QueryBuildsCommand extends CommandBase {
         continue;
       }
 
-      environment.stdout.writeln('"$key" builder:');
+      environment.logger.status('"$key" builder:');
       for (final GlobalBuild build in config.builds) {
         if (!build.canRunOn(environment.platform) && !all) {
           continue;
         }
-        environment.stdout.writeln('  "${build.name}" config');
+        environment.logger.status('"${build.name}" config', indent: 3);
         if (!verbose) {
           continue;
         }
-        environment.stdout.writeln('    gn flags:');
+        environment.logger.status('gn flags:', indent: 6);
         for (final String flag in build.gn) {
-          environment.stdout.writeln('      $flag');
+          environment.logger.status(flag, indent: 9);
         }
         if (build.ninja.targets.isNotEmpty) {
-          environment.stdout.writeln('    ninja targets:');
+          environment.logger.status('ninja targets:', indent: 6);
           for (final String target in build.ninja.targets) {
-            environment.stdout.writeln('      $target');
+            environment.logger.status(target, indent: 9);
           }
         }
       }
