@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_api/backend.dart';
 
 import 'webdriver_browser.dart';
 

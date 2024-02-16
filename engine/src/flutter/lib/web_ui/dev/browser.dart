@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:image/image.dart';
-import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_api/backend.dart';
 
 /// Provides the environment for a specific web browser.
 abstract class BrowserEnvironment {
