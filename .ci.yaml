@@ -501,7 +501,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
+    presubmit: true
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -534,6 +534,7 @@ targets:
         ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
+    presubmit: true
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -547,7 +548,6 @@ targets:
       task_name: android_embedding_v2_smoke_test
       physical_devices: >-
         [
-          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
@@ -561,10 +561,12 @@ targets:
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
+          "--device", "model=MediumPhone.arm,version=34"
         ]
 
   - name: Linux firebase_release_smoke_test
+    presubmit: true
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -578,7 +580,6 @@ targets:
       task_name: release_smoke_test
       physical_devices: >-
         [
-          "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
@@ -592,7 +593,8 @@ targets:
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=NexusLowRes,version=29",
+          "--device", "model=MediumPhone.arm,version=34"
         ]
 
   - name: Linux flutter_packaging_test
