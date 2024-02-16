@@ -54,7 +54,7 @@ def run_firebase_test(apk, results_dir):
           '--results-dir',
           results_dir,
           '--device',
-          'model=shiba,version=34',
+          'model=panther,version=33',
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.STDOUT,
@@ -64,10 +64,7 @@ def run_firebase_test(apk, results_dir):
 
 
 def check_logcat(results_dir):
-  logcat = subprocess.check_output([
-      'gsutil', 'cat',
-      '%s/%s/*/logcat' % (BUCKET, results_dir)
-  ])
+  logcat = subprocess.check_output(['gsutil', 'cat', '%s/%s/*/logcat' % (BUCKET, results_dir)])
   logcat = byte_str_decode(logcat)
   if not logcat:
     sys.exit(1)
@@ -82,8 +79,7 @@ def check_logcat(results_dir):
 def check_timeline(results_dir):
   gsutil_du = subprocess.check_output([
       'gsutil', 'du',
-      '%s/%s/*/game_loop_results/results_scenario_0.json' %
-      (BUCKET, results_dir)
+      '%s/%s/*/game_loop_results/results_scenario_0.json' % (BUCKET, results_dir)
   ])
   gsutil_du = byte_str_decode(gsutil_du)
   gsutil_du = gsutil_du.strip()
@@ -116,16 +112,13 @@ def main():
     print('No APKs found at %s' % apks_dir)
     return 1
 
-  git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-                                         cwd=script_dir)
+  git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=script_dir)
   git_revision = byte_str_decode(git_revision)
   git_revision = git_revision.strip()
   results = []
   apk = None
   for apk in apks:
-    results_dir = '%s/%s/%s' % (
-        os.path.basename(apk), git_revision, args.build_id
-    )
+    results_dir = '%s/%s/%s' % (os.path.basename(apk), git_revision, args.build_id)
     process = run_firebase_test(apk, results_dir)
     results.append((results_dir, process))
 
