@@ -1585,15 +1585,11 @@ void expectSliverGeometry({
   required RenderSliver sliver,
   required double paintExtent,
   required double cacheExtent,
-  double? scrollExtent,
   required bool visible,
 }) {
   expect(sliver.geometry!.paintExtent, paintExtent, reason: 'paintExtent');
   expect(sliver.geometry!.cacheExtent, cacheExtent, reason: 'cacheExtent');
   expect(sliver.geometry!.visible, visible, reason: 'visible');
-  if (scrollExtent != null) {
-    expect(sliver.geometry!.scrollExtent, scrollExtent, reason: 'scrollExtent');
-  }
 }
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
