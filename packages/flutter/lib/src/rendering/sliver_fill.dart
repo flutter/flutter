@@ -93,11 +93,14 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: constraints.viewportMainAxisExtent);
     geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
@@ -165,11 +168,14 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
     geometry = SliverGeometry(
       scrollExtent: extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
@@ -241,11 +247,14 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
     geometry = SliverGeometry(
       scrollExtent: extent,
       paintExtent: math.min(maxExtent, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
