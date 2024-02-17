@@ -22,6 +22,12 @@ if 'GCP_PROJECT' not in os.environ:
   sys.exit(1)
 PROJECT = os.environ['GCP_PROJECT']
 
+# Exit codes returned by the FTL command that signal an infrastructure failure.
+FTL_INFRA_FAILURE_CODES = [1, 15, 20]
+
+# Maximum number of retries done if an infrastructure failure occurs.
+MAX_RETRY_ATTEMPTS = 2
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
 buildroot_dir = os.path.abspath(os.path.join(script_dir, '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
@@ -54,7 +60,7 @@ def run_firebase_test(apk, results_dir):
           '--results-dir',
           results_dir,
           '--device',
-          'model=panther,version=33',
+          'model=shiba,version=34',
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.STDOUT,
@@ -106,7 +112,7 @@ def main():
   args = parser.parse_args()
 
   apks_dir = os.path.join(out_dir, args.variant, 'firebase_apks')
-  apks = glob.glob('%s/*.apk' % apks_dir)
+  apks = set(glob.glob('%s/*.apk' % apks_dir))
 
   if not apks:
     print('No APKs found at %s' % apks_dir)
@@ -115,27 +121,41 @@ def main():
   git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=script_dir)
   git_revision = byte_str_decode(git_revision)
   git_revision = git_revision.strip()
-  results = []
-  apk = None
-  for apk in apks:
-    results_dir = '%s/%s/%s' % (os.path.basename(apk), git_revision, args.build_id)
-    process = run_firebase_test(apk, results_dir)
-    results.append((results_dir, process))
 
-  for results_dir, process in results:
-    for line in iter(process.stdout.readline, ''):
-      print(line.strip())
-    return_code = process.wait()
-    if return_code != 0:
-      print('Firebase test failed with code: %s' % return_code)
-      sys.exit(return_code)
+  for retry in range(MAX_RETRY_ATTEMPTS):
+    if retry > 0:
+      print('Retrying %s' % apks)
 
-    print('Checking logcat for %s' % results_dir)
-    check_logcat(results_dir)
-    # scenario_app produces a timeline, but the android image test does not.
-    if 'scenario' in apk:
-      print('Checking timeline for %s' % results_dir)
-      check_timeline(results_dir)
+    results = []
+    for apk in sorted(apks):
+      results_dir = '%s/%s/%s' % (os.path.basename(apk), git_revision, args.build_id)
+      process = run_firebase_test(apk, results_dir)
+      results.append((apk, results_dir, process))
+
+    for apk, results_dir, process in results:
+      print('===== Test output for %s' % apk)
+      for line in iter(process.stdout.readline, ''):
+        print(line.strip())
+
+      return_code = process.wait()
+      if return_code in FTL_INFRA_FAILURE_CODES:
+        print('Firebase test %s failed with infrastructure error code: %s' % (apk, return_code))
+        continue
+      if return_code != 0:
+        print('Firebase test %s failed with code: %s' % (apk, return_code))
+        sys.exit(return_code)
+
+      print('Checking logcat for %s' % results_dir)
+      check_logcat(results_dir)
+      # scenario_app produces a timeline, but the android image test does not.
+      if 'scenario' in apk:
+        print('Checking timeline for %s' % results_dir)
+        check_timeline(results_dir)
+
+      apks.remove(apk)
+
+    if not apks:
+      break
 
   return 0
 
