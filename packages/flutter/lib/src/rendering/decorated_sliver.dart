@@ -95,22 +95,20 @@ class RenderDecoratedSliver extends RenderProxySliver {
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
-      final Size childSize;
-      final Offset scrollOffset;
 
       // In the case where the child sliver has infinite scroll extent, the decoration
       // should only extend down to the bottom cache extent.
       final double cappedMainAxisExtent = child!.geometry!.scrollExtent.isInfinite
         ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
         : child!.geometry!.scrollExtent;
-      switch (constraints.axis) {
-        case Axis.vertical:
-          childSize = Size(constraints.crossAxisExtent, cappedMainAxisExtent);
-          scrollOffset = Offset(0.0, -constraints.scrollOffset);
-        case Axis.horizontal:
-          childSize = Size(cappedMainAxisExtent, constraints.crossAxisExtent);
-          scrollOffset = Offset(-constraints.scrollOffset, 0.0);
-      }
+      final Size childSize = switch (constraints.axis) {
+        Axis.vertical   => Size(constraints.crossAxisExtent, cappedMainAxisExtent),
+        Axis.horizontal => Size(cappedMainAxisExtent, constraints.crossAxisExtent),
+      };
+      final Offset scrollOffset = switch (constraints.axis) {
+        Axis.vertical   => Offset(0.0, -constraints.scrollOffset),
+        Axis.horizontal => Offset(-constraints.scrollOffset, 0.0),
+      };
       final Offset childOffset = offset + childParentData.paintOffset;
       if (position == DecorationPosition.background) {
         _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));

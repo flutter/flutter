@@ -1168,12 +1168,10 @@ class _ReadingOrderSortData with Diagnosticable {
 
   static void sortWithDirectionality(List<_ReadingOrderSortData> list, TextDirection directionality) {
     mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
-      switch (directionality) {
-        case TextDirection.ltr:
-          return a.rect.left.compareTo(b.rect.left);
-        case TextDirection.rtl:
-          return b.rect.right.compareTo(a.rect.right);
-      }
+      return switch (directionality) {
+        TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
+        TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
+      };
     });
   }
 
@@ -1239,12 +1237,10 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
 
   static void sortWithDirectionality(List<_ReadingOrderDirectionalGroupData> list, TextDirection directionality) {
     mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
-      switch (directionality) {
-        case TextDirection.ltr:
-          return a.rect.left.compareTo(b.rect.left);
-        case TextDirection.rtl:
-          return b.rect.right.compareTo(a.rect.right);
-      }
+      return switch (directionality) {
+        TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
+        TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
+      };
     });
   }
 
