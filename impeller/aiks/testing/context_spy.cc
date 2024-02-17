@@ -34,6 +34,11 @@ std::shared_ptr<ContextMock> ContextSpy::MakeContext(
     return real_context->IsValid();
   });
 
+  ON_CALL(*mock_context, GetBackendType)
+      .WillByDefault([real_context]() -> Context::BackendType {
+        return real_context->GetBackendType();
+      });
+
   ON_CALL(*mock_context, GetCapabilities)
       .WillByDefault(
           [real_context]() -> const std::shared_ptr<const Capabilities>& {
