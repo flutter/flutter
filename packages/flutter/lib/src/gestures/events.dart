@@ -1760,6 +1760,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    Offset? scrollDelta,
   }) {
     return PointerScrollEvent(
       viewId: viewId ?? this.viewId,
@@ -1767,7 +1768,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       kind: kind ?? this.kind,
       device: device ?? this.device,
       position: position ?? this.position,
-      scrollDelta: scrollDelta,
+      scrollDelta: scrollDelta ?? this.scrollDelta,
       embedderId: embedderId ?? this.embedderId,
     ).transformed(transform);
   }
