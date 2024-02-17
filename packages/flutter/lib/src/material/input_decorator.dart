@@ -1728,14 +1728,17 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: labelIsFloating ? 1.0 : 0.0,
-        child: Semantics(
-          sortKey: semanticsSortKey,
-          tagForChildren: semanticsTag,
-          child: child ?? (text == null ? null : Text(text!, style: style)),
+      child: IgnorePointer(
+        ignoring: !labelIsFloating,
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          opacity: labelIsFloating ? 1.0 : 0.0,
+          child: Semantics(
+            sortKey: semanticsSortKey,
+            tagForChildren: semanticsTag,
+            child: child ?? (text == null ? null : Text(text!, style: style)),
+          ),
         ),
       ),
     );
@@ -2393,30 +2396,42 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final EdgeInsets contentPadding;
     final double floatingLabelHeight;
-    if (decoration.isCollapsed
-        ?? themeData.inputDecorationTheme.isCollapsed) {
+
+    if (decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = MediaQuery.textScalerOf(context).scale(4.0 + 0.75 * labelStyle.fontSize!);
       if (decoration.filled ?? false) {
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+        contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+          ? decorationIsDense
+            ? const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0)
+            : const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : decorationIsDense
+            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
-        // Not left or right padding for underline borders that aren't filled
+        // No left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+        contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+          ? decorationIsDense
+            ? const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0)
+            : const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+          : decorationIsDense
+            ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+      contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+        ? decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+          : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
     final _Decorator decorator = _Decorator(
