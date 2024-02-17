@@ -12,6 +12,7 @@ RenderPass::RenderPass(std::shared_ptr<const Context> context,
     : context_(std::move(context)),
       sample_count_(target.GetSampleCount()),
       pixel_format_(target.GetRenderTargetPixelFormat()),
+      has_depth_attachment_(target.GetDepthAttachment().has_value()),
       has_stencil_attachment_(target.GetStencilAttachment().has_value()),
       render_target_size_(target.GetRenderTargetSize()),
       render_target_(target),
@@ -25,6 +26,10 @@ SampleCount RenderPass::GetSampleCount() const {
 
 PixelFormat RenderPass::GetRenderTargetPixelFormat() const {
   return pixel_format_;
+}
+
+bool RenderPass::HasDepthAttachment() const {
+  return has_depth_attachment_;
 }
 
 bool RenderPass::HasStencilAttachment() const {
