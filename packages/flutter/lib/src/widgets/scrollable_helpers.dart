@@ -184,17 +184,21 @@ class EdgeDraggingAutoScroller {
   bool _scrolling = false;
 
   double _offsetExtent(Offset offset, Axis scrollDirection) {
-    return switch (scrollDirection) {
-      Axis.horizontal => offset.dx,
-      Axis.vertical   => offset.dy,
-    };
+    switch (scrollDirection) {
+      case Axis.horizontal:
+        return offset.dx;
+      case Axis.vertical:
+        return offset.dy;
+    }
   }
 
   double _sizeExtent(Size size, Axis scrollDirection) {
-    return switch (scrollDirection) {
-      Axis.horizontal => size.width,
-      Axis.vertical   => size.height,
-    };
+    switch (scrollDirection) {
+      case Axis.horizontal:
+        return size.width;
+      case Axis.vertical:
+        return size.height;
+    }
   }
 
   AxisDirection get _axisDirection => scrollable.axisDirection;
@@ -411,10 +415,12 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         ),
       );
     }
-    return switch (type) {
-      ScrollIncrementType.line => 50.0,
-      ScrollIncrementType.page => 0.8 * state.position.viewportDimension,
-    };
+    switch (type) {
+      case ScrollIncrementType.line:
+        return 50.0;
+      case ScrollIncrementType.page:
+        return 0.8 * state.position.viewportDimension;
+    }
   }
 
   /// Find out how much of an increment to move by, taking the different

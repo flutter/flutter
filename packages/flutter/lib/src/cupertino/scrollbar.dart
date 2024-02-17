@@ -174,10 +174,12 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     if (direction == null) {
       return;
     }
-    _pressStartAxisPosition = switch (direction) {
-      Axis.vertical   => localPosition.dy,
-      Axis.horizontal => localPosition.dx,
-    };
+    switch (direction) {
+      case Axis.vertical:
+        _pressStartAxisPosition = localPosition.dy;
+      case Axis.horizontal:
+        _pressStartAxisPosition = localPosition.dx;
+    }
   }
 
   @override
