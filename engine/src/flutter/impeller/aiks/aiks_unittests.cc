@@ -798,12 +798,12 @@ TEST_P(AiksTest, CanRenderTextFrameSTB) {
 }
 
 TEST_P(AiksTest, TextFrameSubpixelAlignment) {
-  std::array<Scalar, 20> phase_offsets;
-  for (Scalar& offset : phase_offsets) {
-    auto rand = std::rand();  // NOLINT
-    offset = (static_cast<float>(rand) / static_cast<float>(RAND_MAX)) * k2Pi;
-  }
-
+  // "Random" numbers between 0 and 1. Hardcoded to avoid flakiness in goldens.
+  std::array<Scalar, 20> phase_offsets = {
+      7.82637e-06, 0.131538,  0.755605,   0.45865,   0.532767,
+      0.218959,    0.0470446, 0.678865,   0.679296,  0.934693,
+      0.383502,    0.519416,  0.830965,   0.0345721, 0.0534616,
+      0.5297,      0.671149,  0.00769819, 0.383416,  0.0668422};
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
     static float font_size = 20;
     static float phase_variation = 0.2;
@@ -822,11 +822,12 @@ TEST_P(AiksTest, TextFrameSubpixelAlignment) {
     canvas.Scale(GetContentScale());
 
     for (size_t i = 0; i < phase_offsets.size(); i++) {
-      auto position = Point(
-          200 + magnitude * std::sin((-phase_offsets[i] * phase_variation +
-                                      GetSecondsElapsed() * speed)),  //
-          200 + i * font_size * 1.1                                   //
-      );
+      auto position =
+          Point(200 + magnitude *
+                          std::sin((-phase_offsets[i] * k2Pi * phase_variation +
+                                    GetSecondsElapsed() * speed)),  //
+                200 + i * font_size * 1.1                           //
+          );
       if (!RenderTextInCanvasSkia(
               GetContext(), canvas,
               "the quick brown fox jumped over "
