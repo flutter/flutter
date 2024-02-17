@@ -27,8 +27,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// Dynamically changes to a [CupertinoScrollbar], an iOS style scrollbar, by
-/// default on the iOS platform.
+/// Dynamically changes to a [CupertinoScrollbar], an Cupertino style scrollbar, by
+/// default on the iOS and macOS platforms.
 ///
 /// The color of the Scrollbar thumb will change when [MaterialState.dragged],
 /// or [MaterialState.hovered] on desktop and web platforms. These stateful
@@ -66,7 +66,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
 ///  * [ScrollbarTheme], which configures the Scrollbar's appearance.
-///  * [CupertinoScrollbar], an iOS style scrollbar.
+///  * [CupertinoScrollbar], an Cupertino style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 class Scrollbar extends StatelessWidget {
@@ -173,7 +173,9 @@ class Scrollbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    final bool isAppleOS = Theme.of(context).platform == TargetPlatform.iOS ||
+         Theme.of(context).platform == TargetPlatform.macOS;
+    if (isAppleOS) {
       return CupertinoScrollbar(
         thumbVisibility: thumbVisibility ?? false,
         thickness: thickness ?? CupertinoScrollbar.defaultThickness,
