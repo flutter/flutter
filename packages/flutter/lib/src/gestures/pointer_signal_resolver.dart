@@ -66,7 +66,7 @@ class PointerSignalResolver {
         eventTimestamp - (_lastWheelEventTimestamp ?? Duration.zero);
 
     // print(
-    //   'Diff: ${diff.inMilliseconds}; event: ${event.timeStamp}; lastEvent: ${_lastWheelEvent?.timeStamp}',
+    //   'Diff: ${diff.inMilliseconds}; event: ${eventTimestamp}; lastEvent: ${_lastWheelEventTimestamp}',
     // );
     if (diff.inMilliseconds < 100 && _trackpadLastScrollOffset != null) {
       return _trackpadLastScrollOffset!.dx.abs() >
@@ -81,7 +81,7 @@ class PointerSignalResolver {
         eventTimestamp - (_lastWheelEventTimestamp ?? Duration.zero);
 
     // print(
-    //   'Diff: ${diff.inMilliseconds}; event: ${event.timeStamp}; lastEvent: ${_lastWheelEvent?.timeStamp}',
+    //   'Diff: ${diff.inMilliseconds}; event: ${eventTimestamp}; lastEvent: ${_lastWheelEventTimestamp}',
     // );
     if (diff.inMilliseconds < 100 && _trackpadLastScrollOffset != null) {
       return _trackpadLastScrollOffset!.dx.abs() <
@@ -132,7 +132,9 @@ class PointerSignalResolver {
     }
     assert(_isSameEvent(_currentEvent!, event));
 
-    if (event is PointerScrollEvent) {
+    print(event.kind);
+    // TODO(Ichordedionysos): Re-enable check for trackpad once the event.kind is properly exposing trackpad usage.
+    if (event is PointerScrollEvent /*&& event.kind == PointerDeviceKind.trackpad*/) {
       final Duration eventTimestamp = event.timeStamp;
       final Offset eventOffset = event.scrollDelta;
 
