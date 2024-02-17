@@ -1319,7 +1319,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'التراخيص';
 
   @override
-  String get lookUpButtonLabel => 'النظر إلى أعلى';
+  String get lookUpButtonLabel => 'بحث عام';
 
   @override
   String get menuBarMenuLabel => 'قائمة شريط القوائم';
