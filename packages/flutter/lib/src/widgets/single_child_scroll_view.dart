@@ -404,12 +404,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   double get _viewportExtent {
     assert(hasSize);
-    switch (axis) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (axis) {
+      Axis.horizontal => size.width,
+      Axis.vertical   => size.height,
+    };
   }
 
   double get _minScrollExtent {
@@ -422,53 +420,37 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (child == null) {
       return 0.0;
     }
-    switch (axis) {
-      case Axis.horizontal:
-        return math.max(0.0, child!.size.width - size.width);
-      case Axis.vertical:
-        return math.max(0.0, child!.size.height - size.height);
-    }
+    return math.max(0.0, switch (axis) {
+      Axis.horizontal => child!.size.width - size.width,
+      Axis.vertical => child!.size.height - size.height,
+    });
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    switch (axis) {
-      case Axis.horizontal:
-        return constraints.heightConstraints();
-      case Axis.vertical:
-        return constraints.widthConstraints();
-    }
+    return switch (axis) {
+      Axis.horizontal => constraints.heightConstraints(),
+      Axis.vertical   => constraints.widthConstraints(),
+    };
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null) {
-      return child!.getMinIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null) {
-      return child!.getMaxIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null) {
-      return child!.getMinIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicHeight(width) ?? 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null) {
-      return child!.getMaxIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicHeight(width) ?? 0.0;
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
