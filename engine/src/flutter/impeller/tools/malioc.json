@@ -773,9 +773,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -792,9 +792,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -803,9 +803,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -813,7 +813,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         }
       }
@@ -2594,8 +2594,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -2613,8 +2613,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -2624,8 +2624,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -2634,7 +2634,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 18,
           "work_registers_used": 32
         }
       }
@@ -2652,7 +2652,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               3.0,
               0.0
             ],
@@ -2665,22 +2665,21 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               3.0,
               0.0
             ],
             "total_bound_pipelines": [
-              "arithmetic",
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               3.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -3612,8 +3611,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.390625,
-              0.390625,
+              0.359375,
+              0.359375,
               0.09375,
               0.0,
               4.0,
@@ -3631,8 +3630,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.328125,
-              0.328125,
+              0.296875,
+              0.296875,
               0.03125,
               0.0,
               4.0,
@@ -3642,8 +3641,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.546875,
-              0.546875,
+              0.515625,
+              0.515625,
               0.109375,
               0.0,
               4.0,
@@ -3652,7 +3651,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 46,
+          "uniform_registers_used": 36,
           "work_registers_used": 32
         },
         "Varying": {
@@ -3703,7 +3702,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
+          "uniform_registers_used": 18,
           "work_registers_used": 16
         }
       }
@@ -3721,7 +3720,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              6.929999828338623,
+              6.599999904632568,
               8.0,
               0.0
             ],
@@ -3734,7 +3733,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              5.940000057220459,
+              5.610000133514404,
               8.0,
               0.0
             ],
@@ -3742,13 +3741,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.0,
+              8.666666984558105,
               8.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 11,
           "work_registers_used": 3
         }
       }
@@ -3888,8 +3887,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -3907,8 +3906,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -3918,8 +3917,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -3928,7 +3927,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 38,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
@@ -3979,7 +3978,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
+          "uniform_registers_used": 18,
           "work_registers_used": 11
         }
       }
@@ -3997,7 +3996,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.630000114440918,
+              3.299999952316284,
               4.0,
               0.0
             ],
@@ -4010,7 +4009,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              3.630000114440918,
+              3.299999952316284,
               4.0,
               0.0
             ],
@@ -4018,13 +4017,13 @@
               "load_store"
             ],
             "total_cycles": [
-              3.6666667461395264,
+              3.3333332538604736,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
+          "uniform_registers_used": 9,
           "work_registers_used": 3
         }
       }
@@ -5063,8 +5062,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5082,8 +5081,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5093,8 +5092,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5103,7 +5102,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 20,
           "work_registers_used": 32
         },
         "Varying": {
@@ -5154,7 +5153,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 14,
+          "uniform_registers_used": 10,
           "work_registers_used": 12
         }
       }
@@ -5172,7 +5171,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.299999952316284,
+              2.9700000286102295,
               7.0,
               0.0
             ],
@@ -5185,7 +5184,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              3.299999952316284,
+              2.9700000286102295,
               7.0,
               0.0
             ],
@@ -5193,14 +5192,14 @@
               "load_store"
             ],
             "total_cycles": [
-              3.3333332538604736,
+              3.0,
               7.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
-          "work_registers_used": 2
+          "uniform_registers_used": 6,
+          "work_registers_used": 3
         }
       }
     }
@@ -5220,8 +5219,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5239,8 +5238,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5250,8 +5249,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5260,7 +5259,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 18,
           "work_registers_used": 32
         },
         "Varying": {
@@ -5311,7 +5310,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 10,
           "work_registers_used": 9
         }
       }
@@ -5329,7 +5328,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -5342,7 +5341,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -5350,13 +5349,13 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               5.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -5612,8 +5611,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5631,8 +5630,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5642,8 +5641,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5652,7 +5651,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 18,
           "work_registers_used": 32
         },
         "Varying": {
@@ -5703,7 +5702,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 10,
           "work_registers_used": 7
         }
       }
@@ -5721,7 +5720,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -5734,7 +5733,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -5742,13 +5741,13 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -5769,8 +5768,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5788,8 +5787,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5799,8 +5798,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -5809,7 +5808,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 18,
           "work_registers_used": 32
         },
         "Varying": {
@@ -5860,7 +5859,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 10,
           "work_registers_used": 7
         }
       }
@@ -5878,7 +5877,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -5891,7 +5890,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -5899,13 +5898,13 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -6043,8 +6042,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6062,8 +6061,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6073,8 +6072,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6083,7 +6082,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 32,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -6134,7 +6133,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
+          "uniform_registers_used": 14,
           "work_registers_used": 7
         }
       }
@@ -6152,7 +6151,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -6165,7 +6164,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               4.0,
               0.0
             ],
@@ -6173,13 +6172,13 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 8,
+          "uniform_registers_used": 7,
           "work_registers_used": 2
         }
       }
@@ -6714,8 +6713,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6733,8 +6732,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6744,8 +6743,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.109375,
+              0.109375,
               0.0,
               0.0,
               2.0,
@@ -6754,7 +6753,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 20,
           "work_registers_used": 32
         },
         "Varying": {
@@ -6805,7 +6804,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 14,
+          "uniform_registers_used": 12,
           "work_registers_used": 8
         }
       }
@@ -6823,7 +6822,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.299999952316284,
+              2.9700000286102295,
               6.0,
               0.0
             ],
@@ -6836,7 +6835,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              3.299999952316284,
+              2.9700000286102295,
               6.0,
               0.0
             ],
@@ -6844,14 +6843,14 @@
               "load_store"
             ],
             "total_cycles": [
-              3.3333332538604736,
+              3.0,
               6.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
-          "work_registers_used": 2
+          "uniform_registers_used": 6,
+          "work_registers_used": 3
         }
       }
     }
@@ -7798,9 +7797,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.375,
-              0.375,
-              0.109375,
+              0.34375,
+              0.34375,
+              0.125,
               0.0,
               4.0,
               0.0
@@ -7817,9 +7816,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.28125,
-              0.28125,
-              0.03125,
+              0.25,
+              0.25,
+              0.046875,
               0.0,
               4.0,
               0.0
@@ -7828,9 +7827,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.53125,
-              0.53125,
-              0.125,
+              0.5,
+              0.5,
+              0.140625,
               0.0,
               4.0,
               0.0
@@ -7838,7 +7837,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 50,
+          "uniform_registers_used": 44,
           "work_registers_used": 32
         },
         "Varying": {
@@ -7889,7 +7888,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 38,
+          "uniform_registers_used": 36,
           "work_registers_used": 13
         }
       }
@@ -7980,9 +7979,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -7999,9 +7998,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -8010,9 +8009,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -8020,7 +8019,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 44,
+          "uniform_registers_used": 40,
           "work_registers_used": 32
         },
         "Varying": {
@@ -8071,7 +8070,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 36,
+          "uniform_registers_used": 34,
           "work_registers_used": 11
         }
       }
@@ -8881,9 +8880,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -8900,9 +8899,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -8911,9 +8910,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -8921,7 +8920,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         },
         "Varying": {
@@ -8972,7 +8971,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
+          "uniform_registers_used": 20,
           "work_registers_used": 10
         }
       }
@@ -8993,9 +8992,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9012,9 +9011,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9023,9 +9022,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9033,7 +9032,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         },
         "Varying": {
@@ -9084,7 +9083,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 18,
           "work_registers_used": 9
         }
       }
@@ -9321,9 +9320,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9340,9 +9339,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9351,9 +9350,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9361,7 +9360,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         },
         "Varying": {
@@ -9412,7 +9411,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 18,
           "work_registers_used": 7
         }
       }
@@ -9433,9 +9432,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9452,9 +9451,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9463,9 +9462,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9473,7 +9472,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         },
         "Varying": {
@@ -9524,7 +9523,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 18,
           "work_registers_used": 7
         }
       }
@@ -9615,9 +9614,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9634,9 +9633,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9645,9 +9644,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -9655,7 +9654,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 32,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
@@ -9706,7 +9705,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 24,
+          "uniform_registers_used": 22,
           "work_registers_used": 7
         }
       }
@@ -10126,9 +10125,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -10145,9 +10144,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -10156,9 +10155,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
+              0.09375,
+              0.09375,
+              0.015625,
               0.0,
               2.0,
               0.0
@@ -10166,7 +10165,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 24,
           "work_registers_used": 32
         },
         "Varying": {
@@ -10217,7 +10216,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
+          "uniform_registers_used": 20,
           "work_registers_used": 10
         }
       }

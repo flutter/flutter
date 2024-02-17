@@ -89,6 +89,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
         pass.SetPipeline(renderer.GetTexturePipeline(pipeline_options));
 
         TextureFillVertexShader::FrameInfo frame_info;
+        frame_info.depth = 0.0;
         frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
         frame_info.texture_sampler_y_coord_scale = 1.0;
         frame_info.alpha = 1.0;

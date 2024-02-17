@@ -200,6 +200,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
       vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
 
   VS::FrameInfo info;
+  info.depth = entity.GetShaderClipDepth();
   info.mvp = pass.GetOrthographicTransform();
   VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 

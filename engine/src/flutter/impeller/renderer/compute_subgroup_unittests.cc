@@ -159,6 +159,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
                      .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
+    frame_info.depth = 0.0;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
@@ -357,6 +358,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
                      .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
+    frame_info.depth = 0.0;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();
@@ -436,6 +438,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
                      .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
+    frame_info.depth = 0.0;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
     frame_info.color = Color::Red().Premultiply();

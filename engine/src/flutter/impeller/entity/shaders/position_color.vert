@@ -17,6 +17,7 @@ in vec4 color;
 out f16vec4 v_color;
 
 void main() {
-  gl_Position = frame_info.mvp * vec4(position, frame_info.depth, 1.0);
+  gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position.z = frame_info.depth;
   v_color = f16vec4(color);
 }
