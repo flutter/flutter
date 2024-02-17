@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../impeller_test_helpers.dart';
+
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
 const bool skipPerspectiveTextGoldens = isBrowser;
 
@@ -1607,7 +1609,7 @@ void main() {
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
         );
       }
-    });
+    }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1752,7 +1754,7 @@ void main() {
         matchesGoldenFile('timer_picker_test.datetime.drag.png'),
       );
     }
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
     Duration? duration;
