@@ -1718,6 +1718,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // the text may position outside the visible region even when the text fits.
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
+  /// {@macro flutter.painting.textPainter.computeLineMetrics}
+  ///
+  /// Valid only after [layout].
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!debugNeedsLayout);
+    return _textPainter.computeLineMetrics();
+  }
+
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
   /// If the selection is collapsed (and therefore occupies a single point), the

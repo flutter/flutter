@@ -148,6 +148,28 @@ void main() {
     expect(editable.size.height, 10);
   });
 
+  test('computeLineMetrics with two lines', () {
+    final RenderEditable paragraph = RenderEditable(
+      text: const TextSpan(text: 'This is long enough that\nit needs multiple lines!'),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      maxLines: 3
+    );
+    layout(paragraph);
+
+    final List<LineMetrics> metrics = paragraph.computeLineMetrics();
+    expect(metrics.length, 2);
+
+    final LineMetrics firstLine = metrics.first;
+    expect(firstLine.baseline + firstLine.descent, firstLine.height);
+
+    final LineMetrics secondLine = metrics.last;
+    expect(secondLine.baseline + secondLine.descent, firstLine.height + secondLine.height);
+  });
+
   test('Editable respect clipBehavior in describeApproximatePaintClip', () {
     final String longString = 'a' * 10000;
     final RenderEditable editable = RenderEditable(
