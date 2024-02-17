@@ -664,7 +664,7 @@ class _AndroidMotionEventConverter {
       PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
       PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
       PointerDeviceKind.mouse          => AndroidViewController.kInputDeviceSourceMouse,
-      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus
+      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
     };
