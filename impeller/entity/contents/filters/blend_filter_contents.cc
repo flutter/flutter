@@ -470,6 +470,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
+    frame_info.depth = entity.GetShaderClipDepth();
 
     auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
     if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {

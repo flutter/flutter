@@ -17,5 +17,6 @@ IMPELLER_MAYBE_FLAT out f16vec4 v_color;
 
 void main() {
   v_color = frame_info.color;
-  gl_Position = frame_info.mvp * vec4(position, frame_info.depth, 1.0);
+  gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position.z = frame_info.depth;
 }

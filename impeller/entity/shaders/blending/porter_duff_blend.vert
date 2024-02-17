@@ -20,7 +20,8 @@ out vec2 v_texture_coords;
 out f16vec4 v_color;
 
 void main() {
-  gl_Position = frame_info.mvp * vec4(vertices, frame_info.depth, 1.0);
+  gl_Position = frame_info.mvp * vec4(vertices, 0.0, 1.0);
+  gl_Position.z = frame_info.depth;
   v_color = f16vec4(color);
   v_texture_coords =
       IPRemapCoords(texture_coords, frame_info.texture_sampler_y_coord_scale);

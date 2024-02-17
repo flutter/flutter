@@ -3525,10 +3525,10 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   canvas.DrawRRect(Rect::MakeLTRB(0, 0, 100, 100), {10, 10}, {});  // Depth 2
   canvas.Save();
   {
-    canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 5
-    canvas.SaveLayer({});                                          // Depth 3
+    canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 4
+    canvas.SaveLayer({});                                          // Depth 4
     {
-      canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 4
+      canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});  // Depth 3
     }
     canvas.Restore();  // Restore the savelayer.
   }
@@ -3538,9 +3538,13 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   auto picture = canvas.EndRecordingAsPicture();
   std::array<uint32_t, 5> expected = {
       2,  // DrawRRect
-      4,  // ClipRRect
-      3,  // SaveLayer
-      4,  // DrawRRect
+      4,  // ClipRRect -- Has a depth value equal to the max depth of all the
+          //              content it affect. In this case, the SaveLayer and all
+          //              its contents are affected.
+      4,  // SaveLayer -- The SaveLayer is drawn to the parent pass after its
+          //              contents are rendered, so it should have a depth value
+          //              greater than all its contents.
+      3,  // DrawRRect
       5,  // Restore (will be removed once we switch to the clip depth approach)
   };
   std::vector<uint32_t> actual;
@@ -3557,7 +3561,7 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
 
   ASSERT_EQ(actual.size(), expected.size());
   for (size_t i = 0; i < expected.size(); i++) {
-    EXPECT_EQ(actual[i], expected[i]) << "Index: " << i;
+    EXPECT_EQ(expected[i], actual[i]) << "Index: " << i;
   }
 }
 
