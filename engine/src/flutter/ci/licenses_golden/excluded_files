@@ -1564,6 +1564,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.devicetree/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.platform/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.sysmem/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.test/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia/meta.json
@@ -1629,6 +1630,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/meta.json
