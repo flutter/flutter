@@ -12,7 +12,7 @@ namespace impeller {
 class RecordingRenderPass : public RenderPass {
  public:
   explicit RecordingRenderPass(std::shared_ptr<RenderPass> delegate,
-                               const std::shared_ptr<Context>& context,
+                               const std::shared_ptr<const Context>& context,
                                const RenderTarget& render_target);
 
   ~RecordingRenderPass() = default;

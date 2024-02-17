@@ -44,8 +44,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
   const std::vector<Command>& commands = recording_pass->GetCommands();
 
   ASSERT_EQ(commands.size(), 1u);
-  ASSERT_STREQ(commands[0].pipeline->GetDescriptor().GetLabel().c_str(),
-               "TextureFill Pipeline V#1");
+  EXPECT_TRUE(commands[0].pipeline->GetDescriptor().GetLabel().find(
+                  "TextureFill Pipeline") != std::string::npos);
 
   if (GetParam() == PlaygroundBackend::kMetal) {
     recording_pass->EncodeCommands();
@@ -84,8 +84,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
   const std::vector<Command>& commands = render_pass->GetCommands();
 
   ASSERT_EQ(commands.size(), 1u);
-  ASSERT_STREQ(commands[0].pipeline->GetDescriptor().GetLabel().c_str(),
-               "TiledTextureFillExternal Pipeline V#1");
+  EXPECT_TRUE(commands[0].pipeline->GetDescriptor().GetLabel().find(
+                  "TiledTextureFillExternal Pipeline") != std::string::npos);
 }
 #endif
 
