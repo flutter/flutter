@@ -59,8 +59,9 @@ class ChoiceChip extends StatelessWidget
   /// Create a chip that acts like a radio button.
   ///
   /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [ChoiceChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const ChoiceChip({
     super.key,
     this.avatar,
@@ -91,6 +92,7 @@ class ChoiceChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -98,8 +100,9 @@ class ChoiceChip extends StatelessWidget
   /// Create an elevated chip that acts like a radio button.
   ///
   /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// not be null. When [onSelected] is null, the [ChoiceChip] will be disabled.
+  /// The [pressElevation] and [elevation] must be null or non-negative. Typically,
+  /// [pressElevation] is greater than [elevation].
   const ChoiceChip.elevated({
     super.key,
     this.avatar,
@@ -130,6 +133,7 @@ class ChoiceChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    this.avatarBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -190,6 +194,8 @@ class ChoiceChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -234,6 +240,7 @@ class ChoiceChip extends StatelessWidget
       selectedShadowColor: selectedShadowColor,
       avatarBorder: avatarBorder,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
     );
   }
 }

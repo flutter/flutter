@@ -7076,9 +7076,6 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -7097,9 +7094,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
@@ -7117,9 +7111,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test', (WidgetTester tester) async {
@@ -7147,9 +7138,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
@@ -7206,9 +7194,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
@@ -7229,9 +7214,6 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
-      // TODO(gspencergoog): Remove the variant when the deprecated
-      // KeySimulatorTransitModeVariant API is removed.
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
@@ -7309,9 +7291,6 @@ void main() {
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7365,9 +7344,6 @@ void main() {
     expect(find.text(clipboardContent), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7447,9 +7423,6 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7501,9 +7474,6 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7558,9 +7528,6 @@ void main() {
     expect(find.text(expected2), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7656,9 +7623,6 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7736,9 +7700,6 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -10907,6 +10868,7 @@ void main() {
         expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
+        final double lineHeight = findRenderEditable(tester).preferredLineHeight;
 
         // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
         final TestGesture gesture = await tester.startGesture(
@@ -10941,35 +10903,35 @@ void main() {
 
         // Drag, down after the triple tap, to select line by line.
         // Moving down will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 35);
 
         // Moving down will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 54);
 
         // Moving down will extend the selection to the last line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 40.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 4));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 72);
 
         // Moving up will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 54);
 
         // Moving up will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 1));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
@@ -11008,6 +10970,7 @@ void main() {
         expect(controller.value.text, testValueA);
 
         final Offset firstLinePos = textOffsetToPosition(tester, 5);
+        final double lineHeight = findRenderEditable(tester).preferredLineHeight;
 
         // Tap on text field to gain focus, and set selection to 'i|s' on the first line.
         final TestGesture gesture = await tester.startGesture(
@@ -11042,35 +11005,35 @@ void main() {
 
         // Drag, down after the triple tap, to select paragraph by paragraph.
         // Moving down will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 36);
 
         // Moving down will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 55);
 
         // Moving down will extend the selection to the last line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 40.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 4));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 72);
 
         // Moving up will extend the selection to the third line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 20.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight * 2));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 55);
 
         // Moving up will extend the selection to the second line.
-        await gesture.moveTo(firstLinePos + const Offset(0, 10.0));
+        await gesture.moveTo(firstLinePos + Offset(0, lineHeight));
         await tester.pumpAndSettle();
 
         expect(controller.selection.baseOffset, 0);
@@ -15570,10 +15533,12 @@ void main() {
     int prefixTapCount = 0;
     int suffixTapCount = 0;
 
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            focusNode: focusNode,
             onTap: () { textFieldTapCount += 1; },
             decoration: InputDecoration(
               labelText: 'Label',
@@ -15590,6 +15555,10 @@ void main() {
         ),
       ),
     );
+
+    // Focus to show the prefix and suffix buttons.
+    focusNode.requestFocus();
+    await tester.pump();
 
     TestGesture gesture =
         await tester.startGesture(
@@ -15622,10 +15591,12 @@ void main() {
     int prefixTapCount = 0;
     int suffixTapCount = 0;
 
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TextField(
+            focusNode: focusNode,
             onTap: () { textFieldTapCount += 1; },
             decoration: InputDecoration(
               labelText: 'Label',
@@ -15642,6 +15613,10 @@ void main() {
         ),
       ),
     );
+
+    // Focus to show the prefix and suffix buttons.
+    focusNode.requestFocus();
+    await tester.pump();
 
     await tester.tap(find.text('prefix'));
     expect(textFieldTapCount, 0);

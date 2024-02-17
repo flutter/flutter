@@ -22,6 +22,7 @@ import '../test/runner.dart';
 import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
+import '../web/compile.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -357,6 +358,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
+    final String? webRendererString = stringArg('web-renderer');
+    final WebRendererMode webRenderer = (webRendererString != null)
+        ? WebRendererMode.values.byName(webRendererString)
+        : WebRendererMode.auto;
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -369,6 +374,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
+      webRenderer: webRenderer,
     );
 
     String? testAssetDirectory;
@@ -591,6 +597,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
       );
     }
   }
@@ -610,7 +620,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    final Iterable<DevFSFileContent> files = entries.values
+      .map((AssetBundleEntry asset) => asset.content)
+      .whereType<DevFSFileContent>();
+    for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {
