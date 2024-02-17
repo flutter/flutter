@@ -5,8 +5,8 @@
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:convert';
-import 'dart:io' hide Directory;
 import 'dart:ffi' show Abi;
+import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
