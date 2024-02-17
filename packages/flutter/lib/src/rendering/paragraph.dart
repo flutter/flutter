@@ -630,10 +630,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position) ?? 0.0);
   }
 
-  List<ui.LineMetrics> _computeLineMetrics() {
-    return _textPainter.computeLineMetrics();
-  }
-
   @override
   double computeMinIntrinsicWidth(double height) {
     if (!_canComputeIntrinsics()) {
@@ -934,6 +930,14 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       context.canvas.restore();
     }
+  }
+
+  /// {@macro flutter.painting.textPainter.computeLineMetrics}
+  ///
+  /// Valid only after [layout].
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!debugNeedsLayout);
+    return _textPainter.computeLineMetrics();
   }
 
   /// Returns the offset at which to paint the caret.
@@ -1924,7 +1928,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {
-    final List<ui.LineMetrics> lines = paragraph._computeLineMetrics();
+    final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
     final Offset offset = paragraph.getOffsetForCaret(position, Rect.zero);
     int currentLine = lines.length - 1;
     for (final ui.LineMetrics lineMetrics in lines) {

@@ -95,6 +95,23 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
+  test('computeLineMetrics control test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final List<LineMetrics> metrics = paragraph.computeLineMetrics();
+    expect(metrics.length, 2);
+
+    final LineMetrics firstLine = metrics.first;
+    expect(firstLine.baseline + firstLine.descent, firstLine.height);
+
+    final LineMetrics secondLine = metrics.last;
+    expect(secondLine.baseline + secondLine.descent, firstLine.height + secondLine.height);
+  });
+
   test('getOffsetForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
