@@ -1190,6 +1190,41 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
+  testUsingContext('Rebuild the asset bundle if an asset file has changed since previous build', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    fs.file('asset.txt').writeAsStringSync('1');
+    fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  assets:
+    - asset.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    fs.file('asset.txt').writeAsStringSync('2');
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    final String fileContent = fs.file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt')).readAsStringSync();
+    expect(fileContent, '2');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.empty(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
   group('Fatal Logs', () {
     testUsingContext("doesn't fail when --fatal-warnings is set and no warning output", () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
