@@ -58,6 +58,38 @@ class PointerSignalResolver {
   PointerSignalResolvedCallback? _firstRegisteredCallback;
 
   PointerSignalEvent? _currentEvent;
+  Duration? _lastWheelEventTimestamp;
+  Offset? _trackpadLastScrollOffset;
+
+  bool _isLockedHorizontally(Duration eventTimestamp, Offset eventOffset) {
+    final Duration diff =
+        eventTimestamp - (_lastWheelEventTimestamp ?? Duration.zero);
+
+    // print(
+    //   'Diff: ${diff.inMilliseconds}; event: ${event.timeStamp}; lastEvent: ${_lastWheelEvent?.timeStamp}',
+    // );
+    if (diff.inMilliseconds < 100 && _trackpadLastScrollOffset != null) {
+      return _trackpadLastScrollOffset!.dx.abs() >
+          _trackpadLastScrollOffset!.dy.abs();
+    }
+    _trackpadLastScrollOffset = eventOffset;
+    return eventOffset.dx.abs() > eventOffset.dy.abs();
+  }
+
+  bool _isLockedVertically(Duration eventTimestamp, Offset eventOffset) {
+    final Duration diff =
+        eventTimestamp - (_lastWheelEventTimestamp ?? Duration.zero);
+
+    // print(
+    //   'Diff: ${diff.inMilliseconds}; event: ${event.timeStamp}; lastEvent: ${_lastWheelEvent?.timeStamp}',
+    // );
+    if (diff.inMilliseconds < 100 && _trackpadLastScrollOffset != null) {
+      return _trackpadLastScrollOffset!.dx.abs() <
+          _trackpadLastScrollOffset!.dy.abs();
+    }
+    _trackpadLastScrollOffset = eventOffset;
+    return eventOffset.dx.abs() < eventOffset.dy.abs();
+  }
 
   /// Registers interest in handling [event].
   ///
@@ -99,14 +131,29 @@ class PointerSignalResolver {
       return;
     }
     assert(_isSameEvent(_currentEvent!, event));
+
+    if (event is PointerScrollEvent) {
+      final Duration eventTimestamp = event.timeStamp;
+      final Offset eventOffset = event.scrollDelta;
+
+      if (_isLockedVertically(eventTimestamp, eventOffset)) {
+        event = event.copyWith(scrollDelta: Offset(0, eventOffset.dy));
+      } else if (_isLockedHorizontally(eventTimestamp, eventOffset)) {
+        event = event.copyWith(scrollDelta: Offset(eventOffset.dx, 0));
+      }
+
+      _lastWheelEventTimestamp = eventTimestamp;
+    }
+
     try {
-      _firstRegisteredCallback!(_currentEvent!);
+      _firstRegisteredCallback!(event);
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
-        ];
+              DiagnosticsProperty<PointerSignalEvent>('Event', event,
+                  style: DiagnosticsTreeStyle.errorProperty),
+            ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(
