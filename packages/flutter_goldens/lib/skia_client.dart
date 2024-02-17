@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:ffi' show Abi;
+import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
@@ -50,8 +50,10 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
+    Abi? abi,
     io.HttpClient? httpClient,
-  }) : httpClient = httpClient ?? io.HttpClient();
+  }) : httpClient = httpClient ?? io.HttpClient(),
+       abi = abi ?? Abi.current();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -74,6 +76,11 @@ class SkiaGoldClient {
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
+
+  /// The ABI of the current host platform.
+  ///
+  /// If not overriden for testing, defaults to [Abi.current];
+  final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and JSON files
@@ -488,8 +495,6 @@ class SkiaGoldClient {
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
   String _getKeysJSON() {
-    final Abi abi = Abi.current();
-    print(abi.toString());
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'Abi': abi.toString(),
@@ -564,7 +569,6 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
-    final Abi abi = Abi.current();
     final Map<String, Object?> keys = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,

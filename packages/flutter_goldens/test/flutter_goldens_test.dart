@@ -6,6 +6,7 @@
 
 import 'dart:convert';
 import 'dart:io' hide Directory;
+import 'dart:ffi' show Abi;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -431,12 +432,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
+        equals('1937c1c93610cc0122a86a83d5bd38a4'),
       );
 
       // Browser
@@ -458,12 +460,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('e9d5c296c48e7126808520e9cc191243'),
+        equals('bc44a50c01eb3bbaf72a80d76c1c2305'),
       );
 
       // Locally - should defer to luci traceID
@@ -480,12 +483,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+        equals('8821f4896801fcdd7cd6d30f5a8e4284'),
       );
     });
 
