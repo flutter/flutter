@@ -2335,15 +2335,7 @@ class MBSRoute<T> extends ModalRoute<T> {
     );
   }
 
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return navigatorBuilder(context);
-  }
-
-  // Animates the MBSRoute down into position as the top tab with its parent
-  // visible behind it at the top.
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  static Widget buildChildRouteTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     const Offset begin = Offset(0.0, 1.0);
     const Offset end = Offset(0.0, 0.1);
     const Curve curve = Curves.ease;
@@ -2354,6 +2346,18 @@ class MBSRoute<T> extends ModalRoute<T> {
       position: animation.drive(tween),
       child: child,
     );
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return navigatorBuilder(context);
+  }
+
+  // Animates the MBSRoute down into position as the top tab with its parent
+  // visible behind it at the top.
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return buildChildRouteTransitions(context, animation, secondaryAnimation, child);
   }
 
   @override
