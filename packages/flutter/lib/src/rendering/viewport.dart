@@ -1942,7 +1942,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   @override
   double computeChildMainAxisPosition(RenderSliver child, double parentMainAxisPosition) {
     assert(hasSize);
-    final SliverLogicalParentData childParentData = child.parentData! as SliverLogicalParentData;
     final double layoutOffset = (child.parentData! as SliverLogicalParentData).layoutOffset!;
     return switch (applyGrowthDirectionToAxisDirection(child.constraints.axisDirection, child.constraints.growthDirection)) {
       AxisDirection.down || AxisDirection.right => parentMainAxisPosition - layoutOffset,
