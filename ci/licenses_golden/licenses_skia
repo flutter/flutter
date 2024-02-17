@@ -1,4 +1,4 @@
-Signature: 23ad9ac19ccf8eed4c2207328a3db033
+Signature: 7caa6a67725e3f69e94be70f7822d5a4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -396,6 +396,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/PreferStillImage.md
 FILE: ../../../flutter/third_party/skia/relnotes/SkSurfaceProps-Flags.md
 FILE: ../../../flutter/third_party/skia/relnotes/TickToProcessEvents.md
 FILE: ../../../flutter/third_party/skia/relnotes/VkDeviceLostCallback.md
