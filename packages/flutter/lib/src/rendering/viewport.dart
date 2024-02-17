@@ -783,7 +783,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final double (mainAxisPosition, crossAxisPosition) = switch (axis) {
+    final (double mainAxisPosition, double crossAxisPosition) = switch (axis) {
       Axis.vertical   => (position.dy, position.dx),
       Axis.horizontal => (position.dx, position.dy),
     };
