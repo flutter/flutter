@@ -249,9 +249,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
-    final File outputWasmFile = environment.buildDir.childFile(
-      compilerConfig.runWasmOpt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
-    );
+    final File outputWasmFile =
+        environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
@@ -261,12 +260,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
 
     final List<String> compilationArgs = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
-      '--disable-dart-dev',
-      artifacts.getArtifactPath(Artifact.dart2wasmSnapshot, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      'compile',
+      'wasm',
       '--packages=.dart_tool/package_config.json',
-      '--dart-sdk=$dartSdkPath',
-      '--platform=$platformFilePath',
+      '--extra-compiler-option=--dart-sdk=$dartSdkPath',
+      '--extra-compiler-option=--platform=$platformFilePath',
+      if (compilerConfig.renderer == WebRendererMode.skwasm) ...<String>[
+        '--extra-compiler-option=--import-shared-memory',
+        '--extra-compiler-option=--shared-memory-max-pages=32768',
+        ],
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
@@ -274,16 +277,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines)
         '-D$dartDefine',
-      ...compilerConfig.toCommandOptions(),
-      if (compilerConfig.renderer == WebRendererMode.skwasm)
-        ...<String>[
-          '--import-shared-memory',
-          '--shared-memory-max-pages=32768',
-        ],
-      '--depfile=${depFile.path}',
+      '--extra-compiler-option=--depfile=${depFile.path}',
 
-      environment.buildDir.childFile('main.dart').path, // dartfile
+      ...compilerConfig.toCommandOptions(),
+      '-o',
       outputWasmFile.path,
+      environment.buildDir.childFile('main.dart').path, // dartfile
     ];
 
     final ProcessUtils processUtils = ProcessUtils(
@@ -295,37 +294,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       throwOnError: true,
       compilationArgs,
     );
-    if (compilerConfig.runWasmOpt) {
-      final String wasmOptBinary = artifacts.getArtifactPath(
-        Artifact.wasmOptBinary,
-        platform: TargetPlatform.web_javascript
-      );
-      final File optimizedOutput = environment.buildDir.childFile('main.dart.wasm');
-      final List<String> optimizeArgs = <String>[
-        wasmOptBinary,
-        '--all-features',
-        '--closed-world',
-        '--traps-never-happen',
-        '-O3',
-        '--type-ssa',
-        '--gufa',
-        '-O3',
-        '--type-merging',
-        if (compilerConfig.wasmOpt == WasmOptLevel.debug)
-          '--debuginfo',
-        outputWasmFile.path,
-        '-o',
-        optimizedOutput.path,
-      ];
-      await processUtils.run(
-        throwOnError: true,
-        optimizeArgs,
-      );
-
-      // Rename the .mjs file not to have the `.unopt` bit
-      final File jsRuntimeFile = environment.buildDir.childFile('main.dart.unopt.mjs');
-      await jsRuntimeFile.rename(environment.buildDir.childFile('main.dart.mjs').path);
-    }
   }
 
   @override
