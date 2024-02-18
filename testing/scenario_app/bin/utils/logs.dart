@@ -14,6 +14,9 @@ Future<void> step(String msg, Future<void> Function() fn) async {
   stdout.writeln('-> $_green$msg$_reset');
   try {
     await fn();
+  } catch (_) {
+    stderr.writeln('~~ ${_red}Failed$_reset');
+    rethrow;
   } finally {
     stdout.writeln('<- ${_gray}Done$_reset');
   }

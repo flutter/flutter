@@ -30,6 +30,9 @@ dart bin/android_integration_tests.dart --smoke-test dev.flutter.scenarios.Engin
 - `--out-dir`: The directory containing the build artifacts. Defaults to the
   last updated build directory in `out/` that starts with `android_`.
 
+- `--logs-dir`: The directory to store logs and screenshots. Defaults to
+  `FLUTTER_LOGS_DIR` if set, or `out/.../scenario_app/logs` otherwise.
+
 - `--use-skia-gold`: Use Skia Gold to compare screenshots. Defaults to true
   when running on CI, and false otherwise (i.e. when running locally). If
   set to true, `isSkiaGoldClientAvailable` must be true.
