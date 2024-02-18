@@ -66,7 +66,7 @@ abstract class Listenable {
   /// will lead to memory leaks or exceptions.
   ///
   /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
+  factory Listenable.merge(Iterable<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -491,7 +491,7 @@ mixin class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable?> _children;
+  final Iterable<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {
