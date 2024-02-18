@@ -669,10 +669,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       constraints: constraints,
     );
 
-    return switch (_direction) {
-      Axis.horizontal => constraints.constrain(Size(sizes.mainSize, sizes.crossSize)),
-      Axis.vertical   => constraints.constrain(Size(sizes.crossSize, sizes.mainSize)),
-    };
+    return constraints.constrain(switch (_direction) {
+      Axis.horizontal => Size(sizes.mainSize, sizes.crossSize),
+      Axis.vertical   => Size(sizes.crossSize, sizes.mainSize),
+    });
   }
 
   FlutterError? _debugCheckConstraints({required BoxConstraints constraints, required bool reportParentConstraints}) {

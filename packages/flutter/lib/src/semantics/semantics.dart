@@ -5040,10 +5040,11 @@ AttributedString _concatAttributedString({
     return thisAttributedString;
   }
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
-    otherAttributedString = switch (otherTextDirection) {
-      TextDirection.rtl => AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF),
-      TextDirection.ltr => AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF),
+    final AttributedString directionEmbedding = switch (otherTextDirection) {
+      TextDirection.rtl => AttributedString(Unicode.RLE),
+      TextDirection.ltr => AttributedString(Unicode.LRE),
     };
+    otherAttributedString = directionEmbedding + otherAttributedString + AttributedString(Unicode.PDF);
   }
   if (thisAttributedString.string.isEmpty) {
     return otherAttributedString;

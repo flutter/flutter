@@ -526,10 +526,10 @@ class RenderWrap extends RenderBox
     crossAxisExtent += runCrossAxisExtent;
     mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
 
-    return switch (direction) {
-      Axis.horizontal => constraints.constrain(Size(mainAxisExtent, crossAxisExtent)),
-      Axis.vertical   => constraints.constrain(Size(crossAxisExtent, mainAxisExtent)),
-    };
+    return constraints.constrain(switch (direction) {
+      Axis.horizontal => Size(mainAxisExtent, crossAxisExtent),
+      Axis.vertical   => Size(crossAxisExtent, mainAxisExtent),
+    });
   }
 
   @override
