@@ -69,11 +69,14 @@ enum ScrollDirection {
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
 ScrollDirection flipScrollDirection(ScrollDirection direction) {
-  return switch (direction) {
-    ScrollDirection.idle    => ScrollDirection.idle,
-    ScrollDirection.forward => ScrollDirection.reverse,
-    ScrollDirection.reverse => ScrollDirection.forward,
-  };
+  switch (direction) {
+    case ScrollDirection.idle:
+      return ScrollDirection.idle;
+    case ScrollDirection.forward:
+      return ScrollDirection.reverse;
+    case ScrollDirection.reverse:
+      return ScrollDirection.forward;
+  }
 }
 
 /// Which part of the content inside the viewport should be visible.

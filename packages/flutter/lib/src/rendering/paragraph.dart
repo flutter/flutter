@@ -843,10 +843,15 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
             locale: locale,
           )..layout();
           if (didOverflowWidth) {
-            final (double fadeStart, double fadeEnd) = switch (textDirection) {
-              TextDirection.rtl => (fadeSizePainter.width, 0.0),
-              TextDirection.ltr => (size.width - fadeSizePainter.width, size.width),
-            };
+            double fadeEnd, fadeStart;
+            switch (textDirection) {
+              case TextDirection.rtl:
+                fadeEnd = 0.0;
+                fadeStart = fadeSizePainter.width;
+              case TextDirection.ltr:
+                fadeEnd = size.width;
+                fadeStart = fadeEnd - fadeSizePainter.width;
+            }
             _overflowShader = ui.Gradient.linear(
               Offset(fadeStart, 0.0),
               Offset(fadeEnd, 0.0),

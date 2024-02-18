@@ -67,11 +67,14 @@ class TextSelectionPoint {
 
   @override
   String toString() {
-    return switch (direction) {
-      TextDirection.ltr => '$point-ltr',
-      TextDirection.rtl => '$point-rtl',
-      null => '$point',
-    };
+    switch (direction) {
+      case TextDirection.ltr:
+        return '$point-ltr';
+      case TextDirection.rtl:
+        return '$point-rtl';
+      case null:
+        return '$point';
+    }
   }
 
   @override
@@ -1683,26 +1686,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
   Offset get _paintOffset {
-    return switch (_viewportAxis) {
-      Axis.horizontal => Offset(-offset.pixels, 0.0),
-      Axis.vertical   => Offset(0.0, -offset.pixels),
-    };
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return Offset(-offset.pixels, 0.0);
+      case Axis.vertical:
+        return Offset(0.0, -offset.pixels);
+    }
   }
 
   double get _viewportExtent {
     assert(hasSize);
-    return switch (_viewportAxis) {
-      Axis.horizontal => size.width,
-      Axis.vertical   => size.height,
-    };
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return size.width;
+      case Axis.vertical:
+        return size.height;
+    }
   }
 
   double _getMaxScrollExtent(Size contentSize) {
     assert(hasSize);
-    return switch (_viewportAxis) {
-      Axis.horizontal => math.max(0.0, contentSize.width - size.width),
-      Axis.vertical   => math.max(0.0, contentSize.height - size.height),
-    };
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return math.max(0.0, contentSize.width - size.width);
+      case Axis.vertical:
+        return math.max(0.0, contentSize.height - size.height);
+    }
   }
 
   // We need to check the paint offset here because during animation, the start of
