@@ -827,10 +827,7 @@ void main() {
             return 100.0;
           },
           itemBuilder: (BuildContext context, int index) {
-            if (index < 10000) {
-              // Filter out the call with int.max (to determine whether children count finite).
-              buildLog.insert(0, index);
-            }
+            buildLog.insert(0, index);
             return Text('Item $index');
           },
         ),

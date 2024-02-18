@@ -937,29 +937,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     );
   }
 
-  /// The best available estimate of [childCount], or null if no estimate is available.
-  ///
-  /// This differs from [childCount] in that [childCount] never returns null (and must
-  /// not be accessed if the child count is not yet available, meaning the [createChild]
-  /// method has not been provided an index that does not create a child).
-  ///
-  /// See also:
-  ///
-  ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
-  int? get estimatedChildCount => (widget as SliverMultiBoxAdaptorWidget).delegate.estimatedChildCount;
-
   @override
-  bool? get isFiniteChildren {
-    if (estimatedChildCount != null) {
-      return true;
-    } else {
-      final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      const int max = kIsWeb
-        ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
-        : ((1 << 63) - 1);
-      return _build(max - 1, adaptorWidget) == null;
-    }
-  }
+  int? get estimatedChildCount => (widget as SliverMultiBoxAdaptorWidget).delegate.estimatedChildCount;
 
   @override
   int get childCount {
