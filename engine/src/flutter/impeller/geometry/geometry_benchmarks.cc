@@ -46,9 +46,9 @@ class ImpellerBenchmarkAccessor {
 namespace {
 /// A path with many connected cubic components, including
 /// overlaps/self-intersections/multi-contour.
-Path CreateCubic();
+Path CreateCubic(bool closed);
 /// Similar to the path above, but with all cubics replaced by quadratics.
-Path CreateQuadratic();
+Path CreateQuadratic(bool closed);
 /// Create a rounded rect.
 Path CreateRRect();
 }  // namespace
@@ -157,36 +157,52 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join)                 \
+#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed)         \
   BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join, \
-                    Create##path(), Cap::k##cap, Join::k##join, false)
+                    Create##path(closed), Cap::k##cap, Join::k##join, false)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_UV(path, cap, join)                   \
+#define MAKE_STROKE_BENCHMARK_CAPTURE_UV(path, cap, join, closed)           \
   BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##_uv, \
-                    Create##path(), Cap::k##cap, Join::k##join, true)
+                    Create##path(closed), Cap::k##cap, Join::k##join, true)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uv) \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Bevel);    \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Miter);    \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Round);    \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Square, Bevel);  \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Round, Bevel)
+#define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uv)       \
+  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Bevel, false);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Miter, false);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Round, false);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Square, Bevel, false); \
+  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Round, Bevel, false)
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE_UVS(path)     \
   MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, ); \
   MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _UV)
 
-BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(), false);
-BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(), true);
+BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
+BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(true), true);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_cubic_polyline,
+                  CreateCubic(false),
+                  false);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_cubic_polyline_tess,
+                  CreateCubic(false),
+                  true);
 MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Cubic);
 
-BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(), false);
-BENCHMARK_CAPTURE(BM_Polyline, quad_polyline_tess, CreateQuadratic(), true);
+BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true), false);
+BENCHMARK_CAPTURE(BM_Polyline, quad_polyline_tess, CreateQuadratic(true), true);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_quad_polyline,
+                  CreateQuadratic(false),
+                  false);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_quad_polyline_tess,
+                  CreateQuadratic(false),
+                  true);
 MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Quadratic);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel);
-MAKE_STROKE_BENCHMARK_CAPTURE_UV(RRect, Butt, Bevel);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, );
+MAKE_STROKE_BENCHMARK_CAPTURE_UV(RRect, Butt, Bevel, );
 
 namespace {
 
@@ -196,8 +212,9 @@ Path CreateRRect() {
       .TakePath();
 }
 
-Path CreateCubic() {
-  return PathBuilder{}
+Path CreateCubic(bool closed) {
+  auto builder = PathBuilder{};
+  builder  //
       .MoveTo({359.934, 96.6335})
       .CubicCurveTo({358.189, 96.7055}, {356.436, 96.7908}, {354.673, 96.8895})
       .CubicCurveTo({354.571, 96.8953}, {354.469, 96.9016}, {354.367, 96.9075})
@@ -265,12 +282,18 @@ Path CreateCubic() {
       .LineTo({360, 119.256})
       .LineTo({360, 106.332})
       .LineTo({360, 96.6307})
-      .CubicCurveTo({359.978, 96.6317}, {359.956, 96.6326}, {359.934, 96.6335})
-      .Close()
+      .CubicCurveTo({359.978, 96.6317}, {359.956, 96.6326}, {359.934, 96.6335});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({337.336, 124.143})
       .CubicCurveTo({337.274, 122.359}, {338.903, 121.511}, {338.903, 121.511})
-      .CubicCurveTo({338.903, 121.511}, {338.96, 123.303}, {337.336, 124.143})
-      .Close()
+      .CubicCurveTo({338.903, 121.511}, {338.96, 123.303}, {337.336, 124.143});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({340.082, 121.849})
       .CubicCurveTo({340.074, 121.917}, {340.062, 121.992}, {340.046, 122.075})
       .CubicCurveTo({340.039, 122.109}, {340.031, 122.142}, {340.023, 122.177})
@@ -295,8 +318,11 @@ Path CreateCubic() {
       .CubicCurveTo({339.256, 122.215}, {339.339, 122.12}, {339.425, 122.037})
       .CubicCurveTo({339.428, 122.033}, {339.431, 122.03}, {339.435, 122.027})
       .CubicCurveTo({339.785, 121.687}, {340.106, 121.511}, {340.106, 121.511})
-      .CubicCurveTo({340.106, 121.511}, {340.107, 121.645}, {340.082, 121.849})
-      .Close()
+      .CubicCurveTo({340.106, 121.511}, {340.107, 121.645}, {340.082, 121.849});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({340.678, 113.245})
       .CubicCurveTo({340.594, 113.488}, {340.356, 113.655}, {340.135, 113.775})
       .CubicCurveTo({339.817, 113.948}, {339.465, 114.059}, {339.115, 114.151})
@@ -315,21 +341,30 @@ Path CreateCubic() {
       .CubicCurveTo({339.574, 110.984}, {337.942, 112.708}, {336.753, 113.784})
       .CubicCurveTo({336.768, 113.8}, {336.782, 113.816}, {336.796, 113.833})
       .CubicCurveTo({338.104, 112.946}, {340.187, 111.755}, {340.65, 112.813})
-      .CubicCurveTo({340.71, 112.95}, {340.728, 113.102}, {340.678, 113.245})
-      .Close()
+      .CubicCurveTo({340.71, 112.95}, {340.728, 113.102}, {340.678, 113.245});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({346.357, 106.771})
       .CubicCurveTo({346.295, 104.987}, {347.924, 104.139}, {347.924, 104.139})
-      .CubicCurveTo({347.924, 104.139}, {347.982, 105.931}, {346.357, 106.771})
-      .Close()
+      .CubicCurveTo({347.924, 104.139}, {347.982, 105.931}, {346.357, 106.771});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({347.56, 106.771})
       .CubicCurveTo({347.498, 104.987}, {349.127, 104.139}, {349.127, 104.139})
-      .CubicCurveTo({349.127, 104.139}, {349.185, 105.931}, {347.56, 106.771})
-      .Close()
-      .TakePath();
+      .CubicCurveTo({349.127, 104.139}, {349.185, 105.931}, {347.56, 106.771});
+  if (closed) {
+    builder.Close();
+  }
+  return builder.TakePath();
 }
 
-Path CreateQuadratic() {
-  return PathBuilder{}
+Path CreateQuadratic(bool closed) {
+  auto builder = PathBuilder{};
+  builder  //
       .MoveTo({359.934, 96.6335})
       .QuadraticCurveTo({358.189, 96.7055}, {354.673, 96.8895})
       .QuadraticCurveTo({354.571, 96.8953}, {354.367, 96.9075})
@@ -397,12 +432,18 @@ Path CreateQuadratic() {
       .LineTo({360, 119.256})
       .LineTo({360, 106.332})
       .LineTo({360, 96.6307})
-      .QuadraticCurveTo({359.978, 96.6317}, {359.934, 96.6335})
-      .Close()
+      .QuadraticCurveTo({359.978, 96.6317}, {359.934, 96.6335});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({337.336, 124.143})
       .QuadraticCurveTo({337.274, 122.359}, {338.903, 121.511})
-      .QuadraticCurveTo({338.903, 121.511}, {337.336, 124.143})
-      .Close()
+      .QuadraticCurveTo({338.903, 121.511}, {337.336, 124.143});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({340.082, 121.849})
       .QuadraticCurveTo({340.074, 121.917}, {340.046, 122.075})
       .QuadraticCurveTo({340.039, 122.109}, {340.023, 122.177})
@@ -426,8 +467,11 @@ Path CreateQuadratic() {
       .QuadraticCurveTo({339.256, 122.215}, {339.425, 122.037})
       .QuadraticCurveTo({339.428, 122.033}, {339.435, 122.027})
       .QuadraticCurveTo({339.785, 121.687}, {340.106, 121.511})
-      .QuadraticCurveTo({340.106, 121.511}, {340.082, 121.849})
-      .Close()
+      .QuadraticCurveTo({340.106, 121.511}, {340.082, 121.849});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({340.678, 113.245})
       .QuadraticCurveTo({340.594, 113.488}, {340.135, 113.775})
       .QuadraticCurveTo({339.817, 113.948}, {339.115, 114.151})
@@ -446,17 +490,25 @@ Path CreateQuadratic() {
       .QuadraticCurveTo({339.574, 110.984}, {336.753, 113.784})
       .QuadraticCurveTo({336.768, 113.8}, {336.796, 113.833})
       .QuadraticCurveTo({338.104, 112.946}, {340.65, 112.813})
-      .QuadraticCurveTo({340.71, 112.95}, {340.678, 113.245})
-      .Close()
+      .QuadraticCurveTo({340.71, 112.95}, {340.678, 113.245});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({346.357, 106.771})
       .QuadraticCurveTo({346.295, 104.987}, {347.924, 104.139})
-      .QuadraticCurveTo({347.924, 104.139}, {346.357, 106.771})
-      .Close()
+      .QuadraticCurveTo({347.924, 104.139}, {346.357, 106.771});
+  if (closed) {
+    builder.Close();
+  }
+  builder  //
       .MoveTo({347.56, 106.771})
       .QuadraticCurveTo({347.498, 104.987}, {349.127, 104.139})
-      .QuadraticCurveTo({349.127, 104.139}, {347.56, 106.771})
-      .Close()
-      .TakePath();
+      .QuadraticCurveTo({349.127, 104.139}, {347.56, 106.771});
+  if (closed) {
+    builder.Close();
+  }
+  return builder.TakePath();
 }
 
 }  // namespace
