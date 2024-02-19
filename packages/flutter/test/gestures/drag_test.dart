@@ -1100,6 +1100,8 @@ void main() {
 
     log.add('-a');
     // #5 pointer move (100.0, 100.0), received delta should be (100.0, 100.0).
+    // offset = 100 / 1
+    // delta = offset - 0 (last offset)
     tester.route(pointer5.move(const Offset(100.0, 100.0)));
 
     // _moveDeltaBeforeFrame = { 5: Offset(100, 100), }
@@ -1112,7 +1114,10 @@ void main() {
     tester.route(down6);
 
     log.add('-b');
-    // #6 pointer move (110.0, 110.0), received delta should be (10, 10).
+    // #6 pointer move (110.0, 110.0), received delta should be (5, 5).
+    // offset = (100 + 110) / 2
+    // delta = offset - 100 (last offset)
+
     tester.route(pointer6.move(const Offset(110.0, 110.0)));
 
     // _moveDeltaBeforeFrame = { 5: Offset(100, 100), 6: Offset(110, 110),}
@@ -1125,7 +1130,9 @@ void main() {
     tester.route(down7);
 
     log.add('-c');
-    // #7 pointer move (-100.0, -100.0), received delta should be (-100.0, -100.0).
+    // #7 pointer move (-100.0, -100.0), received delta should be (-68.3, -68.3).
+    // offset = (100 + 110 -100) / 3
+    // delta = offset - 105(last offset)
     tester.route(pointer7.move(const Offset(-100.0, -100.0)));
 
     // _moveDeltaBeforeFrame = {
@@ -1142,7 +1149,9 @@ void main() {
     tester.route(down8);
 
     log.add('-d');
-    // #8 pointer (-110.0, -110.0), received delta should be (-10, -10).
+    // #8 pointer (-110.0, -110.0), received delta should be (-36.7, -36.7).
+    // offset = (100 + 110 -100 - 110) / 4
+    // delta = offset - 36.7(last offset)
     tester.route(pointer8.move(const Offset(-110.0, -110.0)));
 
     // _moveDeltaBeforeFrame = {
@@ -1153,7 +1162,9 @@ void main() {
     // }
 
     log.add('-e');
-    // #5 pointer move (20.0, 20.0), received delta should be (10.0, 10.0).
+    // #5 pointer move (20.0, 20.0), received delta should be (5.0, 5.0).
+    // offset = (100 + 110 -100 - 110 + 20) / 4
+    // delta = offset - 0 (last offset)
     tester.route(pointer5.move(const Offset(120.0, 120.0)));
 
     // _moveDeltaBeforeFrame = {
@@ -1164,7 +1175,9 @@ void main() {
     // }
 
     log.add('-f');
-    // #7 pointer move (-20.0, -20.0), received delta should be (-10.0, -10.0).
+    // #7 pointer move (-20.0, -20.0), received delta should be (-5.0, -5.0).
+    // offset = (120 + 110 -100 - 110 - 20) / 4
+    // delta = offset - 5 (last offset)
     tester.route(pointer7.move(const Offset(-120.0, -120.0)));
 
     // _moveDeltaBeforeFrame = {
@@ -1181,7 +1194,9 @@ void main() {
     // _moveDeltaBeforeFrame = { }
 
     log.add('-g');
-    // #6 pointer move (10.0, 10.0), received delta should be (10, 10).
+    // #6 pointer move (10.0, 10.0), received delta should be (2.5, 2.5).
+    // offset = 10 / 4
+    // delta = offset - 0 (last offset)
     tester.route(pointer6.move(const Offset(120, 120)));
 
     // _moveDeltaBeforeFrame = {
@@ -1189,7 +1204,9 @@ void main() {
     // }
 
     log.add('-h');
-    // #8 pointer move (-10.0, -10.0), received delta should be (-10, -10).
+    // #8 pointer move (-10.0, -10.0), received delta should be (-2.5, -2.5).
+    // offset = (10 - 10) / 4
+    // delta = offset - 2.5 (last offset)
     tester.route(pointer8.move(const Offset(-120, -120)));
 
     // _moveDeltaBeforeFrame = {
@@ -1198,7 +1215,9 @@ void main() {
     // }
 
     log.add('-i');
-    // #5 pointer move (10.0, 10.0), received delta should be (0.0, 0.0).
+    // #5 pointer move (10.0, 10.0), received delta should be (2.5, 2.5).
+    // offset = (10 - 10 + 10) / 4
+    // delta = offset - 0 (last offset)
     tester.route(pointer5.move(const Offset(130, 130)));
 
     // _moveDeltaBeforeFrame = {
@@ -1208,7 +1227,9 @@ void main() {
     // }
 
     log.add('-j');
-    // #7 pointer move (-10.0, -10.0), received delta should be (0.0, 0.0).
+    // #7 pointer move (-10.0, -10.0), received delta should be (-2.5, -2.5).
+    // offset = (10 + 10 - 10 - 10) / 4
+    // delta = offset - 2.5 (last offset)
     tester.route(pointer7.move(const Offset(-130.0, -130.0)));
 
     tester.route(pointer5.up());
@@ -1224,23 +1245,23 @@ void main() {
       '-a',
       'drag-update (Offset(100.0, 100.0))',
       '-b',
-      'drag-update (Offset(10.0, 10.0))',
+      'drag-update (Offset(5.0, 5.0))',
       '-c',
-      'drag-update (Offset(-100.0, -100.0))',
+      'drag-update (Offset(-68.3, -68.3))',
       '-d',
-      'drag-update (Offset(-10.0, -10.0))',
+      'drag-update (Offset(-36.7, -36.7))',
       '-e',
-      'drag-update (Offset(10.0, 10.0))',
+      'drag-update (Offset(5.0, 5.0))',
       '-f',
-      'drag-update (Offset(-10.0, -10.0))',
+      'drag-update (Offset(-5.0, -5.0))',
       '-g',
-      'drag-update (Offset(10.0, 10.0))',
+      'drag-update (Offset(2.5, 2.5))',
       '-h',
-      'drag-update (Offset(-10.0, -10.0))',
+      'drag-update (Offset(-2.5, -2.5))',
       '-i',
-      'drag-update (Offset(0.0, 0.0))',
+      'drag-update (Offset(2.5, 2.5))',
       '-j',
-      'drag-update (Offset(0.0, 0.0))'
+      'drag-update (Offset(-2.5, -2.5))'
     ]);
   });
 
