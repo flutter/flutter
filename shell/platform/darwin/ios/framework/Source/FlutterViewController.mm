@@ -1520,15 +1520,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   BOOL keyboardAnimationIsCompounding =
       self.keyboardAnimationIsShowing == keyboardWillShow && _keyboardAnimationVSyncClient != nil;
 
-  // Avoid triggering startKeyBoardAnimation when keyboard notifications are triggered
-  // by the dismissal of password autofill prompt. When this happens, there is
-  // no keyboard on the screen and FlutterTextInputViewAccessibilityHider is nil.
-  FlutterTextInputPlugin* textInputPlugin = self.engine.textInputPlugin;
-  UIView* textInputHider = [[textInputPlugin textInputView] superview];
-  if (keyboardWillShow && textInputHider == nil) {
-    return;
-  }
-
   // Mark keyboard as showing or hiding.
   self.keyboardAnimationIsShowing = keyboardWillShow;
 
