@@ -477,11 +477,13 @@ class _StringFragment extends StatelessWidget {
       child: SizedBox(
         width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
         height: height,
-        child: Text(
-          _stringFragmentValue(timeOfDayFormat),
-          style: effectiveStyle,
-          textScaler: TextScaler.noScaling,
-          textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            _stringFragmentValue(timeOfDayFormat),
+            style: effectiveStyle,
+            textScaler: TextScaler.noScaling,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );

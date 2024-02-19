@@ -1836,6 +1836,15 @@ void main() {
         expect(minuteFieldTop, separatorTop);
       });
 
+      testWidgets('Ensure time selector separator is centered vertically',
+          (WidgetTester tester) async {
+        await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType);
+        final Rect parent = tester.getRect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'));
+        final Rect child = tester.getRect(find.text(':'));
+        expect(parent.center, child.center);
+        expect(parent.height, isNot(child.height));
+      });
+
       testWidgets('Can switch between hour/minute fields using keyboard input action', (WidgetTester tester) async {
         await startPicker(tester, (TimeOfDay? time) {},
             entryMode: TimePickerEntryMode.input, materialType: materialType);
