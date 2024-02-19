@@ -25,10 +25,7 @@ class TestSpecs {
   }
 
   int get endTime {
-    if (_endTime == null) {
-      return 0;
-    }
-    return _endTime!;
+    return _endTime ?? 0;
   }
 
   String toJson() {

@@ -97,11 +97,9 @@ DropdownButton<String>(
   onChanged: (String? newValue) {
     // null indicates the user didn't select a
     // new value.
-    setState(() {
-      if (newValue != null) {
-        dropdownValue = newValue;
-      }
-    });
+    if (newValue != null) {
+      setState(() => dropdownValue = newValue);
+    }
   },
   items: <String>['One', 'Two', 'Free', 'Four']
     .map<DropdownMenuItem<String>>((String value) {
