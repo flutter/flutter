@@ -578,10 +578,7 @@ abstract class Route<T> {
   /// rendered. It is even possible for the route to be active but for the stateful
   /// widgets within the route to not be instantiated. See [ModalRoute.maintainState].
   bool get isActive {
-    if (_navigator == null) {
-      return false;
-    }
-    return _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
+    return _navigator?._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
   }
 }
 
@@ -3773,10 +3770,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _updateEffectiveObservers() {
+    _effectiveObservers = widget.observers;
     if (_heroControllerFromScope != null) {
-      _effectiveObservers = widget.observers + <NavigatorObserver>[_heroControllerFromScope!];
-    } else {
-      _effectiveObservers = widget.observers;
+      _effectiveObservers += <NavigatorObserver>[_heroControllerFromScope!];
     }
   }
 
