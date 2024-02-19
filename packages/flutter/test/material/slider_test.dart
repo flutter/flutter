@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../cupertino/theme_test.dart';
 import '../widgets/semantics_tester.dart';
 
 // A thumb shape that also logs its repaint center.
@@ -4250,5 +4251,35 @@ void main() {
         <String>['onChangeStart', 'onChanged', 'onChangeEnd', 'onChangeStart', 'onChanged', 'onChangeEnd'],
       );
     });
+  });
+
+  testWidgets('Slider.onChanged is called only once', (WidgetTester tester) async {
+    int onChangeCallbackCount = 0;
+    late final double screenWidth;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            screenWidth = constraints.maxWidth;
+            return Center(
+              child: Slider(
+                max: 5,
+                divisions: 5,
+                value: 0,
+                onChanged: (double newValue) {
+                  onChangeCallbackCount++;
+                },
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
+    await tester.pump(kLongPressTimeout);
+    await gesture.moveBy(Offset(screenWidth / 5, 0));
+    await gesture.moveBy(const Offset(1, 0));
+    await gesture.moveBy(const Offset(1, 0));
+    expect(onChangeCallbackCount, 1);
   });
 }
