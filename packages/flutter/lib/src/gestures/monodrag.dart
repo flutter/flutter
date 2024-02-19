@@ -535,8 +535,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       dy = _resolveDelta(pointer: pointer, axis: _DragDirection.vertical, localDelta: localDelta);
       assert(dy.abs() <= localDelta.dy.abs());
     } else {
-      final double averageX = _resolveDeltaForPanGesture(pointer: pointer, axis: _DragDirection.horizontal, localDelta: localDelta);
-      final double averageY = _resolveDeltaForPanGesture(pointer: pointer, axis: _DragDirection.vertical, localDelta: localDelta);
+      final double averageX = _resolveDeltaForPanGesture(axis: _DragDirection.horizontal, localDelta: localDelta);
+      final double averageY = _resolveDeltaForPanGesture(axis: _DragDirection.vertical, localDelta: localDelta);
       final Offset updatedDelta = Offset(averageX, averageY) - _lastUpdatedDeltaForPan;
       _lastUpdatedDeltaForPan = Offset(averageX, averageY);
       dx = updatedDelta.dx;
@@ -578,7 +578,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   double _resolveDeltaForPanGesture({
-    required int pointer,
     required _DragDirection axis,
     required Offset localDelta,
   }) {
