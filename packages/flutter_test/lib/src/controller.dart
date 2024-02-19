@@ -289,7 +289,7 @@ class SemanticsController {
         'Traversal: [\n  ${traversal.join('\n  ')}\n]');
     }
 
-    int endIndex;
+    int? endIndex;
     if (end != null) {
       node = find(end);
       endIndex = traversal.indexOf(node);
@@ -298,8 +298,6 @@ class SemanticsController {
       node = endNode.evaluate().single;
       endIndex = traversal.indexOf(node);
       errorString = endNode.toString(describeSelf: true);
-    } else {
-      endIndex = traversal.length - 1;
     }
     if (endIndex == -1) {
       throw StateError(
@@ -308,6 +306,7 @@ class SemanticsController {
         'Expected End Node: $node\n\n'
         'Traversal: [\n  ${traversal.join('\n  ')}\n]');
     }
+    endIndex ??= traversal.length - 1;
 
     return traversal.getRange(startIndex, endIndex + 1);
   }
