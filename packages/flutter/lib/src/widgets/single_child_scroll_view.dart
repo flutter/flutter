@@ -435,22 +435,34 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return child?.getMinIntrinsicWidth(height) ?? 0.0;
+    if (child != null) {
+      return child!.getMinIntrinsicWidth(height);
+    }
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return child?.getMaxIntrinsicWidth(height) ?? 0.0;
+    if (child != null) {
+      return child!.getMaxIntrinsicWidth(height);
+    }
+    return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return child?.getMinIntrinsicHeight(width) ?? 0.0;
+    if (child != null) {
+      return child!.getMinIntrinsicHeight(width);
+    }
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return child?.getMaxIntrinsicHeight(width) ?? 0.0;
+    if (child != null) {
+      return child!.getMaxIntrinsicHeight(width);
+    }
+    return 0.0;
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
