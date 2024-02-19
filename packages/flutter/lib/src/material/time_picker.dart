@@ -1191,10 +1191,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   TimeOfDay _notifyOnChangedIfNeeded({ bool roundMinutes = false }) {
     final TimeOfDay current = _getTimeForTheta(_theta.value, roundMinutes: roundMinutes, radius: _radius.value);
-    if (widget.onChanged == null) {
-      return current;
-    }
-    if (current != widget.selectedTime) {
+    if (widget.onChanged != null && widget.selectedTime != current) {
       widget.onChanged!(current);
     }
     return current;

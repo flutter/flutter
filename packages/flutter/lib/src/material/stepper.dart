@@ -424,12 +424,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isLabel() {
-    for (final Step step in widget.steps) {
-      if (step.label != null) {
-        return true;
-      }
-    }
-    return false;
+    return widget.steps.any((Step step) => step.label != null);
   }
 
   StepStyle? _stepStyle(int index) {
@@ -442,10 +437,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       if (isActive) MaterialState.selected else MaterialState.disabled,
     };
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
-    if (resolvedConnectorColor != null) {
-      return resolvedConnectorColor;
-    }
-    return isActive ? colorScheme.primary : Colors.grey.shade400;
+
+    return resolvedConnectorColor ?? isActive ? colorScheme.primary : Colors.grey.shade400;
   }
 
   Widget _buildLine(bool visible, bool isActive) {
