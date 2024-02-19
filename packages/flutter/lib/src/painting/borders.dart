@@ -515,7 +515,8 @@ abstract class ShapeBorder {
     if (identical(a, b)) {
       return a;
     }
-    return b?.lerpFrom(a, t) ?? a?.lerpTo(b, t) ?? (t < 0.5 ? a : b);
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    return result ?? (t < 0.5 ? a : b);
   }
 
   /// Create a [Path] that describes the outer edge of the border.
