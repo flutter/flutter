@@ -521,7 +521,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     final _DragDirection? axis = _getPrimaryDragAxis();
 
-    if (localDelta == Offset.zero || (_moveDeltaBeforeFrame.isEmpty && axis != null)) {
+    if (_state != _DragState.accepted || localDelta == Offset.zero || (_moveDeltaBeforeFrame.isEmpty && axis != null)) {
       return localDelta;
     }
 
@@ -583,9 +583,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }) {
     final double delta = axis == _DragDirection.horizontal ? localDelta.dx : localDelta.dy;
     final int pointerCount = _acceptedActivePointers.length;
-    if (pointerCount == 0) {
-      return delta;
-    }
+    assert(pointerCount >= 1);
+
     double sum = delta;
     for (final Offset offset in _moveDeltaBeforeFrame.values) {
       if (axis == _DragDirection.horizontal) {
