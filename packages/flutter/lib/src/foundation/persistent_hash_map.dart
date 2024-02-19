@@ -47,13 +47,9 @@ class PersistentHashMap<K extends Object, V> {
   /// is not in the map.
   @pragma('dart2js:as:trust')
   V? operator[](K key) {
-    if (_root == null) {
-      return null;
-    }
-
     // Unfortunately can not use unsafeCast<V?>(...) here because it leads
     // to worse code generation on VM.
-    return _root.get(0, key, key.hashCode) as V?;
+    return _root?.get(0, key, key.hashCode) as V?;
   }
 }
 
