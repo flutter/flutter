@@ -1546,6 +1546,120 @@ void main() {
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 
+  group('TextLayout', () {
+    test('+ operator basic test', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      const Offset additionalOffset = Offset(100, 1000);
+      final TextLayout layout = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      ).layout() + additionalOffset;
+
+      // The offset applies to offsets in all kinds of metrics.
+      expect(layout.getDistanceToBaseline(TextBaseline.alphabetic), additionalOffset.dy + 7.5);
+      expect(layout.getDistanceToBaseline(TextBaseline.ideographic), additionalOffset.dy + 10.0);
+
+      expect(
+        layout.getGlyphInfoAt(0),
+        GlyphInfo(
+          const Rect.fromLTWH(0, 0, fontSize, fontSize).shift(additionalOffset),
+          const TextRange(start: 0, end: 1),
+          TextDirection.ltr,
+        ),
+      );
+      expect(
+        layout.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(100, 1000, fontSize + 100, fontSize + 1000, TextDirection.ltr)],
+      );
+
+      expect(
+        layout.getLineMetricsAt(0),
+        LineMetrics(hardBreak: true, ascent: 7.5, descent: 2.5, unscaledAscent: 7.5, height: 10, width: 50, left: 100, baseline: 1007.5, lineNumber: 0),
+      );
+
+      // Hit Testing
+      expect(
+        layout.getClosestGlyphForOffset(additionalOffset + const Offset(5, 5)),
+        GlyphInfo(
+          const Rect.fromLTWH(0, 0, fontSize, fontSize).shift(additionalOffset),
+          const TextRange(start: 0, end: 1),
+          TextDirection.ltr,
+        ),
+      );
+      expect(layout.getPositionForOffset(additionalOffset + const Offset(3, 5)), const TextPosition(offset: 0));
+    });
+
+    test('+ operator throws if given an infinite offset', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextLayout layout = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      ).layout();
+
+      expect(() => layout + Offset.infinite, throwsAssertionError);
+      expect(() => layout + const Offset(double.nan, 0), throwsAssertionError);
+      expect(() => layout + const Offset(0, double.nan), throwsAssertionError);
+    });
+
+    test('- / = operators basic test', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.right,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      );
+
+      expect(painter.layout(), painter.layout());
+      expect(painter.layout() - painter.layout(), Offset.zero);
+
+      expect(painter.layout(), painter.layout(maxWidth: 50));
+      expect(painter.layout() - painter.layout(maxWidth: 50), Offset.zero);
+
+      expect(painter.layout(), isNot(painter.layout(minWidth: double.infinity)));
+      expect(painter.layout(minWidth: double.infinity) - painter.layout(), const Offset(double.infinity, 0));
+      expect(painter.layout() - painter.layout(minWidth: double.infinity), const Offset(double.negativeInfinity, 0));
+
+      expect(painter.layout(minWidth: double.infinity), painter.layout(minWidth: double.infinity));
+      expect(painter.layout(minWidth: double.infinity) - painter.layout(minWidth: double.infinity), Offset.zero);
+
+      expect(painter.layout(), isNot(TextPainter(textDirection: TextDirection.ltr, text: const TextSpan()).layout()));
+      expect(painter.layout() - TextPainter(textDirection: TextDirection.ltr, text: const TextSpan()).layout(), isNull);
+
+      // Not the same layout if lines break differently.
+      expect(painter.layout(), isNot(painter.layout(maxWidth: 10)));
+      expect(painter.layout() - painter.layout(maxWidth: 10), isNull);
+    });
+
+    test('TextLayout lifecycle', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      );
+
+      final TextLayout initialLayout = painter.layout();
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter..layout()..layout();
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter.layout(maxWidth: 50);
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter.layout(maxWidth: 10);
+      expect(initialLayout.debugIsValid, isFalse);
+
+      final TextLayout lastLayout = painter.layout(maxWidth: 10);
+      expect(lastLayout.debugIsValid, isTrue);
+      painter.dispose();
+      expect(lastLayout.debugIsValid, isFalse);
+    });
+  });
+
   test('TextPainter dispatches memory events', () async {
     await expectLater(
       await memoryEvents(() => TextPainter().dispose(), TextPainter),
