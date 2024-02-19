@@ -60,11 +60,9 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                       Radio<UnfocusDisposition>(
                         groupValue: disposition,
                         onChanged: (UnfocusDisposition? value) {
-                          setState(() {
-                            if (value != null) {
-                              disposition = value;
-                            }
-                          });
+                          if (value != null) {
+                            setState(() => disposition = value);
+                          }
                         },
                         value: UnfocusDisposition.values[index],
                       ),

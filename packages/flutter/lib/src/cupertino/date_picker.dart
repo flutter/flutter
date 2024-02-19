@@ -686,10 +686,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // Lazily calculate the column width of the column being displayed only.
   double _getEstimatedColumnWidth(_PickerColumnType columnType) {
-    if (estimatedColumnWidths[columnType.index] == null) {
-      estimatedColumnWidths[columnType.index] =
-          CupertinoDatePicker._getColumnWidth(columnType, localizations, context, widget.showDayOfWeek);
-    }
+    estimatedColumnWidths[columnType.index] ??=
+        CupertinoDatePicker._getColumnWidth(columnType, localizations, context, widget.showDayOfWeek);
 
     return estimatedColumnWidths[columnType.index]!;
   }
