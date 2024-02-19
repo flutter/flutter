@@ -424,7 +424,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isLabel() {
-    return widget.steps.any((Step step) => step.label != null);
+    for (final Step step in widget.steps) {
+      if (step.label != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   StepStyle? _stepStyle(int index) {

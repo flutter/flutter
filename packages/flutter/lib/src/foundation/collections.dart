@@ -29,7 +29,12 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   if (identical(a, b)) {
     return true;
   }
-  return a.containsAll(b);
+  for (final T value in a) {
+    if (!b.contains(value)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// Compares two lists for element-by-element equality.

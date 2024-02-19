@@ -698,8 +698,8 @@ abstract class OutlinedBorder extends ShapeBorder {
     if (identical(a, b)) {
       return a;
     }
-    final OutlinedBorder? result = (b?.lerpFrom(a, t) ?? a?.lerpTo(b, t)) as OutlinedBorder?;
-    return result ?? (t < 0.5 ? a : b);
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
   }
 }
 

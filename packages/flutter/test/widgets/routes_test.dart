@@ -2080,9 +2080,8 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  Curve get barrierCurve {
-    return _barrierCurve ?? super.barrierCurve;
-  }
+  Curve get barrierCurve => _barrierCurve ?? super.barrierCurve;
+
   final Curve? _barrierCurve;
 
   @override

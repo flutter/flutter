@@ -3770,9 +3770,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _updateEffectiveObservers() {
-    _effectiveObservers = widget.observers;
     if (_heroControllerFromScope != null) {
-      _effectiveObservers += <NavigatorObserver>[_heroControllerFromScope!];
+      _effectiveObservers = widget.observers + <NavigatorObserver>[_heroControllerFromScope!];
+    } else {
+      _effectiveObservers = widget.observers;
     }
   }
 

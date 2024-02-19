@@ -72,10 +72,12 @@ class AppStateModel extends Model {
   void removeItemFromCart(int productId) {
     final int? value = _productsInCart[productId];
 
-    if (value == 1) {
-      _productsInCart.remove(productId);
-    } else if (value != null) {
-      _productsInCart[productId] = value - 1;
+    if (value != null) {
+      if (_productsInCart[productId] == 1) {
+        _productsInCart.remove(productId);
+      } else {
+        _productsInCart[productId] = value - 1;
+      }
     }
 
     notifyListeners();
