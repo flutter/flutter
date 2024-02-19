@@ -425,7 +425,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     assert(_frameTimeStamp == SchedulerBinding.instance.currentSystemFrameTimeStamp);
 
-    if (localDelta == Offset.zero) {
+    if (_state != _DragState.accepted || localDelta == Offset.zero) {
       return;
     }
 
@@ -712,6 +712,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       resolvePointer(pointer, GestureDisposition.rejected);
     }
 
+    _moveDeltaBeforeFrame.remove(pointer);
     if (_activePointer == pointer) {
       _activePointer =
         _acceptedActivePointers.isNotEmpty ? _acceptedActivePointers.first : null;
