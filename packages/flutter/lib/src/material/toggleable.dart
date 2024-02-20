@@ -69,7 +69,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
   Animation<double> get reaction => _reaction;
-  late Animation<double> _reaction;
+  late CurvedAnimation _reaction;
 
   /// Controls the radial reaction's opacity animation for hover changes.
   ///
@@ -80,7 +80,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
   Animation<double> get reactionHoverFade => _reactionHoverFade;
-  late Animation<double> _reactionHoverFade;
+  late CurvedAnimation _reactionHoverFade;
   late AnimationController _reactionHoverFadeController;
 
   /// Controls the radial reaction's opacity animation for focus changes.
@@ -91,7 +91,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
   Animation<double> get reactionFocusFade => _reactionFocusFade;
-  late Animation<double> _reactionFocusFade;
+  late CurvedAnimation _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
 
   /// Whether [value] of this control can be changed by user interaction.
@@ -203,9 +203,13 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   @override
   void dispose() {
     _positionController.dispose();
+    _position.dispose();
     _reactionController.dispose();
+    _reaction.dispose();
     _reactionHoverFadeController.dispose();
+    _reactionHoverFade.dispose();
     _reactionFocusFadeController.dispose();
+    _reactionFocusFade.dispose();
     super.dispose();
   }
 
