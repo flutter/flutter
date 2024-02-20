@@ -21,10 +21,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('Hides and shows only a single menu',
-  // TODO(polina-c): exempt singletons, https://github.com/dart-lang/leak_tracker/issues/218 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Hides and shows only a single menu', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     late final BuildContext context;
@@ -94,7 +91,10 @@ void main() {
     expect(find.byKey(key2), findsNothing);
   });
 
-  testWidgets('A menu can be hidden and then reshown', (WidgetTester tester) async {
+  testWidgets('A menu can be hidden and then reshown',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     late final BuildContext context;
 
@@ -182,7 +182,10 @@ void main() {
     controller.remove();
   });
 
-  testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu', (WidgetTester tester) async {
+  testWidgets('Calling show when a built-in widget is already showing its context menu hides the built-in menu',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey builtInKey = GlobalKey();
     final GlobalKey directKey = GlobalKey();
     late final BuildContext context;
