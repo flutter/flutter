@@ -33,6 +33,7 @@ import 'framework.dart';
 import 'heroes.dart';
 import 'notification_listener.dart';
 import 'overlay.dart';
+import 'pages.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
@@ -4861,9 +4862,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
-  Future<T?> push<T extends Object?>(Route<T> route, [DelegatedTransitionBuilder? delegateBuilder]) {
+  Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
-    delegateTransitionBuilder = delegateBuilder;
+    if (route is PageRoute<T>) {
+      delegateTransitionBuilder = route.delegatedTransition;
+    }
     return route.popped;
   }
 
