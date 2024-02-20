@@ -18,7 +18,8 @@ namespace flutter {
 class GPUSurfaceGLImpeller final : public Surface {
  public:
   explicit GPUSurfaceGLImpeller(GPUSurfaceGLDelegate* delegate,
-                                std::shared_ptr<impeller::Context> context);
+                                std::shared_ptr<impeller::Context> context,
+                                bool render_to_surface);
 
   // |Surface|
   ~GPUSurfaceGLImpeller() override;
@@ -29,6 +30,7 @@ class GPUSurfaceGLImpeller final : public Surface {
  private:
   GPUSurfaceGLDelegate* delegate_ = nullptr;
   std::shared_ptr<impeller::Context> impeller_context_;
+  bool render_to_surface_ = true;
   std::shared_ptr<impeller::Renderer> impeller_renderer_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
