@@ -304,9 +304,10 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/111706
   Scrollbar scrollbar = Scrollbar(showTrackOnHover: true);
   bool nowShowing = scrollbar.showTrackOnHover;
-  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
-  scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
-  scrollbarTheme.showTrackOnHover;
+  // The 3 expressions below have `bulkApply` set to true thus can't be tested yet.
+  //ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
+  //scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
+  //scrollbarTheme.showTrackOnHover;
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOverride(context);
