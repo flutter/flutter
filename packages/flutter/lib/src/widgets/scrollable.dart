@@ -548,16 +548,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   /// Used by [EdgeDraggingAutoScroller] to progress the position forward when a
   /// drag gesture reaches the edge of the [Viewport].
   Offset get deltaToScrollOrigin {
-    switch (axisDirection) {
-      case AxisDirection.down:
-        return Offset(0, position.pixels);
-      case AxisDirection.up:
-        return Offset(0, -position.pixels);
-      case AxisDirection.left:
-        return Offset(-position.pixels, 0);
-      case AxisDirection.right:
-        return Offset(position.pixels, 0);
-    }
+    return switch (axisDirection) {
+      AxisDirection.up    => Offset(0, -position.pixels),
+      AxisDirection.down  => Offset(0, position.pixels),
+      AxisDirection.left  => Offset(-position.pixels, 0),
+      AxisDirection.right => Offset(position.pixels, 0),
+    };
   }
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
@@ -1505,16 +1501,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 }
 
 Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
-  switch (scrollableState.axisDirection) {
-    case AxisDirection.down:
-      return Offset(0, scrollableState.position.pixels);
-    case AxisDirection.up:
-      return Offset(0, -scrollableState.position.pixels);
-    case AxisDirection.left:
-      return Offset(-scrollableState.position.pixels, 0);
-    case AxisDirection.right:
-      return Offset(scrollableState.position.pixels, 0);
-  }
+  return switch (scrollableState.axisDirection) {
+    AxisDirection.up    => Offset(0, -scrollableState.position.pixels),
+    AxisDirection.down  => Offset(0, scrollableState.position.pixels),
+    AxisDirection.left  => Offset(-scrollableState.position.pixels, 0),
+    AxisDirection.right => Offset(scrollableState.position.pixels, 0),
+  };
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be

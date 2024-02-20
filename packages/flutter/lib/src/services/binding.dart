@@ -335,30 +335,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // Any transition to itself shouldn't happen.
       return false;
     }
-    switch (starting) {
-      case AppLifecycleState.detached:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.resumed:
-        // Can't go from resumed to detached directly (must go through paused).
-        if (ending == AppLifecycleState.inactive) {
-          return true;
-        }
-      case AppLifecycleState.inactive:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
-          return true;
-        }
-      case AppLifecycleState.hidden:
-        if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.paused:
-        if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
-          return true;
-        }
-    }
-    return false;
+    return switch (starting) {
+      // Can't go from resumed to detached directly (must go through paused).
+      AppLifecycleState.resumed  => ending == AppLifecycleState.inactive,
+      AppLifecycleState.detached => ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused,
+      AppLifecycleState.inactive => ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden,
+      AppLifecycleState.hidden   => ending == AppLifecycleState.paused  || ending == AppLifecycleState.inactive,
+      AppLifecycleState.paused   => ending == AppLifecycleState.hidden  || ending == AppLifecycleState.detached,
+    };
   }
 
 
@@ -391,19 +375,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.hidden':
-        return AppLifecycleState.hidden;
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
+    return switch (message) {
+      'AppLifecycleState.resumed'  => AppLifecycleState.resumed,
+      'AppLifecycleState.inactive' => AppLifecycleState.inactive,
+      'AppLifecycleState.hidden'   => AppLifecycleState.hidden,
+      'AppLifecycleState.paused'   => AppLifecycleState.paused,
+      'AppLifecycleState.detached' => AppLifecycleState.detached,
+      _ => null,
+    };
   }
 
   /// Handles any requests for application exit that may be received on the
