@@ -476,9 +476,14 @@ class SnackBar extends StatefulWidget {
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({
+    required TickerProvider vsync,
+    Duration? duration,
+    Duration? reverseDuration,
+  }) {
     return AnimationController(
-      duration: _snackBarTransitionDuration,
+      duration: duration ?? _snackBarTransitionDuration,
+      reverseDuration: reverseDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
     );

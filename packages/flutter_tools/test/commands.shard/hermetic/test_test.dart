@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -953,6 +955,41 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
+  testUsingContext('Rebuild the asset bundle if an asset file has changed since previous build', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    fs.file('asset.txt').writeAsStringSync('1');
+    fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  assets:
+    - asset.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    fs.file('asset.txt').writeAsStringSync('2');
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    final String fileContent = fs.file(globals.fs.path.join('build', 'unit_test_assets', 'asset.txt')).readAsStringSync();
+    expect(fileContent, '2');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.empty(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
   group('Fatal Logs', () {
     testUsingContext("doesn't fail when --fatal-warnings is set and no warning output", () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
@@ -1057,6 +1094,24 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Passes web renderer into debugging options', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--platform=chrome',
+        '--web-renderer=canvaskit',
+      ]);
+      expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.canvaskit);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
@@ -1105,6 +1160,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Device? integrationTestDevice,
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;

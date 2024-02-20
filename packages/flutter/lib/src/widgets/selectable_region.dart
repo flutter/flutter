@@ -192,6 +192,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// ```
 ///
 /// See also:
+///
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
 ///  * [SelectionHandler], which contains APIs to handle selection events from the
@@ -216,13 +217,13 @@ class SelectableRegion extends StatefulWidget {
     this.onSelectionChanged,
   });
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
+  /// The configuration for the magnifier used with selections in this region.
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
+  /// For a version of [SelectableRegion] that adapts automatically to the
+  /// current platform, consider [SelectionArea].
   ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}

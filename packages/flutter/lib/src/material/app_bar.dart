@@ -489,9 +489,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The fill color to use for an app bar's [Material].
   ///
   /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
-  /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
+  /// null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
   /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
   /// If this color is a [MaterialStateColor] it will be resolved against
   /// [MaterialState.scrolledUnder] when the content of the app's
@@ -514,10 +518,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The default color for [Text] and [Icon]s within the app bar.
   ///
   /// If null, then [AppBarTheme.foregroundColor] is used. If that
-  /// value is also null, then [AppBar] uses the overall theme's
-  /// [ColorScheme.onPrimary] if the overall theme's brightness is
-  /// [Brightness.light], and [ColorScheme.onSurface] if the overall
-  /// theme's brightness is [Brightness.dark].
+  /// value is also null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onPrimary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.onSurface]
+  /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onSurface].
   ///
   /// This color is used to configure [DefaultTextStyle] that contains
   /// the toolbar's children, and the default [IconTheme] widgets that

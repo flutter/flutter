@@ -45,7 +45,7 @@ class FlutterExtension {
     public final int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    public  final int minSdkVersion = 19
+    public  final int minSdkVersion = 21
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -112,7 +112,8 @@ buildscript {
     }
     dependencies {
         // When bumping, also update:
-        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/flutter.groovy
+        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+        //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts
         //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
         //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
         classpath("com.android.tools.build:gradle:7.3.0")
@@ -200,6 +201,8 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties localProperties
     private String engineVersion
     private String engineRealm
+    private List<Map<String, Object>> pluginList
+    private List<Map<String, Object>> pluginDependencies
 
     /**
      * Flutter Docs Website URLs for help messages.
@@ -323,22 +326,27 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile()
 
-        final String propMultidexEnabled = "multidex-enabled"
-        if (project.hasProperty(propMultidexEnabled) &&
-            project.property(propMultidexEnabled).toBoolean()) {
-            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                "gradle", "flutter_multidex_keepfile.txt")
-            project.android {
-                buildTypes {
-                    release {
-                        multiDexKeepFile(project.file(flutterMultidexKeepfile))
-                    }
-                }
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range.
+        // TODO(gmackall) Dependency version checking is currently implemented as an additional
+        // Gradle plugin because we can't import it from Groovy code. As part of the Groovy
+        // -> Kotlin migration, we should remove this complexity and perform the checks inside
+        // of the main Flutter Gradle Plugin.
+        // See https://github.com/flutter/flutter/issues/121541#issuecomment-1920363687.
+        final Boolean shouldSkipDependencyChecks = project.hasProperty("skipDependencyChecks") && project.getProperty("skipDependencyChecks");
+        if (!shouldSkipDependencyChecks) {
+            try {
+                final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
+                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
+                        "dependency_version_checker.gradle.kts")
+                project.apply from: dependencyCheckerPluginPath
+            } catch (Exception ignored) {
+                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                        + ignored)
             }
-            project.dependencies {
-                implementation("androidx.multidex:multidex:2.0.1")
-            }
-            }
+        }
+
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
 
@@ -906,19 +914,26 @@ class FlutterPlugin implements Plugin<Project> {
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
     private List<Map<String, Object>> getPluginList(Project project) {
-        return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+        if (pluginList == null) {
+            pluginList = project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
+        }
+        return pluginList
     }
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
-        Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
-        if (meta == null) {
-            return []
+        if (pluginDependencies == null) {
+            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
+            if (meta == null) {
+                pluginDependencies = []
+            } else {
+                assert(meta.dependencyGraph instanceof List<Map>)
+                pluginDependencies = meta.dependencyGraph as List<Map<String, Object>>
+            }
         }
-        assert(meta.dependencyGraph instanceof List<Map>)
-        return meta.dependencyGraph as List<Map<String, Object>>
+        return pluginDependencies
     }
 
     private String resolveProperty(String name, String defaultValue) {
@@ -1578,6 +1593,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
 
+    @Optional @Input
+    Boolean skipDependencyChecks
     @Optional @Input
     String flavor
 

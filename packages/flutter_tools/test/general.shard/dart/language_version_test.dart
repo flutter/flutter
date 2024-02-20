@@ -275,6 +275,7 @@ library funstuff;
 
   testWithoutContext('defaults to current version if package lookup returns null', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    setUpLanguageVersion(fileSystem);
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
 // Some license

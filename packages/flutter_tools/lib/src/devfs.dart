@@ -15,8 +15,8 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -570,7 +570,6 @@ class DevFS {
     DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
     final DateTime candidateCompileTime = DateTime.now();
@@ -598,7 +597,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: projectRootPath,
+      projectRootPath: rootDirectory?.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,

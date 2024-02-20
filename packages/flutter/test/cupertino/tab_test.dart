@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -288,5 +289,38 @@ void main() {
 
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second route'), findsNothing);
+  });
+
+  testWidgets('Handles Android back button', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(label: '', icon: Text('1')),
+              BottomNavigationBarItem(label: '', icon: Text('2'))
+            ],
+          ),
+          tabBuilder: (_, int i) => PopScope(
+            canPop: false,
+            child: CupertinoTabView(
+              navigatorKey: key,
+              builder: (BuildContext context) => const Text('first route'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('first route'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
+    await tester.pumpAndSettle();
+
+    // Navigator didn't pop, so first route is still visible
+    expect(find.text('first route'), findsOneWidget);
   });
 }

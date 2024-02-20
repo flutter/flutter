@@ -1325,9 +1325,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// To listen for platform shutdown messages (and other lifecycle changes),
   /// consider the [AppLifecycleListener] API.
   ///
-  /// ### Dismissing Flutter UI via platform native methods
-  ///
   /// {@macro flutter.widgets.runApp.dismissal}
+  ///
+  /// See the method used to bootstrap the app (e.g. [runApp] or [runWidget])
+  /// for suggestions on how to release resources more eagerly.
   ///
   /// See also:
   ///
@@ -5854,11 +5855,13 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         child._updateParentData(widget);
-      } else {
-        child.visitChildren(applyParentDataToChild);
+      } else if (child.renderObjectAttachingChild != null) {
+        applyParentDataToChild(child.renderObjectAttachingChild!);
       }
     }
-    visitChildren(applyParentDataToChild);
+    if (renderObjectAttachingChild != null) {
+      applyParentDataToChild(renderObjectAttachingChild!);
+    }
   }
 
   /// Calls [ParentDataWidget.applyParentData] on the given widget, passing it
@@ -6535,7 +6538,7 @@ abstract class RenderObjectElement extends Element {
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
               parentData: renderObject.parentData,
-              parentDataCreator: _ancestorRenderObjectElement!.widget as RenderObjectWidget,
+              parentDataCreator: _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
           ]);
@@ -6970,9 +6973,16 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
             'however, expects that a child will be attached.',
           ),
           ErrorHint(
-            'Try moving the subtree that contains the ${toStringShort()} widget into the '
-            'view property of a ViewAnchor widget or to the root of the widget tree, where '
-            'it is not expected to attach its RenderObject to a parent.',
+            'Try moving the subtree that contains the ${toStringShort()} widget '
+            'to a location where it is not expected to attach its RenderObject '
+            'to a parent. This could mean moving the subtree into the view '
+            'property of a "ViewAnchor" widget or - if the subtree is the root of '
+            'your widget tree - passing it to "runWidget" instead of "runApp".',
+          ),
+          ErrorHint(
+            'If you are seeing this error in a test and the subtree containing '
+            'the ${toStringShort()} widget is passed to "WidgetTester.pumpWidget", '
+            'consider setting the "wrapWithView" parameter of that method to false.'
           ),
         ],
       );
