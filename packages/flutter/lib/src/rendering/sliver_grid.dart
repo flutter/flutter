@@ -165,8 +165,8 @@ abstract class SliverGridLayout {
 class SliverGridRegularTileLayout extends SliverGridLayout {
   /// Creates a layout that uses equally sized and spaced tiles.
   ///
-  /// All of the arguments must not be null and must not be negative. The
-  /// `crossAxisCount` argument must be greater than zero.
+  /// All of the arguments must not be negative. The `crossAxisCount` argument
+  /// must be greater than zero.
   const SliverGridRegularTileLayout({
     required this.crossAxisCount,
     required this.mainAxisStride,
@@ -336,7 +336,6 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   /// Creates a delegate that makes grid layouts with a fixed number of tiles in
   /// the cross axis.
   ///
-  /// All of the arguments except [mainAxisExtent] must not be null.
   /// The `mainAxisSpacing`, `mainAxisExtent` and `crossAxisSpacing` arguments
   /// must not be negative. The `crossAxisCount` and `childAspectRatio`
   /// arguments must be greater than zero.
@@ -435,7 +434,6 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   /// Creates a delegate that makes grid layouts with tiles that have a maximum
   /// cross-axis extent.
   ///
-  /// All of the arguments except [mainAxisExtent] must not be null.
   /// The [maxCrossAxisExtent], [mainAxisExtent], [mainAxisSpacing],
   /// and [crossAxisSpacing] arguments must not be negative.
   /// The [childAspectRatio] argument must be greater than zero.
@@ -549,8 +547,6 @@ class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
 class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that contains multiple box children that whose size and
   /// position are determined by a delegate.
-  ///
-  /// The [childManager] and [gridDelegate] arguments must not be null.
   RenderSliverGrid({
     required super.childManager,
     required SliverGridDelegate gridDelegate,
@@ -600,14 +596,9 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final int firstIndex = layout.getMinChildIndexForScrollOffset(scrollOffset);
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
       layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
-
     if (firstChild != null) {
-      final int oldFirstIndex = indexOf(firstChild!);
-      final int oldLastIndex = indexOf(lastChild!);
-      final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
-      final int trailingGarbage = targetLastIndex == null
-        ? 0
-        : (oldLastIndex - targetLastIndex).clamp(0, childCount);
+      final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
+      final int trailingGarbage = targetLastIndex != null ? _calculateTrailingGarbage(targetLastIndex) : 0;
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -716,5 +707,25 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       childManager.setDidUnderflow(true);
     }
     childManager.didFinishLayout();
+  }
+
+  int _calculateLeadingGarbage(int firstIndex) {
+    RenderBox? walker = firstChild;
+    int leadingGarbage = 0;
+    while (walker != null && indexOf(walker) < firstIndex) {
+      leadingGarbage += 1;
+      walker = childAfter(walker);
+    }
+    return leadingGarbage;
+  }
+
+  int _calculateTrailingGarbage(int targetLastIndex) {
+    RenderBox? walker = lastChild;
+    int trailingGarbage = 0;
+    while (walker != null && indexOf(walker) > targetLastIndex) {
+      trailingGarbage += 1;
+      walker = childBefore(walker);
+    }
+    return trailingGarbage;
   }
 }

@@ -32,6 +32,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
+      defines: <String, String>{},
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -91,6 +92,69 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  group("Only copies assets with a flavor if the assets' flavor matches the flavor in the environment", () {
+    testUsingContext('When the environment does not have a flavor defined', () async {
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+
+      await const CopyAssets().build(environment);
+
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'), exists);
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'), isNot(exists));
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'), isNot(exists));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('When the environment has a flavor defined', () async {
+      environment.defines[kFlavor] = 'strawberry';
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+
+      await const CopyAssets().build(environment);
+
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'), exists);
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'), isNot(exists));
+      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'), exists);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   testUsingContext('Throws exception if pubspec contains missing files', () async {

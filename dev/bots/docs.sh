@@ -111,7 +111,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 6.3.0
+    "$DART" pub global activate dartdoc 8.0.2
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
@@ -134,6 +134,11 @@ function main() {
   if ! [[ "$DESTINATION" =~ ^/ ]]; then
     DESTINATION="$PWD/$DESTINATION"
   fi
+
+  # Make sure the destination has .zip as an extension, because zip will add it
+  # anyhow, and we want to print the correct output location.
+  DESTINATION=${DESTINATION%.zip}.zip
+
   # Zip up doc directory and write the output to the destination.
   (cd "$STAGING_DIR"; zip -r -9 -q "$DESTINATION" ./doc)
   if [[ $KEEP_STAGING -eq 1 ]]; then

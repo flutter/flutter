@@ -24,6 +24,16 @@ class _NoDoubleClamp implements AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
+  void applyTo(ResolvedUnitResult unit) {
+    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
+    unit.unit.visitChildren(visitor);
+    final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
+    if (violationsInUnit.isNotEmpty) {
+      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
+    }
+  }
+
+  @override
   void reportViolations(String workingDirectory) {
     if (_errors.isEmpty) {
       return;
@@ -39,16 +49,6 @@ class _NoDoubleClamp implements AnalyzeRule {
           '${locationInFile(entry.key, node)}: ${node.parent}',
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
     ]);
-  }
-
-  @override
-  void applyTo(ResolvedUnitResult unit) {
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
-    unit.unit.visitChildren(visitor);
-    final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
-    if (violationsInUnit.isNotEmpty) {
-      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
-    }
   }
 
   @override
@@ -73,30 +73,32 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
     if (node.name != 'clamp' || node.staticElement is! MethodElement) {
       return;
     }
-    switch (node.parent) {
+    final bool isAllowed = switch (node.parent) {
       // PropertyAccess matches num.clamp in tear-off form. Always prefer
       // doubleClamp over tear-offs: even when all 3 operands are int literals,
       // the return type doesn't get promoted to int:
-      // final x = 1.clamp(0, 2); // The inferred return type is int.
+      // final x = 1.clamp(0, 2); // The inferred return type is int, where as:
       // final f = 1.clamp;
       // final y = f(0, 2)       // The inferred return type is num.
-      case PropertyAccess(
+      PropertyAccess(
         target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
-      ):
-        clampAccessNodes.add(node);
-      case MethodInvocation(
+      ) => false,
+
+      // Expressions like `final int x = 1.clamp(0, 2);` should be allowed.
+      MethodInvocation(
         target: Expression(staticType: DartType(isDartCoreInt: true)),
         argumentList: ArgumentList(arguments: [Expression(staticType: DartType(isDartCoreInt: true)), Expression(staticType: DartType(isDartCoreInt: true))]),
-      ):
-        // Expressions such as `final int x = 1.clamp(0, 2);` should be allowed.
-        // Do nothing.
-        break;
-      case MethodInvocation(
+      ) => true,
+
+      // Otherwise, disallow num.clamp() invocations.
+      MethodInvocation(
         target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
-      ):
-        clampAccessNodes.add(node);
-      case _:
-        break;
+      ) => false,
+
+      _ => true,
+    };
+    if (!isAllowed) {
+      clampAccessNodes.add(node);
     }
   }
 }

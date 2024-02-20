@@ -34,6 +34,11 @@ void main() {
       expect(localizations.datePickerMonth(11), isNotNull);
       expect(localizations.datePickerMonth(12), isNotNull);
 
+      expect(localizations.datePickerStandaloneMonth(1), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(2), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(11), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(12), isNotNull);
+
       expect(localizations.datePickerDayOfMonth(0), isNotNull);
       expect(localizations.datePickerDayOfMonth(1), isNotNull);
       expect(localizations.datePickerDayOfMonth(2), isNotNull);
@@ -120,7 +125,7 @@ void main() {
     expect(localizations.pasteButtonLabel, 'Coller');
     expect(localizations.datePickerDateOrder, DatePickerDateOrder.dmy);
     expect(localizations.timerPickerSecondLabel(20), 's');
-    expect(localizations.selectAllButtonLabel, 'Tout sélect.');
+    expect(localizations.selectAllButtonLabel, 'Tout sélectionner');
     expect(localizations.timerPickerMinute(10), '10');
   });
 
@@ -226,6 +231,14 @@ void main() {
     expect(buttonItems.first.onPressed, isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
+  });
 }
 
 class _FakeEditableText extends EditableText {

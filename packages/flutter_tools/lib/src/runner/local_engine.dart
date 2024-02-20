@@ -9,7 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 
@@ -33,20 +33,17 @@ class LocalEngineLocator {
     required FileSystem fileSystem,
     required String flutterRoot,
     required UserMessages userMessages,
-    bool treatMissingLocalEngineHostAsFatal = false,
   }) : _platform = platform,
        _logger = logger,
        _fileSystem = fileSystem,
        _flutterRoot = flutterRoot,
-        _userMessages = userMessages,
-        _treatMissingLocalEngineHostAsFatal = treatMissingLocalEngineHostAsFatal;
+        _userMessages = userMessages;
 
   final Platform _platform;
   final Logger _logger;
   final FileSystem _fileSystem;
   final String _flutterRoot;
   final UserMessages _userMessages;
-  final bool _treatMissingLocalEngineHostAsFatal;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({
@@ -170,26 +167,6 @@ class LocalEngineLocator {
     return engineSourcePath;
   }
 
-  // Determine the host engine directory associated with the local engine:
-  // Strip '_sim' since there are no host simulator builds.
-  String _getHostEngineBasename(String localEngineBasename) {
-    if (localEngineBasename.startsWith('web_') ||
-        localEngineBasename.startsWith('wasm_') ||
-        localEngineBasename.startsWith('host_')) {
-      // Don't modify the web or host local engine's basename.
-      return localEngineBasename;
-    }
-
-    String tmpBasename = localEngineBasename.replaceFirst('_sim', '');
-    tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
-    // Strip suffix for various archs.
-    const List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
-    for (final String suffix in suffixes) {
-      tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
-    }
-    return 'host_$tmpBasename';
-  }
-
   EngineBuildPaths _findEngineBuildPath({
     required String engineSourcePath,
     String? localEngine,
@@ -209,16 +186,10 @@ class LocalEngineLocator {
       }
 
       if (localHostEngine == null) {
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/132245, always throwToolExit.
-        if (_treatMissingLocalEngineHostAsFatal) {
-          throwToolExit(_userMessages.runnerLocalEngineRequiresHostEngine());
-        }
-        _logger.printStatus(_userMessages.runnerLocalEngineRequiresHostEngine(warning: true));
+        throwToolExit(_userMessages.runnerLocalEngineRequiresHostEngine);
       }
-      final String basename = localHostEngine ?? _fileSystem.path.basename(engineBuildPath);
-      final String hostBasename = _getHostEngineBasename(basename);
       engineHostBuildPath = _fileSystem.path.normalize(
-        _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), hostBasename),
+        _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), localHostEngine),
       );
       if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
         throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);

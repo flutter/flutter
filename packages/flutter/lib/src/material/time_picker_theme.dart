@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
+import 'colors.dart';
 import 'input_decorator.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -43,7 +44,7 @@ class TimePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.dayPeriodBorderSide,
-    this.dayPeriodColor,
+    Color? dayPeriodColor,
     this.dayPeriodShape,
     this.dayPeriodTextColor,
     this.dayPeriodTextStyle,
@@ -61,18 +62,18 @@ class TimePickerThemeData with Diagnosticable {
     this.inputDecorationTheme,
     this.padding,
     this.shape,
-  });
+  }) : _dayPeriodColor = dayPeriodColor;
 
   /// The background color of a time picker.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.background].
+  /// [ColorScheme.surfaceContainerHigh].
   final Color? backgroundColor;
 
   /// The style of the cancel button of a [TimePickerDialog].
   final ButtonStyle? cancelButtonStyle;
 
-  /// The style of the conform (OK) button of a [TimePickerDialog].
+  /// The style of the confirm (OK) button of a [TimePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
   /// The color and weight of the day period's outline.
@@ -82,7 +83,7 @@ class TimePickerThemeData with Diagnosticable {
   /// ```dart
   /// BorderSide(
   ///   color: Color.alphaBlend(
-  ///     Theme.of(context).colorScheme.onBackground.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
   ///     Theme.of(context).colorScheme.surface,
   ///   ),
   /// ),
@@ -102,7 +103,21 @@ class TimePickerThemeData with Diagnosticable {
   /// brightness is [Brightness.dark].
   /// If the segment is not selected, [Colors.transparent] is used to allow the
   /// [Dialog]'s color to be used.
-  final Color? dayPeriodColor;
+  Color? get dayPeriodColor {
+    if (_dayPeriodColor == null || _dayPeriodColor is MaterialStateColor) {
+      return _dayPeriodColor;
+    }
+    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return _dayPeriodColor;
+      }
+      // The unselected day period should match the overall picker dialog color.
+      // Making it transparent enables that without being redundant and allows
+      // the optional elevation overlay for dark mode to be visible.
+      return Colors.transparent;
+    });
+  }
+  final Color? _dayPeriodColor;
 
   /// The shape of the day period that the time picker uses.
   ///
@@ -137,7 +152,7 @@ class TimePickerThemeData with Diagnosticable {
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
   ///
   /// If this is null and [ThemeData.useMaterial3] is true, the time picker
-  /// dial background color defaults [ColorScheme.surfaceVariant] color.
+  /// dial background color defaults [ColorScheme.surfaceContainerHighest] color.
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, the time picker
   /// dial background color defaults to [ColorScheme.onSurface] color with
@@ -300,8 +315,6 @@ class TimePickerThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two time picker themes.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TimePickerThemeData lerp(TimePickerThemeData? a, TimePickerThemeData? b, double t) {

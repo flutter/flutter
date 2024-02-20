@@ -154,31 +154,69 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
+  testWidgets('ScrollBehavior multitouchDragStrategy test', (WidgetTester tester) async {
+    const ScrollBehavior behavior1 = ScrollBehavior();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
+      multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers
+    );
+    final ScrollController controller = ScrollController();
+    addTearDown(() => controller.dispose());
+
+    Widget buildFrame(ScrollBehavior behavior) {
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800, 600)),
-          child: ScrollConfiguration(
-            behavior: const ScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
-            child: ListView(
-              children: const <Widget>[
-                SizedBox(
-                  height: 1000.0,
-                  width: 1000.0,
-                  child: Text('Test'),
-                ),
-              ],
-            ),
+        child: ScrollConfiguration(
+          behavior: behavior,
+          child: ListView(
+            controller: controller,
+            children: const <Widget>[
+              SizedBox(
+                height: 1000.0,
+                width: 1000.0,
+                child: Text('I Love Flutter!'),
+              ),
+            ],
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+    await tester.pumpWidget(buildFrame(behavior1));
+
+    expect(controller.position.pixels, 0.0);
+
+    final Offset listLocation = tester.getCenter(find.byType(ListView));
+
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(listLocation);
+    await tester.pump();
+
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(listLocation);
+    await tester.pump();
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    // The default multitouchDragStrategy should be MultitouchDragStrategy.latestPointer.
+    // Only the latest active pointer be tracked.
+    expect(controller.position.pixels, 50.0);
+
+    // Change to MultitouchDragStrategy.sumAllPointers.
+    await tester.pumpWidget(buildFrame(behavior2));
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    // All active pointers be tracked.
+    expect(controller.position.pixels, 50.0 + 50.0 + 50.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('ScrollBehavior configuration is maintained over multiple copies', () {
     testWidgets('dragDevices', (WidgetTester tester) async {
@@ -201,22 +239,6 @@ void main() {
       // Copy again. The previously modified drag devices should carry over.
       final ScrollBehavior twiceCopiedBehavior = onceCopiedBehavior.copyWith();
       expect(twiceCopiedBehavior.dragDevices, PointerDeviceKind.values.toSet());
-    });
-
-    testWidgets('androidOverscrollIndicator', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/91673
-      const ScrollBehavior defaultBehavior = ScrollBehavior();
-      expect(defaultBehavior.androidOverscrollIndicator, AndroidOverscrollIndicator.glow);
-
-      // Use copyWith to modify androidOverscrollIndicator
-      final ScrollBehavior onceCopiedBehavior = defaultBehavior.copyWith(
-        androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-      );
-      expect(onceCopiedBehavior.androidOverscrollIndicator, AndroidOverscrollIndicator.stretch);
-
-      // Copy again. The previously modified value should carry over.
-      final ScrollBehavior twiceCopiedBehavior = onceCopiedBehavior.copyWith();
-      expect(twiceCopiedBehavior.androidOverscrollIndicator, AndroidOverscrollIndicator.stretch);
     });
 
     testWidgets('physics', (WidgetTester tester) async {

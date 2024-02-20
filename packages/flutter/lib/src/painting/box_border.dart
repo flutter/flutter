@@ -387,8 +387,6 @@ class Border extends BoxBorder {
   /// Creates a border.
   ///
   /// All the sides of the border default to [BorderSide.none].
-  ///
-  /// The arguments must not be null.
   const Border({
     this.top = BorderSide.none,
     this.right = BorderSide.none,
@@ -397,8 +395,6 @@ class Border extends BoxBorder {
   });
 
   /// Creates a border whose sides are all the same.
-  ///
-  /// The `side` argument must not be null.
   const Border.fromBorderSide(BorderSide side)
       : top = side,
         right = side,
@@ -410,7 +406,7 @@ class Border extends BoxBorder {
   /// The `vertical` argument applies to the [left] and [right] sides, and the
   /// `horizontal` argument applies to the [top] and [bottom] sides.
   ///
-  /// All arguments default to [BorderSide.none] and must not be null.
+  /// All arguments default to [BorderSide.none].
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
@@ -437,8 +433,6 @@ class Border extends BoxBorder {
   ///
   /// It is only valid to call this if [BorderSide.canMerge] returns true for
   /// the pairwise combination of each side on both [Border]s.
-  ///
-  /// The arguments must not be null.
   static Border merge(Border a, Border b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.right, b.right));
@@ -761,8 +755,6 @@ class BorderDirectional extends BoxBorder {
   /// the trailing edge. They are resolved during [paint].
   ///
   /// All the sides of the border default to [BorderSide.none].
-  ///
-  /// The arguments must not be null.
   const BorderDirectional({
     this.top = BorderSide.none,
     this.start = BorderSide.none,
@@ -775,8 +767,6 @@ class BorderDirectional extends BoxBorder {
   ///
   /// It is only valid to call this if [BorderSide.canMerge] returns true for
   /// the pairwise combination of each side on both [BorderDirectional]s.
-  ///
-  /// The arguments must not be null.
   static BorderDirectional merge(BorderDirectional a, BorderDirectional b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.start, b.start));
@@ -1023,16 +1013,11 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
-    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (BorderSide left, BorderSide right) = switch (textDirection!) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors();

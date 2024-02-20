@@ -20,6 +20,8 @@ export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
 export 'animation.dart' show Animation, AnimationStatus;
 export 'curves.dart' show Curve;
 
+const String _flutterAnimationLibrary = 'package:flutter/animation.dart';
+
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // late bool dismissed;
@@ -206,6 +208,19 @@ enum AnimationBehavior {
 /// controllers are created in [State.initState] and disposed in
 /// [State.dispose], as described in the previous section.)
 ///
+/// {@tool dartpad}
+/// This example shows how to use [AnimationController] and
+/// [SlideTransition] to create an animated digit like you might find
+/// on an old pinball machine our your car's odometer.  New digit
+/// values slide into place from below, as the old value slides
+/// upwards and out of view. Taps that occur while the controller is
+/// already animating cause the controller's
+/// [AnimationController.duration] to be reduced so that the visuals
+/// don't fall behind.
+///
+/// ** See code in examples/api/lib/animation/animation_controller/animated_digit.0.dart **
+/// {@end-tool}
+
 /// See also:
 ///
 ///  * [Tween], the base class for converting an [AnimationController] to a
@@ -230,9 +245,9 @@ class AnimationController extends Animation<double>
   ///   value at which this animation is deemed to be completed. It cannot be
   ///   null.
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   AnimationController({
     double? value,
     this.duration,
@@ -244,6 +259,9 @@ class AnimationController extends Animation<double>
     required TickerProvider vsync,
   }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -258,9 +276,9 @@ class AnimationController extends Animation<double>
   /// * [debugLabel] is a string to help identify this animation during
   ///   debugging (used by [toString]).
   ///
-  /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and must not be null. See
-  ///   [TickerProvider] for advice on obtaining a ticker provider.
+  /// * `vsync` is the required [TickerProvider] for the current context. It can
+  ///   be changed by calling [resync]. See [TickerProvider] for advice on
+  ///   obtaining a ticker provider.
   ///
   /// This constructor is most useful for animations that will be driven using a
   /// physics simulation, especially when the physics simulation has no
@@ -275,8 +293,22 @@ class AnimationController extends Animation<double>
   }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
+  }
+
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterAnimationLibrary,
+        className: '$AnimationController',
+        object: this,
+      );
+    }
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -566,20 +598,15 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _animateToInternal(double target, { Duration? duration, Curve curve = Curves.linear }) {
-    double scale = 1.0;
-    if (SemanticsBinding.instance.disableAnimations) {
-      switch (animationBehavior) {
-        case AnimationBehavior.normal:
-          // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
-          // duration to limit most animations to a single frame.
-          // Ideally, the framework would be able to handle zero duration animations, however, the common
-          // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
-          // for at least one frame.
-          scale = 0.05;
-        case AnimationBehavior.preserve:
-          break;
-      }
-    }
+    final double scale = switch (animationBehavior) {
+      // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
+      // duration to limit most animations to a single frame.
+      // Ideally, the framework would be able to handle zero duration animations, however, the common
+      // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
+      // for at least one frame.
+      AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 0.05,
+      AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
+    };
     Duration? simulationDuration = duration;
     if (simulationDuration == null) {
       assert(!(this.duration == null && _direction == _AnimationDirection.forward));
@@ -689,16 +716,12 @@ class AnimationController extends Animation<double>
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
-    double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance.disableAnimations) {
-      switch (behavior) {
-        case AnimationBehavior.normal:
-          scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
-        case AnimationBehavior.preserve:
-          break;
-      }
-    }
+    final double scale = switch (behavior) {
+      // This is arbitrary (it was chosen because it worked for the drawer widget).
+      AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 200.0,
+      AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
+    };
     final SpringSimulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     assert(
@@ -800,6 +823,9 @@ class AnimationController extends Animation<double>
       }
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _ticker!.dispose();
     _ticker = null;
     clearStatusListeners();

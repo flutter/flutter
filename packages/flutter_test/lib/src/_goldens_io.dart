@@ -96,11 +96,14 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       await getGoldenBytes(golden),
     );
 
-    if (!result.passed) {
-      final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
+    if (result.passed) {
+      result.dispose();
+      return true;
     }
-    return result.passed;
+
+    final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
   }
 
   @override
@@ -172,18 +175,18 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master)) {
-    return ComparisonResult(
-      passed: true,
-      diffPercent: 0.0,
-    );
-  }
-
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
+    );
+  }
+
+  if (listEquals(test, master)) {
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
     );
   }
 
@@ -207,9 +210,11 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
+        diffs: <String, Image>{
+          'masterImage': masterImage,
+          'testImage': testImage,
+        },
     );
-    masterImage.dispose();
-    testImage.dispose();
     return result;
   }
 
@@ -257,7 +262,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${(diffPercent * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}%, ${pixelDiffCount}px '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
@@ -294,6 +299,16 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
 
   @override
   Future<void> update(double width, double height, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }

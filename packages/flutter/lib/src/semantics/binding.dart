@@ -191,7 +191,17 @@ mixin SemanticsBinding on BindingBase {
 ///
 /// To obtain a [SemanticsHandle], call [SemanticsBinding.ensureSemantics].
 class SemanticsHandle {
-  SemanticsHandle._(this._onDispose);
+  SemanticsHandle._(this._onDispose) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/semantics.dart',
+        className: '$SemanticsHandle',
+        object: this,
+      );
+    }
+  }
 
   final VoidCallback _onDispose;
 
@@ -201,6 +211,12 @@ class SemanticsHandle {
   /// framework will stop generating semantics information.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     _onDispose();
   }
 }

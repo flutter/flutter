@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
+import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -210,7 +211,7 @@ void main() {
             ? fakePubCache.childDirectory(name)
             : fileSystem.directory(nameOrPath);
         packagesFile.writeAsStringSync(
-            '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+            '$name:${pluginDirectory.childFile('lib').uri}\n',
             mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
             ..createSync(recursive: true)
@@ -1438,6 +1439,29 @@ flutter:
         FileSystem: () => fsWindows,
         ProcessManager: () => FakeProcessManager.any(),
       });
+
+      testUsingContext('injectPlugins will validate if all plugins in the project are part of the passed allowedPlugins', () async {
+        // Re-run the setup using the Windows filesystem.
+        setUpProject(fsWindows);
+        createFakePlugins(fsWindows, const <String>['plugin_one', 'plugin_two']);
+
+        expect(
+          () => injectPlugins(
+            flutterProject,
+            linuxPlatform: true,
+            windowsPlatform: true,
+            allowedPlugins: PreviewDevice.supportedPubPlugins,
+          ),
+          throwsToolExit(message: '''
+The Flutter Preview device does not support the following plugins from your pubspec.yaml:
+
+[plugin_one, plugin_two]
+'''),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fsWindows,
+        ProcessManager: () => FakeProcessManager.empty(),
+      });
     });
 
     group('createPluginSymlinks', () {
@@ -1687,6 +1711,24 @@ flutter:
           destination: ephemeralPackagePath,
         ),
         throwsToolExit(message: 'administrator'),
+      );
+    });
+
+    testWithoutContext('Symlink failures instruct developers to have their project on the same drive as their SDK', () async {
+      final Platform platform = FakePlatform(operatingSystem: 'windows');
+      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
+
+      const FileSystemException e = FileSystemException('', '', OSError('', 1));
+
+      expect(
+        () => handleSymlinkException(
+          e,
+          platform: platform,
+          os: os,
+          source: pubCachePath,
+          destination: ephemeralPackagePath,
+        ),
+        throwsToolExit(message: 'Try moving your Flutter project to the same drive as your Flutter SDK'),
       );
     });
 

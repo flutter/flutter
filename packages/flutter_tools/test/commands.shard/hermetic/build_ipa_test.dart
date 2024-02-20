@@ -6,9 +6,11 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -17,6 +19,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -33,10 +36,10 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
 
   @override
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
+    String projectPath, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return <String, String>{
       ...overrides,
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -63,7 +66,8 @@ class FakePlistUtils extends Fake implements PlistParser {
 
   @override
   T? getValueFromFile<T>(String plistFilePath, String key) {
-    return fileContents[plistFilePath]![key] as T?;
+    final Map<String, Object>? plistFile = fileContents[plistFilePath];
+    return plistFile == null ? null : plistFile[key] as T?;
   }
 }
 
@@ -71,7 +75,11 @@ void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
+  late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
+  late BufferLogger logger;
+  late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -79,9 +87,19 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    artifacts = Artifacts.test(fileSystem: fileSystem);
     usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
+    logger = BufferLogger.test();
+    processUtils = ProcessUtils(
+      logger: logger,
+      processManager: fakeProcessManager,
+    );
     plistUtils = FakePlistUtils();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -119,7 +137,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -137,7 +155,11 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({
+    bool verbose = false,
+    int exitCode = 0,
+    void Function(List<String> args)? onRun,
+  }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -168,6 +190,7 @@ void main() {
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
     File? cachePlist,
+    bool deleteExportOptionsPlist = false,
   }) {
     return FakeCommand(
       command: <String>[
@@ -183,11 +206,14 @@ void main() {
         '-exportOptionsPlist',
         exportOptionsPlist,
       ],
-      onRun: () {
+      onRun: (_) {
         // exportOptionsPlist will be cleaned up within the command.
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
           cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+        if (deleteExportOptionsPlist) {
+          fileSystem.file(_exportOptionsPlist).deleteSync();
         }
       }
     );
@@ -195,10 +221,12 @@ void main() {
 
   testUsingContext('ipa build fails when there is no ios project', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -209,16 +237,18 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails in debug with code analysis', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -229,16 +259,18 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -252,18 +284,21 @@ void main() {
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
+    Logger: () => logger,
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails when export plist does not exist',
       () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -280,7 +315,8 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () =>
         FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -289,10 +325,12 @@ void main() {
   testUsingContext('ipa build fails when export plist is not a file', () async {
     final Directory bogus = fileSystem.directory('bogus')..createSync();
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -309,17 +347,19 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -338,17 +378,88 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build reports when IPA fails', () async {
+  testUsingContext('ipa build reports method from --export-method when used', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building ad-hoc IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build reports method from --export-options-plist when used', () async {
+    final File exportOptions = fileSystem.file('/ExportOptions.plist')
+      ..createSync();
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[exportOptions.path] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      'method': 'enterprise'
+    };
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: exportOptions.path),
+    ]);
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']
+    );
+
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building enterprise IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
+  testUsingContext('ipa build reports when IPA fails', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -378,13 +489,48 @@ void main() {
       const <String>['build', 'ipa', '--no-pub']
     );
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building App Store IPA'));
-    expect(testLogger.errorText, contains('Encountered error while creating the IPA:'));
-    expect(testLogger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building App Store IPA'));
+    expect(logger.errorText, contains('Encountered error while creating the IPA:'));
+    expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(
+        exportOptionsPlist: _exportOptionsPlist,
+        cachePlist: cachedExportOptionsPlist,
+        deleteExportOptionsPlist: true,
+      ),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -393,10 +539,12 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -426,14 +574,15 @@ void main() {
     final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building App Store IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
-    expect(testLogger.statusText, contains('To upload to the App Store'));
-    expect(testLogger.statusText, contains('Apple Transporter macOS app'));
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building App Store IPA'));
+    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains('To upload to the App Store'));
+    expect(logger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -442,10 +591,12 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -475,14 +626,15 @@ void main() {
     final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building ad-hoc IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
-    // Don't instruct how to upload to the App Store.
-    expect(testLogger.statusText, isNot(contains('To upload')));
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building ad-hoc IPA'));
+    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    // Don'ltruct how to upload to the App Store.
+    expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -491,10 +643,12 @@ void main() {
   testUsingContext('ipa build invokes xcodebuild and archives for enterprise distribution', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -524,14 +678,15 @@ void main() {
     final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(testLogger.statusText, contains('Building enterprise IPA'));
-    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
-    // Don't instruct how to upload to the App Store.
-    expect(testLogger.statusText, isNot(contains('To upload')));
+    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Building enterprise IPA'));
+    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    // Don'ltruct how to upload to the App Store.
+    expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -539,10 +694,12 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -558,6 +715,35 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build invokes xcode build without disablePortPublication', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub', '--ci']
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -565,10 +751,12 @@ void main() {
 
   testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -604,9 +792,10 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--no-codesign']
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
-    expect(testLogger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
+    expect(logger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -614,14 +803,17 @@ void main() {
 
   testUsingContext('code size analysis fails when app not found', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
 
+    fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
     await expectToolExitLater(
       createTestCommandRunner(command).run(
           const <String>['build', 'ipa', '--no-pub', '--analyze-size']
@@ -630,17 +822,19 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -650,7 +844,7 @@ void main() {
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -673,18 +867,23 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--analyze-size']
     );
 
-    expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
+    expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(logger.statusText, contains('dart devtools --appSizeBase='));
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -694,10 +893,12 @@ void main() {
     final File exportOptions = fileSystem.file('ExportOptions.plist')
       ..createSync();
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -717,10 +918,11 @@ void main() {
       ],
     );
 
-    expect(testLogger.statusText, contains('Built IPA to $outputPath.'));
+    expect(logger.statusText, contains('Built IPA to $outputPath.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -728,15 +930,17 @@ void main() {
 
   testUsingContext('Trace error if xcresult is empty.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(),
@@ -748,10 +952,11 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+    expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -759,15 +964,17 @@ void main() {
 
   testUsingContext('Display xcresult issues on console if parsed.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -779,11 +986,12 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+    expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+    expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -791,15 +999,17 @@ void main() {
 
   testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -811,13 +1021,14 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-    expect(testLogger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-    expect(testLogger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+    expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+    expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+    expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
+    expect(logger.warningText, isNot(contains('but the range of supported deployment target versions')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -825,10 +1036,12 @@ void main() {
 
   testUsingContext('Trace if xcresult bundle does not exist.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -842,10 +1055,11 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+    expect(logger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -854,15 +1068,17 @@ void main() {
 
   testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -874,14 +1090,15 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(testLogger.errorText, contains('Some Provisioning profile issue.'));
-    expect(testLogger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
-    expect(testLogger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
-    expect(testLogger.errorText, contains('open ios/Runner.xcworkspace'));
-    expect(testLogger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
+    expect(logger.errorText, contains('Some Provisioning profile issue.'));
+    expect(logger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
+    expect(logger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
+    expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
+    expect(logger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -893,7 +1110,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -906,17 +1123,19 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains(
         '[!] App Settings Validation\n'
         '    ! Version Number: Missing\n'
@@ -927,11 +1146,12 @@ void main() {
         '    ! You must set up the missing app settings.\n'
     ));
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -943,7 +1163,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -956,38 +1176,41 @@ void main() {
       'CFBundleDisplayName': 'Awesome Gallery',
       // Will not use CFBundleName since CFBundleDisplayName is present.
       'CFBundleName': 'Awesome Gallery 2',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains(
         '[✓] App Settings Validation\n'
         '    • Version Number: 12.34.56\n'
         '    • Build Number: 666\n'
         '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 11.0\n'
+        '    • Deployment Target: 17.0\n'
         '    • Bundle Identifier: io.flutter.someProject\n'
       )
     );
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -999,7 +1222,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1011,38 +1234,41 @@ void main() {
       'CFBundleIdentifier': 'io.flutter.someProject',
       // Will use CFBundleName since CFBundleDisplayName is absent.
       'CFBundleName': 'Awesome Gallery',
-      'MinimumOSVersion': '11.0',
+      'MinimumOSVersion': '17.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '[✓] App Settings Validation\n'
-            '    • Version Number: 12.34.56\n'
-            '    • Build Number: 666\n'
-            '    • Display Name: Awesome Gallery\n'
-            '    • Deployment Target: 11.0\n'
-            '    • Bundle Identifier: io.flutter.someProject\n'
-        )
+      logger.statusText,
+      contains(
+        '[✓] App Settings Validation\n'
+        '    • Version Number: 12.34.56\n'
+        '    • Build Number: 666\n'
+        '    • Display Name: Awesome Gallery\n'
+        '    • Deployment Target: 17.0\n'
+        '    • Bundle Identifier: io.flutter.someProject\n'
+      ),
     );
     expect(
-        testLogger.statusText,
-        contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+      logger.statusText,
+      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1055,7 +1281,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1068,21 +1294,25 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
-        <String>['build', 'ipa', '--no-pub']);
+      <String>['build', 'ipa', '--no-pub'],
+    );
 
     expect(
-      testLogger.statusText,
-      contains('    ! Your application still contains the default "com.example" bundle identifier.')
+      logger.statusText,
+      contains('    ! Your application still contains the default "com.example" bundle identifier.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1094,7 +1324,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1107,21 +1337,24 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       isNot(contains('    ! Your application still contains the default "com.example" bundle identifier.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1137,7 +1370,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -1188,21 +1421,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1216,7 +1452,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1267,21 +1503,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
-      isNot(contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'))
+      logger.statusText,
+      isNot(contains('! App icon is set to the default placeholder icon. Replace with unique icons.')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1293,7 +1532,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1326,21 +1565,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1352,7 +1594,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1385,21 +1627,25 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
-        <String>['build', 'ipa', '--no-pub']);
+      <String>['build', 'ipa', '--no-pub'],
+    );
 
     expect(
-      testLogger.statusText,
-      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')
+      logger.statusText,
+      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1411,7 +1657,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1444,21 +1690,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
-      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'))
+      logger.statusText,
+      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1470,7 +1719,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // Uses unknown format version 123.
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1504,22 +1753,26 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
-        <String>['build', 'ipa', '--no-pub']);
+      <String>['build', 'ipa', '--no-pub'],
+    );
 
     // The validation should be skipped, even when the icon size is incorrect.
     expect(
-      testLogger.statusText,
+      logger.statusText,
       isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1538,7 +1791,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // The following json contains examples of:
         // - invalid size
         // - invalid scale
@@ -1608,24 +1861,28 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
-        <String>['build', 'ipa', '--no-pub']);
+      <String>['build', 'ipa', '--no-pub'],
+    );
 
     // The validation should be skipped, even when the image size is incorrect.
     for (final String imageFileName in imageFileNames) {
       expect(
-        testLogger.statusText,
-        isNot(contains('    ! App icon is using the incorrect size (e.g. $imageFileName).'))
+        logger.statusText,
+        isNot(contains('    ! App icon is using the incorrect size (e.g. $imageFileName).')),
       );
     }
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1639,7 +1896,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1688,21 +1945,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1717,7 +1977,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1766,21 +2026,24 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-      testLogger.statusText,
+      logger.statusText,
       isNot(contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),

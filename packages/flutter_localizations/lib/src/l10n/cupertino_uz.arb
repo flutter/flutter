@@ -25,6 +25,7 @@
   "noSpellCheckReplacementsLabel": "Almashtirish uchun soʻz topilmadi",
   "menuDismissLabel": "Menyuni yopish",
   "lookUpButtonLabel": "Tepaga qarang",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Internetdan qidirish",
+  "shareButtonLabel": "Ulashish…",
+  "clearButtonLabel": "Clear"
 }

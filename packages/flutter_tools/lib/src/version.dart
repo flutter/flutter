@@ -279,6 +279,8 @@ abstract class FlutterVersion {
       localFrameworkCommitDate = DateTime.parse(_gitCommitDate(workingDirectory: flutterRoot));
     } on VersionCheckError {
       return;
+    } on FormatException {
+      return;
     }
     final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
 
@@ -532,7 +534,13 @@ class _FlutterVersionFromFile extends FlutterVersion {
   final String devToolsVersion;
 
   @override
-  void ensureVersionFile() {}
+  void ensureVersionFile() {
+    _ensureLegacyVersionFile(
+      fs: fs,
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+    );
+  }
 }
 
 class _FlutterVersionGit extends FlutterVersion {
@@ -599,16 +607,28 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
-    if (!legacyVersionFile.existsSync()) {
-      legacyVersionFile.writeAsStringSync(frameworkVersion);
-    }
+    _ensureLegacyVersionFile(
+      fs: fs,
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+    );
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {
       newVersionFile.writeAsStringSync(encoder.convert(toJson()));
     }
+  }
+}
+
+void _ensureLegacyVersionFile({
+  required FileSystem fs,
+  required String flutterRoot,
+  required String frameworkVersion,
+}) {
+  final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
+  if (!legacyVersionFile.existsSync()) {
+    legacyVersionFile.writeAsStringSync(frameworkVersion);
   }
 }
 

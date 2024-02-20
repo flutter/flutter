@@ -9,12 +9,12 @@ updates:
       interval: "weekly"
     reviewers:
       - "christopherfujino"
-      - "vashworth"
+      - "jmagman"
       - "keyonghan"
       - "yusuf-goog"
     labels:
       - "team"
-      - "team: infra"
+      - "team-infra"
       - "autosubmit"
   - package-ecosystem: "docker"
     directory: "/dev/ci/docker_linux"
@@ -26,7 +26,7 @@ updates:
       - "christopherfujino"
     labels:
       - "team"
-      - "team: infra"
+      - "team-infra"
       - "autosubmit"
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -36,5 +36,5 @@ updates:
       - "godofredoc"
     labels:
       - "team"
-      - "team: infra"
+      - "team-infra"
       - "autosubmit"

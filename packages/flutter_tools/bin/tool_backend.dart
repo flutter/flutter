@@ -13,6 +13,7 @@ Future<void> main(List<String> arguments) async {
 
   final String? dartDefines = Platform.environment['DART_DEFINES'];
   final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
+  final String? frontendServerStarterPath = Platform.environment['FRONTEND_SERVER_STARTER_PATH'];
   final String? extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
   final String? extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
   final String? flutterEngine = Platform.environment['FLUTTER_ENGINE'];
@@ -75,7 +76,7 @@ or
     else
       'flutter',
   ]);
-  final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
+  final String bundlePlatform = targetPlatform;
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
   final Process assembleProcess = await Process.start(
     flutterExecutable,
@@ -106,6 +107,8 @@ or
         '--DartDefines=$dartDefines',
       if (extraGenSnapshotOptions != null)
         '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+      if (frontendServerStarterPath != null)
+        '-dFrontendServerStarterPath=$frontendServerStarterPath',
       if (extraFrontEndOptions != null)
         '--ExtraFrontEndOptions=$extraFrontEndOptions',
       target,

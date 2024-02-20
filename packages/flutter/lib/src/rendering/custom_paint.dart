@@ -293,7 +293,7 @@ abstract class CustomPainter extends Listenable {
 /// the accessibility of applications.
 ///
 /// Implement [CustomPainter.semanticsBuilder] to build the semantic
-/// description of the whole picture drawn by a [CustomPaint], rather that one
+/// description of the whole picture drawn by a [CustomPaint], rather than one
 /// particular rectangle.
 ///
 /// See also:
@@ -303,8 +303,6 @@ abstract class CustomPainter extends Listenable {
 @immutable
 class CustomPainterSemantics {
   /// Creates semantics information describing a rectangle on a canvas.
-  ///
-  /// Arguments `rect` and `properties` must not be null.
   const CustomPainterSemantics({
     this.key,
     required this.rect,

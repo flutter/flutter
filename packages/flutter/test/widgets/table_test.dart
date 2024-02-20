@@ -1001,7 +1001,7 @@ void main() {
     expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
   });
 
-  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed', (WidgetTester tester) async {
+  testWidgets('Do not crash if a child that has not been laid out in a previous build is removed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/60488.
     Widget buildTable(Key key) {
       return Directionality(
@@ -1023,7 +1023,7 @@ void main() {
 
     await tester.pumpWidget(
       buildTable(const ValueKey<int>(1)),
-      null, EnginePhase.build, // Children are not layed out!
+      phase: EnginePhase.build, // Children are not laid out!
     );
 
     await tester.pumpWidget(
@@ -1077,6 +1077,48 @@ void main() {
       'One or more TableRow have no children.\n'
       'Every TableRow in a Table must have at least one child, so there is no empty row.',
     );
+  });
+
+    testWidgets('Set defaultVerticalAlignment to intrinsic height and check their heights', (WidgetTester tester) async {
+    final Widget table = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
+        children: const <TableRow>[
+          TableRow(
+            children: <Widget>[
+              SizedBox(height: 100, child: Text('A')),
+              SizedBox(height: 200, child: Text('B')),
+            ],
+          ),
+          TableRow(
+            children: <Widget>[
+              SizedBox(height: 200, child: Text('C')),
+              SizedBox(height: 300, child: Text('D')),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // load and check if render object was created.
+    await tester.pumpWidget(table);
+    expect(find.byWidget(table), findsOneWidget);
+
+    final RenderBox boxA = tester.renderObject(find.text('A'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
+
+    // boxA and boxB must be the same height, even though boxB is higher than boxA initially.
+    expect(boxA.size.height, equals(boxB.size.height));
+
+    final RenderBox boxC = tester.renderObject(find.text('C'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+
+    // boxC and boxD must be the same height, even though boxD is higher than boxC initially.
+    expect(boxC.size.height, equals(boxD.size.height));
+
+    // boxD (300.0h) should be higher than boxA (200.0h) which has the same height of boxB.
+    expect(boxD.size.height, greaterThan(boxA.size.height));
   });
 
   // TODO(ianh): Test handling of TableCell object

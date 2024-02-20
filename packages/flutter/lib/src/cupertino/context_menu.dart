@@ -132,9 +132,7 @@ enum _ContextMenuLocation {
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
-  /// [actions] is required and cannot be null or empty.
-  ///
-  /// [child] is required and cannot be null.
+  /// The [actions] parameter cannot be empty.
   CupertinoContextMenu({
     super.key,
     required this.actions,
@@ -153,9 +151,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Use instead of the default constructor when it is needed to have a more
   /// custom animation.
   ///
-  /// [actions] is required and cannot be null or empty.
-  ///
-  /// [builder] is required.
+  /// The [actions] parameter cannot be empty.
   CupertinoContextMenu.builder({
     super.key,
     required this.actions,
@@ -389,7 +385,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// These actions are typically [CupertinoContextMenuAction]s.
   ///
-  /// This parameter cannot be null or empty.
+  /// This parameter must not be empty.
   final List<Widget> actions;
 
   /// If true, clicking on the [CupertinoContextMenuAction]s will
@@ -433,7 +429,6 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the CupertinoContextMenu is animating its preview
   ///   // widget open and closed.
-  ///   // ignore: deprecated_member_use
   ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
@@ -572,6 +567,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           });
         }
         _lastOverlayEntry?.remove();
+        _lastOverlayEntry?.dispose();
         _lastOverlayEntry = null;
 
       case AnimationStatus.completed:
@@ -585,9 +581,10 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         // one frame.
         SchedulerBinding.instance.addPostFrameCallback((Duration _) {
           _lastOverlayEntry?.remove();
+          _lastOverlayEntry?.dispose();
           _lastOverlayEntry = null;
           _openController.reset();
-        });
+        }, debugLabel: 'removeContextMenuDecoy');
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -687,6 +684,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   void dispose() {
+    _tapGestureRecognizer.dispose();
     _openController.dispose();
     super.dispose();
   }
@@ -905,14 +903,11 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Get the alignment for the _ContextMenuSheet's Transform.scale based on the
   // contextMenuLocation.
   static AlignmentDirectional getSheetAlignment(_ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return AlignmentDirectional.topCenter;
-      case _ContextMenuLocation.right:
-        return AlignmentDirectional.topEnd;
-      case _ContextMenuLocation.left:
-        return AlignmentDirectional.topStart;
-    }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.center => AlignmentDirectional.topCenter,
+      _ContextMenuLocation.right  => AlignmentDirectional.topEnd,
+      _ContextMenuLocation.left   => AlignmentDirectional.topStart,
+    };
   }
 
   // The place to start the sheetRect animation from.
@@ -1011,7 +1006,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       _updateTweenRects();
       _internalOffstage = false;
       _setOffstageInternally();
-    });
+    }, debugLabel: 'renderContextMenuRouteOffstage');
     return super.didPush();
   }
 
@@ -1224,20 +1219,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topLeft;
-      case _ContextMenuLocation.left:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
+    if (orientation == Orientation.portrait) {
+      return Alignment.bottomCenter;
     }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.left   => Alignment.topRight,
+      _ContextMenuLocation.center => Alignment.topRight,
+      _ContextMenuLocation.right  => Alignment.topLeft,
+    };
   }
 
   void _setDragOffset(Offset dragOffset) {
@@ -1308,16 +1297,12 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       ),
     );
 
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return <Widget>[child, spacer, sheet];
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? <Widget>[child, spacer, sheet]
-          : <Widget>[sheet, spacer, child];
-      case _ContextMenuLocation.left:
-        return <Widget>[child, spacer, sheet];
-    }
+    return switch (contextMenuLocation) {
+      _ContextMenuLocation.right when orientation == Orientation.portrait => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.right  => <Widget>[sheet, spacer, child],
+      _ContextMenuLocation.center => <Widget>[child, spacer, sheet],
+      _ContextMenuLocation.left   => <Widget>[child, spacer, sheet],
+    };
   }
 
   // Build the animation for the _ContextMenuSheet.
@@ -1476,29 +1461,12 @@ class _ContextMenuSheet extends StatelessWidget {
       ),
     );
 
-    switch (_contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return _orientation == Orientation.portrait
-          ? <Widget>[
-            const Spacer(),
-            menu,
-            const Spacer(),
-          ]
-        : <Widget>[
-            menu,
-            const Spacer(),
-          ];
-      case _ContextMenuLocation.right:
-        return <Widget>[
-          const Spacer(),
-          menu,
-        ];
-      case _ContextMenuLocation.left:
-        return <Widget>[
-          menu,
-          const Spacer(),
-        ];
-    }
+    return switch (_contextMenuLocation) {
+      _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
+      _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
+      _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
+      _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
+    };
   }
 
   @override

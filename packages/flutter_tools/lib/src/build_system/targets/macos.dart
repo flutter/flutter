@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -16,7 +18,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -80,7 +81,7 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath);
+    await _thinFramework(environment, frameworkBinaryPath);
   }
 
   static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
@@ -96,17 +97,21 @@ abstract class UnpackMacOS extends Target {
     }
   }
 
-  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+  Future<void> _thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+  ) async {
     final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+    final ProcessResult infoResult =
+        await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -387,6 +392,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
+
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
@@ -432,7 +438,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
-      shaderTarget: ShaderTarget.sksl,
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -447,22 +453,22 @@ abstract class MacOSBundleFlutterAssets extends Target {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleExecutable</key>
-	<string>App</string>
-	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.app</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>App</string>
-	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>App</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.app</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>App</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
 </dict>
 </plist>
 
@@ -624,6 +630,11 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'macos-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }

@@ -515,14 +515,14 @@ class _SnippetChecker {
   /// Returns true if any errors are found, false otherwise.
   Future<bool> checkSnippets() async {
     final Map<String, _SnippetFile> snippets = <String, _SnippetFile>{};
-    if (_dartUiLocation != null && !_dartUiLocation!.existsSync()) {
-      stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation!.path}.');
+    if (_dartUiLocation != null && !_dartUiLocation.existsSync()) {
+      stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation.path}.');
     }
     final List<File> filesToAnalyze = <File>[
       for (final Directory flutterPackage in _flutterPackages)
         ..._listDartFiles(flutterPackage, recursive: true),
-      if (_dartUiLocation != null && _dartUiLocation!.existsSync())
-        ..._listDartFiles(_dartUiLocation!, recursive: true),
+      if (_dartUiLocation != null && _dartUiLocation.existsSync())
+        ..._listDartFiles(_dartUiLocation, recursive: true),
     ];
     final Set<Object> errors = <Object>{};
     errors.addAll(await _extractSnippets(filesToAnalyze, snippetMap: snippets));

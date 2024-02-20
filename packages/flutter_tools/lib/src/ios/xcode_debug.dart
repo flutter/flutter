@@ -6,7 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:xml/xml.dart';
+import 'package:xml/xpath.dart';
 
+import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -58,7 +61,6 @@ class XcodeDebug {
     required String deviceId,
     required List<String> launchArguments,
   }) async {
-
     // If project is not already opened in Xcode, open it.
     if (!await _isProjectOpenInXcode(project: project)) {
       final bool openResult = await _openProjectInXcode(xcodeWorkspace: project.xcodeWorkspace);
@@ -85,6 +87,13 @@ class XcodeDebug {
           project.xcodeProject.path,
           '--workspace-path',
           project.xcodeWorkspace.path,
+          '--project-name',
+          project.hostAppProjectName,
+          if (project.expectedConfigurationBuildDir != null)
+            ...<String>[
+              '--expected-configuration-build-dir',
+              project.expectedConfigurationBuildDir!,
+            ],
           '--device-id',
           deviceId,
           '--scheme',
@@ -310,6 +319,7 @@ class XcodeDebug {
           _xcode.xcodeAppPath,
           '-g', // Do not bring the application to the foreground.
           '-j', // Launches the app hidden.
+          '-F', // Open "fresh", without restoring windows.
           xcodeWorkspace.path
         ],
         throwOnError: true,
@@ -396,11 +406,55 @@ class XcodeDebug {
 
     return XcodeDebugProject(
       scheme: 'Runner',
+      hostAppProjectName: 'Runner',
       xcodeProject: tempXcodeProject.childDirectory('Runner.xcodeproj'),
       xcodeWorkspace: tempXcodeProject.childDirectory('Runner.xcworkspace'),
       isTemporaryProject: true,
       verboseLogging: verboseLogging,
     );
+  }
+
+  /// Ensure the Xcode project is set up to launch an LLDB debugger. If these
+  /// settings are not set, the launch will fail with a "Cannot create a
+  /// FlutterEngine instance in debug mode without Flutter tooling or Xcode."
+  /// error message. These settings should be correct by default, but some users
+  /// reported them not being so after upgrading to Xcode 15.
+  void ensureXcodeDebuggerLaunchAction(File schemeFile) {
+    if (!schemeFile.existsSync()) {
+      _logger.printError('Failed to find ${schemeFile.path}');
+      return;
+    }
+
+    final String schemeXml = schemeFile.readAsStringSync();
+    try {
+      final XmlDocument document = XmlDocument.parse(schemeXml);
+      final Iterable<XmlNode> nodes = document.xpath('/Scheme/LaunchAction');
+      if (nodes.isEmpty) {
+        _logger.printError('Failed to find LaunchAction for the Scheme in ${schemeFile.path}.');
+        return;
+      }
+      final XmlNode launchAction = nodes.first;
+      final XmlAttribute? debuggerIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) =>
+              attribute.localName == 'selectedDebuggerIdentifier')
+          .firstOrNull;
+      final XmlAttribute? launcherIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) =>
+              attribute.localName == 'selectedLauncherIdentifier')
+          .firstOrNull;
+      if (debuggerIdentifier == null ||
+          launcherIdentifier == null ||
+          !debuggerIdentifier.value.contains('LLDB') ||
+          !launcherIdentifier.value.contains('LLDB')) {
+        throwToolExit('''
+Your Xcode project is not setup to start a debugger. To fix this, launch Xcode
+and select "Product > Scheme > Edit Scheme", select "Run" in the sidebar,
+and ensure "Debug executable" is checked in the "Info" tab.
+''');
+      }
+    } on XmlException catch (exception) {
+      _logger.printError('Failed to parse ${schemeFile.path}: $exception');
+    }
   }
 }
 
@@ -447,7 +501,7 @@ class XcodeAutomationScriptDebugResult {
     );
   }
 
-  /// Whether this scheme action has completed (sucessfully or otherwise). Will
+  /// Whether this scheme action has completed (successfully or otherwise). Will
   /// be false if still running.
   final bool? completed;
 
@@ -470,6 +524,8 @@ class XcodeDebugProject {
     required this.scheme,
     required this.xcodeWorkspace,
     required this.xcodeProject,
+    required this.hostAppProjectName,
+    this.expectedConfigurationBuildDir,
     this.isTemporaryProject = false,
     this.verboseLogging = false,
   });
@@ -477,6 +533,8 @@ class XcodeDebugProject {
   final String scheme;
   final Directory xcodeWorkspace;
   final Directory xcodeProject;
+  final String hostAppProjectName;
+  final String? expectedConfigurationBuildDir;
   final bool isTemporaryProject;
 
   /// When [verboseLogging] is true, the xcode_debug.js script will log

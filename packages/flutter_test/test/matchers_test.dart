@@ -470,6 +470,14 @@ void main() {
         expect(comparator.imageBytes, equals(<int>[1, 2]));
         expect(comparator.golden, Uri.parse('foo.png'));
       });
+
+      testWidgets('future nullable list of integers',
+          (WidgetTester tester) async {
+        await expectLater(Future<List<int>?>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, equals(<int>[1, 2]));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
     });
 
     group('does not match', () {
@@ -655,6 +663,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -782,6 +791,7 @@ void main() {
         link: true,
         onTap: () { },
         onLongPress: () { },
+        identifier: 'ident',
         label: 'foo',
         hint: 'bar',
         value: 'baz',
@@ -939,6 +949,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1031,6 +1042,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1129,6 +1141,7 @@ void main() {
       final SemanticsData emptyData = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1155,6 +1168,7 @@ void main() {
       final SemanticsData fullData = SemanticsData(
         flags: allFlags,
         actions: allActions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1244,6 +1258,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: SemanticsAction.customAction.index,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),

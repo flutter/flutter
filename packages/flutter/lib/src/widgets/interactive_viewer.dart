@@ -44,8 +44,6 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
 /// size of the area that should be interactive.
 ///
-/// The [child] must not be null.
-///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
@@ -62,8 +60,6 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 @immutable
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
-  ///
-  /// The [child] parameter must not be null.
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
@@ -111,8 +107,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Can be used to render a child that changes in response to the current
   /// transformation.
   ///
-  /// The [builder] parameter must not be null. See its docs for an example of
-  /// using it to optimize a large child.
+  /// See the [builder] attribute docs for an example of using it to optimize a
+  /// large child.
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
@@ -307,7 +303,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 2.5.
   ///
-  /// Cannot be null, and must be greater than zero and greater than minScale.
+  /// Must be greater than zero and greater than [minScale].
   final double maxScale;
 
   /// The minimum allowed scale.
@@ -321,15 +317,14 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 0.8.
   ///
-  /// Cannot be null, and must be a finite number greater than zero and less
-  /// than maxScale.
+  /// Must be a finite number greater than zero and less than [maxScale].
   final double minScale;
 
   /// Changes the deceleration behavior after a gesture.
   ///
   /// Defaults to 0.0000135.
   ///
-  /// Cannot be null, and must be a finite number greater than zero.
+  /// Must be a finite number greater than zero.
   final double interactionEndFrictionCoefficient;
 
   /// Called when the user ends a pan or scale gesture on the widget.
@@ -605,19 +600,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
-    late final Offset alignedTranslation;
+    final Offset alignedTranslation;
 
     if (_currentAxis != null) {
-      switch (widget.panAxis){
-        case PanAxis.horizontal:
-          alignedTranslation = _alignAxis(translation, Axis.horizontal);
-        case PanAxis.vertical:
-          alignedTranslation = _alignAxis(translation, Axis.vertical);
-        case PanAxis.aligned:
-          alignedTranslation = _alignAxis(translation, _currentAxis!);
-        case PanAxis.free:
-          alignedTranslation = translation;
-      }
+      alignedTranslation = switch (widget.panAxis){
+        PanAxis.horizontal => _alignAxis(translation, Axis.horizontal),
+        PanAxis.vertical   => _alignAxis(translation, Axis.vertical),
+        PanAxis.aligned    => _alignAxis(translation, _currentAxis!),
+        PanAxis.free       => translation,
+      };
     } else {
       alignedTranslation = translation;
     }
@@ -744,17 +735,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Returns true iff the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType? gestureType) {
-    switch (gestureType) {
-      case _GestureType.rotate:
-        return _rotateEnabled;
-
-      case _GestureType.scale:
-        return widget.scaleEnabled;
-
-      case _GestureType.pan:
-      case null:
-        return widget.panEnabled;
-    }
+    return switch (gestureType) {
+      _GestureType.rotate => _rotateEnabled,
+      _GestureType.scale => widget.scaleEnabled,
+      _GestureType.pan || null => widget.panEnabled,
+    };
   }
 
   // Decide which type of gesture this is by comparing the amount of scale
@@ -1453,12 +1438,10 @@ Offset _round(Offset offset) {
 // Align the given offset to the given axis by allowing movement only in the
 // axis direction.
 Offset _alignAxis(Offset offset, Axis axis) {
-  switch (axis) {
-    case Axis.horizontal:
-      return Offset(offset.dx, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, offset.dy);
-  }
+  return switch (axis) {
+    Axis.horizontal => Offset(offset.dx, 0.0),
+    Axis.vertical   => Offset(0.0, offset.dy),
+  };
 }
 
 // Given two points, return the axis where the distance between the points is

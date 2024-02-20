@@ -44,8 +44,6 @@ enum Artifact {
   dart2jsSnapshot,
   /// The dart snapshot of the dart2wasm compiler.
   dart2wasmSnapshot,
-  /// The wasm-opt binary that ships with the dart-sdk
-  wasmOptBinary,
 
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
@@ -69,6 +67,9 @@ enum Artifact {
 
   /// The location of file generators.
   flutterToolsFileGenerators,
+
+  /// Pre-built desktop debug app.
+  flutterPreviewDevice,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -77,6 +78,9 @@ enum HostArtifact {
   flutterWebSdk,
   /// The libraries JSON file for web release builds.
   flutterWebLibrariesJson,
+
+  // The flutter.js bootstrapping file provided by the engine.
+  flutterJsDirectory,
 
   /// Folder that contains platform dill files for the web sdk.
   webPlatformKernelFolder,
@@ -138,6 +142,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
@@ -187,10 +192,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'dart2js.dart.snapshot';
     case Artifact.dart2wasmSnapshot:
       return 'dart2wasm_product.snapshot';
-    case Artifact.wasmOptBinary:
-      return 'wasm-opt$exe';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
-      return 'frontend_server.dart.snapshot';
+      return 'frontend_server_aot.dart.snapshot';
     case Artifact.linuxDesktopPath:
       return '';
     case Artifact.linuxHeaders:
@@ -213,6 +216,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'const_finder.dart.snapshot';
     case Artifact.flutterToolsFileGenerators:
       return '';
+    case Artifact.flutterPreviewDevice:
+      return 'flutter_preview$exe';
   }
 }
 
@@ -227,6 +232,8 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
   switch (artifact) {
     case HostArtifact.flutterWebSdk:
       return '';
+    case HostArtifact.flutterJsDirectory:
+      return 'flutter_js';
     case HostArtifact.iosDeploy:
       return 'ios-deploy';
     case HostArtifact.idevicesyslog:
@@ -435,6 +442,9 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -513,6 +523,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -551,7 +562,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -573,6 +583,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -592,7 +603,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
@@ -612,6 +622,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -651,7 +662,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
       case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
@@ -663,6 +673,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+      case Artifact.flutterPreviewDevice:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -688,11 +699,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _dartSdkPath(_cache), 'bin', 'snapshots',
-          _artifactToFileName(artifact, _platform),
-        );
-      case Artifact.wasmOptBinary:
-        return _fileSystem.path.join(
-          _dartSdkPath(_cache), 'bin', 'utils',
           _artifactToFileName(artifact, _platform),
         );
       case Artifact.flutterTester:
@@ -727,8 +733,9 @@ class CachedArtifacts implements Artifacts {
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
       case Artifact.windowsCppClientWrapper:
+        final String platformDirName = _enginePlatformDirectoryName(platform);
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, _platform, mode));
+        return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact, _platform));
@@ -745,6 +752,9 @@ class CachedArtifacts implements Artifacts {
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        assert(platform == TargetPlatform.windows_x64);
+        return _cache.getArtifactDirectory('flutter_preview').childFile('flutter_preview.exe').path;
     }
   }
 
@@ -756,6 +766,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -794,10 +805,11 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
   }
   if (platform.isLinux) {
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
-             TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
+        TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
-    return TargetPlatform.windows_x64;
+    return operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64 ?
+        TargetPlatform.windows_arm64 : TargetPlatform.windows_x64;
   }
   throw UnimplementedError('Host OS not supported.');
 }
@@ -882,6 +894,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -1012,10 +1027,15 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
-      case Artifact.wasmOptBinary:
-        return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'utils', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        return _backupCache.getArtifactPath(
+          artifact,
+          platform: platform,
+          mode: mode,
+          environmentType: environmentType,
+        );
     }
   }
 
@@ -1060,6 +1080,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
+      case TargetPlatform.windows_arm64:
+        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -1118,7 +1140,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils;
 
-
   final Artifacts _parent;
   final String _webSdkPath;
   final FileSystem _fileSystem;
@@ -1143,11 +1164,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
             _getDartSdkPath(), 'bin', 'snapshots',
             _artifactToFileName(artifact, _platform, mode),
           );
-        case Artifact.wasmOptBinary:
-          return _fileSystem.path.join(
-            _getDartSdkPath(), 'bin', 'utils',
-            _artifactToFileName(artifact, _platform, mode),
-          );
         case Artifact.genSnapshot:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:
@@ -1169,6 +1185,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fontSubset:
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
+        case Artifact.flutterPreviewDevice:
           break;
       }
     }
@@ -1187,6 +1204,9 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.flutterWebLibrariesJson:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.file(path);
+      case HostArtifact.flutterJsDirectory:
+        final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'flutter_js');
+        return _fileSystem.directory(path);
       case HostArtifact.webPlatformKernelFolder:
         final String path = _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel');
         return _fileSystem.file(path);
@@ -1258,6 +1278,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         return 'linux-x64';
       case TargetPlatform.windows_x64:
         return 'windows-x64';
+      case TargetPlatform.windows_arm64:
+        return 'windows-arm64';
       case TargetPlatform.ios:
       case TargetPlatform.android:
       case TargetPlatform.android_arm:

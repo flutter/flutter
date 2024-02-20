@@ -19,7 +19,7 @@ Future<void> main() async {
         await createHotModeTest(deviceIdOverride: deviceId, checkAppRunningOnLocalDevice: true)();
       });
     } finally {
-      await removeIOSimulator(simulatorDeviceId);
+      await removeIOSSimulator(simulatorDeviceId);
     }
 
     return TaskResult.success(null);

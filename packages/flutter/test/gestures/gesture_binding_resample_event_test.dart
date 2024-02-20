@@ -33,7 +33,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback) {
+  int addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
     postFrameCallback = callback;
     return 0;
   }
@@ -47,7 +47,8 @@ class TestSamplingClock implements SamplingClock {
   DateTime now() => clock.now();
 
   @override
-  Stopwatch stopwatch() => clock.stopwatch();
+  Stopwatch stopwatch() => clock.stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: FakeAsync controls clock.stopwatch(), this is safe in tests.
 }
 
 typedef ResampleEventTest = void Function(FakeAsync async);

@@ -220,7 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   double get crossAxisMargin => _crossAxisMargin;
   double _crossAxisMargin;
   set crossAxisMargin(double value) {
@@ -276,8 +276,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// partial obstructions such as display notches. If you only want additional
   /// margins around the scrollbar, see [mainAxisMargin].
   ///
-  /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
-  /// directions must be greater than or equal to zero.
+  /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
+  /// greater than or equal to zero.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
   set padding(EdgeInsets value) {
@@ -384,14 +384,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
   double get _leadingTrackMainAxisOffset {
-    switch (_resolvedOrientation) {
-      case ScrollbarOrientation.left:
-      case ScrollbarOrientation.right:
-        return padding.top;
-      case ScrollbarOrientation.top:
-      case ScrollbarOrientation.bottom:
-        return padding.left;
-    }
+    return switch (_resolvedOrientation) {
+      ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
+      ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+    };
   }
 
   Rect? _thumbRect;
@@ -401,16 +397,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   late double _thumbExtent;
   // Thumb Offsets
   // The thumb is offset by padding and margins.
-  double get _leadingThumbMainAxisOffset {
-    switch (_resolvedOrientation) {
-      case ScrollbarOrientation.left:
-      case ScrollbarOrientation.right:
-        return padding.top + mainAxisMargin;
-      case ScrollbarOrientation.top:
-      case ScrollbarOrientation.bottom:
-        return padding.left + mainAxisMargin;
-    }
-  }
+  double get _leadingThumbMainAxisOffset => _leadingTrackMainAxisOffset + mainAxisMargin;
+
   void _setThumbExtent() {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
@@ -655,7 +643,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Convert between a thumb track position and the corresponding scroll
   /// position.
   ///
-  /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
+  /// The `thumbOffsetLocal` argument is a position in the thumb track.
   double getTrackToScroll(double thumbOffsetLocal) {
     final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
     final double thumbMovableExtent = _traversableTrackExtent - _thumbExtent;
@@ -957,9 +945,6 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The [child], or a descendant of the [child], should be a source of
   /// [ScrollNotification] notifications, typically a [Scrollable] widget.
-  ///
-  /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
-  /// must not be null.
   const RawScrollbar({
     super.key,
     required this.child,
@@ -1245,18 +1230,18 @@ class RawScrollbar extends StatefulWidget {
 
   /// The [Duration] of the fade animation.
   ///
-  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
+  /// Defaults to a [Duration] of 300 milliseconds.
   final Duration fadeDuration;
 
   /// The [Duration] of time until the fade animation begins.
   ///
-  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
+  /// Defaults to a [Duration] of 600 milliseconds.
   final Duration timeToFade;
 
   /// The [Duration] of time that a LongPress will trigger the drag gesture of
   /// the scrollbar thumb.
   ///
-  /// Cannot be null, defaults to [Duration.zero].
+  /// Defaults to [Duration.zero].
   final Duration pressDuration;
 
   /// {@template flutter.widgets.Scrollbar.notificationPredicate}
@@ -1307,7 +1292,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   final double crossAxisMargin;
 
   /// The insets by which the scrollbar thumb and track should be padded.
@@ -1416,7 +1401,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_debugCheckHasValidScrollPosition());
-    });
+    }, debugLabel: 'RawScrollbar.checkScrollPosition');
     return true;
   }
 
@@ -1469,18 +1454,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           ErrorHint(
             'The Scrollbar attempted to use the $controllerForError. This '
             'ScrollController should be associated with the ScrollView that '
-            'the Scrollbar is being applied to.'
-            '${tryPrimary
-              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
-                'platforms will automatically use the '
-                'PrimaryScrollController if the user has not provided a '
-                'ScrollController. To use the PrimaryScrollController '
-                'explicitly, set ScrollView.primary to true for the Scrollable '
-                'widget.'
-              : 'When providing your own ScrollController, ensure both the '
-                'Scrollbar and the Scrollable widget use the same one.'
-            }',
+            'the Scrollbar is being applied to.',
           ),
+          if (tryPrimary) ...<ErrorHint>[
+            ErrorHint(
+              'If a ScrollController has not been provided, the '
+              'PrimaryScrollController is used by default on mobile platforms '
+              'for ScrollViews with an Axis.vertical scroll direction.',
+            ),
+            ErrorHint(
+              'To use the PrimaryScrollController explicitly, '
+              'set ScrollView.primary to true on the Scrollable widget.',
+            ),
+          ]
+          else
+            ErrorHint(
+              'When providing your own ScrollController, ensure both the '
+              'Scrollbar and the Scrollable widget use the same one.',
+            ),
         ]);
       }
       return true;
@@ -1494,26 +1485,32 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
-            'The $controllerForError is currently attached to more than one '
-            'ScrollPosition.',
+            'The $controllerForError is attached to more than one ScrollPosition.',
           ),
           ErrorDescription(
             'The Scrollbar requires a single ScrollPosition in order to be painted.',
           ),
           ErrorHint(
             'When $when, the associated ScrollController must only have one '
-            'ScrollPosition attached.'
-            '${tryPrimary
-              ? 'If a ScrollController has not been provided, the '
-                'PrimaryScrollController is used by default on mobile platforms '
-                'for ScrollViews with an Axis.vertical scroll direction. More '
-                'than one ScrollView may have tried to use the '
-                'PrimaryScrollController of the current context. '
-                'ScrollView.primary can override this behavior.'
-              : 'The provided ScrollController must be unique to one '
-                'ScrollView widget.'
-            }',
+            'ScrollPosition attached.',
           ),
+          if (tryPrimary) ...<ErrorHint>[
+            ErrorHint(
+              'If a ScrollController has not been provided, the '
+              'PrimaryScrollController is used by default on mobile platforms '
+              'for ScrollViews with an Axis.vertical scroll direction.'
+            ),
+            ErrorHint(
+              'More than one ScrollView may have tried to use the '
+              'PrimaryScrollController of the current context. '
+              'ScrollView.primary can override this behavior.'
+            ),
+          ]
+          else
+            ErrorHint(
+              'The provided ScrollController cannot be shared by multiple '
+              'ScrollView widgets.'
+            ),
         ]);
       }
       return true;

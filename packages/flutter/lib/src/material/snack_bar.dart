@@ -83,8 +83,6 @@ enum SnackBarClosedReason {
 ///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
-  ///
-  /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     super.key,
     this.textColor,
@@ -118,7 +116,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
-  /// The button diabled background color. This color is shown after the
+  /// The button disabled background color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   ///
   /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
@@ -127,7 +125,7 @@ class SnackBarAction extends StatefulWidget {
   /// The button label.
   final String label;
 
-  /// The callback to be called when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed.
   ///
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
@@ -272,8 +270,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null. The [elevation] must be null or
-  /// non-negative.
+  /// The [elevation] must be null or non-negative.
   const SnackBar({
     super.key,
     required this.content,
@@ -292,7 +289,7 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    this.dismissDirection = DismissDirection.down,
+    this.dismissDirection,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(width == null || margin == null,
@@ -466,20 +463,27 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Cannot be null, defaults to [DismissDirection.down].
-  final DismissDirection dismissDirection;
+  /// If this property is null, then [SnackBarThemeData.dismissDirection] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// [DismissDirection.down].
+  final DismissDirection? dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({
+    required TickerProvider vsync,
+    Duration? duration,
+    Duration? reverseDuration,
+  }) {
     return AnimationController(
-      duration: _snackBarTransitionDuration,
+      duration: duration ?? _snackBarTransitionDuration,
+      reverseDuration: reverseDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
     );
@@ -581,7 +585,7 @@ class _SnackBarState extends State<SnackBar> {
               primary: colorScheme.onPrimary,
               secondary: buttonColor,
               surface: colorScheme.onSurface,
-              background: defaults.backgroundColor!,
+              background: defaults.backgroundColor,
               error: colorScheme.onError,
               onPrimary: colorScheme.primary,
               onSecondary: colorScheme.secondary,
@@ -667,6 +671,7 @@ class _SnackBarState extends State<SnackBar> {
     final double actionAndIconWidth = actionTextPainter.size.width +
         (widget.action != null ? actionHorizontalMargin : 0) +
         (showCloseIcon ? (iconButton?.iconSize ?? 0 + iconHorizontalMargin) : 0);
+    actionTextPainter.dispose();
 
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
@@ -739,6 +744,7 @@ class _SnackBarState extends State<SnackBar> {
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? defaults.elevation!;
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? defaults.backgroundColor!;
     final ShapeBorder? shape = widget.shape ?? snackBarTheme.shape ?? (isFloatingSnackBar ? defaults.shape : null);
+    final DismissDirection dismissDirection = widget.dismissDirection ?? snackBarTheme.dismissDirection ?? DismissDirection.down;
 
     snackBar = Material(
       shape: shape,
@@ -785,7 +791,7 @@ class _SnackBarState extends State<SnackBar> {
       },
       child: Dismissible(
         key: const Key('dismissible'),
-        direction: widget.dismissDirection,
+        direction: dismissDirection,
         resizeDuration: null,
         behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {

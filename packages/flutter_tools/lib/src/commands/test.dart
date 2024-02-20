@@ -13,6 +13,7 @@ import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -21,6 +22,7 @@ import '../test/runner.dart';
 import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
+import '../web/compile.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -63,16 +65,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
+    this.nativeAssetsBuilder,
   }) {
     requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
     usesWebRendererOption();
     usesDeviceUserOption();
     usesFlavorOption();
+    addEnableImpellerFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addMultiOption('name',
@@ -235,6 +240,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
   final bool verbose;
 
   @visibleForTesting
@@ -343,19 +350,38 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    String? testAssetDirectory;
-    if (buildTestAssets) {
-      await _buildTestAsset();
-      testAssetDirectory = globals.fs.path.
-        join(flutterProject.directory.path, 'build', 'unit_test_assets');
-    }
-
     final bool startPaused = boolArg('start-paused');
     if (startPaused && _testFileUris.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
         exitCode: 1,
       );
+    }
+
+    final String? webRendererString = stringArg('web-renderer');
+    final WebRendererMode webRenderer = (webRendererString != null)
+        ? WebRendererMode.values.byName(webRendererString)
+        : WebRendererMode.auto;
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      startPaused: startPaused,
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      serveObservatory: boolArg('serve-observatory'),
+      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
+      disablePortPublication: true,
+      enableDds: enableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
+      enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
+      webRenderer: webRenderer,
+    );
+
+    String? testAssetDirectory;
+    if (buildTestAssets) {
+      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      testAssetDirectory = globals.fs.path.
+        join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -425,18 +451,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       watcher = collector;
     }
 
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      buildInfo,
-      startPaused: startPaused,
-      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-      serveObservatory: boolArg('serve-observatory'),
-      // On iOS >=14, keeping this enabled will leave a prompt on the screen.
-      disablePortPublication: true,
-      enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
-      usingCISystem: usingCISystem,
-    );
-
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -465,6 +479,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           '  integration_test:\n'
           '    sdk: flutter\n',
         );
+      }
+
+      if (stringArg('flavor') != null && !integrationTestDevice.supportsFlavors) {
+        throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
       }
     }
 
@@ -496,6 +514,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
       testTimeRecorder: testTimeRecorder,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
@@ -560,9 +579,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         .replace(query: queryPart.isEmpty ? null : queryPart);
   }
 
-  Future<void> _buildTestAsset() async {
+  Future<void> _buildTestAsset({
+    required String? flavor,
+    required ImpellerStatus impellerStatus,
+  }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build(packagesPath: '.packages');
+    final int build = await assetBundle.build(
+      packagesPath: '.packages',
+      flavor: flavor,
+    );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
@@ -570,13 +595,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
-        assetBundle.entryKinds,
         targetPlatform: TargetPlatform.tester,
+        impellerStatus: impellerStatus,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
       );
     }
   }
 
-  bool _needRebuild(Map<String, DevFSContent> entries) {
+  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.
@@ -591,7 +620,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    final Iterable<DevFSFileContent> files = entries.values
+      .map((AssetBundleEntry asset) => asset.content)
+      .whereType<DevFSFileContent>();
+    for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

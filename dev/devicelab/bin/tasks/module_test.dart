@@ -14,15 +14,37 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String gradlewExecutable =
+    Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
+
+/// Combines several TaskFunctions with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (final TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return TaskResult.success(null);
+  };
+}
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-Future<void> main() async {
-  await task(() async {
+class ModuleTest {
+  ModuleTest(
+    this.buildTarget, {
+    this.gradleVersion = '7.6.3',
+  });
 
+  final String buildTarget;
+  final String gradleVersion;
+
+  Future<TaskResult> call() async {
+    section('Running: $buildTarget');
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -40,6 +62,32 @@ Future<void> main() async {
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
+        );
+      });
+
+      section('Create package with native assets');
+
+      await flutter(
+        'config',
+        options: <String>['--enable-native-assets'],
+      );
+
+      const String ffiPackageName = 'ffi_package';
+      await createFfiPackage(ffiPackageName, tempDir);
+
+      section('Add FFI package');
+
+      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        'dependencies:$platformLineSep',
+        'dependencies:$platformLineSep  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
         );
       });
 
@@ -63,8 +111,6 @@ Future<void> main() async {
         ]);
       }
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '$platformLineSep  # assets:$platformLineSep',
         '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
@@ -73,7 +119,6 @@ Future<void> main() async {
 
       section('Add plugins');
 
-      content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
         '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
@@ -85,6 +130,8 @@ Future<void> main() async {
           options: <String>['get'],
         );
       });
+
+      // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
 
       section('Build Flutter module library archive');
 
@@ -191,11 +238,25 @@ Future<void> main() async {
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper',
+            'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+      // Modify gradle version to passed in version.
+      // This is somehow the wrong file.
+      final File gradleWrapperProperties = File(path.join(
+          hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+      String propertyContent = await gradleWrapperProperties.readAsString();
+      propertyContent = propertyContent.replaceFirst(
+        'REPLACEME',
+        gradleVersion,
+      );
+      section(propertyContent);
+      await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
+
+      final File analyticsOutputFile =
+          File(path.join(tempDir.path, 'analytics.log'));
 
       section('Build debug host APK');
 
@@ -233,6 +294,8 @@ Future<void> main() async {
         ...flutterAssets,
         ...debugAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -264,9 +327,8 @@ Future<void> main() async {
         'app',
         'build',
         'intermediates',
-        'merged_assets',
+        'assets',
         'debug',
-        'out',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -312,8 +374,10 @@ Future<void> main() async {
       checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...baseApkFiles,
+        'lib/arm64-v8a/lib$ffiPackageName.so',
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
+        'lib/armeabi-v7a/lib$ffiPackageName.so',
         'lib/armeabi-v7a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
@@ -354,9 +418,8 @@ Future<void> main() async {
         'app',
         'build',
         'intermediates',
-        'merged_assets',
+        'assets',
         'release',
-        'out',
         'flutter_assets',
         'assets',
         'read-only.txt',
@@ -380,5 +443,13 @@ Future<void> main() async {
     } finally {
       rmTree(tempDir);
     }
-  });
+  }
+}
+
+Future<void> main() async {
+  await task(combine(<TaskFunction>[
+    // ignore: avoid_redundant_argument_values
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6-rc-2').call,
+  ]));
 }

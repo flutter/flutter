@@ -38,8 +38,6 @@ class FlutterLogoDecoration extends Decoration {
   ///
   /// The [style] controls whether and where to draw the "Flutter" label. If one
   /// is shown, the [textColor] controls the color of the label.
-  ///
-  /// The [textColor], [style], and [margin] arguments must not be null.
   const FlutterLogoDecoration({
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
@@ -217,9 +215,14 @@ class _FlutterLogoPainter extends BoxPainter {
   final FlutterLogoDecoration _config;
 
   // these are configured assuming a font size of 100.0.
-  // TODO(dnfield): Figure out how to dispose this https://github.com/flutter/flutter/issues/110601
   late TextPainter _textPainter;
   late Rect _textBoundingRect;
+
+  @override
+  void dispose() {
+    _textPainter.dispose();
+    super.dispose();
+  }
 
   void _prepareText() {
     const String kLabel = 'Flutter';

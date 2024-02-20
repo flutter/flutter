@@ -46,6 +46,14 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
+  test('KeepAlive debugTypicalAncestorWidgetClass', () {
+    final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
+    expect(
+      keepAlive.debugTypicalAncestorWidgetDescription,
+      'SliverWithKeepAliveWidget or TwoDimensionalViewport',
+    );
+  });
+
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -209,7 +217,8 @@ void main() {
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'
@@ -383,7 +392,8 @@ void main() {
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'

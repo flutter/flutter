@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -46,14 +46,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
-      addPostFrameCallback(_handleWebFirstFrame);
+      addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
-    // TODO(LongCatIsLooong): clean up after
-    // https://github.com/flutter/flutter/issues/31707 is fully migrated.
-    if (!const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK', defaultValue: true)) {
-      ui.ParagraphBuilder.setDisableRoundingHack(false);
-    }
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -352,12 +347,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    final FlutterView view = renderView.flutterView;
-    final double devicePixelRatio = view.devicePixelRatio;
-    return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
-    );
+    return ViewConfiguration.fromView(renderView.flutterView);
   }
 
   /// Called when the system metrics change.
@@ -390,7 +380,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [MediaQuery] directly. Preferred.
+  /// Querying [MediaQuery.platformBrightnessOf] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
@@ -402,15 +392,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// Querying [MediaQueryData].
-  ///
-  /// ```dart
-  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
-  /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -477,7 +458,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         return true;
       }());
       _mouseTracker!.updateAllDevices();
-    });
+    }, debugLabel: 'RendererBinding.mouseTrackerUpdate');
   }
 
   int _firstFrameDeferredCount = 0;
@@ -773,6 +754,9 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
 /// A [PipelineManifold] implementation that is backed by the [RendererBinding].
 class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifold {
   _BindingPipelineManifold(this._binding) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _binding.addSemanticsEnabledListener(notifyListeners);
   }
 

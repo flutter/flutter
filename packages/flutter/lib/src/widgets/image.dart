@@ -123,8 +123,9 @@ Future<void> precacheImage(
       // image stream.
       // See ImageCache._liveImages
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        image?.dispose();
         stream.removeListener(listener!);
-      });
+      }, debugLabel: 'precacheImage.removeListener');
     },
     onError: (Object exception, StackTrace? stackTrace) {
       if (!completer.isCompleted) {
@@ -335,9 +336,6 @@ class Image extends StatefulWidget {
   /// To show an image from the network or from an asset bundle, consider using
   /// [Image.network] and [Image.asset] respectively.
   ///
-  /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
-  /// must not be null.
-  ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
@@ -372,8 +370,6 @@ class Image extends StatefulWidget {
   });
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
-  ///
-  /// The [src], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -428,8 +424,6 @@ class Image extends StatefulWidget {
        assert(cacheHeight == null || cacheHeight > 0);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
-  ///
-  /// The [file], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -525,8 +519,6 @@ class Image extends StatefulWidget {
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
-  ///
-  /// The [name] and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -662,8 +654,6 @@ class Image extends StatefulWidget {
   /// The `scale` argument specifies the linear scale factor for drawing this
   /// image at its intended size and applies to both the width and the height.
   /// {@macro flutter.painting.imageInfo.scale}
-  ///
-  /// The `bytes`, `scale`, and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
@@ -1175,7 +1165,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _replaceImage({required ImageInfo? info}) {
     final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback((_) => oldImageInfo?.dispose());
+    SchedulerBinding.instance.addPostFrameCallback(
+      (_) => oldImageInfo?.dispose(),
+      debugLabel: 'Image.disposeOldInfo'
+    );
     _imageInfo = info;
   }
 

@@ -156,6 +156,12 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     }
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   void _updateObservers() {
     _navigatorObservers =
         List<NavigatorObserver>.of(widget.navigatorObservers)
@@ -191,7 +197,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         if (!_isActive) {
           return;
         }
-        _navigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.maybePop();
       },
       child: child,
     );

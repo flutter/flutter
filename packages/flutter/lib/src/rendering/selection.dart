@@ -142,6 +142,10 @@ mixin Selectable implements SelectionHandler {
   /// The size of this [Selectable].
   Size get size;
 
+  /// A list of [Rect]s that represent the bounding box of this [Selectable]
+  /// in local coordinates.
+  List<Rect> get boundingBoxes;
+
   /// Disposes resources held by the mixer.
   void dispose();
 }
@@ -421,8 +425,6 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
 /// [isEnd], according to the [granularity].
 class GranularlyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [GranularlyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const GranularlyExtendSelectionEvent({
     required this.forward,
     required this.isEnd,
@@ -499,8 +501,6 @@ enum SelectionExtendDirection {
 /// move to when moving to across lines.
 class DirectionallyExtendSelectionEvent extends SelectionEvent {
   /// Creates a [DirectionallyExtendSelectionEvent].
-  ///
-  /// All parameters are required and must not be null.
   const DirectionallyExtendSelectionEvent({
     required this.dx,
     required this.isEnd,
@@ -706,8 +706,6 @@ class SelectionGeometry {
 @immutable
 class SelectionPoint with Diagnosticable {
   /// Creates a selection point object.
-  ///
-  /// All properties must not be null.
   const SelectionPoint({
     required this.localPosition,
     required this.lineHeight,

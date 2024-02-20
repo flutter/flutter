@@ -49,8 +49,6 @@ const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 ///  * [TextFormField], a convenience widget that wraps a [TextField] widget in a [FormField].
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
-  ///
-  /// The [child] argument must not be null.
   const Form({
     super.key,
     required this.child,
@@ -293,18 +291,45 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
+  ///
+  /// See also:
+  ///  * [validateGranularly], which also validates descendant [FormField]s,
+  /// but instead returns a [Set] of fields with errors.
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
     return _validate();
   }
 
-  bool _validate() {
+
+  /// Validates every [FormField] that is a descendant of this [Form], and
+  /// returns a [Set] of [FormFieldState] of the invalid field(s) only, if any.
+  ///
+  /// This method can be useful to highlight field(s) with errors.
+  ///
+  /// The form will rebuild to report the results.
+  ///
+  /// See also:
+  ///  * [validate], which also validates descendant [FormField]s,
+  /// and return true if there are no errors.
+  Set<FormFieldState<Object?>> validateGranularly() {
+    final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
+    _hasInteractedByUser = true;
+    _forceRebuild();
+    _validate(invalidFields);
+    return invalidFields;
+  }
+
+  bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
-      hasError = !field.validate() || hasError;
+      final bool isFieldValid = field.validate();
+      hasError = !isFieldValid || hasError;
       errorMessage += field.errorText ?? '';
+      if (invalidFields != null && !isFieldValid) {
+        invalidFields.add(field);
+      }
     }
 
     if (errorMessage.isNotEmpty) {
@@ -384,8 +409,6 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 ///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
   /// Creates a single form field.
-  ///
-  /// The [builder] argument must not be null.
   const FormField({
     super.key,
     required this.builder,
@@ -440,7 +463,7 @@ class FormField<T> extends StatefulWidget {
   /// will auto-validate even without user interaction. If
   /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled], cannot be null.
+  /// Defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
 
@@ -528,6 +551,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void _validate() {
     if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    } else {
+      _errorText.value = null;
     }
   }
 
@@ -571,6 +596,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void deactivate() {
     Form.maybeOf(context)?._unregister(this);
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _errorText.dispose();
+    _hasInteractedByUser.dispose();
+    super.dispose();
   }
 
   @override

@@ -5,14 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = UniqueKey();
 
 void main() {
-  testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),

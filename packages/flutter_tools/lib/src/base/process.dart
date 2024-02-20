@@ -8,6 +8,8 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../convert.dart';
+import '../globals.dart' as globals;
+import '../reporting/first_run.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -231,6 +233,52 @@ abstract class ProcessUtils {
     List<String> cli, {
     Map<String, String>? environment,
   });
+
+  /// Write [line] to [stdin] and catch any errors with [onError].
+  ///
+  /// Specifically with [Process] file descriptors, an exception that is
+  /// thrown as part of a write can be most reliably caught with a
+  /// [ZoneSpecification] error handler.
+  ///
+  /// On some platforms, the following code appears to work:
+  ///
+  /// ```dart
+  /// stdin.writeln(line);
+  /// try {
+  ///   await stdin.flush(line);
+  /// } catch (err) {
+  ///   // handle error
+  /// }
+  /// ```
+  ///
+  /// However it did not catch a [SocketException] on Linux.
+  static Future<void> writelnToStdinGuarded({
+    required IOSink stdin,
+    required String line,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    final Completer<void> completer = Completer<void>();
+
+    void writeFlushAndComplete() {
+      stdin.writeln(line);
+      stdin.flush().whenComplete(() {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+    }
+
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+    return completer.future;
+  }
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
@@ -275,7 +323,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       _logger.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
           (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
-        runResult.throwException('Process exited abnormally:\n$runResult');
+        runResult.throwException('Process exited abnormally with exit code ${runResult.exitCode}:\n$runResult');
       }
       return runResult;
     }
@@ -339,7 +387,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         _logger.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
             (allowedFailures == null || !allowedFailures(exitCode))) {
-          runResult.throwException('Process exited abnormally:\n$runResult');
+          runResult.throwException('Process exited abnormally with exit code $exitCode:\n$runResult');
         }
         return runResult;
       }
@@ -405,7 +453,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      String message = 'The command failed';
+      String message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message = 'The command failed\nStdout:\n${runResult.stdout}\n'
             'Stderr:\n${runResult.stderr}';
@@ -563,4 +611,85 @@ class _DefaultProcessUtils implements ProcessUtils {
       _logger.printTrace('executing: [$workingDirectory/] $argsText');
     }
   }
+}
+
+Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
+  // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
+  // before invoking the print welcome method because the print welcome method
+  // will set `messenger.shouldDisplayLicenseTerms()` to false
+  final FirstRunMessenger messenger =
+      FirstRunMessenger(persistentToolState: globals.persistentToolState!);
+  final bool legacyAnalyticsMessageShown =
+      messenger.shouldDisplayLicenseTerms();
+
+  // Prints the welcome message if needed for legacy analytics.
+  if (!(await globals.isRunningOnBot)) {
+    globals.flutterUsage.printWelcome();
+  }
+
+  // Ensure that the consent message has been displayed for unified analytics
+  if (globals.analytics.shouldShowMessage) {
+    globals.logger.printStatus(globals.analytics.getConsentMessage);
+    if (!globals.flutterUsage.enabled) {
+      globals.printStatus(
+          'Please note that analytics reporting was already disabled, '
+          'and will continue to be disabled.\n');
+    }
+
+    // Because the legacy analytics may have also sent a message,
+    // the conditional below will print additional messaging informing
+    // users that the two consent messages they are receiving is not a
+    // bug
+    if (legacyAnalyticsMessageShown) {
+      globals.logger
+          .printStatus('You have received two consent messages because '
+              'the flutter tool is migrating to a new analytics system. '
+              'Disabling analytics collection will disable both the legacy '
+              'and new analytics collection systems. '
+              'You can disable analytics reporting by running `flutter --disable-analytics`\n');
+    }
+
+    // Invoking this will onboard the flutter tool onto
+    // the package on the developer's machine and will
+    // allow for events to be sent to Google Analytics
+    // on subsequent runs of the flutter tool (ie. no events
+    // will be sent on the first run to allow developers to
+    // opt out of collection)
+    globals.analytics.clientShowedMessage();
+  }
+
+  // Send any last analytics calls that are in progress without overly delaying
+  // the tool's exit (we wait a maximum of 250ms).
+  if (globals.flutterUsage.enabled) {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    await globals.flutterUsage.ensureAnalyticsSent();
+    globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
+  // Run shutdown hooks before flushing logs
+  await shutdownHooks.runShutdownHooks(globals.logger);
+
+  final Completer<void> completer = Completer<void>();
+
+  // Allow any pending analytics events to send and close the http connection
+  //
+  // By default, we will wait 250 ms before canceling any pending events, we
+  // can change the [delayDuration] in the close method if it needs to be changed
+  await globals.analytics.close();
+
+  // Give the task / timer queue one cycle through before we hard exit.
+  Timer.run(() {
+    try {
+      globals.printTrace('exiting with code $code');
+      exit(code);
+      completer.complete();
+    // This catches all exceptions because the error is propagated on the
+    // completer.
+    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
+      completer.completeError(error, stackTrace);
+    }
+  });
+
+  await completer.future;
+  return code;
 }

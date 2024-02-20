@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -53,7 +54,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
 ///  * [IndexedWidgetBuilder], which is similar but not nullable.
-typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, ChildVicinity vicinity);
+typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext context, ChildVicinity vicinity);
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [TwoDimensionalScrollable].
@@ -497,7 +498,6 @@ class TwoDimensionalViewportParentData extends ParentData  with KeepAliveParentD
 ///
 /// Subclasses should not override [performLayout], as it handles housekeeping
 /// on either side of the call to [layoutChildSequence].
-// TODO(Piinks): ensureVisible https://github.com/flutter/flutter/issues/126299
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
@@ -779,8 +779,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Children must have a [ParentData] of type
   /// [TwoDimensionalViewportParentData], or a subclass thereof.
   @protected
+  @mustCallSuper
   TwoDimensionalViewportParentData parentDataOf(RenderBox child) {
-    assert(_children.containsValue(child));
+    assert(_children.containsValue(child) ||
+        _keepAliveBucket.containsValue(child) ||
+        _debugOrphans!.contains(child));
     return child.parentData! as TwoDimensionalViewportParentData;
   }
 
@@ -793,7 +796,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// Returns null if there is no active child for the given [ChildVicinity].
   @protected
-  RenderBox? getChildFor(ChildVicinity vicinity) => _children[vicinity];
+  RenderBox? getChildFor(covariant ChildVicinity vicinity) => _children[vicinity];
 
   @override
   void attach(PipelineOwner owner) {
@@ -848,11 +851,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderBox? child = _firstChild;
     while (child != null) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
-      // TODO(Piinks): When ensure visible is supported, remove this isVisible
-      //  condition.
-      if (childParentData.isVisible) {
-        visitor(child);
-      }
+      visitor(child);
       child = childParentData._nextSibling;
     }
     // Do not visit children in [_keepAliveBucket].
@@ -920,10 +919,262 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
   }
 
+  @protected
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
-    // TODO(Piinks): Add this back in follow up change (ensureVisible), https://github.com/flutter/flutter/issues/126299
-    return const RevealedOffset(offset: 0.0, rect: Rect.zero);
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis,
+  }) {
+    // If an axis has not been specified, use the mainAxis.
+    axis ??= mainAxis;
+
+    final (double offset, AxisDirection axisDirection) = switch (axis) {
+      Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
+      Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
+    };
+
+    rect ??= target.paintBounds;
+    // `child` will be the last RenderObject before the viewport when walking
+    // up from `target`.
+    RenderObject child = target;
+    while (child.parent != this) {
+      child = child.parent!;
+    }
+
+    assert(child.parent == this);
+    final RenderBox box = child as RenderBox;
+    final Rect rectLocal = MatrixUtils.transformRect(target.getTransformTo(child), rect);
+
+    double leadingScrollOffset = offset;
+
+    // The scroll offset of `rect` within `child`.
+    leadingScrollOffset += switch (axisDirection) {
+      AxisDirection.up    => child.size.height - rectLocal.bottom,
+      AxisDirection.left  => child.size.width - rectLocal.right,
+      AxisDirection.right => rectLocal.left,
+      AxisDirection.down  => rectLocal.top,
+    };
+
+    // The scroll offset in the viewport to `rect`.
+    final Offset paintOffset = parentDataOf(box).paintOffset!;
+    leadingScrollOffset += switch (axisDirection) {
+      AxisDirection.up    => viewportDimension.height - paintOffset.dy - box.size.height,
+      AxisDirection.left  => viewportDimension.width - paintOffset.dx - box.size.width,
+      AxisDirection.right => paintOffset.dx,
+      AxisDirection.down  => paintOffset.dy,
+    };
+
+    // This step assumes the viewport's layout is up-to-date, i.e., if
+    // the position is changed after the last performLayout, the new scroll
+    // position will not be accounted for.
+    final Matrix4 transform = target.getTransformTo(this);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    final double mainAxisExtentDifference = switch (axis) {
+      Axis.horizontal => viewportDimension.width - rectLocal.width,
+      Axis.vertical   => viewportDimension.height - rectLocal.height,
+    };
+
+    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
+
+    final double offsetDifference = switch (axis) {
+      Axis.horizontal => horizontalOffset.pixels - targetOffset,
+      Axis.vertical   => verticalOffset.pixels - targetOffset,
+    };
+
+    targetRect = switch (axisDirection) {
+      AxisDirection.up    => targetRect.translate(0.0, -offsetDifference),
+      AxisDirection.down  => targetRect.translate(0.0,  offsetDifference),
+      AxisDirection.left  => targetRect.translate(-offsetDifference, 0.0),
+      AxisDirection.right => targetRect.translate( offsetDifference, 0.0),
+    };
+
+    final RevealedOffset revealedOffset = RevealedOffset(
+      offset: targetOffset,
+      rect: targetRect,
+    );
+    return revealedOffset;
+  }
+
+  @override
+  void showOnScreen({
+    RenderObject? descendant,
+    Rect? rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    // It is possible for one and not both axes to allow for implicit scrolling,
+    // so handling is split between the options for allowed implicit scrolling.
+    final bool allowHorizontal = horizontalOffset.allowImplicitScrolling;
+    final bool allowVertical = verticalOffset.allowImplicitScrolling;
+    AxisDirection? axisDirection;
+    switch ((allowHorizontal, allowVertical)) {
+      case (true, true):
+        // Both allow implicit scrolling.
+        break;
+      case (false, true):
+        // Only the vertical Axis allows implicit scrolling.
+        axisDirection = verticalAxisDirection;
+      case (true, false):
+        // Only the horizontal Axis allows implicit scrolling.
+        axisDirection = horizontalAxisDirection;
+      case (false, false):
+        // Neither axis allows for implicit scrolling.
+        return super.showOnScreen(
+          descendant: descendant,
+          rect: rect,
+          duration: duration,
+          curve: curve,
+        );
+    }
+
+    final Rect? newRect = RenderTwoDimensionalViewport.showInViewport(
+      descendant: descendant,
+      viewport: this,
+      axisDirection: axisDirection,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
+
+    super.showOnScreen(
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
+  /// Make (a portion of) the given `descendant` of the given `viewport` fully
+  /// visible in one or both dimensions of the `viewport` by manipulating the
+  /// [ViewportOffset]s.
+  ///
+  /// The `axisDirection` determines from which axes the `descendant` will be
+  /// revealed. When the `axisDirection` is null, both axes will be updated to
+  /// reveal the descendant.
+  ///
+  /// The optional `rect` parameter describes which area of the `descendant`
+  /// should be shown in the viewport. If `rect` is null, the entire
+  /// `descendant` will be revealed. The `rect` parameter is interpreted
+  /// relative to the coordinate system of `descendant`.
+  ///
+  /// The returned [Rect] describes the new location of `descendant` or `rect`
+  /// in the viewport after it has been revealed. See [RevealedOffset.rect]
+  /// for a full definition of this [Rect].
+  ///
+  /// The parameter `viewport` is required and cannot be null. If `descendant`
+  /// is null, this is a no-op and `rect` is returned.
+  ///
+  /// If both `descendant` and `rect` are null, null is returned because there
+  /// is nothing to be shown in the viewport.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to animate the
+  /// target object into the viewport with an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.showOnScreen], overridden by
+  ///   [RenderTwoDimensionalViewport] to delegate to this method.
+  static Rect? showInViewport({
+    RenderObject? descendant,
+    Rect? rect,
+    required RenderTwoDimensionalViewport viewport,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    AxisDirection? axisDirection,
+  }) {
+    if (descendant == null) {
+      return rect;
+    }
+
+    Rect? showVertical(Rect? rect) {
+      return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: viewport,
+        axis: Axis.vertical,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    Rect? showHorizontal(Rect? rect) {
+      return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: viewport,
+        axis: Axis.horizontal,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    switch (axisDirection) {
+      case AxisDirection.left:
+      case AxisDirection.right:
+        return showHorizontal(rect);
+      case AxisDirection.up:
+      case AxisDirection.down:
+        return showVertical(rect);
+      case null:
+        // Update rect after revealing in one axis before revealing in the next.
+        rect = showHorizontal(rect) ?? rect;
+        // We only return the final rect after both have been revealed.
+        rect = showVertical(rect);
+        if (rect == null) {
+          // `descendant` is between leading and trailing edge and hence already
+          //  fully shown on screen.
+          assert(viewport.parent != null);
+          final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+          return MatrixUtils.transformRect(
+            transform,
+            rect ?? descendant.paintBounds,
+          );
+        }
+        return rect;
+    }
+  }
+
+  static Rect? _showInViewportForAxisDirection({
+    required RenderObject descendant,
+    Rect? rect,
+    required RenderTwoDimensionalViewport viewport,
+    required Axis axis,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    final ViewportOffset offset = switch (axis) {
+      Axis.vertical => viewport.verticalOffset,
+      Axis.horizontal => viewport.horizontalOffset,
+    };
+
+    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(
+      descendant,
+      0.0,
+      rect: rect,
+      axis: axis,
+    );
+    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(
+      descendant,
+      1.0,
+      rect: rect,
+      axis: axis,
+    );
+    final double currentOffset = offset.pixels;
+
+    final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
+      leadingEdgeOffset: leadingEdgeOffset,
+      trailingEdgeOffset: trailingEdgeOffset,
+      currentOffset: currentOffset,
+    );
+    if (targetOffset == null) {
+      // Already visible in this axis.
+      return null;
+    }
+
+    offset.moveTo(targetOffset.offset, duration: duration, curve: curve);
+    return targetOffset.rect;
   }
 
   /// Should be used by subclasses to invalidate any cached metrics for the
@@ -1304,26 +1555,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // This is only usable once we have sizes.
     assert(hasSize);
     assert(child.hasSize);
-    final double xOffset;
-    final double yOffset;
-    switch (verticalAxisDirection) {
-      case AxisDirection.up:
-        yOffset = viewportDimension.height - (layoutOffset.dy + child.size.height);
-      case AxisDirection.down:
-        yOffset = layoutOffset.dy;
-      case AxisDirection.right:
-      case AxisDirection.left:
-        throw Exception('This should not happen');
-    }
-    switch (horizontalAxisDirection) {
-      case AxisDirection.right:
-        xOffset = layoutOffset.dx;
-      case AxisDirection.left:
-        xOffset = viewportDimension.width - (layoutOffset.dx + child.size.width);
-      case AxisDirection.up:
-      case AxisDirection.down:
-        throw Exception('This should not happen');
-    }
+    final double xOffset = switch (horizontalAxisDirection) {
+      AxisDirection.right => layoutOffset.dx,
+      AxisDirection.left => viewportDimension.width - (layoutOffset.dx + child.size.width),
+      AxisDirection.up || AxisDirection.down => throw Exception('This should not happen'),
+    };
+    final double yOffset = switch (verticalAxisDirection) {
+      AxisDirection.up => viewportDimension.height - (layoutOffset.dy + child.size.height),
+      AxisDirection.down => layoutOffset.dy,
+      AxisDirection.right || AxisDirection.left => throw Exception('This should not happen'),
+    };
     return Offset(xOffset, yOffset);
   }
 

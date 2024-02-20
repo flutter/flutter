@@ -10,7 +10,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Virtual key VK_PROCESSKEY in Win32 API.
 //
@@ -19,17 +18,25 @@ const int _vkProcessKey = 0xe5;
 
 /// Platform-specific key event data for Windows.
 ///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
+///
 /// This object contains information about key events obtained from Windows's
 /// win32 API.
 ///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataWindows extends RawKeyEventData {
   /// Creates a key event data structure specific for Windows.
-  ///
-  /// The [keyCode], [scanCode], [characterCodePoint], and [modifiers], arguments
-  /// must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataWindows({
     this.keyCode = 0,
     this.scanCode = 0,
@@ -94,26 +101,22 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
-    if (modifiers & anyMask == 0 &&
-        modifiers & leftMask == 0 &&
-        modifiers & rightMask == 0) {
+    if (modifiers & (leftMask | rightMask | anyMask) == 0) {
       return false;
     }
-    // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed. Handles the case where Windows
-    // supplies just the "either" modifier flag, but not the left/right flag.
-    // (e.g. modifierShift but not modifierLeftShift).
-    final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0 || anyOnly;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0 || anyOnly;
+    if (modifiers & (leftMask | rightMask | anyMask) == anyMask) {
+      // If only the "anyMask" bit is set, then we respond true for requests of
+      // whether either left or right is pressed. Handles the case where Windows
+      // supplies just the "either" modifier flag, but not the left/right flag.
+      // (e.g. modifierShift but not modifierLeftShift).
+      return true;
     }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => modifiers & leftMask != 0 && modifiers & rightMask != 0,
+      KeyboardSide.left  => modifiers & leftMask != 0,
+      KeyboardSide.right => modifiers & rightMask != 0,
+    };
   }
 
   @override

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +17,7 @@ void main() {
   testWidgets('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
@@ -325,7 +327,7 @@ void main() {
 
   testWidgets('Assertion error when SliverExpanded is used outside of SliverCrossAxisGroup', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     await tester.pumpWidget(
@@ -357,6 +359,7 @@ void main() {
   testWidgets('Hit test works properly on various parts of SliverCrossAxisGroup', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     String? clickedTile;
 
@@ -456,7 +459,7 @@ void main() {
 
   testWidgets('Assertion error when constrained widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     final List<int> items = List<int>.generate(20, (int i) => i);
@@ -478,7 +481,7 @@ void main() {
 
   testWidgets('Assertion error when expanded widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
     final List<int> items = List<int>.generate(20, (int i) => i);
@@ -517,6 +520,7 @@ void main() {
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -542,6 +546,7 @@ void main() {
 
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -571,6 +576,7 @@ void main() {
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -601,6 +607,7 @@ void main() {
 
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -637,6 +644,7 @@ void main() {
 
   testWidgets('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -674,6 +682,7 @@ void main() {
 
   testWidgets('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -703,6 +712,7 @@ void main() {
 
   testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -743,6 +753,7 @@ void main() {
 
   testWidgets('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -783,6 +794,7 @@ void main() {
 
   testWidgets('SliverFloatingPersistentHeader scroll direction is not affected by controller.jumpTo', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -812,6 +824,7 @@ void main() {
 
   testWidgets('SliverCrossAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     int counter = 0;
     void incrementCounter() {

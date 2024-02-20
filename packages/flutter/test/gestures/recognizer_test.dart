@@ -6,6 +6,7 @@ import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
@@ -47,6 +48,16 @@ void main() {
   test('GestureRecognizer smoketest', () {
     final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
     expect(recognizer, hasAGoodToStringDeep);
+  });
+
+  test('GestureRecognizer dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => TestGestureRecognizer().dispose(),
+        TestGestureRecognizer
+      ,),
+      areCreateAndDispose,
+    );
   });
 
   test('OffsetPair', () {

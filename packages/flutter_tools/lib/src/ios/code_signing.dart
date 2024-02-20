@@ -206,7 +206,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  logger.printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
+  logger.printStatus('Developer identity "$signingIdentity" selected for iOS code signing');
 
   final String? signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern

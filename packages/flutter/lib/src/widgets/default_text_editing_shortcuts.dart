@@ -419,10 +419,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageUp, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageDown, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
@@ -431,12 +427,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowRight, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageUp): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.pageDown): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.home, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.enter): DoNothingAndStopPropagationTextIntent(),
   };
@@ -455,6 +445,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageUp): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.end, control: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.home, control: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
   // Hand backspace/delete events that do not depend on text layout (delete
@@ -472,20 +472,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return _androidShortcuts;
-      case TargetPlatform.fuchsia:
-        return _fuchsiaShortcuts;
-      case TargetPlatform.iOS:
-        return _iOSShortcuts;
-      case TargetPlatform.linux:
-        return _linuxShortcuts;
-      case TargetPlatform.macOS:
-        return _macShortcuts;
-      case TargetPlatform.windows:
-        return _windowsShortcuts;
-    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => _androidShortcuts,
+      TargetPlatform.fuchsia => _fuchsiaShortcuts,
+      TargetPlatform.iOS     => _iOSShortcuts,
+      TargetPlatform.linux   => _linuxShortcuts,
+      TargetPlatform.macOS   => _macShortcuts,
+      TargetPlatform.windows => _windowsShortcuts,
+    };
   }
 
   Map<ShortcutActivator, Intent>? _getDisablingShortcut() {

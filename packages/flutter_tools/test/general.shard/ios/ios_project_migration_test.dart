@@ -16,22 +16,32 @@ import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embed
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
+import 'package:flutter_tools/src/migrations/cocoapods_toolchain_directory_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main () {
   group('iOS migration', () {
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       testUsage = TestUsage();
+
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     testWithoutContext('migrators succeed', () {
@@ -58,10 +68,12 @@ void main () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage
+          testUsage,
+          fakeAnalytics,
         );
         iosProjectMigration.migrate();
         expect(testUsage.events, isEmpty);
+        expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -78,9 +90,11 @@ void main () {
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
         iosProjectMigration.migrate();
         expect(testUsage.events, isEmpty);
+        expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -98,6 +112,7 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
         iosProjectMigration.migrate();
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -125,9 +140,11 @@ keep this 2
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
         iosProjectMigration.migrate();
         expect(testUsage.events, isEmpty);
+        expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -146,11 +163,19 @@ keep this 2
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
 
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         expect(testUsage.events, contains(
           const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.appleUsageEvent(
+              workflow: 'ios-migration',
+              parameter: 'remove-frameworks',
+              result: 'failure',
+            )
         ));
       });
 
@@ -163,10 +188,18 @@ keep this 2
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         expect(testUsage.events, contains(
           const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.appleUsageEvent(
+              workflow: 'ios-migration',
+              parameter: 'remove-frameworks',
+              result: 'failure',
+            )
         ));
       });
 
@@ -179,10 +212,18 @@ keep this 2
           project,
           testLogger,
           testUsage,
+          fakeAnalytics,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
         expect(testUsage.events, contains(
           const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.appleUsageEvent(
+              workflow: 'ios-migration',
+              parameter: 'remove-frameworks',
+              result: 'failure',
+            )
         ));
       });
     });
@@ -545,18 +586,18 @@ keep this 3
       });
 
       testWithoutContext('skipped if nothing to upgrade', () {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
         const String appFrameworkInfoPlistContents = '''
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
 ''';
         appFrameworkInfoPlist.writeAsStringSync(appFrameworkInfoPlistContents);
 
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-        const String podfileFileContents = "# platform :ios, '11.0'";
+        const String podfileFileContents = "# platform :ios, '12.0'";
         podfile.writeAsStringSync(podfileFileContents);
         final DateTime podfileLastModified = podfile.lastModifiedSync();
 
@@ -575,7 +616,7 @@ keep this 3
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Xcode project is migrated to 11', () {
+      testWithoutContext('Xcode project is migrated to 12', () {
         xcodeProjectInfoFile.writeAsStringSync('''
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -584,6 +625,7 @@ keep this 3
 
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 ''');
 
         appFrameworkInfoPlist.writeAsStringSync('''
@@ -597,6 +639,8 @@ keep this 3
   <string>8.0</string>
   <key>MinimumOSVersion</key>
   <string>11.0</string>
+  <key>MinimumOSVersion</key>
+  <string>12.0</string>
 </dict>
 </plist>
 ''');
@@ -604,6 +648,8 @@ keep this 3
         podfile.writeAsStringSync('''
 # platform :ios, '9.0'
 platform :ios, '9.0'
+# platform :ios, '11.0'
+platform :ios, '11.0'
 ''');
 
         final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
@@ -614,12 +660,13 @@ platform :ios, '9.0'
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 ''');
 
         expect(appFrameworkInfoPlist.readAsStringSync(), '''
@@ -630,19 +677,23 @@ platform :ios, '9.0'
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
   <key>MinimumOSVersion</key>
-  <string>11.0</string>
+  <string>12.0</string>
+  <key>MinimumOSVersion</key>
+  <string>12.0</string>
 </dict>
 </plist>
 ''');
 
         expect(podfile.readAsStringSync(), '''
-# platform :ios, '11.0'
-platform :ios, '11.0'
+# platform :ios, '12.0'
+platform :ios, '12.0'
+# platform :ios, '12.0'
+platform :ios, '12.0'
 ''');
         // Only print once even though 2 lines were changed.
-        expect('Updating minimum iOS deployment target to 11.0'.allMatches(testLogger.statusText).length, 1);
+        expect('Updating minimum iOS deployment target to 12.0'.allMatches(testLogger.statusText).length, 1);
       });
     });
 
@@ -661,7 +712,7 @@ platform :ios, '11.0'
         project.xcodeProjectInfoFile = xcodeProjectInfoFile;
 
         xcodeProjectSchemeFile = memoryFileSystem.file('Runner.xcscheme');
-        project.xcodeProjectSchemeFile = xcodeProjectSchemeFile;
+        project.schemeFile = xcodeProjectSchemeFile;
       });
 
       testWithoutContext('skipped if files are missing', () {
@@ -685,13 +736,13 @@ platform :ios, '11.0'
 	objectVersion = 54;
 	objects = {
 			attributes = {
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
       ''';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
         const String xcodeProjectSchemeFileContents = '''
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1510"
 ''';
         xcodeProjectSchemeFile.writeAsStringSync(xcodeProjectSchemeFileContents);
 
@@ -717,13 +768,13 @@ platform :ios, '11.0'
 	objectVersion = 46;
 	objects = {
 			attributes = {
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "";
 ''');
 
         xcodeProjectSchemeFile.writeAsStringSync('''
 <Scheme
-   LastUpgradeVersion = "1020"
+   LastUpgradeVersion = "1430"
    version = "1.3">
 ''');
 
@@ -739,13 +790,13 @@ platform :ios, '11.0'
 	objectVersion = 54;
 	objects = {
 			attributes = {
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 ''');
 
         expect(xcodeProjectSchemeFile.readAsStringSync(), '''
 <Scheme
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1510"
    version = "1.3">
 ''');
         // Only print once even though 3 lines were changed.
@@ -863,7 +914,7 @@ platform :ios, '11.0'
       });
 
       testWithoutContext('skipped if nothing to upgrade', () {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
@@ -1001,6 +1052,150 @@ platform :ios, '11.0'
   fi
 ''');
         expect(testLogger.statusText, contains('Upgrading Pods-Runner-frameworks.sh'));
+      });
+    });
+
+    group('Cocoapods migrate toolchain directory', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late Directory podRunnerTargetSupportFiles;
+      late ProcessManager processManager;
+      late XcodeProjectInterpreter xcode15ProjectInterpreter;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        podRunnerTargetSupportFiles = memoryFileSystem.directory('Pods-Runner');
+        testLogger = BufferLogger.test();
+        project = FakeIosProject();
+        processManager = FakeProcessManager.any();
+        xcode15ProjectInterpreter = XcodeProjectInterpreter.test(processManager: processManager, version: Version(15, 0, 0));
+        project.podRunnerTargetSupportFiles = podRunnerTargetSupportFiles;
+      });
+
+      testWithoutContext('skip if directory is missing', () {
+        final CocoaPodsToolchainDirectoryMigration iosProjectMigration = CocoaPodsToolchainDirectoryMigration(
+          project,
+          xcode15ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerTargetSupportFiles.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('CocoaPods Pods-Runner Target Support Files not found'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skip if xcconfig files are missing', () {
+        podRunnerTargetSupportFiles.createSync();
+        final CocoaPodsToolchainDirectoryMigration iosProjectMigration = CocoaPodsToolchainDirectoryMigration(
+          project,
+          xcode15ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerTargetSupportFiles.existsSync(), isTrue);
+        expect(testLogger.traceText, isEmpty);
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skip if nothing to upgrade', () {
+        podRunnerTargetSupportFiles.createSync();
+        final File debugConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.debug.xcconfig');
+        const String contents = r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+LIBRARY_SEARCH_PATHS = $(inherited) "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''';
+        debugConfig.writeAsStringSync(contents);
+
+        final File profileConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.profile.xcconfig');
+        profileConfig.writeAsStringSync(contents);
+
+        final File releaseConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.release.xcconfig');
+        releaseConfig.writeAsStringSync(contents);
+
+        final CocoaPodsToolchainDirectoryMigration iosProjectMigration = CocoaPodsToolchainDirectoryMigration(
+          project,
+          xcode15ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(debugConfig.existsSync(), isTrue);
+        expect(testLogger.traceText, isEmpty);
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if Xcode version below 15', () {
+        podRunnerTargetSupportFiles.createSync();
+        final File debugConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.debug.xcconfig');
+        const String contents = r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+LIBRARY_SEARCH_PATHS = $(inherited) "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''';
+        debugConfig.writeAsStringSync(contents);
+
+        final File profileConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.profile.xcconfig');
+        profileConfig.writeAsStringSync(contents);
+
+        final File releaseConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.release.xcconfig');
+        releaseConfig.writeAsStringSync(contents);
+
+        final XcodeProjectInterpreter xcode14ProjectInterpreter = XcodeProjectInterpreter.test(
+          processManager: processManager,
+          version: Version(14, 0, 0),
+        );
+
+        final CocoaPodsToolchainDirectoryMigration iosProjectMigration = CocoaPodsToolchainDirectoryMigration(
+          project,
+          xcode14ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(debugConfig.existsSync(), isTrue);
+        expect(testLogger.traceText, contains('Detected Xcode version is 14.0.0, below 15.0'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated and ignores leading whitespace', () {
+        podRunnerTargetSupportFiles.createSync();
+        final File debugConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.debug.xcconfig');
+        const String contents = r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+  LIBRARY_SEARCH_PATHS = $(inherited) "${DT_TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''';
+        debugConfig.writeAsStringSync(contents);
+
+        final File profileConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.profile.xcconfig');
+        profileConfig.writeAsStringSync(contents);
+
+        final File releaseConfig = podRunnerTargetSupportFiles.childFile('Pods-Runner.release.xcconfig');
+        releaseConfig.writeAsStringSync(contents);
+
+        final CocoaPodsToolchainDirectoryMigration iosProjectMigration = CocoaPodsToolchainDirectoryMigration(
+          project,
+          xcode15ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+
+        expect(debugConfig.existsSync(), isTrue);
+        expect(debugConfig.readAsStringSync(), r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+  LIBRARY_SEARCH_PATHS = $(inherited) "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''');
+        expect(profileConfig.existsSync(), isTrue);
+        expect(profileConfig.readAsStringSync(), r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+  LIBRARY_SEARCH_PATHS = $(inherited) "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''');
+        expect(releaseConfig.existsSync(), isTrue);
+        expect(releaseConfig.readAsStringSync(), r'''
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frameworks' '@loader_path/Frameworks' "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}"
+  LIBRARY_SEARCH_PATHS = $(inherited) "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+''');
+        expect(testLogger.statusText, contains('Upgrading Pods-Runner.debug.xcconfig'));
+        expect(testLogger.statusText, contains('Upgrading Pods-Runner.profile.xcconfig'));
+        expect(testLogger.statusText, contains('Upgrading Pods-Runner.release.xcconfig'));
       });
     });
   });
@@ -1225,8 +1420,10 @@ class FakeIosProject extends Fake implements IosProject {
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
 
+  File? schemeFile;
+
   @override
-  File xcodeProjectSchemeFile = MemoryFileSystem.test().file('xcodeProjectSchemeFile');
+  File xcodeProjectSchemeFile({String? scheme}) => schemeFile ?? MemoryFileSystem.test().file('xcodeProjectSchemeFile');
 
   @override
   File appFrameworkInfoPlist = MemoryFileSystem.test().file('appFrameworkInfoPlist');
@@ -1239,6 +1436,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File podRunnerFrameworksScript = MemoryFileSystem.test().file('podRunnerFrameworksScript');
+
+  @override
+  Directory podRunnerTargetSupportFiles = MemoryFileSystem.test().directory('Pods-Runner');
 }
 
 class FakeIOSMigrator extends ProjectMigrator {

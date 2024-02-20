@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
@@ -116,6 +117,18 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
+/// The argument [experimentalLeakTesting] is experimental and is not recommended
+/// for use outside of the Flutter framework.
+/// When [experimentalLeakTesting] is set, it is used to leak track objects created
+/// during test execution.
+/// Otherwise [LeakTesting.settings] is used.
+/// Adjust [LeakTesting.settings] in flutter_test_config.dart
+/// (see https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
+/// for the entire package or folder, or in the test's main for a test file
+/// (don't use [setUp] or [setUpAll]).
+/// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
+/// `LeakTrackingForTests.ignore()`.
+///
 /// ## Sample code
 ///
 /// ```dart
@@ -135,6 +148,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
+  LeakTesting? experimentalLeakTesting,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -165,9 +179,11 @@ void testWidgets(
             Object? memento;
             try {
               memento = await variant.setUp(value);
+              maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {
               await variant.tearDown(value, memento);
+              maybeTearDownLeakTrackingForTest();
             }
             semanticsHandle?.dispose();
           },
@@ -565,15 +581,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// ```
   /// {@end-tool}
   ///
+  /// By default, the provided `widget` is rendered into [WidgetTester.view],
+  /// whose properties tests can modify to simulate different scenarios (e.g.
+  /// running on a large/small screen). Tests that want to control the
+  /// [FlutterView] into which content is rendered can set `wrapWithView` to
+  /// false and use [View] widgets in the provided `widget` tree to specify the
+  /// desired [FlutterView]s.
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
-    Widget widget, [
+    Widget widget, {
     Duration? duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
+    bool wrapWithView = true,
+  }) {
     return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.attachRootWidget(wrapWithView ? binding.wrapWithDefaultView(widget) : widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
@@ -1059,7 +1083,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   int? _lastRecordedSemanticsHandles;
 
   // TODO(goderbauer): Only use binding.debugOutstandingSemanticsHandles when deprecated binding.pipelineOwner is removed.
-  // ignore: deprecated_member_use
   int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {

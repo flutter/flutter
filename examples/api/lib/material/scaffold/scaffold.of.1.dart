@@ -34,7 +34,7 @@ class OfExample extends StatelessWidget {
             child: ElevatedButton(
               child: const Text('SHOW BOTTOM SHEET'),
               onPressed: () {
-                Scaffold.of(context).showBottomSheet<void>(
+                Scaffold.of(context).showBottomSheet(
                   (BuildContext context) {
                     return Container(
                       alignment: Alignment.center,

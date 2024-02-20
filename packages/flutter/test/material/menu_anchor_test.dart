@@ -78,51 +78,75 @@ void main() {
     AlignmentGeometry? alignment,
     Offset alignmentOffset = Offset.zero,
     TextDirection textDirection = TextDirection.ltr,
+    bool consumesOutsideTap = false,
+    void Function(TestMenu)? onPressed,
+    void Function(TestMenu)? onOpen,
+    void Function(TestMenu)? onClose,
   }) {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     return MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Directionality(
           textDirection: textDirection,
-          child: Center(
-            child: MenuAnchor(
-              childFocusNode: focusNode,
-              controller: controller,
-              alignmentOffset: alignmentOffset,
-              style: MenuStyle(alignment: alignment),
-              menuChildren: <Widget>[
-                MenuItemButton(
-                  key: menuItemKey,
-                  shortcut: const SingleActivator(
-                    LogicalKeyboardKey.keyB,
-                    control: true,
+          child: Column(
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  onPressed?.call(TestMenu.outsideButton);
+                },
+                child: Text(TestMenu.outsideButton.label)),
+              MenuAnchor(
+                childFocusNode: focusNode,
+                controller: controller,
+                alignmentOffset: alignmentOffset,
+                consumeOutsideTap: consumesOutsideTap,
+                style: MenuStyle(alignment: alignment),
+                onOpen: () {
+                  onOpen?.call(TestMenu.anchorButton);
+                },
+                onClose: () {
+                  onClose?.call(TestMenu.anchorButton);
+                },
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    key: menuItemKey,
+                    shortcut: const SingleActivator(
+                      LogicalKeyboardKey.keyB,
+                      control: true,
+                    ),
+                    onPressed: () {
+                      onPressed?.call(TestMenu.subMenu00);
+                    },
+                    child: Text(TestMenu.subMenu00.label),
                   ),
-                  onPressed: () {},
-                  child: Text(TestMenu.subMenu00.label),
-                ),
-                MenuItemButton(
-                  leadingIcon: const Icon(Icons.send),
-                  trailingIcon: const Icon(Icons.mail),
-                  onPressed: () {},
-                  child: Text(TestMenu.subMenu01.label),
-                ),
-              ],
-              builder: (BuildContext context, MenuController controller, Widget? child) {
-                return ElevatedButton(
-                  focusNode: focusNode,
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: child,
-                );
-              },
-              child: const Text('Press Me'),
-            ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(Icons.send),
+                    trailingIcon: const Icon(Icons.mail),
+                    onPressed: () {
+                      onPressed?.call(TestMenu.subMenu01);
+                    },
+                    child: Text(TestMenu.subMenu01.label),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return ElevatedButton(
+                    focusNode: focusNode,
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                      onPressed?.call(TestMenu.anchorButton);
+                    },
+                    child: child,
+                  );
+                },
+                child: Text(TestMenu.anchorButton.label),
+              ),
+            ],
           ),
         ),
       ),
@@ -237,7 +261,7 @@ void main() {
     );
   });
 
-  testWidgets('menu defaults colors', (WidgetTester tester) async {
+  testWidgets('Menu defaults', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -256,55 +280,67 @@ void main() {
     );
 
     // menu bar(horizontal menu)
-    Finder menuMaterial = find.ancestor(
-      of: find.byType(TextButton),
-      matching: find.byType(Material),
-    ).first;
+    Finder menuMaterial = find
+        .ancestor(
+          of: find.byType(TextButton),
+          matching: find.byType(Material),
+        )
+        .first;
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    Finder buttonMaterial = find.descendant(
-      of: find.byType(TextButton),
-      matching: find.byType(Material),
-    ).first;
+    Finder buttonMaterial = find
+        .descendant(
+          of: find.byType(TextButton),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
+    expect(material.textStyle?.fontSize, 14.0);
+    expect(material.textStyle?.height, 1.43);
 
     // vertical menu
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
 
-    menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-      matching: find.byType(Material),
-    ).first;
+    menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     material = tester.widget<Material>(menuMaterial);
     expect(opened.last, equals(TestMenu.mainMenu1));
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
-      matching: find.byType(Material),
-    ).first;
+    buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
+    expect(material.textStyle?.fontSize, 14.0);
+    expect(material.textStyle?.height, 1.43);
 
     await tester.tap(find.text(TestMenu.mainMenu0.label));
     await tester.pump();
@@ -315,7 +351,7 @@ void main() {
     expect(iconRichText.text.style?.color, themeData.colorScheme.onSurfaceVariant);
   });
 
-  testWidgets('menu defaults - disabled', (WidgetTester tester) async {
+  testWidgets('Menu defaults - disabled', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -334,23 +370,27 @@ void main() {
     );
 
     // menu bar(horizontal menu)
-    Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
-      matching: find.byType(Material),
-    ).first;
+    Finder menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
-      matching: find.byType(Material),
-    ).first;
+    Finder buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.mainMenu5.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -361,22 +401,26 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu2.label));
     await tester.pump();
 
-    menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
-      matching: find.byType(Material),
-    ).first;
+    menuMaterial = find
+        .ancestor(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
+          matching: find.byType(Material),
+        )
+        .first;
 
     material = tester.widget<Material>(menuMaterial);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
-      matching: find.byType(Material),
-    ).first;
+    buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu20.label),
+          matching: find.byType(Material),
+        )
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -428,10 +472,9 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Test Scrollbar thumb color.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xffff0000)),
     );
 
@@ -477,16 +520,16 @@ void main() {
     await tester.tap(find.text('Main Menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Scrollbar), findsOneWidget);
     // Scrollbar thumb color should be updated.
     expect(
-      find.byType(Scrollbar),
+      find.byType(Scrollbar).last,
       paints..rrect(color: const Color(0xff00ff00)),
     );
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
     final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
+    addTearDown(buttonFocus.dispose);
     FocusNode? focusInOnPressed;
 
     void onMenuSelected(TestMenu item) {
@@ -732,26 +775,26 @@ void main() {
       await tester.pumpWidget(buildTestApp());
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope = find.ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope)).first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 324.0, 602.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 62.0, 602.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 276.0, 602.0, 388.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 14.0, 602.0, 126.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.center));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 300.0, 674.0, 412.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 38.0, 674.0, 150.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(472.0, 324.0, 746.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(472.0, 62.0, 746.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
       await tester.pump();
@@ -775,7 +818,7 @@ void main() {
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -783,20 +826,20 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 324.0, 472.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 62.0, 472.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 276.0, 472.0, 388.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 14.0, 472.0, 126.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.center));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(126.0, 300.0, 400.0, 412.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(126.0, 38.0, 400.0, 150.0)));
 
       await tester
           .pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.bottomEnd));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(54.0, 324.0, 328.0, 436.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(54.0, 62.0, 328.0, 174.0)));
 
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart));
       await tester.pump();
@@ -817,7 +860,7 @@ void main() {
       await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(100, 50)));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -825,13 +868,13 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 374.0, 702.0, 486.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(428.0, 112.0, 702.0, 224.0)));
 
       // Now move the menu by calling open() again with a local position on the
       // anchor.
       controller.open(position: const Offset(200, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 476.0, 800.0, 588.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 214.0, 800.0, 326.0)));
     });
 
     testWidgets('menu position in RTL', (WidgetTester tester) async {
@@ -841,8 +884,8 @@ void main() {
       ));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
-      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 276.0, 472.0, 324.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
+      expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
       final Finder findMenuScope =
           find.ancestor(of: find.text(TestMenu.subMenu00.label), matching: find.byType(FocusScope)).first;
@@ -850,13 +893,13 @@ void main() {
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(98.0, 374.0, 372.0, 486.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(98.0, 112.0, 372.0, 224.0)));
 
       // Now move the menu by calling open() again with a local position on the
       // anchor.
       controller.open(position: const Offset(400, 200));
       await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 476.0, 800.0, 588.0)));
+      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(526.0, 214.0, 800.0, 326.0)));
     });
 
     testWidgets('works with Padding around menu and overlay', (WidgetTester tester) async {
@@ -1107,6 +1150,78 @@ void main() {
 
       expect(opened, equals(<TestMenu>[TestMenu.mainMenu0]));
       expect(closed, equals(<TestMenu>[TestMenu.mainMenu1]));
+    });
+
+    testWidgets('Menus close and consume tap when open and tapped outside', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTestApp(consumesOutsideTap: true, onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+      );
+
+      expect(opened, isEmpty);
+      expect(closed, isEmpty);
+
+      // Doesn't consume tap when the menu is closed.
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.anchorButton.label));
+      await tester.pump();
+      expect(opened, equals(<TestMenu>[TestMenu.anchorButton]));
+      expect(closed, isEmpty);
+      expect(selected, equals(<TestMenu>[TestMenu.anchorButton]));
+      opened.clear();
+      closed.clear();
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, equals(<TestMenu>[TestMenu.anchorButton]));
+      // When the menu is open, don't expect the outside button to be selected:
+      // it's supposed to consume the key down.
+      expect(selected, isEmpty);
+      selected.clear();
+      opened.clear();
+      closed.clear();
+    });
+
+    testWidgets("Menus close and don't consume tap when open and tapped outside", (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+      );
+
+      expect(opened, isEmpty);
+      expect(closed, isEmpty);
+
+      // Doesn't consume tap when the menu is closed.
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.anchorButton.label));
+      await tester.pump();
+      expect(opened, equals(<TestMenu>[TestMenu.anchorButton]));
+      expect(closed, isEmpty);
+      expect(selected, equals(<TestMenu>[TestMenu.anchorButton]));
+      opened.clear();
+      closed.clear();
+      selected.clear();
+
+      await tester.tap(find.text(TestMenu.outsideButton.label));
+      await tester.pump();
+
+      expect(opened, isEmpty);
+      expect(closed, equals(<TestMenu>[TestMenu.anchorButton]));
+      // Because consumesOutsideTap is false, this is expected to receive its
+      // tap.
+      expect(selected, equals(<TestMenu>[TestMenu.outsideButton]));
+      selected.clear();
+      opened.clear();
+      closed.clear();
     });
 
     testWidgets('select works', (WidgetTester tester) async {
@@ -1466,6 +1581,7 @@ void main() {
 
     testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -1505,6 +1621,7 @@ void main() {
     testWidgets('menus do not close on root menu internal scroll', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/122168.
       final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
       bool rootOpened = false;
 
       await tester.pumpWidget(
@@ -1536,8 +1653,12 @@ void main() {
                       child: const Text('Show menu'),
                     );
                   },
-                  onOpen: () { rootOpened = true; },
-                  onClose: () { rootOpened = false; },
+                  onOpen: () {
+                    rootOpened = true;
+                  },
+                  onClose: () {
+                    rootOpened = false;
+                  },
                   menuChildren: createTestMenus(
                     onPressed: onPressed,
                     onOpen: onOpen,
@@ -1576,6 +1697,7 @@ void main() {
 
     testWidgets('menus close on view size change', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
       final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
       Widget build(Size size) {
@@ -2234,7 +2356,6 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           <String>[
-            'child: Text("Menu 0")',
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
@@ -2379,9 +2500,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
-          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
-          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
           Rect.fromLTRB(112.0, 104.0, 326.0, 152.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
     });
@@ -2426,9 +2547,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(688.0, 0.0, 796.0, 48.0),
           Rect.fromLTRB(580.0, 0.0, 688.0, 48.0),
-          Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
-          Rect.fromLTRB(294.0, 0.0, 472.0, 48.0),
           Rect.fromLTRB(474.0, 104.0, 688.0, 152.0),
+          Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
+          Rect.fromLTRB(294.0, 0.0, 472.0, 48.0)
         ]),
       );
     });
@@ -2471,11 +2592,63 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
-          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
-          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
           Rect.fromLTRB(86.0, 104.0, 300.0, 152.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
+    });
+
+    testWidgets('tapping MenuItemButton with null focus node', (WidgetTester tester) async {
+
+      FocusNode? buttonFocusNode = FocusNode();
+
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MenuAnchor(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    focusNode: buttonFocusNode,
+                    closeOnActivate: false,
+                    child: const Text('Set focus to null'),
+                    onPressed: () {
+                      setState((){
+                        buttonFocusNode?.dispose();
+                        buttonFocusNode = null;
+                      });
+                    },
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return TextButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
+                },
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('OPEN MENU'));
+      await tester.pump();
+
+      expect(find.text('Set focus to null'), findsOneWidget);
+
+      await tester.tap(find.text('Set focus to null'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -2516,9 +2689,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(188.0, 0.0, 296.0, 48.0),
           Rect.fromLTRB(80.0, 0.0, 188.0, 48.0),
+          Rect.fromLTRB(0.0, 104.0, 214.0, 152.0),
           Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0),
-          Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0),
-          Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)
+          Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0)
         ]),
       );
     });
@@ -3180,8 +3353,7 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.hasExpandedState],
+                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.hasExpandedState],
                 label: 'ABC',
                 textDirection: TextDirection.ltr,
               ),
@@ -3201,10 +3373,10 @@ void main() {
         MaterialApp(
           home: Center(
             child: SubmenuButton(
-              onHover: (bool value) {},
               style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
               menuChildren: <Widget>[
                 MenuItemButton(
+                  style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
                   child: const Text('Item 0'),
                   onPressed: () {},
                 ),
@@ -3226,47 +3398,57 @@ void main() {
               TestSemantics(
                 id: 1,
                 rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                children: <TestSemantics> [
+                children: <TestSemantics>[
                   TestSemantics(
                     id: 2,
                     rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                    children: <TestSemantics> [
+                    children: <TestSemantics>[
                       TestSemantics(
                         id: 3,
                         rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
-                        children: <TestSemantics> [
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isExpanded, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable],
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isExpanded,
+                            ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          )
-                        ]
-                      )
-                    ]
-                  ),
-                  TestSemantics(
-                      id: 6,
-                      rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 64.0),
-                      children: <TestSemantics> [
-                        TestSemantics(
-                            id: 7,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 48.0),
-                            flags: <SemanticsFlag> [SemanticsFlag.hasImplicitScrolling],
-                            children: <TestSemantics> [
+                          ),
+                          TestSemantics(
+                            id: 6,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                            children: <TestSemantics>[
                               TestSemantics(
-                                  id: 8,
-                                  label: 'Item 0',
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 48.0),
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
-                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                id: 7,
+                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    id: 8,
+                                    label: 'Item 0',
+                                    rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.hasEnabledState,
+                                      SemanticsFlag.isEnabled,
+                                      SemanticsFlag.isFocusable,
+                                    ],
+                                    actions: <SemanticsAction>[SemanticsAction.tap],
+                                  ),
+                                ],
                               ),
                             ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -3287,27 +3469,32 @@ void main() {
               TestSemantics(
                 id: 1,
                 rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                children: <TestSemantics> [
+                children: <TestSemantics>[
                   TestSemantics(
-                      id: 2,
-                      rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                      children: <TestSemantics> [
-                        TestSemantics(
-                            id: 3,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                            flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
-                            children: <TestSemantics> [
-                              TestSemantics(
-                                id: 4,
-                                flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
-                                label: 'ABC',
-                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                              )
-                            ]
-                        )
-                      ]
+                    id: 2,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -3319,6 +3506,104 @@ void main() {
 
       semantics.dispose();
     });
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/131676.
+  testWidgets('Material3 - Menu uses correct text styles', (WidgetTester tester) async {
+    const TextStyle menuTextStyle = TextStyle(
+      fontSize: 18.5,
+      fontStyle: FontStyle.italic,
+      wordSpacing: 1.2,
+      decoration: TextDecoration.lineThrough,
+    );
+    final ThemeData themeData = ThemeData(
+      textTheme: const TextTheme(
+        labelLarge: menuTextStyle,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: MenuBar(
+            controller: controller,
+            children: createTestMenus(
+              onPressed: onPressed,
+              onOpen: onOpen,
+              onClose: onClose,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test menu button text style uses the TextTheme.labelLarge.
+    Finder buttonMaterial = find
+        .descendant(
+          of: find.byType(TextButton),
+          matching: find.byType(Material),
+        )
+        .first;
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuTextStyle.decoration);
+
+    // Open the menu.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    // Test menu item text style uses the TextTheme.labelLarge.
+    buttonMaterial = find
+        .descendant(
+          of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+          matching: find.byType(Material),
+        )
+        .first;
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuTextStyle.decoration);
+  });
+
+  testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    int onFocusChangeCalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SubmenuButton(
+                focusNode: focusNode,
+                onFocusChange: (bool value) {
+                  setState(() {
+                    onFocusChangeCalled += 1;
+                  });
+                },
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('item 0'))
+                ],
+                child: const Text('Submenu 0'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+    expect(onFocusChangeCalled, 1);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+    expect(onFocusChangeCalled, 2);
   });
 }
 
@@ -3436,7 +3721,9 @@ enum TestMenu {
   subSubMenu110('Sub Sub Menu 11&0'),
   subSubMenu111('Sub Sub Menu 11&1'),
   subSubMenu112('Sub Sub Menu 11&2'),
-  subSubMenu113('Sub Sub Menu 11&3');
+  subSubMenu113('Sub Sub Menu 11&3'),
+  anchorButton('Press Me'),
+  outsideButton('Outside');
 
   const TestMenu(this.acceleratorLabel);
   final String acceleratorLabel;

@@ -599,6 +599,7 @@ void main() {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    addTearDown(curve.dispose);
     await tester.pumpWidget(wrap(
       child: ValueListenableBuilder<Curve>(
         valueListenable: curve,

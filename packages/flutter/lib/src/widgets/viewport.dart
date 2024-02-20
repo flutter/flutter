@@ -53,8 +53,6 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The viewport listens to the [offset], which means you do not need to
   /// rebuild this widget when the [offset] changes.
   ///
-  /// The [offset] argument must not be null.
-  ///
   /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
   /// not [CacheExtentStyle.pixel].
   Viewport({
@@ -327,8 +325,6 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   ///
   /// The viewport listens to the [offset], which means you do not need to
   /// rebuild this widget when the [offset] changes.
-  ///
-  /// The [offset] argument must not be null.
   const ShrinkWrappingViewport({
     super.key,
     this.axisDirection = AxisDirection.down,

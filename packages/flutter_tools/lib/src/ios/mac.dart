@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -89,12 +90,17 @@ class IMobileDevice {
   late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) {
+  Future<Process> startLogger(
+    String deviceID,
+    bool isWirelesslyConnected,
+  ) {
     return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
+        if (isWirelesslyConnected)
+          '--network',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry]
@@ -133,16 +139,16 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch? activeArch,
   bool codesign = true,
   String? deviceID,
-  bool isCoreDevice = false,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
+  bool disablePortPublication = false,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -242,7 +248,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    usingCoreDevice: isCoreDevice,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
   if (configOnly) {
@@ -384,6 +389,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       _kResultBundleVersion,
     ]);
 
+    // Adds a setting which xcode_backend.dart will use to skip adding Bonjour
+    // service settings to the Info.plist.
+    if (disablePortPublication) {
+      buildCommands.add('DISABLE_PORT_PUBLICATION=YES');
+    }
+
     // Don't log analytics for downstream Flutter commands.
     // e.g. `flutter build bundle`.
     buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
@@ -413,7 +424,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
           + getElapsedAsSeconds(sw.elapsed).padLeft(5),
     );
-    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+    final Duration elapsedDuration = sw.elapsed;
+    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', elapsedDuration);
+    globals.analytics.send(Event.timing(
+      workflow: xcodeBuildActionToString(buildAction),
+      variableName: 'xcode-ios',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (tempDir.existsSync()) {
       // Display additional warning and error message from xcresult bundle.
@@ -576,17 +593,35 @@ return result.exitCode != 0 &&
     result.stdout.contains(kConcurrentRunFailureMessage2);
 }
 
-Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
+Future<void> diagnoseXcodeBuildFailure(
+  XcodeBuildResult result,
+  Usage flutterUsage,
+  Logger logger,
+  Analytics analytics,
+) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null
       && xcodeBuildExecution.environmentType == EnvironmentType.physical
       && (result.stdout?.toUpperCase().contains('BITCODE') ?? false)) {
-    BuildEvent('xcode-bitcode-failure',
-      type: 'ios',
-      command: xcodeBuildExecution.buildCommands.toString(),
-      settings: xcodeBuildExecution.buildSettings.toString(),
+
+    const String label = 'xcode-bitcode-failure';
+    const String buildType = 'ios';
+    final String command = xcodeBuildExecution.buildCommands.toString();
+    final String settings = xcodeBuildExecution.buildSettings.toString();
+
+    BuildEvent(
+      label,
+      type: buildType,
+      command: command,
+      settings: settings,
       flutterUsage: flutterUsage,
     ).send();
+    analytics.send(Event.flutterBuildInfo(
+      label: label,
+      buildType: buildType,
+      command: command,
+      settings: settings,
+    ));
   }
 
   // Handle errors.

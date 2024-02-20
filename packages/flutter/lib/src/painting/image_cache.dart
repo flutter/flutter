@@ -231,8 +231,7 @@ class ImageCache {
   /// completely discarded by the cache. It should be set to false when calls
   /// to evict are trying to relieve memory pressure, since an image with a
   /// listener will not actually be evicted from memory, and subsequent attempts
-  /// to load it will end up allocating more memory for the image again. The
-  /// argument must not be null.
+  /// to load it will end up allocating more memory for the image again.
   ///
   /// See also:
   ///
@@ -312,8 +311,6 @@ class ImageCache {
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the 'most recently used' position.
-  ///
-  /// The arguments must not be null. The `loader` cannot return null.
   ///
   /// In the event that the loader throws an exception, it will be caught only if
   /// `onError` is also provided. When an exception is caught resolving an image,
@@ -609,7 +606,17 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : handle = completer.keepAlive();
+  }) : handle = completer.keepAlive() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$_CachedImageBase',
+        object: this,
+      );
+    }
+  }
 
   final ImageStreamCompleter completer;
   int? sizeBytes;
@@ -618,13 +625,16 @@ abstract class _CachedImageBase {
   @mustCallSuper
   void dispose() {
     assert(handle != null);
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       assert(handle != null);
       handle?.dispose();
       handle = null;
-    });
+    }, debugLabel: 'CachedImage.disposeHandle');
   }
 }
 

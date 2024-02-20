@@ -83,8 +83,6 @@ class DividerThemeData with Diagnosticable {
 
   /// Linearly interpolate between two Divider themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static DividerThemeData lerp(DividerThemeData? a, DividerThemeData? b, double t) {
     if (identical(a, b) && a != null) {

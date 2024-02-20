@@ -245,4 +245,7 @@ void main() {
     decorationClipBehavior: Clip.none,
   );
   final Clip clip = details.decorationClipBehavior;
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
+  final Widget bodyValue = platformMenuBar.child;
 }

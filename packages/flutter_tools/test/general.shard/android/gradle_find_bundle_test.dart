@@ -9,14 +9,21 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   testWithoutContext('Finds app bundle when flavor contains multiple dimensions in release mode', () {
@@ -26,6 +33,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -39,6 +47,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -52,6 +61,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -65,6 +75,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -78,6 +89,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -91,6 +103,7 @@ void main() {
       const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -104,6 +117,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -117,6 +131,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -130,6 +145,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -143,6 +159,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -156,6 +173,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -169,6 +187,7 @@ void main() {
       BuildInfo.debug,
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -182,6 +201,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -195,6 +215,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -208,6 +229,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -221,6 +243,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -234,6 +257,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -247,6 +271,7 @@ void main() {
       const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -260,6 +285,7 @@ void main() {
       const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -273,6 +299,7 @@ void main() {
       const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -286,6 +313,7 @@ void main() {
       BuildInfo.debug,
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -299,6 +327,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -312,6 +341,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -325,6 +355,7 @@ void main() {
       const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
     TestUsage(),
+    fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -338,6 +369,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -352,6 +384,7 @@ void main() {
       const BuildInfo(BuildMode.release, 'Foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -366,6 +399,7 @@ void main() {
       const BuildInfo(BuildMode.debug, 'Foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
       TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -382,6 +416,7 @@ void main() {
           const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
           BufferLogger.test(),
           testUsage,
+          fakeAnalytics,
         );
       },
       throwsToolExit(
@@ -396,10 +431,21 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.5, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
         }),
       ),
     ));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.flutterBuildInfo(
+          label: 'gradle-expected-file-not-found',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
+        ),
+      ),
+    );
   });
 }
 

@@ -659,6 +659,48 @@ dependencies {
           androidSdk: androidSdk,
         );
       });
+      group('_', () {
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: Version(11, 0, 2));
+        processManager = FakeProcessManager.empty();
+        androidStudio = FakeAndroidStudio();
+        androidSdk =
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory
+            .childDirectory(androidStudio.javaPath!)
+            .createSync();
+        _testInMemory(
+          'null agp only',
+          () async {
+            const String gradleV = '7.0.3';
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: '',
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+                value.description,
+                isNot(
+                    contains(RegExp(AndroidProject.validJavaGradleAgpString))));
+            // On gradle/agp error print help url null value for agp.
+            expect(value.description,
+                contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+            expect(value.description, contains(RegExp(gradleV)));
+            expect(value.description, contains(RegExp('null')));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
     });
 
     group('language', () {
@@ -690,6 +732,60 @@ apply plugin: 'kotlin-android'
 ''';
         });
         expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+    testUsingContext('kotlin host app language with Gradle Kotlin DSL', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+    testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+''';
+        });
+
+        expect(project.android.isKotlin, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -733,7 +829,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -751,13 +846,15 @@ apply plugin: 'kotlin-android'
               'applinks:example2.com',
             ],
           );
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+
           expect(
-            settings.associatedDomains,
+            json['associatedDomains'],
             unorderedEquals(
               <String>[
                 'example.com',
@@ -765,8 +862,8 @@ apply plugin: 'kotlin-android'
               ],
             ),
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject.suffix');
         });
 
         testWithMocks('can handle entitlement file in nested directory structure.', () async {
@@ -778,7 +875,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -796,13 +892,15 @@ apply plugin: 'kotlin-android'
               'applinks:example2.com',
             ],
           );
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(
-            settings.associatedDomains,
+            json['associatedDomains'],
             unorderedEquals(
               <String>[
                 'example.com',
@@ -810,8 +908,8 @@ apply plugin: 'kotlin-android'
               ],
             ),
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject.suffix');
         });
 
         testWithMocks('return empty when no entitlement', () async {
@@ -821,7 +919,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -830,13 +927,15 @@ apply plugin: 'kotlin-android'
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
           testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER)');
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject');
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject');
+          expect(json['associatedDomains'], unorderedEquals(<String>[]));
         });
       });
 
@@ -1474,7 +1573,7 @@ void _testInMemory(
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
       Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionlly null if not set. Some ios tests fail if this is a fake.
+      // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
             logger: globals.logger,
@@ -1523,11 +1622,18 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { required String Function() gradleFileContent }) {
+/// Adds app-level Gradle Groovy build file (build.gradle) to [directory].
+///
+/// If [kotlinDsl] is true, then build.gradle.kts is created instead of
+/// build.gradle. It's the caller's responsibility to make sure that
+/// [gradleFileContent] is consistent with the value of the [kotlinDsl] flag.
+void addAndroidGradleFile(Directory directory, {
+  required String Function() gradleFileContent, bool kotlinDsl = false,
+}) {
   directory
       .childDirectory('android')
       .childDirectory('app')
-      .childFile('build.gradle')
+      .childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileContent());
 }
@@ -1546,7 +1652,6 @@ void addGradleWrapperFile(Directory directory, String gradleVersion) {
       .childDirectory(gradle_utils.gradleWrapperDirectoryName)
       .childFile(gradle_utils.gradleWrapperPropertiesFilename)
     ..createSync(recursive: true)
-    // ignore: unnecessary_string_escapes
     ..writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -1564,8 +1669,8 @@ FileSystem getFileSystemForPlatform() {
   );
 }
 
-void addAndroidWithGroup(Directory directory, String id) {
-  directory.childDirectory('android').childFile('build.gradle')
+void addAndroidWithGroup(Directory directory, String id, {bool kotlinDsl = false}) {
+  directory.childDirectory('android').childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileWithGroupId(id));
 }
@@ -1617,7 +1722,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId '$id'
@@ -1634,7 +1739,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 }
 ''';
 }

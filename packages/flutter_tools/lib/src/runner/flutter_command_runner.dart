@@ -6,13 +6,13 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -26,8 +26,8 @@ abstract final class FlutterGlobalOptions {
   static const String kColorFlag = 'color';
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
-  static const String kDisableTelemetryFlag = 'disable-telemetry';
-  static const String kEnableTelemetryFlag = 'enable-telemetry';
+  static const String kDisableAnalyticsFlag = 'disable-analytics';
+  static const String kEnableAnalyticsFlag = 'enable-analytics';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
   static const String kLocalEngineHostOption = 'local-engine-host';
@@ -44,6 +44,7 @@ abstract final class FlutterGlobalOptions {
   static const String kVersionFlag = 'version';
   static const String kWrapColumnOption = 'wrap-column';
   static const String kWrapFlag = 'wrap';
+  static const String kDebugLogsDirectoryFlag = 'debug-logs-dir';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -101,17 +102,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Allow Flutter to check for updates when this command runs.');
-    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
-        negatable: false,
-        help: 'Suppress analytics reporting for the current CLI invocation.');
-    argParser.addFlag(FlutterGlobalOptions.kDisableTelemetryFlag,
-        negatable: false,
-        help: 'Disable telemetry reporting each time a flutter or dart '
-              'command runs, until it is re-enabled.');
-    argParser.addFlag(FlutterGlobalOptions.kEnableTelemetryFlag,
+    argParser.addFlag(FlutterGlobalOptions.kEnableAnalyticsFlag,
         negatable: false,
         help: 'Enable telemetry reporting each time a flutter or dart '
               'command runs.');
+    argParser.addFlag(FlutterGlobalOptions.kDisableAnalyticsFlag,
+        negatable: false,
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
+    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
+        negatable: false,
+        help: 'Suppress analytics reporting for the current CLI invocation.');
     argParser.addOption(FlutterGlobalOptions.kPackagesOption,
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -162,6 +163,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterGlobalOptions.kContinuousIntegrationFlag,
       negatable: false,
       help: 'Enable a set of CI-specific test debug settings.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      FlutterGlobalOptions.kDebugLogsDirectoryFlag,
+      help: 'Path to a directory where logs for debugging may be added.',
       hide: !verboseHelp,
     );
   }
@@ -237,8 +243,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
-    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableTelemetryFlag) ||
-        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableTelemetryFlag)) {
+    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableAnalyticsFlag) ||
+        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableAnalyticsFlag)) {
       return;
     }
 
@@ -250,10 +256,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+          throwToolExit(globals.userMessages.runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
+        throwToolExit(globals.userMessages.runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]));
       }
     }
 
@@ -304,6 +310,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
           globals.flutterUsage.suppressAnalytics = true;
+          globals.analytics.suppressTelemetry();
         }
 
         globals.flutterVersion.ensureVersionFile();
@@ -328,6 +335,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
+          globals.analytics.send(Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: globals.stdio.hasTerminal,
+          ));
           final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
             clock: globals.systemClock,
           );

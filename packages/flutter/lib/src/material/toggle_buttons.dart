@@ -205,9 +205,8 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// Both [children] and [isSelected] properties arguments are required.
   ///
-  /// [isSelected] values must be non-null. [focusNodes] must be null or a
-  /// list of non-null nodes. [renderBorder] and [direction] must not be null.
-  /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
+  /// The [focusNodes] argument must be null or a list of nodes. If [direction]
+  /// is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
     super.key,
     required this.children,
@@ -1214,19 +1213,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     }
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
     if (direction == Axis.horizontal) {
-      switch (textDirection) {
-        case TextDirection.ltr:
-          childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
-        case TextDirection.rtl:
-          childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
-      }
+      childParentData.offset = switch (textDirection) {
+        TextDirection.ltr => Offset(leadingBorderSide.width,  borderSide.width),
+        TextDirection.rtl => Offset(trailingBorderSide.width, borderSide.width),
+      };
     } else {
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
-        case VerticalDirection.up:
-          childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
-      }
+      childParentData.offset = switch (verticalDirection) {
+        VerticalDirection.down => Offset(borderSide.width, leadingBorderSide.width),
+        VerticalDirection.up   => Offset(borderSide.width, trailingBorderSide.width),
+      };
     }
   }
 

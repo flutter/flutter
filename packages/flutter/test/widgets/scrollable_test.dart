@@ -363,6 +363,8 @@ void main() {
     ScrollDirection? lastUserScrollingDirection;
 
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
 
     controller.addListener(() {
@@ -600,6 +602,8 @@ void main() {
     int cheapWidgets = 0;
     int expensiveWidgets = 0;
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -774,6 +778,7 @@ void main() {
 
   testWidgets('ensureVisible does not move PageViews', (WidgetTester tester) async {
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -861,6 +866,7 @@ void main() {
       length: 3,
       vsync: vsync,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -945,7 +951,10 @@ void main() {
   testWidgets('PointerScroll on nested NeverScrollable ListView goes to outer Scrollable.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70948
     final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
     final ScrollController innerController = ScrollController();
+    addTearDown(innerController.dispose);
+
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Scaffold(
@@ -1001,6 +1010,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/71949
   testWidgets('Zero offset pointer scroll should not trigger an assertion.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     Widget build(double height) {
       return MaterialApp(
         home: Scaffold(
@@ -1027,7 +1038,7 @@ void main() {
 
     // Make the outer constraints larger that the scrollable widget is no longer able to scroll.
     await tester.pumpWidget(build(300.0));
-    expect(controller.position.pixels, 100.0);
+    expect(controller.position.pixels, 0.0);
     expect(controller.position.maxScrollExtent, 0.0);
 
     // Hover over the scroll view and create a zero offset pointer scroll.
@@ -1270,11 +1281,13 @@ void main() {
         key: key,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           if (withViewPort) {
+            final ViewportOffset offset = ViewportOffset.zero();
+            addTearDown(() => offset.dispose());
             return Viewport(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: Semantics(key: key1, container: true, child: const Text('text1')))
               ],
-              offset: ViewportOffset.zero(),
+              offset: offset,
             );
           }
           return Semantics(key: key1, container: true, child: const Text('text1'));

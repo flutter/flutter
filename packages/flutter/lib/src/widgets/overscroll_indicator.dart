@@ -79,9 +79,6 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// In order for this widget to display an overscroll indication, the [child]
   /// widget must contain a widget that generates a [ScrollNotification], such
   /// as a [ListView] or a [GridView].
-  ///
-  /// The [showLeading], [showTrailing], [axisDirection], [color], and
-  /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
     super.key,
     this.showLeading = true,
@@ -311,6 +308,9 @@ class _GlowController extends ChangeNotifier {
     required Axis axis,
   }) : _color = color,
        _axis = axis {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = CurvedAnimation(
@@ -613,19 +613,15 @@ enum _StretchDirection {
 /// To prevent the indicator from showing the indication, call
 /// [OverscrollIndicatorNotification.disallowIndicator] on the notification.
 ///
-/// Created by [ScrollBehavior.buildOverscrollIndicator] on platforms
+/// Created by [MaterialScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
-/// [ScrollBehavior.androidOverscrollIndicator] is
-/// [AndroidOverscrollIndicator.stretch]. Otherwise, the default
-/// [GlowingOverscrollIndicator] is applied.
-/// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
-/// [ThemeData.useMaterial3], or override
-/// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
+/// [ThemeData.useMaterial3] is true. Otherwise, when [ThemeData.useMaterial3]
+/// is false, a [GlowingOverscrollIndicator] is used instead.=
 ///
 /// See also:
 ///
-///  * [OverscrollIndicatorNotification], which can be used to prevent the stretch
-///    effect from being applied at all.
+///  * [OverscrollIndicatorNotification], which can be used to prevent the
+///    stretch effect from being applied at all.
 ///  * [NotificationListener], to listen for the
 ///    [OverscrollIndicatorNotification].
 ///  * [GlowingOverscrollIndicator], the default overscroll indicator for
@@ -637,8 +633,6 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   /// In order for this widget to display an overscroll indication, the [child]
   /// widget must contain a widget that generates a [ScrollNotification], such
   /// as a [ListView] or a [GridView].
-  ///
-  /// The [axisDirection] and [notificationPredicate] arguments must not be null.
   const StretchingOverscrollIndicator({
     super.key,
     required this.axisDirection,
@@ -666,14 +660,6 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   /// The overscroll indicator will apply a stretch effect to this child. This
   /// child (and its subtree) should include a source of [ScrollNotification]
   /// notifications.
-  ///
-  /// Typically a [StretchingOverscrollIndicator] is created by a
-  /// [ScrollBehavior.buildOverscrollIndicator] method when opted-in using the
-  /// [ScrollBehavior.androidOverscrollIndicator] flag. In this case
-  /// the child is usually the one provided as an argument to that method.
-  /// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
-  /// [ThemeData.useMaterial3], or override
-  /// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
   final Widget? child;
 
   @override
@@ -745,24 +731,16 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   AlignmentGeometry _getAlignmentForAxisDirection(_StretchDirection stretchDirection) {
     // Accounts for reversed scrollables by checking the AxisDirection
-    switch (widget.axisDirection) {
-      case AxisDirection.up:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.topCenter
-            : AlignmentDirectional.bottomCenter;
-      case AxisDirection.right:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerRight
-            : Alignment.centerLeft;
-      case AxisDirection.down:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.bottomCenter
-            : AlignmentDirectional.topCenter;
-      case AxisDirection.left:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerLeft
-            : Alignment.centerRight;
-    }
+    final AxisDirection direction = switch (stretchDirection) {
+      _StretchDirection.trailing => widget.axisDirection,
+      _StretchDirection.leading => flipAxisDirection(widget.axisDirection),
+    };
+    return switch (direction) {
+      AxisDirection.up    => AlignmentDirectional.topCenter,
+      AxisDirection.down  => AlignmentDirectional.bottomCenter,
+      AxisDirection.left  => Alignment.centerLeft,
+      AxisDirection.right => Alignment.centerRight,
+    };
   }
 
   @override
@@ -798,10 +776,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           );
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-
           final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
+            filterQuality: stretch == 0 ? null : FilterQuality.low,
             child: widget.child,
           );
 
@@ -829,17 +807,21 @@ enum _StretchState {
 
 class _StretchController extends ChangeNotifier {
   _StretchController({ required TickerProvider vsync }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _stretchController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _stretchSize = decelerator.drive(_stretchSizeTween);
+    _stretchSize = _decelerator.drive(_stretchSizeTween);
   }
 
   late final AnimationController _stretchController;
   late final Animation<double> _stretchSize;
+  late final CurvedAnimation _decelerator;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
 
@@ -942,6 +924,7 @@ class _StretchController extends ChangeNotifier {
   @override
   void dispose() {
     _stretchController.dispose();
+    _decelerator.dispose();
     super.dispose();
   }
 
@@ -964,8 +947,6 @@ class _StretchController extends ChangeNotifier {
 class OverscrollIndicatorNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that an [GlowingOverscrollIndicator] or a
   /// [StretchingOverscrollIndicator] will start showing an overscroll indication.
-  ///
-  /// The [leading] argument must not be null.
   OverscrollIndicatorNotification({
     required this.leading,
   });
@@ -996,7 +977,7 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   /// Calling [disallowIndicator] sets this to false, preventing the over scroll
   /// indicator from showing.
   ///
-  /// Defaults to true, cannot be null.
+  /// Defaults to true.
   bool accepted = true;
 
   /// Call this method if the overscroll indicator should be prevented.

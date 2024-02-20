@@ -742,12 +742,13 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xABCDABCD),
+        color: const Color(0x20240125),
       ),
     ));
 

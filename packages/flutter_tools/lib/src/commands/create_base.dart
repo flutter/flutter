@@ -352,6 +352,7 @@ abstract class CreateBase extends FlutterCommand {
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
     bool withFfiPluginHook = false,
+    bool withFfiPackage = false,
     bool withEmptyMain = false,
     bool ios = false,
     bool android = false,
@@ -389,7 +390,7 @@ abstract class CreateBase extends FlutterCommand {
       'macosIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
       'windowsIdentifier': windowsIdentifier,
-      'description': projectDescription != null ? escapeYamlString(projectDescription) : null,
+      'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': kAndroidSdkMinVersion,
@@ -399,9 +400,11 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
+      'withFfi': withFfiPluginHook || withFfiPackage,
+      'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
-      'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
+      'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
@@ -419,9 +422,9 @@ abstract class CreateBase extends FlutterCommand {
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
       'agpVersion': agpVersion,
+      'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
       'kotlinVersion': kotlinVersion,
       'gradleVersion': gradleVersion,
-      'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
       'compileSdkVersion': gradle.compileSdkVersion,
       'minSdkVersion': gradle.minSdkVersion,
       'ndkVersion': gradle.ndkVersion,
@@ -531,6 +534,7 @@ abstract class CreateBase extends FlutterCommand {
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -540,6 +544,7 @@ abstract class CreateBase extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];

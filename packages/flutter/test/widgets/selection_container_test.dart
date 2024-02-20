@@ -23,6 +23,8 @@ void main() {
   testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -45,6 +47,8 @@ void main() {
   testWidgets('disabled container', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -68,7 +72,10 @@ void main() {
   testWidgets('Swapping out container delegate does not crash', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
     final TestContainerDelegate childDelegate = TestContainerDelegate();
+    addTearDown(childDelegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -90,6 +97,8 @@ void main() {
     expect(delegate.value.hasContent, isTrue);
 
     final TestContainerDelegate newDelegate = TestContainerDelegate();
+    addTearDown(newDelegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -115,7 +124,10 @@ void main() {
   testWidgets('Can update within one frame', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
     final TestContainerDelegate childDelegate = TestContainerDelegate();
+    addTearDown(childDelegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -142,6 +154,8 @@ void main() {
   testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
+
     await pumpContainer(
       tester,
       SelectionContainer(
@@ -184,6 +198,7 @@ void main() {
   testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
 
     await pumpContainer(
       tester,

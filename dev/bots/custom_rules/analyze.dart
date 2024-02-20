@@ -12,19 +12,31 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-/// Analyzes the given `flutterRootDirectory` with the given set of
-/// [AnalyzeRule]s.
+/// Analyzes the dart source files in the given `flutterRootDirectory` with the
+/// given [AnalyzeRule]s.
+///
+/// The `includePath` parameter takes a collection of paths relative to the given
+/// `flutterRootDirectory`. It specifies the files or directory this function
+/// should analyze. Defaults to null in which case this function analyzes the
+/// all dart source files in `flutterRootDirectory`.
+///
+/// The `excludePath` parameter takes a collection of paths relative to the given
+/// `flutterRootDirectory` that this function should skip analyzing.
 ///
 /// If a compilation unit can not be resolved, this function ignores the
 /// corresponding dart source file and logs an error using [foundError].
-Future<void> analyzeDirectoryWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
-  final String flutterLibPath = path.canonicalize('$flutterRootDirectory/packages/flutter/lib');
-  if (!Directory(flutterLibPath).existsSync()) {
-    foundError(<String>['Analyzer error: the specified $flutterLibPath does not exist.']);
+Future<void> analyzeWithRules(String flutterRootDirectory, List<AnalyzeRule> rules, {
+  Iterable<String>? includePaths,
+  Iterable<String>? excludePaths,
+}) async {
+  if (!Directory(flutterRootDirectory).existsSync()) {
+    foundError(<String>['Analyzer error: the specified $flutterRootDirectory does not exist.']);
   }
+  final Iterable<String> includes = includePaths?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'))
+                                 ?? <String>[path.canonicalize(flutterRootDirectory)];
   final AnalysisContextCollection collection = AnalysisContextCollection(
-    includedPaths: <String>[flutterLibPath],
-    excludedPaths: <String>[path.canonicalize('$flutterLibPath/fix_data')],
+    includedPaths: includes.toList(),
+    excludedPaths: excludePaths?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath')).toList(),
   );
 
   final List<String> analyzerErrors = <String>[];
@@ -53,20 +65,26 @@ Future<void> analyzeDirectoryWithRules(String flutterRootDirectory, List<Analyze
 }
 
 /// An interface that defines a set of best practices, and collects information
-/// about code that violates the defined best practices when it is applied to
-/// dart source files.
+/// about code that violates the best practices in a [ResolvedUnitResult].
 ///
-/// The [analyzeDirectoryWithRules] function uses this interface to verify that
-/// a collection of resolved compilation units ([ResolvedUnitResult]s) follow
-/// the defined best practices.
+/// The [analyzeWithRules] function scans and analyzes the specified
+/// source directory using the dart analyzer package, and applies custom rules
+/// defined in the form of this interface on each resulting [ResolvedUnitResult].
+/// The [reportViolations] method will be called at the end, once all
+/// [ResolvedUnitResult]s are parsed.
+///
+/// Implementers can assume each [ResolvedUnitResult] is valid compilable dart
+/// code, as the caller only applies the custom rules once the code passes
+/// `flutter analyze`.
 abstract class AnalyzeRule {
-  /// Applies this rule to the given resolved compilation unit (which is
-  /// typically a file) and collects information about violations occurred in
-  /// the compilation unit if any.
+  /// Applies this rule to the given [ResolvedUnitResult] (typically a file), and
+  /// collects information about violations occurred in the compilation unit.
   void applyTo(ResolvedUnitResult unit);
 
   /// Reports all violations in the resolved compilation units [applyTo] was
-  /// called on.
+  /// called on, if any.
+  ///
+  /// This method is called once all [ResolvedUnitResult] are parsed.
   ///
   /// The implementation typically calls [foundErrors] to report violations.
   void reportViolations(String workingDirectory);

@@ -261,7 +261,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: theme.colorScheme.surfaceVariant) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
 
@@ -284,7 +284,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: const Color(0xffff0000)) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
   });
@@ -602,7 +602,7 @@ void main() {
         render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('setting orientation should override MediaQuery orientation', (WidgetTester tester) async {
@@ -616,7 +616,7 @@ void main() {
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {
@@ -1083,7 +1083,7 @@ void main() {
         // Verify that the time display is not affected by text scale.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 2,
+          textScaler: const TextScaler.linear(2),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1098,7 +1098,7 @@ void main() {
         // Verify that text scale for AM/PM is at most 2x.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 3,
+          textScaler: const TextScaler.linear(3),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1996,7 +1996,7 @@ Future<void> mediaQueryBoilerplate(
   WidgetTester tester, {
   bool alwaysUse24HourFormat = false,
   TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-  double textScaleFactor = 1,
+  TextScaler textScaler = TextScaler.noScaling,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
   String? hourLabelText,
@@ -2020,7 +2020,7 @@ Future<void> mediaQueryBoilerplate(
         child: MediaQuery(
           data: MediaQueryData(
             alwaysUse24HourFormat: alwaysUse24HourFormat,
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
             accessibleNavigation: accessibleNavigation,
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),
@@ -2097,6 +2097,12 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
       );
     },
   );
+
+  @override
+  void dispose() {
+    _restorableTimePickerRouteFuture.dispose();
+    super.dispose();
+  }
 
   @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(

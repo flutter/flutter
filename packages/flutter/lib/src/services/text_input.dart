@@ -566,7 +566,7 @@ class TextInputConfiguration {
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -580,7 +580,7 @@ class TextInputConfiguration {
   /// change is sent through semantics actions and is directly disabled from
   /// the widget side.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   final bool enableInteractiveSelection;
 
   /// What text to display in the text input control's action button.
@@ -612,7 +612,7 @@ class TextInputConfiguration {
   ///
   /// This flag only affects Android. On iOS, there is no equivalent flag.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -684,7 +684,7 @@ class TextInputConfiguration {
   ///  * If [TextInputClient] is implemented then updates for the editing
   ///    state will come through [TextInputClient.updateEditingValue].
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   final bool enableDeltaModel;
 
   /// Returns a representation of this object as a JSON object.
@@ -712,19 +712,41 @@ class TextInputConfiguration {
 }
 
 TextAffinity? _toTextAffinity(String? affinity) {
-  switch (affinity) {
-    case 'TextAffinity.downstream':
-      return TextAffinity.downstream;
-    case 'TextAffinity.upstream':
-      return TextAffinity.upstream;
-  }
-  return null;
+  return switch (affinity) {
+    'TextAffinity.downstream' => TextAffinity.downstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
+    _ => null,
+  };
 }
 
-/// A floating cursor state the user has induced by force pressing an iOS
-/// keyboard.
+/// The state of a "floating cursor" drag on an iOS soft keyboard.
+///
+/// The "floating cursor" cursor-positioning mode is an iOS feature used to
+/// precisely position the caret in some editable text using certain touch
+/// gestures. As an example, when the user long-presses the spacebar on the iOS
+/// virtual keyboard, iOS enters floating cursor mode where the whole keyboard
+/// becomes a trackpad. In this mode, there are two visible cursors. One, the
+/// floating cursor, hovers over the text, following the user's horizontal
+/// movements exactly and snapping to lines vertically. The other, the
+/// placeholder cursor, is a "shadow" that also snaps to the actual location
+/// where the cursor will go horizontally when the user releases the trackpad.
+///
+/// The floating cursor renders over the text field, while the placeholder
+/// cursor is a faint shadow of the cursor rendered in the text field in the
+/// location between characters where the cursor will drop into when released.
+/// The placeholder cursor is a faint vertical bar, while the floating cursor
+/// has the same appearance as a normal cursor (a blue vertical bar).
+///
+/// This feature works out-of-the-box with Flutter. Support is built into
+/// [EditableText].
+///
+/// See also:
+///
+///  * [EditableText.backgroundCursorColor], which configures the color of the
+///    placeholder cursor while the floating cursor is being dragged.
 enum FloatingCursorDragState {
-  /// A user has just activated a floating cursor.
+  /// A user has just activated a floating cursor by long pressing on the
+  /// spacebar.
   Start,
 
   /// A user is dragging a floating cursor.
@@ -736,6 +758,11 @@ enum FloatingCursorDragState {
 }
 
 /// The current state and position of the floating cursor.
+///
+/// See also:
+///
+///  * [FloatingCursorDragState], which explains the floating cursor feature in
+///    detail.
 class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
@@ -744,11 +771,17 @@ class RawFloatingCursorPoint {
   /// [FloatingCursorDragState.Update].
   RawFloatingCursorPoint({
     this.offset,
+    this.startLocation,
     required this.state,
   }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
+
+  /// Represents the starting location when initiating a floating cursor via long press.
+  /// This is a tuple where the first item is the local offset and the second item is the new caret position.
+  /// This is only non-null when a floating cursor is started.
+  final (Offset, TextPosition)? startLocation;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;
@@ -761,9 +794,6 @@ class TextEditingValue {
   ///
   /// The selection and composing range must be within the text. This is not
   /// checked during construction, and must be guaranteed by the caller.
-  ///
-  /// The [text], [selection], and [composing] arguments must not be null but
-  /// each have default values.
   ///
   /// The default value of [selection] is `TextSelection.collapsed(offset: -1)`.
   /// This indicates that there is no selection at all.
@@ -1148,6 +1178,11 @@ mixin TextInputClient {
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
@@ -1398,8 +1433,8 @@ class TextInputConnection {
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
   ///
-  /// The given `rect` can not be null. If any of the 4 coordinates of the given
-  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  /// If any of the 4 coordinates of the given [Rect] is not finite, a [Rect] of
+  /// size (-1, -1) will be sent instead.
   ///
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
@@ -1478,47 +1513,31 @@ class TextInputConnection {
 }
 
 TextInputAction _toTextInputAction(String action) {
-  switch (action) {
-    case 'TextInputAction.none':
-      return TextInputAction.none;
-    case 'TextInputAction.unspecified':
-      return TextInputAction.unspecified;
-    case 'TextInputAction.go':
-      return TextInputAction.go;
-    case 'TextInputAction.search':
-      return TextInputAction.search;
-    case 'TextInputAction.send':
-      return TextInputAction.send;
-    case 'TextInputAction.next':
-      return TextInputAction.next;
-    case 'TextInputAction.previous':
-      return TextInputAction.previous;
-    case 'TextInputAction.continueAction':
-      return TextInputAction.continueAction;
-    case 'TextInputAction.join':
-      return TextInputAction.join;
-    case 'TextInputAction.route':
-      return TextInputAction.route;
-    case 'TextInputAction.emergencyCall':
-      return TextInputAction.emergencyCall;
-    case 'TextInputAction.done':
-      return TextInputAction.done;
-    case 'TextInputAction.newline':
-      return TextInputAction.newline;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
+  return switch (action) {
+    'TextInputAction.none'           => TextInputAction.none,
+    'TextInputAction.unspecified'    => TextInputAction.unspecified,
+    'TextInputAction.go'             => TextInputAction.go,
+    'TextInputAction.search'         => TextInputAction.search,
+    'TextInputAction.send'           => TextInputAction.send,
+    'TextInputAction.next'           => TextInputAction.next,
+    'TextInputAction.previous'       => TextInputAction.previous,
+    'TextInputAction.continueAction' => TextInputAction.continueAction,
+    'TextInputAction.join'           => TextInputAction.join,
+    'TextInputAction.route'          => TextInputAction.route,
+    'TextInputAction.emergencyCall'  => TextInputAction.emergencyCall,
+    'TextInputAction.done'           => TextInputAction.done,
+    'TextInputAction.newline'        => TextInputAction.newline,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]),
+  };
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
-  switch (state) {
-    case 'FloatingCursorDragState.start':
-      return FloatingCursorDragState.Start;
-    case 'FloatingCursorDragState.update':
-      return FloatingCursorDragState.Update;
-    case 'FloatingCursorDragState.end':
-      return FloatingCursorDragState.End;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
+  return switch (state) {
+    'FloatingCursorDragState.start'  => FloatingCursorDragState.Start,
+    'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
+    'FloatingCursorDragState.end'    => FloatingCursorDragState.End,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]),
+  };
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
@@ -2229,7 +2248,15 @@ class _PlatformTextInputControl with TextInputControl {
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
-      json['inputType'] = TextInputType.none.toJson();
+      final Map<String, dynamic> none = TextInputType.none.toJson();
+      // See: https://github.com/flutter/flutter/issues/125875
+      // On Web engine, use isMultiline to create <input> or <textarea> element
+      // When there's a custom [TextInputControl] installed.
+      // It's only needed When there's a custom [TextInputControl] installed.
+      if (kIsWeb) {
+        none['isMultiline'] = configuration.inputType == TextInputType.multiline;
+      }
+      json['inputType'] = none;
     }
     return json;
   }

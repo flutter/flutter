@@ -18,8 +18,8 @@ import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
-import 'custom_rules/debug_assert.dart';
 import 'custom_rules/no_double_clamp.dart';
+import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -89,6 +89,9 @@ Future<void> run(List<String> arguments) async {
   if (!assertsEnabled) {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
+
+  printProgress('TargetPlatform tool/framework consistency');
+  await verifyTargetPlatform(flutterRoot);
 
   printProgress('All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
@@ -161,19 +164,28 @@ Future<void> run(List<String> arguments) async {
 
   // Analyze all the Dart code in the repo.
   printProgress('Dart analysis...');
-  final CommandResult analyzeResults = await _runFlutterAnalyze(flutterRoot, options: <String>[
+  final CommandResult dartAnalyzeResult = await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
   ]);
 
-  if (analyzeResults.exitCode == 0) {
+  if (dartAnalyzeResult.exitCode == 0) {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, debugAssert];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches, debugAssert];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeDirectoryWithRules(flutterRoot, rules);
+    await analyzeWithRules(flutterRoot, rules,
+      includePaths: <String>['packages/flutter/lib'],
+      excludePaths: <String>['packages/flutter/lib/fix_data'],
+    );
+    final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
+    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
+    await analyzeWithRules(flutterRoot, testRules,
+      includePaths: <String>['packages/flutter/test'],
+    );
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
@@ -248,6 +260,84 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
     parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
   );
   return _Line(lineNumber, content);
+}
+
+Future<void> verifyTargetPlatform(String workingDirectory) async {
+  final File framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
+  final Set<String> frameworkPlatforms = <String>{};
+  List<String> lines = framework.readAsLinesSync();
+  int index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Can no longer find TargetPlatform enum.']);
+      return;
+    }
+    if (lines[index].startsWith('enum TargetPlatform {')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Could not find end of TargetPlatform enum.']);
+      return;
+    }
+    String line = lines[index].trim();
+    final int comment = line.indexOf('//');
+    if (comment >= 0) {
+      line = line.substring(0, comment);
+    }
+    if (line == '}') {
+      break;
+    }
+    if (line.isNotEmpty) {
+      if (line.endsWith(',')) {
+        frameworkPlatforms.add(line.substring(0, line.length - 1));
+      } else {
+        foundError(<String>['${framework.path}:$index: unparseable line when looking for TargetPlatform values']);
+      }
+    }
+    index += 1;
+  }
+  final File tool = File('$workingDirectory/packages/flutter_tools/lib/src/resident_runner.dart');
+  final Set<String> toolPlatforms = <String>{};
+  lines = tool.readAsLinesSync();
+  index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
+      return;
+    }
+    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Could not find end of nextPlatform logic.']);
+      return;
+    }
+    final String line = lines[index].trim();
+    if (line.startsWith("'") && line.endsWith("',")) {
+      toolPlatforms.add(line.substring(1, line.length - 2));
+    } else if (line == '];') {
+      break;
+    } else {
+      foundError(<String>['${tool.path}:$index: unparseable line when looking for nextPlatform values']);
+    }
+    index += 1;
+  }
+  final Set<String> frameworkExtra = frameworkPlatforms.difference(toolPlatforms);
+  if (frameworkExtra.isNotEmpty) {
+    foundError(<String>['TargetPlatform has some extra values not found in the tool: ${frameworkExtra.join(", ")}']);
+  }
+  final Set<String> toolExtra = toolPlatforms.difference(frameworkPlatforms);
+  if (toolExtra.isNotEmpty) {
+    foundError(<String>['The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}']);
+  }
 }
 
 /// Verify Token Templates are mapped to correct file names while generating

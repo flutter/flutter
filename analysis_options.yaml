@@ -17,10 +17,13 @@
 analyzer:
   language:
     strict-casts: true
+    strict-inference: true
     strict-raw-types: true
   errors:
-    # allow self-reference to deprecated members (we do this because otherwise we have
-    # to annotate every member in every test, assert, etc, when we deprecate something)
+    # allow deprecated members (we do this because otherwise we have to annotate
+    # every member in every test, assert, etc, when we or the Dart SDK deprecates
+    # something (https://github.com/flutter/flutter/issues/143312)
+    deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
   exclude:
     - "bin/cache/**"
@@ -116,7 +119,7 @@ linter:
     - library_prefixes
     - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
-    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
+    - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list

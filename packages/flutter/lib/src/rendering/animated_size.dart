@@ -82,6 +82,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.textDirection,
     super.child,
     Clip clipBehavior = Clip.hardEdge,
+    VoidCallback? onEnd,
   }) : _vsync = vsync,
        _clipBehavior = clipBehavior {
     _controller = AnimationController(
@@ -97,10 +98,45 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       parent: _controller,
       curve: curve,
     );
+    _onEnd = onEnd;
+  }
+
+  /// When asserts are enabled, returns the animation controller that is used
+  /// to drive the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  AnimationController? get debugController {
+    AnimationController? controller;
+    assert(() {
+      controller = _controller;
+      return true;
+    }());
+    return controller;
+  }
+
+  /// When asserts are enabled, returns the animation that drives the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  CurvedAnimation? get debugAnimation {
+    CurvedAnimation? animation;
+    assert(() {
+      animation = _animation;
+      return true;
+    }());
+    return animation;
   }
 
   late final AnimationController _controller;
   late final CurvedAnimation _animation;
+
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
@@ -141,7 +177,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -169,6 +205,19 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _controller.resync(vsync);
   }
 
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  VoidCallback? get onEnd => _onEnd;
+  VoidCallback? _onEnd;
+  set onEnd(VoidCallback? value) {
+    if (value == _onEnd) {
+      return;
+    }
+    _onEnd = value;
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -182,11 +231,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         // already, to resume interrupted resizing animation.
         markNeedsLayout();
     }
+    _controller.addStatusListener(_animationStatusListener);
   }
 
   @override
   void detach() {
     _controller.stop();
+    _controller.removeStatusListener(_animationStatusListener);
     super.detach();
   }
 
@@ -230,7 +281,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child == null || constraints.isTight) {
       return constraints.smallest;
     }
@@ -328,6 +380,16 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     }
   }
 
+  void _animationStatusListener(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.completed:
+        _onEnd?.call();
+      case AnimationStatus.dismissed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+    }
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
@@ -351,6 +413,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 }

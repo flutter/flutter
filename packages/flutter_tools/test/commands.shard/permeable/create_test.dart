@@ -7,25 +7,31 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' as software;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterProjectType;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
@@ -40,6 +46,8 @@ const String _kNoPlatformsMessage = "You've created a plugin project that doesn'
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
+const String _kIncompatibleJavaVersionMessage = 'The configured version of Java detected may conflict with the';
+final String _kIncompatibleAgpVersionForModule = Version.parse(templateAndroidGradlePluginVersion) < Version.parse(templateAndroidGradlePluginVersionForModule) ? templateAndroidGradlePluginVersionForModule : templateAndroidGradlePluginVersion;
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
@@ -65,6 +73,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late BufferLogger logger;
   late FakeStdio mockStdio;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -82,6 +91,10 @@ void main() {
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: fakeFlutterVersion,
+    );
   });
 
   tearDown(() {
@@ -165,10 +178,24 @@ void main() {
       ],
     );
     expect(logger.statusText, contains('In order to run your application, type:'));
-    // check that we're telling them about documentation
+    // Check that we're telling them about documentation
     expect(logger.statusText, contains('https://docs.flutter.dev/'));
     expect(logger.statusText, contains('https://api.flutter.dev/'));
-    // check that the tests run clean
+
+    // Check for usage values sent in analytics
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'create',
+          commandHasTerminal: false,
+          createAndroidLanguage: 'java',
+          createIosLanguage: 'objc',
+        ),
+      ),
+    );
+
+    // Check that the tests run clean
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
@@ -181,6 +208,7 @@ void main() {
       stdio: mockStdio,
     ),
     Logger: () => logger,
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
@@ -1257,7 +1285,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1338,7 +1366,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1417,6 +1445,7 @@ void main() {
     expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
   }, overrides: <Type, Generator>{
     FlutterVersion: () => fakeFlutterVersion,
+    Java: () => null,
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
   });
@@ -1582,7 +1611,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('path = "flutter_project.app";'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
 
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'));
@@ -2009,6 +2038,26 @@ void main() {
       isNot(contains('Getting Started')));
   });
 
+
+  testUsingContext("can't create an empty non-application project", () async {
+    final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--empty',
+      '--template=plugin',
+      outputDir,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(
+        message: 'The --empty flag is only supported for the app template.',
+    ));
+  });
+
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
       projectDir,
@@ -2028,7 +2077,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() {}')),
           ),
         ]);
@@ -2051,7 +2100,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           ),
         ]);
@@ -2078,7 +2127,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: FakeResponse(body: utf8.encode(samplesIndexJson)),
           ),
         ]);
@@ -2107,7 +2156,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
           ),
         ]);
       };
@@ -2131,7 +2180,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: const FakeResponse(statusCode: HttpStatus.notFound),
           ),
         ]);
@@ -2610,6 +2659,18 @@ void main() {
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
+  testUsingContext('create an ffi package with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=package_ffi', '--platform=ios', projectDir.path])
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+  });
+
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
 
@@ -2788,7 +2849,7 @@ void main() {
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
 
-  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+  testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     Cache.flutterRoot = '../..';
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot!,
@@ -2821,7 +2882,7 @@ void main() {
 
     for (final String templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '12.0'"));
     }
 
     final CreateCommand command = CreateCommand();
@@ -2831,7 +2892,7 @@ void main() {
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
         exists);
     final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '12.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -2846,9 +2907,10 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
-    expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
+    expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);
+    expect(buildContent.contains('minSdk = flutter.minSdkVersion'), true);
+    expect(buildContent.contains('targetSdk = flutter.targetSdkVersion'), true);
   });
 
   testUsingContext('Android Java plugin contains namespace', () async {
@@ -2870,7 +2932,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2893,7 +2955,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2917,7 +2979,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2940,10 +3002,10 @@ void main() {
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
     // Each build file should contain the expected namespace.
-    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    const String expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
-    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    const String expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
     expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.
@@ -3315,43 +3377,49 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('FFI plugins error android language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '-a',
-      'kotlin',
-      '--platforms=android',
-      projectDir.path,
-    ];
+  for (final String template in <String>['package_ffi', 'plugin_ffi']) {
+    testUsingContext('$template error android language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '-a',
+        'kotlin',
+        if (template == 'plugin_ffi') '--platforms=android',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "android-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "android-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
 
-  testUsingContext('FFI plugins error ios language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '--ios-language',
-      'swift',
-      '--platforms=ios',
-      projectDir.path,
-    ];
+    testUsingContext('$template error ios language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '--ios-language',
+        'swift',
+        if (template == 'plugin_ffi') '--platforms=ios',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "ios-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "ios-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
+  }
 
   testUsingContext('FFI plugins error web platform', () async {
     final CreateCommand command = CreateCommand();
@@ -3383,6 +3451,254 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when Java version not found', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+    expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
+  }, overrides: <Type, Generator>{
+    Java: () => null,
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when created project type is irrelevant', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Test not creating a project for Android.
+    await runner.run(<String>['create', '--no-pub', '--platforms=ios,windows,macos,linux', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating project types without configured Gradle versions.
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    tryToDelete(projectDir);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'plugin'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'pluginFfi'))));
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP versions when project type unrelated', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Test not creating a project for Android.
+    await runner.run(<String>['create', '--no-pub', '--platforms=ios,windows,macos,linux', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')), // Too low a version for template AGP versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning for incompatible Java/template Gradle versions when detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.module];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // Check components of expected header warning message are printed.
+      expect(logger.warningText, contains(expectedMessage));
+      expect(logger.warningText, isNot(contains(unexpectedMessage)));
+      expect(logger.warningText, contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'));
+      expect(logger.warningText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
+
+      // Check expected file for updating Gradle version is present.
+      if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/gradle/wrapper/gradle-wrapper.properties')));
+      }
+      else {
+        // Project type is module.
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/gradle/wrapper/gradle-wrapper.properties')));
+      }
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning for incompatible Java/template AGP versions when detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // Check components of expected header warning message are printed.
+      expect(logger.warningText, contains(expectedMessage));
+      expect(logger.warningText, isNot(contains(unexpectedMessage)));
+      expect(logger.warningText, contains('https://developer.android.com/build/releases/gradle-plugin'));
+
+      // Check expected file(s) for updating AGP version is/are present.
+      if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton || projectType == FlutterProjectType.pluginFfi) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/build.gradle')));
+      }
+      else if (projectType == FlutterProjectType.plugin) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/app/build.gradle')));
+      }
+      else {
+        // Project type is module.
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/build.gradle')));
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/app/build.gradle')));
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/Flutter/build.gradle')));
+      }
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(1, 8, 0, '1.8.0')), // Too low a version for template AGP versions.
+    Logger: () => logger,
+  });
+
+  // The Java versions configured in the following tests will need updates as more Java versions are supported by AGP/Gradle:
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(14, 0, 0, '14.0.0')), // Middle compatible Java version with current template AGP/Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- maximum compatible Java version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(17, 0, 0, '18.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- minimum compatible Java version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java: () => FakeJava(version: const software.Version.withText(11, 0, 0, '11.0.0')), // Minimum compatible Java version with current template AGP/Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('Does not double quote description in index.html on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/index.html'],
+    );
+
+    final String rawIndexHtml = await projectDir.childDirectory('web').childFile('index.html').readAsString();
+    const String expectedDescription = '<meta name="description" content="A new Flutter project.">';
+
+    expect(rawIndexHtml.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('Does not double quote description in manifest.json on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/manifest.json'],
+    );
+
+    final String rawManifestJson = await projectDir.childDirectory('web').childFile('manifest.json').readAsString();
+    const String expectedDescription = '"description": "A new Flutter project."';
+
+    expect(rawManifestJson.contains(expectedDescription), isTrue);
   });
 }
 

@@ -220,14 +220,10 @@ class ScrollPhysics {
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
-  /// The velocity parameter must not be null, but may be positive, negative, or
-  /// zero.
+  /// The `velocity` parameter may be positive, negative, or zero.
   ///
-  /// The metrics parameter must not be null.
-  ///
-  /// The context parameter must not be null. It normally refers to the
-  /// [BuildContext] of the widget making the call, such as an [Image] widget
-  /// in a [ListView].
+  /// The `context` parameter normally refers to the [BuildContext] of the widget
+  /// making the call, such as an [Image] widget in a [ListView].
   ///
   /// This can be used to determine whether decoding or fetching complex data
   /// for the currently visible part of the viewport should be delayed
@@ -747,13 +743,6 @@ class BouncingScrollPhysics extends ScrollPhysics {
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
-      double constantDeceleration;
-      switch (decelerationRate) {
-        case ScrollDecelerationRate.fast:
-          constantDeceleration = 1400;
-        case ScrollDecelerationRate.normal:
-          constantDeceleration = 0;
-      }
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
@@ -761,7 +750,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
-        constantDeceleration: constantDeceleration
+        constantDeceleration: switch (decelerationRate) {
+          ScrollDecelerationRate.fast => 1400,
+          ScrollDecelerationRate.normal => 0,
+        },
       );
     }
     return null;
@@ -799,12 +791,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   double get maxFlingVelocity {
-    switch (decelerationRate) {
-      case ScrollDecelerationRate.fast:
-        return kMaxFlingVelocity * 8.0;
-      case ScrollDecelerationRate.normal:
-        return super.maxFlingVelocity;
-    }
+    return switch (decelerationRate) {
+      ScrollDecelerationRate.fast => kMaxFlingVelocity * 8.0,
+      ScrollDecelerationRate.normal => super.maxFlingVelocity,
+    };
   }
 
   @override

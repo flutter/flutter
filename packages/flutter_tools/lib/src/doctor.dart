@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -19,6 +20,7 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
@@ -51,17 +53,20 @@ abstract class DoctorValidatorsProvider {
   // [FeatureFlags].
   factory DoctorValidatorsProvider.test({
     Platform? platform,
+    Logger? logger,
     required FeatureFlags featureFlags,
   }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      logger: logger ?? BufferLogger.test(),
     );
   }
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
+    logger: globals.logger,
     platform: globals.platform,
     featureFlags: featureFlags,
   );
@@ -74,12 +79,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
     required this.platform,
     required this.featureFlags,
-  });
+    required Logger logger,
+  }) : _logger = logger;
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final Logger _logger;
 
   late final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
     platform: platform,
@@ -112,9 +119,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators(
         fileSystem: globals.fs,
         platform: platform,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         plistParser: globals.plistParser,
         processManager: globals.processManager,
+        logger: _logger,
       ),
       ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
     ];
@@ -126,7 +134,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -134,6 +142,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (platform.isWindows)
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
+          processLister: ProcessLister(globals.processManager),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -141,7 +150,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
             xcode: globals.xcode!,
-            userMessages: userMessages,
+            userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),
           globals.cocoapodsValidator!,
@@ -161,7 +170,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
+          userMessages: globals.userMessages,
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
@@ -229,9 +238,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 class Doctor {
   Doctor({
     required Logger logger,
-  }) : _logger = logger;
+    required SystemClock clock,
+    Analytics? analytics,
+  })  : _logger = logger,
+        _clock = clock,
+        _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
+  final SystemClock _clock;
+  final Analytics _analytics;
 
   List<DoctorValidator> get validators {
     return DoctorValidatorsProvider._instance.validators;
@@ -375,6 +390,10 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
+    // This timestamp will be used on the backend of GA4 to group each of the events that
+    // were sent for each doctor validator and its result
+    final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
+
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
@@ -404,6 +423,37 @@ class Doctor {
           break;
       }
       if (sendEvent) {
+        if (validator is GroupedValidator) {
+          for (int i = 0; i < validator.subValidators.length; i++) {
+            final DoctorValidator subValidator = validator.subValidators[i];
+
+            // Ensure that all of the subvalidators in the group have
+            // a corresponding subresult in case a validator crashed
+            final ValidationResult subResult;
+            try {
+              subResult = validator.subResults[i];
+            } on RangeError {
+              continue;
+            }
+
+            _analytics.send(Event.doctorValidatorResult(
+              validatorName: subValidator.title,
+              result: subResult.typeStr,
+              statusInfo: subResult.statusInfo,
+              partOfGroupedValidator: true,
+              doctorInvocationId: analyticsTimestamp,
+            ));
+          }
+        } else {
+          _analytics.send(Event.doctorValidatorResult(
+            validatorName: validator.title,
+            result: result.typeStr,
+            statusInfo: result.statusInfo,
+            partOfGroupedValidator: false,
+            doctorInvocationId: analyticsTimestamp,
+          ));
+        }
+        // TODO(eliasyishak): remove this after migrating from package:usage
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
@@ -727,8 +777,10 @@ class DeviceValidator extends DoctorValidator {
 class DoctorText {
   DoctorText(
     BufferLogger logger, {
+    SystemClock? clock,
     @visibleForTesting Doctor? doctor,
-  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+  })  : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
+        _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;

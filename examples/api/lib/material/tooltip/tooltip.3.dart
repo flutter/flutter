@@ -13,8 +13,9 @@ class TooltipExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TooltipSample(title: 'Tooltip Sample'),
+    return MaterialApp(
+      theme: ThemeData(tooltipTheme: const TooltipThemeData(preferBelow: false)),
+      home: const TooltipSample(title: 'Tooltip Sample'),
     );
   }
 }

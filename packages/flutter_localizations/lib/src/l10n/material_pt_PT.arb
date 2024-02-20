@@ -1,4 +1,6 @@
 {
+  "searchWebButtonLabel": "Pesquisar na Web",
+  "shareButtonLabel": "Partilhar…",
   "scanTextButtonLabel": "Digitalizar texto",
   "lookUpButtonLabel": "Procurar",
   "menuDismissLabel": "Ignorar menu",
@@ -139,7 +141,6 @@
   "reorderItemRight": "Mover para a direita",
   "expandedIconTapHint": "Reduzir",
   "collapsedIconTapHint": "Expandir",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Resta 1 caráter",
   "remainingTextFieldCharacterCountOther": "Restam $remainingCount carateres",
   "refreshIndicatorSemanticLabel": "Atualizar"
