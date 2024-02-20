@@ -62,7 +62,7 @@ abstract class Listenable {
   /// Return a [Listenable] that triggers when any of the given [Listenable]s
   /// themselves trigger.
   ///
-  /// [listenables] must not be changed after this method has been called.
+  /// Once the factory is called, items must not be added or removed from the iterable.
   /// Doing so will lead to memory leaks or exceptions.
   ///
   /// The iterable may contain nulls; they are ignored.

@@ -282,7 +282,7 @@ void main() {
     final TestNotifier source3 = TestNotifier();
     final List<String> log = <String>[];
 
-    final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
+    final Listenable merged = Listenable.merge(<Listenable>{source1, source2});
     void listener1() {
       log.add('listener1');
     }
