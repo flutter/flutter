@@ -48,11 +48,13 @@ void main() {
   });
 
   group('run', () {
+    late BufferLogger logger;
     late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
 
     setUp(() {
-      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
+      logger = BufferLogger.test();
+      testDeviceManager = TestDeviceManager(logger: logger);
       fileSystem = MemoryFileSystem.test();
     });
 
@@ -65,7 +67,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('does not support --no-sound-null-safety by default', () async {
@@ -89,7 +91,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
@@ -109,7 +111,7 @@ void main() {
     }, overrides: <Type, Generator>{
       DeviceManager: () => testDeviceManager,
       FileSystem: () => fileSystem,
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
       NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -137,7 +139,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
@@ -165,7 +167,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -185,7 +187,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     group('run app', () {
@@ -431,7 +433,7 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
-      testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
+      testUsingContext('prints warning when --flavor is used with an unsupported target platform', () async {
         const List<String> runCommand = <String>[
           'run',
           '--no-pub',
@@ -440,24 +442,25 @@ void main() {
           '-d',
           'all',
         ];
-
         // Useful for test readability.
         // ignore: avoid_redundant_argument_values
         final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
         final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
         testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
 
-        await expectLater(
-          () => createTestCommandRunner(RunCommand()).run(runCommand),
-          throwsToolExit(
-            message: '--flavor is only supported for Android, macOS, and iOS devices.',
-          ),
-        );
+        await createTestCommandRunner(TestRunCommandThatOnlyValidates()).run(runCommand);
+
+        expect(logger.warningText, contains(
+          '--flavor is only supported for Android, macOS, and iOS devices. '
+          'Flavor-related features may not function properly and could '
+          'behave differently in a future release.'
+        ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        Logger: () => logger,
       });
 
       testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
@@ -677,7 +680,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
 
         testUsingContext('can disable devtools with --no-devtools', () async {
@@ -705,7 +708,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
       });
     });
@@ -1014,7 +1017,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1035,7 +1038,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1059,7 +1062,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1079,7 +1082,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
     });
