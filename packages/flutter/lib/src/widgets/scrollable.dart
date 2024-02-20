@@ -549,10 +549,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   /// drag gesture reaches the edge of the [Viewport].
   Offset get deltaToScrollOrigin {
     return switch (axisDirection) {
-      AxisDirection.down  => Offset(0,  position.pixels),
       AxisDirection.up    => Offset(0, -position.pixels),
+      AxisDirection.down  => Offset(0, position.pixels),
       AxisDirection.left  => Offset(-position.pixels, 0),
-      AxisDirection.right => Offset( position.pixels, 0),
+      AxisDirection.right => Offset(position.pixels, 0),
     };
   }
 
@@ -1488,10 +1488,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
 Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
   return switch (scrollableState.axisDirection) {
-    AxisDirection.down  => Offset(0,  scrollableState.position.pixels),
     AxisDirection.up    => Offset(0, -scrollableState.position.pixels),
+    AxisDirection.down  => Offset(0, scrollableState.position.pixels),
     AxisDirection.left  => Offset(-scrollableState.position.pixels, 0),
-    AxisDirection.right => Offset( scrollableState.position.pixels, 0),
+    AxisDirection.right => Offset(scrollableState.position.pixels, 0),
   };
 }
 
