@@ -1160,6 +1160,16 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
+        fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
+
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+          baseDirectory: fakeDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
         // reset property or it will carry on to other tests
         fakeSkiaClient.getExpectationForTestThrowable = null;
       });
