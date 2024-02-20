@@ -234,11 +234,15 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// Creates a series of one or more initial routes.
 typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
 
-/// Disposes navigation related singletons.
+/// Disposes singletons created by the Flutter package.
+///
+/// This function is called in `tearDown` for:
+/// - better test hermeticity
+/// - compliance to memory debugging tools that verify all disposables are disposed at the end of test
 @visibleForTesting
 void disposeFlutterSingletons() {
   // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
-  disposeNavigationSingletons();
+  Navigator.disposeSingletons();
   WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject?.dispose();
   WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject = null;
 }

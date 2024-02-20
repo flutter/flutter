@@ -1660,6 +1660,13 @@ class Navigator extends StatefulWidget {
   /// Defaults to true.
   final bool requestFocus;
 
+  /// Disposes navigation related singletons.
+  @visibleForTesting
+  static void disposeSingletons() {
+    _RouteEntry._notAnnounced?.dispose();
+    _RouteEntry._notAnnounced = null;
+  }
+
   /// Push a named route onto the navigator that most tightly encloses the given
   /// context.
   ///
@@ -2903,13 +2910,6 @@ class _NotAnnounced extends Route<void> {
   // A placeholder for the lastAnnouncedPreviousRoute, the
   // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
   // change has been announced.
-}
-
-/// Disposes navigation related singletons.
-@visibleForTesting
-void disposeNavigationSingletons() {
-  _RouteEntry._notAnnounced?.dispose();
-  _RouteEntry._notAnnounced = null;
 }
 
 class _RouteEntry extends RouteTransitionRecord {
