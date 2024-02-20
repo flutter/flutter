@@ -3360,16 +3360,10 @@ class _MenuPanelState extends State<_MenuPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final MenuStyle? themeStyle;
-    final MenuStyle defaultStyle;
-    switch (widget.orientation) {
-      case Axis.horizontal:
-        themeStyle = MenuBarTheme.of(context).style;
-        defaultStyle = _MenuBarDefaultsM3(context);
-      case Axis.vertical:
-        themeStyle = MenuTheme.of(context).style;
-        defaultStyle = _MenuDefaultsM3(context);
-    }
+    final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (widget.orientation) {
+      Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
+      Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
+    };
     final MenuStyle? widgetStyle = widget.menuStyle;
 
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
@@ -3518,16 +3512,10 @@ class _Submenu extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use the text direction of the context where the button is.
     final TextDirection textDirection = Directionality.of(context);
-    final MenuStyle? themeStyle;
-    final MenuStyle defaultStyle;
-    switch (anchor._parent?._orientation ?? Axis.horizontal) {
-      case Axis.horizontal:
-        themeStyle = MenuBarTheme.of(context).style;
-        defaultStyle = _MenuBarDefaultsM3(context);
-      case Axis.vertical:
-        themeStyle = MenuTheme.of(context).style;
-        defaultStyle = _MenuDefaultsM3(context);
-    }
+    final (MenuStyle? themeStyle,  MenuStyle defaultStyle) = switch (anchor._parent?._orientation) {
+      Axis.horizontal || null => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
+      Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
+    };
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }

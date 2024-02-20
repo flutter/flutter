@@ -557,14 +557,11 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    switch (value) {
-      case 254:
-        return buffer.getUint16();
-      case 255:
-        return buffer.getUint32();
-      default:
-        return value;
-    }
+    return switch (value) {
+      254 => buffer.getUint16(),
+      255 => buffer.getUint32(),
+      _ => value,
+    };
   }
 }
 

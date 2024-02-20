@@ -307,27 +307,15 @@ class GLFWKeyHelper implements KeyHelper {
     // a key down, then we need to add the correct modifier bits, and if it's a
     // key up, we need to remove them.
 
-    int modifierChange = 0;
-    switch (keyCode) {
-      case shiftLeftKeyCode:
-      case shiftRightKeyCode:
-        modifierChange = modifierShift;
-      case controlLeftKeyCode:
-      case controlRightKeyCode:
-        modifierChange = modifierControl;
-      case altLeftKeyCode:
-      case altRightKeyCode:
-        modifierChange = modifierAlt;
-      case metaLeftKeyCode:
-      case metaRightKeyCode:
-        modifierChange = modifierMeta;
-      case capsLockKeyCode:
-        modifierChange = modifierCapsLock;
-      case numLockKeyCode:
-        modifierChange = modifierNumericPad;
-      default:
-        break;
-    }
+    final int modifierChange = switch (keyCode) {
+      shiftLeftKeyCode   || shiftRightKeyCode   => modifierShift,
+      controlLeftKeyCode || controlRightKeyCode => modifierControl,
+      altLeftKeyCode     || altRightKeyCode     => modifierAlt,
+      metaLeftKeyCode    || metaRightKeyCode    => modifierMeta,
+      capsLockKeyCode => modifierCapsLock,
+      numLockKeyCode  => modifierNumericPad,
+      _ => 0,
+    };
 
     return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
   }
@@ -335,25 +323,18 @@ class GLFWKeyHelper implements KeyHelper {
   @override
   bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
     modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return modifiers & modifierControl != 0;
-      case ModifierKey.shiftModifier:
-        return modifiers & modifierShift != 0;
-      case ModifierKey.altModifier:
-        return modifiers & modifierAlt != 0;
-      case ModifierKey.metaModifier:
-        return modifiers & modifierMeta != 0;
-      case ModifierKey.capsLockModifier:
-        return modifiers & modifierCapsLock != 0;
-      case ModifierKey.numLockModifier:
-        return modifiers & modifierNumericPad != 0;
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-      case ModifierKey.scrollLockModifier:
-        // These are not used in GLFW keyboards.
-        return false;
-    }
+    return switch (key) {
+      ModifierKey.controlModifier  => modifiers & modifierControl != 0,
+      ModifierKey.shiftModifier    => modifiers & modifierShift != 0,
+      ModifierKey.altModifier      => modifiers & modifierAlt != 0,
+      ModifierKey.metaModifier     => modifiers & modifierMeta != 0,
+      ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
+      ModifierKey.numLockModifier  => modifiers & modifierNumericPad != 0,
+      // These are not used in GLFW keyboards.
+      ModifierKey.functionModifier   => false,
+      ModifierKey.symbolModifier     => false,
+      ModifierKey.scrollLockModifier => false,
+    };
   }
 
   @override
@@ -451,28 +432,15 @@ class GtkKeyHelper implements KeyHelper {
     // a key down, then we need to add the correct modifier bits, and if it's a
     // key up, we need to remove them.
 
-    int modifierChange = 0;
-    switch (keyCode) {
-      case shiftLeftKeyCode:
-      case shiftRightKeyCode:
-        modifierChange = modifierShift;
-      case controlLeftKeyCode:
-      case controlRightKeyCode:
-        modifierChange = modifierControl;
-      case altLeftKeyCode:
-      case altRightKeyCode:
-        modifierChange = modifierMod1;
-      case metaLeftKeyCode:
-      case metaRightKeyCode:
-        modifierChange = modifierMeta;
-      case capsLockKeyCode:
-      case shiftLockKeyCode:
-        modifierChange = modifierCapsLock;
-      case numLockKeyCode:
-        modifierChange = modifierMod2;
-      default:
-        break;
-    }
+    final int modifierChange = switch (keyCode) {
+      shiftLeftKeyCode   || shiftRightKeyCode   => modifierShift,
+      controlLeftKeyCode || controlRightKeyCode => modifierControl,
+      altLeftKeyCode     || altRightKeyCode     => modifierMod1,
+      metaLeftKeyCode    || metaRightKeyCode    => modifierMeta,
+      capsLockKeyCode    || shiftLockKeyCode    => modifierCapsLock,
+      numLockKeyCode => modifierMod2,
+      _ => 0,
+    };
 
     return isDown ? modifiers | modifierChange : modifiers & ~modifierChange;
   }
@@ -480,25 +448,18 @@ class GtkKeyHelper implements KeyHelper {
   @override
   bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
     modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return modifiers & modifierControl != 0;
-      case ModifierKey.shiftModifier:
-        return modifiers & modifierShift != 0;
-      case ModifierKey.altModifier:
-        return modifiers & modifierMod1 != 0;
-      case ModifierKey.metaModifier:
-        return modifiers & modifierMeta != 0;
-      case ModifierKey.capsLockModifier:
-        return modifiers & modifierCapsLock != 0;
-      case ModifierKey.numLockModifier:
-        return modifiers & modifierMod2 != 0;
-      case ModifierKey.functionModifier:
-      case ModifierKey.symbolModifier:
-      case ModifierKey.scrollLockModifier:
-        // These are not used in GTK keyboards.
-        return false;
-    }
+    return switch (key) {
+      ModifierKey.controlModifier  => modifiers & modifierControl != 0,
+      ModifierKey.shiftModifier    => modifiers & modifierShift != 0,
+      ModifierKey.altModifier      => modifiers & modifierMod1 != 0,
+      ModifierKey.metaModifier     => modifiers & modifierMeta != 0,
+      ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
+      ModifierKey.numLockModifier  => modifiers & modifierMod2 != 0,
+      // These are not used in GTK keyboards.
+      ModifierKey.functionModifier   => false,
+      ModifierKey.symbolModifier     => false,
+      ModifierKey.scrollLockModifier => false,
+    };
   }
 
   @override

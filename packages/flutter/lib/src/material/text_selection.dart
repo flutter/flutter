@@ -92,20 +92,11 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     // [handle] is a circle, with a rectangle in the top left quadrant of that
     // circle (an onion pointing to 10:30). We rotate [handle] to point
     // straight up or up-right depending on the handle type.
-    switch (type) {
-      case TextSelectionHandleType.left: // points up-right
-        return Transform.rotate(
-          angle: math.pi / 2.0,
-          child: handle,
-        );
-      case TextSelectionHandleType.right: // points up-left
-        return handle;
-      case TextSelectionHandleType.collapsed: // points up
-        return Transform.rotate(
-          angle: math.pi / 4.0,
-          child: handle,
-        );
-    }
+    return switch (type) {
+      TextSelectionHandleType.left => Transform.rotate(angle: math.pi / 2.0, child: handle), // points up-right
+      TextSelectionHandleType.right => handle, // points up-left
+      TextSelectionHandleType.collapsed => Transform.rotate(angle: math.pi / 4.0, child: handle), // points up
+    };
   }
 
   /// Gets anchor for material-style text selection handles.

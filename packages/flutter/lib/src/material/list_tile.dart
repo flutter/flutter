@@ -1507,14 +1507,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   Color? get iconColor {
-    switch (_theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null, Use current icon theme color
-    }
+    return switch (_theme.brightness) {
+      // For the sake of backwards compatibility, the default for unselected
+      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+      Brightness.light => Colors.black45,
+      // null -> use current icon theme color
+      Brightness.dark => null,
+    };
   }
 }
 

@@ -503,19 +503,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final double visualPosition;
-    final Color leftColor;
-    final Color rightColor;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - _position.value;
-        leftColor = _activeColor;
-        rightColor = trackColor;
-      case TextDirection.ltr:
-        visualPosition = _position.value;
-        leftColor = trackColor;
-        rightColor = _activeColor;
-    }
+    final (double visualPosition, Color leftColor, Color rightColor) = switch (textDirection) {
+      TextDirection.rtl => (1.0 - _position.value, _activeColor, trackColor),
+      TextDirection.ltr => (_position.value, trackColor, _activeColor),
+    };
 
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;

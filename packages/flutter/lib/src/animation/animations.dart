@@ -425,15 +425,10 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        _curveDirection = null;
-      case AnimationStatus.forward:
-        _curveDirection ??= AnimationStatus.forward;
-      case AnimationStatus.reverse:
-        _curveDirection ??= AnimationStatus.reverse;
-    }
+    _curveDirection = switch (status) {
+      AnimationStatus.dismissed || AnimationStatus.completed => null,
+      AnimationStatus.forward || AnimationStatus.reverse => _curveDirection ?? status,
+    };
   }
 
   bool get _useForwardCurve {
@@ -584,12 +579,10 @@ class TrainHoppingAnimation extends Animation<double>
     bool hop = false;
     if (_nextTrain != null) {
       assert(_mode != null);
-      switch (_mode!) {
-        case _TrainHoppingMode.minimize:
-          hop = _nextTrain!.value <= _currentTrain!.value;
-        case _TrainHoppingMode.maximize:
-          hop = _nextTrain!.value >= _currentTrain!.value;
-      }
+      hop = switch (_mode!) {
+        _TrainHoppingMode.minimize => _nextTrain!.value <= _currentTrain!.value,
+        _TrainHoppingMode.maximize => _nextTrain!.value >= _currentTrain!.value,
+      };
       if (hop) {
         _currentTrain!
           ..removeStatusListener(_statusChangeHandler)
