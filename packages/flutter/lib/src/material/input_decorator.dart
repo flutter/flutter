@@ -4602,47 +4602,53 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   final BuildContext context;
 
   @override
-  TextStyle? get hintStyle {
-    return InputDecorationStyle(
-      normal: TextStyle(color: Theme.of(context).hintColor),
-      disabled: TextStyle(color: Theme.of(context).disabledColor),
-    );
-  }
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
 
   @override
-  TextStyle? get labelStyle {
-    return InputDecorationStyle(
-      normal: TextStyle(color: Theme.of(context).hintColor),
-      disabled: TextStyle(color: Theme.of(context).disabledColor),
-    );
-  }
+  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
 
   @override
-  TextStyle? get floatingLabelStyle {
-    return InputDecorationStyle(
-      normal: TextStyle(color: Theme.of(context).hintColor),
-      focused: TextStyle(color: Theme.of(context).colorScheme.primary),
-      error: TextStyle(color: Theme.of(context).colorScheme.error),
-      disabled: TextStyle(color: Theme.of(context).disabledColor),
-      disabledError: TextStyle(color: Theme.of(context).disabledColor),
-    );
-  }
+  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    if (states.contains(MaterialState.error)) {
+      return TextStyle(color: Theme.of(context).colorScheme.error);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return TextStyle(color: Theme.of(context).colorScheme.primary);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
 
   @override
-  TextStyle? get helperStyle {
-    return InputDecorationStyle(
-      normal: themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor),
-      disabled: themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent),
-    );
-  }
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final ThemeData themeData= Theme.of(context);
+    if (states.contains(MaterialState.disabled)) {
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
+    }
+
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor);
+  });
 
   @override
-  TextStyle? get errorStyle {
-    return InputDecorationStyle(
-      normal: themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error),
-      disabled: themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent),
-    );
-  }
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final ThemeData themeData= Theme.of(context);
+    if (states.contains(MaterialState.disabled)) {
+      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
+    }
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
+  });
 
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -4714,10 +4720,12 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get hintStyle => InputDecorationStyle(
-    normal: TextStyle(color: Theme.of(context).hintColor),
-    disabled: TextStyle(color: Theme.of(context).disabledColor),
-  );
+  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
 
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -4792,46 +4800,68 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     return _colors.onSurfaceVariant;
   });
 
-
   @override
-  TextStyle? get labelStyle {
-    TextStyle applyColor(Color? color) {
-      return _textTheme.bodyLarge?.copyWith(color: color) ?? TextStyle(color: color);
+  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return InputDecorationStyle(
-      normal: applyColor(_colors.onSurfaceVariant),
-      disabled: applyColor(_colors.onSurface.withOpacity(0.38)),
-      disabledError: applyColor(_colors.onSurface.withOpacity(0.38)),
-      error: applyColor(_colors.error),
-      focused: applyColor(_colors.primary),
-      hovered: InputDecorationStyle(
-        normal: applyColor(_colors.onSurfaceVariant),
-        disabled: applyColor(_colors.onSurface.withOpacity(0.38)),
-        disabledError: applyColor(_colors.onSurface.withOpacity(0.38)),
-        error: applyColor(_colors.onErrorContainer),
-        focused: applyColor(_colors.onSurfaceVariant),
-      ),
-    );
-  }
-
-  @override
-  TextStyle? get floatingLabelStyle => labelStyle;
-
-  @override
-  TextStyle? get helperStyle {
-    TextStyle applyColor(Color? color) {
-      return _textTheme.bodyLarge?.copyWith(color: color) ?? TextStyle(color: color);
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color: _colors.error);
+      }
+      return textStyle.copyWith(color: _colors.error);
     }
-    return InputDecorationStyle(
-      normal: applyColor(_colors.onSurfaceVariant),
-      disabled: applyColor(_colors.onSurface.withOpacity(0.38)),
-    );
-  }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color: _colors.primary);
+    }
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
+  });
 
   @override
-  TextStyle? get errorStyle {
-    return _textTheme.bodySmall?.copyWith(color: _colors.error) ?? TextStyle(color: _colors.error);
-  }
+  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color: _colors.error);
+      }
+      return textStyle.copyWith(color: _colors.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color: _colors.primary);
+    }
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
+  });
+
+  @override
+  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
+  });
+
+  @override
+  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
+    return textStyle.copyWith(color: _colors.error);
+  });
 }
 
 // END GENERATED TOKEN PROPERTIES - InputDecorator

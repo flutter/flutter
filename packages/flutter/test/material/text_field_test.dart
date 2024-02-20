@@ -6906,10 +6906,12 @@ void main() {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: const InputDecorationStyle(
-                normal: TextStyle(color: Colors.blue),
-                disabled: TextStyle(color: Colors.red),
-              ),
+              style: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.disabled)) {
+                  return const TextStyle(color: Colors.red);
+                }
+                return const TextStyle(color: Colors.blue);
+              }),
             ),
           ),
         ),

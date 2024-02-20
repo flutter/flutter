@@ -1598,12 +1598,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-TextStyle? _m2StateInputStyle(BuildContext context) {
-  return InputDecorationStyle(
-    normal: TextStyle(color: theme.textTheme.titleMedium?.color),
-    disabled: TextStyle(color: theme.disabledColor),
-  );
-}
+TextStyle? _m2StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  final ThemeData theme = Theme.of(context);
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: theme.disabledColor);
+  }
+  return TextStyle(color: theme.textTheme.titleMedium?.color);
+});
 
 TextStyle _m2CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
@@ -1615,13 +1616,12 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-TextStyle? _m3StateInputStyle(BuildContext context) {
-  final Color? color = Theme.of(context).textTheme.bodyLarge!.color;
-  return InputDecorationStyle(
-    normal: TextStyle(color: color),
-    disabled: TextStyle(color: color?.withOpacity(0.38)),
-  );
-}
+TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  if (states.contains(MaterialState.disabled)) {
+    return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
+  }
+  return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
+});
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 

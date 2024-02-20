@@ -171,8 +171,10 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    final TextStyle textStyle = ${textStyle('$tokenGroup.headline')}!;
-    return textStyle.copyWith(color: ${componentColor('$tokenGroup.headline')});
+    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+      final TextStyle textStyle = ${textStyle('$tokenGroup.headline')}!;
+      return textStyle.copyWith(color: ${componentColor('$tokenGroup.headline')});
+    });
   }
 
   @override
