@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
@@ -104,8 +105,9 @@ static std::unique_ptr<rapidjson::Document> EncodedEditingState(
 
 class MockFlutterWindowsView : public FlutterWindowsView {
  public:
-  MockFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window)
-      : FlutterWindowsView(std::move(window)) {}
+  MockFlutterWindowsView(FlutterWindowsEngine* engine,
+                         std::unique_ptr<WindowBindingHandler> window)
+      : FlutterWindowsView(engine, std::move(window)) {}
   virtual ~MockFlutterWindowsView() = default;
 
   MOCK_METHOD(void, OnCursorRectUpdated, (const Rect&), (override));
@@ -143,9 +145,11 @@ class TextInputPluginTest : public WindowsTest {
     EXPECT_CALL(*window, GetWindowHandle).WillRepeatedly(Return(nullptr));
 
     engine_ = builder.Build();
-    view_ = std::make_unique<MockFlutterWindowsView>(std::move(window));
+    view_ = std::make_unique<MockFlutterWindowsView>(engine_.get(),
+                                                     std::move(window));
 
-    engine_->SetView(view_.get());
+    EngineModifier modifier{engine_.get()};
+    modifier.SetImplicitView(view_.get());
   }
 
  private:

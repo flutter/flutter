@@ -22,8 +22,9 @@ using ::testing::Return;
 
 class MockFlutterWindowsView : public FlutterWindowsView {
  public:
-  MockFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window)
-      : FlutterWindowsView(std::move(window)) {}
+  MockFlutterWindowsView(FlutterWindowsEngine* engine,
+                         std::unique_ptr<WindowBindingHandler> window)
+      : FlutterWindowsView(engine, std::move(window)) {}
   virtual ~MockFlutterWindowsView() = default;
 
   MOCK_METHOD(bool,
@@ -59,9 +60,11 @@ class CompositorSoftwareTest : public WindowsTest {
     EXPECT_CALL(*window.get(), GetWindowHandle).WillRepeatedly(Return(nullptr));
 
     engine_ = builder.Build();
-    view_ = std::make_unique<MockFlutterWindowsView>(std::move(window));
+    view_ = std::make_unique<MockFlutterWindowsView>(engine_.get(),
+                                                     std::move(window));
 
-    engine_->SetView(view_.get());
+    EngineModifier modifier{engine_.get()};
+    modifier.SetImplicitView(view_.get());
   }
 
  private:

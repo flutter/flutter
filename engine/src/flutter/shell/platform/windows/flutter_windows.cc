@@ -82,12 +82,11 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
           width, height, engine_ptr->windows_proc_table());
 
   auto engine = std::unique_ptr<flutter::FlutterWindowsEngine>(engine_ptr);
-  auto view = std::make_unique<flutter::FlutterWindowsView>(
-      std::move(window_wrapper), engine_ptr->windows_proc_table());
+  std::unique_ptr<flutter::FlutterWindowsView> view =
+      engine->CreateView(std::move(window_wrapper));
   auto controller = std::make_unique<flutter::FlutterWindowsViewController>(
       std::move(engine), std::move(view));
 
-  controller->view()->SetEngine(controller->engine());
   controller->view()->CreateRenderSurface();
   if (!controller->engine()->running()) {
     if (!controller->engine()->Run()) {

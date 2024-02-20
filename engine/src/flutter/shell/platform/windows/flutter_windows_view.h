@@ -32,18 +32,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
  public:
   // Creates a FlutterWindowsView with the given implementor of
   // WindowBindingHandler.
-  //
-  // In order for object to render Flutter content the SetEngine method must be
-  // called with a valid FlutterWindowsEngine instance.
   FlutterWindowsView(
+      FlutterWindowsEngine* engine,
       std::unique_ptr<WindowBindingHandler> window_binding,
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
 
   virtual ~FlutterWindowsView();
-
-  // Configures the window instance with an instance of a running Flutter
-  // engine.
-  void SetEngine(FlutterWindowsEngine* engine);
 
   // Creates rendering surface for Flutter engine to draw into.
   // Should be called before calling FlutterEngineRun using this view.
