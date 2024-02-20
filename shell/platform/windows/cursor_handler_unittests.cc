@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
@@ -73,14 +74,16 @@ class CursorHandlerTest : public WindowsTest {
     FlutterWindowsEngineBuilder builder{GetContext()};
 
     auto window = std::make_unique<MockWindowBindingHandler>();
+    EXPECT_CALL(*window.get(), SetView).Times(1);
+    EXPECT_CALL(*window.get(), GetWindowHandle).WillRepeatedly(Return(nullptr));
 
     window_ = window.get();
-    EXPECT_CALL(*window_, SetView).Times(1);
-
     engine_ = builder.Build();
-    view_ = std::make_unique<FlutterWindowsView>(std::move(window));
+    view_ =
+        std::make_unique<FlutterWindowsView>(engine_.get(), std::move(window));
 
-    engine_->SetView(view_.get());
+    EngineModifier modifier{engine_.get()};
+    modifier.SetImplicitView(view_.get());
   }
 
  private:

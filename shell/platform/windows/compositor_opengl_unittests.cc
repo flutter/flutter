@@ -84,7 +84,7 @@ class CompositorOpenGLTest : public WindowsTest {
     FlutterWindowsEngineBuilder builder{GetContext()};
 
     engine_ = builder.Build();
-    EngineModifier modifier(engine_.get());
+    EngineModifier modifier{engine_.get()};
     modifier.SetEGLManager(std::move(egl_manager));
   }
 
@@ -95,7 +95,8 @@ class CompositorOpenGLTest : public WindowsTest {
     EXPECT_CALL(*window.get(), SetView).Times(1);
     EXPECT_CALL(*window.get(), GetWindowHandle).WillRepeatedly(Return(nullptr));
 
-    view_ = std::make_unique<FlutterWindowsView>(std::move(window));
+    view_ =
+        std::make_unique<FlutterWindowsView>(engine_.get(), std::move(window));
 
     if (add_surface) {
       auto surface = std::make_unique<egl::MockWindowSurface>();
@@ -107,7 +108,8 @@ class CompositorOpenGLTest : public WindowsTest {
       modifier.SetSurface(std::move(surface));
     }
 
-    engine_->SetView(view_.get());
+    EngineModifier modifier{engine_.get()};
+    modifier.SetImplicitView(view_.get());
   }
 
  private:

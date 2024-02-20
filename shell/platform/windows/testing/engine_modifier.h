@@ -37,6 +37,10 @@ class EngineModifier {
     engine_->egl_manager_ = std::move(egl_manager);
   }
 
+  // Override the engine's implicit view. This is the "default" view
+  // that Flutter apps render to.
+  void SetImplicitView(FlutterWindowsView* view) { engine_->view_ = view; }
+
   /// Reset the start_time field that is used to align vsync events.
   void SetStartTime(uint64_t start_time_nanos) {
     engine_->start_time_ = std::chrono::nanoseconds(start_time_nanos);
@@ -63,6 +67,10 @@ class EngineModifier {
   // Run the FlutterWindowsEngine's handler that runs right before an engine
   // restart. This resets the keyboard's state if it exists.
   void Restart() { engine_->OnPreEngineRestart(); }
+
+  // Initialize they keyboard and text input subsystems or reset them them if
+  // they are already initialized.
+  void InitializeKeyboard() { engine_->InitializeKeyboard(); }
 
   void SetLifecycleManager(std::unique_ptr<WindowsLifecycleManager>&& handler) {
     engine_->lifecycle_manager_ = std::move(handler);

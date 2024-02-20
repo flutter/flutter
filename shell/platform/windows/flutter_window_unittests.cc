@@ -4,6 +4,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
+#include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
@@ -26,7 +27,7 @@ static constexpr int32_t kDefaultPointerDeviceId = 0;
 class MockFlutterWindow : public FlutterWindow {
  public:
   MockFlutterWindow(bool reset_view_on_exit = true)
-      : FlutterWindow(), reset_view_on_exit_(reset_view_on_exit) {
+      : reset_view_on_exit_(reset_view_on_exit) {
     ON_CALL(*this, GetDpiScale())
         .WillByDefault(Return(this->FlutterWindow::GetDpiScale()));
   }
@@ -95,8 +96,9 @@ class MockFlutterWindow : public FlutterWindow {
 
 class MockFlutterWindowsView : public FlutterWindowsView {
  public:
-  MockFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding)
-      : FlutterWindowsView(std::move(window_binding)) {}
+  MockFlutterWindowsView(FlutterWindowsEngine* engine,
+                         std::unique_ptr<WindowBindingHandler> window_binding)
+      : FlutterWindowsView(engine, std::move(window_binding)) {}
   ~MockFlutterWindowsView() {}
 
   MOCK_METHOD(void,
@@ -313,12 +315,14 @@ TEST_F(FlutterWindowTest, AccessibilityNodeWithoutView) {
 // Ensure that announcing the alert propagates the message to the alert node.
 // Different screen readers use different properties for alerts.
 TEST_F(FlutterWindowTest, AlertNode) {
-  std::unique_ptr<MockFlutterWindow> win32window =
-      std::make_unique<MockFlutterWindow>();
+  std::unique_ptr<FlutterWindowsEngine> engine =
+      FlutterWindowsEngineBuilder{GetContext()}.Build();
+  auto win32window = std::make_unique<MockFlutterWindow>();
   EXPECT_CALL(*win32window.get(), GetAxFragmentRootDelegate())
       .WillRepeatedly(Return(nullptr));
   EXPECT_CALL(*win32window.get(), OnWindowStateEvent).Times(AnyNumber());
-  MockFlutterWindowsView view(std::move(win32window));
+  EXPECT_CALL(*win32window.get(), GetWindowHandle).Times(AnyNumber());
+  MockFlutterWindowsView view{engine.get(), std::move(win32window)};
   std::wstring message = L"Test alert";
   EXPECT_CALL(view, NotifyWinEventWrapper(_, ax::mojom::Event::kAlert))
       .Times(1);
