@@ -23,7 +23,6 @@ There are currently many missing features. Some overall goals are listed in the
 GitHub issue [here](https://github.com/flutter/flutter/issues/132807). Some
 desirable new features would do the following:
 
-* Support Windows hosts.
 * Add a `doctor` command.
 * Update the engine checkout so that engine developers no longer have to remeber
 to run `gclient sync -D`.
