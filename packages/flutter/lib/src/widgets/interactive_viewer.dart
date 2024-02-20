@@ -600,19 +600,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix.clone();
     }
 
-    late final Offset alignedTranslation;
+    final Offset alignedTranslation;
 
     if (_currentAxis != null) {
-      switch (widget.panAxis){
-        case PanAxis.horizontal:
-          alignedTranslation = _alignAxis(translation, Axis.horizontal);
-        case PanAxis.vertical:
-          alignedTranslation = _alignAxis(translation, Axis.vertical);
-        case PanAxis.aligned:
-          alignedTranslation = _alignAxis(translation, _currentAxis!);
-        case PanAxis.free:
-          alignedTranslation = translation;
-      }
+      alignedTranslation = switch (widget.panAxis){
+        PanAxis.horizontal => _alignAxis(translation, Axis.horizontal),
+        PanAxis.vertical   => _alignAxis(translation, Axis.vertical),
+        PanAxis.aligned    => _alignAxis(translation, _currentAxis!),
+        PanAxis.free       => translation,
+      };
     } else {
       alignedTranslation = translation;
     }
@@ -739,17 +735,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Returns true iff the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType? gestureType) {
-    switch (gestureType) {
-      case _GestureType.rotate:
-        return _rotateEnabled;
-
-      case _GestureType.scale:
-        return widget.scaleEnabled;
-
-      case _GestureType.pan:
-      case null:
-        return widget.panEnabled;
-    }
+    return switch (gestureType) {
+      _GestureType.rotate => _rotateEnabled,
+      _GestureType.scale => widget.scaleEnabled,
+      _GestureType.pan || null => widget.panEnabled,
+    };
   }
 
   // Decide which type of gesture this is by comparing the amount of scale
@@ -1448,12 +1438,10 @@ Offset _round(Offset offset) {
 // Align the given offset to the given axis by allowing movement only in the
 // axis direction.
 Offset _alignAxis(Offset offset, Axis axis) {
-  switch (axis) {
-    case Axis.horizontal:
-      return Offset(offset.dx, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, offset.dy);
-  }
+  return switch (axis) {
+    Axis.horizontal => Offset(offset.dx, 0.0),
+    Axis.vertical   => Offset(0.0, offset.dy),
+  };
 }
 
 // Given two points, return the axis where the distance between the points is

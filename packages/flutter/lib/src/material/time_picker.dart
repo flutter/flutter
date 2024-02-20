@@ -1136,13 +1136,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   double _getRadiusForTime(TimeOfDay time) {
     switch (widget.hourMinuteMode) {
       case _HourMinuteMode.hour:
-        switch (widget.hourDialType) {
-          case _HourDialType.twentyFourHourDoubleRing:
-            return time.hour >= 12 ? 0 : 1;
-          case _HourDialType.twentyFourHour:
-          case _HourDialType.twelveHour:
-            return 1;
-        }
+        return switch (widget.hourDialType) {
+          _HourDialType.twentyFourHourDoubleRing => time.hour >= 12 ? 0 : 1,
+          _HourDialType.twentyFourHour || _HourDialType.twelveHour => 1,
+        };
       case _HourMinuteMode.minute:
         return 1;
     }
@@ -2752,14 +2749,11 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
     final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
     final HourFormat timeOfDayHour = hourFormat(of: timeOfDayFormat);
-    final _HourDialType hourMode;
-    switch (timeOfDayHour) {
-      case HourFormat.HH:
-      case HourFormat.H:
-        hourMode = theme.useMaterial3 ? _HourDialType.twentyFourHourDoubleRing : _HourDialType.twentyFourHour;
-      case HourFormat.h:
-        hourMode = _HourDialType.twelveHour;
-    }
+    final _HourDialType hourMode = switch (timeOfDayHour) {
+      HourFormat.HH || HourFormat.H when theme.useMaterial3 => _HourDialType.twentyFourHourDoubleRing,
+      HourFormat.HH || HourFormat.H => _HourDialType.twentyFourHour,
+      HourFormat.h => _HourDialType.twelveHour,
+    };
 
     final String helpText;
     final Widget picker;
@@ -3356,7 +3350,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get backgroundColor {
-    return _colors.surface;
+    return _colors.surfaceContainerHigh;
   }
 
   @override
@@ -3444,7 +3438,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   }
 
   @override
@@ -3521,22 +3515,22 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
-        Color overlayColor = _colors.surfaceVariant;
+        Color overlayColor = _colors.surfaceContainerHighest;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
+          const double focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
-        return Color.alphaBlend(overlayColor, _colors.surfaceVariant);
+        return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);
       }
     });
   }

@@ -2321,14 +2321,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex == -1) {
-      switch (event.direction) {
-        case SelectionExtendDirection.previousLine:
-        case SelectionExtendDirection.backward:
-          currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
-        case SelectionExtendDirection.nextLine:
-        case SelectionExtendDirection.forward:
-        currentSelectionStartIndex = currentSelectionEndIndex = 0;
-      }
+      currentSelectionStartIndex = currentSelectionEndIndex = switch (event.direction) {
+        SelectionExtendDirection.previousLine || SelectionExtendDirection.backward => selectables.length,
+        SelectionExtendDirection.nextLine || SelectionExtendDirection.forward => 0,
+      };
     }
     int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
     SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
