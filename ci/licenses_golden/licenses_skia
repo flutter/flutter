@@ -1,4 +1,4 @@
-Signature: eb73f4e1f13e4aa76521d602858e2f30
+Signature: b63b075252eead4ef89c72d7423ce999
 
 ====================================================================================================
 LIBRARY: etc1
@@ -396,12 +396,6 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/PreferStillImage.md
-FILE: ../../../flutter/third_party/skia/relnotes/SkSurfaceProps-Flags.md
-FILE: ../../../flutter/third_party/skia/relnotes/TickToProcessEvents.md
-FILE: ../../../flutter/third_party/skia/relnotes/VkDeviceLostCallback.md
-FILE: ../../../flutter/third_party/skia/relnotes/anim-codec-player.md
-FILE: ../../../flutter/third_party/skia/relnotes/codec-image.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
