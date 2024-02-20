@@ -1095,10 +1095,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void updateFocusHighlights() {
-    updateHighlight(_HighlightType.focus, value: switch (FocusManager.instance.highlightMode) {
+    final bool showFocus = switch (FocusManager.instance.highlightMode) {
       FocusHighlightMode.touch => false,
       FocusHighlightMode.traditional => _shouldShowFocus,
-    });
+    };
+    updateHighlight(_HighlightType.focus, value: showFocus);
   }
 
   bool _hasFocus = false;
