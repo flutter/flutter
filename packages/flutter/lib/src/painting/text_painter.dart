@@ -633,9 +633,9 @@ class TextPainter {
     }
   }
 
-  @Deprecated('''
-    The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.
-  ''')
+  @Deprecated(  // flutter_ignore: deprecation_syntax (see analyze.dart)
+    'The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.'
+  )
   /// Migration only flag, do no use.
   static bool disableStrutHalfLeading = true;
 
