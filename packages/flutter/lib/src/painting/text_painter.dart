@@ -343,7 +343,7 @@ class _TextLayout {
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
     // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
-    // spaces don't contribute to the line width thus require special handling
+    // spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
@@ -488,8 +488,8 @@ class _TextPainterLayoutCacheWithOffset {
 /// ligature component.
 final class _LineCaretMetrics {
   const _LineCaretMetrics({required this.offset, required this.writingDirection});
-  /// The offset from the top left corner of the paragraph to the the caret's
-  /// top start location.
+  /// The offset from the top left corner of the paragraph to the caret's top
+  /// start location.
   final Offset offset;
 
   /// The writing direction of the glyph the _LineCaretMetrics is associated with.
@@ -1379,10 +1379,10 @@ class TextPainter {
   // `position` in the text, or null if the paragraph is empty.
   //
   // For a TextPosition, typically when its TextAffinity is downstream, the
-  // corresponding I-beam caret is anchored to the leading edge of the
-  // `offset`-th character in the text. When the TextAffinity is upstream, the
-  // I-beam is then anchored to the trailing edge of the preceding character,
-  // except for a few edge cases:
+  // corresponding I-beam caret is anchored to the leading edge of the character
+  // at `offset` in the text. When the TextAffinity is upstream, the I-beam is
+  // then anchored to the trailing edge of the preceding character, except for a
+  // few edge cases:
   //
   // 1. empty paragraph: this method returns null and the caller handles this
   //    case.
@@ -1478,7 +1478,7 @@ class TextPainter {
         writingDirection: box.direction,
       );
     } else {
-      // fallback to glyphInfo. This should only happen when using the HTML renderer.
+      // Fall back to glyphInfo. This should only happen when using the HTML renderer.
       assert(kIsWeb && !isCanvasKit);
       final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
       final double dx = switch (glyphInfo.writingDirection) {
