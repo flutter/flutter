@@ -1485,7 +1485,7 @@ class TextPainter {
         TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,
         TextDirection.rtl => anchorToLeadingEdge ? graphemeBounds.right : graphemeBounds.left,
       };
-      metrics =_LineCaretMetrics(
+      metrics = _LineCaretMetrics(
         offset: Offset(dx, graphemeBounds.top),
         writingDirection: glyphInfo.writingDirection,
       );
