@@ -535,7 +535,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [MaterialStateOutlineInputBorder.resolveWith].
 class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
   const _MaterialStateOutlineInputBorder(this._resolve);
 
@@ -598,7 +598,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [MaterialStateOutlineInputBorder.resolveWith].
 class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
   const _MaterialStateUnderlineInputBorder(this._resolve);
 

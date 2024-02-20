@@ -22,12 +22,12 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
-    }
-    return TextStyle(color: Theme.of(context).hintColor);
-  });
+  TextStyle? get hintStyle {
+    return InputDecorationStyle(
+      normal: TextStyle(color: Theme.of(context).hintColor),
+      disabled: TextStyle(color: Theme.of(context).disabledColor),
+    );
+  }
 
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
@@ -133,79 +133,54 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
+  TextStyle? get labelStyle {
+    TextStyle applyColor(Color? color) {
+      return ${textStyle("md.comp.filled-text-field.label-text")}?.copyWith(color: color) ?? TextStyle(color: color);
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.hover.label-text')});
-      }
-      if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.label-text')});
-      }
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.label-text')});
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.hover.label-text')});
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.focus.label-text')});
-    }
-    return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.label-text')});
-  });
+    return InputDecorationStyle(
+      normal: applyColor(${componentColor('md.comp.filled-text-field.label-text')}),
+      disabled: applyColor(${componentColor('md.comp.filled-text-field.disabled.label-text')}),
+      disabledError: applyColor(${componentColor('md.comp.filled-text-field.disabled.label-text')}),
+      focused: ${componentColor('md.comp.filled-text-field.focus.label-text')},
+      error: applyColor(${componentColor('md.comp.filled-text-field.error.label-text')}),
+      focusedError: applyColor(${componentColor('md.comp.filled-text-field.error.focus.label-text')}),
+      hovered: InputDecorationStyle(
+        normal: applyColor(${componentColor('md.comp.filled-text-field.hover.label-text')}),
+        disabled: applyColor(${componentColor('md.comp.filled-text-field.disabled.label-text')}),
+        disabledError: applyColor(${componentColor('md.comp.filled-text-field.disabled.label-text')}),
+        error: applyColor(${componentColor('md.comp.filled-text-field.error.hover.label-text')}),
+        focused: applyColor(${componentColor('md.comp.filled-text-field.hover.label-text')}),
+      ),
+    );
+  }
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
-    }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.hover.label-text')});
-      }
-      if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.label-text')});
-      }
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.label-text')});
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.hover.label-text')});
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.focus.label-text')});
-    }
-    return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.label-text')});
-  });
+  TextStyle? get floatingLabelStyle => labelStyle;
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
-    }${componentColor('md.comp.filled-text-field.hover.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.hover.supporting-text')});
-    }'''}${componentColor('md.comp.filled-text-field.focus.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.focus.supporting-text')});
-    }'''}
-    return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.supporting-text')});
-  });
+  TextStyle? get helperStyle {
+    return InputDecorationStyle(
+      normal: textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.supporting-text')}),
+      disabled: textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')}),${componentColor('md.comp.filled-text-field.focus.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
+      focused: textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.focus.supporting-text')})'''}${componentColor('md.comp.filled-text-field.hover.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
+      hovered: InputDecorationStyle(
+        normal: textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.supporting-text')}),
+        disabled: textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')}),
+      ),'''}
+    );
+  }
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.error.hover.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.hover.supporting-text')});
-    }'''}${componentColor('md.comp.filled-text-field.error.focus.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.supporting-text')});
-    }'''}
-    return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.supporting-text')});
-  });
+  TextStyle? get errorStyle {
+    TextStyle applyColor(Color? color) {
+      return ${textStyle("md.comp.filled-text-field.supporting-text")}?.copyWith(color: color) ?? TextStyle(color: color);
+    }
+    return InputDecorationStyle(
+      normal: applyColor(${componentColor('md.comp.filled-text-field.error.supporting-text')}),${componentColor('md.comp.filled-text-field.error.focus.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
+      focused: applyColor(${componentColor('md.comp.filled-text-field.error.focus.supporting-text')}),'''}${componentColor('md.comp.filled-text-field.error.hover.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
+      hovered: applyColor(${componentColor('md.comp.filled-text-field.error.hover.supporting-text')}),'''}
+    );
+  }
 }
 ''';
 

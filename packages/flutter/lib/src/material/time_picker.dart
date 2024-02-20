@@ -3499,10 +3499,8 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-      final TextStyle textStyle = _textTheme.labelMedium!;
-      return textStyle.copyWith(color: _colors.onSurfaceVariant);
-    });
+    final TextStyle textStyle = _textTheme.labelMedium!;
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   }
 
   @override
