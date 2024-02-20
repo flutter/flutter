@@ -1142,9 +1142,7 @@ void main() {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-      return const TextStyle(color: Colors.blue);
-    });
+    const InputDecorationStyle decorationStyle = InputDecorationStyle(normal: TextStyle(color: Colors.blue));
 
     // InputDecorationTheme arguments define InputDecoration properties.
     InputDecoration decoration = const InputDecoration().applyDefaults(
