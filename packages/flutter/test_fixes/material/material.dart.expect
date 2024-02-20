@@ -301,9 +301,9 @@ void main() {
   Scrollbar scrollbar = Scrollbar(trackVisibility: true);
   bool nowShowing = scrollbar.trackVisibility;
   // The 3 expressions below have `bulkApply` set to true thus can't be tested yet.
-  //ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(trackVisibility: nowShowing);
-  //scrollbarTheme.copyWith(trackVisibility: nowShowing);
-  //scrollbarTheme.trackVisibility;
+  //ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
+  //scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
+  //scrollbarTheme.showTrackOnHover;
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOf(context);
