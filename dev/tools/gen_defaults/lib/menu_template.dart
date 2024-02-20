@@ -38,7 +38,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(${componentColor('md.comp.menu.container.surface-tint-layer')});
+    return const MaterialStatePropertyAll<Color?>(${colorOrTransparent('md.comp.menu.container.surface-tint-layer')});
   }
 
   @override
@@ -242,7 +242,10 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(${componentColor('md.comp.menu.container.surface-tint-layer')});
+    return ${componentColor('md.comp.menu.container.surface-tint-layer') == 'null'
+      ? 'const MaterialStatePropertyAll<Color?>(Colors.transparent)'
+      : 'MaterialStatePropertyAll<Color?>(${componentColor('md.comp.menu.container.surface-tint-layer')})'
+  };
   }
 
   @override

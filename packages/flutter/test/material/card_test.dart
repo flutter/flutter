@@ -24,9 +24,9 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.elevation, 1.0);
     expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.color, colors.surface);
+    expect(material.color, colors.surfaceContainerLow);
     expect(material.shadowColor, colors.shadow);
-    expect(material.surfaceTintColor, colors.surfaceTint); // Default primary color
+    expect(material.surfaceTintColor, Colors.transparent); // Don't use surface tint. Toned surface container is used instead.
     expect(material.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
@@ -48,7 +48,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.elevation, 0.0);
     expect(container.margin, const EdgeInsets.all(4.0));
-    expect(material.color, colors.surfaceVariant);
+    expect(material.color, colors.surfaceContainerHighest);
     expect(material.shadowColor, colors.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shape, const RoundedRectangleBorder(
@@ -74,7 +74,7 @@ void main() {
     expect(container.margin, const EdgeInsets.all(4.0));
     expect(material.color, colors.surface);
     expect(material.shadowColor, colors.shadow);
-    expect(material.surfaceTintColor, colors.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shape, RoundedRectangleBorder(
       side: BorderSide(color: colors.outlineVariant),
       borderRadius: const BorderRadius.all(Radius.circular(12.0)),

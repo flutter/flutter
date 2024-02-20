@@ -67,7 +67,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The background color of a time picker.
   ///
   /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.background].
+  /// [ColorScheme.surfaceContainerHigh].
   final Color? backgroundColor;
 
   /// The style of the cancel button of a [TimePickerDialog].
@@ -83,7 +83,7 @@ class TimePickerThemeData with Diagnosticable {
   /// ```dart
   /// BorderSide(
   ///   color: Color.alphaBlend(
-  ///     Theme.of(context).colorScheme.onBackground.withOpacity(0.38),
+  ///     Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
   ///     Theme.of(context).colorScheme.surface,
   ///   ),
   /// ),
@@ -152,7 +152,7 @@ class TimePickerThemeData with Diagnosticable {
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
   ///
   /// If this is null and [ThemeData.useMaterial3] is true, the time picker
-  /// dial background color defaults [ColorScheme.surfaceVariant] color.
+  /// dial background color defaults [ColorScheme.surfaceContainerHighest] color.
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, the time picker
   /// dial background color defaults to [ColorScheme.onSurface] color with

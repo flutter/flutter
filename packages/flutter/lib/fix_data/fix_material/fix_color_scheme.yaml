@@ -26,6 +26,435 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'light'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'light'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'light'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'dark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'dark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'dark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastLight'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastLight'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastLight'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastDark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastDark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastDark'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate background"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'background'
+            newName: 'surface'
+      - if: "surface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'background'
+    variables:
+      surface:
+        kind: 'fragment'
+        value: 'arguments[surface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate onBackground"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "onSurface == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'onBackground'
+            newName: 'onSurface'
+      - if: "onSurface != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'onBackground'
+    variables:
+      onSurface:
+        kind: 'fragment'
+        value: 'arguments[onSurface]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate surfaceVariant"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ColorScheme'
+    oneOf:
+      - if: "surfaceContainerHighest == ''"
+        changes:
+          - kind: 'renameParameter'
+            oldName: 'surfaceVariant'
+            newName: 'surfaceContainerHighest'
+      - if: "surfaceContainerHighest != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'surfaceVariant'
+    variables:
+      surfaceContainerHighest:
+        kind: 'fragment'
+        value: 'arguments[surfaceContainerHighest]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate 'background' to 'surface'"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'background'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'surface'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate 'onBackground' to 'onSurface'"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'onBackground'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'onSurface'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138521
+  - title: "Migrate 'surfaceVariant' to 'surfaceContainerHighest'"
+    date: 2023-12-04
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'surfaceVariant'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'surfaceContainerHighest'
+
   # Changes made in https://github.com/flutter/flutter/pull/93427
   - title: "Remove 'primaryVariant' and 'secondaryVariant'"
     date: 2021-11-19

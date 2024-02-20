@@ -285,7 +285,7 @@ void main() {
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -296,7 +296,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
 
     focusNode.dispose();
   });

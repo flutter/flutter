@@ -3715,7 +3715,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
@@ -3725,7 +3725,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override
@@ -3835,13 +3835,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     return MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         return Colors.transparent;
       },
@@ -3924,12 +3924,12 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override

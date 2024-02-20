@@ -1,9 +1,8 @@
 {
-  "version": "v0_158",
+  "version": "v0_206",
 
-  "md.comp.search-view.container.color": "surface",
+  "md.comp.search-view.container.color": "surfaceContainerHigh",
   "md.comp.search-view.container.elevation": "md.sys.elevation.level3",
-  "md.comp.search-view.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.search-view.divider.color": "outline",
   "md.comp.search-view.docked.container.shape": "md.sys.shape.corner.extra-large",
   "md.comp.search-view.docked.header.container.height": 56.0,
