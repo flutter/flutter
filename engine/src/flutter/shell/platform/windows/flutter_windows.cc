@@ -247,7 +247,10 @@ bool FlutterDesktopEngineProcessExternalWindowMessage(
 
 FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return HandleForView(registrar->engine->view());
+  // TODO(loicsharma): Add |FlutterDesktopPluginRegistrarGetViewById| and
+  // deprecate this API as it makes single view assumptions.
+  // https://github.com/flutter/flutter/issues/143767
+  return HandleForView(registrar->engine->view(flutter::kImplicitViewId));
 }
 
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(

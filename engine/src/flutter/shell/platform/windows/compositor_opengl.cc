@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 
 #include "GLES3/gl3.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 namespace flutter {
@@ -93,7 +94,9 @@ bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
 
 bool CompositorOpenGL::Present(const FlutterLayer** layers,
                                size_t layers_count) {
-  FlutterWindowsView* view = engine_->view();
+  // TODO(loicsharma): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  FlutterWindowsView* view = engine_->view(kImplicitViewId);
   if (!view) {
     return false;
   }

@@ -84,10 +84,13 @@ void UpdateVsync(const FlutterWindowsEngine& engine,
 }  // namespace
 
 FlutterWindowsView::FlutterWindowsView(
+    FlutterViewId view_id,
     FlutterWindowsEngine* engine,
     std::unique_ptr<WindowBindingHandler> window_binding,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
-    : engine_(engine), windows_proc_table_(std::move(windows_proc_table)) {
+    : view_id_(view_id),
+      engine_(engine),
+      windows_proc_table_(std::move(windows_proc_table)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
@@ -650,6 +653,10 @@ bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
                                                size_t height) {
   return binding_handler_->OnBitmapSurfaceUpdated(allocation, row_bytes,
                                                   height);
+}
+
+FlutterViewId FlutterWindowsView::view_id() const {
+  return view_id_;
 }
 
 void FlutterWindowsView::CreateRenderSurface() {

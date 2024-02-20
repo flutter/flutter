@@ -1029,7 +1029,7 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
-  FlutterWindowsView view{engine.get(),
+  FlutterWindowsView view{kImplicitViewId, engine.get(),
                           std::make_unique<flutter::FlutterWindow>(100, 100)};
 
   bool schedule_frame_called = false;

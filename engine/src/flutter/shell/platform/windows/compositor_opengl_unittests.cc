@@ -95,8 +95,8 @@ class CompositorOpenGLTest : public WindowsTest {
     EXPECT_CALL(*window.get(), SetView).Times(1);
     EXPECT_CALL(*window.get(), GetWindowHandle).WillRepeatedly(Return(nullptr));
 
-    view_ =
-        std::make_unique<FlutterWindowsView>(engine_.get(), std::move(window));
+    view_ = std::make_unique<FlutterWindowsView>(kImplicitViewId, engine_.get(),
+                                                 std::move(window));
 
     if (add_surface) {
       auto surface = std::make_unique<egl::MockWindowSurface>();

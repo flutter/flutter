@@ -340,7 +340,10 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    auto view = host->view();
+
+    // TODO(loicsharma): Remove implicit view assumption.
+    // https://github.com/flutter/flutter/issues/142845
+    auto view = host->view(kImplicitViewId);
     if (!view) {
       return;
     }
@@ -485,8 +488,10 @@ bool FlutterWindowsEngine::Stop() {
 
 std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
     std::unique_ptr<WindowBindingHandler> window) {
-  auto view = std::make_unique<FlutterWindowsView>(this, std::move(window),
-                                                   windows_proc_table_);
+  // TODO(loicsharma): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  auto view = std::make_unique<FlutterWindowsView>(
+      kImplicitViewId, this, std::move(window), windows_proc_table_);
 
   view_ = view.get();
   InitializeKeyboard();
@@ -520,6 +525,12 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
   }
 
   return std::chrono::nanoseconds(interval);
+}
+
+FlutterWindowsView* FlutterWindowsEngine::view(FlutterViewId view_id) const {
+  FML_DCHECK(view_id == kImplicitViewId);
+
+  return view_;
 }
 
 // Returns the currently configured Plugin Registrar.
