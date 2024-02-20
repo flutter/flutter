@@ -601,7 +601,7 @@ class InputDecorationStyle extends MaterialStateTextStyle {
 
   /// The default style to use.
   /// [normal] is usually active when a different element has focus,
-  /// or when other arguments aren't given.
+  /// or when the appropriate style is null.
   final TextStyle normal;
 
   /// The style to use when the enclosing widget has primary focus.
