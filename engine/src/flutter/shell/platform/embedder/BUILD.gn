@@ -242,6 +242,7 @@ test_fixtures("fixtures") {
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
+    "fixtures/impeller_gl_gradient.png",
     "fixtures/vk_dpr_noxform.png",
     "fixtures/vk_gradient.png",
     "fixtures/gradient_metal.png",
@@ -250,7 +251,6 @@ test_fixtures("fixtures") {
     "fixtures/scene_without_custom_compositor.png",
     "fixtures/scene_without_custom_compositor_with_xform.png",
     "fixtures/snapshot_large_scene.png",
-    "fixtures/solid_red.png",
     "fixtures/verifyb143464703.png",
     "fixtures/verifyb143464703_soft_noxform.png",
   ]

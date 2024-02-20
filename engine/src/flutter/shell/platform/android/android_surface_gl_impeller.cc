@@ -36,8 +36,9 @@ bool AndroidSurfaceGLImpeller::IsValid() const {
 std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
   auto surface = std::make_unique<GPUSurfaceGLImpeller>(
-      this,                                   // delegate
-      android_context_->GetImpellerContext()  // context
+      this,                                    // delegate
+      android_context_->GetImpellerContext(),  // context
+      true                                     // render to surface
   );
   if (!surface->IsValid()) {
     return nullptr;

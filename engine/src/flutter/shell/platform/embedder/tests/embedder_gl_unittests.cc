@@ -4704,8 +4704,14 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
   EmbedderConfigBuilder builder(context);
 
+  bool present_called = false;
+  static_cast<EmbedderTestContextGL&>(context).SetGLPresentCallback(
+      [&present_called](FlutterPresentInfo present_info) {
+        present_called = true;
+      });
+
   builder.AddCommandLineArgument("--enable-impeller");
-  builder.SetDartEntrypoint("draw_solid_red");
+  builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
   builder.SetCompositor();
   builder.SetRenderTargetType(
@@ -4727,8 +4733,12 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
 
   ASSERT_TRUE(ImageMatchesFixture(
       FixtureNameForBackend(EmbedderTestContextType::kOpenGLContext,
-                            "solid_red.png"),
+                            "impeller_gl_gradient.png"),
       rendered_scene));
+
+  // The scene will be rendered by the compositor, and the surface present
+  // callback should not be invoked.
+  ASSERT_FALSE(present_called);
 }
 
 INSTANTIATE_TEST_SUITE_P(
