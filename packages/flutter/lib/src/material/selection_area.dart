@@ -35,6 +35,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [SelectableRegion], which provides an overview of the selection system.
+///  * [SelectableText], which enables selection on a single run of text.
 class SelectionArea extends StatefulWidget {
   /// Creates a [SelectionArea].
   ///
