@@ -282,7 +282,7 @@ void main() {
     final TestNotifier source3 = TestNotifier();
     final List<String> log = <String>[];
 
-    final Listenable merged = Listenable.merge(<Listenable>{source1, source2});
+    final Listenable merged = Listenable.merge(<Listenable>[source1, source2]);
     void listener1() {
       log.add('listener1');
     }
@@ -311,6 +311,21 @@ void main() {
     source2.notify();
     source3.notify();
     expect(log, <String>['listener1', 'listener2', 'listener1', 'listener2']);
+    log.clear();
+  });
+
+  test('Merging change notifiers supports any iterable', () {
+    final TestNotifier source1 = TestNotifier();
+    final TestNotifier source2 = TestNotifier();
+    final List<String> log = <String>[];
+
+    final Listenable merged = Listenable.merge(<Listenable?>{source1, source2});
+    void listener() => log.add('listener');
+
+    merged.addListener(listener);
+    source1.notify();
+    source2.notify();
+    expect(log, <String>['listener', 'listener']);
     log.clear();
   });
 
