@@ -142,6 +142,8 @@ enum MainAxisAlignment {
 /// See also:
 ///
 ///  * [Column], [Row], and [Flex], the flex widgets.
+///  * [Flex.crossAxisAlignment], the property on flex widgets that
+///    has this type.
 ///  * [RenderFlex], the flex render object.
 enum CrossAxisAlignment {
   /// Place the children with their start edge aligned with the start side of
@@ -185,9 +187,24 @@ enum CrossAxisAlignment {
 
   /// Place the children along the cross axis such that their baselines match.
   ///
+  /// Consider using this value for any horizontal main axis (as with [Row])
+  /// where the children primarily contain text.  If the different children
+  /// have text with different font metrics (for example because they differ
+  /// in [TextStyle.fontSize] or other [TextStyle] properties, or because
+  /// they use different fonts due to being written in different scripts),
+  /// then this typically produces better visual alignment than the other
+  /// [CrossAxisAlignment] values, which use no information about
+  /// where the text sits vertically within its bounding box.
+  ///
+  /// The baseline of a widget is typically the typographic baseline of the
+  /// first text in the first [Text] or [RichText] widget it encloses, if any.
+  /// The typographic baseline is a horizontal line used for aligning text,
+  /// which is specified by each font; for alphabetic scripts, it ordinarily
+  /// runs along the bottom of letters excluding any descenders.
+  ///
   /// Because baselines are always horizontal, this alignment is intended for
-  /// horizontal main axes. If the main axis is vertical, then this value is
-  /// treated like [start].
+  /// horizontal main axes (as with [Row]). If the main axis is vertical
+  /// (as with [Column]), then this value is treated like [start].
   ///
   /// For horizontal main axes, if the minimum height constraint passed to the
   /// flex layout exceeds the intrinsic height of the cross axis, children will
@@ -195,6 +212,10 @@ enum CrossAxisAlignment {
   /// alignment. In other words, the extra space will be below all the children.
   ///
   /// Children who report no baseline will be top-aligned.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.getDistanceToBaseline], which defines the baseline of a box.
   baseline,
 }
 
