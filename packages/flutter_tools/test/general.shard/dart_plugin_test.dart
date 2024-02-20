@@ -595,7 +595,7 @@ void main() {
 
         },
         throwsToolExit(
-          message: 'Please resolve the resolution errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -684,7 +684,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the resolution errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -741,7 +741,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the resolution errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(

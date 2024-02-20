@@ -1402,7 +1402,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     }
   }
   if (hasResolutionError) {
-    throwToolExit('Please resolve the resolution errors');
+    throwToolExit('Please resolve the plugin implementation selection errors');
   }
   return finalResolution;
 }
