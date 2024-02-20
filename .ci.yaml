@@ -5066,7 +5066,7 @@ targets:
 
   - name: Windows framework_tests_libraries_leak_tracking
     recipe: flutter/flutter_drone
-    # bringup: true # New target: https://github.com/flutter/flutter/issues/140414
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
       ignore_flakiness: "true"
@@ -5152,7 +5152,7 @@ targets:
 
   - name: Windows framework_tests_widgets_leak_tracking
     recipe: flutter/flutter_drone
-    # bringup: true # New target: https://github.com/flutter/flutter/issues/140414
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
       ignore_flakiness: "true"
