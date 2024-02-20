@@ -394,7 +394,7 @@ void RenderTarget::SetupDepthStencilAttachments(
   stencil0.load_action = stencil_attachment_config.load_action;
   stencil0.store_action = stencil_attachment_config.store_action;
   stencil0.clear_stencil = 0u;
-  stencil0.texture = depth_stencil_texture;
+  stencil0.texture = std::move(depth_stencil_texture);
 
   stencil0.texture->SetLabel(
       SPrintF("%s Depth+Stencil Texture", label.c_str()));
