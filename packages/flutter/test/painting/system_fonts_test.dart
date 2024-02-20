@@ -232,9 +232,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
-  testWidgets('TimePicker relayout upon system fonts changes',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-  (WidgetTester tester) async {
+  testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
