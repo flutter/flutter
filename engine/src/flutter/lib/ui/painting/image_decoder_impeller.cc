@@ -556,6 +556,9 @@ std::shared_ptr<impeller::DeviceBuffer> ImpellerAllocator::GetDeviceBuffer()
 }
 
 bool ImpellerAllocator::allocPixelRef(SkBitmap* bitmap) {
+  if (!bitmap) {
+    return false;
+  }
   const SkImageInfo& info = bitmap->info();
   if (kUnknown_SkColorType == info.colorType() || info.width() < 0 ||
       info.height() < 0 || !info.validRowBytes(bitmap->rowBytes())) {
@@ -571,6 +574,9 @@ bool ImpellerAllocator::allocPixelRef(SkBitmap* bitmap) {
       kShouldUseMallocDeviceBuffer
           ? std::make_shared<MallocDeviceBuffer>(descriptor)
           : allocator_->CreateBuffer(descriptor);
+  if (!device_buffer) {
+    return false;
+  }
 
   struct ImpellerPixelRef final : public SkPixelRef {
     ImpellerPixelRef(int w, int h, void* s, size_t r)

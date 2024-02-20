@@ -1050,6 +1050,13 @@ TEST_F(ImageDecoderFixtureTest,
   PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 }
 
+TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
+  auto context = std::make_shared<impeller::TestImpellerContext>();
+  auto allocator = ImpellerAllocator(context->GetResourceAllocator());
+
+  EXPECT_FALSE(allocator.allocPixelRef(nullptr));
+}
+
 }  // namespace testing
 }  // namespace flutter
 
