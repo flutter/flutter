@@ -780,6 +780,37 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  // Regression test for https://github.com/flutter/flutter/pull/138912
+  testWidgets('itemExtentBuilder should respect item count', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<double> numbers = <double>[
+      10, 20, 30, 40, 50,
+    ];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: numbers.length,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return numbers[index];
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: numbers[index],
+              child: Text('Item $index'),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/131393
   testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
