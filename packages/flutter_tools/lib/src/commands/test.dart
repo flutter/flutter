@@ -547,6 +547,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
+        concurrency: jobs,
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         randomSeed: stringArg('test-randomize-ordering-seed'),

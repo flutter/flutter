@@ -76,6 +76,7 @@ abstract class FlutterTestRunner {
     String? excludeTags,
     bool machine = false,
     bool updateGoldens = false,
+    required int? concurrency,
     String? testAssetDirectory,
     FlutterProject? flutterProject,
     String? icudtlPath,
@@ -653,6 +654,7 @@ class SpawnPlugin extends PlatformPlugin {
     String? excludeTags,
     bool machine = false,
     bool updateGoldens = false,
+    required int? concurrency,
     String? testAssetDirectory,
     FlutterProject? flutterProject,
     String? icudtlPath,
@@ -717,6 +719,8 @@ class SpawnPlugin extends PlatformPlugin {
         '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
+      if (concurrency != null)
+        '--concurrency=$concurrency',
       for (final String name in names)
         ...<String>['--name', name],
       for (final String plainName in plainNames)
