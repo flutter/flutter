@@ -15,12 +15,14 @@
   package: display_list_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/display_list_render_tests#meta/display_list_render_tests.cm
   package: display_list_render_tests-0.far
+  disabled: on arm64 because of the slowness
   variant: x64
 - test_command: test run fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
   package: flow_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/runtime_tests#meta/runtime_tests.cm
   package: runtime_tests-0.far
-  variant: debug
+  disabled: on debug_arm64 because of the slowness
+  variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/shell_tests#meta/shell_tests.cm
   package: shell_tests-0.far
   variant: debug_x64
@@ -31,7 +33,8 @@
   variant: debug
 - test_command: test run fuchsia-pkg://fuchsia.com/ui_tests#meta/ui_tests.cm
   package: ui_tests-0.far
-  variant: debug
+  disabled: on debug_arm64 because of the slowness
+  variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
   package: embedder_tests-0.far
   variant: debug_x64
