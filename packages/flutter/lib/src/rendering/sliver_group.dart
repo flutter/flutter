@@ -204,6 +204,30 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
   }
 
   @override
+  double? childScrollOffset(RenderObject child) {
+    assert(child.parent == this);
+    final GrowthDirection growthDirection = constraints.growthDirection;
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        double childScrollOffset = 0.0;
+        RenderSliver? current = childBefore(child as RenderSliver);
+        while (current != null) {
+          childScrollOffset += current.geometry!.scrollExtent;
+          current = childBefore(current);
+        }
+        return childScrollOffset;
+      case GrowthDirection.reverse:
+        double childScrollOffset = 0.0;
+        RenderSliver? current = childAfter(child as RenderSliver);
+        while (current != null) {
+          childScrollOffset -= current.geometry!.scrollExtent;
+          current = childAfter(current);
+        }
+        return childScrollOffset;
+    }
+  }
+
+  @override
   double childMainAxisPosition(RenderSliver child) {
     switch (constraints.axisDirection) {
       case AxisDirection.up:
@@ -254,6 +278,15 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       offset += childLayoutGeometry.scrollExtent;
       maxPaintExtent += child.geometry!.maxPaintExtent;
       child = childAfter(child);
+      assert(() {
+        if (child != null && maxPaintExtent.isInfinite) {
+          throw FlutterError(
+            'Unreachable sliver found, you may have a sliver behind '
+            'a sliver with infinite extent. '
+          );
+        }
+        return true;
+      }());
     }
 
     final double totalScrollExtent = offset;
