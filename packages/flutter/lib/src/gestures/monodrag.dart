@@ -48,6 +48,20 @@ typedef GestureDragCancelCallback = void Function();
 /// Used by [DragGestureRecognizer.velocityTrackerBuilder].
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
+/// {@template flutter.gestures.monodrag.GestureDragDownAccept}
+/// Signature for a function that returns whether the gesture should immediately win when a pointer down event occurs.
+/// 
+/// The purpose of this function is to determine whether
+/// the gesture should be recognized and processed immediately upon the initial pointer touch,
+/// rather than waiting for a certain threshold or 'touch slop' to be met.
+/// 
+/// This can be useful in situations where you're already in the a scrolling
+/// and you want to start a new drag on a scrollable widget.
+/// {@endtemplate}
+/// 
+/// Used by [DragGestureRecognizer.downAccept].
+typedef GestureDragDownAccept = bool Function();
+
 /// Recognizes movement.
 ///
 /// In contrast to [MultiDragGestureRecognizer], [DragGestureRecognizer]
@@ -76,6 +90,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.multitouchDragStrategy = MultitouchDragStrategy.latestPointer,
     this.velocityTrackerBuilder = _defaultBuilder,
+    this.downAccept,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
@@ -272,6 +287,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    determining the initial fling velocity for a [Scrollable] on iOS, to
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
+  
+  /// Whether the gesture should be accepted immediately when a drag down event.
+  /// 
+  /// If returned value is true, it is accepted immediately
+  /// without considering touch slop and thresholds.
+  GestureDragDownAccept? downAccept;
 
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
@@ -396,6 +417,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
+    if (event is PointerDownEvent) {
+      if (downAccept?.call() ?? false) _checkDrag(event.pointer);
+    }
     if (!event.synthesized &&
         (event is PointerDownEvent ||
          event is PointerMoveEvent ||
@@ -648,6 +672,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.downAccept,
   });
 
   @override
@@ -705,6 +730,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.downAccept,
   });
 
   @override
