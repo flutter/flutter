@@ -405,6 +405,7 @@ Future<void> _buildValueIndicatorStaticSlider(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
