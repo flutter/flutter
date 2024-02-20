@@ -50,15 +50,15 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 
 /// {@template flutter.gestures.monodrag.GestureDragDownAccept}
 /// Signature for a function that returns whether the gesture should immediately win when a pointer down event occurs.
-/// 
+///
 /// The purpose of this function is to determine whether
 /// the gesture should be recognized and processed immediately upon the initial pointer touch,
 /// rather than waiting for a certain threshold or 'touch slop' to be met.
-/// 
+///
 /// This can be useful in situations where you're already in the a scrolling
 /// and you want to start a new drag on a scrollable widget.
 /// {@endtemplate}
-/// 
+///
 /// Used by [DragGestureRecognizer.downAccept].
 typedef GestureDragDownAccept = bool Function();
 
@@ -287,9 +287,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    determining the initial fling velocity for a [Scrollable] on iOS, to
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
-  
+
   /// Whether the gesture should be accepted immediately when a drag down event.
-  /// 
+  ///
   /// If returned value is true, it is accepted immediately
   /// without considering touch slop and thresholds.
   GestureDragDownAccept? downAccept;
@@ -418,7 +418,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
     if (event is PointerDownEvent) {
-      if (downAccept?.call() ?? false) _checkDrag(event.pointer);
+      if (downAccept?.call() ?? false) {
+        _checkDrag(event.pointer);
+      }
     }
     if (!event.synthesized &&
         (event is PointerDownEvent ||
