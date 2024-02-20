@@ -41,7 +41,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
   @override
   Future<int> run(Iterable<String> args) async {
     try{
-      return await runCommand(parse(args)) ?? 1;
+      return await runCommand(parse(args)) ?? 0;
     } on FormatException catch (e) {
       environment.logger.error(e);
       return 1;
