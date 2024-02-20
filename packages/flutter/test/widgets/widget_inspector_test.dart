@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+import '../impeller_test_helpers.dart';
 import 'widget_inspector_test_utils.dart';
 
 // Start of block of code where widget creation location line numbers and
@@ -3869,7 +3870,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3879,7 +3880,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3906,7 +3907,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3916,7 +3917,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4551,7 +4552,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    });
+    }, skip: impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
 
     group('layout explorer', () {
       const String group = 'test-group';

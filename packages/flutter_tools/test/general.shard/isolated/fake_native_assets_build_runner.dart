@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/src/interface/file_system.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
