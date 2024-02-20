@@ -1167,12 +1167,13 @@ class _ReadingOrderSortData with Diagnosticable {
   }
 
   static void sortWithDirectionality(List<_ReadingOrderSortData> list, TextDirection directionality) {
-    mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
-      return switch (directionality) {
+    mergeSort<_ReadingOrderSortData>(
+      list,
+      compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) => switch (directionality) {
         TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
         TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
-      };
-    });
+      },
+    );
   }
 
   /// Returns the list of Directionality ancestors, in order from nearest to
@@ -1236,12 +1237,13 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
   List<Directionality>? _memberAncestors;
 
   static void sortWithDirectionality(List<_ReadingOrderDirectionalGroupData> list, TextDirection directionality) {
-    mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
-      return switch (directionality) {
+    mergeSort<_ReadingOrderDirectionalGroupData>(
+      list,
+      compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) => switch (directionality) {
         TextDirection.ltr => a.rect.left.compareTo(b.rect.left),
         TextDirection.rtl => b.rect.right.compareTo(a.rect.right),
-      };
-    });
+      },
+    );
   }
 
   @override
