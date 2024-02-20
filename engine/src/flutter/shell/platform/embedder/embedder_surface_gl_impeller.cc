@@ -179,8 +179,9 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,              // GPU surface GL delegate
-      impeller_context_  // render to surface
+      this,                     // GPU surface GL delegate
+      impeller_context_,        // Impeller context
+      !external_view_embedder_  // render to surface
   );
 }
 
