@@ -432,7 +432,8 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// their support, like [InputDecoration.labelStyle].
 ///
 /// To use a [MaterialStateTextStyle], you can either:
-///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
+///   1. Create a [InputDecorationStyle] object.
+///   1. Create another subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///
@@ -457,8 +458,7 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
-      _MaterialStateTextStyle(callback);
+  factory MaterialStateTextStyle.resolveWith(MaterialPropertyResolver<TextStyle> callback) = _MaterialStateTextStyle;
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
