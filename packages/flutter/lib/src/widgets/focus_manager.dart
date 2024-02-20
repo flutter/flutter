@@ -1711,10 +1711,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         _suspendedNode = null;
       }
       else if (_suspendedNode != null) {
-        assert(_focusDebug(() => 'marking node $_suspendedNode to be focused'));
-        _markedForFocus = _suspendedNode;
+        assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
+        _suspendedNode!.requestFocus();
         _suspendedNode = null;
-        applyFocusChangesIfNeeded();
       }
     } else if (_primaryFocus != rootScope) {
       assert(_focusDebug(() => 'suspending $_primaryFocus'));
