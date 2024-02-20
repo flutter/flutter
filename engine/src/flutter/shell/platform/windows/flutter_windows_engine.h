@@ -111,8 +111,9 @@ class FlutterWindowsEngine {
   // Returns false if stopping the engine fails, or if it was not running.
   virtual bool Stop();
 
-  // Sets the view that is displaying this engine's content.
-  void SetView(FlutterWindowsView* view);
+  // Create the view that is displaying this engine's content.
+  std::unique_ptr<FlutterWindowsView> CreateView(
+      std::unique_ptr<WindowBindingHandler> window);
 
   // The view displaying this engine's content, if any. This will be null for
   // headless engines.
