@@ -564,6 +564,117 @@ class FloatingLabelAlignment {
   String toString() => _stringify(_x);
 }
 
+/// {@template flutter.material.InputDecorationStyle}
+/// A [TextStyle] that can be used for an [InputDecoration],
+/// or anywhere else that supports [MaterialStateTextStyle]s.
+///
+/// This class accepts multiple [TextStyle]s as parameters.
+/// While the app is running, the relevant style will be applied
+/// based on which [MaterialState]s are active.
+/// {@endtemplate}
+///
+/// The [resolve] method makes an attempt to combine the given styles
+/// in a logical and intuitive way. If you have different preferences or needs,
+/// consider using a [MaterialStateTextStyle] object.
+///
+/// ```dart
+/// InputDecorationTheme(
+///   floatingLabelStyle: MaterialStateTextStyle.resolveWith((states) {
+///     if (states.contains(MaterialState.error)) {
+///       // your preferred logic here
+///       return TextStyle();
+///     }
+///   }),
+/// )
+/// ```
+class InputDecorationStyle extends MaterialStateTextStyle {
+  /// {@macro flutter.material.InputDecorationStyle}
+  const InputDecorationStyle({
+    required this.normal,
+    this.focused,
+    this.disabled,
+    this.error,
+    this.focusedError,
+    this.disabledError,
+    this.hovered,
+  });
+
+  /// The default style to use.
+  /// [normal] is usually active when a different element has focus,
+  /// or when other arguments aren't given.
+  final TextStyle normal;
+
+  /// The style to use when the enclosing widget has primary focus.
+  final TextStyle? focused;
+
+  /// The style to use when the enclosing widget is disabled.
+  final TextStyle? disabled;
+
+  /// The style to use when [MaterialState.error] is active,
+  /// often as a result of a failed validation.
+  final TextStyle? error;
+
+  /// The style to use when [MaterialState.error] is active
+  /// and the enclosing widget has primary focus.
+  ///
+  /// If [focusedError] is not supplied, defaults to [error],
+  /// and if both are null, then defaults to [focused].
+  final TextStyle? focusedError;
+
+  /// The style to use when [MaterialState.error] is active
+  /// and the enclosing widget is disabled.
+  ///
+  /// If [disabledError] is not supplied, defaults to [error],
+  /// and if both are null, then defaults to [disabled].
+  final TextStyle? disabledError;
+
+  /// The style to use when the user drags their mouse cursor
+  /// over the enclosing widget.
+  ///
+  /// This can be either a [TextStyle] or an [InputDecorationStyle].
+  ///
+  /// If a [TextStyle] is supplied, [hovered] is applied
+  /// on top of the current active style using [merge].
+  ///
+  /// If [hovered] is an [InputDecorationStyle], then other styles
+  /// will be ignored while the cursor is over the enclosing widget.
+  ///
+  /// Giving [hovered] its own `hovered` member throws an error.
+  final TextStyle? hovered;
+
+  @override
+  TextStyle resolve(Set<MaterialState> states) {
+    TextStyle? style;
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.disabled)) {
+        style ??= disabledError;
+      } else if (states.contains(MaterialState.focused)) {
+        style ??= focusedError;
+      }
+      style ??= error;
+    }
+    if (states.contains(MaterialState.disabled)) {
+      style ??= disabled;
+    } else if (states.contains(MaterialState.focused)) {
+      style ??= focused;
+    }
+    style ??= normal;
+
+    if (states.contains(MaterialState.hovered)) {
+      switch (hovered) {
+        case final InputDecorationStyle hoverStyle:
+          if (hoverStyle.hovered != null) {
+            throw UnsupportedError('MaterialStyle.hovered cannot have its own "hovered" property.');
+          }
+          return hoverStyle.resolve(states);
+        case TextStyle():
+          return style.merge(hovered);
+      }
+    }
+    return style;
+  }
+}
+
 // Identifies the children of a _RenderDecorationElement.
 enum _DecorationSlot {
   icon,
