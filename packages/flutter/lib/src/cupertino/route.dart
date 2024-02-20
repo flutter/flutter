@@ -153,7 +153,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return !(nextRoute is CupertinoRouteTransitionMixin && nextRoute.fullscreenDialog);
+    return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    // return !(nextRoute is CupertinoRouteTransitionMixin && nextRoute.fullscreenDialog);
   }
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
@@ -348,6 +349,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     super.fullscreenDialog,
     super.allowSnapshotting = true,
     super.barrierDismissible = false,
+    super.delegatedTransition = CupertinoPageTransition.delegateTransition,
   }) {
     assert(opaque);
   }
