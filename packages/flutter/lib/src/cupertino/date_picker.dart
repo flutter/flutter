@@ -415,12 +415,12 @@ class CupertinoDatePicker extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // The `time` mode and `dateAndTime` mode of the picker share the time
-    // columns, so they are placed together to one state.
-    // The `date` mode has different children and is implemented in a different
-    // state.
     // ignore: no_logic_in_create_state, https://github.com/flutter/flutter/issues/70499
     return switch (mode) {
+      // The `time` mode and `dateAndTime` mode of the picker share the time
+      // columns, so they are placed together to one state.
+      // The `date` mode has different children and is implemented in a different
+      // state.
       CupertinoDatePickerMode.time        => _CupertinoDatePickerDateTimeState(),
       CupertinoDatePickerMode.dateAndTime => _CupertinoDatePickerDateTimeState(),
       CupertinoDatePickerMode.date        => _CupertinoDatePickerDateState(dateOrder: dateOrder),
