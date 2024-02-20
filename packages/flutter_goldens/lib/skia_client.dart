@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
@@ -49,8 +50,10 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
+    Abi? abi,
     io.HttpClient? httpClient,
-  }) : httpClient = httpClient ?? io.HttpClient();
+  }) : httpClient = httpClient ?? io.HttpClient(),
+       abi = abi ?? Abi.current();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -73,6 +76,11 @@ class SkiaGoldClient {
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
+
+  /// The ABI of the current host platform.
+  ///
+  /// If not overriden for testing, defaults to [Abi.current];
+  final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and JSON files
@@ -489,6 +497,7 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -567,6 +576,7 @@ class SkiaGoldClient {
         'WebRenderer' : 'canvaskit',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
