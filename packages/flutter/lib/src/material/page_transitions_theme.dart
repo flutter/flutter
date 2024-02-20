@@ -86,14 +86,6 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
       ),
     );
 
-    final CurvedAnimation primaryAnimation = CurvedAnimation(
-      parent: ReverseAnimation(secondaryAnimation),
-      curve: _transitionCurve,
-      reverseCurve: _transitionCurve.flipped,
-    );
-
-    final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
-
     return AnimatedBuilder(
       animation: secondaryAnimation,
       child: FractionalTranslation(
@@ -899,6 +891,19 @@ class PageTransitionsTheme with Diagnosticable {
       secondaryAnimation: secondaryAnimation,
       child: child,
     );
+  }
+
+  /// Provide delegate transition for platform.
+  DelegatedTransitionBuilder? delegatedTransition(BuildContext context) {
+    final TargetPlatform platform = Theme.of(context).platform;
+
+    final PageTransitionsBuilder matchingBuilder =
+      builders[platform] ?? const ZoomPageTransitionsBuilder();
+
+    if (matchingBuilder == const ZoomPageTransitionsBuilder()) {
+      return ZoomPageTransitionsBuilder.delegateTransition;
+    }
+    return null;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
