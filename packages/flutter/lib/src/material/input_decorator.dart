@@ -668,7 +668,7 @@ class InputDecorationStyle extends MaterialStateTextStyle {
           }
           return hoverStyle.resolve(states);
         case TextStyle():
-          return style.merge(hovered);
+          return style?.merge(hovered) ?? hovered;
       }
     }
     return style;
