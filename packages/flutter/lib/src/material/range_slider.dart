@@ -889,9 +889,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
   final _RangeSliderState _state;
-  late Animation<double> _overlayAnimation;
-  late Animation<double> _valueIndicatorAnimation;
-  late Animation<double> _enableAnimation;
+  late CurvedAnimation _overlayAnimation;
+  late CurvedAnimation _valueIndicatorAnimation;
+  late CurvedAnimation _enableAnimation;
   final TextPainter _startLabelPainter = TextPainter();
   final TextPainter _endLabelPainter = TextPainter();
   late HorizontalDragGestureRecognizer _drag;
@@ -1185,6 +1185,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _tap.dispose();
     _startLabelPainter.dispose();
     _endLabelPainter.dispose();
+    _enableAnimation.dispose();
+    _valueIndicatorAnimation.dispose();
+    _overlayAnimation.dispose();
     super.dispose();
   }
 
