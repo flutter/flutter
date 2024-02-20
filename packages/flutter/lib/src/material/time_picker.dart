@@ -2752,7 +2752,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     assert(debugCheckHasMediaQuery(context));
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
     final ThemeData theme = Theme.of(context);
-    final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
+    final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context, entryMode: widget.entryMode) : _TimePickerDefaultsM2(context);
     final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
     final HourFormat timeOfDayHour = hourFormat(of: timeOfDayFormat);
     final _HourDialType hourMode = switch (timeOfDayHour) {
@@ -3347,9 +3347,10 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
-  _TimePickerDefaultsM3(this.context);
+  _TimePickerDefaultsM3(this.context, { this.entryMode = TimePickerEntryMode.dial });
 
   final BuildContext context;
+  final TimePickerEntryMode entryMode;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
@@ -3612,7 +3613,9 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
-      return _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states));
+      return entryMode == TimePickerEntryMode.dial
+        ? _textTheme.displayLarge!.copyWith(color: _hourMinuteTextColor.resolve(states))
+        : _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states));
     });
   }
 
