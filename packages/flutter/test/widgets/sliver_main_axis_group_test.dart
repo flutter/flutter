@@ -728,6 +728,23 @@ void main() {
     ) as RenderSliverMainAxisGroup;
     expect(renderGroup.geometry!.cacheExtent, 850.0);
   });
+
+  testWidgets('SliverMainAxisGroup correctly handles ensureVisible', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 300,
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 300)),
+          SliverToBoxAdapter(child: SizedBox(key: key, height: 100)),
+          const SliverToBoxAdapter(child: SizedBox(height: 300)),
+        ]
+      )
+    );
+    Scrollable.ensureVisible(key.currentContext!);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
+  });
 }
 
 Widget _buildSliverList({

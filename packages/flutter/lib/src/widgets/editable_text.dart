@@ -173,7 +173,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// between the framework and the input method. Consider using
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
-/// If both the [text] or [selection] properties need to be changed, set the
+/// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead.
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
@@ -195,7 +195,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextEditingController extends ValueNotifier<TextEditingValue> {
-  /// Creates a controller for an editable text field.
+  /// Creates a controller for an editable text field, with no initial selection.
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
@@ -206,7 +206,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// selection is not valid, the text field will update the selection when it
   /// is focused (the selection will be an empty selection positioned at the
   /// end of the text).
-  //
+  ///
   /// Consider using [TextEditingController.fromValue] to initialize both the
   /// text and the selection.
   ///
@@ -293,7 +293,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
-  /// The currently selected [text].
+  /// The currently selected range within [text].
   ///
   /// If the selection is collapsed, then this property gives the offset of the
   /// cursor within the text.
