@@ -114,8 +114,9 @@ void RunApplication(
   const bool success = app.SetUp();
 
   const int64_t end = Dart_TimelineGetMicros();
-  Dart_TimelineEvent("DartComponentController::SetUp", start, end,
-                     Dart_Timeline_Event_Duration, 0, NULL, NULL);
+  Dart_RecordTimelineEvent(
+      "DartComponentController::SetUp", start, end, 0, nullptr,
+      Dart_Timeline_Event_Duration, 0, NULL, NULL);
   if (success) {
     app.Run();
   }
@@ -146,8 +147,9 @@ void RunTestApplication(
   test_component->SetUp();
 
   const int64_t end = Dart_TimelineGetMicros();
-  Dart_TimelineEvent("DartTestComponentController::SetUp", start, end,
-                     Dart_Timeline_Event_Duration, 0, NULL, NULL);
+  Dart_RecordTimelineEvent(
+      "DartTestComponentController::SetUp", start, end, 0, nullptr,
+      Dart_Timeline_Event_Duration, 0, NULL, NULL);
 }
 
 bool EntropySource(uint8_t* buffer, intptr_t count) {
