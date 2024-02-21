@@ -400,7 +400,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
             Tessellator{}.Tessellate(
                 PathBuilder{}
                     .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
-                    .TakePath(FillType::kPositive),
+                    .TakePath(FillType::kOdd),
                 1.0f,
                 [&builder](const float* vertices, size_t vertices_count,
                            const uint16_t* indices, size_t indices_count) {

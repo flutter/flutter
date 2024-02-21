@@ -17,7 +17,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Zero points.
   {
     Tessellator t;
-    auto path = PathBuilder{}.TakePath(FillType::kPositive);
+    auto path = PathBuilder{}.TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -29,7 +29,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // One point.
   {
     Tessellator t;
-    auto path = PathBuilder{}.LineTo({0, 0}).TakePath(FillType::kPositive);
+    auto path = PathBuilder{}.LineTo({0, 0}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -41,8 +41,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Two points.
   {
     Tessellator t;
-    auto path =
-        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kPositive);
+    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -59,7 +58,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
       auto coord = i * 1.0f;
       builder.AddLine({coord, coord}, {coord + 1, coord + 1});
     }
-    auto path = builder.TakePath(FillType::kPositive);
+    auto path = builder.TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -71,8 +70,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Closure fails.
   {
     Tessellator t;
-    auto path =
-        PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kPositive);
+    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,

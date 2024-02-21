@@ -51,12 +51,6 @@ static int ToTessWindingRule(FillType fill_type) {
       return TESS_WINDING_ODD;
     case FillType::kNonZero:
       return TESS_WINDING_NONZERO;
-    case FillType::kPositive:
-      return TESS_WINDING_POSITIVE;
-    case FillType::kNegative:
-      return TESS_WINDING_NEGATIVE;
-    case FillType::kAbsGeqTwo:
-      return TESS_WINDING_ABS_GEQ_TWO;
   }
   return TESS_WINDING_ODD;
 }
