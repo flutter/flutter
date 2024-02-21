@@ -2846,6 +2846,7 @@ class InputDecoration {
   /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
+  /// {@template flutter.material.inputDecoration.labelStyle}
   /// The style to use for [InputDecoration.labelText] when the label is on top
   /// of the input field.
   ///
@@ -2855,13 +2856,11 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// {@template flutter.material.inputDecoration.inputDecorationStyle}
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
   /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
-  /// {@endtemplate}
   ///
   /// {@tool dartpad}
   /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
@@ -2870,6 +2869,7 @@ class InputDecoration {
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
   /// {@end-tool}
+  /// {@endtemplate}
   final TextStyle? labelStyle;
 
   /// {@template flutter.material.inputDecoration.floatingLabelStyle}
@@ -2879,7 +2879,11 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, [labelStyle] will be used for the floating label.
   ///
@@ -2903,7 +2907,11 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [helperText] can occupy.
@@ -2929,7 +2937,11 @@ class InputDecoration {
 
   /// The style to use for the [hintText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
@@ -3199,7 +3211,11 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3295,7 +3311,11 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3357,7 +3377,11 @@ class InputDecoration {
 
   /// The style to use for the [counterText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
@@ -3988,24 +4012,7 @@ class InputDecorationTheme with Diagnosticable {
     this.constraints,
   });
 
-  /// The style to use for [InputDecoration.labelText] when the label is on top
-  /// of the input field.
-  ///
-  /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
-  /// the input field, the text uses the [floatingLabelStyle] instead.
-  ///
-  /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
-  ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
-  ///
-  /// {@tool dartpad}
-  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
-  /// which resolves to a text style whose color depends on the decorator's
-  /// error state.
-  ///
-  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
-  /// {@end-tool}
+  /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelStyle}
@@ -4013,7 +4020,11 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for [InputDecoration.helperText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [InputDecoration.helperText] can occupy.
@@ -4031,7 +4042,11 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.hintText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// Also used for the [InputDecoration.labelText] when the
   /// [InputDecoration.labelText] is displayed on top of the input field (i.e.,
@@ -4108,7 +4123,11 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.prefixText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? prefixStyle;
@@ -4124,7 +4143,11 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.suffixText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? suffixStyle;
@@ -4140,7 +4163,11 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.counterText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
