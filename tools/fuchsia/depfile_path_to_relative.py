@@ -13,12 +13,8 @@ def main():
   parser = argparse.ArgumentParser(
       description='Executes a command, then rewrites the depfile, converts all absolute paths to relative'
   )
-  parser.add_argument(
-      '--depfile', help='Path to the depfile to rewrite', required=True
-  )
-  parser.add_argument(
-      'command', nargs='+', help='Positional args for the command to run'
-  )
+  parser.add_argument('--depfile', help='Path to the depfile to rewrite', required=True)
+  parser.add_argument('command', nargs='+', help='Positional args for the command to run')
   args = parser.parse_args()
 
   retval = subprocess.call(args.command)

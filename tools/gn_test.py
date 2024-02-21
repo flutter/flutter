@@ -32,9 +32,7 @@ class GNTestCase(unittest.TestCase):
 
   def test_to_gn_args(self):
     # This would not necessarily be true on a 32-bit machine?
-    self.assertEquals(
-        self._gn_args(['--ios', '--simulator'])['target_cpu'], 'x64'
-    )
+    self.assertEquals(self._gn_args(['--ios', '--simulator'])['target_cpu'], 'x64')
     self.assertEquals(self._gn_args(['--ios'])['target_cpu'], 'arm')
 
   def test_cannot_use_android_and_enable_unittests(self):

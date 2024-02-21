@@ -20,8 +20,7 @@ def xvfb_pid_filename(child_build_name):
   """Returns the filename to the Xvfb pid file.  This name is unique for each
   builder. This is used by the linux builders."""
   return os.path.join(
-      tempfile.gettempdir(),
-      'xvfb-' + xvfb_display_index(child_build_name) + '.pid'
+      tempfile.gettempdir(), 'xvfb-' + xvfb_display_index(child_build_name) + '.pid'
   )
 
 
@@ -86,8 +85,8 @@ def start_virtual_x(child_build_name, build_dir):
   # Start a virtual X server that we run the tests in.  This makes it so we can
   # run the tests even if we didn't start the tests from an X session.
   proc = subprocess.Popen([
-      cmd, display, '-screen', '0', '1280x800x24', '-ac', '-dpi', '96',
-      '-maxclients', '512', '-extension', 'MIT-SHM'
+      cmd, display, '-screen', '0', '1280x800x24', '-ac', '-dpi', '96', '-maxclients', '512',
+      '-extension', 'MIT-SHM'
   ],
                           stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT,

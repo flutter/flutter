@@ -15,15 +15,9 @@ def main():
       "Verifies that all .dart files are included in sources, and sources don't include nonexsitent files"
   )
   parser.add_argument(
-      "--source_dir",
-      help="Path to the directory containing the package sources",
-      required=True
+      "--source_dir", help="Path to the directory containing the package sources", required=True
   )
-  parser.add_argument(
-      "--stamp",
-      help="File to touch when source checking succeeds",
-      required=True
-  )
+  parser.add_argument("--stamp", help="File to touch when source checking succeeds", required=True)
   parser.add_argument("sources", help="source files", nargs=argparse.REMAINDER)
   args = parser.parse_args()
 
@@ -41,8 +35,7 @@ def main():
   expected_sources = set(args.sources)
   # It is possible for sources to include dart files outside of source_dir.
   actual_sources.update([
-      s for s in (expected_sources - actual_sources)
-      if src_dir_path.joinpath(s).resolve().exists()
+      s for s in (expected_sources - actual_sources) if src_dir_path.joinpath(s).resolve().exists()
   ],)
 
   if actual_sources == expected_sources:
@@ -56,14 +49,16 @@ def main():
   missing_sources = actual_sources - expected_sources
   if missing_sources:
     print(
-        '\nSource files found that were missing from the "sources" parameter:\n{}\n'
-        .format("\n".join(sources_to_abs_path(missing_sources))),
+        '\nSource files found that were missing from the "sources" parameter:\n{}\n'.format(
+            "\n".join(sources_to_abs_path(missing_sources))
+        ),
     )
   nonexistent_sources = expected_sources - actual_sources
   if nonexistent_sources:
     print(
-        '\nSource files listed in "sources" parameter but not found:\n{}\n'
-        .format("\n".join(sources_to_abs_path(nonexistent_sources))),
+        '\nSource files listed in "sources" parameter but not found:\n{}\n'.format(
+            "\n".join(sources_to_abs_path(nonexistent_sources))
+        ),
     )
   return 1
 

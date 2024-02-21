@@ -54,13 +54,11 @@ TEST(MessageLoopTaskQueueMergeUnmerge,
   auto queue_id_1 = task_queue->CreateTaskQueue();
   auto queue_id_2 = task_queue->CreateTaskQueue();
 
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_1));
 
   task_queue->Merge(queue_id_1, queue_id_2);
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
 
   ASSERT_EQ(2u, task_queue->GetNumPendingTasks(queue_id_1));
   ASSERT_EQ(0u, task_queue->GetNumPendingTasks(queue_id_2));
@@ -73,8 +71,7 @@ TEST(MessageLoopTaskQueueMergeUnmerge,
   auto queue_id_1 = task_queue->CreateTaskQueue();
   auto queue_id_2 = task_queue->CreateTaskQueue();
 
-  task_queue->RegisterTask(
-      queue_id_2, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_2, []() {}, ChronoTicksSinceEpoch());
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_2));
 
   task_queue->Merge(queue_id_1, queue_id_2);
@@ -88,10 +85,8 @@ TEST(MessageLoopTaskQueueMergeUnmerge, MergeUnmergeTasksPreserved) {
   auto queue_id_1 = task_queue->CreateTaskQueue();
   auto queue_id_2 = task_queue->CreateTaskQueue();
 
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
-  task_queue->RegisterTask(
-      queue_id_2, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_2, []() {}, ChronoTicksSinceEpoch());
 
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_1));
   ASSERT_EQ(1u, task_queue->GetNumPendingTasks(queue_id_2));
@@ -200,8 +195,7 @@ TEST(MessageLoopTaskQueueMergeUnmerge, MergeInvokesBothWakeables) {
   task_queue->SetWakeable(queue_id_1, wakeable1.get());
   task_queue->SetWakeable(queue_id_2, wakeable2.get());
 
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
 
   task_queue->Merge(queue_id_1, queue_id_2);
 
@@ -227,10 +221,8 @@ TEST(MessageLoopTaskQueueMergeUnmerge,
   task_queue->SetWakeable(queue_id_1, wakeable1.get());
   task_queue->SetWakeable(queue_id_2, wakeable2.get());
 
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
-  task_queue->RegisterTask(
-      queue_id_2, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_2, []() {}, ChronoTicksSinceEpoch());
 
   task_queue->Merge(queue_id_1, queue_id_2);
   task_queue->Unmerge(queue_id_1, queue_id_2);
@@ -258,8 +250,7 @@ TEST(MessageLoopTaskQueueMergeUnmerge, GetTasksToRunNowBlocksMerge) {
     wake_up_end.Wait();
   });
 
-  task_queue->RegisterTask(
-      queue_id_1, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_1, []() {}, ChronoTicksSinceEpoch());
   task_queue->SetWakeable(queue_id_1, wakeable.get());
 
   std::thread tasks_to_run_now_thread(
@@ -307,8 +298,7 @@ TEST(MessageLoopTaskQueueMergeUnmerge,
       queue_id_2, [&]() { task_queue->Merge(queue_id_1, queue_id_2); },
       ChronoTicksSinceEpoch());
 
-  task_queue->RegisterTask(
-      queue_id_2, []() {}, ChronoTicksSinceEpoch());
+  task_queue->RegisterTask(queue_id_2, []() {}, ChronoTicksSinceEpoch());
 
   ASSERT_EQ(CountRemainingTasks(task_queue, queue_id_2, true), 1);
   ASSERT_EQ(CountRemainingTasks(task_queue, queue_id_1, true), 1);

@@ -72,12 +72,8 @@ def GatherArtifacts(src_root, dst_root, create_meta_package=True):
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-      '--artifacts-root', dest='artifacts_root', action='store', required=True
-  )
-  parser.add_argument(
-      '--dest-dir', dest='dst_dir', action='store', required=True
-  )
+  parser.add_argument('--artifacts-root', dest='artifacts_root', action='store', required=True)
+  parser.add_argument('--dest-dir', dest='dst_dir', action='store', required=True)
 
   args = parser.parse_args()
 

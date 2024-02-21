@@ -79,8 +79,7 @@ def extract_deps(deps_file):
       continue
 
     dep_split = dep.rsplit('@', 1)
-    ancestor_result = get_common_ancestor([dep_split[0], dep_split[1]],
-                                          deps_list)
+    ancestor_result = get_common_ancestor([dep_split[0], dep_split[1]], deps_list)
     if ancestor_result:
       filtered_osv_deps.append({
           'package': {'name': ancestor_result[1], 'commit': ancestor_result[0]}
@@ -88,18 +87,12 @@ def extract_deps(deps_file):
 
   try:
     # Clean up cloned upstream dependency directory.
-    shutil.rmtree(
-        DEP_CLONE_DIR
-    )  # Use shutil.rmtree since dir could be non-empty.
+    shutil.rmtree(DEP_CLONE_DIR)  # Use shutil.rmtree since dir could be non-empty.
   except OSError as clone_dir_error:
-    print(
-        'Error cleaning up clone directory: %s : %s' %
-        (DEP_CLONE_DIR, clone_dir_error.strerror)
-    )
+    print('Error cleaning up clone directory: %s : %s' % (DEP_CLONE_DIR, clone_dir_error.strerror))
 
   osv_result = {
-      'packageSource': {'path': deps_file, 'type': 'lockfile'},
-      'packages': filtered_osv_deps
+      'packageSource': {'path': deps_file, 'type': 'lockfile'}, 'packages': filtered_osv_deps
   }
   return osv_result
 
@@ -150,19 +143,12 @@ def get_common_ancestor(dep, deps_list):
     upstream = deps_list.get(UPSTREAM_PREFIX + dep_name)
     temp_dep_dir = DEP_CLONE_DIR + '/' + dep_name
     # Clone dependency from mirror.
-    subprocess.check_output(['git', 'clone', '--quiet', '--', dep[0], dep_name],
-                            cwd=DEP_CLONE_DIR)
+    subprocess.check_output(['git', 'clone', '--quiet', '--', dep[0], dep_name], cwd=DEP_CLONE_DIR)
 
     # Create branch that will track the upstream dep.
-    print(
-        'attempting to add upstream remote from: {upstream}'.format(
-            upstream=upstream
-        )
-    )
-    subprocess.check_output(['git', 'remote', 'add', 'upstream', upstream],
-                            cwd=temp_dep_dir)
-    subprocess.check_output(['git', 'fetch', '--quiet', 'upstream'],
-                            cwd=temp_dep_dir)
+    print('attempting to add upstream remote from: {upstream}'.format(upstream=upstream))
+    subprocess.check_output(['git', 'remote', 'add', 'upstream', upstream], cwd=temp_dep_dir)
+    subprocess.check_output(['git', 'fetch', '--quiet', 'upstream'], cwd=temp_dep_dir)
     # Get name of the default branch for upstream (e.g. main/master/etc.).
     default_branch = subprocess.check_output(
         'git remote show upstream ' + "| sed -n \'/HEAD branch/s/.*: //p\'",
@@ -174,14 +160,12 @@ def get_common_ancestor(dep, deps_list):
 
     # Make upstream branch track the upstream dep.
     subprocess.check_output([
-        'git', 'checkout', '--force', '-b', 'upstream', '--track',
-        'upstream/' + default_branch
+        'git', 'checkout', '--force', '-b', 'upstream', '--track', 'upstream/' + default_branch
     ],
                             cwd=temp_dep_dir)
     # Get the most recent commit from default branch of upstream.
     commit = subprocess.check_output(
-        'git for-each-ref ' +
-        "--format=\'%(objectname:short)\' refs/heads/upstream",
+        'git for-each-ref ' + "--format=\'%(objectname:short)\' refs/heads/upstream",
         cwd=temp_dep_dir,
         shell=True
     )
@@ -211,9 +195,7 @@ def get_common_ancestor(dep, deps_list):
 
 def parse_args(args):
   args = args[1:]
-  parser = argparse.ArgumentParser(
-      description='A script to find common ancestor commit SHAs'
-  )
+  parser = argparse.ArgumentParser(description='A script to find common ancestor commit SHAs')
 
   parser.add_argument(
       '--deps',

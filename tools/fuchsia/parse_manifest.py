@@ -17,12 +17,8 @@ import hashlib
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-      '--input', dest='file_path', action='store', required=True
-  )
-  parser.add_argument(
-      '--clang-cpu', dest='clang_cpu', action='store', required=True
-  )
+  parser.add_argument('--input', dest='file_path', action='store', required=True)
+  parser.add_argument('--clang-cpu', dest='clang_cpu', action='store', required=True)
 
   args = parser.parse_args()
 

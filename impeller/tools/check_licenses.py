@@ -54,9 +54,7 @@ def is_source_file(path):
 # Checks that all source files have the same license preamble.
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument(
-      '--source-root', type=str, required=True, help='The source root.'
-  )
+  parser.add_argument('--source-root', type=str, required=True, help='The source root.')
   args = parser.parse_args()
 
   assert os.path.exists(args.source_root)
@@ -71,9 +69,7 @@ def main():
 
   for source_file in source_files:
     if not contains_license_block(source_file):
-      raise Exception(
-          'Could not find valid license block in source ', source_file
-      )
+      raise Exception('Could not find valid license block in source ', source_file)
 
 
 if __name__ == '__main__':

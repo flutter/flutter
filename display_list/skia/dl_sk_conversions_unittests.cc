@@ -142,9 +142,9 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kLastSeparableMode)             \
   FUNC(kLastMode)
 
-TEST(DisplayListSkConversions, ToSkBlendMode) {
+TEST(DisplayListSkConversions, ToSkBlendMode){
 #define CHECK_TO_SKENUM(V) ASSERT_EQ(ToSk(DlBlendMode::V), SkBlendMode::V);
-  FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
+    FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
 #undef CHECK_TO_SKENUM
 }
 

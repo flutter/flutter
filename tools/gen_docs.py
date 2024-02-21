@@ -32,19 +32,15 @@ SECTIONS = {
             ]
         ),
     'linux':
-        Section(
-            'Linux Embedder', [
-                'shell/platform/linux',
-                'shell/platform/common',
-            ]
-        ),
+        Section('Linux Embedder', [
+            'shell/platform/linux',
+            'shell/platform/common',
+        ]),
     'windows':
-        Section(
-            'Windows Embedder', [
-                'shell/platform/windows',
-                'shell/platform/common',
-            ]
-        ),
+        Section('Windows Embedder', [
+            'shell/platform/windows',
+            'shell/platform/common',
+        ]),
     'impeller':
         Section('Impeller', [
             'impeller',
@@ -56,12 +52,8 @@ def generate_doxyfile(section, output_dir, log_file, doxy_file):
   doxyfile = open('docs/Doxyfile.template', 'r').read()
   doxyfile = doxyfile.replace('@@OUTPUT_DIRECTORY@@', output_dir)
   doxyfile = doxyfile.replace('@@LOG_FILE@@', log_file)
-  doxyfile = doxyfile.replace(
-      '@@INPUT_DIRECTORIES@@', '"{}"'.format('" "'.join(section.inputs))
-  )
-  doxyfile = doxyfile.replace(
-      '@@PROJECT_NAME@@', 'Flutter {}'.format(section.title)
-  )
+  doxyfile = doxyfile.replace('@@INPUT_DIRECTORIES@@', '"{}"'.format('" "'.join(section.inputs)))
+  doxyfile = doxyfile.replace('@@PROJECT_NAME@@', 'Flutter {}'.format(section.title))
   doxyfile = doxyfile.replace(
       '@@DOCSET_FEEDNAME@@', 'Flutter {} Documentation'.format(section.title)
   )

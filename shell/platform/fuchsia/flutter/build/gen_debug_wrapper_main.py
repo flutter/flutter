@@ -13,12 +13,8 @@ def main():
   parser = argparse.ArgumentParser(
       sys.argv[0], description="Generate main file for Fuchsia dart test"
   )
-  parser.add_argument(
-      "--out", help="Path to .dart file to generate", required=True
-  )
-  parser.add_argument(
-      "--main-dart", help="Path to main.dart file to import", required=True
-  )
+  parser.add_argument("--out", help="Path to .dart file to generate", required=True)
+  parser.add_argument("--main-dart", help="Path to main.dart file to import", required=True)
   args = parser.parse_args()
   out_dir = os.path.dirname(args.out)
   assert os.path.isfile(os.path.join(os.path.dirname(args.out), args.main_dart))

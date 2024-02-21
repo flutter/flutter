@@ -13,9 +13,7 @@ import shutil
 
 
 def get_llvm_bin_directory():
-  buildtool_dir = os.path.join(
-      os.path.dirname(os.path.realpath(__file__)), '../../buildtools'
-  )
+  buildtool_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../buildtools')
   platform_dir = ''
   if sys.platform.startswith('linux'):
     platform_dir = 'linux-x64'
@@ -23,9 +21,7 @@ def get_llvm_bin_directory():
     platform_dir = 'mac-x64'
   else:
     raise Exception('Unknown/Unsupported platform.')
-  llvm_bin_dir = os.path.abspath(
-      os.path.join(buildtool_dir, platform_dir, 'clang/bin')
-  )
+  llvm_bin_dir = os.path.abspath(os.path.join(buildtool_dir, platform_dir, 'clang/bin'))
   if not os.path.exists(llvm_bin_dir):
     raise Exception('LLVM directory %s double not be located.' % llvm_bin_dir)
   return llvm_bin_dir
@@ -61,9 +57,7 @@ def collect_profiles(args):
       print('Path %s does not exist.' % absolute_test_path)
       return -1
 
-    unstripped_test_path = os.path.join(
-        absolute_test_dir, 'exe.unstripped', test_name
-    )
+    unstripped_test_path = os.path.join(absolute_test_dir, 'exe.unstripped', test_name)
 
     if os.path.exists(unstripped_test_path):
       binaries.append(unstripped_test_path)
@@ -74,10 +68,7 @@ def collect_profiles(args):
 
     remove_if_exists(raw_profile)
 
-    print(
-        'Running test %s to gather profile.' %
-        os.path.basename(absolute_test_path)
-    )
+    print('Running test %s to gather profile.' % os.path.basename(absolute_test_path))
 
     test_command = [absolute_test_path]
 
@@ -105,8 +96,7 @@ def merge_profiles(llvm_bin_dir, raw_profiles, output):
   print('Merging %d raw profile(s) into single profile.' % len(raw_profiles))
   merged_profile_path = os.path.join(output, 'all.profile')
   remove_if_exists(merged_profile_path)
-  merge_command = [profdata_binary, 'merge', '-sparse'
-                  ] + raw_profiles + ['-o', merged_profile_path]
+  merge_command = [profdata_binary, 'merge', '-sparse'] + raw_profiles + ['-o', merged_profile_path]
   subprocess.check_call(merge_command)
   print('Done.')
   return merged_profile_path

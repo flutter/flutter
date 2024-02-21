@@ -30,9 +30,7 @@ public final class BuildConfig {{
 
 
 def main():
-  parser = argparse.ArgumentParser(
-      description='Generate BuildConfig.java for Android'
-  )
+  parser = argparse.ArgumentParser(description='Generate BuildConfig.java for Android')
   parser.add_argument('--runtime-mode', type=str, required=True)
   parser.add_argument('--out', type=str, required=True)
 

@@ -60,11 +60,7 @@ class BenchmarkResult:  # pylint: disable=too-many-instance-attributes
     figures.append(plt.figure(dpi=1200, frameon=False, figsize=(11, 8.5)))
 
     for family in self.series:
-      plt.plot(
-          self.series[family]['x'],
-          self.series[family]['y'],
-          label=self.series_labels[family]
-      )
+      plt.plot(self.series[family]['x'], self.series[family]['y'], label=self.series_labels[family])
 
     plt.xlabel('Benchmark Seed')
     plt.ylabel('Time (' + self.time_unit + ')')
@@ -92,9 +88,7 @@ class BenchmarkResult:  # pylint: disable=too-many-instance-attributes
       figures.append(plt.figure(dpi=1200, frameon=False, figsize=(11, 8.5)))
       for family in self.series:
         plt.plot(
-            self.series[family]['x'],
-            self.series[family]['y'],
-            label=self.series_labels[family]
+            self.series[family]['x'], self.series[family]['y'], label=self.series_labels[family]
         )
 
       plt.xlabel('Benchmark Seed')
@@ -140,9 +134,7 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      'filename',
-      action='store',
-      help='Path to the JSON output from Google Benchmark'
+      'filename', action='store', help='Path to the JSON output from Google Benchmark'
   )
   parser.add_argument(
       '-o',
@@ -232,15 +224,11 @@ def process_benchmark_data(benchmark_json, output_pdf, output_csv):
     else:
       benchmark_draw_call_count = -1
 
-    optional_keys = [
-        'DrawCallCount_Varies', 'VerbCount', 'PointCount', 'VertexCount',
-        'GlyphCount'
-    ]
+    optional_keys = ['DrawCallCount_Varies', 'VerbCount', 'PointCount', 'VertexCount', 'GlyphCount']
 
     if benchmark_name not in benchmark_results_data:
       benchmark_results_data[benchmark_name] = BenchmarkResult(
-          benchmark_name, benchmark_backend, benchmark_unit,
-          benchmark_draw_call_count
+          benchmark_name, benchmark_backend, benchmark_unit, benchmark_draw_call_count
       )
 
     for key in optional_keys:

@@ -21,9 +21,7 @@ import tempfile
 
 # Path to the engine root checkout. This is used to calculate absolute
 # paths if relative ones are passed to the script.
-BUILD_ROOT_DIR = os.path.abspath(
-    os.path.join(os.path.realpath(__file__), '..', '..', '..', '..')
-)
+BUILD_ROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))
 
 
 def IsLinux():
@@ -103,9 +101,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
-        os.path.join(
-            _packaging_dir, 'fuchsia-debug-symbols-%s.cipd' % target_arch
-        )
+        os.path.join(_packaging_dir, 'fuchsia-debug-symbols-%s.cipd' % target_arch)
     ]
 
   # Retry up to three times.  We've seen CIPD fail on verification in some
@@ -181,14 +177,8 @@ def main():
           'empty temp directory'
       )
   )
-  parser.add_argument(
-      '--target-arch', type=str, choices=['x64', 'arm64'], required=True
-  )
-  parser.add_argument(
-      '--engine-version',
-      required=True,
-      help='Specifies the flutter engine SHA.'
-  )
+  parser.add_argument('--target-arch', type=str, choices=['x64', 'arm64'], required=True)
+  parser.add_argument('--engine-version', required=True, help='Specifies the flutter engine SHA.')
 
   parser.add_argument('--upload', default=False, action='store_true')
 

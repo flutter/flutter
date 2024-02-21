@@ -24,12 +24,8 @@ def main():
       type=Path,
       required=True
   )
-  parser.add_argument(
-      "--sources", help="List of FIDL source files", nargs="+", required=True
-  )
-  parser.add_argument(
-      "--dep-libraries", help="List of dependent libraries", nargs="*"
-  )
+  parser.add_argument("--sources", help="List of FIDL source files", nargs="+", required=True)
+  parser.add_argument("--dep-libraries", help="List of dependent libraries", nargs="*")
   args, args_to_forward = parser.parse_known_args()
 
   # Each line contains a library's source files separated by spaces.
