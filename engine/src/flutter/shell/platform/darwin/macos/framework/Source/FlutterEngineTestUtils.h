@@ -15,7 +15,7 @@
 
 namespace flutter::testing {
 
-class FlutterEngineTest : public ::testing::Test {
+class FlutterEngineTest : public AutoreleasePoolTest {
  public:
   FlutterEngineTest();
 
