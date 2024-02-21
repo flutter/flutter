@@ -561,7 +561,7 @@ optional("typeface_freetype") {
   enabled = skia_use_freetype
 
   public_defines = [ "SK_TYPEFACE_FACTORY_FREETYPE" ]
-  deps = [ "//third_party/freetype2" ]
+  deps = [ "//flutter/third_party/freetype2" ]
   sources = [
     "$_skia_root/src/ports/SkFontHost_FreeType.cpp",
     "$_skia_root/src/ports/SkFontHost_FreeType_common.cpp",

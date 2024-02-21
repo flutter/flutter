@@ -408,7 +408,8 @@ if (enable_unittests) {
         "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
       ]
 
-      # This is needed for //third_party/googletest for linking zircon symbols.
+      # This is needed for //flutter/third_party/googletest for linking zircon
+      # symbols.
       libs =
           [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
     }

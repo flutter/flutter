@@ -56,8 +56,8 @@ executable("flutter_shell_native_unittests") {
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
   ]
 }
 

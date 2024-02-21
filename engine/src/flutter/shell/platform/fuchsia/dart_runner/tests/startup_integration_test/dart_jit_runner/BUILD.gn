@@ -20,7 +20,8 @@ executable("dart-jit-runner-integration-test-bin") {
 
   sources = [ "dart-jit-runner-integration-test.cc" ]
 
-  # This is needed for //third_party/googletest for linking zircon symbols.
+  # This is needed for //flutter/third_party/googletest for linking zircon
+  # symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
@@ -34,8 +35,8 @@ executable("dart-jit-runner-integration-test-bin") {
     "../dart_echo_server:jit_echo_package",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/dart_runner/fidl:dart_test",
-    "//third_party/googletest:gtest",
-    "//third_party/googletest:gtest_main",
+    "//flutter/third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gtest_main",
   ]
 }
 

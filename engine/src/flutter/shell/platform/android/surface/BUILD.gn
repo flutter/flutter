@@ -53,8 +53,8 @@ source_set("surface_mock") {
     ":surface",
     "//flutter/flow",
     "//flutter/shell/gpu:gpu_surface_gl",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
   ]
 
   if (shell_enable_vulkan) {

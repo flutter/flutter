@@ -40,8 +40,8 @@ source_set("testing_lib") {
   public_deps = [
     "//flutter/display_list",
     "//flutter/fml",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
   ]
   public_configs = [ "//flutter:config" ]
 }
@@ -139,7 +139,7 @@ if (is_mac || is_ios) {
 
     deps = [
       "//flutter/fml",
-      "//third_party/googletest:gtest",
+      "//flutter/third_party/googletest:gtest",
     ]
   }
 }

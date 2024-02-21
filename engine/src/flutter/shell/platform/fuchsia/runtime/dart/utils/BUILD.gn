@@ -92,7 +92,8 @@ executable("dart_utils_unittests") {
   sources = [ "build_info_unittests.cc" ]
 
   libs = [
-    # This is needed for //third_party/googletest for linking zircon symbols.
+    # This is needed for //flutter/third_party/googletest for linking zircon
+    # symbols.
     "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so",
   ]
 
