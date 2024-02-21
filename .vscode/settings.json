@@ -14,5 +14,8 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "cSpell.words": [
+        "Piinks"
+    ]
 }

@@ -331,7 +331,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
 
     if (firstChild == null) {
-      if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex,))) {
+      final double layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+      if (!addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
         // There are either no children, or we are past the end of all our children.
         final double max;
         if (firstIndex <= 0) {

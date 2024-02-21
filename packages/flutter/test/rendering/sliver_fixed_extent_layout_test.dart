@@ -149,7 +149,56 @@ void main() {
     expect(parent.paintsChild(children[2]), true);
   });
 
-  test('RenderSliverFillViewport correctly references itemExtent', (){
+  test('RenderSliverFillViewport correctly references itemExtent, non-zero offset', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+    ];
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+      children: children,
+    );
+    final RenderSliverFillViewport sliver = childManager.createRenderSliverFillViewport();
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(1200.0),
+      cacheExtent: 100,
+      children: <RenderSliver>[ sliver ],
+    );
+    layout(root);
+    // These are a bogus itemExtents, and motivate the deprecation. The sliver
+    // knows its itemExtent, and should use its configured extent rather than
+    // whatever is provided through these methods.
+    // Also, the API is a bit redundant, so we clean!
+    // In this case, the true item extent is 600 to fill the viewport.
+    expect(
+      sliver.constraints.scrollOffset,
+      1200.0
+    );
+    expect(sliver.itemExtent, 600.0);
+    final double layoutOffset = sliver.indexToLayoutOffset(
+      150.0, // itemExtent
+      10,
+    );
+    expect(layoutOffset, 6000.0);
+    final int minIndex = sliver.getMinChildIndexForScrollOffset(
+      sliver.constraints.scrollOffset,
+      150.0, // itemExtent
+    );
+    expect(minIndex, 2);
+    final int maxIndex = sliver.getMaxChildIndexForScrollOffset(
+      sliver.constraints.scrollOffset,
+      150, // itemExtent
+    );
+    expect(maxIndex, 1);
+    final double maxScrollOffset = sliver.computeMaxScrollOffset(
+      sliver.constraints,
+      150, // itemExtent
+    );
+    expect(maxScrollOffset, 1800.0);
+  });
+
+  test('RenderSliverFillViewport correctly references itemExtent, zero offset', () {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
@@ -198,7 +247,57 @@ void main() {
     expect(maxScrollOffset, 1800.0);
   });
 
-  test('RenderSliverFixedExtentList correctly references itemExtent', (){
+  test('RenderSliverFixedExtentList correctly references itemExtent, non-zero offset', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+    ];
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+      children: children,
+    );
+    final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(30.0);
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(45.0),
+      cacheExtent: 100,
+      children: <RenderSliver>[ sliver ],
+    );
+    layout(root);
+    // These are a bogus itemExtents, and motivate the deprecation. The sliver
+    // knows its itemExtent, and should use its configured extent rather than
+    // whatever is provided through these methods.
+    // Also, the API is a bit redundant, so we clean!
+    // In this case, the true item extent is 30.0.
+    expect(
+      sliver.constraints.scrollOffset,
+      45.0
+    );
+    expect(sliver.constraints.viewportMainAxisExtent, 600.0);
+    expect(sliver.itemExtent, 30.0);
+    final double layoutOffset = sliver.indexToLayoutOffset(
+      150.0, // itemExtent
+      10,
+    );
+    expect(layoutOffset, 300.0);
+    final int minIndex = sliver.getMinChildIndexForScrollOffset(
+      sliver.constraints.scrollOffset,
+      150.0, // itemExtent
+    );
+    expect(minIndex, 1);
+    final int maxIndex = sliver.getMaxChildIndexForScrollOffset(
+      sliver.constraints.scrollOffset,
+      150, // itemExtent
+    );
+    expect(maxIndex, 1);
+    final double maxScrollOffset = sliver.computeMaxScrollOffset(
+      sliver.constraints,
+      150, // itemExtent
+    );
+    expect(maxScrollOffset, 90.0);
+  });
+
+  test('RenderSliverFixedExtentList correctly references itemExtent, zero offset', () {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
