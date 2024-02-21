@@ -142,7 +142,7 @@ final class AssetTransformer {
 }
 
 final class _AssetTransformerFailure {
-  _AssetTransformerFailure(this.message);
+  const _AssetTransformerFailure(this.message);
 
   final String message;
 }
