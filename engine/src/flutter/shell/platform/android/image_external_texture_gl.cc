@@ -29,19 +29,19 @@ ImageExternalTextureGL::ImageExternalTextureGL(
 
 void ImageExternalTextureGL::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
-    if (!latest_android_image_.is_null() && !latest_bounds_.isEmpty()) {
-      // After detach the cache of textures will have been cleared. If
-      // there is an android image we must populate it now so that the
-      // first frame isn't blank.
-      JavaLocalRef hardware_buffer = HardwareBufferFor(latest_android_image_);
-      UpdateImage(hardware_buffer, context);
-      CloseHardwareBuffer(hardware_buffer);
-    }
+    // TODO(johnmccurtchan): We currently display the first frame after an
+    // attach-detach cycle as blank. There seems to be an issue on some
+    // devices where ImageReaders/Images from before the detach aren't
+    // valid after the attach. According to Android folks this doesn't
+    // match the spec. Revisit this in the future.
+    // See https://github.com/flutter/flutter/issues/142978 and
+    // https://github.com/flutter/flutter/issues/139039.
     state_ = AttachmentState::kAttached;
   }
 }
 
 void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
+                                         const SkRect& bounds,
                                          PaintContext& context) {
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
   std::optional<HardwareBufferKey> key =
@@ -57,7 +57,7 @@ void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
     return;
   }
 
-  dl_image_ = CreateDlImage(context, latest_bounds_, key, std::move(egl_image));
+  dl_image_ = CreateDlImage(context, bounds, key, std::move(egl_image));
   if (key.has_value()) {
     gl_entries_.erase(image_lru_.AddImage(dl_image_, key.value()));
   }
@@ -70,17 +70,8 @@ void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
     return;
   }
   JavaLocalRef hardware_buffer = HardwareBufferFor(image);
-  UpdateImage(hardware_buffer, context);
+  UpdateImage(hardware_buffer, bounds, context);
   CloseHardwareBuffer(hardware_buffer);
-
-  // NOTE: In the following code it is important that old_android_image is
-  // not closed until after the update of egl_image_ otherwise the image might
-  // be closed before the old EGLImage referencing it has been deleted. After
-  // an image is closed the underlying HardwareBuffer may be recycled and used
-  // for a future frame.
-  JavaLocalRef old_android_image(latest_android_image_);
-  latest_android_image_.Reset(image);
-  CloseImage(old_android_image);
 }
 
 void ImageExternalTextureGL::Detach() {

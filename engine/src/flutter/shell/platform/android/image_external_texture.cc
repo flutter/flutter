@@ -26,7 +26,6 @@ void ImageExternalTexture::Paint(PaintContext& context,
   if (state_ == AttachmentState::kDetached) {
     return;
   }
-  latest_bounds_ = bounds;
   Attach(context);
   const bool should_process_frame = !freeze;
   if (should_process_frame) {
