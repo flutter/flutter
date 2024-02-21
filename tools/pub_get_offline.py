@@ -72,7 +72,8 @@ def check_package(package):
     for package_data in packages_data:
       package_uri = package_data['rootUri']
       package_name = package_data['name']
-      if '.pub-cache' in package_uri and 'pub.dartlang.org' in package_uri:
+      if '.pub-cache' in package_uri and ('pub.dartlang.org' in package_uri or
+                                          'pub.dev' in package_uri):
         print('Error: package "%s" was fetched from pub' % package_name)
         pub_count = pub_count + 1
   if pub_count > 0:
