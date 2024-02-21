@@ -78,6 +78,8 @@ class SurfaceContextVK : public Context,
   ///        recreated on the next frame.
   void UpdateSurfaceSize(const ISize& size) const;
 
+  void InitializeCommonlyUsedShadersIfNeeded() const override;
+
 #ifdef FML_OS_ANDROID
   vk::UniqueSurfaceKHR CreateAndroidSurface(ANativeWindow* window) const;
 #endif  // FML_OS_ANDROID

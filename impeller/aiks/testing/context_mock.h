@@ -117,6 +117,11 @@ class ContextMock : public Context {
               (const override));
 
   MOCK_METHOD(void, Shutdown, (), (override));
+
+  MOCK_METHOD(void,
+              InitializeCommonlyUsedShadersIfNeeded,
+              (),
+              (const, override));
 };
 
 }  // namespace testing

@@ -6,6 +6,8 @@
 
 #include "fml/concurrent_message_loop.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
+#include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
+#include "impeller/renderer/render_target.h"
 
 #ifdef FML_OS_ANDROID
 #include <pthread.h>
@@ -570,6 +572,47 @@ std::shared_ptr<DescriptorPoolRecyclerVK> ContextVK::GetDescriptorPoolRecycler()
 
 std::shared_ptr<CommandQueue> ContextVK::GetCommandQueue() const {
   return command_queue_vk_;
+}
+
+// Creating a render pass is observed to take an additional 6ms on a Pixel 7
+// device as the driver will lazily bootstrap and compile shaders to do so.
+// The render pass does not need to be begun or executed.
+void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
+  RenderTargetAllocator rt_allocator(GetResourceAllocator());
+  RenderTarget render_target =
+      RenderTarget::CreateOffscreenMSAA(*this, rt_allocator, {1, 1}, 1);
+
+  RenderPassBuilderVK builder;
+  for (const auto& [bind_point, color] : render_target.GetColorAttachments()) {
+    builder.SetColorAttachment(
+        bind_point,                                          //
+        color.texture->GetTextureDescriptor().format,        //
+        color.texture->GetTextureDescriptor().sample_count,  //
+        color.load_action,                                   //
+        color.store_action                                   //
+    );
+  }
+
+  if (auto depth = render_target.GetDepthAttachment(); depth.has_value()) {
+    builder.SetDepthStencilAttachment(
+        depth->texture->GetTextureDescriptor().format,        //
+        depth->texture->GetTextureDescriptor().sample_count,  //
+        depth->load_action,                                   //
+        depth->store_action                                   //
+    );
+  }
+
+  if (auto stencil = render_target.GetStencilAttachment();
+      stencil.has_value()) {
+    builder.SetStencilAttachment(
+        stencil->texture->GetTextureDescriptor().format,        //
+        stencil->texture->GetTextureDescriptor().sample_count,  //
+        stencil->load_action,                                   //
+        stencil->store_action                                   //
+    );
+  }
+
+  auto pass = builder.Build(GetDevice());
 }
 
 }  // namespace impeller

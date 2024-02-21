@@ -186,6 +186,14 @@ class Context {
     FML_CHECK(false && "not supported in this context");
   }
 
+  /// Run backend specific additional setup and create common shader variants.
+  ///
+  /// This bootstrap is intended to improve the performance of several
+  /// first frame benchmarks that are tracked in the flutter device lab.
+  /// The workload includes initializing commonly used but not default
+  /// shader variants, as well as forcing driver initialization.
+  virtual void InitializeCommonlyUsedShadersIfNeeded() const {}
+
  protected:
   Context();
 

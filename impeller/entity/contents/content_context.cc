@@ -612,12 +612,14 @@ void ContentContext::FlushCommandBuffers() const {
 }
 
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
+  TRACE_EVENT0("flutter", "InitializeCommonlyUsedShadersIfNeeded");
+  GetContext()->InitializeCommonlyUsedShadersIfNeeded();
+
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
     // TODO(jonahwilliams): The OpenGL Embedder Unittests hang if this code
     // runs.
     return;
   }
-  TRACE_EVENT0("flutter", "InitializeCommonlyUsedShadersIfNeeded");
 
   // Initialize commonly used shaders that aren't defaults. These settings were
   // chosen based on the knowledge that we mix and match triangle and
