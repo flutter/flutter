@@ -7,7 +7,7 @@
 #include <lib/fdio/directory.h>
 #include <lib/zx/process.h>
 
-#include <algorithm>  // Foor std::remove_if
+#include <algorithm>  // For std::remove_if
 #include <memory>
 #include <string>
 #include <utility>
