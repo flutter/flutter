@@ -579,11 +579,11 @@ class FloatingLabelAlignment {
 ///
 /// ```dart
 /// InputDecorationTheme(
-///   floatingLabelStyle: MaterialStateTextStyle.resolveWith((states) {
+///   floatingLabelStyle: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.error)) {
 ///       // your preferred logic here
-///       return TextStyle();
 ///     }
+///     return TextStyle();
 ///   }),
 /// )
 /// ```
