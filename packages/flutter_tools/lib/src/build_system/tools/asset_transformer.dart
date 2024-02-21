@@ -71,7 +71,7 @@ final class AssetTransformer {
             'User-defined transformation of asset "${asset.path}" failed.\n'
             '${transformerFailure.message}',
           );
-          break;
+          return false;
         }
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
