@@ -5401,6 +5401,7 @@ targets:
       - .ci.yaml
 
   - name: Windows_arm64 run_debug_test_windows
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/143836
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
