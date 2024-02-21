@@ -153,7 +153,7 @@ void testMain() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/125672.
-    test('updates meta state for Meta key and wrong DOM event metaKey value', () {
+    test('updates meta state for Meta key and wrong DOM event metaKey value (Linux)', () {
       RawKeyboard.initialize();
 
       Map<String, dynamic>? dataReceived;
@@ -180,6 +180,38 @@ void testMain() {
       });
       RawKeyboard.instance!.dispose();
     }, skip: operatingSystem != OperatingSystem.linux);
+
+    // Regression test for https://github.com/flutter/flutter/issues/141186.
+    test('updates meta state for Meta key seen as "Process" key', () {
+      RawKeyboard.initialize();
+
+      Map<String, dynamic>? dataReceived;
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
+          ui.PlatformMessageResponseCallback? callback) {
+        dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
+      };
+
+      // Purposely send a DOM event where Meta key is pressed but event.metaKey is not set to true.
+      // This can happen when the Meta key is seen as the 'Process' key.
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        'keydown',
+        key: 'Process',
+        code: 'MetaLeft',
+        location: 1,
+        keyCode: 229,
+      );
+      expect(event.defaultPrevented, isFalse);
+      expect(dataReceived, <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'MetaLeft',
+        'key': 'Process',
+        'location': 1,
+        'metaState': 0x8,
+        'keyCode': 229,
+      });
+      RawKeyboard.instance!.dispose();
+    });
 
     test('dispatches repeat events', () {
       RawKeyboard.initialize();
