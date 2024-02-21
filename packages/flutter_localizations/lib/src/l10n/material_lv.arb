@@ -147,5 +147,6 @@
   "lookUpButtonLabel": "Meklēt",
   "searchWebButtonLabel": "Meklēt tīmeklī",
   "shareButtonLabel": "Kopīgot…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

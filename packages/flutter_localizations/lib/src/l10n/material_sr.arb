@@ -148,5 +148,6 @@
   "lookUpButtonLabel": "Поглед нагоре",
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
