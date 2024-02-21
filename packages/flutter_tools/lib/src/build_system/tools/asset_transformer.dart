@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import '../../artifacts.dart';
@@ -54,7 +53,7 @@ final class AssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
   }) async {
 
-    String getTempFilePath() => '${_random.nextInt(1<<32)}${path.extension(asset.path)}';
+    String getTempFilePath() => '${_random.nextInt(1<<32)}${_fileSystem.path.extension(asset.path)}';
 
     File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath());
     await asset.copy(tempInputFile.path);
