@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "جستجو",
   "searchWebButtonLabel": "جستجو در وب",
   "shareButtonLabel": "هم‌رسانی…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

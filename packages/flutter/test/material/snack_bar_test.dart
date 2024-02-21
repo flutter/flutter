@@ -2825,6 +2825,7 @@ void main() {
   testWidgets('Material3 - SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -2908,6 +2909,7 @@ void main() {
   testWidgets('Material2 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2941,6 +2943,7 @@ void main() {
   testWidgets('Material3 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),

@@ -333,6 +333,20 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   ShapeBorder get shape {
     return ${shape("$tokenGroup.container")};
   }
+
+  @override
+  MaterialStateProperty<Color?>? get timeSelectorSeparatorColor {
+    // TODO(tahatesser): Update this when tokens are available.
+    // This is taken from https://m3.material.io/components/time-pickers/specs.
+    return MaterialStatePropertyAll<Color>(_colors.onSurface);
+  }
+
+  @override
+  MaterialStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
+    // TODO(tahatesser): Update this when tokens are available.
+    // This is taken from https://m3.material.io/components/time-pickers/specs.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.displayLarge);
+  }
 }
 ''';
 }
