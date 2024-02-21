@@ -30,7 +30,6 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
               .index_type = IndexType::k16bit,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 

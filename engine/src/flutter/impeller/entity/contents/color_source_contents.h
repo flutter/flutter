@@ -123,7 +123,7 @@ class ColorSourceContents : public Contents {
     // increment the stencil buffer as we draw, preventing overlapping fragments
     // from drawing. Afterwards, we need to append another draw call to clean up
     // the stencil buffer (happens below in this method).
-    if (geometry_result.prevent_overdraw) {
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
       options.stencil_mode =
           ContentContextOptions::StencilMode::kLegacyClipIncrement;
     }
@@ -156,7 +156,7 @@ class ColorSourceContents : public Contents {
     // If we performed overdraw prevention, a subsection of the clip heightmap
     // was incremented by 1 in order to self-clip. So simply append a clip
     // restore to clean it up.
-    if (geometry_result.prevent_overdraw) {
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
       auto restore = ClipRestoreContents();
       restore.SetRestoreCoverage(GetCoverage(entity));
       return restore.Render(renderer, entity, pass);
