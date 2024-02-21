@@ -41,6 +41,10 @@
                     "script": "flutter/ci/format.sh"
                 },
                 {
+                    "nane": "test:GeneratedPluginRegistant.java omitted",
+                    "script": "flutter/ci/test/format_no_generated_java_test.sh"
+                },
+                {
                     "language": "python3",
                     "name": "test: Host_Tests_for_host_debug_unopt",
                     "script": "flutter/testing/run_tests.py",
