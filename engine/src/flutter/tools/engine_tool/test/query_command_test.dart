@@ -9,6 +9,7 @@ import 'dart:io' as io;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
+import 'package:engine_tool/src/commands/flags.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:litetest/litetest.dart';
@@ -81,12 +82,12 @@ void main() {
     expect(
       stringsFromLogs(logger.testLogs),
       equals(<String>[
-        'Add --verbose to see detailed information about each builder',
-        '',
-        '"linux_test_config" builder:',
-        '   "build_name" config',
-        '"linux_test_config2" builder:',
-        '   "build_name" config',
+        'Add --verbose to see detailed information about each builder\n',
+        '\n',
+        '"linux_test_config" builder:\n',
+        '   "build_name" config\n',
+        '"linux_test_config2" builder:\n',
+        '   "build_name" config\n',
       ]),
     );
   });
@@ -99,16 +100,16 @@ void main() {
       configs: configs,
     );
     final int result = await runner.run(<String>[
-      'query', 'builds', '--builder', 'linux_test_config',
+      'query', 'builds', '--$builderFlag', 'linux_test_config',
     ]);
     expect(result, equals(0));
     expect(
       stringsFromLogs(logger.testLogs),
       equals(<String>[
-        'Add --verbose to see detailed information about each builder',
-        '',
-        '"linux_test_config" builder:',
-        '   "build_name" config',
+        'Add --verbose to see detailed information about each builder\n',
+        '\n',
+        '"linux_test_config" builder:\n',
+        '   "build_name" config\n',
       ]),
     );
   });
@@ -121,7 +122,7 @@ void main() {
       configs: configs,
     );
     final int result = await runner.run(<String>[
-      'query', 'builds', '--all',
+      'query', 'builds', '--$allFlag',
     ]);
     expect(result, equals(0));
     expect(

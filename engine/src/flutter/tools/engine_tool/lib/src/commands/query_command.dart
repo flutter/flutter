@@ -5,14 +5,11 @@
 import 'package:engine_build_configs/engine_build_configs.dart';
 
 import 'command.dart';
+import 'flags.dart';
 
-const String _allFlag = 'all';
-const String _builderFlag = 'builder';
-const String _verboseFlag = 'verbose';
-
-/// The root 'query' command.
+// ignore: public_member_api_docs
 final class QueryCommand extends CommandBase {
-  /// Constructs the 'query' command.
+  // ignore: public_member_api_docs
   QueryCommand({
     required super.environment,
     required this.configs,
@@ -20,13 +17,13 @@ final class QueryCommand extends CommandBase {
     // Add options here that are common to all queries.
     argParser
       ..addFlag(
-        _allFlag,
+        allFlag,
         abbr: 'a',
         help: 'List all results, even when not relevant on this platform',
         negatable: false,
       )
       ..addOption(
-        _builderFlag,
+        builderFlag,
         abbr: 'b',
         help: 'Restrict the query to a single builder.',
         allowed: <String>[
@@ -42,7 +39,7 @@ final class QueryCommand extends CommandBase {
         },
       )
       ..addFlag(
-        _verboseFlag,
+        verboseFlag,
         abbr: 'v',
         help: 'Respond to queries with extra information',
         negatable: false,
@@ -65,9 +62,9 @@ final class QueryCommand extends CommandBase {
                             'and tests.';
 }
 
-/// The 'query builds' command.
+// ignore: public_member_api_docs
 final class QueryBuildsCommand extends CommandBase {
-  /// Constructs the 'query build' command.
+  // ignore: public_member_api_docs
   QueryBuildsCommand({
     required super.environment,
     required this.configs,
@@ -87,9 +84,9 @@ final class QueryBuildsCommand extends CommandBase {
   Future<int> run() async {
     // Loop through all configs, and log those that are compatible with the
     // current platform.
-    final bool all = parent!.argResults![_allFlag]! as bool;
-    final String? builderName = parent!.argResults![_builderFlag] as String?;
-    final bool verbose = parent!.argResults![_verboseFlag] as bool;
+    final bool all = parent!.argResults![allFlag]! as bool;
+    final String? builderName = parent!.argResults![builderFlag] as String?;
+    final bool verbose = parent!.argResults![verboseFlag] as bool;
     if (!verbose) {
       environment.logger.status(
         'Add --verbose to see detailed information about each builder',

@@ -20,19 +20,19 @@ void main() {
   test('error messages are recorded at the default log level', () {
     final Logger logger = Logger.test();
     logger.error('Error');
-    expect(stringsFromLogs(logger.testLogs), equals(<String>['Error']));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Error\n']));
   });
 
   test('warning messages are recorded at the default log level', () {
     final Logger logger = Logger.test();
     logger.warning('Warning');
-    expect(stringsFromLogs(logger.testLogs), equals(<String>['Warning']));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Warning\n']));
   });
 
   test('status messages are recorded at the default log level', () {
     final Logger logger = Logger.test();
     logger.status('Status');
-    expect(stringsFromLogs(logger.testLogs), equals(<String>['Status']));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Status\n']));
   });
 
   test('info messages are not recorded at the default log level', () {
@@ -45,12 +45,37 @@ void main() {
     final Logger logger = Logger.test();
     logger.level = Logger.infoLevel;
     logger.info('info');
-    expect(stringsFromLogs(logger.testLogs), equals(<String>['info']));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['info\n']));
   });
 
   test('indent indents the message', () {
     final Logger logger = Logger.test();
     logger.status('Status', indent: 1);
-    expect(stringsFromLogs(logger.testLogs), equals(<String>[' Status']));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>[' Status\n']));
+  });
+
+  test('newlines in error() can be disabled', () {
+    final Logger logger = Logger.test();
+    logger.error('Error', newline: false);
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Error']));
+  });
+
+  test('newlines in warning() can be disabled', () {
+    final Logger logger = Logger.test();
+    logger.warning('Warning', newline: false);
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Warning']));
+  });
+
+  test('newlines in status() can be disabled', () {
+    final Logger logger = Logger.test();
+    logger.status('Status', newline: false);
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['Status']));
+  });
+
+  test('newlines in info() can be disabled', () {
+    final Logger logger = Logger.test();
+    logger.level = Logger.infoLevel;
+    logger.info('info', newline: false);
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['info']));
   });
 }

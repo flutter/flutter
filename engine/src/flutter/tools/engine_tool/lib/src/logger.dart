@@ -76,7 +76,7 @@ class Logger {
     }
     runZoned<void>(() {
       try {
-        sink.writeln(message);
+        sink.write(message);
       } catch (_) { // ignore: avoid_catches_without_on_clauses
         _stdioDone = true;
       }
@@ -104,27 +104,38 @@ class Logger {
   }
 
   /// Record a log message at level [Logger.error].
-  void error(Object? message, {int indent = 0}) {
-    _emitLog(errorLevel, message, indent);
+  void error(Object? message, {int indent = 0, bool newline = true}) {
+    _emitLog(errorLevel, message, indent, newline);
   }
 
   /// Record a log message at level [Logger.warning].
-  void warning(Object? message, {int indent = 0}) {
-    _emitLog(warningLevel, message, indent);
+  void warning(Object? message, {int indent = 0, bool newline = true}) {
+    _emitLog(warningLevel, message, indent, newline);
   }
 
   /// Record a log message at level [Logger.warning].
-  void status(Object? message, {int indent = 0}) {
-    _emitLog(statusLevel, message, indent);
+  void status(Object? message, {int indent = 0, bool newline = true}) {
+    _emitLog(statusLevel, message, indent, newline);
   }
 
   /// Record a log message at level [Logger.info].
-  void info(Object? message, {int indent = 0}) {
-    _emitLog(infoLevel, message, indent);
+  void info(Object? message, {int indent = 0, bool newline = true}) {
+    _emitLog(infoLevel, message, indent, newline);
   }
 
-  void _emitLog(log.Level level, Object? message, int indent) {
-    final String m = '${' ' * indent}$message';
+  /// Writes a number of spaces to stdout equal to the width of the terminal
+  /// and emits a carriage return.
+  void clearLine() {
+    if (!io.stdout.hasTerminal) {
+      return;
+    }
+    final int width = io.stdout.terminalColumns;
+    final String spaces = ' ' * width;
+    _ioSinkWrite(io.stdout, '$spaces\r');
+  }
+
+  void _emitLog(log.Level level, Object? message, int indent, bool newline) {
+    final String m = '${' ' * indent}$message${newline ? '\n' : ''}';
     _logger.log(level, m);
   }
 
