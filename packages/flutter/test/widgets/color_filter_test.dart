@@ -40,6 +40,7 @@ void main() {
         child: ColorFiltered(
           colorFilter: sepia,
           child: MaterialApp(
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             title: 'Flutter Demo',
             theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
