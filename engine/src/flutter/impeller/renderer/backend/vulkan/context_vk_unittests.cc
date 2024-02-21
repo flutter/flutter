@@ -5,6 +5,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -208,6 +209,17 @@ TEST(CapabilitiesVKTest,
               })
           .Build();
   ASSERT_EQ(context, nullptr);
+}
+
+TEST(ContextVKTest, WarmUpFunctionCreatesRenderPass) {
+  const std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+
+  context->SetOffscreenFormat(PixelFormat::kR8G8B8A8UNormInt);
+  context->InitializeCommonlyUsedShadersIfNeeded();
+
+  auto functions = GetMockVulkanFunctions(context->GetDevice());
+  ASSERT_TRUE(std::find(functions->begin(), functions->end(),
+                        "vkCreateRenderPass") != functions->end());
 }
 
 }  // namespace testing
