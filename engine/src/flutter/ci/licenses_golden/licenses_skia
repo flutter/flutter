@@ -1,4 +1,4 @@
-Signature: b63b075252eead4ef89c72d7423ce999
+Signature: c8e063603c9114ac623c542fa6132e26
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5738,7 +5738,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/layers/NullLayer.c
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/layers/SolidLayer.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/RangeSelector.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/RangeSelector.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/SkottieShaper.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAdapter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAdapter.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAnimator.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -5857,7 +5856,6 @@ FILE: ../../../flutter/third_party/skia/modules/skottie/src/layers/NullLayer.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/layers/SolidLayer.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/RangeSelector.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/RangeSelector.h
-FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/SkottieShaper.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAdapter.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAdapter.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/TextAnimator.cpp
