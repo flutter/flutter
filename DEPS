@@ -283,8 +283,8 @@ deps = {
   'src/flutter/third_party/rapidjson':
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
-  'src/third_party/harfbuzz':
-   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'b61761f36e93c3f1e36c9bed0755acfa7f4e3d4f',
+  'src/flutter/third_party/harfbuzz':
+   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea8f97c615f0ba17dc25013ef67dbd6bfaaa76f2',
 
   'src/third_party/libcxx':
    Var('llvm_git') + '/llvm-project/libcxx' + '@' + '44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0',
@@ -313,7 +313,7 @@ deps = {
   'src/flutter/third_party/benchmark':
    Var('chromium_git') + '/external/github.com/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
 
-  'src/third_party/googletest':
+  'src/flutter/third_party/googletest':
    Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '7f036c5563af7d0329f20e8bb42effb04629f0c0',
 
   'src/flutter/third_party/boringssl':
@@ -628,7 +628,7 @@ deps = {
   'src/flutter/third_party/expat':
    Var('chromium_git') + '/external/github.com/libexpat/libexpat.git' + '@' + '654d2de0da85662fcc7644a7acd7c2dd2cfb21f0',
 
-  'src/third_party/freetype2':
+  'src/flutter/third_party/freetype2':
    Var('flutter_git') + '/third_party/freetype2' + '@' + '3bea2761290a1cbe7d8f75c1c5a7ad727f826a66',
 
   'src/flutter/third_party/skia':

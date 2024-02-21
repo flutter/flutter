@@ -51,7 +51,7 @@ if (skia_enable_skshaper) {
       sources += skia_shaper_harfbuzz_sources
       deps += [
         "../skunicode",
-        "//third_party/harfbuzz",
+        "//flutter/third_party/harfbuzz",
       ]
     }
     configs += [ "../../:skia_private" ]
