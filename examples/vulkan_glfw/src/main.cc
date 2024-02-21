@@ -512,7 +512,7 @@ int main(int argc, char** argv) {
   }
 
   // Load instance procs.
-  VULKAN_HPP_DEFAULT_DISPATCHER.init(g_state.instance);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(vk::Instance(g_state.instance));
 
   /// --------------------------------------------------------------------------
   /// Create the window surface.
