@@ -285,22 +285,22 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2021().englishLike.displayMedium!
-        .merge(Typography.material2021().black.displayMedium)
+      Typography.material2021().englishLike.displayLarge!
+        .merge(Typography.material2021().black.displayLarge)
         .copyWith(
           color: defaultTheme.colorScheme.onPrimaryContainer,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2021().englishLike.displayMedium!
-        .merge(Typography.material2021().black.displayMedium)
+      Typography.material2021().englishLike.displayLarge!
+        .merge(Typography.material2021().black.displayLarge)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
@@ -456,6 +456,28 @@ void main() {
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final TextStyle hourTextStyle = _textField(tester, '7').style!;
+    expect(
+      hourTextStyle,
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
+        .copyWith(
+          color: defaultTheme.colorScheme.onSurface,
+          decorationColor: defaultTheme.colorScheme.onSurface,
+        ),
+    );
+
+    final TextStyle minuteTextStyle = _textField(tester, '15').style!;
+    expect(
+      minuteTextStyle,
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
+        .copyWith(
+          color: defaultTheme.colorScheme.onSurface,
+          decorationColor: defaultTheme.colorScheme.onSurface,
+        ),
+    );
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);

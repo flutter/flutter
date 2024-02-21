@@ -244,8 +244,16 @@ class TimePickerThemeData with Diagnosticable {
 
   /// Used to configure the [TextStyle]s for the hour/minute controls.
   ///
-  /// If this is null, the time picker defaults to the overall theme's
-  /// [TextTheme.headline3].
+  /// If this is null and entry mode is [TimePickerEntryMode.dial], the time
+  /// picker defaults to the overall theme's [TextTheme.displayLarge] with
+  /// the value of [hourMinuteTextColor].
+  ///
+  /// If this is null and entry mode is [TimePickerEntryMode.input], the time
+  /// picker defaults to the overall theme's [TextTheme.displayMedium] with
+  /// the value of [hourMinuteTextColor].
+  ///
+  /// If this is null and [ThemeData.useMaterial3] is false, the time picker
+  /// defaults to the overall theme's [TextTheme.displayMedium].
   final TextStyle? hourMinuteTextStyle;
 
   /// The input decoration theme for the [TextField]s in the time picker.
