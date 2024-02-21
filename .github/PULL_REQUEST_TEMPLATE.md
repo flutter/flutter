@@ -13,7 +13,7 @@
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
-- [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where necessary.
+- [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
