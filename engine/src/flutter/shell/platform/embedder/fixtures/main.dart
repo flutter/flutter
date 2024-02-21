@@ -1364,3 +1364,21 @@ void render_gradient_retained() {
   };
   PlatformDispatcher.instance.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void render_impeller_gl_test() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+    final Paint paint = Paint();
+    paint.color = Color.fromARGB(255, 0, 0, 255);
+    final PictureRecorder baseRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(baseRecorder);
+    canvas.drawPaint(Paint()..color = Color.fromARGB(255, 255, 0, 0));
+    canvas.drawRect(Rect.fromLTRB(20.0, 20.0, 200.0, 150.0), paint);
+    builder.addPicture(Offset.zero, baseRecorder.endRecording());
+    builder.pop();
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
