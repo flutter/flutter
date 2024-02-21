@@ -636,7 +636,7 @@ class TextPainter {
   @Deprecated(  // flutter_ignore: deprecation_syntax (see analyze.dart)
     'The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.'
   )
-  /// Migration only flag, do no use.
+  /// Migration only flag, do not use.
   static bool disableStrutHalfLeading = true;
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
