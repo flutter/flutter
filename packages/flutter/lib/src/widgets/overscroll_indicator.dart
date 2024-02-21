@@ -384,7 +384,6 @@ class _GlowController extends ChangeNotifier {
   @override
   void dispose() {
     _glowController.dispose();
-    _decelerator.removeListener(notifyListeners);
     _decelerator.dispose();
     _displacementTicker.dispose();
     _pullRecedeTimer?.cancel();
