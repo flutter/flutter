@@ -590,7 +590,7 @@ class FloatingLabelAlignment {
 class InputDecorationStyle extends MaterialStateTextStyle {
   /// {@macro flutter.material.InputDecorationStyle}
   const InputDecorationStyle({
-    required this.normal,
+    this.normal = const TextStyle(),
     this.focused,
     this.disabled,
     this.error,
