@@ -151,5 +151,6 @@
   "lookUpButtonLabel": "Знайсці",
   "searchWebButtonLabel": "Пошук у сетцы",
   "shareButtonLabel": "Абагуліць...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Tra cứu",
   "searchWebButtonLabel": "Tìm kiếm trên web",
   "shareButtonLabel": "Chia sẻ...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

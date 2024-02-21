@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Tumingin sa Itaas",
   "searchWebButtonLabel": "Maghanap sa Web",
   "shareButtonLabel": "Ibahagi...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

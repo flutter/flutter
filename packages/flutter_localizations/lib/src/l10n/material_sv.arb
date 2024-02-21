@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Titta upp",
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela …",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
