@@ -22,17 +22,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /*
  * A presentation used for hosting a single Android view in a virtual display.
@@ -359,7 +360,7 @@ class SingleViewPresentation extends Presentation {
 
     private WindowManager getWindowManager() {
       if (windowManager == null) {
-        windowManager = windowManagerHandler.getWindowManager();
+        windowManager = windowManagerHandler;
       }
       return windowManager;
     }
@@ -377,21 +378,18 @@ class SingleViewPresentation extends Presentation {
   }
 
   /*
-   * A dynamic proxy handler for a WindowManager with custom overrides.
+   * A static proxy handler for a WindowManager with custom overrides.
    *
    * The presentation's window manager delegates all calls to the default window manager.
    * WindowManager#addView calls triggered by views that are attached to the virtual display are crashing
    * (see: https://github.com/flutter/flutter/issues/20714). This was triggered when selecting text in an embedded
    * WebView (as the selection handles are implemented as popup windows).
    *
-   * This dynamic proxy overrides the addView, removeView, removeViewImmediate, and updateViewLayout methods
-   * to prevent these crashes.
-   *
-   * This will be more efficient as a static proxy that's not using reflection, but as the engine is currently
-   * not being built against the latest Android SDK we cannot override all relevant method.
-   * Tracking issue for upgrading the engine's Android sdk: https://github.com/flutter/flutter/issues/20717
+   * This static proxy overrides the addView, removeView, removeViewImmediate, and updateViewLayout methods
+   * to prevent these crashes, and forwards all other calls to the delegate.
    */
-  static class WindowManagerHandler implements InvocationHandler {
+  @VisibleForTesting
+  static class WindowManagerHandler implements WindowManager {
     private static final String TAG = "PlatformViewsController";
 
     private final WindowManager delegate;
@@ -402,72 +400,86 @@ class SingleViewPresentation extends Presentation {
       fakeWindowRootView = fakeWindowViewGroup;
     }
 
-    public WindowManager getWindowManager() {
-      return (WindowManager)
-          Proxy.newProxyInstance(
-              WindowManager.class.getClassLoader(), new Class<?>[] {WindowManager.class}, this);
+    @Override
+    @Deprecated
+    public Display getDefaultDisplay() {
+      return delegate.getDefaultDisplay();
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      switch (method.getName()) {
-        case "addView":
-          addView(args);
-          return null;
-        case "removeView":
-          removeView(args);
-          return null;
-        case "removeViewImmediate":
-          removeViewImmediate(args);
-          return null;
-        case "updateViewLayout":
-          updateViewLayout(args);
-          return null;
-      }
-      try {
-        return method.invoke(delegate, args);
-      } catch (InvocationTargetException e) {
-        throw e.getCause();
-      }
-    }
-
-    private void addView(Object[] args) {
-      if (fakeWindowRootView == null) {
-        Log.w(TAG, "Embedded view called addView while detached from presentation");
-        return;
-      }
-      View view = (View) args[0];
-      WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) args[1];
-      fakeWindowRootView.addView(view, layoutParams);
-    }
-
-    private void removeView(Object[] args) {
-      if (fakeWindowRootView == null) {
-        Log.w(TAG, "Embedded view called removeView while detached from presentation");
-        return;
-      }
-      View view = (View) args[0];
-      fakeWindowRootView.removeView(view);
-    }
-
-    private void removeViewImmediate(Object[] args) {
+    public void removeViewImmediate(View view) {
       if (fakeWindowRootView == null) {
         Log.w(TAG, "Embedded view called removeViewImmediate while detached from presentation");
         return;
       }
-      View view = (View) args[0];
       view.clearAnimation();
       fakeWindowRootView.removeView(view);
     }
 
-    private void updateViewLayout(Object[] args) {
+    @Override
+    public void addView(View view, ViewGroup.LayoutParams params) {
+      if (fakeWindowRootView == null) {
+        Log.w(TAG, "Embedded view called addView while detached from presentation");
+        return;
+      }
+      fakeWindowRootView.addView(view, params);
+    }
+
+    @Override
+    public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
       if (fakeWindowRootView == null) {
         Log.w(TAG, "Embedded view called updateViewLayout while detached from presentation");
         return;
       }
-      View view = (View) args[0];
-      WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) args[1];
-      fakeWindowRootView.updateViewLayout(view, layoutParams);
+      fakeWindowRootView.updateViewLayout(view, params);
+    }
+
+    @Override
+    public void removeView(View view) {
+      if (fakeWindowRootView == null) {
+        Log.w(TAG, "Embedded view called removeView while detached from presentation");
+        return;
+      }
+      fakeWindowRootView.removeView(view);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    @NonNull
+    @Override
+    public WindowMetrics getCurrentWindowMetrics() {
+      return delegate.getCurrentWindowMetrics();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    @NonNull
+    @Override
+    public WindowMetrics getMaximumWindowMetrics() {
+      return delegate.getMaximumWindowMetrics();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    @Override
+    public boolean isCrossWindowBlurEnabled() {
+      return delegate.isCrossWindowBlurEnabled();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    @Override
+    public void addCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+      delegate.addCrossWindowBlurEnabledListener(listener);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    @Override
+    public void addCrossWindowBlurEnabledListener(
+        @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
+      delegate.addCrossWindowBlurEnabledListener(executor, listener);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.S)
+    @Override
+    public void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+      delegate.removeCrossWindowBlurEnabledListener(listener);
     }
   }
 
