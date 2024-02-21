@@ -301,6 +301,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(ColorProperty('actionBackgroundColor', actionBackgroundColor, defaultValue: null));
     properties.add(ColorProperty('disabledActionBackgroundColor', disabledActionBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<DismissDirection>('dismissDirection', dismissDirection, defaultValue: null));
-    properties.add(DiagnosticProperty<TextStyle>('actionLabelStyle', actionLabelStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('actionLabelStyle', actionLabelStyle, defaultValue: null));
   }
 }
