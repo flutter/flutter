@@ -32,6 +32,29 @@ SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART_SDK_DIR="${SRC_DIR}/third_party/dart/tools/sdks/dart-sdk"
 DART="${DART_SDK_DIR}/bin/dart"
 
+# Check if a file named **/GeneratedPluginRegistrant.java exists in the project.
+# If it does, fail the build and print a message to the user pointing them to
+# the file and instructing them to remove it.
+#
+# See: https://github.com/flutter/flutter/issues/143782.
+
+# The expected path to the file. Any *other* path is unexpected.
+EXPECTED_PATHS=("./shell/platform/android/test/io/flutter/plugins/GeneratedPluginRegistrant.java")
+
+# Find all files named GeneratedPluginRegistrant.java in the project.
+GENERATED_PLUGIN_REGISTRANT_PATHS=$(find "$SRC_DIR/flutter" -name "GeneratedPluginRegistrant.java")
+
+# Check for GeneratedPluginRegistrant.java in unexpected locations
+for expected_path in "${EXPECTED_PATHS[@]}"; do
+    found_files=$(find . -name "GeneratedPluginRegistrant.java" -not -path "$expected_path")
+
+    for file in $found_files; do
+        echo "Error: Unexpected GeneratedPluginRegistrant.java found: $file"
+        echo "Please remove the unexpected file and see: https://github.com/flutter/flutter/issues/143782"
+        exit 1
+    done
+done
+
 cd "$SCRIPT_DIR"
 "$DART" \
   --disable-dart-dev \
