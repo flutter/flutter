@@ -265,6 +265,21 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     setState(() {
       _selectedDate = value;
       widget.onDateChanged(_selectedDate!);
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          final bool isToday = DateUtils.isSameDay(widget.currentDate, _selectedDate);
+          final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
+          SemanticsService.announce(
+            '${_localizations.selectedDateLabel} ${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
+            _textDirection,
+          );
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          break;
+      }
     });
   }
 

@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Ara",
   "searchWebButtonLabel": "Web'de Ara",
   "shareButtonLabel": "Paylaş...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -1086,6 +1086,51 @@ void main() {
         }
         semantics.dispose();
       });
+
+      // This is a regression test for https://github.com/flutter/flutter/issues/143439.
+      testWidgets('Selected date Semantics announcement on onDateChanged', (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+        final DateTime initialDate = DateTime(2016, DateTime.january, 15);
+        DateTime? selectedDate;
+
+        await tester.pumpWidget(calendarDatePicker(
+          initialDate: initialDate,
+          onDateChanged: (DateTime value) {
+            selectedDate = value;
+          },
+        ));
+
+        final bool isToday = DateUtils.isSameDay(initialDate, selectedDate);
+        final String semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+
+        // The initial date should be announced.
+        expect(
+          tester.takeAnnouncements().last.message,
+          '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+        );
+
+        // Select a new date.
+        await tester.tap(find.text('20'));
+        await tester.pumpAndSettle();
+
+        // The selected date should be announced.
+        expect(
+          tester.takeAnnouncements().last.message,
+          '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+        );
+
+        // Select the initial date.
+        await tester.tap(find.text('15'));
+
+        // The initial date should be announced as selected.
+        expect(
+          tester.takeAnnouncements().first.message,
+          '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+        );
+
+        semantics.dispose();
+      }, variant: TargetPlatformVariant.desktop());
     });
   });
 

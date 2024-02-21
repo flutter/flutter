@@ -444,6 +444,11 @@
     "description": "Label indicating that the focused date is the current date."
   },
 
+  "selectedDateLabel": "Selected",
+  "@selectedDateLabel": {
+    "description": "The semantics label to describe the selected date in the calendar picker invoked using [showDatePicker]."
+  },
+
   "reorderItemToStart": "Move to the start",
   "@reorderItemToStart": {
     "description": "The audio announcement to move an item in a Reorderable List to the start of the list."

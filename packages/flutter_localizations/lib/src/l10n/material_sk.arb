@@ -151,5 +151,6 @@
   "lookUpButtonLabel": "Pohľad nahor",
   "searchWebButtonLabel": "Hľadať na webe",
   "shareButtonLabel": "Zdieľať…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

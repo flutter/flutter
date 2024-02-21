@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Kërko",
   "searchWebButtonLabel": "Kërko në ueb",
   "shareButtonLabel": "Ndaj...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

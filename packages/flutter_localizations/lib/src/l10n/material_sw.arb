@@ -147,5 +147,6 @@
   "lookUpButtonLabel": "Tafuta",
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Shiriki...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
   "shareButtonLabel": "Κοινοποίηση…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

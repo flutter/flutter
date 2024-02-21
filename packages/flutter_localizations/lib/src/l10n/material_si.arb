@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "උඩ බලන්න",
   "searchWebButtonLabel": "වෙබය සොයන්න",
   "shareButtonLabel": "බෙදා ගන්න...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

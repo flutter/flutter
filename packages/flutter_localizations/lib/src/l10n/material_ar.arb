@@ -156,5 +156,6 @@
   "lookUpButtonLabel": "النظر إلى أعلى",
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

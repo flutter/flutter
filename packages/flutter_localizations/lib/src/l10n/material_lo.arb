@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "ຊອກຫາຂໍ້ມູນ",
   "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
   "shareButtonLabel": "ແບ່ງປັນ...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
