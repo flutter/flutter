@@ -21,6 +21,11 @@ struct BlurParameters {
 KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
     BlurParameters parameters);
 
+/// This will shrink the size of a kernel by roughly half by sampling between
+/// samples and relying on linear interpolation between the samples.
+KernelPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
+    KernelPipeline::FragmentShader::KernelSamples samples);
+
 /// Performs a bidirectional Gaussian blur.
 ///
 /// This is accomplished by rendering multiple passes in multiple directions.

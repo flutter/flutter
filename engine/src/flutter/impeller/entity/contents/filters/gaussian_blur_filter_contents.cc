@@ -174,7 +174,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         GaussianBlurVertexShader::BindFrameInfo(
             pass, host_buffer.EmplaceUniform(frame_info));
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, host_buffer.EmplaceUniform(GenerateBlurInfo(blur_info)));
+            pass, host_buffer.EmplaceUniform(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
         return pass.Draw().ok();
       };
   if (destination_target.has_value()) {
@@ -502,6 +503,34 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   // Make sure everything adds up to 1.
   for (auto& sample : result.samples) {
     sample.coefficient /= tally;
+  }
+
+  return result;
+}
+
+// This works by shrinking the kernel size by 2 and relying on lerp to read
+// between the samples.
+KernelPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
+    KernelPipeline::FragmentShader::KernelSamples parameters) {
+  KernelPipeline::FragmentShader::KernelSamples result;
+  result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
+  int32_t middle = result.sample_count / 2;
+  int32_t j = 0;
+  for (int i = 0; i < result.sample_count; i++) {
+    if (i == middle) {
+      result.samples[i] = parameters.samples[j++];
+    } else {
+      KernelPipeline::FragmentShader::KernelSample left = parameters.samples[j];
+      KernelPipeline::FragmentShader::KernelSample right =
+          parameters.samples[j + 1];
+      result.samples[i] = KernelPipeline::FragmentShader::KernelSample{
+          .uv_offset = (left.uv_offset * left.coefficient +
+                        right.uv_offset * right.coefficient) /
+                       (left.coefficient + right.coefficient),
+          .coefficient = left.coefficient + right.coefficient,
+      };
+      j += 2;
+    }
   }
 
   return result;
