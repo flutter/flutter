@@ -249,6 +249,8 @@ class SkiaGoldClient {
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      // Otherwise post submit will not fail.
+      '--passfail',
       ..._getMatchingArguments(testName, screenshotSize, pixelDeltaThreshold, maxDifferentPixelsRate),
     ];
 
