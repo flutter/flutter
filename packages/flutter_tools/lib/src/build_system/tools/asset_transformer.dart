@@ -126,7 +126,7 @@ final class AssetTransformer {
       );
     }
 
-    if (!await _fileSystem.file(output).exists()) {
+    if (!_fileSystem.file(output).existsSync()) {
       return _AssetTransformerFailure(
         'Asset transformer ${transformer.package} did not produce an output file.\n'
         'Input file provided to transformer: "${asset.path}"\n'
