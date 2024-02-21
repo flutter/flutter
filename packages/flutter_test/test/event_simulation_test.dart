@@ -44,7 +44,7 @@ void main() {
   testWidgets('debugKeyEventSimulatorTransitModeOverride overrides default transit mode', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
     expect(KeyEventSimulator.transitMode, KeyDataTransitMode.rawKeyData);
-    // Unsetting debugKeyEventSimulatorTransitModeOverride can't be call in a
+    // Unsetting debugKeyEventSimulatorTransitModeOverride can't be called in a
     // tear down callback because TestWidgetsFlutterBinding._verifyInvariants
     // is called before tear down callbacks.
     debugKeyEventSimulatorTransitModeOverride = null;
