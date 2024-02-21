@@ -445,7 +445,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle?> {
+abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateTextStyle();
@@ -458,13 +458,13 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle?> callback) =>
+  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
       _MaterialStateTextStyle(callback);
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
   @override
-  TextStyle? resolve(Set<MaterialState> states);
+  TextStyle resolve(Set<MaterialState> states);
 }
 
 /// A [MaterialStateTextStyle] created from a [MaterialPropertyResolver<TextStyle>]
@@ -477,10 +477,10 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
 class _MaterialStateTextStyle extends MaterialStateTextStyle {
   const _MaterialStateTextStyle(this._resolve);
 
-  final MaterialPropertyResolver<TextStyle?> _resolve;
+  final MaterialPropertyResolver<TextStyle> _resolve;
 
   @override
-  TextStyle? resolve(Set<MaterialState> states) => _resolve(states);
+  TextStyle resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].

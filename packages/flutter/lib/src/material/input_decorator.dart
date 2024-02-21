@@ -590,7 +590,7 @@ class FloatingLabelAlignment {
 class InputDecorationStyle extends MaterialStateTextStyle {
   /// {@macro flutter.material.InputDecorationStyle}
   const InputDecorationStyle({
-    this.normal,
+    required this.normal,
     this.focused,
     this.disabled,
     this.error,
@@ -602,7 +602,7 @@ class InputDecorationStyle extends MaterialStateTextStyle {
   /// The default style to use.
   /// [normal] is usually active when a different element has focus,
   /// or when the appropriate style is null.
-  final TextStyle? normal;
+  final TextStyle normal;
 
   /// The style to use when the enclosing widget has primary focus.
   final TextStyle? focused;
@@ -643,7 +643,7 @@ class InputDecorationStyle extends MaterialStateTextStyle {
   final TextStyle? hovered;
 
   @override
-  TextStyle? resolve(Set<MaterialState> states) {
+  TextStyle resolve(Set<MaterialState> states) {
     TextStyle? style;
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.disabled)) {
@@ -668,10 +668,10 @@ class InputDecorationStyle extends MaterialStateTextStyle {
           }
           return hoverStyle.resolve(states);
         case TextStyle():
-          return style?.merge(hovered) ?? hovered;
+          return style?.merge(hovered) ?? hovered!;
       }
     }
-    return style;
+    return style!;
   }
 }
 
