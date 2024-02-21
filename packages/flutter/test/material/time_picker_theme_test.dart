@@ -42,6 +42,8 @@ void main() {
     expect(timePickerTheme.entryModeIconColor, null);
     expect(timePickerTheme.padding, null);
     expect(timePickerTheme.shape, null);
+    expect(timePickerTheme.timeSelectorSeparatorColor, null);
+    expect(timePickerTheme.timeSelectorSeparatorTextStyle, null);
   });
 
   testWidgets('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -89,6 +91,8 @@ void main() {
       shape: RoundedRectangleBorder(
         side: BorderSide(color: Color(0xfffffff3)),
       ),
+      timeSelectorSeparatorColor: MaterialStatePropertyAll<Color>(Color(0xfffffff4)),
+      timeSelectorSeparatorTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(color: Color(0xfffffff5))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -118,7 +122,9 @@ void main() {
       'hourMinuteTextStyle: TextStyle(inherit: true, color: Color(0xfffffff1))',
       'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: Color(0xfffffff2)))',
       'padding: EdgeInsets.all(1.0)',
-      'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)'
+      'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)',
+      'timeSelectorSeparatorColor: MaterialStatePropertyAll(Color(0xfffffff4))',
+      'timeSelectorSeparatorTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, color: Color(0xfffffff5)))'
     ]));
   });
 
@@ -797,6 +803,38 @@ void main() {
 
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, Colors.blue);
+  });
+
+  testWidgets('Time selector separator color uses the timeSelectorSeparatorColor value', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(
+      timeSelectorSeparatorColor: const MaterialStatePropertyAll<Color>(Color(0xff00ff00))
+    );
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, const Color(0xff00ff00));
+  });
+
+  testWidgets('Time selector separator text style uses the timeSelectorSeparatorTextStyle value', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(
+      timeSelectorSeparatorTextStyle: const MaterialStatePropertyAll<TextStyle>(
+        TextStyle(
+          fontSize: 35.0,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.fontSize, 35.0);
+    expect(paragraph.text.style!.fontStyle, FontStyle.italic);
   });
 }
 

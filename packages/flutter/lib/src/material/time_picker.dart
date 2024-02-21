@@ -242,7 +242,7 @@ class _TimePickerHeader extends StatelessWidget {
                     textDirection: TextDirection.ltr,
                     children: <Widget>[
                       const Expanded(child: _HourControl()),
-                      _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                      _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                       const Expanded(child: _MinuteControl()),
                     ],
                   ),
@@ -278,7 +278,7 @@ class _TimePickerHeader extends StatelessWidget {
                       textDirection: TextDirection.ltr,
                       children: <Widget>[
                         const Expanded(child: _HourControl()),
-                        _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                        _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                         const Expanded(child: _MinuteControl()),
                       ],
                     ),
@@ -428,12 +428,12 @@ class _HourControl extends StatelessWidget {
 /// A passive fragment showing a string value.
 ///
 /// Used to display the appropriate separator between the input fields.
-class _StringFragment extends StatelessWidget {
-  const _StringFragment({ required this.timeOfDayFormat });
+class _TimeSelectorSeparator extends StatelessWidget {
+  const _TimeSelectorSeparator({ required this.timeOfDayFormat });
 
   final TimeOfDayFormat timeOfDayFormat;
 
-  String _stringFragmentValue(TimeOfDayFormat timeOfDayFormat) {
+  String _timeSelectorSeparatorValue(TimeOfDayFormat timeOfDayFormat) {
     switch (timeOfDayFormat) {
       case TimeOfDayFormat.h_colon_mm_space_a:
       case TimeOfDayFormat.a_space_h_colon_mm:
@@ -455,11 +455,17 @@ class _StringFragment extends StatelessWidget {
     final Set<MaterialState> states = <MaterialState>{};
 
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
-      timePickerTheme.hourMinuteTextColor ?? defaultTheme.hourMinuteTextColor,
+      timePickerTheme.timeSelectorSeparatorColor?.resolve(states)
+        ?? timePickerTheme.hourMinuteTextColor
+        ?? defaultTheme.timeSelectorSeparatorColor?.resolve(states)
+        ?? defaultTheme.hourMinuteTextColor,
       states,
     );
     final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
-      timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle,
+      timePickerTheme.timeSelectorSeparatorTextStyle?.resolve(states)
+        ?? timePickerTheme.hourMinuteTextStyle
+        ?? defaultTheme.timeSelectorSeparatorTextStyle?.resolve(states)
+        ?? defaultTheme.hourMinuteTextStyle,
       states,
     ).copyWith(color: effectiveTextColor);
 
@@ -478,7 +484,7 @@ class _StringFragment extends StatelessWidget {
         width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
         height: height,
         child: Text(
-          _stringFragmentValue(timeOfDayFormat),
+          _timeSelectorSeparatorValue(timeOfDayFormat),
           style: effectiveStyle,
           textScaler: TextScaler.noScaling,
           textAlign: TextAlign.center,
@@ -1801,7 +1807,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                         ],
                       ),
                     ),
-                    _StringFragment(timeOfDayFormat: timeOfDayFormat),
+                    _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3654,6 +3660,20 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   @override
   ShapeBorder get shape {
     return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get timeSelectorSeparatorColor {
+    // TODO(tahatesser): Update this when tokens are available.
+    // This is taken from https://m3.material.io/components/time-pickers/specs.
+    return MaterialStatePropertyAll<Color>(_colors.onSurface);
+  }
+
+  @override
+  MaterialStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
+    // TODO(tahatesser): Update this when tokens are available.
+    // This is taken from https://m3.material.io/components/time-pickers/specs.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.displayLarge);
   }
 }
 

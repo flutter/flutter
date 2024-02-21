@@ -1831,7 +1831,7 @@ void main() {
         final double minuteFieldTop =
             tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
         final double separatorTop =
-            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator')).dy;
         expect(hourFieldTop, separatorTop);
         expect(minuteFieldTop, separatorTop);
       });
@@ -1965,6 +1965,32 @@ void main() {
       });
     });
   }
+
+  testWidgets('Material3 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 57.0);
+  });
+
+  testWidgets('Material2 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 56.0);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -2175,10 +2201,11 @@ Future<Offset?> startPicker(
   ValueChanged<TimeOfDay?> onChanged, {
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? restorationId,
-  required MaterialType materialType,
+  ThemeData? theme,
+  MaterialType? materialType,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+    theme: theme ?? ThemeData(useMaterial3: materialType == MaterialType.material3),
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
     home: _TimePickerLauncher(
