@@ -596,7 +596,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = true,
+      .mode = GeometryResult::Mode::kPreventOverdraw,
   };
 }
 
@@ -642,7 +642,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = true,
+      .mode = GeometryResult::Mode::kPreventOverdraw,
   };
 }
 
