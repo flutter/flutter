@@ -178,6 +178,11 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
+  // Ensure that the GL context is current before creating the GPU surface.
+  // GPUSurfaceGLImpeller initialization will set up shader pipelines, and the
+  // current thread needs to be able to execute reactor operations.
+  GLContextMakeCurrent();
+
   return std::make_unique<GPUSurfaceGLImpeller>(
       this,                     // GPU surface GL delegate
       impeller_context_,        // Impeller context

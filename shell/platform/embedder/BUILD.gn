@@ -242,7 +242,7 @@ test_fixtures("fixtures") {
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
-    "fixtures/impeller_gl_gradient.png",
+    "fixtures/impeller_gl_test.png",
     "fixtures/vk_dpr_noxform.png",
     "fixtures/vk_gradient.png",
     "fixtures/gradient_metal.png",
