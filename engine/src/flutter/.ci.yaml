@@ -202,15 +202,6 @@ targets:
     #   - shell/platform/windows/**
     #   - web_sdk/**
 
-  - name: Linux Framework Smoke Tests
-    recipe: engine/framework_smoke
-    enabled_branches:
-      - main
-    timeout: 60
-    properties:
-      gclient_variables: >-
-        {"use_rbe": true}
-
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
     timeout: 120
