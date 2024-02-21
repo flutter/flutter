@@ -86,19 +86,15 @@ void testMain() {
       focusableViewElement1.focus();
       focusableViewElement2.focus();
 
-      expect(viewFocusEvents, hasLength(3));
+      expect(viewFocusEvents, hasLength(2));
 
       expect(viewFocusEvents[0].viewId, view1.viewId);
       expect(viewFocusEvents[0].state, ui.ViewFocusState.focused);
       expect(viewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
 
-      expect(viewFocusEvents[1].viewId, view1.viewId);
-      expect(viewFocusEvents[1].state, ui.ViewFocusState.unfocused);
-      expect(viewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
-
-      expect(viewFocusEvents[2].viewId, view2.viewId);
-      expect(viewFocusEvents[2].state, ui.ViewFocusState.focused);
-      expect(viewFocusEvents[2].direction, ui.ViewFocusDirection.forward);
+      expect(viewFocusEvents[1].viewId, view2.viewId);
+      expect(viewFocusEvents[1].state, ui.ViewFocusState.focused);
+      expect(viewFocusEvents[1].direction, ui.ViewFocusDirection.forward);
     });
 
     test('fires a focus event - focus transitions on and off views', () async {
@@ -125,23 +121,19 @@ void testMain() {
       focusableViewElement2.focus();
       focusableViewElement2.blur();
 
-      expect(viewFocusEvents, hasLength(4));
+      expect(viewFocusEvents, hasLength(3));
 
       expect(viewFocusEvents[0].viewId, view1.viewId);
       expect(viewFocusEvents[0].state, ui.ViewFocusState.focused);
       expect(viewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
 
-      expect(viewFocusEvents[1].viewId, view1.viewId);
-      expect(viewFocusEvents[1].state, ui.ViewFocusState.unfocused);
-      expect(viewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+      expect(viewFocusEvents[1].viewId, view2.viewId);
+      expect(viewFocusEvents[1].state, ui.ViewFocusState.focused);
+      expect(viewFocusEvents[1].direction, ui.ViewFocusDirection.forward);
 
       expect(viewFocusEvents[2].viewId, view2.viewId);
-      expect(viewFocusEvents[2].state, ui.ViewFocusState.focused);
-      expect(viewFocusEvents[2].direction, ui.ViewFocusDirection.forward);
-
-      expect(viewFocusEvents[3].viewId, view2.viewId);
-      expect(viewFocusEvents[3].state, ui.ViewFocusState.unfocused);
-      expect(viewFocusEvents[3].direction, ui.ViewFocusDirection.undefined);
+      expect(viewFocusEvents[2].state, ui.ViewFocusState.unfocused);
+      expect(viewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
     });
   });
 }
