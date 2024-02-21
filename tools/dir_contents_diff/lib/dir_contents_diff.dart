@@ -70,8 +70,20 @@ int dirContentsDiff(String goldenPath, String dirPath) {
     final String dirListing = _generateDirListing(dirPath);
     tempFile.writeAsStringSync(dirListing);
     final ProcessResult diffResult = Process.runSync(
-        'git', <String>['diff', '-p', goldenPath, tempFile.path],
-        runInShell: true, stdoutEncoding: utf8);
+      'git',
+      <String>[
+        'diff',
+        // If you manually edit the golden file, many text editors will add
+        // trailing whitespace. This flag ignores that because honestly it's
+        // not a significant part of this test.
+        '--ignore-space-at-eol',
+        '-p',
+        goldenPath,
+        tempFile.path,
+      ],
+      runInShell: true,
+      stdoutEncoding: utf8,
+    );
     if (diffResult.exitCode != 0) {
       print(
           'Unexpected diff in $goldenPath, use `git apply` with the following patch.\n');
