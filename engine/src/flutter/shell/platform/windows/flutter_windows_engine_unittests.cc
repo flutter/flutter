@@ -784,9 +784,9 @@ TEST_F(FlutterWindowsEngineTest, TestExitCancel) {
   }
 }
 
-// TODO(loicsharma): This test is passing incorrectly on the first
-// WM_CLOSE message when instead it should pass on the second WM_CLOSE message.
-// https://github.com/flutter/flutter/issues/137963
+// Flutter consumes the first WM_CLOSE message to allow the app to cancel the
+// exit. If the app does not cancel the exit, Flutter synthesizes a second
+// WM_CLOSE message.
 TEST_F(FlutterWindowsEngineTest, TestExitSecondCloseMessage) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.SetDartEntrypoint("exitTestExit");
@@ -802,18 +802,16 @@ TEST_F(FlutterWindowsEngineTest, TestExitSecondCloseMessage) {
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
   EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
-  // TODO(loicsharma): These should be `EXPECT_CALL`s
-  // https://github.com/flutter/flutter/issues/137963
-  ON_CALL(*handler, IsLastWindowOfProcess).WillByDefault(Return(true));
-  ON_CALL(*handler, Quit)
-      .WillByDefault([handler_ptr = handler.get()](
-                         std::optional<HWND> hwnd, std::optional<WPARAM> wparam,
-                         std::optional<LPARAM> lparam, UINT exit_code) {
+  EXPECT_CALL(*handler, IsLastWindowOfProcess).WillOnce(Return(true));
+  EXPECT_CALL(*handler, Quit)
+      .WillOnce([handler_ptr = handler.get()](
+                    std::optional<HWND> hwnd, std::optional<WPARAM> wparam,
+                    std::optional<LPARAM> lparam, UINT exit_code) {
         handler_ptr->WindowsLifecycleManager::Quit(hwnd, wparam, lparam,
                                                    exit_code);
       });
-  ON_CALL(*handler, DispatchMessage)
-      .WillByDefault(
+  EXPECT_CALL(*handler, DispatchMessage)
+      .WillRepeatedly(
           [&engine](HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
             engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
                 hwnd, msg, wparam, lparam);
