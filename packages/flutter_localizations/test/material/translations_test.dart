@@ -55,6 +55,7 @@ void main() {
       expect(localizations.collapsedHint, isNotNull);
       expect(localizations.expandedHint, isNotNull);
       expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
+      expect(localizations.selectedDateLabel, isNotNull);
 
       // Regression test for https://github.com/flutter/flutter/issues/136090
       expect(localizations.remainingTextFieldCharacterCount(0), isNot(contains('TBD')));

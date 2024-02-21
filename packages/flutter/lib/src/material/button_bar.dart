@@ -429,12 +429,10 @@ class _RenderButtonBarRow extends RenderFlex {
             }
         }
         currentHeight += child.size.height;
-        switch (verticalDirection) {
-          case VerticalDirection.down:
-            child = childParentData.nextSibling;
-          case VerticalDirection.up:
-            child = childParentData.previousSibling;
-        }
+        child = switch (verticalDirection) {
+          VerticalDirection.down => childParentData.nextSibling,
+          VerticalDirection.up   => childParentData.previousSibling,
+        };
 
         if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;

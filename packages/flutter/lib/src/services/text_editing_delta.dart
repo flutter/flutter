@@ -15,13 +15,11 @@ export 'text_editing.dart' show TextSelection;
 export 'text_input.dart' show TextEditingValue;
 
 TextAffinity? _toTextAffinity(String? affinity) {
-  switch (affinity) {
-    case 'TextAffinity.downstream':
-      return TextAffinity.downstream;
-    case 'TextAffinity.upstream':
-      return TextAffinity.upstream;
-  }
-  return null;
+  return switch (affinity) {
+    'TextAffinity.downstream' => TextAffinity.downstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
+    _ => null,
+  };
 }
 
 // Replaces a range of text in the original string with the text given in the

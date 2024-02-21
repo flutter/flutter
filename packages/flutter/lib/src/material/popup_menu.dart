@@ -4,9 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
@@ -570,12 +572,14 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
     super.key,
+    required this.itemKeys,
     required this.route,
     required this.semanticLabel,
     this.constraints,
     required this.clipBehavior,
   });
 
+  final List<GlobalKey> itemKeys;
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
@@ -609,6 +613,7 @@ class _PopupMenu<T> extends StatelessWidget {
             route.itemSizes[i] = size;
           },
           child: FadeTransition(
+            key: itemKeys[i],
             opacity: opacity,
             child: item,
           ),
@@ -791,6 +796,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
     required this.items,
+    required this.itemKeys,
     this.initialValue,
     this.elevation,
     this.surfaceTintColor,
@@ -811,6 +817,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
+  final List<GlobalKey> itemKeys;
   final List<Size?> itemSizes;
   final T? initialValue;
   final double? elevation;
@@ -836,6 +843,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return super.createAnimation();
   }
 
+  void scrollTo(int selectedItemIndex) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (itemKeys[selectedItemIndex].currentContext != null) {
+        Scrollable.ensureVisible(itemKeys[selectedItemIndex].currentContext!);
+      }
+    });
+  }
+
   @override
   Duration get transitionDuration => popUpAnimationStyle?.duration ?? _kMenuDuration;
 
@@ -859,9 +874,13 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         }
       }
     }
+    if (selectedItemIndex != null) {
+      scrollTo(selectedItemIndex);
+    }
 
     final Widget menu = _PopupMenu<T>(
       route: this,
+      itemKeys: itemKeys,
       semanticLabel: semanticLabel,
       constraints: constraints,
       clipBehavior: clipBehavior,
@@ -985,10 +1004,12 @@ Future<T?> showMenu<T>({
       semanticLabel ??= MaterialLocalizations.of(context).popupMenuLabel;
   }
 
+  final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
     items: items,
+    itemKeys: menuItemKeys,
     initialValue: initialValue,
     elevation: elevation,
     shadowColor: shadowColor,
@@ -1177,8 +1198,13 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The color used as an overlay on [color] to indicate elevation.
   ///
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
+  ///
   /// If null, [PopupMenuThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [ColorScheme.surfaceTint].
+  /// is also null, the default value is [Colors.transparent].
   ///
   /// See [Material.surfaceTintColor] for more details on how this
   /// overlay is applied.
@@ -1234,7 +1260,8 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// If this property is null, then [PopupMenuThemeData.color] is used.
   /// If [PopupMenuThemeData.color] is also null, then
-  /// Theme.of(context).cardColor is used.
+  /// [ThemeData.cardColor] is used in Material 2. In Material3, defaults to
+  /// [ColorScheme.surfaceContainer].
   final Color? color;
 
   /// If provided, this color is used for the button icon.
@@ -1496,13 +1523,13 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   }
 
   @override
-  Color? get color => _colors.surface;
+  Color? get color => _colors.surfaceContainer;
 
   @override
   Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));

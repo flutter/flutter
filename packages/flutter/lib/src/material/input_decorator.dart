@@ -2971,9 +2971,26 @@ class InputDecoration {
   ///
   /// If [isCollapsed] is true then [contentPadding] is [EdgeInsets.zero].
   ///
+  /// ### Material 3 default content padding
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is true then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(12, 4, 12, 4)` when [isDense]
+  /// is true and `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is false then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(0, 4, 0, 4)` when [isDense] is
+  /// true and `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is true then [contentPadding] is
+  /// `EdgeInsets.fromLTRB(12, 16, 12, 8)` when [isDense] is true
+  /// and `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is false.
+  ///
+  /// ### Material 2 default content padding
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// [contentPadding] is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// [contentPadding] is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
@@ -4636,7 +4653,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   });
 
   @override

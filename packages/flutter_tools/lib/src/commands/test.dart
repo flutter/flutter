@@ -620,7 +620,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    final Iterable<DevFSFileContent> files = entries.values
+      .map((AssetBundleEntry asset) => asset.content)
+      .whereType<DevFSFileContent>();
+    for (final DevFSFileContent entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {
