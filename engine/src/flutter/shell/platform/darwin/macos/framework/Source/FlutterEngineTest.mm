@@ -222,8 +222,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
 }
 
-// TODO(cbracken): Needs deflaking. https://github.com/flutter/flutter/issues/124677
-TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
+TEST_F(FlutterEngineTest, BackgroundIsBlack) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
@@ -252,8 +251,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
   latch.Wait();
 }
 
-// TODO(cbracken): Needs deflaking. https://github.com/flutter/flutter/issues/124677
-TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
+TEST_F(FlutterEngineTest, CanOverrideBackgroundColor) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
