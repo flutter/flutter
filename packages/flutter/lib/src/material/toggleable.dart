@@ -68,7 +68,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  Animation<double> get reaction => _reaction;
+  CurvedAnimation get reaction => _reaction;
   late CurvedAnimation _reaction;
 
   /// Controls the radial reaction's opacity animation for hover changes.
@@ -79,7 +79,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  Animation<double> get reactionHoverFade => _reactionHoverFade;
+  CurvedAnimation get reactionHoverFade => _reactionHoverFade;
   late CurvedAnimation _reactionHoverFade;
   late AnimationController _reactionHoverFadeController;
 
@@ -90,7 +90,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  Animation<double> get reactionFocusFade => _reactionFocusFade;
+  CurvedAnimation get reactionFocusFade => _reactionFocusFade;
   late CurvedAnimation _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
 
