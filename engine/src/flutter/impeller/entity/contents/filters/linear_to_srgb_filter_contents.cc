@@ -65,6 +65,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;
+    frame_info.depth = entity.GetShaderClipDepth();
     frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
                      input_snapshot->transform *
                      Matrix::MakeScale(Vector2(size));
