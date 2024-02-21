@@ -160,14 +160,13 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
       ),
       hasVisualOverflow: childLayoutGeometry.hasVisualOverflow,
     );
-
-    final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
     final double calculatedOffset = switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       AxisDirection.up    => paintOffset(from: resolvedPadding.bottom + scrollExtent, to: resolvedPadding.vertical + scrollExtent),
       AxisDirection.left  => paintOffset(from: resolvedPadding.right + scrollExtent, to: resolvedPadding.horizontal + scrollExtent),
       AxisDirection.right => paintOffset(from: 0.0, to: resolvedPadding.left),
       AxisDirection.down  => paintOffset(from: 0.0, to: resolvedPadding.top),
     };
+    final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
     childParentData.paintOffset = switch (constraints.axis) {
       Axis.horizontal => Offset(calculatedOffset, resolvedPadding.top),
       Axis.vertical   => Offset(resolvedPadding.left, calculatedOffset),

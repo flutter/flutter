@@ -1573,7 +1573,7 @@ abstract class RenderSliver extends RenderObject {
       AxisDirection.up    => Size(constraints.crossAxisExtent, -geometry!.paintExtent),
       AxisDirection.down  => Size(constraints.crossAxisExtent,  geometry!.paintExtent),
       AxisDirection.left  => Size(-geometry!.paintExtent, constraints.crossAxisExtent),
-      AxisDirection.right => Size( geometry!.paintExtent, constraints.crossAxisExtent),
+      AxisDirection.right => Size(geometry!.paintExtent,  constraints.crossAxisExtent),
     };
   }
 
