@@ -18,7 +18,8 @@ executable("text-input-test-bin") {
   output_name = "text-input-test"
   sources = [ "text-input-test.cc" ]
 
-  # This is needed for //third_party/googletest for linking zircon symbols.
+  # This is needed for //flutter/third_party/googletest for linking zircon
+  # symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
@@ -42,8 +43,8 @@ executable("text-input-test-bin") {
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:check_view",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
-    "//third_party/googletest:gtest",
-    "//third_party/googletest:gtest_main",
+    "//flutter/third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gtest_main",
   ]
 }
 

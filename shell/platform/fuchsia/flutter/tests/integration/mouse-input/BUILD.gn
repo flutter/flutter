@@ -18,7 +18,8 @@ executable("mouse-input-test-bin") {
   output_name = "mouse-input-test"
   sources = [ "mouse-input-test.cc" ]
 
-  # This is needed for //third_party/googletest for linking zircon symbols.
+  # This is needed for //flutter/third_party/googletest for linking zircon
+  # symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
@@ -47,8 +48,8 @@ executable("mouse-input-test-bin") {
     "mouse-input-view:package",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
-    "//third_party/googletest:gtest",
-    "//third_party/googletest:gtest_main",
+    "//flutter/third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gtest_main",
   ]
 }
 

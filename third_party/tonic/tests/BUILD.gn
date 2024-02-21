@@ -30,7 +30,7 @@ executable("tonic_unittests") {
     "//flutter/runtime:runtime",
     "//flutter/testing",
     "//flutter/testing:fixture_test",
-    "//third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gtest",
   ]
 
   deps = [ "../:tonic" ]

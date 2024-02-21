@@ -12,7 +12,7 @@ executable("_font-subset") {
     "main.cc",
   ]
 
-  deps = [ "//third_party/harfbuzz:harfbuzz_subset" ]
+  deps = [ "//flutter/third_party/harfbuzz:harfbuzz_subset" ]
 
   if (is_mac) {
     frameworks = [
