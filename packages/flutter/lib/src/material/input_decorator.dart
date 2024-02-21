@@ -2856,13 +2856,7 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// {@template flutter.material.inputDecoration.inputDecorationStyle}
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
-  /// {@endtemplate}
+  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
   ///
   /// {@tool dartpad}
   /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
@@ -2905,7 +2899,13 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// {@macro flutter.material.inputDecoration.inputDecorationStyle}
+  /// {@template flutter.material.inputDecoration.inputDecorationStyle}
+  /// This style can be set in multiple ways:
+  /// - [TextStyle], if the style doesn't need to change.
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [MaterialStateTextStyle.resolveWith], with a callback that
+  ///   resolves to a [TextStyle] based on the given states.
+  /// {@endtemplate}
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [helperText] can occupy.
