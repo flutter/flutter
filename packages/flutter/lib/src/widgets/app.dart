@@ -236,9 +236,14 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 
 /// Disposes singletons created by the Flutter package.
 ///
-/// This function is called in `tearDown` for:
+/// This function is called in Flutter Framework `tearDown` for:
 /// - better test hermeticity
-/// - compliance to memory debugging tools that verify all disposables are disposed at the end of test
+/// - compliance to memory debugging tools that verify that disposables are disposed by the end of test
+///
+/// Application developers can also call this function in their tests to improve test hermeticity.
+///
+/// The method does not dispose all singletons, only the ones that are known to
+/// noticeably impact test hermeticity.
 @visibleForTesting
 void disposeFlutterSingletons() {
   // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
