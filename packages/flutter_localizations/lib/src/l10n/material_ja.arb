@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "調べる",
   "searchWebButtonLabel": "ウェブを検索",
   "shareButtonLabel": "共有...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
