@@ -7,8 +7,8 @@
 
 #include <Windows.h>
 
-#include <map>
 #include <optional>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -22,30 +22,35 @@ class WindowProcDelegateManager {
   explicit WindowProcDelegateManager();
   ~WindowProcDelegateManager();
 
-  // Adds |delegate| as a delegate to be called for |OnTopLevelWindowProc|.
+  // Adds |callback| as a delegate to be called for |OnTopLevelWindowProc|.
   //
-  // Multiple calls with the same |delegate| will replace the previous
+  // Multiple calls with the same |callback| will replace the previous
   // registration, even if |user_data| is different.
   void RegisterTopLevelWindowProcDelegate(
-      FlutterDesktopWindowProcCallback delegate,
+      FlutterDesktopWindowProcCallback callback,
       void* user_data);
 
-  // Unregisters |delegate| as a delate for |OnTopLevelWindowProc|.
+  // Unregisters |callback| as a delegate for |OnTopLevelWindowProc|.
   void UnregisterTopLevelWindowProcDelegate(
-      FlutterDesktopWindowProcCallback delegate);
+      FlutterDesktopWindowProcCallback callback);
 
-  // Calls any registered WindowProc delegates.
+  // Calls any registered WindowProc delegates in the order they were
+  // registered.
   //
   // If a result is returned, then the message was handled in such a way that
   // further handling should not be done.
   std::optional<LRESULT> OnTopLevelWindowProc(HWND hwnd,
                                               UINT message,
                                               WPARAM wparam,
-                                              LPARAM lparam);
+                                              LPARAM lparam) const;
 
  private:
-  std::map<FlutterDesktopWindowProcCallback, void*>
-      top_level_window_proc_handlers_;
+  struct WindowProcDelegate {
+    FlutterDesktopWindowProcCallback callback = nullptr;
+    void* user_data = nullptr;
+  };
+
+  std::vector<WindowProcDelegate> delegates_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowProcDelegateManager);
 };

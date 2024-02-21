@@ -125,6 +125,41 @@ TEST(WindowProcDelegateManagerTest, RegisterMultiple) {
   EXPECT_TRUE(called_b);
 }
 
+TEST(WindowProcDelegateManagerTest, Ordered) {
+  TestWindowProcDelegate delegate_1 = [](HWND hwnd, UINT message, WPARAM wparam,
+                                         LPARAM lparam) { return 1; };
+  TestWindowProcDelegate delegate_2 = [](HWND hwnd, UINT message, WPARAM wparam,
+                                         LPARAM lparam) { return 2; };
+
+  // Result should be 1 if delegate '1' is registered before delegate '2'.
+  {
+    WindowProcDelegateManager manager;
+    manager.RegisterTopLevelWindowProcDelegate(TestWindowProcCallback,
+                                               &delegate_1);
+    manager.RegisterTopLevelWindowProcDelegate(TestWindowProcCallback2,
+                                               &delegate_2);
+
+    std::optional<LRESULT> result =
+        manager.OnTopLevelWindowProc(nullptr, 0, 0, 0);
+
+    EXPECT_EQ(result, 1);
+  }
+
+  // Result should be 2 if delegate '2' is registered before delegate '1'.
+  {
+    WindowProcDelegateManager manager;
+    manager.RegisterTopLevelWindowProcDelegate(TestWindowProcCallback2,
+                                               &delegate_2);
+    manager.RegisterTopLevelWindowProcDelegate(TestWindowProcCallback,
+                                               &delegate_1);
+
+    std::optional<LRESULT> result =
+        manager.OnTopLevelWindowProc(nullptr, 0, 0, 0);
+
+    EXPECT_EQ(result, 2);
+  }
+}
+
 TEST(WindowProcDelegateManagerTest, ConflictingDelegates) {
   WindowProcDelegateManager manager;
 
