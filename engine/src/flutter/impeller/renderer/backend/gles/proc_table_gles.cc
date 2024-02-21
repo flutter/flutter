@@ -80,8 +80,7 @@ ProcTableGLES::ProcTableGLES(Resolver resolver) {
 
   auto error_fn = reinterpret_cast<PFNGLGETERRORPROC>(resolver("glGetError"));
   if (!error_fn) {
-    VALIDATION_LOG << "Could not resolve "
-                   << "glGetError";
+    VALIDATION_LOG << "Could not resolve " << "glGetError";
     return;
   }
 

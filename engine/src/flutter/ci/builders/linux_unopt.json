@@ -37,8 +37,13 @@
             },
             "tests": [
                 {
-                    "name": "test:format_and_dart_test",
-                    "script": "flutter/ci/format.sh"
+                    "name": "test: Check formatting",
+                    "script": "flutter/bin/et",
+                    "parameters": [
+                        "format",
+                        "--dry-run",
+                        "--all"
+                    ]
                 },
                 {
                     "nane": "test:GeneratedPluginRegistant.java omitted",

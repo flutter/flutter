@@ -50,9 +50,7 @@ def CopyPath(src, dst):
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-      '--file-list', dest='file_list', action='store', required=True
-  )
+  parser.add_argument('--file-list', dest='file_list', action='store', required=True)
 
   args = parser.parse_args()
 

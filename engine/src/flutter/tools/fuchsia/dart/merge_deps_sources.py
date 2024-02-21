@@ -14,14 +14,10 @@ import sys
 
 def main():
   parser = argparse.ArgumentParser(
-      'Merges sources of a Dart target and its dependencies',
-      fromfile_prefix_chars='@'
+      'Merges sources of a Dart target and its dependencies', fromfile_prefix_chars='@'
   )
   parser.add_argument(
-      '--output',
-      help='Path to output the final list',
-      type=argparse.FileType('w'),
-      required=True
+      '--output', help='Path to output the final list', type=argparse.FileType('w'), required=True
   )
   parser.add_argument(
       '--depfile',
@@ -34,16 +30,10 @@ def main():
       help='Sources of this target',
       nargs='*',
   )
-  parser.add_argument(
-      '--source_lists',
-      help='Files containing lists of Dart sources',
-      nargs='*'
-  )
+  parser.add_argument('--source_lists', help='Files containing lists of Dart sources', nargs='*')
   args = parser.parse_args()
 
-  args.depfile.write(
-      '{}: {}\n'.format(args.output.name, ' '.join(args.source_lists))
-  )
+  args.depfile.write('{}: {}\n'.format(args.output.name, ' '.join(args.source_lists)))
 
   # Merges sources of this target, and all of its dependencies.
   all_sources = set(args.sources)

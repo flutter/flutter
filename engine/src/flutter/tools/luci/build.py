@@ -55,17 +55,11 @@ def Main():
       default=False,
       help='Force artifact upload, overwriting existing artifacts.'
   )
-  parser.add_argument(
-      '--all', action='store_true', default=False, help='Re-run all builds.'
-  )
+  parser.add_argument('--all', action='store_true', default=False, help='Re-run all builds.')
   parser.add_argument('--builder', type=str, help='The builer to rerun.')
+  parser.add_argument('--commit', type=str, required=True, help='The commit to rerun.')
   parser.add_argument(
-      '--commit', type=str, required=True, help='The commit to rerun.'
-  )
-  parser.add_argument(
-      '--dry-run',
-      action='store_true',
-      help='Print what would be done, but do nothing.'
+      '--dry-run', action='store_true', help='Print what would be done, but do nothing.'
   )
   args = parser.parse_args()
 
@@ -92,10 +86,7 @@ def Main():
       capture_output=True,
   )
   if auth_result.returncode != 0:
-    print(
-        'Auth failed:\nstdout:\n%s\nstderr:\n%s' %
-        (auth_result.stdout, auth_result.stderr)
-    )
+    print('Auth failed:\nstdout:\n%s\nstderr:\n%s' % (auth_result.stdout, auth_result.stderr))
     return 1
   auth_token = auth_result.stdout.rstrip()
 
@@ -106,9 +97,7 @@ def Main():
           % (args.commit, builder)
       )
     else:
-      params = '{"Commit": "%s", "Builder": "%s", "Repo": "engine"}' % (
-          args.commit, builder
-      )
+      params = '{"Commit": "%s", "Builder": "%s", "Repo": "engine"}' % (args.commit, builder)
     curl_command = [
         'curl',
         'http://flutter-dashboard.appspot.com/api/reset-prod-task',

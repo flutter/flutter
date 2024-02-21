@@ -381,15 +381,12 @@ void PlatformView::OnChildViewStatus(
   FML_DCHECK(child_view_info_.count(content_id) == 1);
 
   std::ostringstream out;
-  out << "{"
-      << "\"method\":\"View.viewStateChanged\","
-      << "\"args\":{"
+  out << "{" << "\"method\":\"View.viewStateChanged\"," << "\"args\":{"
       << "  \"viewId\":" << child_view_info_.at(content_id).view_id
       << ","                         // ViewId
       << "  \"is_rendering\":true,"  // IsViewRendering
       << "  \"state\":true"          // IsViewRendering
-      << "  }"
-      << "}";
+      << "  }" << "}";
   auto call = out.str();
 
   std::unique_ptr<flutter::PlatformMessage> message =
@@ -518,9 +515,7 @@ void PlatformView::OnDisposeView(int64_t view_id_raw) {
 void PlatformView::OnChildViewConnected(uint64_t content_id) {
   FML_CHECK(child_view_info_.count(content_id) == 1);
   std::ostringstream out;
-  out << "{"
-      << "\"method\":\"View.viewConnected\","
-      << "\"args\":{"
+  out << "{" << "\"method\":\"View.viewConnected\"," << "\"args\":{"
       << "  \"viewId\":" << child_view_info_.at(content_id).view_id << "  }"
       << "}";
   auto call = out.str();
@@ -535,9 +530,7 @@ void PlatformView::OnChildViewConnected(uint64_t content_id) {
 void PlatformView::OnChildViewDisconnected(uint64_t content_id) {
   FML_CHECK(child_view_info_.count(content_id) == 1);
   std::ostringstream out;
-  out << "{"
-      << "\"method\":\"View.viewDisconnected\","
-      << "\"args\":{"
+  out << "{" << "\"method\":\"View.viewDisconnected\"," << "\"args\":{"
       << "  \"viewId\":" << child_view_info_.at(content_id).view_id << "  }"
       << "}";
   auto call = out.str();

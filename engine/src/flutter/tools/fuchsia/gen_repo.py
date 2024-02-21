@@ -19,12 +19,8 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument('--pm-bin', dest='pm_bin', action='store', required=True)
-  parser.add_argument(
-      '--repo-dir', dest='repo_dir', action='store', required=True
-  )
-  parser.add_argument(
-      '--archive', dest='archives', action='append', required=True
-  )
+  parser.add_argument('--repo-dir', dest='repo_dir', action='store', required=True)
+  parser.add_argument('--archive', dest='archives', action='append', required=True)
 
   args = parser.parse_args()
 

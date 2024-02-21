@@ -17,29 +17,23 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 def JavadocBin():
   if sys.platform == 'darwin':
     return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk',
-        'Contents', 'Home', 'bin', 'javadoc'
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin',
+        'javadoc'
     )
   elif sys.platform.startswith(('cygwin', 'win')):
     return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin',
-        'javadoc.exe'
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe'
     )
   else:
     return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin',
-        'javadoc'
+        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc'
     )
 
 
 def main():
-  parser = argparse.ArgumentParser(
-      description='Runs javadoc on Flutter Android libraries'
-  )
+  parser = argparse.ArgumentParser(description='Runs javadoc on Flutter Android libraries')
   parser.add_argument('--out-dir', type=str, required=True)
-  parser.add_argument(
-      '--android-source-root', type=str, default=ANDROID_SRC_ROOT
-  )
+  parser.add_argument('--android-source-root', type=str, default=ANDROID_SRC_ROOT)
   parser.add_argument('--build-config-path', type=str)
   parser.add_argument('--third-party', type=str, default='third_party')
   parser.add_argument('--quiet', default=False, action='store_true')
@@ -57,12 +51,8 @@ def main():
 
   classpath = [
       args.android_source_root,
-      os.path.join(
-          args.third_party, 'android_tools/sdk/platforms/android-34/android.jar'
-      ),
-      os.path.join(
-          args.third_party, 'android_embedding_dependencies', 'lib', '*'
-      ),
+      os.path.join(args.third_party, 'android_tools/sdk/platforms/android-34/android.jar'),
+      os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)

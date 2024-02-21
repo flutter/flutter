@@ -16,7 +16,7 @@
 namespace flutter {
 
 class Fixture : public testing::FixtureTest {
-  void TestBody() override{};
+  void TestBody() override {};
 };
 
 static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {

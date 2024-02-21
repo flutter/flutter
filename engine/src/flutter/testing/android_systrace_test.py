@@ -9,9 +9,7 @@ import os
 import subprocess
 import sys
 
-BUILDROOT_DIR = os.path.abspath(
-    os.path.join(os.path.realpath(__file__), '..', '..', '..')
-)
+BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 
 PERFETTO_SESSION_KEY = 'session1'
 PERFETTO_TRACE_FILE = '/data/misc/perfetto-traces/trace'
@@ -39,17 +37,15 @@ def install_apk(apk_path, package_name, adb_path='adb'):
   print('Installing APK')
   subprocess.check_output([adb_path, 'shell', 'am', 'force-stop', package_name])
   # Allowed to fail if APK was never installed.
-  subprocess.call([adb_path, 'uninstall', package_name],
-                  stdout=subprocess.DEVNULL)
+  subprocess.call([adb_path, 'uninstall', package_name], stdout=subprocess.DEVNULL)
   subprocess.check_output([adb_path, 'install', apk_path])
 
 
 def start_perfetto(package_name, adb_path='adb'):
   print('Starting trace')
   cmd = [
-      adb_path, 'shell', 'echo', "'" + PERFETTO_CONFIG % package_name + "'",
-      '|', 'perfetto', '-c', '-', '--txt', '-o', PERFETTO_TRACE_FILE,
-      '--detach', PERFETTO_SESSION_KEY
+      adb_path, 'shell', 'echo', "'" + PERFETTO_CONFIG % package_name + "'", '|', 'perfetto', '-c',
+      '-', '--txt', '-o', PERFETTO_TRACE_FILE, '--detach', PERFETTO_SESSION_KEY
   ]
 
   subprocess.check_output(cmd, stderr=subprocess.STDOUT)
@@ -71,8 +67,7 @@ def launch_package(package_name, activity_name, adb_path='adb'):
                           stderr=subprocess.STDOUT)
   for line in logcat.stdout:
     print('>>>>>>>> ' + line.strip())
-    if ('Observatory listening' in line) or ('Dart VM service is listening'
-                                             in line):
+    if ('Observatory listening' in line) or ('Dart VM service is listening' in line):
       logcat.kill()
       break
 
@@ -88,12 +83,9 @@ def collect_and_validate_trace(adb_path='adb'):
 
   print('Validating trace')
   traceconv = os.path.join(
-      BUILDROOT_DIR, 'third_party', 'android_tools', 'trace_to_text',
-      'trace_to_text'
+      BUILDROOT_DIR, 'third_party', 'android_tools', 'trace_to_text', 'trace_to_text'
   )
-  traceconv_output = subprocess.check_output([
-      traceconv, 'systrace', 'trace.pb'
-  ],
+  traceconv_output = subprocess.check_output([traceconv, 'systrace', 'trace.pb'],
                                              stderr=subprocess.STDOUT,
                                              universal_newlines=True)
 
@@ -111,10 +103,7 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--apk-path',
-      dest='apk_path',
-      action='store',
-      help='Provide the path to the APK to install'
+      '--apk-path', dest='apk_path', action='store', help='Provide the path to the APK to install'
   )
   parser.add_argument(
       '--package-name',
@@ -145,10 +134,7 @@ def main():
   ],
                                               text=True).strip()
   if int(android_api_level) < 29:
-    print(
-        'Android API %s detected. This script requires API 29 or above.' %
-        android_api_level
-    )
+    print('Android API %s detected. This script requires API 29 or above.' % android_api_level)
     return 0
 
   install_apk(args.apk_path, args.package_name, args.adb_path)

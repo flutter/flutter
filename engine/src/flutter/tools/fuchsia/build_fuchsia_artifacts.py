@@ -59,9 +59,7 @@ def GetHostArchFromPlatform():
 
 
 def GetPMBinPath():
-  return os.path.join(
-      GetFuchsiaSDKPath(), 'tools', GetHostArchFromPlatform(), 'pm'
-  )
+  return os.path.join(GetFuchsiaSDKPath(), 'tools', GetHostArchFromPlatform(), 'pm')
 
 
 def RunExecutable(command):
@@ -69,10 +67,7 @@ def RunExecutable(command):
 
 
 def RunGN(variant_dir, flags):
-  print(
-      'Running gn for variant "%s" with flags: %s' %
-      (variant_dir, ','.join(flags))
-  )
+  print('Running gn for variant "%s" with flags: %s' % (variant_dir, ','.join(flags)))
   RunExecutable([
       os.path.join('flutter', 'tools', 'gn'),
   ] + flags)
@@ -84,8 +79,7 @@ def BuildNinjaTargets(variant_dir, targets):
   assert os.path.exists(os.path.join(_out_dir, variant_dir))
 
   print('Running autoninja for targets: %s' % targets)
-  RunExecutable(['autoninja', '-C',
-                 os.path.join(_out_dir, variant_dir)] + targets)
+  RunExecutable(['autoninja', '-C', os.path.join(_out_dir, variant_dir)] + targets)
 
 
 def RemoveDirectoryIfExists(path):
@@ -129,16 +123,14 @@ def CopyGenSnapshotIfExists(source, destination):
   FindFileAndCopyTo('gen_snapshot', source_root, destination_base)
   FindFileAndCopyTo('gen_snapshot_product', source_root, destination_base)
   FindFileAndCopyTo(
-      'kernel_compiler.dart.snapshot', source_root, destination_base,
-      'kernel_compiler.snapshot'
+      'kernel_compiler.dart.snapshot', source_root, destination_base, 'kernel_compiler.snapshot'
   )
   FindFileAndCopyTo(
       'frontend_server.dart.snapshot', source_root, destination_base,
       'flutter_frontend_server.snapshot'
   )
   FindFileAndCopyTo(
-      'list_libraries.dart.snapshot', source_root, destination_base,
-      'list_libraries.snapshot'
+      'list_libraries.dart.snapshot', source_root, destination_base, 'list_libraries.snapshot'
   )
 
 
@@ -154,9 +146,7 @@ def CopyZirconFFILibIfExists(source, destination):
   FindFileAndCopyTo('libzircon_ffi.so', source_root, destination_base)
 
 
-def CopyToBucketWithMode(
-    source, destination, aot, product, runner_type, api_level
-):
+def CopyToBucketWithMode(source, destination, aot, product, runner_type, api_level):
   mode = 'aot' if aot else 'jit'
   product_suff = '_product' if product else ''
   runner_name = '%s_%s%s_runner' % (runner_type, mode, product_suff)
@@ -198,13 +188,9 @@ def CopyVulkanDepsToBucket(src, dst, arch):
   sdk_path = GetFuchsiaSDKPath()
   deps_bucket_path = os.path.join(_bucket_directory, dst)
   if not os.path.exists(deps_bucket_path):
+    FindFileAndCopyTo('VkLayer_khronos_validation.json', '%s/pkg' % (sdk_path), deps_bucket_path)
     FindFileAndCopyTo(
-        'VkLayer_khronos_validation.json', '%s/pkg' % (sdk_path),
-        deps_bucket_path
-    )
-    FindFileAndCopyTo(
-        'VkLayer_khronos_validation.so', '%s/arch/%s' % (sdk_path, arch),
-        deps_bucket_path
+        'VkLayer_khronos_validation.so', '%s/arch/%s' % (sdk_path, arch), deps_bucket_path
     )
 
 
@@ -234,10 +220,7 @@ def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   # are about to package.
   bucket_root = os.path.join(_bucket_directory, 'flutter')
   licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
-  license_files = [
-      'licenses_flutter', 'licenses_fuchsia', 'licenses_skia',
-      'licenses_third_party'
-  ]
+  license_files = ['licenses_flutter', 'licenses_fuchsia', 'licenses_skia', 'licenses_third_party']
   for license in license_files:
     src_path = os.path.join(licenses_root, license)
     dst_path = os.path.join(bucket_root, license)
@@ -313,8 +296,8 @@ def ProcessCIPDPackage(upload, engine_version):
 
 
 def BuildTarget(
-    runtime_mode, arch, optimized, enable_lto, enable_legacy, asan,
-    dart_version_git_info, prebuilt_dart_sdk, build_targets
+    runtime_mode, arch, optimized, enable_lto, enable_legacy, asan, dart_version_git_info,
+    prebuilt_dart_sdk, build_targets
 ):
   unopt = "_unopt" if not optimized else ""
   out_dir = 'fuchsia_%s%s_%s' % (runtime_mode, unopt, arch)
@@ -362,11 +345,7 @@ def main():
       help='If set, uploads the CIPD package and tags it as the latest.'
   )
 
-  parser.add_argument(
-      '--engine-version',
-      required=False,
-      help='Specifies the flutter engine SHA.'
-  )
+  parser.add_argument('--engine-version', required=False, help='Specifies the flutter engine SHA.')
 
   parser.add_argument(
       '--unoptimized',
@@ -376,15 +355,10 @@ def main():
   )
 
   parser.add_argument(
-      '--runtime-mode',
-      type=str,
-      choices=['debug', 'profile', 'release', 'all'],
-      default='all'
+      '--runtime-mode', type=str, choices=['debug', 'profile', 'release', 'all'], default='all'
   )
 
-  parser.add_argument(
-      '--archs', type=str, choices=['x64', 'arm64', 'all'], default='all'
-  )
+  parser.add_argument('--archs', type=str, choices=['x64', 'arm64', 'all'], default='all')
 
   parser.add_argument(
       '--asan',
@@ -394,10 +368,7 @@ def main():
   )
 
   parser.add_argument(
-      '--no-lto',
-      action='store_true',
-      default=False,
-      help='If set, disables LTO for the build.'
+      '--no-lto', action='store_true', default=False, help='If set, disables LTO for the build.'
   )
 
   parser.add_argument(
@@ -417,10 +388,8 @@ def main():
   parser.add_argument(
       '--targets',
       default='',
-      help=(
-          'Comma-separated list; adds additional targets to build for '
-          'Fuchsia.'
-      )
+      help=('Comma-separated list; adds additional targets to build for '
+            'Fuchsia.')
   )
 
   parser.add_argument(
@@ -477,9 +446,8 @@ def main():
       if build_mode == 'all' or runtime_mode == build_mode:
         if not args.skip_build:
           BuildTarget(
-              runtime_mode, arch, optimized, enable_lto, enable_legacy,
-              args.asan, not args.no_dart_version_git_info,
-              not args.no_prebuilt_dart_sdk,
+              runtime_mode, arch, optimized, enable_lto, enable_legacy, args.asan,
+              not args.no_dart_version_git_info, not args.no_prebuilt_dart_sdk,
               args.targets.split(",") if args.targets else ['flutter']
           )
         CopyBuildToBucket(runtime_mode, arch, optimized, product)

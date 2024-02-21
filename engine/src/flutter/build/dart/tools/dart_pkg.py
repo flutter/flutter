@@ -16,9 +16,7 @@ import sys
 
 USE_LINKS = sys.platform != 'win32'
 
-DART_ANALYZE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'dart_analyze.py'
-)
+DART_ANALYZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dart_analyze.py')
 
 
 def dart_filter(path):
@@ -164,10 +162,7 @@ def analyze_entrypoints(dart_sdk, package_root, entrypoints):
 def main():
   parser = argparse.ArgumentParser(description='Generate a dart-pkg')
   parser.add_argument(
-      '--dart-sdk',
-      action='store',
-      metavar='dart_sdk',
-      help='Path to the Dart SDK.'
+      '--dart-sdk', action='store', metavar='dart_sdk', help='Path to the Dart SDK.'
   )
   parser.add_argument(
       '--package-name',
@@ -183,28 +178,14 @@ def main():
       required=True
   )
   parser.add_argument(
-      '--package-root',
-      metavar='package_root',
-      help='packages/ directory',
-      required=True
+      '--package-root', metavar='package_root', help='packages/ directory', required=True
+  )
+  parser.add_argument('--stamp-file', metavar='stamp_file', help='timestamp file', required=True)
+  parser.add_argument(
+      '--entries-file', metavar='entries_file', help='script entries file', required=True
   )
   parser.add_argument(
-      '--stamp-file',
-      metavar='stamp_file',
-      help='timestamp file',
-      required=True
-  )
-  parser.add_argument(
-      '--entries-file',
-      metavar='entries_file',
-      help='script entries file',
-      required=True
-  )
-  parser.add_argument(
-      '--package-sources',
-      metavar='package_sources',
-      help='Package sources',
-      nargs='+'
+      '--package-sources', metavar='package_sources', help='Package sources', nargs='+'
   )
   parser.add_argument(
       '--package-entrypoints',
@@ -259,16 +240,12 @@ def main():
   sdkext_path = os.path.join(lib_path, '_sdkext')
   if mappings:
     with open(sdkext_path, 'w') as stream:
-      json.dump(
-          mappings, stream, sort_keys=True, indent=2, separators=(',', ': ')
-      )
+      json.dump(mappings, stream, sort_keys=True, indent=2, separators=(',', ': '))
   else:
     remove_if_exists(sdkext_path)
 
   # Copy or symlink package sources into pkg directory.
-  common_source_prefix = os.path.dirname(
-      os.path.commonprefix(args.package_sources)
-  )
+  common_source_prefix = os.path.dirname(os.path.commonprefix(args.package_sources))
   for source in args.package_sources:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(target_dir, relative_source)
@@ -291,9 +268,7 @@ def main():
       target = os.path.join(sdk_ext_dir, relative_source)
       copy_or_link(source, target)
 
-  common_source_prefix = os.path.dirname(
-      os.path.commonprefix(args.sdk_ext_files)
-  )
+  common_source_prefix = os.path.dirname(os.path.commonprefix(args.sdk_ext_files))
   for source in args.sdk_ext_files:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(sdk_ext_dir, relative_source)

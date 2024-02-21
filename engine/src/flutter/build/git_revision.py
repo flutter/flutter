@@ -40,10 +40,7 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument(
-      '--repository',
-      action='store',
-      help='Path to the Git repository.',
-      required=True
+      '--repository', action='store', help='Path to the Git repository.', required=True
   )
 
   args = parser.parse_args()

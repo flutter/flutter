@@ -15,9 +15,7 @@ import sys
 # out/impeller-cmake-example, so the build can then be performed with
 # e.g. ninja -C out/impeller-cmake-example-out.
 
-SRC_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def parse_args(argv):
@@ -122,9 +120,7 @@ def main(argv):
     return 0
 
   if args.cmake:
-    cmake_path = os.path.join(
-        SRC_ROOT, 'buildtools', 'mac-x64', 'cmake', 'bin', 'cmake'
-    )
+    cmake_path = os.path.join(SRC_ROOT, 'buildtools', 'mac-x64', 'cmake', 'bin', 'cmake')
     cmake_command = [
         cmake_path,
         '--preset',

@@ -25,9 +25,7 @@ def GenerateManifest(package_dir):
       common_prefix = os.path.commonprefix([root, package_dir])
       rel_path = os.path.relpath(os.path.join(root, f), common_prefix)
       from_package = os.path.abspath(os.path.join(package_dir, rel_path))
-      assert from_package, 'Failed to create from_package for %s' % os.path.join(
-          root, f
-      )
+      assert from_package, 'Failed to create from_package for %s' % os.path.join(root, f)
       full_paths.append('%s=%s' % (rel_path, from_package))
 
   parent_dir = os.path.abspath(os.path.join(package_dir, os.pardir))
@@ -43,8 +41,7 @@ def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir, api_level):
   manifest_path = GenerateManifest(package_dir)
 
   pm_command_base = [
-      pm_bin, '-m', manifest_path, '-k', signing_key, '-o', dst_dir,
-      '--api-level', api_level
+      pm_bin, '-m', manifest_path, '-k', signing_key, '-o', dst_dir, '--api-level', api_level
   ]
 
   # Build the package
@@ -60,24 +57,13 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument('--pm-bin', dest='pm_bin', action='store', required=True)
+  parser.add_argument('--package-dir', dest='package_dir', action='store', required=True)
+  parser.add_argument('--manifest-file', dest='manifest_file', action='store', required=False)
   parser.add_argument(
-      '--package-dir', dest='package_dir', action='store', required=True
+      '--manifest-json-file', dest='manifest_json_file', action='store', required=True
   )
-  parser.add_argument(
-      '--manifest-file', dest='manifest_file', action='store', required=False
-  )
-  parser.add_argument(
-      '--manifest-json-file',
-      dest='manifest_json_file',
-      action='store',
-      required=True
-  )
-  parser.add_argument(
-      '--far-name', dest='far_name', action='store', required=False
-  )
-  parser.add_argument(
-      '--api-level', dest='api_level', action='store', required=False
-  )
+  parser.add_argument('--far-name', dest='far_name', action='store', required=False)
+  parser.add_argument('--api-level', dest='api_level', action='store', required=False)
 
   args = parser.parse_args()
 
@@ -113,16 +99,13 @@ def main():
   # Use check_output so if anything goes wrong we get the output.
   try:
 
-    build_command = [
-        'build', '--output-package-manifest', args.manifest_json_file
-    ]
+    build_command = ['build', '--output-package-manifest', args.manifest_json_file]
 
     if args.api_level is not None:
       build_command = ['--api-level', args.api_level] + build_command
 
     archive_command = [
-        'archive', '--output=' +
-        os.path.join(os.path.dirname(output_dir), args.far_name + "-0")
+        'archive', '--output=' + os.path.join(os.path.dirname(output_dir), args.far_name + "-0")
     ]
 
     pm_commands = [build_command, archive_command]
@@ -130,24 +113,16 @@ def main():
     for pm_command in pm_commands:
       subprocess.check_output(pm_command_base + pm_command)
   except subprocess.CalledProcessError as e:
-    print(
-        '==================== Manifest contents ========================================='
-    )
+    print('==================== Manifest contents =========================================')
     with open(manifest_file, 'r') as manifest:
       sys.stdout.write(manifest.read())
-    print(
-        '==================== End manifest contents ====================================='
-    )
+    print('==================== End manifest contents =====================================')
     meta_contents_path = os.path.join(output_dir, 'meta', 'contents')
     if os.path.exists(meta_contents_path):
-      print(
-          '==================== meta/contents ============================================='
-      )
+      print('==================== meta/contents =============================================')
       with open(meta_contents_path, 'r') as meta_contents:
         sys.stdout.write(meta_contents.read())
-      print(
-          '==================== End meta/contents ========================================='
-      )
+      print('==================== End meta/contents =========================================')
     raise
 
   return 0

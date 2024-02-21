@@ -394,14 +394,15 @@ int epoxy_gl_version(void) {
 #define CONSTRUCT(_func) static void _func(void) __attribute__((constructor));
 #define DESTRUCT(_func) static void _func(void) __attribute__((destructor));
 #elif defined(_MSC_VER) && (_MSC_VER >= 1500)
-#define CONSTRUCT(_func)                                   \
-  static void _func(void);                                 \
-  static int _func##_wrapper(void) {                       \
-    _func();                                               \
-    return 0;                                              \
-  }                                                        \
-  __pragma(section(".CRT$XCU", read)) __declspec(allocate( \
-      ".CRT$XCU")) static int (*_array##_func)(void) = _func##_wrapper;
+#define CONSTRUCT(_func)                                                   \
+  static void _func(void);                                                 \
+  static int _func##_wrapper(void) {                                       \
+    _func();                                                               \
+    return 0;                                                              \
+  }                                                                        \
+  __pragma(section(".CRT$XCU", read))                                      \
+      __declspec(allocate(".CRT$XCU")) static int (*_array##_func)(void) = \
+          _func##_wrapper;
 
 #else
 #error "You will need constructor support for your compiler"

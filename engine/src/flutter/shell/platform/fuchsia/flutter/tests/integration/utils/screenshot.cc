@@ -44,8 +44,7 @@ Screenshot::Screenshot(const zx::vmo& screenshot_vmo,
 }
 
 std::ostream& operator<<(std::ostream& stream, const Pixel& pixel) {
-  return stream << "{Pixel:"
-                << " r:" << static_cast<unsigned int>(pixel.red)
+  return stream << "{Pixel:" << " r:" << static_cast<unsigned int>(pixel.red)
                 << " g:" << static_cast<unsigned int>(pixel.green)
                 << " b:" << static_cast<unsigned int>(pixel.blue)
                 << " a:" << static_cast<unsigned int>(pixel.alpha) << "}";

@@ -19,9 +19,7 @@ def main():
   dest = sys.argv[2]
 
   if os.path.isdir(source):
-    print(
-        f'{source} is a directory, tool "copy" does not support directory copies'
-    )
+    print(f'{source} is a directory, tool "copy" does not support directory copies')
     return 1
 
   if os.path.exists(dest):

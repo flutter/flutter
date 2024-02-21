@@ -22,12 +22,8 @@ def main():
       help='The framework paths used to create the XCFramework.',
       required=True
   )
-  parser.add_argument(
-      '--name', help='Name of the XCFramework', type=str, required=True
-  )
-  parser.add_argument(
-      '--location', help='Output directory', type=str, required=True
-  )
+  parser.add_argument('--name', help='Name of the XCFramework', type=str, required=True)
+  parser.add_argument('--location', help='Output directory', type=str, required=True)
 
   args = parser.parse_args()
 

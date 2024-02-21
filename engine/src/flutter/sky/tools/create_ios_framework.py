@@ -15,23 +15,19 @@ from create_xcframework import create_xcframework  # pylint: disable=import-erro
 
 ARCH_SUBPATH = 'mac-arm64' if platform.processor() == 'arm' else 'mac-x64'
 DSYMUTIL = os.path.join(
-    os.path.dirname(__file__), '..', '..', '..', 'buildtools', ARCH_SUBPATH,
-    'clang', 'bin', 'dsymutil'
+    os.path.dirname(__file__), '..', '..', '..', 'buildtools', ARCH_SUBPATH, 'clang', 'bin',
+    'dsymutil'
 )
 
 
 def main():
-  parser = argparse.ArgumentParser(
-      description='Creates Flutter.framework and Flutter.xcframework'
-  )
+  parser = argparse.ArgumentParser(description='Creates Flutter.framework and Flutter.xcframework')
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
   parser.add_argument('--armv7-out-dir', type=str, required=False)
   # TODO(gw280): Remove --simulator-out-dir alias when all recipes are updated
-  parser.add_argument(
-      '--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True
-  )
+  parser.add_argument('--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True)
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
   parser.add_argument('--strip', action='store_true', default=False)
   parser.add_argument('--dsym', action='store_true', default=False)
@@ -41,13 +37,9 @@ def main():
   framework = os.path.join(args.dst, 'Flutter.framework')
   simulator_framework = os.path.join(args.dst, 'sim', 'Flutter.framework')
   arm64_framework = os.path.join(args.arm64_out_dir, 'Flutter.framework')
-  simulator_x64_framework = os.path.join(
-      args.simulator_x64_out_dir, 'Flutter.framework'
-  )
+  simulator_x64_framework = os.path.join(args.simulator_x64_out_dir, 'Flutter.framework')
   if args.simulator_arm64_out_dir is not None:
-    simulator_arm64_framework = os.path.join(
-        args.simulator_arm64_out_dir, 'Flutter.framework'
-    )
+    simulator_arm64_framework = os.path.join(args.simulator_arm64_out_dir, 'Flutter.framework')
     simulator_arm64_dylib = os.path.join(simulator_arm64_framework, 'Flutter')
 
   arm64_dylib = os.path.join(arm64_framework, 'Flutter')
@@ -86,8 +78,8 @@ def main():
 
     # Create the arm64/x64 simulator fat framework.
     subprocess.check_call([
-        'lipo', simulator_x64_dylib, simulator_arm64_dylib, '-create',
-        '-output', simulator_framework_binary
+        'lipo', simulator_x64_dylib, simulator_arm64_dylib, '-create', '-output',
+        simulator_framework_binary
     ])
     process_framework(args, simulator_framework, simulator_framework_binary)
   else:
@@ -101,8 +93,7 @@ def main():
 
   # Add the x64 simulator into the fat framework
   subprocess.check_call([
-      'lipo', arm64_dylib, simulator_x64_dylib, '-create', '-output',
-      framework_binary
+      'lipo', arm64_dylib, simulator_x64_dylib, '-create', '-output', framework_binary
   ])
 
   process_framework(args, framework, framework_binary)

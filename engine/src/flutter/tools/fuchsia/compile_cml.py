@@ -16,13 +16,9 @@ import sys
 def main():
   parser = argparse.ArgumentParser()
 
-  parser.add_argument(
-      '--cmc-bin', dest='cmc_bin', action='store', required=True
-  )
+  parser.add_argument('--cmc-bin', dest='cmc_bin', action='store', required=True)
   parser.add_argument('--output', dest='output', action='store', required=True)
-  parser.add_argument(
-      '--manifest-file', dest='manifest_file', action='store', required=True
-  )
+  parser.add_argument('--manifest-file', dest='manifest_file', action='store', required=True)
   parser.add_argument(
       '--includepath',
       dest='includepath',

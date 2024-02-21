@@ -15,16 +15,12 @@ import re
 import sys
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
-sys.path += [
-    os.path.join(THIS_DIR, '..', '..', '..', 'third_party', 'pyyaml', 'lib3')
-]
+sys.path += [os.path.join(THIS_DIR, '..', '..', '..', 'third_party', 'pyyaml', 'lib3')]
 import yaml
 
 DEFAULT_LANGUAGE_VERSION = '2.8'
 
-Package = collections.namedtuple(
-    'Package', ['name', 'rootUri', 'languageVersion', 'packageUri']
-)
+Package = collections.namedtuple('Package', ['name', 'rootUri', 'languageVersion', 'packageUri'])
 
 
 class PackageConfig:
@@ -107,12 +103,8 @@ def collect_packages(items, relative_to):
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument(
-      '--input', help='Path to original package_config', required=True
-  )
-  parser.add_argument(
-      '--output', help='Path to the updated package_config', required=True
-  )
+  parser.add_argument('--input', help='Path to original package_config', required=True)
+  parser.add_argument('--output', help='Path to the updated package_config', required=True)
   parser.add_argument('--root', help='Path to fuchsia root', required=True)
   parser.add_argument('--depfile', help='Path to the depfile', required=True)
   args = parser.parse_args()
@@ -131,11 +123,7 @@ def main():
   with open(args.output, 'w') as output_file:
     package_config = PackageConfig(packages)
     json.dump(
-        package_config.asdict(),
-        output_file,
-        indent=2,
-        sort_keys=True,
-        separators=(',', ': ')
+        package_config.asdict(), output_file, indent=2, sort_keys=True, separators=(',', ': ')
     )
 
   return 0

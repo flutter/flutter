@@ -12,9 +12,7 @@ import subprocess
 import sys
 
 SRC_ROOT = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
@@ -34,8 +32,7 @@ def Main(argv):
       'config',
       'core.hooksPath',
       githooks,
-  ],
-                          cwd=FLUTTER_DIR)
+  ], cwd=FLUTTER_DIR)
   return result.returncode
 
 

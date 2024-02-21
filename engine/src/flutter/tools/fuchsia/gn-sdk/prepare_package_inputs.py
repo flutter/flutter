@@ -54,8 +54,7 @@ def _get_stripped_path(bin_path):
 
         returns |bin_path| if no stripped path is found.
   """
-  stripped_path = bin_path.replace('lib.unstripped/',
-                                   'lib/').replace('exe.unstripped/', '')
+  stripped_path = bin_path.replace('lib.unstripped/', 'lib/').replace('exe.unstripped/', '')
   if os.path.exists(stripped_path):
     return stripped_path
   else:
@@ -101,8 +100,7 @@ def _write_build_ids_txt(binary_paths, ids_txt_path):
       # Create a set to dedupe stripped binary paths in case both the stripped and
       # unstripped versions of a binary are specified.
       readelf_stdout = subprocess.check_output(['readelf', '-n'] +
-                                               sorted(unprocessed_binary_paths)
-                                              ).decode('utf8')
+                                               sorted(unprocessed_binary_paths)).decode('utf8')
 
       if len(binary_paths) == 1:
         # Readelf won't report a binary's path if only one was provided to the
@@ -122,8 +120,7 @@ def _write_build_ids_txt(binary_paths, ids_txt_path):
           # Paths to the unstripped executables listed in "ids.txt" are specified
           # as relative paths to that file.
           unstripped_rel_path = os.path.relpath(
-              os.path.abspath(binary_path),
-              os.path.dirname(os.path.abspath(ids_txt_path))
+              os.path.abspath(binary_path), os.path.dirname(os.path.abspath(ids_txt_path))
           )
 
           build_id = line[len(READELF_BUILD_ID_PREFIX):]
@@ -151,11 +148,7 @@ def _get_component_manifests(component_info):
 # until compile time.
 def _get_resource_items_from_json_items(component_info):
   nested_resources = []
-  files = [
-      c.get('source')
-      for c in component_info
-      if c.get('type') == 'json_of_resources'
-  ]
+  files = [c.get('source') for c in component_info if c.get('type') == 'json_of_resources']
   for json_file in files:
     for resource in _parse_component(json_file):
       nested_resources.append(resource)
@@ -217,9 +210,7 @@ def _write_meta_package_manifest(
     manifest_entries['meta/package'] = package_json_filepath
 
 
-def _write_component_manifest(
-    manifest_entries, component_info, archive_manifest_path, out_dir
-):
+def _write_component_manifest(manifest_entries, component_info, archive_manifest_path, out_dir):
   """Copy component manifest files and add to archive manifest.
 
     Raises an exception if a component uses a unknown manifest version.
@@ -241,8 +232,7 @@ def _write_component_manifest(
     #     os.path.dirname(archive_manifest_path),
     #     component_manifest.get('output_name') + extension)
     manifest_dest_file_path = os.path.join(
-        os.path.dirname(archive_manifest_path),
-        component_manifest.get('output_name')
+        os.path.dirname(archive_manifest_path), component_manifest.get('output_name')
     )
     # Add the 'meta/' subdir, for example, if `output_name` includes it
     os.makedirs(os.path.dirname(manifest_dest_file_path), exist_ok=True)
@@ -254,8 +244,7 @@ def _write_component_manifest(
 
 
 def _write_package_manifest(
-    manifest_entries, expanded_files, out_dir, exclude_file, root_dir,
-    component_info
+    manifest_entries, expanded_files, out_dir, exclude_file, root_dir, component_info
 ):
   """Writes the package manifest for a Fuchsia package
 
@@ -321,13 +310,12 @@ def _build_manifest(args):
   # because of runtime libraries.
   manifest_entries = {}
   _write_meta_package_manifest(
-      manifest_entries, args.manifest_path, args.app_name, args.out_dir,
-      args.package_version
+      manifest_entries, args.manifest_path, args.app_name, args.out_dir, args.package_version
   )
   for component_item in component_info:
     _write_package_manifest(
-        manifest_entries, expanded_files, args.out_dir, args.exclude_file,
-        args.root_dir, component_item
+        manifest_entries, expanded_files, args.out_dir, args.exclude_file, args.root_dir,
+        component_item
     )
     component_manifests.append(
         _write_component_manifest(
@@ -347,13 +335,11 @@ def _build_manifest(args):
   roots = [gen_dir, args.root_dir, args.out_dir]
   excluded_files_set = set(args.exclude_file)
   expanded_deps_files = [
-      path for path in expanded_files
-      if make_package_path(path, roots) not in excluded_files_set
+      path for path in expanded_files if make_package_path(path, roots) not in excluded_files_set
   ]
 
   _write_gn_deps_file(
-      args.depfile_path, args.manifest_path, component_manifests, args.out_dir,
-      expanded_deps_files
+      args.depfile_path, args.manifest_path, component_manifests, args.out_dir, expanded_deps_files
   )
   return 0
 
@@ -364,29 +350,19 @@ def main():
   parser.add_argument('--out-dir', required=True, help='Build output directory')
   parser.add_argument('--app-name', required=True, help='Package name')
   parser.add_argument(
-      '--runtime-deps-file',
-      required=True,
-      help='File with the list of runtime dependencies.'
+      '--runtime-deps-file', required=True, help='File with the list of runtime dependencies.'
   )
-  parser.add_argument(
-      '--depfile-path', required=True, help='Path to write GN deps file.'
-  )
+  parser.add_argument('--depfile-path', required=True, help='Path to write GN deps file.')
   parser.add_argument(
       '--exclude-file',
       action='append',
       default=[],
       help='Package-relative file path to exclude from the package.'
   )
-  parser.add_argument(
-      '--manifest-path', required=True, help='Manifest output path.'
-  )
-  parser.add_argument(
-      '--build-ids-file', required=True, help='Debug symbol index path.'
-  )
+  parser.add_argument('--manifest-path', required=True, help='Manifest output path.')
+  parser.add_argument('--build-ids-file', required=True, help='Debug symbol index path.')
   parser.add_argument('--json-file', required=True)
-  parser.add_argument(
-      '--package-version', default='0', help='Version of the package'
-  )
+  parser.add_argument('--package-version', default='0', help='Version of the package')
 
   args = parser.parse_args()
 

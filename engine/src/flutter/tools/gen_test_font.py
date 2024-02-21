@@ -118,8 +118,7 @@ def glyph_program(glyph):
   # Round To Grid every on-curve point, but ignore those who are on the ASCENT
   # or DESCENT line. This step keeps "p" (ascent flushed) and "É" (descent
   # flushed)'s y extents from overlapping each other.
-  for index, point in enumerate(
-      [p for contour in glyph.foreground for p in contour]):
+  for index, point in enumerate([p for contour in glyph.foreground for p in contour]):
     if point.y not in [ASCENT, DESCENT]:
       instructions += f"""
                 PUSHB_1
@@ -210,9 +209,8 @@ square_codepoints = [
         [0x221E, 0x222B, 0x2248, 0x2260],
         unicode_range(0x2264, 0x2265),
         [
-            0x22F2, 0x25CA, 0x3007, 0x4E00, 0x4E03, 0x4E09, 0x4E5D, 0x4E8C,
-            0x4E94, 0x516B, 0x516D, 0x5341, 0x56D7, 0x56DB, 0x571F, 0x6728,
-            0x6C34, 0x706B, 0x91D1
+            0x22F2, 0x25CA, 0x3007, 0x4E00, 0x4E03, 0x4E09, 0x4E5D, 0x4E8C, 0x4E94, 0x516B, 0x516D,
+            0x5341, 0x56D7, 0x56DB, 0x571F, 0x6728, 0x6C34, 0x706B, 0x91D1
         ],
         unicode_range(0xF000, 0xF002),
     ] for codepoint in l
@@ -253,8 +251,7 @@ create_glyph(".notdef", not_def_glyph).unicode = -1
 
 def create_no_path_glyph(codepoint, advance_percentage):
   name = "Zero Advance" if advance_percentage == 0 else (
-      "Full Advance"
-      if advance_percentage == 1 else f"1/{(int)(1/advance_percentage)} Advance"
+      "Full Advance" if advance_percentage == 1 else f"1/{(int)(1/advance_percentage)} Advance"
   )
   no_path_glyph = font.createChar(codepoint, name)
   no_path_glyph.width = (int)(EM * advance_percentage)
@@ -295,9 +292,7 @@ for glyph in font.glyphs():
     else:
       glyph_mapping[script] = [codepoint]
 
-  codepoints_by_script = [
-      glyph_mapping.get(script, []) for script in script_list
-  ]
+  codepoints_by_script = [glyph_mapping.get(script, []) for script in script_list]
 
   def describe_codepoint_range(codepoints):
     if not codepoints:
@@ -320,8 +315,7 @@ for glyph in font.glyphs():
 
     full_list = " ".join([map_char(c) for c in characters])
     return "**codepoint(s):** " + ", ".join([
-        f"{hex(r[0])}-{hex(r[-1])}" if len(r) > 1 else hex(r[0])
-        for r in codepoint_ranges
+        f"{hex(r[0])}-{hex(r[-1])}" if len(r) > 1 else hex(r[0]) for r in codepoint_ranges
     ]) + "<br />" + "**character(s):** " + full_list
 
   print(

@@ -21,5 +21,4 @@ def byte_str_decode(str_or_bytes):
         the possible value changes depending on the version of python
         used.
     """
-  return str_or_bytes if isinstance(str_or_bytes,
-                                    str) else str_or_bytes.decode(ENCODING)
+  return str_or_bytes if isinstance(str_or_bytes, str) else str_or_bytes.decode(ENCODING)

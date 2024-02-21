@@ -14,9 +14,7 @@ import shutil
 import subprocess
 import sys
 
-SRC_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FUCHSIA_SDK_DIR = os.path.join(SRC_ROOT, 'fuchsia', 'sdk')
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
@@ -64,12 +62,10 @@ def DownloadFuchsiaSDKFromGCS(sdk_path, verbose):
       universal_newlines=True,
   )
   if curl_result.returncode == 0 and verbose:
-    print(
-        'curl output:stdout:\n{}\nstderr:\n{}'.format(
-            curl_result.stdout,
-            curl_result.stderr,
-        )
-    )
+    print('curl output:stdout:\n{}\nstderr:\n{}'.format(
+        curl_result.stdout,
+        curl_result.stderr,
+    ))
   elif curl_result.returncode != 0:
     eprint(
         'Failed to download: stdout:\n{}\nstderr:\n{}'.format(
@@ -138,10 +134,7 @@ def Main():
 
   parser.add_argument('--host-os', help='The host os')
 
-  parser.add_argument(
-      '--fuchsia-sdk-path',
-      help='The path in gcs to the fuchsia sdk to download'
-  )
+  parser.add_argument('--fuchsia-sdk-path', help='The path in gcs to the fuchsia sdk to download')
 
   args = parser.parse_args()
   fail_loudly = 1 if args.fail_loudly else 0

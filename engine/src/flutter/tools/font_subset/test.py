@@ -28,24 +28,20 @@ PLATFORM_2_PATH = {
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..', '..'))
 MATERIAL_TTF = os.path.join(SCRIPT_DIR, 'fixtures', 'MaterialIcons-Regular.ttf')
-VARIABLE_MATERIAL_TTF = os.path.join(
-    SCRIPT_DIR, 'fixtures', 'MaterialSymbols-Variable.ttf'
-)
+VARIABLE_MATERIAL_TTF = os.path.join(SCRIPT_DIR, 'fixtures', 'MaterialSymbols-Variable.ttf')
 IS_WINDOWS = sys.platform.startswith(('cygwin', 'win'))
 EXE = '.exe' if IS_WINDOWS else ''
 BAT = '.bat' if IS_WINDOWS else ''
 FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug', 'font-subset' + EXE)
 FONT_SUBSET_ZIP = os.path.join(
-    SRC_DIR, 'out', 'host_debug', 'zip_archives',
-    PLATFORM_2_PATH.get(sys.platform, ''), 'font-subset.zip'
+    SRC_DIR, 'out', 'host_debug', 'zip_archives', PLATFORM_2_PATH.get(sys.platform, ''),
+    'font-subset.zip'
 )
 if not os.path.isfile(FONT_SUBSET):
-  FONT_SUBSET = os.path.join(
-      SRC_DIR, 'out', 'host_debug_unopt', 'font-subset' + EXE
-  )
+  FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug_unopt', 'font-subset' + EXE)
   FONT_SUBSET_ZIP = os.path.join(
-      SRC_DIR, 'out', 'host_debug_unopt', 'zip_archives',
-      PLATFORM_2_PATH.get(sys.platform, ''), 'font-subset.zip'
+      SRC_DIR, 'out', 'host_debug_unopt', 'zip_archives', PLATFORM_2_PATH.get(sys.platform, ''),
+      'font-subset.zip'
   )
 if not os.path.isfile(FONT_SUBSET):
   raise Exception(
@@ -57,11 +53,10 @@ COMPARE_TESTS = (
     (True, '1.ttf', MATERIAL_TTF, [r'57347']),
     (True, '1.ttf', MATERIAL_TTF, [r'0xE003']),
     (True, '1.ttf', MATERIAL_TTF, [r'\uE003']),
-    (False, '1.ttf', MATERIAL_TTF, [r'57348'
-                                   ]),  # False because different codepoint
+    (False, '1.ttf', MATERIAL_TTF, [r'57348']),  # False because different codepoint
     (True, '2.ttf', MATERIAL_TTF, [r'0xE003', r'0xE004']),
-    (True, '2.ttf', MATERIAL_TTF, [r'0xE003', r'optional:0xE004'
-                                  ]),  # Optional codepoint that is found
+    (True, '2.ttf', MATERIAL_TTF, [r'0xE003',
+                                   r'optional:0xE004']),  # Optional codepoint that is found
     (True, '2.ttf', MATERIAL_TTF, [
         r'0xE003',
         r'0xE004',
@@ -81,23 +76,19 @@ COMPARE_TESTS = (
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'57347']),
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003']),
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'\uE003']),
-    (False, '1variable.ttf', VARIABLE_MATERIAL_TTF,
-     [r'57348']),  # False because different codepoint
+    (False, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'57348'
+                                                    ]),  # False because different codepoint
     (True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003', r'0xE004']),
-    (
-        True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [
-            r'0xE003',
-            r'0xE004',
-            r'57347',
-        ]
-    ),  # Duplicated codepoint
-    (
-        True, '3variable.ttf', VARIABLE_MATERIAL_TTF, [
-            r'0xE003',
-            r'0xE004',
-            r'0xE021',
-        ]
-    ),
+    (True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [
+        r'0xE003',
+        r'0xE004',
+        r'57347',
+    ]),  # Duplicated codepoint
+    (True, '3variable.ttf', VARIABLE_MATERIAL_TTF, [
+        r'0xE003',
+        r'0xE004',
+        r'0xE021',
+    ]),
 )
 
 FAIL_TESTS = [
@@ -157,11 +148,7 @@ def RunCmd(cmd, codepoints, fail=False):
   print('       %s' % ' '.join(cmd))
   print('STDIN: "%s"' % ' '.join(codepoints))
   p = subprocess.Popen(
-      cmd,
-      stdout=subprocess.PIPE,
-      stdin=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      cwd=SRC_DIR
+      cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=SRC_DIR
   )
   stdout_data, stderr_data = p.communicate(input=' '.join(codepoints).encode())
   if p.returncode != 0 and fail == False:

@@ -22,10 +22,7 @@ def make_directories(path):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument(
-      '--symbol-name',
-      type=str,
-      required=True,
-      help='The name of the symbol referencing the data.'
+      '--symbol-name', type=str, required=True, help='The name of the symbol referencing the data.'
   )
   parser.add_argument(
       '--output-header',
@@ -34,10 +31,7 @@ def main():
       help='The header file containing the symbol reference.'
   )
   parser.add_argument(
-      '--output-source',
-      type=str,
-      required=True,
-      help='The source file containing the file bytes.'
+      '--output-source', type=str, required=True, help='The source file containing the file bytes.'
   )
   parser.add_argument(
       '--source',
@@ -72,9 +66,7 @@ def main():
       data_len += 1
       output.write(f'{ord(byte)},')
     output.write('};\n')
-    output.write(
-        f'const unsigned long impeller_{args.symbol_name}_length = {data_len};\n'
-    )
+    output.write(f'const unsigned long impeller_{args.symbol_name}_length = {data_len};\n')
 
   with open(output_header, 'w') as output:
     output.write('#pragma once\n')
@@ -82,12 +74,8 @@ def main():
     output.write('extern "C" {\n')
     output.write('#endif\n\n')
 
-    output.write(
-        f'extern const unsigned char impeller_{args.symbol_name}_data[];\n'
-    )
-    output.write(
-        f'extern const unsigned long impeller_{args.symbol_name}_length;\n\n'
-    )
+    output.write(f'extern const unsigned char impeller_{args.symbol_name}_data[];\n')
+    output.write(f'extern const unsigned long impeller_{args.symbol_name}_length;\n\n')
 
     output.write('#ifdef __cplusplus\n')
     output.write('}\n')

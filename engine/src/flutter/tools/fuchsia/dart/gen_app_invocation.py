@@ -11,16 +11,10 @@ import sys
 
 
 def main():
-  parser = argparse.ArgumentParser(
-      description='Generate a script that invokes a Dart application'
-  )
-  parser.add_argument(
-      '--out', help='Path to the invocation file to generate', required=True
-  )
+  parser = argparse.ArgumentParser(description='Generate a script that invokes a Dart application')
+  parser.add_argument('--out', help='Path to the invocation file to generate', required=True)
   parser.add_argument('--dart', help='Path to the Dart binary', required=True)
-  parser.add_argument(
-      '--snapshot', help='Path to the app snapshot', required=True
-  )
+  parser.add_argument('--snapshot', help='Path to the app snapshot', required=True)
   args = parser.parse_args()
 
   app_file = args.out
@@ -28,14 +22,12 @@ def main():
   if not os.path.exists(app_path):
     os.makedirs(app_path)
 
-  script_template = string.Template(
-      '''#!/bin/sh
+  script_template = string.Template('''#!/bin/sh
 
 $dart \\
   $snapshot \\
   "$$@"
-'''
-  )
+''')
   with open(app_file, 'w') as file:
     file.write(script_template.substitute(args.__dict__))
   permissions = (

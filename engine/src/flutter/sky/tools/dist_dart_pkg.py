@@ -15,12 +15,8 @@ import sys
 def main():
   parser = argparse.ArgumentParser(description='Copy a Dart package')
 
-  parser.add_argument(
-      '--source', type=str, help='Source directory assembled by dart_pkg.py'
-  )
-  parser.add_argument(
-      '--dest', type=str, help='Destination directory for the package'
-  )
+  parser.add_argument('--source', type=str, help='Source directory assembled by dart_pkg.py')
+  parser.add_argument('--dest', type=str, help='Destination directory for the package')
 
   args = parser.parse_args()
 
@@ -29,9 +25,7 @@ def main():
 
   # dart_pkg.py will create a packages directory within the package.
   # Do not copy this into the release output.
-  shutil.copytree(
-      args.source, args.dest, ignore=shutil.ignore_patterns('packages')
-  )
+  shutil.copytree(args.source, args.dest, ignore=shutil.ignore_patterns('packages'))
 
 
 if __name__ == '__main__':
