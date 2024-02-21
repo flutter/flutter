@@ -18,8 +18,8 @@ final class ViewFocusBinding {
   /// Subscribes the [listener] to [ui.ViewFocusEvent] events.
   void addListener(ui.ViewFocusChangeCallback listener) {
     if (_listeners.isEmpty) {
-      domDocument.body?.addEventListener(_focusin, _focusChangeHandler, true);
-      domDocument.body?.addEventListener(_focusout, _focusChangeHandler, true);
+      domDocument.body?.addEventListener(_focusin, _handleFocusin, true);
+      domDocument.body?.addEventListener(_focusout, _handleFocusout, true);
     }
     _listeners.add(listener);
   }
@@ -28,8 +28,8 @@ final class ViewFocusBinding {
   void removeListener(ui.ViewFocusChangeCallback listener) {
     _listeners.remove(listener);
     if (_listeners.isEmpty) {
-      domDocument.body?.removeEventListener(_focusin, _focusChangeHandler, true);
-      domDocument.body?.removeEventListener(_focusout, _focusChangeHandler, true);
+      domDocument.body?.removeEventListener(_focusin, _handleFocusin, true);
+      domDocument.body?.removeEventListener(_focusout, _handleFocusout, true);
     }
   }
 
@@ -39,9 +39,17 @@ final class ViewFocusBinding {
     }
   }
 
+  late final DomEventListener _handleFocusin = createDomEventListener(
+    (DomEvent event) => _handleFocusChange(event.target as DomElement?),
+  );
+
+  late final DomEventListener _handleFocusout = createDomEventListener(
+    (DomEvent event) => _handleFocusChange((event as DomFocusEvent).relatedTarget as DomElement?),
+  );
+
   int? _lastViewId;
-  late final DomEventListener _focusChangeHandler = createDomEventListener((DomEvent event) {
-    final int? viewId = _viewId(domDocument.activeElement);
+  void _handleFocusChange(DomElement? focusedElement) {
+    final int? viewId = _viewId(focusedElement);
     if (viewId == _lastViewId) {
       return;
     }
@@ -62,7 +70,7 @@ final class ViewFocusBinding {
     }
     _lastViewId = viewId;
     _notify(event);
-  });
+  }
 
   static int? _viewId(DomElement? element) {
     final DomElement? viewElement = element?.closest(

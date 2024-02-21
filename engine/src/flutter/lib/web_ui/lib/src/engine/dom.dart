@@ -2475,18 +2475,26 @@ DomPath2D createDomPath2D([Object? path]) {
   }
 }
 
-@JS('MouseEvent')
-@staticInterop
-class DomMouseEvent extends DomUIEvent {
-  external factory DomMouseEvent.arg1(JSString type);
-  external factory DomMouseEvent.arg2(JSString type, JSAny initDict);
-}
-
 @JS('InputEvent')
 @staticInterop
 class DomInputEvent extends DomUIEvent {
   external factory DomInputEvent.arg1(JSString type);
   external factory DomInputEvent.arg2(JSString type, JSAny initDict);
+}
+
+@JS('FocusEvent')
+@staticInterop
+class DomFocusEvent extends DomUIEvent {}
+
+extension DomFocusEventExtension on DomFocusEvent {
+  external DomEventTarget? get relatedTarget;
+}
+
+@JS('MouseEvent')
+@staticInterop
+class DomMouseEvent extends DomUIEvent {
+  external factory DomMouseEvent.arg1(JSString type);
+  external factory DomMouseEvent.arg2(JSString type, JSAny initDict);
 }
 
 extension DomMouseEventExtension on DomMouseEvent {
