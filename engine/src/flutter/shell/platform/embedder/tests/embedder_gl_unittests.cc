@@ -4711,7 +4711,7 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
       });
 
   builder.AddCommandLineArgument("--enable-impeller");
-  builder.SetDartEntrypoint("render_gradient");
+  builder.SetDartEntrypoint("render_impeller_gl_test");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
   builder.SetCompositor();
   builder.SetRenderTargetType(
@@ -4733,7 +4733,7 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
 
   ASSERT_TRUE(ImageMatchesFixture(
       FixtureNameForBackend(EmbedderTestContextType::kOpenGLContext,
-                            "impeller_gl_gradient.png"),
+                            "impeller_gl_test.png"),
       rendered_scene));
 
   // The scene will be rendered by the compositor, and the surface present
