@@ -208,5 +208,12 @@ TEST(EntityGeometryTest, StrokePathGeometryTransformOfLine) {
   }
 }
 
+TEST(EntityGeometryTest, GeometryResultHasReasonableDefaults) {
+  GeometryResult result;
+  EXPECT_EQ(result.type, PrimitiveType::kTriangleStrip);
+  EXPECT_EQ(result.transform, Matrix());
+  EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+}
+
 }  // namespace testing
 }  // namespace impeller

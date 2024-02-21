@@ -51,7 +51,6 @@ GeometryResult Geometry::ComputePositionGeometry(
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 
@@ -87,7 +86,6 @@ GeometryResult Geometry::ComputePositionUVGeometry(
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 
@@ -159,7 +157,6 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 

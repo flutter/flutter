@@ -105,7 +105,6 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 
@@ -158,7 +157,6 @@ GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
               .index_type = IndexType::kNone,
           },
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .prevent_overdraw = false,
   };
 }
 
