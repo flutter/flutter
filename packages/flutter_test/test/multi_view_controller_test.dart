@@ -190,6 +190,21 @@ void main() {
     expect((find.text('View1Child1').hitTestable().evaluate().single.widget as Text).data, 'View1Child1');
     expect((find.text('View2Child2').hitTestable().evaluate().single.widget as Text).data, 'View2Child2');
   });
+
+  testWidgets('simulatedAccessibilityTraversal - startNode and endNode in same view', (WidgetTester tester) async {
+    await pumpViews(tester: tester);
+    expect(
+      tester.semantics.simulatedAccessibilityTraversal(
+        startNode: find.semantics.byLabel('View2Child1'),
+        endNode: find.semantics.byLabel('View2Child3'),
+      ).map((SemanticsNode node) => node.label),
+      <String>[
+        'View2Child1',
+        'View2Child2',
+        'View2Child3',
+      ],
+    );
+  });
 }
 
 Future<void> pumpViews({required WidgetTester tester}) {

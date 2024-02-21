@@ -212,9 +212,12 @@ abstract interface class ChipAttributes {
   /// Color of the chip's surface tint overlay when its elevation is
   /// greater than 0.
   ///
-  /// If this is null and [ThemeData.useMaterial3] is true, then
-  /// [ColorScheme.surfaceTint] color is used. Otherwise, it defaults
-  /// to null.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
+  ///
+  /// If this is null, defaults to [Colors.transparent].
   Color? get surfaceTintColor;
 
   /// Theme used for all icons in the chip.
@@ -1925,10 +1928,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       assert(sizes.content >= boxSize.height);
       switch (textDirection!) {
         case TextDirection.rtl:
-          return Offset(x - boxSize.width, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
+          x -= boxSize.width;
         case TextDirection.ltr:
-          return Offset(x, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
+          break;
       }
+      return Offset(x, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
     }
 
     // These are the offsets to the upper left corners of the boxes (including
@@ -2036,20 +2040,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     if (enableAnimation.isCompleted) {
       return Colors.white;
     }
-    final ColorTween enableTween;
-    switch (theme.brightness) {
-      case Brightness.light:
-        enableTween = ColorTween(
-          begin: Colors.white.withAlpha(_kDisabledAlpha),
-          end: Colors.white,
-        );
-      case Brightness.dark:
-        enableTween = ColorTween(
-          begin: Colors.black.withAlpha(_kDisabledAlpha),
-          end: Colors.black,
-        );
-    }
-    return enableTween.evaluate(enableAnimation)!;
+    final Color color = switch (theme.brightness) {
+      Brightness.light => Colors.white,
+      Brightness.dark  => Colors.black,
+    };
+    return ColorTween(begin: color.withAlpha(_kDisabledAlpha), end: color).evaluate(enableAnimation)!;
   }
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
@@ -2377,7 +2372,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get checkmarkColor => null;

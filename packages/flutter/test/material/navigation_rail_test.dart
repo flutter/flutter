@@ -79,7 +79,7 @@ void main() {
       ),
     );
 
-    expect(_railMaterial(tester).color, equals(const Color(0xFFFFFBFE))); // default surface color in M3 colorScheme
+    expect(_railMaterial(tester).color, equals(const Color(0xfffef7ff))); // default surface color in M3 colorScheme
 
     await _pumpNavigationRail(
       tester,
