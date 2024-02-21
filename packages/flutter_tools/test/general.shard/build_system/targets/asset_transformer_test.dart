@@ -15,7 +15,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
-  test('Invokes dart properly', () async {
+  testWithoutContext('Invokes dart properly', () async {
     final FileSystem fileSystem = MemoryFileSystem();
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
-    final FileSystem fileSystem = MemoryFileSystem();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
@@ -113,7 +113,7 @@ void main() {
       dartBinaryPath: dartBinaryPath,
     );
 
-    await transformer.transformAsset(
+    final bool transformationSuccessful = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -125,6 +125,8 @@ void main() {
       ],
     );
 
+    expect(transformationSuccessful, false, reason: logger.errorText);
+    expect(asset, exists);
     expect(processManager, hasNoRemainingExpectations);
     expect(logger.errorText, contains(RegExp(
 '''
@@ -140,7 +142,7 @@ Something went wrong
   });
 
   testWithoutContext('prints error message when the transformer does not produce an output file', () async {
-    final FileSystem fileSystem = MemoryFileSystem();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
@@ -172,7 +174,7 @@ Something went wrong
       dartBinaryPath: dartBinaryPath,
     );
 
-    await transformer.transformAsset(
+    final bool transformationSuccessful = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -198,10 +200,11 @@ stderr:
 Transformation failed, but I forgot to exit with a non-zero code\.
 '''
     )));
+    expect(transformationSuccessful, false);
   });
 
   testWithoutContext('correctly chains transformations when there are multiple of them', () async {
-    final FileSystem fileSystem = MemoryFileSystem();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
