@@ -73,8 +73,6 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  private:
   std::weak_ptr<Context> context_;
   std::shared_ptr<TextureSourceVK> source_;
-  SharedHandleVK<vk::Framebuffer> framebuffer_ = nullptr;
-  SharedHandleVK<vk::RenderPass> render_pass_ = nullptr;
 
   // |Texture|
   void SetLabel(std::string_view label) override;

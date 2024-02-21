@@ -175,20 +175,20 @@ vk::ImageView TextureVK::GetRenderTargetView() const {
 
 void TextureVK::SetFramebuffer(
     const SharedHandleVK<vk::Framebuffer>& framebuffer) {
-  framebuffer_ = framebuffer;
+  source_->SetFramebuffer(framebuffer);
 }
 
 void TextureVK::SetRenderPass(
     const SharedHandleVK<vk::RenderPass>& render_pass) {
-  render_pass_ = render_pass;
+  source_->SetRenderPass(render_pass);
 }
 
 SharedHandleVK<vk::Framebuffer> TextureVK::GetFramebuffer() const {
-  return framebuffer_;
+  return source_->GetFramebuffer();
 }
 
 SharedHandleVK<vk::RenderPass> TextureVK::GetRenderPass() const {
-  return render_pass_;
+  return source_->GetRenderPass();
 }
 
 }  // namespace impeller
