@@ -4002,6 +4002,37 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
 
     expect(completer.isCompleted, false);
   });
+
+  testWidgets('SnackBarAction honors labelStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    labelStyle: const TextStyle(backgroundColor: Colors.red),
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.text('ACTION')).style?.backgroundColor,
+      Colors.red,
+    );
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
