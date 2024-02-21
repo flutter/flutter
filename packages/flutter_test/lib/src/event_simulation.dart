@@ -684,7 +684,7 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.rawKeyData;
+  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.keyDataThenRawKeyData;
 
   // The simulation transit mode for [simulateKeyDownEvent], [simulateKeyUpEvent],
   // and [simulateKeyRepeatEvent].
@@ -693,8 +693,8 @@ abstract final class KeyEventSimulator {
   // and delivered. For detailed introduction, see [KeyDataTransitMode] and
   // its values.
   //
-  // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
-  // overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
+  // The `_transitMode` defaults to [KeyDataTransitMode.keyDataThenRawKeyData], and can
+  // be overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
   // is often set with [KeySimulationModeVariant].
   static KeyDataTransitMode get _transitMode {
     KeyDataTransitMode? result;
@@ -704,6 +704,12 @@ abstract final class KeyEventSimulator {
     }());
     return result ?? _defaultTransitMode;
   }
+
+  /// Returns the transit mode that simulated key events are constructed
+  /// and delivered. For detailed introduction, see [KeyDataTransitMode]
+  /// and its values.
+  @visibleForTesting
+  static KeyDataTransitMode get transitMode => _transitMode;
 
   static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
 
@@ -964,6 +970,15 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   )
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
     : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
+
+  /// Creates a [KeySimulatorTransitModeVariant] that only contains
+  /// [KeyDataTransitMode.rawKeyData].
+  @Deprecated(
+    'No longer supported. Transit mode is always key data only. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
+  KeySimulatorTransitModeVariant.rawKeyData()
+    : this(<KeyDataTransitMode>{KeyDataTransitMode.rawKeyData});
 
   @override
   final Set<KeyDataTransitMode> values;
