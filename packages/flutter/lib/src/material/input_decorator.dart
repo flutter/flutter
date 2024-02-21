@@ -2858,7 +2858,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -2881,7 +2881,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -2909,7 +2909,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   final TextStyle? helperStyle;
@@ -2939,7 +2939,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -3213,7 +3213,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -3313,7 +3313,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -3379,7 +3379,7 @@ class InputDecoration {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -4022,7 +4022,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   final TextStyle? helperStyle;
@@ -4044,7 +4044,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -4125,7 +4125,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -4145,7 +4145,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
@@ -4165,7 +4165,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// This style can be set in multiple ways:
   /// - [TextStyle], if the style doesn't need to change.
-  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyles].
+  /// - [InputDecorationStyle], to adapt to the widget's state using multiple [TextStyle]s.
   /// - [MaterialStateTextStyle.resolveWith], with a callback that
   ///   resolves to a [TextStyle] based on the given states.
   ///
