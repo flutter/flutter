@@ -122,4 +122,8 @@ const vk::Device& SurfaceContextVK::GetDevice() const {
   return parent_->GetDevice();
 }
 
+void SurfaceContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
+  parent_->InitializeCommonlyUsedShadersIfNeeded();
+}
+
 }  // namespace impeller

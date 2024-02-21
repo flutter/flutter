@@ -339,6 +339,8 @@ VkResult vkCreateRenderPass(VkDevice device,
                             const VkAllocationCallbacks* pAllocator,
                             VkRenderPass* pRenderPass) {
   *pRenderPass = reinterpret_cast<VkRenderPass>(0x12341234);
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkCreateRenderPass");
   return VK_SUCCESS;
 }
 
