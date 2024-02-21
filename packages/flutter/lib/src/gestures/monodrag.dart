@@ -419,7 +419,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _DragState.ready);
     if (event is PointerDownEvent) {
       if (downAccept?.call() ?? false) {
-        _checkDrag(event.pointer);
+        resolve(GestureDisposition.accepted);
       }
     }
     if (!event.synthesized &&
