@@ -827,7 +827,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ScrollHoldController? _hold;
 
   void _handleDragDown(DragDownDetails details) {
-    _isScrollingDragDown = position.isScrollingNotifier.value;
+    _isScrollingDragDown = position.activity is BallisticScrollActivity;
     assert(_drag == null);
     assert(_hold == null);
     _hold = position.hold(_disposeHold);
