@@ -62,11 +62,11 @@ def get_out_dir(args):
   if args.macos_enable_metal:
     target_dir.append('metal')
 
-  if args.target_dir != '':
-    target_dir = [args.target_dir]
-
   if args.darwin_extension_safe:
     target_dir.append('extension_safe')
+
+  if args.target_dir != '':
+    target_dir = [args.target_dir]
 
   return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 

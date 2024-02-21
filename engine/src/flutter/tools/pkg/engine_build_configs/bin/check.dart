@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 
 // Usage:
 // $ dart bin/check.dart [/path/to/engine/src]
@@ -62,6 +63,38 @@ void main(List<String> args) {
     }
     for (final String error in buildConfigErrors) {
       io.stderr.writeln('    $error');
+    }
+  }
+
+  // Check that global builds for the same platform are uniquely named.
+  final List<String> hostPlatforms = <String>[
+    Platform.linux, Platform.macOS, Platform.windows,
+  ];
+
+  // For each host platform, a mapping from GlobalBuild.name to GlobalBuild.
+  final Map<String, Map<String, (BuildConfig, GlobalBuild)>> builds =
+    <String, Map<String, (BuildConfig, GlobalBuild)>>{};
+  for (final String platform in hostPlatforms) {
+    builds[platform] = <String, (BuildConfig, GlobalBuild)>{};
+  }
+  for (final String name in configs.keys) {
+    final BuildConfig buildConfig = configs[name]!;
+    for (final GlobalBuild build in buildConfig.builds) {
+      for (final String platform in hostPlatforms) {
+        if (!build.canRunOn(FakePlatform(operatingSystem: platform))) {
+          continue;
+        }
+        if (builds[platform]!.containsKey(build.name)) {
+          final (BuildConfig oldConfig, _) = builds[platform]![build.name]!;
+          io.stderr.writeln(
+            '${build.name} is duplicated.\n'
+            '\tFound definition in ${buildConfig.path}.\n'
+            '\tPrevious definition was in ${oldConfig.path}.',
+          );
+          io.exitCode = 1;
+        }
+        builds[platform]![build.name] = (buildConfig, build);
+      }
     }
   }
 }

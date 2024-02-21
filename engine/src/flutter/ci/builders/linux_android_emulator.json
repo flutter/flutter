@@ -15,7 +15,9 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--rbe",
-                "--no-goma"
+                "--no-goma",
+                "--target-dir",
+                "android_emulator_debug_x64"
             ],
             "dependencies": [
                 {
@@ -23,9 +25,9 @@
                     "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
                 }
             ],
-            "name": "android_debug_x64",
+            "name": "android_emulator_debug_x64",
             "ninja": {
-                "config": "android_debug_x64",
+                "config": "android_emulator_debug_x64",
                 "targets": [
                     "flutter/shell/platform/android:flutter_shell_native_unittests",
                     "flutter/testing/scenario_app"
@@ -51,7 +53,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                             "--android-variant",
-                            "android_debug_x64",
+                            "android_emulator_debug_x64",
                             "--type",
                             "android"
                     ]
@@ -74,7 +76,7 @@
                     ],
                     "script": "flutter/testing/scenario_app/run_android_tests.sh",
                     "parameters": [
-                        "android_debug_x64",
+                        "android_emulator_debug_x64",
                         "--no-enable-impeller"
                     ]
                 },
@@ -96,7 +98,7 @@
                     ],
                     "script": "flutter/testing/scenario_app/run_android_tests.sh",
                     "parameters": [
-                        "android_debug_x64",
+                        "android_emulator_debug_x64",
                         "--enable-impeller",
                         "--impeller-backend=vulkan"
                     ]
@@ -118,7 +120,9 @@
                 "--android-cpu=x86",
                 "--no-lto",
                 "--rbe",
-                "--no-goma"
+                "--no-goma",
+                "--target-dir",
+                "android_emulator_debug_x86"
             ],
             "dependencies": [
                 {
@@ -126,9 +130,9 @@
                     "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
                 }
             ],
-            "name": "android_debug_x86",
+            "name": "android_emulator_debug_x86",
             "ninja": {
-                "config": "android_debug_x86",
+                "config": "android_emulator_debug_x86",
                 "targets": [
                     "flutter/shell/platform/android:flutter_shell_native_unittests",
                     "flutter/testing/scenario_app"
@@ -154,7 +158,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                             "--android-variant",
-                            "android_debug_x86",
+                            "android_emulator_debug_x86",
                             "--type",
                             "android"
                     ]
