@@ -458,7 +458,8 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  factory MaterialStateTextStyle.resolveWith(MaterialPropertyResolver<TextStyle?> callback) = _MaterialStateTextStyle;
+  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle?> callback) =>
+      _MaterialStateTextStyle(callback);
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
