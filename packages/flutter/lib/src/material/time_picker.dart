@@ -3613,9 +3613,12 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
-      return entryMode == TimePickerEntryMode.dial
-        ? _textTheme.displayLarge!.copyWith(color: _hourMinuteTextColor.resolve(states))
-        : _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states));
+      return switch (entryMode) {
+        TimePickerEntryMode.dial || TimePickerEntryMode.dialOnly
+          => _textTheme.displayLarge!.copyWith(color: _hourMinuteTextColor.resolve(states)),
+        TimePickerEntryMode.input || TimePickerEntryMode.inputOnly
+          => _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states)),
+      };
     });
   }
 
