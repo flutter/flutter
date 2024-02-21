@@ -1,3 +1,4 @@
+DrawSolidBlueScreenTest.png
 ExternalTextureTests_testCanvasSurface.png
 ExternalTextureTests_testCroppedMediaSurface_bottomLeft.png
 ExternalTextureTests_testCroppedMediaSurface_topRight.png
