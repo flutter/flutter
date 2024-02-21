@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../impeller_test_helpers.dart';
+
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -64,7 +66,7 @@ void main() {
       find.byType(ColorFiltered),
       matchesGoldenFile('color_filter_sepia.png'),
     );
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
