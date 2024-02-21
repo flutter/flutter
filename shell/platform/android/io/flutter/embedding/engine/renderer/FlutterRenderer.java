@@ -189,6 +189,7 @@ public class FlutterRenderer implements TextureRegistry {
     if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= 29) {
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
       registerImageTexture(id, producer);
+      addOnTrimMemoryListener(producer);
       Log.v(TAG, "New ImageReaderSurfaceProducer ID: " + id);
       entry = producer;
     } else {
@@ -404,7 +405,9 @@ public class FlutterRenderer implements TextureRegistry {
   @Keep
   @TargetApi(29)
   final class ImageReaderSurfaceProducer
-      implements TextureRegistry.SurfaceProducer, TextureRegistry.ImageConsumer {
+      implements TextureRegistry.SurfaceProducer,
+          TextureRegistry.ImageConsumer,
+          TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
     private static final int MAX_IMAGES = 4;
 
@@ -436,6 +439,7 @@ public class FlutterRenderer implements TextureRegistry {
     private final LinkedList<PerImageReader> imageReaderQueue = new LinkedList<PerImageReader>();
     private final HashMap<ImageReader, PerImageReader> perImageReaders =
         new HashMap<ImageReader, PerImageReader>();
+    private PerImage lastDequeuedImage = null;
     private PerImageReader lastReaderDequeuedFrom = null;
 
     /** Internal class: state held per Image produced by ImageReaders. */
@@ -607,7 +611,15 @@ public class FlutterRenderer implements TextureRegistry {
               lastDequeueTime = System.nanoTime();
             }
           }
-          // We have dequeued the first image from reader.
+          if (lastDequeuedImage != null) {
+            // We must keep the last image dequeued open until we are done presenting it.
+            // We have just dequeued a new image (r). Close the previously dequeued image.
+            lastDequeuedImage.image.close();
+            lastDequeuedImage = null;
+          }
+          // Remember the last image and reader dequeued from. We do this because we must
+          // keep both of these alive until we are done presenting the image.
+          lastDequeuedImage = r;
           lastReaderDequeuedFrom = reader;
           break;
         }
@@ -616,23 +628,40 @@ public class FlutterRenderer implements TextureRegistry {
       return r;
     }
 
+    @Override
+    public void onTrimMemory(int level) {
+      cleanup();
+      createNewReader = true;
+    }
+
     private void releaseInternal() {
+      cleanup();
       released = true;
-      for (PerImageReader pir : perImageReaders.values()) {
-        pir.close();
+    }
+
+    private void cleanup() {
+      synchronized (lock) {
+        for (PerImageReader pir : perImageReaders.values()) {
+          pir.close();
+        }
+        perImageReaders.clear();
+        if (lastDequeuedImage != null) {
+          lastDequeuedImage.image.close();
+          lastDequeuedImage = null;
+        }
+        if (lastReaderDequeuedFrom != null) {
+          lastReaderDequeuedFrom.close();
+          lastReaderDequeuedFrom = null;
+        }
+        imageReaderQueue.clear();
       }
-      perImageReaders.clear();
-      imageReaderQueue.clear();
     }
 
     @TargetApi(33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
-        boolean signaled = fence.awaitForever();
-        if (!signaled) {
-          Log.e(TAG, "acquireLatestImage image's fence was never signalled.");
-        }
+        fence.awaitForever();
       } catch (IOException e) {
         // Drop.
       }
@@ -874,10 +903,7 @@ public class FlutterRenderer implements TextureRegistry {
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
-        boolean signaled = fence.awaitForever();
-        if (!signaled) {
-          Log.e(TAG, "acquireLatestImage image's fence was never signalled.");
-        }
+        fence.awaitForever();
       } catch (IOException e) {
         // Drop.
       }

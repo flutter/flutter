@@ -38,9 +38,7 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
   if (image.is_null()) {
     return;
   }
-  JavaLocalRef old_android_image(latest_android_image_);
-  latest_android_image_.Reset(image);
-  JavaLocalRef hardware_buffer = HardwareBufferFor(latest_android_image_);
+  JavaLocalRef hardware_buffer = HardwareBufferFor(image);
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
 
   AHardwareBuffer_Desc hb_desc = {};
@@ -53,9 +51,6 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     dl_image_ = existing_image;
 
     CloseHardwareBuffer(hardware_buffer);
-    // IMPORTANT: We have just received a new frame to display so close the
-    // previous Java Image so that it is recycled and used for a future frame.
-    CloseImage(old_android_image);
     return;
   }
 
@@ -105,9 +100,6 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     image_lru_.AddImage(dl_image_, key.value());
   }
   CloseHardwareBuffer(hardware_buffer);
-  // IMPORTANT: We have just received a new frame to display so close the
-  // previous Java Image so that it is recycled and used for a future frame.
-  CloseImage(old_android_image);
 }
 
 }  // namespace flutter
