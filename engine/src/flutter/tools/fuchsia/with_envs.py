@@ -8,12 +8,7 @@ import platform
 import subprocess
 import sys
 
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), 'test_scripts/test/')
-    )
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_scripts/test/')))
 
 from common import catch_sigterm, wait_for_sigterm
 
@@ -27,19 +22,13 @@ def Main():
   # Ensures the signals can be correctly forwarded to the subprocesses.
   catch_sigterm()
 
-  os.environ['SRC_ROOT'] = os.path.abspath(
-      os.path.join(os.path.dirname(__file__), '../../../')
-  )
+  os.environ['SRC_ROOT'] = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
   # Flutter uses a different repo structure and fuchsia sdk is not in the
   # third_party/, so images root and sdk root need to be explicitly set.
-  os.environ['FUCHSIA_IMAGES_ROOT'] = os.path.join(
-      os.environ['SRC_ROOT'], 'fuchsia/images/'
-  )
+  os.environ['FUCHSIA_IMAGES_ROOT'] = os.path.join(os.environ['SRC_ROOT'], 'fuchsia/images/')
 
   assert platform.system() == 'Linux', 'Unsupported OS ' + platform.system()
-  os.environ['FUCHSIA_SDK_ROOT'] = os.path.join(
-      os.environ['SRC_ROOT'], 'fuchsia/sdk/linux/'
-  )
+  os.environ['FUCHSIA_SDK_ROOT'] = os.path.join(os.environ['SRC_ROOT'], 'fuchsia/sdk/linux/')
 
   with subprocess.Popen(sys.argv[1:]) as proc:
     try:

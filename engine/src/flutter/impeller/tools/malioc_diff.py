@@ -34,9 +34,7 @@ import sys
 # negative, the exit code for this script will be 1, and 0 otherwise.
 
 SRC_ROOT = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
 CORES = [
@@ -46,9 +44,7 @@ CORES = [
 
 # Path to the engine root checkout. This is used to calculate absolute
 # paths if relative ones are passed to the script.
-BUILD_ROOT_DIR = os.path.abspath(
-    os.path.join(os.path.realpath(__file__), '..', '..', '..', '..')
-)
+BUILD_ROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))
 
 
 def parse_args(argv):
@@ -118,12 +114,8 @@ def validate_args(args):
 
   # Generate full paths if relative ones are provided with before and
   # after taking precedence.
-  args.before = (
-      args.before or os.path.join(BUILD_ROOT_DIR, args.before_relative_to_src)
-  )
-  args.after = (
-      args.after or os.path.join(BUILD_ROOT_DIR, args.after_relative_to_src)
-  )
+  args.before = (args.before or os.path.join(BUILD_ROOT_DIR, args.before_relative_to_src))
+  args.after = (args.after or os.path.join(BUILD_ROOT_DIR, args.after_relative_to_src))
 
   if not args.after or not os.path.isdir(args.after):
     print('The --after argument must refer to a directory.')
@@ -141,13 +133,11 @@ def read_malioc_file_performance(performance_json):
 
   longest_path_cycles = performance_json['longest_path_cycles']
   performance['longest_path_cycles'] = longest_path_cycles['cycle_count']
-  performance['longest_path_bound_pipelines'] = longest_path_cycles[
-      'bound_pipelines']
+  performance['longest_path_bound_pipelines'] = longest_path_cycles['bound_pipelines']
 
   shortest_path_cycles = performance_json['shortest_path_cycles']
   performance['shortest_path_cycles'] = shortest_path_cycles['cycle_count']
-  performance['shortest_path_bound_pipelines'] = shortest_path_cycles[
-      'bound_pipelines']
+  performance['shortest_path_bound_pipelines'] = shortest_path_cycles['bound_pipelines']
 
   total_cycles = performance_json['total_cycles']
   performance['total_cycles'] = total_cycles['cycle_count']
@@ -219,13 +209,9 @@ def read_malioc_tree(malioc_tree):
 # a space of `width` characters, and separated by `sep`. The separator does not
 # count against the `width`. If `width` is 0, then the width is unconstrained.
 def pretty_list(lst, fmt='s', sep='', width=12):
-  formats = [
-      '{:<{width}{fmt}}' if ele is not None else '{:<{width}s}' for ele in lst
-  ]
+  formats = ['{:<{width}{fmt}}' if ele is not None else '{:<{width}s}' for ele in lst]
   sanitized_list = [x if x is not None else 'null' for x in lst]
-  return (sep.join(formats)).format(
-      width='' if width == 0 else width, fmt=fmt, *sanitized_list
-  )
+  return (sep.join(formats)).format(width='' if width == 0 else width, fmt=fmt, *sanitized_list)
 
 
 def compare_performance(variant, before, after):
@@ -264,13 +250,10 @@ def compare_variants(befores, afters):
     for variant_key, before_variant_val in before_variant.items():
       after_variant_val = after_variant[variant_key]
       if variant_key == 'performance':
-        differences += compare_performance(
-            variant_name, before_variant_val, after_variant_val
-        )
+        differences += compare_performance(variant_name, before_variant_val, after_variant_val)
       elif before_variant_val != after_variant_val:
         differences += [
-            'In variant {}:\n  {vkey}: {} <- before\n  {vkey}: {} <- after'
-            .format(
+            'In variant {}:\n  {vkey}: {} <- before\n  {vkey}: {} <- after'.format(
                 variant_name,
                 before_variant_val,
                 after_variant_val,
@@ -291,11 +274,7 @@ def compare_shaders(malioc_tree, before_shader, after_shader):
     elif key == 'performance':
       differences += compare_performance('Default', before_val, after_val)
     elif before_val != after_val:
-      differences += [
-          '{}:\n  {} <- before\n  {} <- after'.format(
-              key, before_val, after_val
-          )
-      ]
+      differences += ['{}:\n  {} <- before\n  {} <- after'.format(key, before_val, after_val)]
 
   if bool(differences):
     build_gen_dir = os.path.dirname(malioc_tree)
@@ -357,22 +336,15 @@ def main(argv):
         'changes to existing shaders. The golden file must be updated after a '
         'build of android_debug_unopt using the --malioc-path flag to the '
         'flutter/tools/gn script.\n\n'
-        '$ ./flutter/impeller/tools/malioc_diff.py --before {} --after {} --update'
-        .format(args.before, args.after)
+        '$ ./flutter/impeller/tools/malioc_diff.py --before {} --after {} --update'.format(
+            args.before, args.after
+        )
     )
     if args.print_diff:
-      before_lines = json.dumps(
-          before_json, sort_keys=True, indent=2
-      ).splitlines(keepends=True)
-      after_lines = json.dumps(
-          after_json, sort_keys=True, indent=2
-      ).splitlines(keepends=True)
-      before_path = os.path.relpath(
-          os.path.abspath(args.before), start=SRC_ROOT
-      )
-      diff = difflib.unified_diff(
-          before_lines, after_lines, fromfile=before_path
-      )
+      before_lines = json.dumps(before_json, sort_keys=True, indent=2).splitlines(keepends=True)
+      after_lines = json.dumps(after_json, sort_keys=True, indent=2).splitlines(keepends=True)
+      before_path = os.path.relpath(os.path.abspath(args.before), start=SRC_ROOT)
+      diff = difflib.unified_diff(before_lines, after_lines, fromfile=before_path)
       print('\nYou can alternately apply the diff below:')
       print('patch -p0 <<DONE')
       print(*diff, sep='')

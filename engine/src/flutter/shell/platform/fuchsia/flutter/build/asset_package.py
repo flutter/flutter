@@ -13,34 +13,17 @@ import sys
 def main():
   parser = argparse.ArgumentParser(description='Package a Flutter application')
 
+  parser.add_argument('--flutter-root', type=str, required=True, help='The root of the Flutter SDK')
   parser.add_argument(
-      '--flutter-root',
-      type=str,
-      required=True,
-      help='The root of the Flutter SDK'
+      '--flutter-tools', type=str, required=True, help='The executable for the Flutter tool'
   )
   parser.add_argument(
-      '--flutter-tools',
-      type=str,
-      required=True,
-      help='The executable for the Flutter tool'
+      '--asset-dir', type=str, required=True, help='The directory where to put intermediate files'
   )
-  parser.add_argument(
-      '--asset-dir',
-      type=str,
-      required=True,
-      help='The directory where to put intermediate files'
-  )
-  parser.add_argument(
-      '--app-dir', type=str, required=True, help='The root of the app'
-  )
-  parser.add_argument(
-      '--packages', type=str, required=True, help='The package map to use'
-  )
+  parser.add_argument('--app-dir', type=str, required=True, help='The root of the app')
+  parser.add_argument('--packages', type=str, required=True, help='The package map to use')
   parser.add_argument('--manifest', type=str, help='The application manifest')
-  parser.add_argument(
-      '--component-name', type=str, help='The name of the component'
-  )
+  parser.add_argument('--component-name', type=str, help='The name of the component')
   parser.add_argument(
       '--asset-manifest-out',
       type=str,

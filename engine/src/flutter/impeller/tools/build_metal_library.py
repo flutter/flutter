@@ -23,14 +23,9 @@ def make_directories(path):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument(
-      '--output',
-      type=str,
-      required=True,
-      help='The location to generate the Metal library to.'
+      '--output', type=str, required=True, help='The location to generate the Metal library to.'
   )
-  parser.add_argument(
-      '--depfile', type=str, required=True, help='The location of the depfile.'
-  )
+  parser.add_argument('--depfile', type=str, required=True, help='The location of the depfile.')
   parser.add_argument(
       '--source',
       type=str,
@@ -45,9 +40,7 @@ def main():
       help='Select the platform.'
   )
   parser.add_argument(
-      '--metal-version',
-      required=True,
-      help='The language standard version to compile for.'
+      '--metal-version', required=True, help='The language standard version to compile for.'
   )
 
   args = parser.parse_args()

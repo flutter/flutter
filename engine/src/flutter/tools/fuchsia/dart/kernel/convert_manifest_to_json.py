@@ -31,16 +31,10 @@ def collect(path_prefix, lines):
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
-      '--path_prefix',
-      help='Directory path containing the manifest entry sources',
-      required=True
+      '--path_prefix', help='Directory path containing the manifest entry sources', required=True
   )
-  parser.add_argument(
-      '--input', help='Path to original manifest', required=True
-  )
-  parser.add_argument(
-      '--output', help='Path to the updated json file', required=True
-  )
+  parser.add_argument('--input', help='Path to original manifest', required=True)
+  parser.add_argument('--output', help='Path to the updated json file', required=True)
   args = parser.parse_args()
 
   with open(args.input, 'r') as input_file:

@@ -25,14 +25,10 @@ def _zip_dir(path, zip_file, prefix):
     for file in files:
       if os.path.islink(os.path.join(root, file)):
         add_symlink(
-            zip_file, os.path.join(root, file),
-            os.path.join(root.replace(path, prefix), file)
+            zip_file, os.path.join(root, file), os.path.join(root.replace(path, prefix), file)
         )
         continue
-      zip_file.write(
-          os.path.join(root, file),
-          os.path.join(root.replace(path, prefix), file)
-      )
+      zip_file.write(os.path.join(root, file), os.path.join(root.replace(path, prefix), file))
 
 
 def add_symlink(zip_file, source, target):
@@ -80,12 +76,7 @@ def main(args):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='This script creates zip files.')
-  parser.add_argument(
-      '-o',
-      dest='output',
-      action='store',
-      help='The name of the output zip file.'
-  )
+  parser.add_argument('-o', dest='output', action='store', help='The name of the output zip file.')
   parser.add_argument(
       '-i',
       dest='input_pairs',
@@ -94,9 +85,6 @@ if __name__ == '__main__':
       help='The input file and its destination location in the zip archive.'
   )
   parser.add_argument(
-      '-f',
-      dest='source_file',
-      action='store',
-      help='The path to the file list to zip.'
+      '-f', dest='source_file', action='store', help='The path to the file list to zip.'
   )
   sys.exit(main(parser.parse_args()))

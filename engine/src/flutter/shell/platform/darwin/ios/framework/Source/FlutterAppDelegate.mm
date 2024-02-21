@@ -206,8 +206,9 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
-                                       restorableObjects))restorationHandler {
+      restorationHandler:
+          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
+              restorationHandler {
   if ([_lifeCycleDelegate application:application
                  continueUserActivity:userActivity
                    restorationHandler:restorationHandler]) {

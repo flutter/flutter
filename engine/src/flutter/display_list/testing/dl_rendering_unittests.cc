@@ -2232,8 +2232,8 @@ class CanvasCompareTester {
       return DirectoryStatus::kCreated;
     }
     FML_LOG(ERROR) << "Could not create directory (" << dir
-                   << ") for impeller failure images"
-                   << ", ret = " << ret.get() << ", errno = " << errno;
+                   << ") for impeller failure images" << ", ret = " << ret.get()
+                   << ", errno = " << errno;
     return DirectoryStatus::kFailed;
   }
 
