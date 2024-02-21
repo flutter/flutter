@@ -52,7 +52,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: artifacts,
+      dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
     );
 
     await transformer.transformAsset(
@@ -110,7 +110,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: artifacts,
+      dartBinaryPath: dartBinaryPath,
     );
 
     await transformer.transformAsset(
@@ -169,7 +169,7 @@ Something went wrong
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: artifacts,
+      dartBinaryPath: dartBinaryPath,
     );
 
     await transformer.transformAsset(
@@ -264,7 +264,7 @@ Transformation failed, but I forgot to exit with a non-zero code\.
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: artifacts,
+      dartBinaryPath: dartBinaryPath,
     );
 
     await transformer.transformAsset(
@@ -338,7 +338,7 @@ Transformation failed, but I forgot to exit with a non-zero code\.
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: artifacts,
+      dartBinaryPath: dartBinaryPath,
     );
 
     await transformer.transformAsset(

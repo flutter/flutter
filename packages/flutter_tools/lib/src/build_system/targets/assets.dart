@@ -4,6 +4,7 @@
 
 import 'package:pool/pool.dart';
 
+import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
@@ -99,7 +100,7 @@ Future<Depfile> copyAssets(
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
-    artifacts: environment.artifacts,
+    dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
   );
 
   final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{

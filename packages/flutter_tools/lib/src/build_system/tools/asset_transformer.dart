@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:process/process.dart';
 
-import '../../artifacts.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -20,17 +19,16 @@ final class AssetTransformer {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required String dartBinaryPath,
   })  : _processManager = processManager,
         _logger = logger,
-        _fileSystem = fileSystem {
-          _dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
-        }
+        _fileSystem = fileSystem,
+        _dartBinaryPath = dartBinaryPath;
 
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
-  late String _dartBinary;
+  final String _dartBinaryPath;
   final Random _random = Random();
 
   /// The [Source] inputs that targets using this should depend on.
@@ -105,7 +103,7 @@ final class AssetTransformer {
     ];
 
     final List<String> command = <String>[
-      _dartBinary,
+      _dartBinaryPath,
       'run',
       transformer.package,
       ...transformerArguments,
