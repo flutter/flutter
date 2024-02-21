@@ -1484,7 +1484,10 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    return callingAction?.invoke(intent) ?? invokeAction(intent, context);
+    if (callingAction != null) {
+      return callingAction!.invoke(intent);
+    }
+    return invokeAction(intent, context);
   }
 }
 
