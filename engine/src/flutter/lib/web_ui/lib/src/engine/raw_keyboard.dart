@@ -123,6 +123,10 @@ class RawKeyboard {
       } else if (event.key == 'Meta' && operatingSystem == OperatingSystem.linux) {
         // On Chrome Linux, metaState can be wrong when a Meta key is pressed.
         _lastMetaState |= _modifierMeta;
+      } else if (event.code == 'MetaLeft' && event.key == 'Process') {
+        // When Meta key is pressed, browsers can emit an event whose key is 'Process'.
+        // See https://github.com/flutter/flutter/issues/141186.
+        _lastMetaState |= _modifierMeta;
       }
     }
     final Map<String, dynamic> eventData = <String, dynamic>{
