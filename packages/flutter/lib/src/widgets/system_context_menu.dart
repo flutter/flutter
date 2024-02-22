@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
+import 'text_selection_toolbar_anchors.dart';
 
 /// Displays the system context menu on top of the Flutter view.
 ///
@@ -28,49 +29,19 @@ class SystemContextMenu extends StatefulWidget {
     ) = editableTextState.getGlyphHeights();
     return SystemContextMenu._(
       key: key,
-      anchor: _getSelectionRect(
+      anchor: TextSelectionToolbarAnchors.getSelectionRect(
         editableTextState.renderEditable,
         startGlyphHeight,
         endGlyphHeight,
-        editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
+        editableTextState.renderEditable.getEndpointsForSelection(
+          editableTextState.textEditingValue.selection,
+        ),
       ),
     );
   }
 
   /// The [Rect] that the context menu should point to.
   final Rect anchor;
-
-  // TODO(justinmc): Deduplicate logic with TextSelectionToolbarAnchors.fromSelection?
-  static Rect _getSelectionRect(
-    RenderBox renderBox,
-    double startGlyphHeight,
-    double endGlyphHeight,
-    List<TextSelectionPoint> selectionEndpoints,
-  ) {
-    final Rect editingRegion = Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    );
-
-    if (editingRegion.left.isNaN || editingRegion.top.isNaN
-      || editingRegion.right.isNaN || editingRegion.bottom.isNaN) {
-      return Rect.zero;
-    }
-
-    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-        endGlyphHeight / 2;
-
-    return Rect.fromLTRB(
-      isMultiline
-          ? editingRegion.left
-          : editingRegion.left + selectionEndpoints.first.point.dx,
-      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
-      isMultiline
-          ? editingRegion.right
-          : editingRegion.left + selectionEndpoints.last.point.dx,
-      editingRegion.top + selectionEndpoints.last.point.dy,
-    );
-  }
 
   @override
   State<SystemContextMenu> createState() => _SystemContextMenuState();
