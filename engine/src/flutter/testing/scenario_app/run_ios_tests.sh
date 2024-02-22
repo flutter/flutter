@@ -58,13 +58,34 @@ zip_and_upload_xcresult_to_luci () {
   exit 1
 }
 
+readonly DEVICE_NAME="iPhone SE (3rd generation)"
+readonly DEVICE=com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation
+readonly OS_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-17-0
+readonly OS="17.0"
+
+# Delete any existing devices named "iPhone SE (3rd generation)". Having more
+# than one may cause issues when builds target the device.
+echo "Deleting any existing devices names $DEVICE_NAME..."
+RESULT=0
+while [[ $RESULT == 0 ]]; do
+    xcrun simctl delete "$DEVICE_NAME" || RESULT=1
+    if [ $RESULT == 0 ]; then
+        echo "Deleted $DEVICE_NAME"
+    fi
+done
+echo ""
+
+echo "Creating $DEVICE_NAME $DEVICE $OS_RUNTIME ..."
+xcrun simctl create "$DEVICE_NAME" "$DEVICE" "$OS_RUNTIME"
+echo ""
+
 echo "Running simulator tests with Skia"
 echo ""
 
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
-  -destination 'platform=iOS Simulator,OS=17.0,name=iPhone SE (3rd generation)' \
+  -destination "platform=iOS Simulator,OS=$OS,name=$DEVICE_NAME" \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE"; then
   echo "test success."
@@ -82,7 +103,7 @@ echo ""
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
-  -destination 'platform=iOS Simulator,OS=17.0,name=iPhone SE (3rd generation)' \
+  -destination "platform=iOS Simulator,OS=$OS,name=$DEVICE_NAME" \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE" \
   -skip-testing ScenariosUITests/MultiplePlatformViewsBackgroundForegroundTest/testPlatformView \
