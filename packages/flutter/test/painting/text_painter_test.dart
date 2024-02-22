@@ -541,6 +541,39 @@ void main() {
     painter.dispose();
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
+  test('TextPainter maxIntrinsicWidth takes trailing spaces into account', () {
+    const TextStyle style = TextStyle(fontSize: 10);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    painter
+      ..text = TextSpan(text: 'X${" " * 10}', style: style)
+      ..layout();
+    expect(painter.maxIntrinsicWidth, 11 * 10);
+
+    painter
+      ..text = TextSpan(text: ' ' * 10, style: style)
+      ..layout();
+    expect(painter.maxIntrinsicWidth, 10 * 10);
+  });
+
+  test('TextPainter longestLine and trailing spaces', () {
+    const TextStyle style = TextStyle(fontSize: 10);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    painter.text = TextSpan(text: 'X${" " * 10}', style: style);
+    // Trailing spaces are ignored in most cases.
+    expect(painter.layout().longestLine, 10);
+
+    // ... unless the line is otherwise zero-width.
+    painter.text = TextSpan(text: ' ' * 10, style: style);
+    expect(painter.layout().longestLine, 100);
+
+    painter.text = TextSpan(text: '${"\u200B"}${" " * 10}', style: style);
+    expect(painter.layout().longestLine, 100);
+  });
+
   test('TextPainter handles newlines properly', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;

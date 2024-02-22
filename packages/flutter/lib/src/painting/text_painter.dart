@@ -302,25 +302,28 @@ class _UntilTextBoundary extends TextBoundary {
 
 /// An immutable class that represents the result of calling [TextPainter.layout].
 ///
-/// The class discribes the text layout in a 2-D coordinate system, specified by
-/// the API that returns the [TextLayout]. Higher-level APIs can use the [shift]
-/// method to change the origin of the coordinate system.
+/// This class discribes the text layout in a 2D coordinate system where the text
+/// is axis-aligned. The [+] operator can be used to change the origin of the
+/// coordinate system.
 ///
-/// This class typically has a limited lifespan. When [debugIsValid] is false,
-///
+/// Unlike many other immutable classes, each [TextLayout] has a limited lifespan.
+/// A [TextLayout] is typically invalidated when the text it represents changes
+/// layout, or no longer exists. This allows different [TextLayout] objects to be
+/// compared for equality: a cached value computed from an outdated [TextLayout]
+/// may need to be discarded. See the [-] operator for more details.
 class TextLayout {
-  TextLayout._(this._paragraph, this._paintOffset, [int? _layoutEquality])
+  TextLayout._(this._paragraph, this.paintOffset, [int? layoutEqualityId])
     : assert(!_paragraph.debugDisposed),
-      assert(_paintOffset.dx != double.negativeInfinity),
-      assert(!_paintOffset.dx.isNaN),
-      assert(_paintOffset.dy.isFinite),
-      assert(!_paintOffset.dy.isNaN),
-      _layoutEquality = _layoutEquality ?? _currentId++;
+      assert(paintOffset.dx != double.negativeInfinity),
+      assert(!paintOffset.dx.isNaN),
+      assert(paintOffset.dy.isFinite),
+      assert(!paintOffset.dy.isNaN),
+      _layoutEqualityId = layoutEqualityId ?? _currentId++;
 
   static int _currentId = 0;
   // This field is not final because the owner TextPainter could create a new
   // ui.Paragraph with the exact same text layout (for example, when only the
-  // color of the text is changed).
+  // color of the text changes).
   //
   // The creator of this _TextLayout is also responsible for disposing this
   // object when it's no longer needed.
@@ -328,9 +331,9 @@ class TextLayout {
 
   // The paint offset, from the top left of the coordinate system, to the top
   // left corner of the paragraph's bounding box, with a width of [width].
-  final Offset _paintOffset;
+  final Offset paintOffset;
 
-  final int _layoutEquality;
+  final int _layoutEqualityId;
 
   /// Whether this layout has been invalidated and disposed.
   ///
@@ -368,6 +371,9 @@ class TextLayout {
 
   /// The distance from the left edge of the leftmost glyph to the right edge of
   /// the rightmost glyph in the paragraph.
+  ///
+  /// The value typically does not take trailing spaces into account, unless the
+  /// longest line has zero width otherwise.
   double get longestLine {
     assert(debugIsValid);
     return _paragraph.longestLine;
@@ -389,19 +395,22 @@ class TextLayout {
   ///
   /// Returns a non-negative number. If `maxLines` is non-null, the value of
   /// [numberOfLines] never exceeds `maxLines`.
+  ///
+  /// When [hasInfinitePaintOffset] is true, [numberOfLines] may return 0 even
+  /// if the text is not empty.
   int get numberOfLines {
     assert(debugIsValid);
     return _paragraph.numberOfLines;
   }
 
-  /// Returns the distance from the top of the text to the first baseline of the
-  /// given type.
+  /// Returns the distance from the top of this [TextLayout], to the first
+  /// baseline of the given type.
   double getDistanceToBaseline(TextBaseline baseline) {
     assert(debugIsValid);
     return switch (baseline) {
       TextBaseline.alphabetic => _paragraph.alphabeticBaseline,
       TextBaseline.ideographic => _paragraph.ideographicBaseline,
-    } + _paintOffset.dy;
+    } + paintOffset.dy;
   }
 
   // GLYPH METRICS
@@ -410,12 +419,13 @@ class TextLayout {
   /// paragraph coordinate system, or null if the text is empty, or is entirely
   /// clipped or ellipsized away.
   ///
-  /// This method first finds the line closest to `offset.dy`, and then returns
-  /// the [GlyphInfo] of the closest glyph(s) within that line.
+  /// This method does not compare Euclidean distances. It first finds the line
+  /// closest to `offset.dy`, and then returns the glyph with the closest x
+  /// offset to `offset.dx` within that line.
   ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
     assert(debugIsValid);
-    final ui.GlyphInfo? glyphInfo = _paragraph.getClosestGlyphInfoForOffset(offset - _paintOffset);
-    return glyphInfo == null || _paintOffset == Offset.zero ? glyphInfo : _shiftGlyphInfo(glyphInfo, _paintOffset);
+    final ui.GlyphInfo? glyphInfo = _paragraph.getClosestGlyphInfoForOffset(offset - paintOffset);
+    return glyphInfo == null || paintOffset == Offset.zero ? glyphInfo : _shiftGlyphInfo(glyphInfo, paintOffset);
   }
 
   /// Returns the text position closest to the given offset.
@@ -431,19 +441,19 @@ class TextLayout {
   ///    the closest character to an [Offset].
   TextPosition getPositionForOffset(Offset offset) {
     assert(debugIsValid);
-    return _paragraph.getPositionForOffset(offset - _paintOffset);
+    return _paragraph.getPositionForOffset(offset - paintOffset);
   }
 
-   /// Returns the [GlyphInfo] located at the given UTF-16 `codeUnitOffset` in
-   /// the paragraph, or null if the given `codeUnitOffset` is out of the
-   /// visible lines or is ellipsized.
+   /// Returns the [GlyphInfo] located at the given `codeUnitOffset` in the
+   /// paragraph, or null if the given `codeUnitOffset` is out of the visible
+   /// lines or is ellipsized.
    ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
     assert(debugIsValid);
     final ui.GlyphInfo? glyphInfo = _paragraph.getGlyphInfoAt(codeUnitOffset);
-    return glyphInfo == null || _paintOffset == Offset.zero ? glyphInfo : _shiftGlyphInfo(glyphInfo, _paintOffset);
+    return glyphInfo == null || paintOffset == Offset.zero ? glyphInfo : _shiftGlyphInfo(glyphInfo, paintOffset);
   }
 
-  /// Returns a list of rects that bound the given selection.
+  /// Returns a list of rects that bound the given selection, in visual order.
   ///
   /// The [selection] must be a valid range (with [TextSelection.isValid] true).
   ///
@@ -455,8 +465,7 @@ class TextLayout {
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
   ///
-  /// Leading or trailing newline characters will be represented by zero-width
-  /// `TextBox`es.
+  /// Newline characters will be represented by trailing zero-width `TextBox`es.
   ///
   /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
   /// the given `selection`: a multi-code-unit glyph will be excluded if only
@@ -473,9 +482,9 @@ class TextLayout {
       boxHeightStyle: boxHeightStyle,
       boxWidthStyle: boxWidthStyle,
     );
-    if (_paintOffset != Offset.zero) {
+    if (paintOffset != Offset.zero) {
       for (int i = 0; i < boxes.length; i += 1) {
-        boxes[i] = _shiftTextBox(boxes[i], _paintOffset);
+        boxes[i] = _shiftTextBox(boxes[i], paintOffset);
       }
     }
     return boxes;
@@ -505,25 +514,46 @@ class TextLayout {
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
     assert(debugIsValid);
     final ui.LineMetrics? line = _paragraph.getLineMetricsAt(lineNumber);
-    return line == null || _paintOffset == Offset.zero ? line : _shiftLineMetrics(line, _paintOffset);
+    return line == null || paintOffset == Offset.zero ? line : _shiftLineMetrics(line, paintOffset);
   }
 
+  // PAINT OFFSET
+
+  /// Whether the [TextLayout] has an infinite paint offset, and as a result no
+  /// text will be painted on screen.
+  ///
+  /// This is typically true when [TextPainter] is given an infinite width to
+  /// layout the text, and the text is set to be right-aligned. When this is
+  /// true, [TextPainter] may skip performing text layout, in which case this
+  /// [TextLayout] object behaves as if the text was empty.
+  //bool get hasInfinitePaintOffset => _paintOffset.isFinite;
+
+  /// Creates a [TextLayout] with a [paintOffset] of `this.paintOffset + offset`.
   TextLayout operator +(Offset offset) {
     assert(debugIsValid);
     assert(offset.isFinite);
-    final Offset newOffset = _paintOffset + offset;
-    return TextLayout._(_paragraph, newOffset, _layoutEquality);
+    if (offset == Offset.zero) {
+      return this;
+    }
+    final Offset newOffset = paintOffset + offset;
+    return TextLayout._(_paragraph, newOffset, _layoutEqualityId);
   }
 
+  /// Returns the paint offset difference between this [TextLayout] and `other`,
+  /// or returns null if they are completely different [TextLayout]s.
+  ///
+  /// This is the inverse of the [+] operation. It's typically used to determine
+  /// if a cached value that's computed from the previous [TextLayout] needs to
+  /// be discarded and recomputed from the latest [TextLayout], or
   Offset? operator -(TextLayout other) {
-    if (other._layoutEquality != _layoutEquality) {
+    if (other._layoutEqualityId != _layoutEqualityId) {
       return null;
     }
     // We consider the all double.infinity x-offsets equal since nothing will
     // be visible or hit-testable.
-    final Offset offset = _paintOffset == other._paintOffset
+    final Offset offset = paintOffset == other.paintOffset
       ? Offset.zero
-      : _paintOffset - other._paintOffset;
+      : paintOffset - other.paintOffset;
     return offset;
   }
 
@@ -533,12 +563,12 @@ class TextLayout {
       return true;
     }
     return other is TextLayout
-        && other._paintOffset == _paintOffset
-        && other._layoutEquality == _layoutEquality;
+        && other.paintOffset == paintOffset
+        && other._layoutEqualityId == _layoutEqualityId;
   }
 
   @override
-  int get hashCode => Object.hash(_paintOffset, _layoutEquality);
+  int get hashCode => Object.hash(paintOffset, _layoutEqualityId);
 
   //@override
   //String toString() => 'TextLayout @ $_paintOffset';
@@ -615,7 +645,7 @@ class _TextPainterLayoutCache {
     // When the paint offset and the paragraph width are both +∞, it's likely
     // that the text layout engine skipped layout because there weren't anything
     // to paint.
-    final bool hasValidLayout = textLayout._paintOffset.dx.isFinite || layoutMaxWidth.isFinite;
+    final bool hasValidLayout = textLayout.paintOffset.dx.isFinite || layoutMaxWidth.isFinite;
     if (!hasValidLayout) {
       assert(minWidth.isFinite || (minWidth == double.infinity && maxWidth == double.infinity));
       return !minWidth.isFinite;
@@ -633,7 +663,7 @@ class _TextPainterLayoutCache {
 
     final double newContentWidth = _contentWidthFrom(paragraph, minWidth, maxWidth, widthBasis);
     if (newContentWidth != contentWidth && textAlignment > 0.0 && paragraph.width.isFinite) {
-      textLayout = TextLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, newContentWidth), textLayout._layoutEquality);
+      textLayout = TextLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, newContentWidth), textLayout._layoutEqualityId);
     }
     contentWidth = newContentWidth;
     return true;
@@ -1153,7 +1183,7 @@ class TextPainter {
     if (layout == null) {
       return null;
     }
-    final Offset offset = layout.textLayout._paintOffset;
+    final Offset offset = layout.textLayout.paintOffset;
     if (!offset.dx.isFinite || !offset.dy.isFinite) {
       return <TextBox>[];
     }
@@ -1424,7 +1454,7 @@ class TextPainter {
       );
     }
 
-    if (!layoutCache.textLayout._paintOffset.isFinite) {
+    if (!layoutCache.textLayout.paintOffset.isFinite) {
       return;
     }
 
@@ -1446,7 +1476,7 @@ class TextPainter {
       assert(debugSize == size);
     }
     assert(!_rebuildParagraphForPaint);
-    canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.textLayout._paintOffset);
+    canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.textLayout.paintOffset);
   }
 
   // Returns true if value falls in the valid range of the UTF16 encoding.
@@ -1659,8 +1689,8 @@ class TextPainter {
     // should be handled by higher-level implementations (for instance,
     // RenderEditable reserves width for showing the caret, it's best to handle
     // the clamping there).
-    final double adjustedDx = clampDouble(rawOffset.dx + layoutCache.textLayout._paintOffset.dx, 0, layoutCache.contentWidth);
-    return Offset(adjustedDx, rawOffset.dy + layoutCache.textLayout._paintOffset.dy);
+    final double adjustedDx = clampDouble(rawOffset.dx + layoutCache.textLayout.paintOffset.dx, 0, layoutCache.contentWidth);
+    return Offset(adjustedDx, rawOffset.dy + layoutCache.textLayout.paintOffset.dy);
   }
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
@@ -1800,7 +1830,7 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCache layout = _layoutCache!;
-    final Offset offset = layout.textLayout._paintOffset;
+    final Offset offset = layout.textLayout.paintOffset;
     if (!offset.dx.isFinite || !offset.dy.isFinite) {
       return const <ui.LineMetrics>[];
     }
