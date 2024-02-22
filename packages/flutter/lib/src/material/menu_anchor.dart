@@ -323,6 +323,14 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
+    _animateController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _menuAnimation = CurvedAnimation(
+      parent: _animateController,
+      curve: Curves.linear,
+    );
   }
 
   @override
@@ -358,7 +366,7 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       _root._close();
     }
     _viewSize = newSize;
-    createAnimation();
+    updateAnimation(widget.style?.animationStyle);
   }
 
   @override
@@ -376,12 +384,15 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       }
     }
     assert(_menuController._anchor == this);
+    if (oldWidget.style?.animationStyle != widget.style?.animationStyle) {
+      updateAnimation(widget.style?.animationStyle);
+    }
   }
 
-  void createAnimation() {
-    AnimationStyle animationStyle;
-    if (widget.style?.animationStyle != null) {
-      animationStyle = widget.style!.animationStyle!;
+  void updateAnimation(AnimationStyle? style) {
+    final AnimationStyle animationStyle;
+    if (style != null) {
+      animationStyle = style;
     } else {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
@@ -399,16 +410,10 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       }
     }
 
-    _animateController = AnimationController(
-      duration: animationStyle.duration,
-      reverseDuration: animationStyle.reverseDuration,
-      vsync: this,
-    );
-    _menuAnimation = CurvedAnimation(
-      parent: _animateController,
-      curve: animationStyle.curve ?? Curves.linear,
-      reverseCurve: animationStyle.reverseCurve ?? Curves.linear,
-    );
+    _animateController.duration = animationStyle.duration;
+    _animateController.reverseDuration = animationStyle.reverseDuration;
+    _menuAnimation.curve = animationStyle.curve ?? _menuAnimation.curve;
+    _menuAnimation.reverseCurve = animationStyle.reverseCurve;
   }
 
   @override
@@ -605,7 +610,6 @@ _MenuAnchorState? get _previousFocusableSibling {
     _parent?._childChangedOpenState();
     _menuPosition = position;
     _overlayController.show();
-    _animateController.forward();
 
     widget.onOpen?.call();
   }
@@ -614,7 +618,7 @@ _MenuAnchorState? get _previousFocusableSibling {
   ///
   /// Call this when the menu should be closed. Has no effect if the menu is
   /// already closed.
-  Future<void> _close({bool inDispose = false}) async {
+  void _close({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
@@ -623,7 +627,7 @@ _MenuAnchorState? get _previousFocusableSibling {
       FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
-    await _animateController.reverse();
+
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
@@ -699,8 +703,9 @@ class MenuController {
   /// If the menu's anchor point (either a [MenuBar] or a [MenuAnchor]) is
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
-  void close() {
+  Future<void> close() async {
     assert(_anchor != null);
+    await _anchor?._animateController.reverse();
     _anchor!._close();
   }
 
@@ -718,6 +723,7 @@ class MenuController {
   void open({Offset? position}) {
     assert(_anchor != null);
     _anchor!._open(position: position);
+    _anchor!._animateController.forward();
   }
 
   // ignore: use_setters_to_change_properties
@@ -3505,6 +3511,12 @@ class _MenuPanelState extends State<_MenuPanel> {
       );
     }
 
+    if (widget.menuAnimation == null) {
+      return ConstrainedBox(
+        constraints: effectiveConstraints,
+        child: menuPanel,
+      );
+    }
     return SizeTransition(
       sizeFactor: widget.menuAnimation!,
       axisAlignment: -1,
