@@ -11,6 +11,8 @@ import shutil
 import sys
 import os
 
+from create_xcframework import create_xcframework  # pylint: disable=import-error
+
 buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))
 
 ARCH_SUBPATH = 'mac-arm64' if platform.processor() == 'arm' else 'mac-x64'
@@ -23,7 +25,9 @@ out_dir = os.path.join(buildroot_dir, 'out')
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Creates FlutterMacOS.framework for macOS')
+  parser = argparse.ArgumentParser(
+      description='Creates FlutterMacOS.framework and FlutterMacOS.xcframework for macOS'
+  )
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
@@ -95,6 +99,10 @@ def main():
                                       stdin=find_subprocess.stdout)
   find_subprocess.wait()
   xargs_subprocess.wait()
+
+  # Create XCFramework from the arm64 and x64 fat framework.
+  xcframeworks = [fat_framework]
+  create_xcframework(location=dst, name='FlutterMacOS', frameworks=xcframeworks)
 
   process_framework(dst, args, fat_framework, fat_framework_binary)
 
@@ -201,6 +209,32 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
     final_src_path = os.path.join(framework_dst, 'FlutterMacOS.framework_.zip')
     final_dst_path = os.path.join(dst, 'FlutterMacOS.framework.zip')
     shutil.move(final_src_path, final_dst_path)
+
+    zip_xcframework_archive(dst)
+
+
+def zip_xcframework_archive(dst):
+  filepath_with_entitlements = ''
+  filepath_without_entitlements = (
+      'FlutterMacOS.xcframework/macos-arm64_x84_64/'
+      'FlutterMacOS.framework/Versions/A/FlutterMacOS'
+  )
+  embed_codesign_configuration(os.path.join(dst, 'entitlements.txt'), filepath_with_entitlements)
+
+  embed_codesign_configuration(
+      os.path.join(dst, 'without_entitlements.txt'), filepath_without_entitlements
+  )
+
+  subprocess.check_call([
+      'zip',
+      '-r',
+      '-y',
+      'framework.zip',
+      'FlutterMacOS.xcframework',
+      'entitlements.txt',
+      'without_entitlements.txt',
+  ],
+                        cwd=dst)
 
 
 if __name__ == '__main__':
