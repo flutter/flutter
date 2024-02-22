@@ -58,22 +58,4 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   return {};
 }
 
-void TextureSourceVK::SetFramebuffer(
-    const SharedHandleVK<vk::Framebuffer>& framebuffer) {
-  framebuffer_ = framebuffer;
-}
-
-void TextureSourceVK::SetRenderPass(
-    const SharedHandleVK<vk::RenderPass>& render_pass) {
-  render_pass_ = render_pass;
-}
-
-SharedHandleVK<vk::Framebuffer> TextureSourceVK::GetFramebuffer() const {
-  return framebuffer_;
-}
-
-SharedHandleVK<vk::RenderPass> TextureSourceVK::GetRenderPass() const {
-  return render_pass_;
-}
-
 }  // namespace impeller
