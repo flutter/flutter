@@ -2841,11 +2841,11 @@ void main() {
                             menuChildren: <Widget>[
                               SubmenuButton(
                                 menuStyle: menuStyle,
-                                alignmentOffset: Offset(10, 0),
+                                alignmentOffset: const Offset(10, 0),
                                 menuChildren: <Widget>[
                                   SubmenuButton(
                                     menuStyle: menuStyle,
-                                    menuChildren: <Widget>[],
+                                    menuChildren: const <Widget>[],
                                     child: const Text('SubMenuButton4'),
                                   ),
                                 ],
