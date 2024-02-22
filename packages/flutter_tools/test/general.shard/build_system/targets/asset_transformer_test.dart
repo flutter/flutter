@@ -43,6 +43,7 @@ void main() {
             ..addFlag('foo', abbr: 'f')
             ..addOption('my_option'))
             .parse(args);
+
           fileSystem.file(parsedArgs['output']).createSync(recursive: true);
         },
       ),
@@ -55,7 +56,7 @@ void main() {
       dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
     );
 
-    await transformer.transformAsset(
+    final bool transformationSuccessful = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -71,6 +72,7 @@ void main() {
       ],
     );
 
+    expect(transformationSuccessful, isTrue, reason: logger.errorText);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -344,7 +346,7 @@ Transformation failed, but I forgot to exit with a non-zero code\.
       dartBinaryPath: dartBinaryPath,
     );
 
-    await transformer.transformAsset(
+    final bool transformationSuccessful = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -360,6 +362,7 @@ Transformation failed, but I forgot to exit with a non-zero code\.
       ],
     );
 
+    expect(transformationSuccessful, isTrue, reason: logger.errorText);
     expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file(outputPath), isNot(exists));
     expect(logger.errorText, contains(RegExp(
