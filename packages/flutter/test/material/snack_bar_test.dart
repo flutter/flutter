@@ -3244,6 +3244,7 @@ void main() {
   });
 
   testWidgets('SnackBar has tooltip for Close Button', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/143793
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
       debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
@@ -3268,7 +3269,7 @@ void main() {
         showCloseIcon: true,
       ),
     );
-    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
 
     expect(
       find.byTooltip(MaterialLocalizations.of(scaffoldMessengerState.context).closeButtonLabel),
