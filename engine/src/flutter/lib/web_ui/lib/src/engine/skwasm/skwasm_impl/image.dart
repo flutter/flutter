@@ -62,9 +62,9 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
       final ui.Canvas canvas = ui.Canvas(recorder);
       canvas.drawImage(this, ui.Offset.zero, ui.Paint());
       final DomImageBitmap bitmap =
-        (await (renderer as SkwasmRenderer).surface.renderPictures(
-          <SkwasmPicture>[recorder.endRecording() as SkwasmPicture],
-        )).imageBitmaps.single;
+        await (renderer as SkwasmRenderer).surface.renderPicture(
+          recorder.endRecording() as SkwasmPicture,
+        );
       final DomOffscreenCanvas offscreenCanvas =
         createDomOffscreenCanvas(bitmap.width.toDartInt, bitmap.height.toDartInt);
       final DomCanvasRenderingContextBitmapRenderer context =
@@ -75,7 +75,8 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
 
       // Zero out the contents of the canvas so that resources can be reclaimed
       // by the browser.
-      context.transferFromImageBitmap(null);
+      offscreenCanvas.width = 0;
+      offscreenCanvas.height = 0;
       return ByteData.view(arrayBuffer.toDart);
     } else {
       return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
