@@ -1377,55 +1377,27 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       }
     }
 
-    final double leadingY;
-    final double trailingY;
+    final double leadingDiff = tileHeight - leadingSize.height;
+    final double trailingDiff = tileHeight - trailingSize.height;
 
-    switch (titleAlignment) {
-      case ListTileTitleAlignment.threeLine: {
-        if (isThreeLine) {
-          leadingY = _minVerticalPadding;
-          trailingY = _minVerticalPadding;
-        } else {
-          leadingY = (tileHeight - leadingSize.height) / 2.0;
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.titleHeight: {
-        // This attempts to implement the redlines for the vertical position of the
-        // leading and trailing icons on the spec page:
-        //   https://m2.material.io/components/lists#specs
-        // The interpretation for these redlines is as follows:
-        //  - For large tiles (> 72dp), both leading and trailing controls should be
-        //    a fixed distance from top. As per guidelines this is set to 16dp.
-        //  - For smaller tiles, trailing should always be centered. Leading can be
-        //    centered or closer to the top. It should never be further than 16dp
-        //    to the top.
-        if (tileHeight > 72.0) {
-          leadingY = 16.0;
-          trailingY = 16.0;
-        } else {
-          leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.top: {
-        leadingY = _minVerticalPadding;
-        trailingY = _minVerticalPadding;
-        break;
-      }
-      case ListTileTitleAlignment.center: {
-        leadingY = (tileHeight - leadingSize.height) / 2.0;
-        trailingY = (tileHeight - trailingSize.height) / 2.0;
-        break;
-      }
-      case ListTileTitleAlignment.bottom: {
-        leadingY = tileHeight - leadingSize.height - _minVerticalPadding;
-        trailingY = tileHeight - trailingSize.height - _minVerticalPadding;
-        break;
-      }
-    }
+    final (double leadingY, double trailingY) = switch (titleAlignment) {
+      ListTileTitleAlignment.threeLine when isThreeLine => (_minVerticalPadding, _minVerticalPadding),
+      ListTileTitleAlignment.threeLine => (leadingDiff / 2.0, trailingDiff / 2.0),
+      // This attempts to implement the redlines for the vertical position of the
+      // leading and trailing icons on the spec page:
+      //   https://m2.material.io/components/lists#specs
+      //
+      // For large tiles (> 72dp), both leading and trailing controls should be
+      // a fixed distance from top. As per guidelines this is set to 16dp.
+      ListTileTitleAlignment.titleHeight when tileHeight > 72.0 => (16.0, 16.0),
+      // For smaller tiles, trailing should always be centered. Leading can be
+      // centered or closer to the top. It should never be further than 16dp
+      // to the top.
+      ListTileTitleAlignment.titleHeight => (math.min(leadingDiff / 2.0, 16.0), trailingDiff / 2.0),
+      ListTileTitleAlignment.top => (_minVerticalPadding, _minVerticalPadding),
+      ListTileTitleAlignment.center => (leadingDiff / 2.0, trailingDiff / 2.0),
+      ListTileTitleAlignment.bottom => (leadingDiff - _minVerticalPadding, trailingDiff - _minVerticalPadding),
+    };
 
     switch (textDirection) {
       case TextDirection.rtl: {
@@ -1535,14 +1507,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   Color? get iconColor {
-    switch (_theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null, Use current icon theme color
-    }
+    return switch (_theme.brightness) {
+      // For the sake of backwards compatibility, the default for unselected
+      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+      Brightness.light => Colors.black45,
+      // null -> use current icon theme color
+      Brightness.dark => null,
+    };
   }
 }
 

@@ -511,67 +511,66 @@ class SwitchListTile extends StatelessWidget {
     final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
-        control = Switch.adaptive(
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          activeThumbImage: activeThumbImage,
-          inactiveThumbImage: inactiveThumbImage,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          activeTrackColor: activeTrackColor,
-          inactiveTrackColor: inactiveTrackColor,
-          inactiveThumbColor: inactiveThumbColor,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          onActiveThumbImageError: onActiveThumbImageError,
-          onInactiveThumbImageError: onInactiveThumbImageError,
-          thumbColor: thumbColor,
-          trackColor: trackColor,
-          trackOutlineColor: trackOutlineColor,
-          thumbIcon: thumbIcon,
-          applyCupertinoTheme: applyCupertinoTheme,
-          dragStartBehavior: dragStartBehavior,
-          mouseCursor: mouseCursor,
-          splashRadius: splashRadius,
-          overlayColor: overlayColor,
+        control = ExcludeFocus(
+          child: Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            activeThumbImage: activeThumbImage,
+            inactiveThumbImage: inactiveThumbImage,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            activeTrackColor: activeTrackColor,
+            inactiveTrackColor: inactiveTrackColor,
+            inactiveThumbColor: inactiveThumbColor,
+            autofocus: autofocus,
+            onFocusChange: onFocusChange,
+            onActiveThumbImageError: onActiveThumbImageError,
+            onInactiveThumbImageError: onInactiveThumbImageError,
+            thumbColor: thumbColor,
+            trackColor: trackColor,
+            trackOutlineColor: trackOutlineColor,
+            thumbIcon: thumbIcon,
+            applyCupertinoTheme: applyCupertinoTheme,
+            dragStartBehavior: dragStartBehavior,
+            mouseCursor: mouseCursor,
+            splashRadius: splashRadius,
+            overlayColor: overlayColor,
+          ),
         );
 
       case _SwitchListTileType.material:
-        control = Switch(
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          activeThumbImage: activeThumbImage,
-          inactiveThumbImage: inactiveThumbImage,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          activeTrackColor: activeTrackColor,
-          inactiveTrackColor: inactiveTrackColor,
-          inactiveThumbColor: inactiveThumbColor,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          onActiveThumbImageError: onActiveThumbImageError,
-          onInactiveThumbImageError: onInactiveThumbImageError,
-          thumbColor: thumbColor,
-          trackColor: trackColor,
-          trackOutlineColor: trackOutlineColor,
-          thumbIcon: thumbIcon,
-          dragStartBehavior: dragStartBehavior,
-          mouseCursor: mouseCursor,
-          splashRadius: splashRadius,
-          overlayColor: overlayColor,
+        control = ExcludeFocus(
+          child: Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            activeThumbImage: activeThumbImage,
+            inactiveThumbImage: inactiveThumbImage,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            activeTrackColor: activeTrackColor,
+            inactiveTrackColor: inactiveTrackColor,
+            inactiveThumbColor: inactiveThumbColor,
+            autofocus: autofocus,
+            onFocusChange: onFocusChange,
+            onActiveThumbImageError: onActiveThumbImageError,
+            onInactiveThumbImageError: onInactiveThumbImageError,
+            thumbColor: thumbColor,
+            trackColor: trackColor,
+            trackOutlineColor: trackOutlineColor,
+            thumbIcon: thumbIcon,
+            dragStartBehavior: dragStartBehavior,
+            mouseCursor: mouseCursor,
+            splashRadius: splashRadius,
+            overlayColor: overlayColor,
+          ),
         );
     }
 
     Widget? leading, trailing;
-    switch (controlAffinity) {
-      case ListTileControlAffinity.leading:
-        leading = control;
-        trailing = secondary;
-      case ListTileControlAffinity.trailing:
-      case ListTileControlAffinity.platform:
-        leading = secondary;
-        trailing = control;
-    }
+    (leading, trailing) = switch (controlAffinity) {
+      ListTileControlAffinity.leading => (control, secondary),
+      ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
+    };
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);

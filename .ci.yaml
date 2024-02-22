@@ -273,20 +273,12 @@ platform_properties:
         }
   windows:
     properties:
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows-10
       device_type: none
   windows_arm64:
     properties:
       # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
       arch: arm
-      dependencies: >-
-        [
-          {"dependency": "certs", "version": "version:9563bb"}
-        ]
       os: Windows
       cpu: arm64
   windows_android:
@@ -294,7 +286,6 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "certs", "version": "version:9563bb"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
@@ -2180,22 +2171,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
 
-  # TODO(https://github.com/flutter/flutter/issues/142178): Remove this.
-  # In the process of (a) renaming this "external_textures" and (b) making it
-  # an emulator test instead of a physical device.
-  - name: Linux_pixel_7pro external_ui_integration_test
+  - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: external_textures_integration_test
-
-  - name: Linux_android_emu external_ui_integration_test
-    recipe: devicelab/devicelab_drone
-    # TODO(https://github.com/flutter/flutter/issues/142178): Enable this.
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -2206,7 +2183,6 @@ targets:
     properties:
       tags: >
         ["devicelab", "linux"]
-      # TODO(https://github.com/flutter/flutter/issues/142178): Rename this.
       task_name: external_textures_integration_test
 
   # linux motog4 benchmark
@@ -2485,7 +2461,6 @@ targets:
       task_name: integration_ui_driver
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/140645
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2542,8 +2517,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android list_text_layout_impeller_perf__e2e_summary
+  # linux a02s benchmark
+  - name: Linux_samsung_a02 list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2551,7 +2526,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: list_text_layout_impeller_perf__e2e_summary
 
   - name: Linux_pixel_7pro native_assets_android
@@ -2807,8 +2782,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
+  # linux a02s benchmark
+  - name: Linux_samsung_a02 platform_views_scroll_perf_impeller__timeline_summary
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2816,7 +2791,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
@@ -3007,8 +2982,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_choreographer_do_frame_test
 
-  # linux motog4 benchmark
-  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+  # linux a02s benchmark
+  - name: linux_samsung_a02 animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -3016,7 +2991,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
   # Uses Impeller.

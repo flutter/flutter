@@ -1510,6 +1510,24 @@ void main() {
     painter.dispose();
   });
 
+  test('LongestLine TextPainter properly relayout when maxWidth changes.', () {
+    // Regression test for https://github.com/flutter/flutter/issues/142309.
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..textDirection = TextDirection.ltr
+      ..text = TextSpan(text: 'A' * 100, style: const TextStyle(fontSize: 10));
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+
+    painter.layout(maxWidth: 100);
+    expect(painter.width, 100);
+
+    painter.layout(maxWidth: 1000);
+    expect(painter.width, 1000);
+  });
+
   test('TextPainter line breaking does not round to integers', () {
     const double fontSize = 1.25;
     const String text = '12345';
@@ -1527,6 +1545,45 @@ void main() {
         expect(metrics, hasLength(1));
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
+
+  group('strut style', () {
+    test('strut style applies when the span has no style', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+    });
+
+    test('strut style leading is a fontSize multiplier', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100 + 20);
+      // Top leading + scaled ascent.
+      expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 10 + 10 * 7.5);
+    });
+
+    test('force strut height', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 75;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr)],
+      );
+    });
+  }, skip: kIsWeb && !isCanvasKit); // [intended] strut spport for HTML renderer https://github.com/flutter/flutter/issues/32243.
 
   test('TextPainter dispatches memory events', () async {
     await expectLater(
