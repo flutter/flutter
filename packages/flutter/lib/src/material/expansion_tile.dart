@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -600,7 +601,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.dispose();
   }
 
-  void _toggleExpansion() {
+  Future<void> _toggleExpansion() async {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
@@ -621,7 +622,16 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
-    SemanticsService.announce(stateHint, textDirection);
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
+      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
+      await Future<void>.delayed(const Duration(seconds: 1), () async {
+        await SemanticsService.announce(stateHint, textDirection);
+      });
+    } else {
+      await SemanticsService.announce(stateHint, textDirection);
+    }
   }
 
   void _handleTap() {
