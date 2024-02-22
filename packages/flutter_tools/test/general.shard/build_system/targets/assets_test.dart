@@ -188,11 +188,11 @@ flutter:
       ..writeAsStringSync('''
 name: example
 flutter:
-assets:
-  - path: input.txt
-    transformers:
-      - package: my_transformer
-        args: ["-a", "-b", "--color", "green"]
+  assets:
+    - path: input.txt
+      transformers:
+        - package: my_transformer
+          args: ["-a", "-b", "--color", "green"]
 ''');
 
     await fileSystem.file('input.txt').create(recursive: true);
