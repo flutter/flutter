@@ -83,10 +83,30 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
     final SliverConstraints constraints = this.constraints;
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: 0.0,
+      to: constraints.viewportMainAxisExtent,
+    );
     if (child != null) {
+      double maxExtent = extent;
+
+      // If sliver has no extent, but is within viewport's cacheExtent, use the
+      // childExtent as the maxExtent so that it does not get dropped from the
+      // Semantic tree and so it does not get cut off when swiped to.
+      if (extent == 0 && cacheExtent > 0) {
+        final double childExtent;
+        switch (constraints.axis) {
+          case Axis.horizontal:
+            childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
+          case Axis.vertical:
+            childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
+        }
+        maxExtent = childExtent;
+      }
       child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
-        maxExtent: extent,
+        maxExtent: maxExtent,
       ));
     }
 
@@ -94,7 +114,6 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
 
-    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: constraints.viewportMainAxisExtent);
     geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
