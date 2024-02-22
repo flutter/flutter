@@ -41,22 +41,7 @@ class FakeSkiaGoldClient implements SkiaGoldClient {
   }
 
   @override
-  String cleanTestName(String fileName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  List<String> getCIArguments() {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<String?> getExpectationForTest(String testName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<int>> getImageBytes(String imageHash) {
     throw UnimplementedError();
   }
 
