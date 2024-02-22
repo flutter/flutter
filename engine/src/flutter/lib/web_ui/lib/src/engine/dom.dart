@@ -1487,7 +1487,7 @@ class DomCanvasRenderingContextBitmapRenderer {}
 
 extension DomCanvasRenderingContextBitmapRendererExtension
     on DomCanvasRenderingContextBitmapRenderer {
-  external void transferFromImageBitmap(DomImageBitmap bitmap);
+  external void transferFromImageBitmap(DomImageBitmap? bitmap);
 }
 
 @JS('ImageData')

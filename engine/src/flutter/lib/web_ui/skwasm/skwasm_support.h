@@ -23,17 +23,21 @@ extern SkwasmObject skwasm_getAssociatedObject(void* pointer);
 extern void skwasm_disposeAssociatedObjectOnThread(unsigned long threadId,
                                                    void* pointer);
 extern void skwasm_registerMessageListener(pthread_t threadId);
-extern void skwasm_dispatchRenderPicture(unsigned long threadId,
-                                         Skwasm::Surface* surface,
-                                         SkPicture* picture,
-                                         uint32_t callbackId);
+extern void skwasm_dispatchRenderPictures(unsigned long threadId,
+                                          Skwasm::Surface* surface,
+                                          sk_sp<SkPicture>* pictures,
+                                          int count,
+                                          uint32_t callbackId);
 extern uint32_t skwasm_createOffscreenCanvas(int width, int height);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
-extern void skwasm_captureImageBitmap(Skwasm::Surface* surfaceHandle,
-                                      uint32_t contextHandle,
-                                      uint32_t bitmapId,
-                                      int width,
-                                      int height);
+extern SkwasmObject skwasm_captureImageBitmap(uint32_t contextHandle,
+                                              int width,
+                                              int height,
+                                              SkwasmObject imagePromises);
+extern void skwasm_resolveAndPostImages(Skwasm::Surface* surface,
+                                        SkwasmObject imagePromises,
+                                        double rasterStart,
+                                        uint32_t callbackId);
 extern unsigned int skwasm_createGlTextureFromTextureSource(
     SkwasmObject textureSource,
     int width,
