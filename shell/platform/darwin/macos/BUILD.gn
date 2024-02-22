@@ -304,7 +304,17 @@ action("_generate_symlinks") {
   }
 }
 
-group("flutter_framework") {
+action("flutter_framework") {
+  script = "//flutter/sky/tools/create_xcframework.py"
+  outputs = [ "$root_out_dir/FlutterMacOS.xcframework" ]
+  args = [
+    "--frameworks",
+    rebase_path(_flutter_framework_dir),
+    "--name",
+    "FlutterMacOS",
+    "--location",
+    rebase_path(root_out_dir),
+  ]
   deps = [ ":_generate_symlinks_and_verify_framework_module" ]
 }
 
