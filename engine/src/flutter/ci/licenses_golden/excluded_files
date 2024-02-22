@@ -1903,6 +1903,8 @@
 ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/dist/lib/asan/ld.so.1
@@ -1913,6 +1915,8 @@
 ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/dist/lib/asan/ld.so.1
@@ -1923,6 +1927,8 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/packages/blobs
 ../../../fuchsia/sdk/linux/packages/heapdump-collector/meta.json
 ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/meta.json
