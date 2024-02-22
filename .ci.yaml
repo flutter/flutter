@@ -2517,8 +2517,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android list_text_layout_impeller_perf__e2e_summary
+  # linux a02s benchmark
+  - name: Linux_samsung_a02 list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2526,7 +2526,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: list_text_layout_impeller_perf__e2e_summary
 
   - name: Linux_pixel_7pro native_assets_android
@@ -2782,8 +2782,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
+  # linux a02s benchmark
+  - name: Linux_samsung_a02 platform_views_scroll_perf_impeller__timeline_summary
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2791,7 +2791,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
@@ -2982,8 +2982,8 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_choreographer_do_frame_test
 
-  # linux motog4 benchmark
-  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+  # linux a02s benchmark
+  - name: linux_samsung_a02 animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2991,7 +2991,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
   # Uses Impeller.
