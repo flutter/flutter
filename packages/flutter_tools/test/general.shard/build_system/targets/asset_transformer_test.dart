@@ -132,8 +132,8 @@ void main() {
 '''
 User-defined transformation of asset "asset.txt" failed.
 Transformer process terminated with non-zero exit code: 1
-Transformer package: my_transformer
-Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/asset.txt-transformOutput1.txt
+Transformer package: my_copy_transformer
+Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/asset.txt-transformOutput1.txt
 stdout:
 Beginning transformation
 stderr:
