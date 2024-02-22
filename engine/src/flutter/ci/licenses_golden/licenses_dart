@@ -1,4 +1,4 @@
-Signature: 66eb358cd4ecf636beca2c4b7225212a
+Signature: a5b5fa3440e73e9c352b6ae41678ad4b
 
 ====================================================================================================
 LIBRARY: dart
@@ -4134,6 +4134,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/builders.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/code.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/diagnostic.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_macros/exceptions.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/introspection.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/macro.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_macros/macros.dart + ../../../third_party/dart/LICENSE
@@ -4142,6 +4143,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/sdk/lib/_macros/builders.dart
 FILE: ../../../third_party/dart/sdk/lib/_macros/code.dart
 FILE: ../../../third_party/dart/sdk/lib/_macros/diagnostic.dart
+FILE: ../../../third_party/dart/sdk/lib/_macros/exceptions.dart
 FILE: ../../../third_party/dart/sdk/lib/_macros/introspection.dart
 FILE: ../../../third_party/dart/sdk/lib/_macros/macro.dart
 FILE: ../../../third_party/dart/sdk/lib/_macros/macros.dart
@@ -4749,7 +4751,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/0f0f7400c38a7684ba4c4c6dfd7c9a017336abf6
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/e2f2d9b464e90ac10b2e4c5fd5331712020737f0
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
