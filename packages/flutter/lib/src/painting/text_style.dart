@@ -1388,6 +1388,7 @@ class TextStyle with Diagnosticable {
         },
         height: strutStyle.height,
         leading: strutStyle.leading,
+        leadingDistribution: strutStyle.leadingDistribution,
         fontWeight: strutStyle.fontWeight,
         fontStyle: strutStyle.fontStyle,
         forceStrutHeight: strutStyle.forceStrutHeight,
