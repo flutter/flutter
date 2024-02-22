@@ -173,11 +173,12 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// between the framework and the input method. Consider using
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
-/// If both the [text] or [selection] properties need to be changed, set the
+/// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead.
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
+///
 /// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
@@ -194,10 +195,28 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class TextEditingController extends ValueNotifier<TextEditingValue> {
-  /// Creates a controller for an editable text field.
+  /// Creates a controller for an editable text field, with no initial selection.
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
+  ///
+  /// The initial selection is `TextSelection.collapsed(offset: -1)`.
+  /// This indicates that there is no selection at all ([TextSelection.isValid]
+  /// is false in this case). When a text field is built with a controller whose
+  /// selection is not valid, the text field will update the selection when it
+  /// is focused (the selection will be an empty selection positioned at the
+  /// end of the text).
+  ///
+  /// Consider using [TextEditingController.fromValue] to initialize both the
+  /// text and the selection.
+  ///
+  /// {@tool dartpad}
+  /// This example creates a [TextField] with a [TextEditingController] whose
+  /// initial selection is empty (collapsed) and positioned at the beginning
+  /// of the text (offset is 0).
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/text_editing_controller.1.dart **
+  /// {@end-tool}
   TextEditingController({ String? text })
     : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
@@ -274,7 +293,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
-  /// The currently selected [text].
+  /// The currently selected range within [text].
   ///
   /// If the selection is collapsed, then this property gives the offset of the
   /// cursor within the text.
@@ -1799,11 +1818,28 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.EditableText.contextMenuBuilder}
   /// Builds the text selection toolbar when requested by the user.
   ///
-  /// `primaryAnchor` is the desired anchor position for the context menu, while
-  /// `secondaryAnchor` is the fallback location if the menu doesn't fit.
+  /// The context menu is built when [EditableTextState.showToolbar] is called,
+  /// typically by one of the callbacks installed by the widget created by
+  /// [TextSelectionGestureDetectorBuilder.buildGestureDetector]. The widget
+  /// returned by [contextMenuBuilder] is passed to a [ContextMenuController].
   ///
-  /// `buttonItems` represents the buttons that would be built by default for
-  /// this widget.
+  /// If no callback is provided, no context menu will be shown.
+  ///
+  /// The [EditableTextContextMenuBuilder] signature used by the
+  /// [contextMenuBuilder] callback has two parameters, the [BuildContext] of
+  /// the [EditableText] and the [EditableTextState] of the [EditableText].
+  ///
+  /// The [EditableTextState] has two properties that are especially useful when
+  /// building the widgets for the context menu:
+  ///
+  /// * [EditableTextState.contextMenuAnchors] specifies the desired anchor
+  ///   position for the context menu.
+  ///
+  /// * [EditableTextState.contextMenuButtonItems] represents the buttons that
+  ///   should typically be built for this widget (e.g. cut, copy, paste).
+  ///
+  /// The [TextSelectionToolbarLayoutDelegate] class may be particularly useful
+  /// in honoring the preferred anchor positions.
   ///
   /// For backwards compatibility, when [selectionControls] is set to an object
   /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
@@ -1834,8 +1870,6 @@ class EditableText extends StatefulWidget {
   ///   * [BrowserContextMenu], which allows the browser's context menu on web
   ///     to be disabled and Flutter-rendered context menus to appear.
   /// {@endtemplate}
-  ///
-  /// If not provided, no context menu will be shown.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// {@template flutter.widgets.EditableText.spellCheckConfiguration}
@@ -1852,11 +1886,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// The configuration for the magnifier to use with selections in this text
+  /// field.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -4152,7 +4185,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
-  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
+  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled && !renderEditable.floatingCursorOn;
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
@@ -4216,7 +4249,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
-    _cursorBlinkOpacityController.value = 0.0;
+    // If the cursor is animating, stop the animation, and we always
+    // want the cursor to be visible when the floating cursor is enabled.
+    _cursorBlinkOpacityController.value = renderEditable.floatingCursorOn ? 1.0 : 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
     if (resetCharTicks) {

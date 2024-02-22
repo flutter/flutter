@@ -731,24 +731,16 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   AlignmentGeometry _getAlignmentForAxisDirection(_StretchDirection stretchDirection) {
     // Accounts for reversed scrollables by checking the AxisDirection
-    switch (widget.axisDirection) {
-      case AxisDirection.up:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.topCenter
-            : AlignmentDirectional.bottomCenter;
-      case AxisDirection.right:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerRight
-            : Alignment.centerLeft;
-      case AxisDirection.down:
-        return stretchDirection == _StretchDirection.trailing
-            ? AlignmentDirectional.bottomCenter
-            : AlignmentDirectional.topCenter;
-      case AxisDirection.left:
-        return stretchDirection == _StretchDirection.trailing
-            ? Alignment.centerLeft
-            : Alignment.centerRight;
-    }
+    final AxisDirection direction = switch (stretchDirection) {
+      _StretchDirection.trailing => widget.axisDirection,
+      _StretchDirection.leading => flipAxisDirection(widget.axisDirection),
+    };
+    return switch (direction) {
+      AxisDirection.up    => AlignmentDirectional.topCenter,
+      AxisDirection.down  => AlignmentDirectional.bottomCenter,
+      AxisDirection.left  => Alignment.centerLeft,
+      AxisDirection.right => Alignment.centerRight,
+    };
   }
 
   @override
@@ -820,15 +812,16 @@ class _StretchController extends ChangeNotifier {
     }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _stretchController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _stretchSize = decelerator.drive(_stretchSizeTween);
+    _stretchSize = _decelerator.drive(_stretchSizeTween);
   }
 
   late final AnimationController _stretchController;
   late final Animation<double> _stretchSize;
+  late final CurvedAnimation _decelerator;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
 
@@ -931,6 +924,7 @@ class _StretchController extends ChangeNotifier {
   @override
   void dispose() {
     _stretchController.dispose();
+    _decelerator.dispose();
     super.dispose();
   }
 

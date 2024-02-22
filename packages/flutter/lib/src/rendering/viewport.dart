@@ -925,22 +925,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child is RenderSliver);
     final RenderSliver sliver = child as RenderSliver;
 
-    final double targetMainAxisExtent;
     // The scroll offset of `rect` within `child`.
-    switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
-      case AxisDirection.up:
-        leadingScrollOffset += pivotExtent - rectLocal.bottom;
-        targetMainAxisExtent = rectLocal.height;
-      case AxisDirection.right:
-        leadingScrollOffset += rectLocal.left;
-        targetMainAxisExtent = rectLocal.width;
-      case AxisDirection.down:
-        leadingScrollOffset += rectLocal.top;
-        targetMainAxisExtent = rectLocal.height;
-      case AxisDirection.left:
-        leadingScrollOffset += pivotExtent - rectLocal.right;
-        targetMainAxisExtent = rectLocal.width;
-    }
+    leadingScrollOffset += switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
+      AxisDirection.up    => pivotExtent - rectLocal.bottom,
+      AxisDirection.left  => pivotExtent - rectLocal.right,
+      AxisDirection.right => rectLocal.left,
+      AxisDirection.down  => rectLocal.top,
+    };
 
     // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
     // sliver's sliver coordinate system. The sign of this value indicates
@@ -973,35 +964,26 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         // If child's growth direction is reverse, when viewport.offset is
         // `leadingScrollOffset`, it is positioned just outside of the leading
         // edge of the viewport.
-        switch (axis) {
-          case Axis.vertical:
-            leadingScrollOffset -= targetRect.height;
-          case Axis.horizontal:
-            leadingScrollOffset -= targetRect.width;
-        }
+        leadingScrollOffset -= switch (axis) {
+          Axis.vertical   => targetRect.height,
+          Axis.horizontal => targetRect.width,
+        };
     }
 
-    final double mainAxisExtent;
-    switch (axis) {
-      case Axis.horizontal:
-        mainAxisExtent = size.width - extentOfPinnedSlivers;
-      case Axis.vertical:
-        mainAxisExtent = size.height - extentOfPinnedSlivers;
-    }
+    final double mainAxisExtentDifference = switch (axis) {
+      Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
+      Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
+    };
 
-    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
 
-    switch (axisDirection) {
-      case AxisDirection.down:
-        targetRect = targetRect.translate(0.0, offsetDifference);
-      case AxisDirection.right:
-        targetRect = targetRect.translate(offsetDifference, 0.0);
-      case AxisDirection.up:
-        targetRect = targetRect.translate(0.0, -offsetDifference);
-      case AxisDirection.left:
-        targetRect = targetRect.translate(-offsetDifference, 0.0);
-    }
+    targetRect = switch (axisDirection) {
+      AxisDirection.up    => targetRect.translate(0.0, -offsetDifference),
+      AxisDirection.down  => targetRect.translate(0.0,  offsetDifference),
+      AxisDirection.left  => targetRect.translate(-offsetDifference, 0.0),
+      AxisDirection.right => targetRect.translate( offsetDifference, 0.0),
+    };
 
     return RevealedOffset(offset: targetOffset, rect: targetRect);
   }

@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart' show Asset;
+import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
-import '../../android/native_assets.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
-import '../../ios/native_assets.dart';
-import '../../linux/native_assets.dart';
-import '../../macos/native_assets.dart';
+import '../../isolated/native_assets/android/native_assets.dart';
+import '../../isolated/native_assets/ios/native_assets.dart';
+import '../../isolated/native_assets/linux/native_assets.dart';
+import '../../isolated/native_assets/macos/native_assets.dart';
+import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/windows/native_assets.dart';
 import '../../macos/xcode.dart';
-import '../../native_assets.dart';
-import '../../windows/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -56,7 +56,7 @@ class NativeAssets extends Target {
     final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
     if (nativeAssetsEnvironment == 'false') {
       dependencies = <Uri>[];
-      await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+      await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
     } else {
       final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
       if (targetPlatformEnvironment == null) {
@@ -145,7 +145,7 @@ class NativeAssets extends Target {
           } else {
             // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
             // Write the file we claim to have in the [outputs].
-            await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+            await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
             dependencies = <Uri>[];
           }
         case TargetPlatform.android_arm:
@@ -165,7 +165,7 @@ class NativeAssets extends Target {
         case TargetPlatform.web_javascript:
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
           // Write the file we claim to have in the [outputs].
-          await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+          await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
           dependencies = <Uri>[];
       }
     }

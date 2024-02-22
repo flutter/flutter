@@ -439,41 +439,39 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                 Expanded(
                   child: Align(
                     alignment: Alignment(0, groupAlignment),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          for (int i = 0; i < widget.destinations.length; i += 1)
-                            _RailDestination(
-                              minWidth: minWidth,
-                              minExtendedWidth: minExtendedWidth,
-                              extendedTransitionAnimation: _extendedAnimation,
-                              selected: widget.selectedIndex == i,
-                              icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                              label: widget.destinations[i].label,
-                              destinationAnimation: _destinationAnimations[i],
-                              labelType: labelType,
-                              iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
-                              labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                              padding: widget.destinations[i].padding,
-                              useIndicator: useIndicator,
-                              indicatorColor: useIndicator ? indicatorColor : null,
-                              indicatorShape: useIndicator ? indicatorShape : null,
-                              onTap: () {
-                                if (widget.onDestinationSelected != null) {
-                                  widget.onDestinationSelected!(i);
-                                }
-                              },
-                              indexLabel: localizations.tabLabel(
-                                tabIndex: i + 1,
-                                tabCount: widget.destinations.length,
-                              ),
-                              disabled: widget.destinations[i].disabled,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        for (int i = 0; i < widget.destinations.length; i += 1)
+                          _RailDestination(
+                            minWidth: minWidth,
+                            minExtendedWidth: minExtendedWidth,
+                            extendedTransitionAnimation: _extendedAnimation,
+                            selected: widget.selectedIndex == i,
+                            icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
+                            label: widget.destinations[i].label,
+                            destinationAnimation: _destinationAnimations[i],
+                            labelType: labelType,
+                            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+                            labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                            padding: widget.destinations[i].padding,
+                            useIndicator: useIndicator,
+                            indicatorColor: useIndicator ? indicatorColor : null,
+                            indicatorShape: useIndicator ? indicatorShape : null,
+                            onTap: () {
+                              if (widget.onDestinationSelected != null) {
+                                widget.onDestinationSelected!(i);
+                              }
+                            },
+                            indexLabel: localizations.tabLabel(
+                              tabIndex: i + 1,
+                              tabCount: widget.destinations.length,
                             ),
-                          if (widget.trailing != null)
-                            widget.trailing!,
-                        ],
-                      ),
+                            disabled: widget.destinations[i].disabled,
+                          ),
+                        if (widget.trailing != null)
+                          widget.trailing!,
+                      ],
                     ),
                   ),
                 ),
