@@ -566,12 +566,10 @@ class Switch extends StatelessWidget {
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeight);
-      case MaterialTapTargetSize.shrinkWrap:
-        return Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed);
-    }
+    return switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => Size(switchConfig.switchWidth, switchConfig.switchHeight),
+      MaterialTapTargetSize.shrinkWrap => Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed),
+    };
   }
 
   @override
@@ -815,12 +813,10 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         ..curve = Curves.linear
         ..reverseCurve = null;
       final double delta = details.primaryDelta! / _trackInnerLength;
-      switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          positionController.value -= delta;
-        case TextDirection.ltr:
-          positionController.value += delta;
-      }
+      positionController.value += switch (Directionality.of(context)) {
+        TextDirection.rtl => -delta,
+        TextDirection.ltr =>  delta,
+      };
     }
   }
 
@@ -1422,13 +1418,10 @@ class _SwitchPainter extends ToggleablePainter {
   void paint(Canvas canvas, Size size) {
     final double currentValue = position.value;
 
-    final double visualPosition;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        visualPosition = 1.0 - currentValue;
-      case TextDirection.ltr:
-        visualPosition = currentValue;
-    }
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - currentValue,
+      TextDirection.ltr => currentValue,
+    };
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;
     } else {
@@ -2076,7 +2069,7 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        return _colors.surfaceVariant.withOpacity(0.12);
+        return _colors.surfaceContainerHighest.withOpacity(0.12);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2091,15 +2084,15 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return _colors.primary;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 
@@ -2121,24 +2114,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return null;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return null;
     });
@@ -2176,7 +2169,7 @@ class _SwitchConfigM3 with _SwitchConfig {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        return _colors.surfaceVariant.withOpacity(0.38);
+        return _colors.surfaceContainerHighest.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2191,15 +2184,15 @@ class _SwitchConfigM3 with _SwitchConfig {
         return _colors.onPrimaryContainer;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 

@@ -2929,7 +2929,6 @@ String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimi
 ///
 /// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
-///   // ignore: deprecated_member_use
 ///   assert(describeEnum(Day.monday) == 'monday');
 ///   assert(Day.monday.name == 'monday'); // preferred for real enums
 /// }
@@ -3252,7 +3251,7 @@ mixin Diagnosticable {
   ///
   /// Used by [toDiagnosticsNode] and [toString].
   ///
-  /// Do not add values, that have lifetime shorter than the object.
+  /// Do not add values that have lifetime shorter than the object.
   @protected
   @mustCallSuper
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }

@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -78,10 +77,7 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
-  testWidgets('Should show event indicator for pointer events with setSurfaceSize',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];

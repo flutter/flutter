@@ -168,6 +168,9 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// specified state.
   @override
   Color resolve(Set<MaterialState> states);
+
+  /// A constant whose value is [Colors.transparent] for all states.
+  static const MaterialStateColor transparent = _MaterialStateColorTransparent();
 }
 
 /// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
@@ -187,6 +190,13 @@ class _MaterialStateColor extends MaterialStateColor {
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+class _MaterialStateColorTransparent extends MaterialStateColor {
+  const _MaterialStateColorTransparent() : super(0x00000000);
+
+  @override
+  Color resolve(Set<MaterialState> states) => const Color(0x00000000);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
@@ -750,6 +760,14 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// [MaterialState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
+///
+/// When calling `setState` in a [MaterialStatesController] listener, use the
+/// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
+/// the frame has been rendered. It's generally prudent to use the
+/// [SchedulerBinding.addPostFrameCallback] because some of the widgets that
+/// depend on [MaterialStatesController] may call [update] in their build method.
+/// In such cases, listener's that call `setState` - during the build phase - will cause
+/// an error.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
