@@ -16,19 +16,30 @@ environment:
 # relative to this directory into //third_party/dart, or //third_party/pkg
 dependencies:
   crypto: any
+  meta: any
   path: any
   engine_repo_tools: any
   process: any
 
+dev_dependencies:
+  litetest: any
+  process_fakes: any
+
 dependency_overrides:
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
   collection:
     path: ../../../third_party/dart/third_party/pkg/collection
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
   engine_repo_tools:
     path: ../../tools/pkg/engine_repo_tools
+  expect:
+    path: ../../../third_party/dart/pkg/expect
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
+  litetest:
+    path: ../../testing/litetest
   meta:
     path: ../../../third_party/dart/pkg/meta
   path:
@@ -37,5 +48,9 @@ dependency_overrides:
     path: ../../third_party/pkg/platform
   process:
     path: ../../third_party/pkg/process
+  process_fakes:
+    path: ../../tools/pkg/process_fakes
+  smith:
+    path: ../../../third_party/dart/pkg/smith
   typed_data:
     path: ../../../third_party/dart/third_party/pkg/typed_data
