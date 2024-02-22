@@ -462,6 +462,10 @@ void Engine::ScheduleFrame(bool regenerate_layer_trees) {
   animator_->RequestFrame(regenerate_layer_trees);
 }
 
+void Engine::EndWarmUpFrame() {
+  animator_->EndWarmUpFrame();
+}
+
 void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree,
                     float device_pixel_ratio) {
   if (!layer_tree) {

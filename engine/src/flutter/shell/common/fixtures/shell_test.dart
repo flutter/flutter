@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show utf8, json;
+import 'dart:async' show scheduleMicrotask;
+import 'dart:convert' show json, utf8;
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
+
+void expect(Object? a, Object? b) {
+  if (a != b) {
+    throw AssertionError('Expected $a to == $b');
+  }
+}
 
 void main() {}
 
@@ -349,11 +356,6 @@ Future<void> toImageSync() async {
 
   onBeforeToImageSync();
   final Image image = picture.toImageSync(20, 25);
-  void expect(Object? a, Object? b) {
-    if (a != b) {
-      throw 'Expected $a to == $b';
-    }
-  }
   expect(image.width, 20);
   expect(image.height, 25);
 
@@ -528,4 +530,32 @@ void testReportViewWidths() {
   PlatformDispatcher.instance.onMetricsChanged = () {
     nativeReportViewWidthsCallback(getCurrentViewWidths());
   };
+}
+
+@pragma('vm:entry-point')
+void renderWarmUpImplicitView() {
+  bool beginFrameCalled = false;
+
+  PlatformDispatcher.instance.scheduleWarmUpFrame(
+    beginFrame: () {
+      expect(beginFrameCalled, false);
+      beginFrameCalled = true;
+    },
+    drawFrame: () {
+      expect(beginFrameCalled, true);
+
+      final SceneBuilder builder = SceneBuilder();
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+      final Picture picture = recorder.endRecording();
+      builder.addPicture(Offset.zero, picture);
+
+      final Scene scene = builder.build();
+      PlatformDispatcher.instance.implicitView!.render(scene);
+
+      scene.dispose();
+      picture.dispose();
+    },
+  );
 }

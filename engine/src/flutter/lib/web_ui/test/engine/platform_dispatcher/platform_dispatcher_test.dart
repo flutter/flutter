@@ -417,6 +417,23 @@ void testMain() {
       dispatcher.dispose();
       expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
     });
+
+    test('scheduleWarmupFrame should call both callbacks', () async {
+      bool beginFrameCalled = false;
+      final Completer<void> drawFrameCalled = Completer<void>();
+      dispatcher.scheduleWarmUpFrame(beginFrame: () {
+        expect(drawFrameCalled.isCompleted, false);
+        expect(beginFrameCalled, false);
+        beginFrameCalled = true;
+      }, drawFrame: () {
+        expect(beginFrameCalled, true);
+        expect(drawFrameCalled.isCompleted, false);
+        drawFrameCalled.complete();
+      });
+      await drawFrameCalled.future;
+      expect(beginFrameCalled, true);
+      expect(drawFrameCalled.isCompleted, true);
+    });
   });
 }
 

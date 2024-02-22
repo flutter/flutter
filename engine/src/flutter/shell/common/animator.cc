@@ -264,6 +264,12 @@ void Animator::AwaitVSync() {
   }
 }
 
+void Animator::EndWarmUpFrame() {
+  // Do nothing. The warm up frame does not need any additional work to end the
+  // frame for now. This will change once the pipeline supports multi-view.
+  // https://github.com/flutter/flutter/issues/142851
+}
+
 void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
                                               const fml::closure& callback) {
   waiter_->ScheduleSecondaryCallback(id, callback);

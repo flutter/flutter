@@ -187,7 +187,8 @@ Future<void> initializeEngineServices({
           // TODO(yjbanov): technically Flutter flushes microtasks between
           //                onBeginFrame and onDrawFrame. We don't, which hasn't
           //                been an issue yet, but eventually we'll have to
-          //                implement it properly.
+          //                implement it properly. (Also see the to-do in
+          //                `EnginePlatformDispatcher.scheduleWarmUpFrame`).
           EnginePlatformDispatcher.instance.invokeOnDrawFrame();
         }
       });
