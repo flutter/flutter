@@ -140,7 +140,7 @@ class NavigationBar extends StatelessWidget {
   ///
   /// If null, [NavigationBarThemeData.backgroundColor] is used. If that
   /// is also null, then if [ThemeData.useMaterial3] is true, the value is
-  /// [ColorScheme.surfaceContainer]. If that is false, the default blends [ColorScheme.surface]
+  /// [ColorScheme.surface]. If that is false, the default blends [ColorScheme.surface]
   /// and [ColorScheme.onSurface] using an [ElevationOverlay].
   final Color? backgroundColor;
 
@@ -162,13 +162,8 @@ class NavigationBar extends StatelessWidget {
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
-  ///
   /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [Colors.transparent].
+  /// is also null, the default value is [ColorScheme.surfaceTint].
   ///
   /// See [Material.surfaceTintColor] for more details on how this
   /// overlay is applied.
@@ -1368,11 +1363,11 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  @override Color? get backgroundColor => _colors.surfaceContainer;
+  @override Color? get backgroundColor => _colors.surface;
 
   @override Color? get shadowColor => Colors.transparent;
 
-  @override Color? get surfaceTintColor => Colors.transparent;
+  @override Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
