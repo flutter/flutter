@@ -234,7 +234,6 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// Creates a series of one or more initial routes.
 typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
 
-
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
