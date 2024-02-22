@@ -1738,7 +1738,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           debugPrint('yyy $_textSelectionStart');
         } else {
           debugPrint('dont swap');
-          if (!_boundingBoxesContains(localPosition)) {
+          if (false) {
+            debugPrint('whut');
             targetPosition = existingSelectionEnd;
           } else {
             if (position.offset < existingSelectionStart.offset) {
@@ -1758,7 +1759,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         if (existingSelectionStart != null) {
           // If the start edge exists and the end edge is being moved, then the
           // end edge is moved to encompass the entire word at the new position.
+          debugPrint('hi from over here');
           if (position.offset < existingSelectionStart.offset) {
+            debugPrint('hi from 2');
             targetPosition = textBoundary.boundaryStart;
           } else {
             targetPosition = textBoundary.boundaryEnd;
@@ -1849,7 +1852,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       direction: paragraph.textDirection,
     );
 
-    final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
+    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
     final TextPosition positionInFullText = paragraph.getPositionForOffset(SelectionUtils.adjustDragOffset(paragraph.paintBounds, localPosition, direction: paragraph.textDirection));
     debugPrint('positionWrtToFragment $position, positionFullText $positionInFullText');
     debugPrint('start $existingSelectionStart, end $existingSelectionEnd');
@@ -1861,6 +1864,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     debugPrint('test in rect? ${_rect.contains(localPosition)}');
 
     if (_isPlaceholder()) {
+      debugPrint('i am a placeholder');
       // 1. Iteration starts at a placeholder, and drag is outside
       // encompassing render paragraph
       // 2. Iteration starts at a placeholder, and drag is inside
@@ -1875,43 +1879,298 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // 5. Iteration starts at a placeholder, and drag 
       // is inside encompassing paragraph, local render
       // paragraph, and inside local rect.
-      final RenderObject renderObject = _getEncompassingRect()!;
-      final Matrix4 transform = renderObject.getTransformTo(null);
+      final RenderObject rootParagraph = _getEncompassingRect()!;
+      final Matrix4 transform = rootParagraph.getTransformTo(null);
       transform.invert();
       final Offset localPos = MatrixUtils.transformPoint(transform, globalPosition);
-      final bool positionWithinEncompassingParagraph = renderObject.paintBounds.contains(localPos);
+      final bool positionWithinEncompassingParagraph = rootParagraph.paintBounds.contains(localPos);
       if (!positionWithinEncompassingParagraph) {
         if (!_selectableContainsOriginTextBoundary) {
           _setSelectionPosition(position, isEnd: isEnd);
-          if (position.offset >= range.end) {
-            debugPrint('nexttttttttttt');
+          if (position.offset == range.end) {
             return SelectionResult.next;
           }
 
-          if (position.offset <= range.start) {
-            debugPrint('prevvvvvvvvvvvvv');
+          if (position.offset == range.start) {
             return SelectionResult.previous;
           }
         } else {
-          // Maintain selection 
+          assert(existingSelectionStart != null && existingSelectionEnd != null);
+          debugPrint('interesting case here');
+          final bool forwardSelection = existingSelectionEnd!.offset >= existingSelectionStart!.offset;
+          if (forwardSelection) {
+            if (position.offset == range.end) {
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.next;
+            }
+
+            if (position.offset == range.start) {
+              _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.previous;
+            }
+          } else {
+            if (position.offset == range.end) {
+              _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.next;
+            }
+
+            if (position.offset == range.start) {
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.previous;
+            }
+          }
         }
       }
 
       if (positionWithinEncompassingParagraph && !positionWithinParagraphRect) {
-        
+        debugPrint('haiii1');
+        if (!_selectableContainsOriginTextBoundary) {
+          /// Find the paragraph at the local position with regards to the root text.
+          /// Find this placeholders text position in the root text.
+          /// Find the overlap between the paragraph boundary and this placeholder boundary.
+          /// Return results based on the remaining paragraph location.
+          ///
+          /// How can we identify if we are searching backwards or forwards? The selection is not guaranteed
+          /// to exist.
+          /// Where is this selectable in relation with the rest of the paragraph? If its at the end, where is the drag position?
+          final TextPosition rootPos = (rootParagraph as RenderParagraph).getPositionForOffset(localPos);
+          final _TextBoundaryRecord rootParagraphBoundary = _getParagraphBoundaryAtPosition(rootPos, useRootText: true);
+          final TextPosition placeholderInRootTextPos = _getPositionInRootText();
+          final TextRange rootPlaceholderRange = TextRange(start: placeholderInRootTextPos.offset, end: placeholderInRootTextPos.offset + 1);
+          final TextRange? intersectRange = _intersect(rootPlaceholderRange, TextRange(start: rootParagraphBoundary.boundaryStart.offset, end: rootParagraphBoundary.boundaryEnd.offset));
+          debugPrint('checking placeholder intersect $placeholderInRootTextPos $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+          final bool backwardSelection = existingSelectionStart != null && existingSelectionStart.offset == range.end;
+          if (!backwardSelection) {
+            debugPrint('forwardss');
+            if (intersectRange == null) {
+              debugPrint('no intersect placeholder');
+              if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                return SelectionResult.previous;
+              } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                return SelectionResult.next;
+              }
+            }
+            if (intersectRange!.end == rootParagraphBoundary.boundaryEnd.offset) {
+              debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+              _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+              return SelectionResult.end;
+            }
+            if (rootParagraphBoundary.boundaryEnd.offset > intersectRange!.end) {
+              debugPrint('next placeholder');
+              _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+              return SelectionResult.next;
+            }
+              debugPrint('prev placeholder');
+            return SelectionResult.previous;
+          } else {
+            if (intersectRange == null) {
+              debugPrint('no intersect placeholder');
+              if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                return SelectionResult.previous;
+              } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                return SelectionResult.next;
+              }
+            }
+            if (intersectRange!.start == rootParagraphBoundary.boundaryStart.offset) {
+              debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+              _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+              return SelectionResult.end;
+            }
+            if (rootParagraphBoundary.boundaryStart.offset < intersectRange!.start) {
+              debugPrint('prev placeholder');
+              _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+              return SelectionResult.previous;
+            }
+              debugPrint('next placeholder');
+            return SelectionResult.next;
+          }
+          // if (intersectRange == null) {
+          //   debugPrint('no intersect placeholder');
+          //   if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+          //     return SelectionResult.previous;
+          //   } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+          //     return SelectionResult.next;
+          //   }
+          // }
+          // if (intersectRange!.end == rootParagraphBoundary.boundaryEnd.offset) {
+          //   debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+          //   _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+          //   return SelectionResult.end;
+          // }
+          // if (rootParagraphBoundary.boundaryEnd.offset > intersectRange!.end) {
+          //   debugPrint('next placeholder');
+          //   _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+          //   return SelectionResult.next;
+          // }
+          //   debugPrint('prev placeholder');
+          // return SelectionResult.previous;
+        } else {
+          assert(existingSelectionStart != null && existingSelectionEnd != null);
+          debugPrint('haiiii2');
+          // Here I want to know when I should swap edges. I should swap edges when the selection is forward
+          // and the position is before the text boundary start. 
+          final bool forwardSelection = existingSelectionEnd!.offset >= existingSelectionStart!.offset;
+          if (forwardSelection) {
+            debugPrint('forwardssssss');
+            if (position.offset == range.end) {
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.next;
+            }
+
+            if (position.offset == range.start) {
+              debugPrint('ohhhhhhhh');
+              /// Only swap when the localPosition has passed the beginning of the origin
+              /// paragraph boundary with regards to the root paragraph. To do this we
+              /// must find the paragraph boundary this placeholder belongs to. We can do this
+              /// by finding the root render paragraph and grabbing its full text. Then we should
+              /// convert the rect that belongs to this placeholder, and find its text position
+              /// in the root paragraph. From there we can use that to find the paragraph
+              /// boundary at the placeholder position.
+              final Matrix4 rootTransform = (rootParagraph as RenderParagraph).getTransformTo(null);
+              rootTransform.invert();
+              final Offset rootPosition = MatrixUtils.transformPoint(transform, globalPosition);
+              final TextPosition rootTextPosition = (rootParagraph as RenderParagraph).getPositionForOffset(rootPosition);
+              final String rootText = (rootParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false);
+              final _TextBoundaryRecord rootParagraphBoundary = _getParagraphBoundaryAtPosition(_getPositionInRootText(), useRootText: true);
+              final bool shouldSwapEdges = rootTextPosition.offset < rootParagraphBoundary.boundaryStart.offset;
+              if (shouldSwapEdges) {
+                _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+                _setSelectionPosition(position, isEnd: isEnd);
+              } else {
+                _setSelectionPosition(existingSelectionEnd, isEnd: isEnd);
+              }
+
+              final TextPosition placeholderInRootTextPos = _getPositionInRootText();
+              final TextRange rootPlaceholderRange = TextRange(start: placeholderInRootTextPos.offset, end: placeholderInRootTextPos.offset + 1);
+              final TextRange? intersectRange = _intersect(rootPlaceholderRange, TextRange(start: rootParagraphBoundary.boundaryStart.offset, end: rootParagraphBoundary.boundaryEnd.offset));
+              debugPrint('checking placeholder intersect $placeholderInRootTextPos $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+              if (intersectRange == null) {
+                debugPrint('no intersect placeholder');
+                if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                  return SelectionResult.previous;
+                } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                  return SelectionResult.next;
+                }
+              }
+              if (intersectRange!.end == rootParagraphBoundary.boundaryEnd.offset) {
+                debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+                return SelectionResult.end;
+              }
+              if (rootParagraphBoundary.boundaryEnd.offset > intersectRange!.end) {
+                debugPrint('next placeholder');
+                return SelectionResult.next;
+              }
+              debugPrint('prev placeholder');
+              return SelectionResult.previous;
+            }
+          } else {
+            debugPrint('mbackward');
+            if (position.offset == range.end) {
+                final Matrix4 rootTransform = (rootParagraph as RenderParagraph).getTransformTo(null);
+                rootTransform.invert();
+                final Offset rootPosition = MatrixUtils.transformPoint(transform, globalPosition);
+                final TextPosition rootTextPosition = (rootParagraph as RenderParagraph).getPositionForOffset(rootPosition);
+                final String rootText = (rootParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false);
+                final _TextBoundaryRecord rootParagraphBoundary = _getParagraphBoundaryAtPosition(_getPositionInRootText(), useRootText: true);
+                final bool shouldSwapEdges = rootTextPosition.offset > rootParagraphBoundary.boundaryEnd.offset;
+                if (shouldSwapEdges) {
+                  debugPrint('swap');
+                  _setSelectionPosition(isEnd ? existingSelectionStart : existingSelectionEnd, isEnd: isEnd);
+                  _setSelectionPosition(position, isEnd: isEnd);
+                } else {
+                  debugPrint('maintain $existingSelectionEnd');
+                  _setSelectionPosition(existingSelectionEnd, isEnd: isEnd);
+                }
+
+                final TextPosition placeholderInRootTextPos = _getPositionInRootText();
+                final TextRange rootPlaceholderRange = TextRange(start: placeholderInRootTextPos.offset, end: placeholderInRootTextPos.offset + 1);
+                final TextRange? intersectRange = _intersect(rootPlaceholderRange, TextRange(start: rootParagraphBoundary.boundaryStart.offset, end: rootParagraphBoundary.boundaryEnd.offset));
+                debugPrint('checking placeholder intersect $placeholderInRootTextPos $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+
+                if (shouldSwapEdges) {
+                  if (intersectRange == null) {
+                    debugPrint('no intersect placeholder');
+                    if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                      return SelectionResult.previous;
+                    } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                      return SelectionResult.next;
+                    }
+                  }
+                  if (intersectRange!.end == rootParagraphBoundary.boundaryEnd.offset) {
+                    debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+                    return SelectionResult.end;
+                  }
+                  if (rootParagraphBoundary.boundaryEnd.offset > intersectRange!.end) {
+                    debugPrint('next placeholder');
+                    return SelectionResult.next;
+                  }
+                  debugPrint('prev placeholder');
+                  return SelectionResult.previous;
+                } else {
+                  if (intersectRange == null) {
+                    debugPrint('no intersect placeholder');
+                    if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                      return SelectionResult.next;
+                    } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                      return SelectionResult.previous;
+                    }
+                  }
+                  if (intersectRange!.start == rootParagraphBoundary.boundaryStart.offset) {
+                    debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+                    return SelectionResult.end;
+                  }
+                  if (rootParagraphBoundary.boundaryEnd.offset < intersectRange!.start) {
+                    debugPrint('prev placeholder');
+                    return SelectionResult.previous;
+                  }
+                  debugPrint('next placeholder');
+                  return SelectionResult.next;
+                }
+                // if (intersectRange == null) {
+                //   debugPrint('no intersect placeholder');
+                //   if (rootParagraphBoundary.boundaryStart.offset < rootPlaceholderRange.start && rootParagraphBoundary.boundaryEnd.offset < rootPlaceholderRange.start) {
+                //     return SelectionResult.previous;
+                //   } else if (rootParagraphBoundary.boundaryStart.offset > rootPlaceholderRange.end && rootParagraphBoundary.boundaryEnd.offset > rootPlaceholderRange.end) {
+                //     return SelectionResult.next;
+                //   }
+                // }
+                // if (intersectRange!.end == rootParagraphBoundary.boundaryEnd.offset) {
+                //   debugPrint('end placeholder $intersectRange $rootParagraphBoundary $rootPlaceholderRange');
+                //   return SelectionResult.end;
+                // }
+                // if (rootParagraphBoundary.boundaryEnd.offset > intersectRange!.end) {
+                //   debugPrint('next placeholder');
+                //   return SelectionResult.next;
+                // }
+                // debugPrint('prev placeholder');
+                // return SelectionResult.previous;
+            }
+
+            if (position.offset == range.start) {
+              debugPrint('m2');
+              _setSelectionPosition(position, isEnd: isEnd);
+              return SelectionResult.previous;
+            }
+          }
+        }
       }
 
-      if (positionWithinParagraphRect && !positionWithinLocalRect) {
-        // Can we use normal logic? I think so.......
-      }
+      // if (positionWithinParagraphRect && !positionWithinLocalRect) {
+      //   // Can we use normal logic? I think so.......
+      // }
 
-      if (positionWithinLocalRect) {
-        // Can use normal logic?. I think so......
-      }
+      // if (positionWithinLocalRect) {
+      //   // Can use normal logic?. I think so......
+      // }
     }
 
     // When the local position is not in the encompassing rect then...
-    if ((!positionWithinParagraphRect && !_selectableContainsOriginTextBoundary) || _isPlaceholder()) {
+    if (!positionWithinParagraphRect && !_selectableContainsOriginTextBoundary) {
+      // also when we are a placeholder and not in the encompassing rect. If its not in the encompassing rect,
+      // then it will also return false for not in the paragraph rect. This means we don't need to make that
+      // placeholder differentiation.
       debugPrint('not in encompassing rect and therefore not in local rect, also does not contain origin boundary $positionWithinParagraphRect $positionWithinLocalRect');
       // This also means the local position is not in the local rect.
       _setSelectionPosition(position, isEnd: isEnd);
@@ -1930,6 +2189,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
+    debugPrint('do we make it here');
     _TextBoundaryRecord? textBoundary = _boundingBoxesContains(localPosition) || paragraph.paintBounds.contains(localPosition) ? getTextBoundary(position) : null;
     if (textBoundary != null
         && (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start
@@ -1940,7 +2200,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // computing the target position.
       textBoundary = null;
     }
-    if (fullText.codeUnits.elementAt(positionInFullText.offset) == PlaceholderSpan.placeholderCodeUnit) {
+    if (paragraph.paintBounds.contains(localPosition) && fullText.codeUnits.elementAt(positionInFullText.offset) == PlaceholderSpan.placeholderCodeUnit) {
       debugPrint('touching placeholder');
       // Determine if text position is at placeholder.
       // If it is then try to reach it.
@@ -1960,14 +2220,14 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     debugPrint('resulting target $targetPosition');
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
-    if (!paragraph.paintBounds.contains(localPosition)) {
+    if (!positionWithinParagraphRect) {
       ////just addeddd///.
-      if (targetPosition.offset == range.end) {
+      if (position.offset == range.end) {
         debugPrint('neixt');
         return SelectionResult.next;
       }
 
-      if (targetPosition.offset == range.start) {
+      if (position.offset == range.start) {
         debugPrint('preivious');
         return SelectionResult.previous;
       }
@@ -2202,12 +2462,22 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return _handleSelectMultiFragmentTextBoundary(paragraphBoundary);
   }
 
-  _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(fullText);
+  TextPosition _getPositionInRootText() {
+    final RenderObject rootParagraph = _getEncompassingRect()!;
+    final Matrix4 transform = paragraph.getTransformTo(rootParagraph);
+    final Offset localCenter = paragraph.paintBounds.topLeft;
+    final Offset localPos = MatrixUtils.transformPoint(transform, localCenter);
+    final TextPosition position = (rootParagraph as RenderParagraph).getPositionForOffset(localPos);
+    return position;
+  }
+
+  _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position, {bool useRootText = false}) {
+    final String text = useRootText ? (_getEncompassingRect()! as RenderParagraph).text.toPlainText(includeSemanticsLabels: false) : fullText; 
+    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
-    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == fullText.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
-    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? fullText.length;
+    int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == text.length || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
     final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
     return _adjustTextBoundaryAtPosition(paragraphRange, position);
