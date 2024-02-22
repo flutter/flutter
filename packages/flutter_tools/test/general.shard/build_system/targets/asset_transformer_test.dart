@@ -16,7 +16,7 @@ import '../../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('Invokes dart properly', () async {
-    final FileSystem fileSystem = MemoryFileSystem();
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
