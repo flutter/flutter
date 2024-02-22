@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 
 import 'package:process/process.dart';
 
@@ -29,7 +28,6 @@ final class AssetTransformer {
   final Logger _logger;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
-  final Random _random = Random();
 
   /// The [Source] inputs that targets using this should depend on.
   ///
@@ -51,11 +49,15 @@ final class AssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
   }) async {
 
-    String getTempFilePath() => '${_random.nextInt(1<<32)}${_fileSystem.path.extension(asset.path)}';
+    String getTempFilePath(int transformStep) {
+      final String basename = _fileSystem.path.basename(asset.path);
+      final String ext = _fileSystem.path.extension(asset.path);
+      return '$basename-transformOutput$transformStep$ext';
+    }
 
-    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath());
+    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath());
+    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
 
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
@@ -79,7 +81,7 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath());
+          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
         }
       }
     } finally {
