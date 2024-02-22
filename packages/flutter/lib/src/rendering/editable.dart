@@ -2238,17 +2238,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // restored to the original values before final layout and painting.
   List<PlaceholderDimensions>? _placeholderDimensions;
 
-  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+  TextLayout get textLayout {
+    return _textLayout;
+  }
+  TextLayout? _textLayout;
+
+  TextLayout _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
     final double availableMinWidth = math.min(minWidth, availableMaxWidth);
     final double textMaxWidth = _isMultiline ? availableMaxWidth : double.infinity;
     final double textMinWidth = forceLine ? availableMaxWidth : availableMinWidth;
-    _textPainter.layout(
+    final TextLayout layout = _textPainter.layout(
         minWidth: textMinWidth,
         maxWidth: textMaxWidth,
     );
     _textLayoutLastMinWidth = minWidth;
     _textLayoutLastMaxWidth = maxWidth;
+    return layout;
   }
 
   // Computes the text metrics if `_textPainter`'s layout information was marked
@@ -2271,7 +2277,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // the constraints used to layout the `_textPainter` is different. See
   // `TextPainter.layout`.
   void _computeTextMetricsIfNeeded() {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _textLayout = _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
   late Rect _caretPrototype;
