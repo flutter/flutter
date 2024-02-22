@@ -49,6 +49,17 @@ class ClipContents final : public Contents {
   void SetInheritedOpacity(Scalar opacity) override;
 
  private:
+  bool RenderDepthClip(const ContentContext& renderer,
+                       const Entity& entity,
+                       RenderPass& pass,
+                       Entity::ClipOperation clip_op,
+                       const Geometry& geometry) const;
+  bool RenderStencilClip(const ContentContext& renderer,
+                         const Entity& entity,
+                         RenderPass& pass,
+                         Entity::ClipOperation clip_op,
+                         const Geometry& geometry) const;
+
   std::shared_ptr<Geometry> geometry_;
   Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 
