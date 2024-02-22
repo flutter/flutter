@@ -22,14 +22,17 @@
                 "os=Windows-10"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
                 "--windows-cpu",
-                "arm64"
+                "arm64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "host_debug_arm64",
             "ninja": {
@@ -61,14 +64,17 @@
                 "os=Windows-10"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
                 "--windows-cpu",
-                "arm64"
+                "arm64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "host_profile_arm64",
             "ninja": {
@@ -97,7 +103,8 @@
                 "os=Windows-10"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "generators": {},
             "gn": [
@@ -105,7 +112,9 @@
                 "release",
                 "--no-lto",
                 "--windows-cpu",
-                "arm64"
+                "arm64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "host_release_arm64",
             "ninja": {
