@@ -240,6 +240,69 @@ flutter:
     ),
   });
 
+  testUsingContext('exits tool if an asset transformation fails', () async {
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      platform: globals.platform,
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+    );
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: globals.processManager,
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: globals.platform,
+      defines: <String, String>{},
+    );
+
+    await fileSystem.file('.packages').create();
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: input.txt
+      transformers:
+        - package: my_transformer
+          args: ["-a", "-b", "--color", "green"]
+''');
+
+    await fileSystem.file('input.txt').create(recursive: true);
+
+    await expectToolExitLater(
+      const CopyAssets().build(environment),
+      startsWith('User-defined transformation of asset "/input.txt" failed.\n'),
+    );
+    expect(globals.processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+    FileSystem: () => fileSystem,
+    Platform: () => FakePlatform(),
+    ProcessManager: () => FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          exitCode: 1,
+        ),
+      ],
+    ),
+  });
+
+
   testUsingContext('Throws exception if pubspec contains missing files', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()

@@ -6,6 +6,7 @@ import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
@@ -98,7 +99,6 @@ Future<Depfile> copyAssets(
   );
   final AssetTransformer assetTransformer = AssetTransformer(
     processManager: environment.processManager,
-    logger: environment.logger,
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
   );
@@ -143,12 +143,15 @@ Future<Depfile> copyAssets(
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
-                doCopy = !await assetTransformer.transformAsset(
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: content.file as File,
                   outputPath: file.path,
                   workingDirectory: environment.projectDir.path,
                   transformerEntries: entry.value.transformers,
                 );
+                if (failure != null) {
+                  throwToolExit(failure.message);
+                }
               }
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(

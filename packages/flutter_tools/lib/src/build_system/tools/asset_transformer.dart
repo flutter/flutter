@@ -8,7 +8,6 @@ import 'package:process/process.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/logger.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
 
@@ -16,16 +15,13 @@ import '../build_system.dart';
 final class AssetTransformer {
   AssetTransformer({
     required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
     required String dartBinaryPath,
   })  : _processManager = processManager,
-        _logger = logger,
         _fileSystem = fileSystem,
         _dartBinaryPath = dartBinaryPath;
 
   final ProcessManager _processManager;
-  final Logger _logger;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
 
@@ -40,9 +36,7 @@ final class AssetTransformer {
 
   /// Applies, in sequence, a list of transformers to an [asset] and then copies
   /// the output to [outputPath].
-  ///
-  /// Returns `true` if successful and `false` otherwise.
-  Future<bool> transformAsset({
+  Future<AssetTransformationFailure?> transformAsset({
     required File asset,
     required String outputPath,
     required String workingDirectory,
@@ -61,7 +55,7 @@ final class AssetTransformer {
 
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
-        final _AssetTransformerFailure? transformerFailure = await _applyTransformer(
+        final AssetTransformationFailure? transformerFailure = await _applyTransformer(
           asset: tempInputFile,
           output: tempOutputFile,
           transformer: transformer,
@@ -69,11 +63,10 @@ final class AssetTransformer {
         );
 
         if (transformerFailure != null) {
-          _logger.printError(
+          return AssetTransformationFailure(
             'User-defined transformation of asset "${asset.path}" failed.\n'
             '${transformerFailure.message}',
           );
-          return false;
         }
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
@@ -89,10 +82,10 @@ final class AssetTransformer {
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
     }
 
-    return true;
+    return null;
   }
 
-  Future<_AssetTransformerFailure?> _applyTransformer({
+  Future<AssetTransformationFailure?> _applyTransformer({
     required File asset,
     required File output,
     required AssetTransformerEntry transformer,
@@ -119,7 +112,7 @@ final class AssetTransformer {
     final String stderr = result.stderr as String;
 
     if (result.exitCode != 0) {
-      return _AssetTransformerFailure(
+      return AssetTransformationFailure(
         'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
         'Transformer package: ${transformer.package}\n'
         'Full command: ${command.join(' ')}\n'
@@ -129,7 +122,7 @@ final class AssetTransformer {
     }
 
     if (!_fileSystem.file(output).existsSync()) {
-      return _AssetTransformerFailure(
+      return AssetTransformationFailure(
         'Asset transformer ${transformer.package} did not produce an output file.\n'
         'Input file provided to transformer: "${asset.path}"\n'
         'Expected output file at: "${output.absolute.path}"\n'
@@ -143,8 +136,8 @@ final class AssetTransformer {
   }
 }
 
-final class _AssetTransformerFailure {
-  const _AssetTransformerFailure(this.message);
+final class AssetTransformationFailure {
+  const AssetTransformationFailure(this.message);
 
   final String message;
 }

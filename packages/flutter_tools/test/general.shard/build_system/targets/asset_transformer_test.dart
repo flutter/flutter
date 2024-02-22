@@ -51,12 +51,11 @@ void main() {
 
     final AssetTransformer transformer = AssetTransformer(
       processManager: processManager,
-      logger: logger,
       fileSystem: fileSystem,
       dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
     );
 
-    final bool transformationSuccessful = await transformer.transformAsset(
+    final AssetTransformationFailure? transformationFailure = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -72,13 +71,12 @@ void main() {
       ],
     );
 
-    expect(transformationSuccessful, isTrue, reason: logger.errorText);
+    expect(transformationFailure, isNull, reason: logger.errorText);
     expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
     final File asset = fileSystem.file('asset.txt')..createSync();
@@ -110,12 +108,11 @@ void main() {
 
     final AssetTransformer transformer = AssetTransformer(
       processManager: processManager,
-      logger: logger,
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
     );
 
-    final bool transformationSuccessful = await transformer.transformAsset(
+    final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -127,10 +124,10 @@ void main() {
       ],
     );
 
-    expect(transformationSuccessful, false, reason: logger.errorText);
     expect(asset, exists);
     expect(processManager, hasNoRemainingExpectations);
-    expect(logger.errorText, contains(
+    expect(failure, isNotNull);
+    expect(failure!.message,
 '''
 User-defined transformation of asset "asset.txt" failed.
 Transformer process terminated with non-zero exit code: 1
@@ -139,13 +136,11 @@ Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/asset.txt-t
 stdout:
 Beginning transformation
 stderr:
-Something went wrong
-'''));
+Something went wrong''');
   });
 
   testWithoutContext('prints error message when the transformer does not produce an output file', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
     final File asset = fileSystem.file('asset.txt')..createSync();
@@ -171,12 +166,11 @@ Something went wrong
 
     final AssetTransformer transformer = AssetTransformer(
       processManager: processManager,
-      logger: logger,
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
     );
 
-    final bool transformationSuccessful = await transformer.transformAsset(
+    final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -189,7 +183,8 @@ Something went wrong
     );
 
     expect(processManager, hasNoRemainingExpectations);
-    expect(logger.errorText,
+    expect(failure, isNotNull);
+    expect(failure!.message,
 '''
 User-defined transformation of asset "asset.txt" failed.
 Asset transformer my_transformer did not produce an output file.
@@ -199,15 +194,12 @@ Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/asset.txt-t
 stdout:
 
 stderr:
-Transformation failed, but I forgot to exit with a non-zero code.
-'''
+Transformation failed, but I forgot to exit with a non-zero code.'''
     );
-    expect(transformationSuccessful, false);
   });
 
   testWithoutContext('correctly chains transformations when there are multiple of them', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
     final File asset = fileSystem.file('asset.txt')
@@ -267,12 +259,11 @@ Transformation failed, but I forgot to exit with a non-zero code.
 
     final AssetTransformer transformer = AssetTransformer(
       processManager: processManager,
-      logger: logger,
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
     );
 
-    await transformer.transformAsset(
+    final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -289,12 +280,12 @@ Transformation failed, but I forgot to exit with a non-zero code.
     );
 
     expect(processManager, hasNoRemainingExpectations);
+    expect(failure, isNull);
     expect(fileSystem.file(outputPath).readAsStringSync(), '012');
   });
 
   testWithoutContext('prints an error when a transformer in a chain (thats not the first) does not produce an output', () async {
     final FileSystem fileSystem = MemoryFileSystem();
-    final BufferLogger logger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
 
     final File asset = fileSystem.file('asset.txt')
@@ -341,12 +332,11 @@ Transformation failed, but I forgot to exit with a non-zero code.
 
     final AssetTransformer transformer = AssetTransformer(
       processManager: processManager,
-      logger: logger,
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
     );
 
-    final bool transformationSuccessful = await transformer.transformAsset(
+    final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -362,10 +352,8 @@ Transformation failed, but I forgot to exit with a non-zero code.
       ],
     );
 
-    expect(transformationSuccessful, isFalse);
-    expect(processManager, hasNoRemainingExpectations);
-    expect(fileSystem.file(outputPath), isNot(exists));
-    expect(logger.errorText,
+    expect(failure, isNotNull);
+    expect(failure!.message,
 '''
 User-defined transformation of asset "asset.txt" failed.
 Asset transformer my_distance_from_ascii_a_transformer did not produce an output file.
@@ -375,9 +363,10 @@ Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer
 stdout:
 
 stderr:
-Transformation failed, but I forgot to exit with a non-zero code.
-'''
+Transformation failed, but I forgot to exit with a non-zero code.'''
     );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(fileSystem.file(outputPath), isNot(exists));
     expect(fileSystem.systemTempDirectory.listSync(), isEmpty);
   });
 }
