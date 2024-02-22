@@ -64,6 +64,12 @@ void main() {
       Analytics: () => fakeAnalytics,
     });
 
+    testUsingContext('alias aab', () async {
+      final BuildAppBundleCommand command =
+          BuildAppBundleCommand(logger: BufferLogger.test());
+      expect(command.aliases, contains('aab'));
+    });
+
     testUsingContext('build type', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
