@@ -1640,15 +1640,9 @@ class _IsMethodCall extends Matcher {
   }
 
   bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
-    if (a.length != b.length) {
-      return false;
-    }
-    for (final dynamic key in a.keys) {
-      if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) {
-        return false;
-      }
-    }
-    return true;
+    return a.length == b.length && a.keys.every(
+      (dynamic key) => b.containsKey(key) && _deepEquals(a[key], b[key]),
+    );
   }
 
   @override

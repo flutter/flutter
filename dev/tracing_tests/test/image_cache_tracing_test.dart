@@ -98,12 +98,7 @@ void _expectTimelineEvents(List<TimelineEvent> events, List<Map<String, dynamic>
 }
 
 bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
-  for (final String key in expectedArgs.keys) {
-    if (expectedArgs[key] != args[key]) {
-      return false;
-    }
-  }
-  return true;
+  return expectedArgs.keys.every((String key) => expectedArgs[key] == args[key]);
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {

@@ -2026,14 +2026,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// until visitor returns false. Returns true if all the visitor calls
   /// returned true, otherwise returns false.
   bool _visitDescendants(SemanticsNodeVisitor visitor) {
-    if (_children != null) {
-      for (final SemanticsNode child in _children!) {
-        if (!visitor(child) || !child._visitDescendants(visitor)) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return _children?.every((SemanticsNode child) => visitor(child) && child._visitDescendants(visitor)) ?? true;
   }
 
   /// The owner for this node (null if unattached).

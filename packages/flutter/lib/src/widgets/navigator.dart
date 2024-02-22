@@ -5818,12 +5818,7 @@ class _HistoryProperty extends RestorableProperty<Map<String?, List<Object>>?> {
     if (!setEquals(a.keys.toSet(), b.keys.toSet())) {
       return false;
     }
-    for (final String? key in a.keys) {
-      if (!listEquals(a[key], b[key])) {
-        return false;
-      }
-    }
-    return true;
+    return a.keys.every((String? key) => listEquals(a[key], b[key]));
   }
 
   void clear() {

@@ -2308,16 +2308,9 @@ class _MenuBarAnchor extends MenuAnchor {
 }
 
 class _MenuBarAnchorState extends _MenuAnchorState {
+  // If it's a bar, then it's "open" if any of its children are open.
   @override
-  bool get _isOpen {
-    // If it's a bar, then it's "open" if any of its children are open.
-    for (final _MenuAnchorState child in _anchorChildren) {
-      if (child._isOpen) {
-        return true;
-      }
-    }
-    return false;
-  }
+  bool get _isOpen => _anchorChildren.any((_MenuAnchorState child) => child._isOpen);
 
   @override
   Axis get _orientation => Axis.horizontal;

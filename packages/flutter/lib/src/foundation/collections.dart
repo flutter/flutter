@@ -26,15 +26,7 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   if (b == null || a.length != b.length) {
     return false;
   }
-  if (identical(a, b)) {
-    return true;
-  }
-  for (final T value in a) {
-    if (!b.contains(value)) {
-      return false;
-    }
-  }
-  return true;
+  return identical(a, b) || a.every((T value) => b.contains(value));
 }
 
 /// Compares two lists for element-by-element equality.
@@ -95,12 +87,7 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
   if (identical(a, b)) {
     return true;
   }
-  for (final T key in a.keys) {
-    if (!b.containsKey(key) || b[key] != a[key]) {
-      return false;
-    }
-  }
-  return true;
+  return a.keys.every((T key) => b.containsKey(key) && a[key] == b[key]);
 }
 
 /// Returns the position of `value` in the `sortedList`, if it exists.

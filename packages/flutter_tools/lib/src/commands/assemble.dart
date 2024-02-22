@@ -194,21 +194,11 @@ class AssembleCommand extends FlutterCommand {
   }
 
   bool isDeferredComponentsTargets() {
-    for (final String targetName in argResults!.rest) {
-      if (deferredComponentsTargets.contains(targetName)) {
-        return true;
-      }
-    }
-    return false;
+    return argResults!.rest.any((String targetName) => deferredComponentsTargets.contains(targetName));
   }
 
   bool isDebug() {
-    for (final String targetName in argResults!.rest) {
-      if (targetName.contains('debug')) {
-        return true;
-      }
-    }
-    return false;
+    return argResults!.rest.any((String targetName) => targetName.contains('debug'));
   }
 
   late final Environment _environment = _createEnvironment();

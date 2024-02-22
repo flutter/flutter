@@ -135,14 +135,9 @@ class FallbackKeyEventRegistrar {
       if (existing(message)) {
         return true;
       }
-      if (_fallbackNodes.isNotEmpty) {
-        for (final KeyEvent event in message.events) {
-          if (_fallbackNodes.last.onKeyEvent(event)) {
-            return true;
-          }
-        }
-      }
-      return false;
+      return _fallbackNodes.isNotEmpty && message.events.any(
+        (KeyEvent event) => _fallbackNodes.last.onKeyEvent(event),
+      );
     };
   }
 }

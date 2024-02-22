@@ -1762,12 +1762,7 @@ mixin WidgetInspectorService {
       // https://github.com/flutter/flutter/issues/32660 is fixed.
       return !file.contains('packages/flutter/');
     }
-    for (final String directory in _pubRootDirectories!) {
-      if (file.startsWith(directory)) {
-        return true;
-      }
-    }
-    return false;
+    return _pubRootDirectories!.any((String directory) => file.startsWith(directory));
   }
 
   /// Memoized version of [_isLocalCreationLocationImpl].

@@ -101,15 +101,9 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == PackageConfig.empty) {
-      return false;
-    }
-    for (final Package package in packageConfig.packages) {
-      if (!fileSystem.directory(package.root).childFile('pubspec.yaml').existsSync()) {
-        return false;
-      }
-    }
-    return true;
+    return packageConfig != PackageConfig.empty && packageConfig.packages.every(
+      (Package package) => fileSystem.directory(package.root).childFile('pubspec.yaml').existsSync(),
+    );
   }
 
   @override
@@ -809,16 +803,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   bool isUpToDateInner(FileSystem fileSystem) {
-    final List<String>? executables =_kExecutables[name];
-    if (executables == null) {
-      return true;
-    }
-    for (final String executable in executables) {
-      if (!location.childFile(executable).existsSync()) {
-        return false;
-      }
-    }
-    return true;
+    return _kExecutables[name]?.every((String executable) => location.childFile(executable).existsSync()) ?? true;
   }
 
   @override

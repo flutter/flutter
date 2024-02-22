@@ -494,12 +494,7 @@ class XcodeProjectInfo {
   /// regard to case.
   bool hasBuildConfigurationForBuildMode(String buildMode) {
     buildMode = buildMode.toLowerCase();
-    for (final String name in buildConfigurations) {
-      if (name.toLowerCase() == buildMode) {
-        return true;
-      }
-    }
-    return false;
+    return buildConfigurations.any((String name) => name.toLowerCase() == buildMode);
   }
 
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique

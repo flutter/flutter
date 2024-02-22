@@ -225,14 +225,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    assert(() {
-      for (final RenderTapRegion region in _registeredRegions) {
-        if (!region.enabled) {
-          return false;
-        }
-      }
-      return true;
-    }(), 'A RenderTapRegion was registered when it was disabled.');
+    assert(_registeredRegions.every((RenderTapRegion region) => region.enabled), 'A RenderTapRegion was registered when it was disabled.');
 
     if (event is! PointerDownEvent) {
       return;

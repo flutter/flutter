@@ -316,28 +316,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (text != null && !visitor(this)) {
       return false;
     }
-    final List<InlineSpan>? children = this.children;
-    if (children != null) {
-      for (final InlineSpan child in children) {
-        if (!child.visitChildren(visitor)) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return children?.every((InlineSpan child) => child.visitChildren(visitor)) ?? true;
   }
 
   @override
   bool visitDirectChildren(InlineSpanVisitor visitor) {
-    final List<InlineSpan>? children = this.children;
-    if (children != null) {
-      for (final InlineSpan child in children) {
-        if (!visitor(child)) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return children?.every((InlineSpan child) => visitor(child)) ?? true;
   }
 
   /// Returns the text span that contains the given position in the text.

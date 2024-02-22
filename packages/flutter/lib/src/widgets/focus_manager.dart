@@ -472,15 +472,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// node can't be reached via traversal, not that it can't be focused. It may
   /// still be focused explicitly.
   bool get skipTraversal {
-    if (_skipTraversal) {
-      return true;
-    }
-    for (final FocusNode ancestor in ancestors) {
-      if (!ancestor.descendantsAreTraversable) {
-        return true;
-      }
-    }
-    return false;
+    return _skipTraversal || ancestors.any((FocusNode ancestor) => !ancestor.descendantsAreTraversable);
   }
   bool _skipTraversal;
   set skipTraversal(bool value) {
@@ -525,12 +517,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (scope != null && !scope.canRequestFocus) {
       return false;
     }
-    for (final FocusNode ancestor in ancestors) {
-      if (!ancestor.descendantsAreFocusable) {
-        return false;
-      }
-    }
-    return true;
+    return ancestors.every((FocusNode ancestor) => ancestor.descendantsAreFocusable);
   }
 
   bool _canRequestFocus;
