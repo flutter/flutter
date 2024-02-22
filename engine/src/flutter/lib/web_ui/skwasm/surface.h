@@ -62,7 +62,7 @@ class Surface {
 
   // Main thread only
   void dispose();
-  uint32_t renderPicture(SkPicture* picture);
+  uint32_t renderPictures(SkPicture** picture, int count);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
@@ -72,7 +72,10 @@ class Surface {
       SkwasmObject textureSource);
 
   // Worker thread
-  void renderPictureOnWorker(SkPicture* picture, uint32_t callbackId);
+  void renderPicturesOnWorker(sk_sp<SkPicture>* picture,
+                              int pictureCount,
+                              uint32_t callbackId,
+                              double rasterStart);
 
  private:
   void _runWorker();
