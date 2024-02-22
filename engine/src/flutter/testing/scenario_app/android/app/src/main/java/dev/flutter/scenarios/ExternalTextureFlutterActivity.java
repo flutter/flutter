@@ -40,6 +40,7 @@ import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 public class ExternalTextureFlutterActivity extends TestActivity {
@@ -60,6 +61,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     super.onCreate(savedInstanceState);
 
     String surfaceRenderer = getIntent().getStringExtra("surface_renderer");
+    assert surfaceRenderer != null;
     surfaceViewRenderer = selectSurfaceRenderer(surfaceRenderer, getIntent().getExtras());
     flutterRenderer = selectSurfaceRenderer(surfaceRenderer, getIntent().getExtras());
 
@@ -92,7 +94,9 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     super.waitUntilFlutterRendered();
 
     try {
-      firstFrameLatch.await(10, java.util.concurrent.TimeUnit.SECONDS);
+      if (!firstFrameLatch.await(10, java.util.concurrent.TimeUnit.SECONDS)) {
+        throw new RuntimeException("Timeout waiting for firstFrameLatch to signal");
+      }
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -127,8 +131,9 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     // -profile:v main -level:v 5.2 -t 1 -r 1 -vf scale=192:256 -b:v 1M sample.mp4
     try {
       MediaExtractor extractor = new MediaExtractor();
-      AssetFileDescriptor afd = getAssets().openFd("sample.mp4");
-      extractor.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+      try (AssetFileDescriptor afd = getAssets().openFd("sample.mp4")) {
+        extractor.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+      }
       return extractor;
     } catch (IOException e) {
       e.printStackTrace();
@@ -146,7 +151,8 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
   @Override
   public void onFlutterUiDisplayed() {
-    surfaceTextureEntry = getFlutterEngine().getRenderer().createSurfaceTexture();
+    surfaceTextureEntry =
+        Objects.requireNonNull(getFlutterEngine()).getRenderer().createSurfaceTexture();
     SurfaceTexture surfaceTexture = surfaceTextureEntry.surfaceTexture();
     surfaceTexture.setDefaultBufferSize(SURFACE_WIDTH, SURFACE_HEIGHT);
     flutterRenderer.attach(new Surface(surfaceTexture), firstFrameLatch);
@@ -256,7 +262,9 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
     private void decodeThreadMain() {
       try {
-        MediaCodec codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+        MediaCodec codec =
+            MediaCodec.createDecoderByType(
+                Objects.requireNonNull(format.getString(MediaFormat.KEY_MIME)));
         codec.configure(format, surface, null, 0);
         codec.start();
 
@@ -274,6 +282,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
           if (!seenEOS) {
             int inputBufferIndex = codec.dequeueInputBuffer(-1);
             ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferIndex);
+            assert inputBuffer != null;
             int sampleSize = extractor.readSampleData(inputBuffer, 0);
             if (sampleSize >= 0) {
               long presentationTimeUs = extractor.getSampleTime();
