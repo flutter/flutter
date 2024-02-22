@@ -97,20 +97,28 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
+enum class UVMode {
+  kNoUV,
+  kUVRect,
+  kUVRectTx,
+};
+
 template <class... Args>
 static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto path = std::get<Path>(args_tuple);
   auto cap = std::get<Cap>(args_tuple);
   auto join = std::get<Join>(args_tuple);
-  auto generate_uv = std::get<bool>(args_tuple);
+  auto generate_uv = std::get<UVMode>(args_tuple);
 
   const Scalar stroke_width = 5.0f;
   const Scalar miter_limit = 10.0f;
   const Scalar scale = 1.0f;
   const Point texture_origin = Point(0, 0);
   const Size texture_size = Size(100, 100);
-  const Matrix effect_transform = Matrix::MakeScale({2.0f, 2.0f, 1.0f});
+  const Matrix effect_transform = (generate_uv == UVMode::kUVRectTx)
+                                      ? Matrix::MakeScale({2.0f, 2.0f, 1.0f})
+                                      : Matrix();
 
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
@@ -123,14 +131,14 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
-    if (generate_uv) {
+    if (generate_uv == UVMode::kNoUV) {
+      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
+          polyline, stroke_width, miter_limit, join, cap, scale);
+      single_point_count = vertices.size();
+    } else {
       auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVerticesUV(
           polyline, stroke_width, miter_limit, join, cap, scale,  //
           texture_origin, texture_size, effect_transform);
-      single_point_count = vertices.size();
-    } else {
-      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-          polyline, stroke_width, miter_limit, join, cap, scale);
       single_point_count = vertices.size();
     }
     point_count += single_point_count;
@@ -157,24 +165,21 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed)         \
-  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join, \
-                    Create##path(closed), Cap::k##cap, Join::k##join, false)
+#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed, uvname, uvtype) \
+  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##uvname, \
+                    Create##path(closed), Cap::k##cap, Join::k##join, uvtype)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_UV(path, cap, join, closed)           \
-  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##_uv, \
-                    Create##path(closed), Cap::k##cap, Join::k##join, true)
+#define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uvname, uvtype)       \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, false, uvname, uvtype);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, false, uvname, uvtype);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, false, uvname, uvtype);   \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, false, uvname, uvtype); \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, false, uvname, uvtype)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uv)       \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Bevel, false);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Miter, false);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Butt, Round, false);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Square, Bevel, false); \
-  MAKE_STROKE_BENCHMARK_CAPTURE##uv(path, Round, Bevel, false)
-
-#define MAKE_STROKE_BENCHMARK_CAPTURE_UVS(path)     \
-  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, ); \
-  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _UV)
+#define MAKE_STROKE_BENCHMARK_CAPTURE_UVS(path)                           \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, , UVMode::kNoUV);        \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uv, UVMode::kUVRectTx); \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uvNoTx, UVMode::kUVRect)
 
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(true), true);
@@ -201,8 +206,9 @@ BENCHMARK_CAPTURE(BM_Polyline,
 MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Quadratic);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, );
-MAKE_STROKE_BENCHMARK_CAPTURE_UV(RRect, Butt, Bevel, );
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , UVMode::kNoUV);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uv, UVMode::kUVRectTx);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uvNoTx, UVMode::kUVRect);
 
 namespace {
 
