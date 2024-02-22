@@ -1516,8 +1516,8 @@ void main() {
       // With RenderSliverFillRemainingWithScrollable:
       // * The child has a minExtent of the remainingPaintExtent.
       // * If not within the viewport but within the cacheExtent, the child has
-      // a maxExtent of the child's height. Otherwise, the child has a maxExtent
-      // of the remainingPaintExtent
+      // a maxExtent of the sliver's cacheExtent. Otherwise, the child has a
+      // maxExtent of the remainingPaintExtent
       // * The sliver has a paintExtent of the child's minExtent or the
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of either the viewportMainAxisExtent or
@@ -1653,8 +1653,8 @@ void main() {
       // With RenderSliverFillRemainingWithScrollable:
       // * The child has a minExtent of the remainingPaintExtent.
       // * If not within the viewport but within the cacheExtent, the child has
-      // a maxExtent of the child's height. Otherwise, the child has a maxExtent
-      // of the remainingPaintExtent
+      // a maxExtent of the sliver's cacheExtent. Otherwise, the child has a
+      // maxExtent of the remainingPaintExtent
       // * The sliver has a paintExtent of the child's minExtent or the
       // remainingPaintExtent - whichever is smaller.
       // * The sliver has a cacheExtent of either the viewportMainAxisExtent or
@@ -1694,8 +1694,8 @@ void main() {
       minExtentOfChild = remainingPaintExtent;
       // When RenderSliverFillRemainingWithScrollable is completely outside the
       // viewport, but is within the remainingCacheExtent, the child has a
-      // maxExtent of the child's height.
-      maxExtentOfChild = sliverFillRemainingChildHeight;
+      // maxExtent of the slivers's cacheExtent.
+      maxExtentOfChild = remainingCacheExtent;
 
       expectSliverConstraints(
         sliver: sliverFillRemaining,
