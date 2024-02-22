@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "ይመልከቱ",
   "searchWebButtonLabel": "ድርን ፈልግ",
   "shareButtonLabel": "አጋራ...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

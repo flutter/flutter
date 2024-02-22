@@ -161,7 +161,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -189,7 +189,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, Colors.transparent);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       RoundedRectangleBorder(
@@ -235,7 +235,7 @@ void main() {
     Material chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 1);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -245,7 +245,7 @@ void main() {
     );
 
     ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
-    expect(decoration.color, null);
+    expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ActionChip.elevated defaults.
     await tester.pumpWidget(
@@ -263,7 +263,7 @@ void main() {
     chipMaterial = getMaterial(tester);
     expect(chipMaterial.elevation, 0);
     expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
-    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(chipMaterial.surfaceTintColor, Colors.transparent);
     expect(
       chipMaterial.shape,
       const RoundedRectangleBorder(
@@ -436,5 +436,61 @@ void main() {
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
+  });
+
+  testWidgets('ActionChip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: ActionChip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(ActionChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(ActionChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(ActionChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(ActionChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
   });
 }

@@ -1193,6 +1193,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    in detail.
   EdgeInsets floatingCursorAddedMargin;
 
+  /// Returns true if the floating cursor is visible, false otherwise.
+  bool get floatingCursorOn => _floatingCursorOn;
   bool _floatingCursorOn = false;
   late TextPosition _floatingCursorTextPosition;
 
@@ -2963,8 +2965,7 @@ class _CaretPainter extends RenderEditablePainter {
 
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting caret when selection is (-1, -1): https://github.com/flutter/flutter/issues/79495
-    if (selection == null || !selection.isCollapsed) {
+    if (selection == null || !selection.isCollapsed || !selection.isValid) {
       return;
     }
 

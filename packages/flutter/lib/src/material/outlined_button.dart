@@ -78,6 +78,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     required super.child,
+    super.iconAlignment,
   });
 
   /// Create a text button from a pair of widgets that serve as the button's
@@ -87,7 +88,10 @@ class OutlinedButton extends ButtonStyleButton {
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
   /// If [icon] is null, will create an [OutlinedButton] instead.
- factory OutlinedButton.icon({
+  ///
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  ///
+  factory OutlinedButton.icon({
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
@@ -98,6 +102,7 @@ class OutlinedButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
+    IconAlignment iconAlignment = IconAlignment.start,
   }) {
     if (icon == null) {
       return OutlinedButton(
@@ -123,6 +128,7 @@ class OutlinedButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
+      iconAlignment: iconAlignment,
     );
   }
 
@@ -311,7 +317,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.primary
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.primary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.1)
   ///   * others - null
   /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
@@ -415,13 +421,13 @@ class _OutlinedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return foreground.withOpacity(0.12);
+      return foreground.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return foreground.withOpacity(0.04);
+      return foreground.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return foreground.withOpacity(0.12);
+      return foreground.withOpacity(0.1);
     }
     return null;
   }
@@ -455,9 +461,15 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     super.statesController,
     required Widget icon,
     required Widget label,
+    super.iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
-         child: _OutlinedButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
+         child: _OutlinedButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
       );
 
   @override
@@ -486,11 +498,13 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.buttonStyle,
+    required this.iconAlignment,
   });
 
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +513,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
+      children: iconAlignment == IconAlignment.start
+        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -543,13 +559,13 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       return null;
     });

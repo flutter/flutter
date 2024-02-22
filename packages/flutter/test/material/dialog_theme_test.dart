@@ -48,6 +48,11 @@ RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
 }
 
 void main() {
+  test('DialogTheme copyWith, ==, hashCode basics', () {
+    expect(const DialogTheme(), const DialogTheme().copyWith());
+    expect(const DialogTheme().hashCode, const DialogTheme().copyWith().hashCode);
+  });
+
   test('DialogTheme lerp special cases', () {
     expect(DialogTheme.lerp(null, null, 0), const DialogTheme());
     const DialogTheme theme = DialogTheme();
@@ -66,6 +71,8 @@ void main() {
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
       actionsPadding: EdgeInsets.all(8.0),
+      barrierColor: Color(0xff000005),
+      insetPadding: EdgeInsets.all(20.0),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -80,6 +87,8 @@ void main() {
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'actionsPadding: EdgeInsets.all(8.0)',
+      'barrierColor: Color(0xff000005)',
+      'insetPadding: EdgeInsets.all(20.0)',
     ]);
   });
 
@@ -498,5 +507,45 @@ void main() {
 
     final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style!.color, contentTextStyle.color);
+  });
+
+  testWidgets('Custom barrierColor - Theme', (WidgetTester tester) async {
+    const Color barrierColor = Colors.blue;
+    const SimpleDialog dialog = SimpleDialog();
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(barrierColor: barrierColor));
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, barrierColor);
+  });
+
+  testWidgets('DialogTheme.insetPadding updates Dialog insetPadding', (WidgetTester tester) async {
+    // The default testing screen (800, 600)
+    const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+    const DialogTheme dialogTheme = DialogTheme(
+      insetPadding: EdgeInsets.fromLTRB(10, 15, 20, 25)
+    );
+    const Dialog dialog = Dialog(child: Placeholder());
+
+    await tester.pumpWidget(_appWithDialog(
+      tester,
+      dialog,
+      theme: ThemeData(dialogTheme: dialogTheme),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      Rect.fromLTRB(
+        screenRect.left + dialogTheme.insetPadding!.left,
+        screenRect.top + dialogTheme.insetPadding!.top,
+        screenRect.right - dialogTheme.insetPadding!.right,
+        screenRect.bottom - dialogTheme.insetPadding!.bottom,
+      ),
+    );
   });
 }
