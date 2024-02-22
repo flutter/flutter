@@ -173,9 +173,11 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, host_buffer.EmplaceUniform(frame_info));
+        KernelPipeline::FragmentShader::KernelSamples kernel_samples =
+            LerpHackKernelSamples(GenerateBlurInfo(blur_info));
+        FML_CHECK(kernel_samples.sample_count < kMaxKernelSize);
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
+            pass, host_buffer.EmplaceUniform(kernel_samples));
         return pass.Draw().ok();
       };
   if (destination_target.has_value()) {
@@ -478,7 +480,6 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   KernelPipeline::FragmentShader::KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
-  FML_CHECK(result.sample_count < kMaxKernelSize);
 
   // Chop off the last samples if the radius >= 3 where they account for < 1.56%
   // of the result.
