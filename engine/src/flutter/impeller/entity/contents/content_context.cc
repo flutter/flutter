@@ -164,28 +164,32 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.depth_stencil_pass = StencilOperation::kKeep;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
-      case StencilMode::kSetToRef:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
-        front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kNonZeroWrite:
+      case StencilMode::kStencilNonZeroFill:
+        // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kAlways;
         front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
         back_stencil.stencil_compare = CompareFunction::kAlways;
         back_stencil.depth_stencil_pass = StencilOperation::kDecrementWrap;
         desc.SetStencilAttachmentDescriptors(front_stencil, back_stencil);
         break;
-      case StencilMode::kEvenOddWrite:
+      case StencilMode::kStencilEvenOddFill:
+        // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kEqual;
         front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
         front_stencil.stencil_failure = StencilOperation::kDecrementWrap;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
       case StencilMode::kCoverCompare:
+        // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kNotEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+        front_stencil.depth_stencil_pass =
+            StencilOperation::kSetToReferenceValue;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
+      case StencilMode::kCoverCompareInverted:
+        // The stencil ref should be 0 on commands that use this mode.
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
       case StencilMode::kLegacyClipRestore:

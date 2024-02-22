@@ -110,7 +110,7 @@ uint32_t Entity::GetNewClipDepth() const {
 static const Scalar kDepthEpsilon = 1.0f / std::pow(2, 18);
 
 float Entity::GetShaderClipDepth() const {
-  return new_clip_depth_ * kDepthEpsilon;
+  return std::clamp(new_clip_depth_ * kDepthEpsilon, 0.0f, 1.0f);
 }
 
 void Entity::IncrementStencilDepth(uint32_t increment) {
