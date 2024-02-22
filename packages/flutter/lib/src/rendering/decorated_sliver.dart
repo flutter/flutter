@@ -93,7 +93,7 @@ class RenderDecoratedSliver extends RenderProxySliver {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (!(child?.geometry!.visible ?? false)) {
+    if (child == null || !child!.geometry!.visible) {
       return;
     }
     // In the case where the child sliver has infinite scroll extent, the decoration
@@ -102,8 +102,8 @@ class RenderDecoratedSliver extends RenderProxySliver {
       ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
       : child!.geometry!.scrollExtent;
     final (Size childSize, Offset scrollOffset) = switch (constraints.axis) {
-      Axis.vertical   => (Size(constraints.crossAxisExtent, cappedMainAxisExtent), Offset(0.0, -constraints.scrollOffset)),
       Axis.horizontal => (Size(cappedMainAxisExtent, constraints.crossAxisExtent), Offset(-constraints.scrollOffset, 0.0)),
+      Axis.vertical   => (Size(constraints.crossAxisExtent, cappedMainAxisExtent), Offset(0.0, -constraints.scrollOffset)),
     };
     offset += (child!.parentData! as SliverPhysicalParentData).paintOffset;
     void paintDecoration() => _painter!.paint(context.canvas, offset + scrollOffset, configuration.copyWith(size: childSize));
