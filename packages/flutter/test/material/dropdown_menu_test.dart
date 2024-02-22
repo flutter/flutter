@@ -1019,6 +1019,36 @@ void main() {
     }
   });
 
+  testWidgets('Enable filtering with custom filter callback that filter text case sensitive', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          filterCallback: (List<DropdownMenuEntry<TestMenu>>entries,String filter){
+            return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+          },
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find
+        .byType(TextField)
+        .first, 'item');
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      // All items should only find one.
+      expect(find.widgetWithText(MenuItemButton, menu.label), findsOneWidget);
+    }
+  });
+
   testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     final TextEditingController controller = TextEditingController();

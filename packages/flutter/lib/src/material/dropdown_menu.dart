@@ -25,6 +25,12 @@ import 'theme_data.dart';
 // late BuildContext context;
 // late FocusNode myFocusNode;
 
+/// A callback function that returns the list of the items that matches the
+/// current applied filter.
+///
+/// Used by [DropdownMenu.filterCallback].
+typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
+
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
 ///
@@ -162,6 +168,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.focusNode,
     this.requestFocusOnTap,
     this.expandedInsets,
+    this.filterCallback,
     this.searchCallback,
     required this.dropdownMenuEntries,
     this.inputFormatters,
@@ -362,6 +369,38 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
+  /// When  [FlutterDropdownMenu.enableFilter] is true, this callback is used to
+  /// compute the list of filtered items.
+  ///
+  /// {@tool snippet}
+  ///
+  /// In this example the `filterCallback` returns the items that contains the
+  /// trimmed query.
+  ///
+  /// ```dart
+  /// FlutterDropdownMenu<Text>(
+  ///   filterCallback: (List<DropdownMenuEntry<Text>> entries, String filter) {
+  ///     final trimmedFilter = filter.trim().toLowerCase();
+  ///       if (trimmedFilter.isEmpty) {
+  ///         return entries;
+  ///       }
+  ///
+  ///       return entries
+  ///           .where((DropdownMenuEntry<Text> entry) =>
+  ///                 entry.label.toLowerCase().contains(trimmedFilter),
+  ///           )
+  ///           .toList();
+  ///   },
+  ///   dropdownMenuEntries: const <DropdownMenuEntry<Text>>[],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null. If this is null and [FlutterDropdownMenu.enableFilter]
+  /// is true, the default function will return the index of the first matching
+  /// result which contains the contents of the text input field.
+  final FilterCallback<T>? filterCallback;
+
   /// When  [DropdownMenu.enableSearch] is true, this callback is used to compute
   /// the index of the search result to be highlighted.
   ///
@@ -413,7 +452,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
-  late bool _enableFilter;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
@@ -427,7 +465,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   void initState() {
     super.initState();
-    _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
@@ -609,7 +646,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (!_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
-      _enableFilter = false;
       currentHighlight ??= 0;
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
       while (!filteredEntries[currentHighlight!].enabled) {
@@ -628,7 +664,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (!_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
-      _enableFilter = false;
       currentHighlight ??= -1;
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
       while (!filteredEntries[currentHighlight!].enabled) {
@@ -648,7 +683,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller.close();
     } else {  // close to open
       if (_textEditingController.text.isNotEmpty) {
-        _enableFilter = false;
       }
       controller.open();
     }
@@ -662,8 +696,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
-    if (_enableFilter) {
-      filteredEntries = filter(widget.dropdownMenuEntries, _textEditingController);
+    if (widget.enableFilter) {
+      if (widget.filterCallback != null) {
+        filteredEntries = widget.filterCallback!.call(filteredEntries, _textEditingController.text);
+      } else {
+        filteredEntries = filter(widget.dropdownMenuEntries, _textEditingController);
+      }
     }
 
     if (widget.enableSearch) {
@@ -759,7 +797,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               controller.open();
               setState(() {
                 filteredEntries = widget.dropdownMenuEntries;
-                _enableFilter = widget.enableFilter;
               });
             },
             inputFormatters: widget.inputFormatters,
