@@ -432,7 +432,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]));
   });
 
   testWidgets('Tab color - match', (WidgetTester tester) async {
@@ -442,7 +442,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(color: const Color(0xff2196f3), child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.white));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.white));
   });
 
   testWidgets('Tab color - transparency', (WidgetTester tester) async {
@@ -452,7 +452,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(type: MaterialType.transparency, child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]));
   });
 
   testWidgets('TabBar default selected/unselected label style (primary)', (WidgetTester tester) async {
@@ -595,7 +595,7 @@ void main() {
       paints
         // Divider
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
         )
         // Tab indicator
         ..line(
@@ -629,7 +629,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -639,7 +639,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
   });
@@ -666,7 +666,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -676,7 +676,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
   });
 
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
@@ -2557,6 +2557,66 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
+  testWidgets('Material3 - Indicator stretch animation', (WidgetTester tester) async {
+    const double indicatorWidth = 50.0;
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth));
+    });
+
+    final TabController controller = _tabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+    final double tabWidth = tabBarBox.size.width / tabs.length;
+
+    void expectIndicatorAttrs(RenderBox tabBarBox, {required double offset, required double width}) {
+      const double indicatorWeight = 3.0;
+      final double centerX = offset * tabWidth + tabWidth / 2;
+      final RRect rrect = RRect.fromLTRBAndCorners(
+        centerX - width / 2,
+        tabBarBox.size.height - indicatorWeight,
+        centerX + width / 2,
+        tabBarBox.size.height,
+        topLeft: const Radius.circular(3.0),
+        topRight: const Radius.circular(3.0),
+      );
+
+      expect(tabBarBox, paints..rrect(rrect: rrect));
+    }
+
+    // Idle at tab 0.
+    expectIndicatorAttrs(tabBarBox, offset: 0.0, width: indicatorWidth);
+
+    // Peak stretch at 20%.
+    controller.offset = 0.2;
+    await tester.pump();
+    expectIndicatorAttrs(tabBarBox, offset: 0.2, width: indicatorWidth * 2);
+
+    // Idle at tab 1.
+    controller.offset = 1;
+    await tester.pump();
+    expectIndicatorAttrs(tabBarBox, offset: 1, width: indicatorWidth);
+  });
+
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
     const Color indicatorColor = Color(0xFF00FF00);
     const double indicatorWeight = 8.0;
@@ -4311,7 +4371,7 @@ void main() {
     await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT'));
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox, paints..line(
-      color: material3 ? theme.colorScheme.surfaceVariant : Colors.white,
+      color: material3 ? theme.colorScheme.outlineVariant : Colors.white,
     ));
   });
 
@@ -4323,7 +4383,7 @@ void main() {
      await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT', automaticIndicatorColorAdjustment: false));
      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
      expect(tabBarBox, paints..line(
-       color: material3 ? theme.colorScheme.surfaceVariant : const Color(0xff2196f3),
+       color: material3 ? theme.colorScheme.outlineVariant : const Color(0xff2196f3),
      ));
   });
 
@@ -6135,14 +6195,14 @@ void main() {
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
         ))
     );
     expect(
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ))
     );
 
@@ -6153,7 +6213,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
         ),
     );
 
@@ -6164,7 +6224,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
   });
@@ -6184,7 +6244,7 @@ void main() {
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ))
     );
 
@@ -6195,7 +6255,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
 
@@ -6210,7 +6270,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
   });

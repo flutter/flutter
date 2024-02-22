@@ -64,7 +64,12 @@ abstract class AssetBundleFactory {
     required FileSystem fileSystem,
     required Platform platform,
     bool splitDeferredAssets = false,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
+  }) => _ManifestAssetBundleFactory(
+    logger: logger,
+    fileSystem: fileSystem,
+    platform: platform,
+    splitDeferredAssets: splitDeferredAssets,
+  );
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -138,7 +143,13 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   final bool _splitDeferredAssets;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, splitDeferredAssets: _splitDeferredAssets);
+  AssetBundle createBundle() => ManifestAssetBundle(
+    logger: _logger,
+    fileSystem: _fileSystem,
+    platform: _platform,
+    flutterRoot: Cache.flutterRoot!,
+    splitDeferredAssets: _splitDeferredAssets,
+  );
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -149,10 +160,12 @@ class ManifestAssetBundle implements AssetBundle {
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
+    required String flutterRoot,
     bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
@@ -160,6 +173,7 @@ class ManifestAssetBundle implements AssetBundle {
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -584,7 +598,7 @@ class ManifestAssetBundle implements AssetBundle {
         final Uri entryUri = _fileSystem.path.toUri(asset);
         result.add(_Asset(
           baseDir: _fileSystem.path.join(
-            Cache.flutterRoot!,
+            _flutterRoot,
             'bin', 'cache', 'artifacts', 'material_fonts',
           ),
           relativeUri: Uri(path: entryUri.pathSegments.last),
@@ -600,8 +614,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   List<_Asset> _getMaterialShaders() {
     final String shaderPath = _fileSystem.path.join(
-      Cache.flutterRoot!,
-      'packages', 'flutter', 'lib', 'src', 'material', 'shaders',
+      _flutterRoot, 'packages', 'flutter', 'lib', 'src', 'material', 'shaders',
     );
     // This file will exist in a real invocation unless the git checkout is
     // corrupted somehow, but unit tests generally don't create this file
@@ -936,7 +949,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri assetUri, {
     String? packageName,
     Package? attributedPackage,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final String directoryPath;
     try {
@@ -945,8 +958,8 @@ class ManifestAssetBundle implements AssetBundle {
     } on UnsupportedError catch (e) {
       throwToolExit(
         'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this is valid URI that points to a directory '
-        'that is available on the local file system.\nError details:\n$e');
+        'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
+        'Error details:\n$e');
     }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
@@ -987,7 +1000,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -1103,7 +1116,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1142,7 +1155,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
-    List<String>? flavors,
+    Set<String>? flavors,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1179,8 +1192,8 @@ class _Asset {
     required this.entryUri,
     required this.package,
     this.kind = AssetKind.regular,
-    List<String>? flavors,
-  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>[];
+    Set<String>? flavors,
+  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>{};
 
   final String baseDir;
 
@@ -1199,7 +1212,7 @@ class _Asset {
 
   final AssetKind kind;
 
-  final List<String> flavors;
+  final Set<String> flavors;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
@@ -1283,17 +1296,25 @@ class _AssetDirectoryCache {
   final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
   List<String> variantsFor(String assetPath) {
-    final String directory = _fileSystem.path.dirname(assetPath);
+    final String directoryName = _fileSystem.path.dirname(assetPath);
 
-    if (!_fileSystem.directory(directory).existsSync()) {
-      return const <String>[];
+    try {
+      if (!_fileSystem.directory(directoryName).existsSync()) {
+        return const <String>[];
+      }
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to check the existence of asset file "$assetPath". '
+        'Ensure that the asset file is declared as a valid local file system path.\n'
+        'Details: $e',
+      );
     }
 
     if (_cache.containsKey(assetPath)) {
       return _cache[assetPath]!;
     }
-    if (!_variantsPerFolder.containsKey(directory)) {
-      _variantsPerFolder[directory] = _fileSystem.directory(directory)
+    if (!_variantsPerFolder.containsKey(directoryName)) {
+      _variantsPerFolder[directoryName] = _fileSystem.directory(directoryName)
         .listSync()
         .whereType<Directory>()
         .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
@@ -1302,7 +1323,7 @@ class _AssetDirectoryCache {
         .toList();
     }
     final File assetFile = _fileSystem.file(assetPath);
-    final List<File> potentialVariants = _variantsPerFolder[directory]!;
+    final List<File> potentialVariants = _variantsPerFolder[directoryName]!;
     final String basename = assetFile.basename;
     return _cache[assetPath] = <String>[
       // It's possible that the user specifies only explicit variants (e.g. .../1x/asset.png),

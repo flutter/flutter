@@ -18,8 +18,11 @@ import 'viewport_offset.dart';
 
 /// Called to get the item extent by the index of item.
 ///
+/// Should return null if asked to build an item extent with a greater index than
+/// exists.
+///
 /// Used by [ListView.itemExtentBuilder] and [SliverVariedExtentList.itemExtentBuilder].
-typedef ItemExtentBuilder = double Function(int index, SliverLayoutDimensions dimensions);
+typedef ItemExtentBuilder = double? Function(int index, SliverLayoutDimensions dimensions);
 
 /// Relates the dimensions of the [RenderSliver] during layout.
 ///
@@ -1729,22 +1732,11 @@ abstract class RenderSliver extends RenderObject {
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
 mixin RenderSliverHelpers implements RenderSliver {
   bool _getRightWayUp(SliverConstraints constraints) {
-    bool rightWayUp;
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        rightWayUp = false;
-      case AxisDirection.down:
-      case AxisDirection.right:
-        rightWayUp = true;
-    }
-    switch (constraints.growthDirection) {
-      case GrowthDirection.forward:
-        break;
-      case GrowthDirection.reverse:
-        rightWayUp = !rightWayUp;
-    }
-    return rightWayUp;
+    final bool reversed = axisDirectionIsReversed(constraints.axisDirection);
+    return switch (constraints.growthDirection) {
+      GrowthDirection.forward => !reversed,
+      GrowthDirection.reverse => reversed,
+    };
   }
 
   /// Utility function for [hitTestChildren] for use when the children are

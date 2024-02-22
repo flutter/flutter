@@ -712,13 +712,11 @@ class TextInputConfiguration {
 }
 
 TextAffinity? _toTextAffinity(String? affinity) {
-  switch (affinity) {
-    case 'TextAffinity.downstream':
-      return TextAffinity.downstream;
-    case 'TextAffinity.upstream':
-      return TextAffinity.upstream;
-  }
-  return null;
+  return switch (affinity) {
+    'TextAffinity.downstream' => TextAffinity.downstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
+    _ => null,
+  };
 }
 
 /// The state of a "floating cursor" drag on an iOS soft keyboard.
@@ -1515,47 +1513,31 @@ class TextInputConnection {
 }
 
 TextInputAction _toTextInputAction(String action) {
-  switch (action) {
-    case 'TextInputAction.none':
-      return TextInputAction.none;
-    case 'TextInputAction.unspecified':
-      return TextInputAction.unspecified;
-    case 'TextInputAction.go':
-      return TextInputAction.go;
-    case 'TextInputAction.search':
-      return TextInputAction.search;
-    case 'TextInputAction.send':
-      return TextInputAction.send;
-    case 'TextInputAction.next':
-      return TextInputAction.next;
-    case 'TextInputAction.previous':
-      return TextInputAction.previous;
-    case 'TextInputAction.continueAction':
-      return TextInputAction.continueAction;
-    case 'TextInputAction.join':
-      return TextInputAction.join;
-    case 'TextInputAction.route':
-      return TextInputAction.route;
-    case 'TextInputAction.emergencyCall':
-      return TextInputAction.emergencyCall;
-    case 'TextInputAction.done':
-      return TextInputAction.done;
-    case 'TextInputAction.newline':
-      return TextInputAction.newline;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
+  return switch (action) {
+    'TextInputAction.none'           => TextInputAction.none,
+    'TextInputAction.unspecified'    => TextInputAction.unspecified,
+    'TextInputAction.go'             => TextInputAction.go,
+    'TextInputAction.search'         => TextInputAction.search,
+    'TextInputAction.send'           => TextInputAction.send,
+    'TextInputAction.next'           => TextInputAction.next,
+    'TextInputAction.previous'       => TextInputAction.previous,
+    'TextInputAction.continueAction' => TextInputAction.continueAction,
+    'TextInputAction.join'           => TextInputAction.join,
+    'TextInputAction.route'          => TextInputAction.route,
+    'TextInputAction.emergencyCall'  => TextInputAction.emergencyCall,
+    'TextInputAction.done'           => TextInputAction.done,
+    'TextInputAction.newline'        => TextInputAction.newline,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]),
+  };
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
-  switch (state) {
-    case 'FloatingCursorDragState.start':
-      return FloatingCursorDragState.Start;
-    case 'FloatingCursorDragState.update':
-      return FloatingCursorDragState.Update;
-    case 'FloatingCursorDragState.end':
-      return FloatingCursorDragState.End;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
+  return switch (state) {
+    'FloatingCursorDragState.start'  => FloatingCursorDragState.Start,
+    'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
+    'FloatingCursorDragState.end'    => FloatingCursorDragState.End,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]),
+  };
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {

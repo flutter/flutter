@@ -1244,12 +1244,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   bool _canShowHighlight = false;
   void _updateHighlightMode(FocusHighlightMode mode) {
     _mayTriggerCallback(task: () {
-      switch (FocusManager.instance.highlightMode) {
-        case FocusHighlightMode.touch:
-          _canShowHighlight = false;
-        case FocusHighlightMode.traditional:
-          _canShowHighlight = true;
-      }
+      _canShowHighlight = switch (FocusManager.instance.highlightMode) {
+        FocusHighlightMode.touch       => false,
+        FocusHighlightMode.traditional => true,
+      };
     });
   }
 
@@ -1303,13 +1301,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-      switch (mode) {
-        case NavigationMode.traditional:
-          return target.enabled;
-        case NavigationMode.directional:
-          return true;
-      }
+      return switch (MediaQuery.maybeNavigationModeOf(context)) {
+        NavigationMode.traditional || null => target.enabled,
+        NavigationMode.directional => true,
+      };
     }
 
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
@@ -1344,13 +1339,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return widget.enabled;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (MediaQuery.maybeNavigationModeOf(context)) {
+      NavigationMode.traditional || null => widget.enabled,
+      NavigationMode.directional => true,
+    };
   }
 
   // This global key is needed to keep only the necessary widgets in the tree

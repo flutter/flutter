@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -25,9 +24,17 @@ import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
-import 'web_constants.dart';
 
 export 'compiler_config.dart';
+
+/// Whether the application has web plugins.
+const String kHasWebPlugins = 'HasWebPlugins';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// The caching strategy to use for service worker generation.
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 class WebBuilder {
   WebBuilder({
@@ -59,23 +66,14 @@ class WebBuilder {
     String target,
     BuildInfo buildInfo,
     ServiceWorkerStrategy serviceWorkerStrategy, {
-    required WebCompilerConfig compilerConfig,
+    required List<WebCompilerConfig> compilerConfigs,
     String? baseHref,
     String? outputDirectoryPath,
   }) async {
-    if (compilerConfig.isWasm) {
-      globals.logger.printBox(
-        title: 'Experimental feature',
-        '''
-  WebAssembly compilation is experimental.
-  $kWasmMoreInfo''',
-      );
-    }
-
     final bool hasWebPlugins =
         (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
-        ? _fileSystem.directory(getWebBuildDirectory(compilerConfig.isWasm))
+        ? _fileSystem.directory(getWebBuildDirectory())
         : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
@@ -91,7 +89,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
+          globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
           Environment(
             projectDir: _fileSystem.currentDirectory,
             outputDir: outputDirectory,
@@ -101,7 +99,6 @@ class WebBuilder {
               kHasWebPlugins: hasWebPlugins.toString(),
               if (baseHref != null) kBaseHref: baseHref,
               kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
-              ...compilerConfig.toBuildSystemEnvironment(),
               ...buildInfo.toBuildSystemEnvironment(),
             },
             artifacts: globals.artifacts!,
@@ -134,8 +131,7 @@ class WebBuilder {
     }
 
     final String buildSettingsString = _buildEventAnalyticsSettings(
-      config: compilerConfig,
-      buildInfo: buildInfo,
+      configs: compilerConfigs,
     );
 
     BuildEvent(
@@ -151,14 +147,15 @@ class WebBuilder {
     ));
 
     final Duration elapsedDuration = sw.elapsed;
+    final String variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
     _flutterUsage.sendTiming(
       'build',
-      compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      variableName,
       elapsedDuration,
     );
     _analytics.send(Event.timing(
       workflow: 'build',
-      variableName: compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      variableName: variableName,
       elapsedMilliseconds: elapsedDuration.inMilliseconds,
     ));
   }
@@ -210,6 +207,16 @@ enum WebRendererMode implements CliEnum {
             'FLUTTER_WEB_USE_SKWASM=true',
           ]
       };
+
+  List<String> updateDartDefines(List<String> inputDefines) {
+    final Set<String> dartDefinesSet = inputDefines.toSet();
+    if (!inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    }
+    dartDefinesSet.addAll(dartDefines);
+    return dartDefinesSet.toList();
+  }
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
@@ -245,13 +252,18 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
 };
 
 String _buildEventAnalyticsSettings({
-  required WebCompilerConfig config,
-  required BuildInfo buildInfo,
+  required List<WebCompilerConfig> configs,
 }) {
-  final Map<String, Object> values = <String, Object>{
-    ...config.buildEventAnalyticsValues,
-    'web-renderer': buildInfo.webRenderer.cliName,
-  };
+  final Map<String, Object> values = <String, Object>{};
+  final List<String> renderers = <String>[];
+  final List<String> targets = <String>[];
+  for (final WebCompilerConfig config in configs) {
+    values.addAll(config.buildEventAnalyticsValues);
+    renderers.add(config.renderer.name);
+    targets.add(config.compileTarget.name);
+  }
+  values['web-renderer'] = renderers.join(',');
+  values['web-target'] = targets.join(',');
 
   final List<String> sortedList = values.entries
       .map((MapEntry<String, Object> e) => '${e.key}: ${e.value};')

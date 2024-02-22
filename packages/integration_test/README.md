@@ -311,7 +311,8 @@ Execute this script at the root of your Flutter app:
 ```sh
 output="../build/ios_integ"
 product="build/ios_integ/Build/Products"
-dev_target="14.3"
+
+flutter clean
 
 # Pass --simulator if building for the simulator.
 flutter build ios integration_test/foo_test.dart --release
@@ -327,7 +328,7 @@ xcodebuild build-for-testing \
 popd
 
 pushd $product
-zip -r "ios_tests.zip" "Release-iphoneos" "Runner_iphoneos$dev_target-arm64.xctestrun"
+find . -name "Runner_*.xctestrun" -exec zip -r --must-match "ios_tests.zip" "Release-iphoneos" {} +
 popd
 ```
 
@@ -335,7 +336,7 @@ You can verify locally that your tests are successful by running the following c
 
 ```sh
 xcodebuild test-without-building \
-  -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" \
+  -xctestrun "build/ios_integ/Build/Products/Runner_*.xctestrun" \
   -destination id=<YOUR_DEVICE_ID>
 ```
 
