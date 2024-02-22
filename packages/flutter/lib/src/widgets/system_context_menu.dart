@@ -2,28 +2,43 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'context_menu_controller.dart';
+import 'editable_text.dart';
 import 'framework.dart';
-import 'placeholder.dart';
 
 /// Displays the system context menu on top of the Flutter view.
 ///
-/// Currently, only supports iOS and builds nothing on other platforms.
+/// Currently, only supports iOS and displays nothing on other platforms.
 class SystemContextMenu extends StatefulWidget {
-  SystemContextMenu({
+  /// Creates an instance of [SystemContextMenu] that points to the given
+  /// [anchor].
+  const SystemContextMenu._({
     super.key,
-    required RenderBox renderBox,
-    required double startGlyphHeight,
-    required double endGlyphHeight,
-    required List<TextSelectionPoint> selectionEndpoints,
-  }) : _selectionRect = _getSelectionRect(
-         renderBox,
-         startGlyphHeight,
-         endGlyphHeight,
-         selectionEndpoints,
-       );
+    required this.anchor,
+  });
 
-    final Rect _selectionRect;
+  /// Creates an instance of [SystemContextMenu] for the field indicated by the
+  /// given [EditableTextState].
+  factory SystemContextMenu.editableText({
+    Key? key,
+    required EditableTextState editableTextState,
+  }) {
+    final (
+      startGlyphHeight: double startGlyphHeight,
+      endGlyphHeight: double endGlyphHeight,
+    ) = editableTextState.getGlyphHeights();
+    return SystemContextMenu._(
+      key: key,
+      anchor: _getSelectionRect(
+        editableTextState.renderEditable,
+        startGlyphHeight,
+        endGlyphHeight,
+        editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
+      ),
+    );
+  }
+
+  /// The [Rect] that the context menu should point to.
+  final Rect anchor;
 
   // TODO(justinmc): Deduplicate logic with TextSelectionToolbarAnchors.fromSelection?
   static Rect _getSelectionRect(
@@ -65,17 +80,14 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void initState() {
     super.initState();
-    ContextMenuController.removeAny();
-
-    ContextMenu.showSystemContextMenu(widget._selectionRect);
+    ContextMenu.showSystemContextMenu(widget.anchor);
   }
 
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('justin didupdate ${oldWidget._selectionRect}');
-    if (widget._selectionRect != oldWidget._selectionRect) {
-      ContextMenu.showSystemContextMenu(widget._selectionRect);
+    if (widget.anchor != oldWidget.anchor) {
+      ContextMenu.showSystemContextMenu(widget.anchor);
     }
   }
 
@@ -89,4 +101,3 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     return const SizedBox.shrink();
   }
 }
-

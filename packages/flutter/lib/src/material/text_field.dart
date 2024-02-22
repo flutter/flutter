@@ -1646,7 +1646,7 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
 class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of [AdaptiveAndSystemTextSelectionToolbar] for the
   /// given [EditableTextState].
-  const AdaptiveAndSystemTextSelectionToolbar({
+  const AdaptiveAndSystemTextSelectionToolbar.editableText({
     super.key,
     this.buttonItems,
     required this.editableTextState,
@@ -1667,16 +1667,8 @@ class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
-      final (
-        startGlyphHeight: double startGlyphHeight,
-        endGlyphHeight: double endGlyphHeight,
-      ) = editableTextState.getGlyphHeights();
-      return SystemContextMenu(
-        renderBox: editableTextState.renderEditable,
-        // TODO(justinmc): Why not do internally to SystemContextMenu with EditableTextState?
-        startGlyphHeight: startGlyphHeight,
-        endGlyphHeight: endGlyphHeight,
-        selectionEndpoints: editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
+      return SystemContextMenu.editableText(
+        editableTextState: editableTextState,
       );
     }
     if (buttonItems != null) {
