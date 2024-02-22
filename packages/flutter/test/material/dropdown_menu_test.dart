@@ -1130,6 +1130,47 @@ void main() {
     }
   });
 
+  testWidgets('Enable filtering with custom filter callback that filter text case sensitive', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+            return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+          },
+          dropdownMenuEntries: menuChildren,
+          controller: controller,
+        ),
+      ),
+    ));
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField).first, 'item');
+    expect(controller.text, 'item');
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label).hitTestable(), findsNothing);
+    }
+
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    expect(controller.text, 'Item');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(MenuItemButton, 'Item 0').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 2').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 3').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 4').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 5').hitTestable(), findsOneWidget);
+  });
+
   testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     final TextEditingController controller = TextEditingController();
