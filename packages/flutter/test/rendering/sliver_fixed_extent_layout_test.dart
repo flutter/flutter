@@ -346,6 +346,29 @@ void main() {
     );
     expect(maxScrollOffset, 90.0);
   });
+
+  test('RenderSliverMultiBoxAdaptor has calculate leading and trailing garbage', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+    ];
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+      children: children,
+    );
+    final RenderSliverFixedExtentList sliver = childManager.createRenderSliverFixedExtentList(30.0);
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 100,
+      children: <RenderSliver>[ sliver ],
+    );
+    layout(root);
+    // There are 3 children. If I want to garbage collect based on keeping only
+    // the middle child, then I should get 1 for leading and 1 for trailing.
+    expect(sliver.calculateLeadingGarbage(firstIndex: 1), 1);
+    expect(sliver.calculateTrailingGarbage(lastIndex: 1), 1);
+  });
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
