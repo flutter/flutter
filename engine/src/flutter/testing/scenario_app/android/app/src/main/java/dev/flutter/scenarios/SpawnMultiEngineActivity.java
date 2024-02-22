@@ -16,14 +16,16 @@ public class SpawnMultiEngineActivity extends TestActivity {
   @NonNull
   public FlutterEngine provideFlutterEngine(@NonNull Context context) {
     FlutterEngineGroup engineGroup = new FlutterEngineGroup(context);
-    FlutterEngine firstEngine = engineGroup.createAndRunDefaultEngine(context);
+    FlutterEngineGroup.Options options =
+        new FlutterEngineGroup.Options(context).setAutomaticallyRegisterPlugins(false);
+    FlutterEngine firstEngine = engineGroup.createAndRunEngine(options);
 
-    FlutterEngine secondEngine = engineGroup.createAndRunDefaultEngine(context);
+    FlutterEngine secondEngine = engineGroup.createAndRunEngine(options);
 
     // Check that a new engine can be spawned from the group even if the group's
     // original engine has been destroyed.
     firstEngine.destroy();
-    FlutterEngine thirdEngine = engineGroup.createAndRunDefaultEngine(context);
+    FlutterEngine thirdEngine = engineGroup.createAndRunEngine(options);
 
     return thirdEngine;
   }
