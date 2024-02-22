@@ -16,10 +16,15 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "profile",
-                "--android"
+                "--android",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_profile",
             "ninja": {
@@ -45,11 +50,16 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--android",
-                "--android-cpu=arm64"
+                "--android-cpu=arm64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_profile_arm64",
             "ninja": {
@@ -75,11 +85,16 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "profile",
                 "--android",
-                "--android-cpu=x64"
+                "--android-cpu=x64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_profile_x64",
             "ninja": {
@@ -105,10 +120,15 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
-                "--android"
+                "--android",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_release",
             "ninja": {
@@ -134,11 +154,16 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--android",
-                "--android-cpu=arm64"
+                "--android-cpu=arm64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_release_arm64",
             "ninja": {
@@ -164,11 +189,16 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "release",
                 "--android",
-                "--android-cpu=x64"
+                "--android-cpu=x64",
+                "--no-goma",
+                "--rbe"
             ],
             "name": "android_release_x64",
             "ninja": {
