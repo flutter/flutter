@@ -417,17 +417,16 @@ class CanvasKitRenderer implements Renderer {
         "Unable to render to a view which hasn't been registered");
     final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
     final RenderQueue renderQueue = rasterizer.queue;
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
       final Completer<void> completer = Completer<void>();
-      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
+      renderQueue.next = (scene: scene, completer: completer);
       return completer.future;
     }
     final Completer<void> completer = Completer<void>();
-    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
+    renderQueue.current = (scene: scene, completer: completer);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;
   }
@@ -436,7 +435,7 @@ class CanvasKitRenderer implements Renderer {
     final RenderQueue renderQueue = rasterizer.queue;
     final RenderRequest current = renderQueue.current!;
     try {
-      await _renderScene(current.scene, rasterizer, current.recorder);
+      await _renderScene(current.scene, rasterizer);
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
@@ -450,7 +449,7 @@ class CanvasKitRenderer implements Renderer {
     }
   }
 
-  Future<void> _renderScene(ui.Scene scene, ViewRasterizer rasterizer, FrameTimingRecorder? recorder) async {
+  Future<void> _renderScene(ui.Scene scene, ViewRasterizer rasterizer) async {
     // "Build finish" and "raster start" happen back-to-back because we
     // render on the same thread, so there's no overhead from hopping to
     // another thread.
@@ -458,12 +457,11 @@ class CanvasKitRenderer implements Renderer {
     // CanvasKit works differently from the HTML renderer in that in HTML
     // we update the DOM in SceneBuilder.build, which is these function calls
     // here are CanvasKit-only.
-    recorder?.recordBuildFinish();
-    recorder?.recordRasterStart();
+    frameTimingsOnBuildFinish();
+    frameTimingsOnRasterStart();
 
     await rasterizer.draw((scene as LayerScene).layerTree);
-    recorder?.recordRasterFinish();
-    recorder?.submitTimings();
+    frameTimingsOnRasterFinish();
   }
 
   // Map from view id to the associated Rasterizer for that view.

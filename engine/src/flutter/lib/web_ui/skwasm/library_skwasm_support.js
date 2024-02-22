@@ -27,18 +27,11 @@ mergeInto(LibraryManager.library, {
           return;
         }
         switch (skwasmMessage) {
-          case 'renderPictures':
-            _surface_renderPicturesOnWorker(data.surface, data.pictures, data.pictureCount, data.callbackId, performance.now());
+          case 'renderPicture':
+            _surface_renderPictureOnWorker(data.surface, data.picture, data.callbackId);
             return;
           case 'onRenderComplete':
-            _surface_onRenderComplete(
-              data.surface,
-              data.callbackId, {
-                "imageBitmaps": data.imageBitmaps,
-                "rasterStartMilliseconds": data.rasterStart,
-                "rasterEndMilliseconds": data.rasterEnd,
-              },
-            );
+            _surface_onRenderComplete(data.surface, data.callbackId, data.imageBitmap);
             return;
           case 'setAssociatedObject':
             associatedObjectsMap.set(data.pointer, data.object);
@@ -61,12 +54,11 @@ mergeInto(LibraryManager.library, {
         PThread.pthreads[threadId].addEventListener("message", eventListener);
       }
     };
-    _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
+    _skwasm_dispatchRenderPicture = function(threadId, surfaceHandle, pictureHandle, callbackId) {
       PThread.pthreads[threadId].postMessage({
-        skwasmMessage: 'renderPictures',
+        skwasmMessage: 'renderPicture',
         surface: surfaceHandle,
-        pictures,
-        pictureCount,
+        picture: pictureHandle,
         callbackId,
       });
     };
@@ -93,23 +85,15 @@ mergeInto(LibraryManager.library, {
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = function(contextHandle, width, height, imagePromises) {
-      if (!imagePromises) imagePromises = Array();
+    _skwasm_captureImageBitmap = async function(surfaceHandle, contextHandle, callbackId, width, height) {
       const canvas = handleToCanvasMap.get(contextHandle);
-      imagePromises.push(createImageBitmap(canvas, 0, 0, width, height));
-      return imagePromises;
-    };
-    _skwasm_resolveAndPostImages = async function(surfaceHandle, imagePromises, rasterStart, callbackId) {
-      const imageBitmaps = imagePromises ? await Promise.all(imagePromises) : [];
-      const rasterEnd = performance.now();
+      const imageBitmap = await createImageBitmap(canvas, 0, 0, width, height);
       postMessage({
         skwasmMessage: 'onRenderComplete',
         surface: surfaceHandle,
         callbackId,
-        imageBitmaps,
-        rasterStart,
-        rasterEnd,
-      }, [...imageBitmaps]);
+        imageBitmap,
+      }, [imageBitmap]);
     };
     _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
@@ -141,16 +125,14 @@ mergeInto(LibraryManager.library, {
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
   skwasm_registerMessageListener: function() {},
   skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
-  skwasm_dispatchRenderPictures: function() {},
-  skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchRenderPicture: function() {},
+  skwasm_dispatchRenderPicture__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},
   skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
   skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
-  skwasm_resolveAndPostImages: function () {},
-  skwasm_resolveAndPostImages__deps: ['$skwasm_support_setup'],
   skwasm_createGlTextureFromTextureSource: function () {},
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
 });

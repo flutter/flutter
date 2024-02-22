@@ -35,10 +35,10 @@ external void surfaceSetCallbackHandler(
   isLeaf: true)
 external void surfaceDestroy(SurfaceHandle surface);
 
-@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int)>(
-  symbol: 'surface_renderPictures',
+@Native<Int32 Function(SurfaceHandle, PictureHandle)>(
+  symbol: 'surface_renderPicture',
   isLeaf: true)
-external CallbackId surfaceRenderPictures(SurfaceHandle surface, Pointer<PictureHandle> picture, int count);
+external CallbackId surfaceRenderPicture(SurfaceHandle surface, PictureHandle picture);
 
 @Native<Int32 Function(
   SurfaceHandle,
