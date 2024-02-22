@@ -150,6 +150,10 @@ const Feature flutterCustomDevicesFeature = Feature(
 const Feature flutterWebWasm = Feature(
   name: 'WebAssembly compilation from flutter build web',
   environmentOverride: 'FLUTTER_WEB_WASM',
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
