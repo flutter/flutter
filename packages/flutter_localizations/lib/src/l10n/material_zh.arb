@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "查询",
   "searchWebButtonLabel": "在网络上搜索",
   "shareButtonLabel": "分享…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

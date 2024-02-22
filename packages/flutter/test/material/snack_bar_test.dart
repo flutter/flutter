@@ -2825,6 +2825,7 @@ void main() {
   testWidgets('Material3 - SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -2908,6 +2909,7 @@ void main() {
   testWidgets('Material2 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2941,6 +2943,7 @@ void main() {
   testWidgets('Material3 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -3238,6 +3241,40 @@ void main() {
         find.byType(MaterialApp),
         matchesGoldenFile(
             'snack_bar.goldenTest.floatingWithActionWithIcon.png'));
+  });
+
+  testWidgets('SnackBar has tooltip for Close Button', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/143793
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+      home: const Scaffold(
+        bottomSheet: SizedBox(
+          width: 200,
+          height: 50,
+          child: ColoredBox(
+            color: Colors.pink,
+          ),
+        ),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(
+      SnackBar(
+        content: const Text('Snackbar with close button'),
+        duration: const Duration(days: 365),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+      ),
+    );
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
+
+    expect(
+      find.byTooltip(MaterialLocalizations.of(scaffoldMessengerState.context).closeButtonLabel),
+      findsOneWidget
+    );
   });
 
   testWidgets('Material2 - Fixed width snackbar can display optional icon', (WidgetTester tester) async {

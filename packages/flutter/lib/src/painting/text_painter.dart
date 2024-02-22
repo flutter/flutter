@@ -24,6 +24,7 @@ import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_scaler.dart';
 import 'text_span.dart';
+import 'text_style.dart';
 
 export 'dart:ui' show LineMetrics;
 export 'package:flutter/services.dart' show TextRange, TextSelection;
@@ -682,6 +683,12 @@ class TextPainter {
     }
   }
 
+  @Deprecated(  // flutter_ignore: deprecation_syntax (see analyze.dart)
+    'The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.'
+  )
+  /// Migration only flag, do not use.
+  static bool disableStrutHalfLeading = true;
+
   // Whether textWidthBasis has changed after the most recent `layout` call.
   bool _debugNeedsRelayout = true;
   // The result of the most recent `layout` call.
@@ -1014,28 +1021,37 @@ class TextPainter {
   }
   List<PlaceholderDimensions>? _placeholderDimensions;
 
-  ui.ParagraphStyle _createParagraphStyle([ TextAlign? defaultTextAlign ]) {
+  ui.ParagraphStyle _createParagraphStyle([ TextAlign? textAlignOverride ]) {
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
-    return _text!.style?.getParagraphStyle(
-      textAlign: defaultTextAlign ?? textAlign,
+    final TextStyle baseStyle = _text?.style ?? const TextStyle();
+    final StrutStyle? strutStyle = _strutStyle;
+
+    final bool applyMigration = !kIsWeb && TextPainter.disableStrutHalfLeading
+                             && strutStyle != null && (strutStyle.forceStrutHeight ?? false)
+                             && strutStyle.leadingDistribution == TextLeadingDistribution.even;
+    final StrutStyle? strutStyleForMigration = !applyMigration
+      ? strutStyle
+      : StrutStyle(
+        fontFamily: strutStyle.fontFamily,
+        fontFamilyFallback: strutStyle.fontFamilyFallback,
+        fontSize: strutStyle.fontSize,
+        height: strutStyle.height,
+        leadingDistribution: TextLeadingDistribution.proportional,
+        leading: strutStyle.leading,
+        fontWeight: strutStyle.fontWeight,
+        fontStyle: strutStyle.fontStyle,
+        forceStrutHeight: strutStyle.forceStrutHeight,
+      );
+
+    return baseStyle.getParagraphStyle(
+      textAlign: textAlignOverride ?? textAlign,
       textDirection: textDirection,
       textScaler: textScaler,
       maxLines: _maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
-      strutStyle: _strutStyle,
-    ) ?? ui.ParagraphStyle(
-      textAlign: defaultTextAlign ?? textAlign,
-      textDirection: textDirection,
-      // Use the default font size to multiply by as RichText does not
-      // perform inheriting [TextStyle]s and would otherwise
-      // fail to apply textScaler.
-      fontSize: textScaler.scale(kDefaultFontSize),
-      maxLines: maxLines,
-      textHeightBehavior: _textHeightBehavior,
-      ellipsis: ellipsis,
-      locale: locale,
+      strutStyle: strutStyleForMigration,
     );
   }
 
