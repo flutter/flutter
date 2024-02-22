@@ -1,7 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -85,8 +84,13 @@ void testMain() {
 
       focusableViewElement1.focus();
       focusableViewElement2.focus();
+      // The statements simulate the user pressing shift + tab in the keyboard.
+      // Synthetic keyboard events do not trigger focus changes.
+      domDocument.body!.pressTabKey(shift: true);
+      focusableViewElement1.focus();
+      domDocument.body!.releaseTabKey();
 
-      expect(viewFocusEvents, hasLength(2));
+      expect(viewFocusEvents, hasLength(3));
 
       expect(viewFocusEvents[0].viewId, view1.viewId);
       expect(viewFocusEvents[0].state, ui.ViewFocusState.focused);
@@ -95,6 +99,10 @@ void testMain() {
       expect(viewFocusEvents[1].viewId, view2.viewId);
       expect(viewFocusEvents[1].state, ui.ViewFocusState.focused);
       expect(viewFocusEvents[1].direction, ui.ViewFocusDirection.forward);
+
+      expect(viewFocusEvents[2].viewId, view1.viewId);
+      expect(viewFocusEvents[2].state, ui.ViewFocusState.focused);
+      expect(viewFocusEvents[2].direction, ui.ViewFocusDirection.backward);
     });
 
     test('fires a focus event - focus transitions on and off views', () async {
@@ -136,4 +144,24 @@ void testMain() {
       expect(viewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
     });
   });
+}
+
+extension on DomElement {
+  void pressTabKey({bool shift = false}) {
+    dispatchKeyboardEvent(type: 'keydown', key: 'Tab', shiftKey: shift);
+  }
+
+  void releaseTabKey({bool shift = false}) {
+    dispatchKeyboardEvent(type: 'keyup', key: 'Tab', shiftKey: shift);
+  }
+
+  void dispatchKeyboardEvent({
+    required String type,
+    required String key,
+    bool shiftKey = false,
+  }) {
+    dispatchEvent(
+      createDomKeyboardEvent(type, <String, Object>{'key': key, 'shiftKey': shiftKey}),
+    );
+  }
 }
