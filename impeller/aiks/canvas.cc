@@ -219,8 +219,10 @@ bool Canvas::Restore() {
   }
 
   transform_stack_.pop_back();
-  if (num_clips > 0) {
-    RestoreClip();
+  if constexpr (!ContentContext::kEnableStencilThenCover) {
+    if (num_clips > 0) {
+      RestoreClip();
+    }
   }
 
   return true;
@@ -597,7 +599,6 @@ void Canvas::RestoreClip() {
   entity.SetContents(std::make_shared<ClipRestoreContents>());
   entity.SetClipDepth(GetClipDepth());
 
-  // TODO(bdero): To be removed when swapping the clip strategy.
   AddEntityToCurrentPass(std::move(entity));
 }
 
