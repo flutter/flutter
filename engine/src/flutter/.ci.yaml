@@ -291,6 +291,14 @@ targets:
       config_name: linux_web_engine
     drone_dimensions:
       - os=Linux
+    runIf:
+      - DEPS
+      - .ci.yaml
+      - lib/web_ui/**
+      - web_sdk/**
+      - tools/**
+      - ci/**
+      - flutter_frontend_server/**
 
   - name: Linux linux_unopt
     recipe: engine_v2/engine_v2
