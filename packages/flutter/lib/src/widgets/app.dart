@@ -234,23 +234,6 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// Creates a series of one or more initial routes.
 typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
 
-/// Disposes singletons created by the Flutter package.
-///
-/// This function is called in Flutter Framework `tearDown` for:
-/// - better test hermeticity
-/// - compliance to memory debugging tools that verify that disposables are disposed by the end of test
-///
-/// Application developers can also call this function in their tests to improve test hermeticity.
-///
-/// The method does not dispose all singletons, only the ones that are known to
-/// noticeably impact test hermeticity.
-@visibleForTesting
-void disposeFlutterSingletons() {
-  // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
-  Navigator.disposeSingletons();
-  WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject?.dispose();
-  WidgetsApp._debugShowWidgetInspectorOverrideNotifierObject = null;
-}
 
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
@@ -1230,6 +1213,13 @@ class WidgetsApp extends StatefulWidget {
 
   static ValueNotifier<bool> get _debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   static ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
+
+  /// Disposes navigation related singletons.
+  @visibleForTesting
+  static void disposeSingletons() {
+    _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+    _debugShowWidgetInspectorOverrideNotifierObject = null;
+  }
 
   /// If false, prevents the debug banner from being visible.
   ///
