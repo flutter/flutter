@@ -12,17 +12,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-@JS()
-@staticInterop
-@anonymous
-class RasterResult {}
-
-extension RasterResultExtension on RasterResult {
-  external JSNumber get rasterStartMilliseconds;
-  external JSNumber get rasterEndMilliseconds;
-  external JSArray<JSAny> get imageBitmaps;
-}
-
 @pragma('wasm:export')
 WasmVoid callbackHandler(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
   // Actually hide this call behind whether skwasm is enabled. Otherwise, the SkwasmCallbackHandler
@@ -89,22 +78,11 @@ class SkwasmSurface {
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
   }
 
-  Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
-    withStackScope((StackScope scope) async {
-      final Pointer<PictureHandle> pictureHandles =
-        scope.allocPointerArray(pictures.length).cast<PictureHandle>();
-      for (int i = 0; i < pictures.length; i++) {
-        pictureHandles[i] = pictures[i].handle;
-      }
-      final int callbackId = surfaceRenderPictures(handle, pictureHandles, pictures.length);
-      final RasterResult rasterResult = (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
-      final RenderResult result = (
-        imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
-        rasterStartMicros: (rasterResult.rasterStartMilliseconds.toDartDouble * 1000).toInt(),
-        rasterEndMicros: (rasterResult.rasterEndMilliseconds.toDartDouble * 1000).toInt(),
-      );
-      return result;
-    });
+  Future<DomImageBitmap> renderPicture(SkwasmPicture picture) async {
+    final int callbackId = surfaceRenderPicture(handle, picture.handle);
+    final DomImageBitmap bitmap = (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as DomImageBitmap;
+    return bitmap;
+  }
 
   Future<ByteData> rasterizeImage(SkwasmImage image, ui.ImageByteFormat format) async {
     final int callbackId = surfaceRasterizeImage(

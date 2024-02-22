@@ -24,23 +24,17 @@ class StubPictureRenderer implements PictureRenderer {
       createDomCanvasElement(width: 500, height: 500);
 
   @override
-  Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
-    renderedPictures.addAll(pictures);
-    final List<DomImageBitmap> bitmaps = await Future.wait(pictures.map((ScenePicture picture) {
-      final ui.Rect cullRect = picture.cullRect;
-      final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement as JSObject, (
-        x: 0,
-        y: 0,
-        width: cullRect.width.toInt(),
-        height: cullRect.height.toInt(),
-      ));
-      return bitmap;
-    }));
-    return (
-      imageBitmaps: bitmaps,
-      rasterStartMicros: 0,
-      rasterEndMicros: 0,
-    );
+  Future<DomImageBitmap> renderPicture(ScenePicture picture) async {
+    renderedPictures.add(picture);
+    final ui.Rect cullRect = picture.cullRect;
+    final DomImageBitmap bitmap =
+        await createImageBitmap(scratchCanvasElement as JSObject, (
+      x: 0,
+      y: 0,
+      width: cullRect.width.toInt(),
+      height: cullRect.height.toInt(),
+    ));
+    return bitmap;
   }
 
   List<ScenePicture> renderedPictures = <ScenePicture>[];
@@ -71,7 +65,7 @@ void testMain() {
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(PictureSlice(picture));
     final EngineScene scene = EngineScene(rootLayer);
-    await sceneView.renderScene(scene, null);
+    await sceneView.renderScene(scene);
 
     final DomElement sceneElement = sceneView.sceneElement;
     final List<DomElement> children = sceneElement.children.toList();
@@ -106,7 +100,7 @@ void testMain() {
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(PlatformViewSlice(<PlatformView>[platformView], null));
     final EngineScene scene = EngineScene(rootLayer);
-    await sceneView.renderScene(scene, null);
+    await sceneView.renderScene(scene);
 
     final DomElement sceneElement = sceneView.sceneElement;
     final List<DomElement> children = sceneElement.children.toList();
@@ -140,7 +134,7 @@ void testMain() {
       final EngineRootLayer rootLayer = EngineRootLayer();
       rootLayer.slices.add(PictureSlice(picture));
       final EngineScene scene = EngineScene(rootLayer);
-      renderFutures.add(sceneView.renderScene(scene, null));
+      renderFutures.add(sceneView.renderScene(scene));
     }
     await Future.wait(renderFutures);
 
