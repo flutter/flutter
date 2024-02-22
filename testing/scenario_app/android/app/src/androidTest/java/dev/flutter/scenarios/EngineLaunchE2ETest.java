@@ -33,7 +33,13 @@ public class EngineLaunchE2ETest {
     // Run the production under test on the UI thread instead of annotating the whole test
     // as @UiThreadTest because having the message handler and the CompletableFuture both being
     // on the same thread will create deadlocks.
-    UiThreadStatement.runOnUiThread(() -> engine.set(new FlutterEngine(applicationContext)));
+    UiThreadStatement.runOnUiThread(
+        () ->
+            engine.set(
+                new FlutterEngine(
+                    applicationContext,
+                    /*dartVmArgs */ null,
+                    /* automaticallyRegisterPlugins */ false)));
     SettableFuture<Boolean> statusReceived = SettableFuture.create();
 
     // Resolve locale to `en_US`.
