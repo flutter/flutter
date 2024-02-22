@@ -29,7 +29,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(Artifact.engineDartBinary),
           'run',
-          'my_transformer',
+          'my_copy_transformer',
           '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
           '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
           '-f',
@@ -44,7 +44,7 @@ void main() {
             ..addOption('my_option'))
             .parse(args);
 
-          fileSystem.file(parsedArgs['output']).createSync(recursive: true);
+          fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
         },
       ),
     ]);
@@ -61,7 +61,7 @@ void main() {
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
         const AssetTransformerEntry(
-          package: 'my_transformer',
+          package: 'my_copy_transformer',
           args: <String>[
             '-f',
             '--my_option',
@@ -73,6 +73,7 @@ void main() {
 
     expect(transformationFailure, isNull, reason: logger.errorText);
     expect(processManager, hasNoRemainingExpectations);
+    expect(fileSystem.file(outputPath).readAsStringSync(), 'hello world');
   });
 
   testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
@@ -89,7 +90,7 @@ void main() {
         command: <String>[
           dartBinaryPath,
           'run',
-          'my_transformer',
+          'my_copy_transformer',
           '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
           '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
         ],
@@ -98,7 +99,7 @@ void main() {
             ..addOption('input')
             ..addOption('output'))
             .parse(args);
-          fileSystem.file(parsedArgs['output']).createSync(recursive: true);
+          fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
         },
         exitCode: 1,
         stdout: 'Beginning transformation',
@@ -118,7 +119,7 @@ void main() {
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
         const AssetTransformerEntry(
-          package: 'my_transformer',
+          package: 'my_copy_transformer',
           args: <String>[],
         )
       ],
