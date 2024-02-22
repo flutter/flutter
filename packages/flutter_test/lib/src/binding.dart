@@ -195,6 +195,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
     platformDispatcher: PlatformDispatcher.instance,
   ) {
+    platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -246,6 +247,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void reset() {
     _restorationManager?.dispose();
     _restorationManager = null;
+    platformDispatcher.defaultRouteNameTestValue = '/';
     resetGestureBinding();
     testTextInput.reset();
     if (registerTestTextInput) {
