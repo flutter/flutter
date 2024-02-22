@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Bilatu",
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
