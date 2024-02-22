@@ -66,6 +66,13 @@ class PlatformConfigurationClient {
   virtual void ScheduleFrame() = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief    Called when a warm up frame has ended.
+  ///
+  ///           For more introduction, see `Animator::EndWarmUpFrame`.
+  ///
+  virtual void EndWarmUpFrame() = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      Updates the client's rendering on the GPU with the newly
   ///             provided Scene.
   ///
@@ -556,6 +563,8 @@ class PlatformConfigurationNativeApi {
   static std::string DefaultRouteName();
 
   static void ScheduleFrame();
+
+  static void EndWarmUpFrame();
 
   static void Render(int64_t view_id,
                      Scene* scene,
