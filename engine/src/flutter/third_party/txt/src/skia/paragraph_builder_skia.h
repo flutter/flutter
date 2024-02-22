@@ -45,6 +45,8 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
   virtual std::unique_ptr<Paragraph> Build() override;
 
  private:
+  friend class SkiaParagraphBuilderTests_ParagraphStrutStyle_Test;
+
   skia::textlayout::ParagraphPainter::PaintID CreatePaintID(
       const flutter::DlPaint& dl_paint);
   skia::textlayout::ParagraphStyle TxtToSkia(const ParagraphStyle& txt);

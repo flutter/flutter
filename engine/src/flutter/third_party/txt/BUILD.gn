@@ -147,6 +147,7 @@ if (enable_unittests) {
 
     sources = [
       "tests/font_collection_tests.cc",
+      "tests/paragraph_builder_skia_tests.cc",
       "tests/paragraph_unittests.cc",
       "tests/txt_run_all_unittests.cc",
     ]
