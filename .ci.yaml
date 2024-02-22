@@ -386,7 +386,8 @@ targets:
     drone_dimensions:
       - os=Mac-13
 
-  - name: Linux mac_unopt
+  - name: Mac mac_unopt
+    bringup: true
     recipe: engine_v2/engine_v2
     properties:
       config_name: mac_unopt
