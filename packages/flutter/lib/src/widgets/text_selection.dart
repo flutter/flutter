@@ -1426,6 +1426,7 @@ class SelectionOverlay {
     }
 
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    print('justin showToolbar');
     _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -1520,6 +1521,8 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
+    print('justin hide ${_contextMenuController.isShown}');
+    print(StackTrace.current); // in dart:core
     _contextMenuController.remove();
     _spellCheckToolbarController.remove();
     if (_toolbar == null) {

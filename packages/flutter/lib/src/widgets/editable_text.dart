@@ -2995,6 +2995,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
       final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
+      print('justin didupdatewidget rebuild overlay thing. $shouldShowHandles, $shouldShowToolbar. Visible? ${selectionOverlay!.toolbarIsVisible}');
       _selectionOverlay!.dispose();
       _selectionOverlay = _createSelectionOverlay();
       if (shouldShowToolbar || shouldShowHandles) {
@@ -3008,6 +3009,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         });
       }
     } else if (widget.controller.selection != oldWidget.controller.selection) {
+      print('justin update olverlay b/c selection ch anged');
       _selectionOverlay?.update(_value);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;

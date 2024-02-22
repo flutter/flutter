@@ -7,7 +7,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -1638,7 +1637,15 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
 
 // END GENERATED TOKEN PROPERTIES - TextField
 
+// TODO(justinmc): Explain use of system toolbar.
+/// The default context menu for text selection for the current platform, or
+/// the system-drawn context menu if available.
+///
+/// Must be used with an [EditableText], whose [EditableTextState] is passed as
+/// a parameter. The system menu depends on the existence of active text input.
 class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
+  /// Creates an instance of [AdaptiveAndSystemTextSelectionToolbar] for the
+  /// given [EditableTextState].
   const AdaptiveAndSystemTextSelectionToolbar({
     super.key,
     this.buttonItems,
@@ -1664,12 +1671,12 @@ class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
         startGlyphHeight: double startGlyphHeight,
         endGlyphHeight: double endGlyphHeight,
       ) = editableTextState.getGlyphHeights();
-      return _IOSSystemContextMenu(
+      return SystemContextMenu(
         renderBox: editableTextState.renderEditable,
+        // TODO(justinmc): Why not do internally to SystemContextMenu with EditableTextState?
         startGlyphHeight: startGlyphHeight,
         endGlyphHeight: endGlyphHeight,
         selectionEndpoints: editableTextState.renderEditable.getEndpointsForSelection(editableTextState.textEditingValue.selection),
-        buttonItems: buttonItems,
       );
     }
     if (buttonItems != null) {
@@ -1681,79 +1688,5 @@ class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
-  }
-}
-
-class _IOSSystemContextMenu extends StatefulWidget {
-  _IOSSystemContextMenu({
-    required RenderBox renderBox,
-    required double startGlyphHeight,
-    required double endGlyphHeight,
-    required List<TextSelectionPoint> selectionEndpoints,
-  }) : _selectionRect = _getSelectionRect(
-         renderBox,
-         startGlyphHeight,
-         endGlyphHeight,
-         selectionEndpoints,
-       );
-
-    final Rect _selectionRect;
-
-  // TODO(justinmc): Deduplicate logic with TextSelectionToolbarAnchors.fromSelection?
-  static Rect _getSelectionRect(
-    RenderBox renderBox,
-    double startGlyphHeight,
-    double endGlyphHeight,
-    List<TextSelectionPoint> selectionEndpoints,
-  ) {
-    final Rect editingRegion = Rect.fromPoints(
-      renderBox.localToGlobal(Offset.zero),
-      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
-    );
-
-    if (editingRegion.left.isNaN || editingRegion.top.isNaN
-      || editingRegion.right.isNaN || editingRegion.bottom.isNaN) {
-      return Rect.zero;
-    }
-
-    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-        endGlyphHeight / 2;
-
-    return Rect.fromLTRB(
-      isMultiline
-          ? editingRegion.left
-          : editingRegion.left + selectionEndpoints.first.point.dx,
-      editingRegion.top + selectionEndpoints.first.point.dy - startGlyphHeight,
-      isMultiline
-          ? editingRegion.right
-          : editingRegion.left + selectionEndpoints.last.point.dx,
-      editingRegion.top + selectionEndpoints.last.point.dy,
-    );
-  }
-
-  @override
-  State<_IOSSystemContextMenu> createState() => _IOSSystemContextMenuWithWidthState();
-}
-
-class _IOSSystemContextMenuWithWidthState extends State<_IOSSystemContextMenu> {
-  @override
-  void initState() {
-    super.initState();
-    ContextMenuController.removeAny();
-
-    ContextMenu.showSystemContextMenu(widget._selectionRect);
-  }
-
-  @override
-  void didUpdateWidget(_IOSSystemContextMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget._selectionRect != oldWidget._selectionRect) {
-      ContextMenu.showSystemContextMenu(widget._selectionRect);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.shrink();
   }
 }
