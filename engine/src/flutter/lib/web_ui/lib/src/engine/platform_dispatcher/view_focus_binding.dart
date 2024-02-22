@@ -14,12 +14,16 @@ final class ViewFocusBinding {
   static final ViewFocusBinding instance = ViewFocusBinding._();
 
   final List<ui.ViewFocusChangeCallback> _listeners = <ui.ViewFocusChangeCallback>[];
+  int? _lastViewId;
+  ui.ViewFocusDirection _viewFocusDirection = ui.ViewFocusDirection.forward;
 
   /// Subscribes the [listener] to [ui.ViewFocusEvent] events.
   void addListener(ui.ViewFocusChangeCallback listener) {
     if (_listeners.isEmpty) {
-      domDocument.body?.addEventListener(_focusin, _handleFocusin, true);
-      domDocument.body?.addEventListener(_focusout, _handleFocusout, true);
+      domDocument.body?.addEventListener(_keyDown, _handleKeyDown);
+      domDocument.body?.addEventListener(_keyUp, _handleKeyUp);
+      domDocument.body?.addEventListener(_focusin, _handleFocusin);
+      domDocument.body?.addEventListener(_focusout, _handleFocusout);
     }
     _listeners.add(listener);
   }
@@ -28,8 +32,10 @@ final class ViewFocusBinding {
   void removeListener(ui.ViewFocusChangeCallback listener) {
     _listeners.remove(listener);
     if (_listeners.isEmpty) {
-      domDocument.body?.removeEventListener(_focusin, _handleFocusin, true);
-      domDocument.body?.removeEventListener(_focusout, _handleFocusout, true);
+      domDocument.body?.removeEventListener(_keyDown, _handleKeyDown);
+      domDocument.body?.removeEventListener(_keyUp, _handleKeyUp);
+      domDocument.body?.removeEventListener(_focusin, _handleFocusin);
+      domDocument.body?.removeEventListener(_focusout, _handleFocusout);
     }
   }
 
@@ -39,21 +45,32 @@ final class ViewFocusBinding {
     }
   }
 
-  late final DomEventListener _handleFocusin = createDomEventListener(
-    (DomEvent event) => _handleFocusChange(event.target as DomElement?),
-  );
+  late final DomEventListener _handleFocusin = createDomEventListener((DomEvent event) {
+    event as DomFocusEvent;
+    _handleFocusChange(event.target as DomElement?);
+  });
 
-  late final DomEventListener _handleFocusout = createDomEventListener(
-    (DomEvent event) => _handleFocusChange((event as DomFocusEvent).relatedTarget as DomElement?),
-  );
+  late final DomEventListener _handleFocusout = createDomEventListener((DomEvent event) {
+    event as DomFocusEvent;
+    _handleFocusChange(event.relatedTarget as DomElement?);
+  });
 
-  int? _lastViewId;
+  late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
+    event as DomKeyboardEvent;
+    if (event.shiftKey) {
+      _viewFocusDirection = ui.ViewFocusDirection.backward;
+    }
+  });
+
+  late final DomEventListener _handleKeyUp = createDomEventListener((DomEvent event) {
+    _viewFocusDirection = ui.ViewFocusDirection.forward;
+  });
+
   void _handleFocusChange(DomElement? focusedElement) {
     final int? viewId = _viewId(focusedElement);
     if (viewId == _lastViewId) {
       return;
     }
-
     final ui.ViewFocusEvent event;
     if (viewId == null) {
       event = ui.ViewFocusEvent(
@@ -65,7 +82,7 @@ final class ViewFocusBinding {
       event = ui.ViewFocusEvent(
         viewId: viewId,
         state: ui.ViewFocusState.focused,
-        direction: ui.ViewFocusDirection.forward,
+        direction: _viewFocusDirection,
       );
     }
     _lastViewId = viewId;
@@ -84,4 +101,6 @@ final class ViewFocusBinding {
 
   static const String _focusin = 'focusin';
   static const String _focusout = 'focusout';
+  static const String _keyDown = 'keydown';
+  static const String _keyUp = 'keyup';
 }
