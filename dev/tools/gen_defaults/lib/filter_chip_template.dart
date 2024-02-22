@@ -71,7 +71,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
       }
       return _chipVariant == _ChipVariant.flat
         ? ${componentColor("$tokenGroup$flatVariant.container")}
-        : ${componentColor("$tokenGroup$elevatedVariant.unselected.container")};
+        : ${componentColor("$tokenGroup$elevatedVariant.container")};
     });
 
   @override

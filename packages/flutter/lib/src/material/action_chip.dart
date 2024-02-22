@@ -280,9 +280,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
           ? null
           : _colors.onSurface.withOpacity(0.12);
       }
-      return _chipVariant == _ChipVariant.flat
-        ? null
-        : _colors.surfaceContainerLow;
+      return null;
     });
 
   @override
@@ -291,7 +289,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get checkmarkColor => null;
