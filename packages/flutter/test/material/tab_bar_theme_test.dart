@@ -153,7 +153,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.outlineVariant,
+          color: theme.colorScheme.surfaceVariant,
           strokeWidth: 1.0,
         )
         ..rrect(color: theme.colorScheme.primary),
@@ -209,7 +209,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.outlineVariant,
+          color: theme.colorScheme.surfaceVariant,
           strokeWidth: 1.0,
         )
         ..line(color: theme.colorScheme.primary),
@@ -637,7 +637,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.outlineVariant,
+          color: theme.colorScheme.surfaceVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator.
@@ -691,7 +691,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.outlineVariant,
+          color: theme.colorScheme.surfaceVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator

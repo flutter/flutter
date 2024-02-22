@@ -169,7 +169,7 @@ class PageIndicator extends StatelessWidget {
           ),
           TabPageSelector(
             controller: tabController,
-            color: colorScheme.surface,
+            color: colorScheme.background,
             selectedColor: colorScheme.primary,
           ),
           IconButton(

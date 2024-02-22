@@ -268,7 +268,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final Material dialogMaterial = _dialogMaterial(tester);
-    expect(dialogMaterial.color, defaultTheme.colorScheme.surfaceContainerHigh);
+    expect(dialogMaterial.color, defaultTheme.colorScheme.surface);
     expect(
       dialogMaterial.shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
@@ -278,7 +278,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.surfaceContainerHighest) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.surfaceVariant) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value)), // Dial hand color.
     );
 
@@ -372,7 +372,7 @@ void main() {
     );
 
     final Material minuteMaterial = _textMaterial(tester, '15');
-    expect(minuteMaterial.color, defaultTheme.colorScheme.surfaceContainerHighest);
+    expect(minuteMaterial.color, defaultTheme.colorScheme.surfaceVariant);
     expect(
       minuteMaterial.shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -481,7 +481,7 @@ void main() {
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);
-    expect(hourDecoration.fillColor, defaultTheme.colorScheme.surfaceContainerHighest);
+    expect(hourDecoration.fillColor, defaultTheme.colorScheme.surfaceVariant);
     expect(
       hourDecoration.enabledBorder,
       const OutlineInputBorder(
@@ -666,7 +666,7 @@ void main() {
       Typography.material2021().englishLike.bodyMedium!
         .merge(Typography.material2021().black.bodyMedium)
         .merge(timePickerTheme.hourMinuteTextStyle)
-        .copyWith(color: _selectedColor, decorationColor: const Color(0xff1d1b20)),
+        .copyWith(color: _selectedColor, decorationColor: const Color(0xff1c1b1f)),
     );
 
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
@@ -675,7 +675,7 @@ void main() {
       Typography.material2021().englishLike.bodyMedium!
         .merge(Typography.material2021().black.bodyMedium)
         .merge(timePickerTheme.hourMinuteTextStyle)
-        .copyWith(color: _unselectedColor, decorationColor: const Color(0xff1d1b20)),
+        .copyWith(color: _unselectedColor, decorationColor: const Color(0xff1c1b1f)),
     );
 
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
@@ -684,7 +684,7 @@ void main() {
       Typography.material2021().englishLike.bodyMedium!
         .merge(Typography.material2021().black.bodyMedium)
         .merge(timePickerTheme.hourMinuteTextStyle)
-        .copyWith(color: _selectedColor, decorationColor: const Color(0xff1d1b20)),
+        .copyWith(color: _selectedColor, decorationColor: const Color(0xff1c1b1f)),
     );
 
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
@@ -693,7 +693,7 @@ void main() {
       Typography.material2021().englishLike.bodyMedium!
         .merge(Typography.material2021().black.bodyMedium)
         .merge(timePickerTheme.hourMinuteTextStyle)
-        .copyWith(color: _unselectedColor, decorationColor: const Color(0xff1d1b20)),
+        .copyWith(color: _unselectedColor, decorationColor: const Color(0xff1c1b1f)),
     );
 
     final RenderParagraph helperText = _textRenderParagraph(tester, 'Select time');

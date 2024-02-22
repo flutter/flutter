@@ -27,7 +27,7 @@ void main() {
     );
 
     // Test the default animation.
-    expect(getScaffoldMaterial().color, lightTheme.colorScheme.surface);
+    expect(getScaffoldMaterial().color, lightTheme.colorScheme.background);
 
     await tester.tap(find.text( 'Switch Theme Mode'));
     await tester.pump();
@@ -37,13 +37,13 @@ void main() {
     // The Scaffold background color is updated.
     expect(
       getScaffoldMaterial().color,
-      Color.lerp(lightTheme.colorScheme.surface, darkTheme.colorScheme.surface, 0.5),
+      Color.lerp(lightTheme.colorScheme.background, darkTheme.colorScheme.background, 0.5),
     );
 
     await tester.pumpAndSettle();
 
     // The Scaffold background color is now fully dark.
-    expect(getScaffoldMaterial().color, darkTheme.colorScheme.surface);
+    expect(getScaffoldMaterial().color, darkTheme.colorScheme.background);
 
     // Test the custom animation curve and duration.
     await tester.tap(find.text('Custom'));
@@ -55,12 +55,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     // The Scaffold background color is updated.
-    expect(getScaffoldMaterial().color, const Color(0xff333731));
+    expect(getScaffoldMaterial().color, const Color(0xff3c3e3b));
 
     await tester.pumpAndSettle();
 
     // The Scaffold background color is now fully light.
-    expect(getScaffoldMaterial().color, lightTheme.colorScheme.surface);
+    expect(getScaffoldMaterial().color, lightTheme.colorScheme.background);
 
     // Test the no animation style.
     await tester.tap(find.text('None'));
@@ -71,6 +71,6 @@ void main() {
     await tester.pump();
 
     // The Scaffold background color is updated immediately.
-    expect(getScaffoldMaterial().color, darkTheme.colorScheme.surface);
+    expect(getScaffoldMaterial().color, darkTheme.colorScheme.background);
   });
 }
