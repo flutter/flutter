@@ -6,6 +6,15 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   // Change made in https://github.com/flutter/flutter/pull/109014
-  InteractiveViewer();
-  InteractiveViewer.builder();
+  InteractiveViewer(panAxis: PanAxis.free);
+  InteractiveViewer.builder(panAxis: PanAxis.free);
+
+  InteractiveViewer(panAxis: PanAxis.aligned);
+  InteractiveViewer.builder(panAxis: PanAxis.aligned);
+
+  InteractiveViewer(panAxis: PanAxis.aligned,);
+  InteractiveViewer.builder(panAxis: PanAxis.aligned,);
+
+  InteractiveViewer(panAxis: PanAxis.aligned,);
+  InteractiveViewer.builder(panAxis: PanAxis.aligned,);
 }

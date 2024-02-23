@@ -20,24 +20,86 @@ version: 1
 transforms:
   # Change made in https://github.com/flutter/flutter/pull/109014
   - title: "Migrate to 'panAxis'"
-    date: 2024-01-29
+    date: 2024-02-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'InteractiveViewer'
-    changes:
-      - kind: 'removeParameter'
-        name: 'alignPanAxis'
+    variables:
+      alignPanAxis:
+        kind: 'fragment'
+        value: 'arguments[alignPanAxis]'
+      panAxis:
+        kind: 'fragment'
+        value: 'arguments[panAxis]'
+    oneOf:
+      - if: "panAxis == '' && alignPanAxis == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'panAxis'
+            style: optional_named
+            argumentValue:
+              expression: 'PanAxis.aligned'
+              requiredIf: "alignPanAxis == 'true'"
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
+      - if: "panAxis == '' && alignPanAxis == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'panAxis'
+            style: optional_named
+            argumentValue:
+              expression: 'PanAxis.free'
+              requiredIf: "alignPanAxis == 'false'"
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
+      - if: "alignPanAxis != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
 
   # Change made in https://github.com/flutter/flutter/pull/109014
   - title: "Migrate to 'panAxis'"
-    date: 2024-01-29
+    date: 2024-02-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: 'builder'
       inClass: 'InteractiveViewer'
-    changes:
-      - kind: 'removeParameter'
-        name: 'alignPanAxis'
+    variables:
+      alignPanAxis:
+        kind: 'fragment'
+        value: 'arguments[alignPanAxis]'
+      panAxis:
+        kind: 'fragment'
+        value: 'arguments[panAxis]'
+    oneOf:
+      - if: "panAxis == '' && alignPanAxis == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'panAxis'
+            style: optional_named
+            argumentValue:
+              expression: 'PanAxis.aligned'
+              requiredIf: "alignPanAxis == 'true'"
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
+      - if: "panAxis == '' && alignPanAxis == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'panAxis'
+            style: optional_named
+            argumentValue:
+              expression: 'PanAxis.free'
+              requiredIf: "alignPanAxis == 'false'"
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
+      - if: "alignPanAxis != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: 'alignPanAxis'
 
 # Before adding a new fix: read instructions at the top of this file.
