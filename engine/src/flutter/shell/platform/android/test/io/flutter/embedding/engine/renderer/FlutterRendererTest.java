@@ -27,7 +27,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
 import org.junit.Test;
@@ -263,8 +262,8 @@ public class FlutterRendererTest {
             });
     fakeFinalizer.start();
     try {
-      latch.await(5L, TimeUnit.SECONDS);
-    } catch (Throwable e) {
+      latch.await();
+    } catch (InterruptedException e) {
       // do nothing
     }
   }
