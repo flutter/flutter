@@ -390,9 +390,13 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
   }
 
   void updateAnimation() {
+    final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (_orientation) {
+    Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
+    Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
+    };
     final AnimationStyle effectiveAnimationStyle = widget.style?.animationStyle
-      ?? MenuTheme.of(context).style?.animationStyle
-      ?? _MenuDefaultsM3(context).animationStyle;
+      ?? themeStyle?.animationStyle
+      ?? defaultStyle.animationStyle;
 
     _animateController.duration = effectiveAnimationStyle.duration;
     _animateController.reverseDuration = effectiveAnimationStyle.reverseDuration;
@@ -3972,20 +3976,16 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   AnimationStyle get animationStyle {
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return AnimationStyle(
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia
+        => AnimationStyle(
           curve: Curves.easeIn,
           reverseCurve: Curves.easeOut,
           duration: const Duration(milliseconds: 200),
-        );
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return AnimationStyle.noAnimation;
-    }
+        ),
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows
+        => AnimationStyle.noAnimation,
+    };
   }
 }
 
