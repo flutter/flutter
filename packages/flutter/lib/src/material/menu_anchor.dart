@@ -390,13 +390,9 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
   }
 
   void updateAnimation() {
-    final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (_orientation) {
-    Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
-    Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
-    };
     final AnimationStyle effectiveAnimationStyle = widget.style?.animationStyle
-      ?? themeStyle?.animationStyle
-      ?? defaultStyle.animationStyle;
+      ?? MenuTheme.of(context).style?.animationStyle
+      ?? _MenuDefaultsM3(context).animationStyle;
 
     _animateController.duration = effectiveAnimationStyle.duration;
     _animateController.reverseDuration = effectiveAnimationStyle.reverseDuration;
