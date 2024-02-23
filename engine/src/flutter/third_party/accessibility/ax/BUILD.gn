@@ -108,7 +108,7 @@ source_set("ax") {
     ]
     deps = [
       "//flutter/fml:fml",
-      "//third_party/icu:icui18n",
+      "//flutter/third_party/icu:icui18n",
     ]
   }
 

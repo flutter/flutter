@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 public_include_dirs = [
-  "//third_party/icu/source/common",
-  "//third_party/icu/source/i18n",
+  "//flutter/third_party/icu/source/common",
+  "//flutter/third_party/icu/source/i18n",
 ]
 
 config("icu_bidi_public") {
@@ -34,20 +34,20 @@ static_library("icu_bidi") {
     "U_I18N_IMPLEMENTATION",
   ]
   sources = [
-    "//third_party/icu/source/common/cmemory.cpp",
-    "//third_party/icu/source/common/cstring.cpp",
-    "//third_party/icu/source/common/ubidi.cpp",
-    "//third_party/icu/source/common/ubidi_props.cpp",
-    "//third_party/icu/source/common/ubidiln.cpp",
-    "//third_party/icu/source/common/ubidiwrt.cpp",
-    "//third_party/icu/source/common/uchar.cpp",
-    "//third_party/icu/source/common/udataswp.cpp",
-    "//third_party/icu/source/common/uinvchar.cpp",
-    "//third_party/icu/source/common/ustring.cpp",
-    "//third_party/icu/source/common/ustrtrns.cpp",
-    "//third_party/icu/source/common/utf_impl.cpp",
-    "//third_party/icu/source/common/utrie2.cpp",
-    "//third_party/icu/source/common/utypes.cpp",
+    "//flutter/third_party/icu/source/common/cmemory.cpp",
+    "//flutter/third_party/icu/source/common/cstring.cpp",
+    "//flutter/third_party/icu/source/common/ubidi.cpp",
+    "//flutter/third_party/icu/source/common/ubidi_props.cpp",
+    "//flutter/third_party/icu/source/common/ubidiln.cpp",
+    "//flutter/third_party/icu/source/common/ubidiwrt.cpp",
+    "//flutter/third_party/icu/source/common/uchar.cpp",
+    "//flutter/third_party/icu/source/common/udataswp.cpp",
+    "//flutter/third_party/icu/source/common/uinvchar.cpp",
+    "//flutter/third_party/icu/source/common/ustring.cpp",
+    "//flutter/third_party/icu/source/common/ustrtrns.cpp",
+    "//flutter/third_party/icu/source/common/utf_impl.cpp",
+    "//flutter/third_party/icu/source/common/utrie2.cpp",
+    "//flutter/third_party/icu/source/common/utypes.cpp",
   ]
   public_configs = [ ":icu_bidi_public" ]
   cflags = [ "-w" ]

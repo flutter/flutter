@@ -72,7 +72,7 @@ if (build_engine_artifacts && !is_android) {
       }
       files += [
         {
-          source = "//third_party/icu/flutter/icudtl.dat"
+          source = "//flutter/third_party/icu/flutter/icudtl.dat"
           destination = "icudtl.dat"
         },
         {

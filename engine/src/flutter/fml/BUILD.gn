@@ -116,7 +116,7 @@ source_set("fml") {
     "$dart_src/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.
-    "//third_party/icu",
+    "//flutter/third_party/icu",
   ]
 
   if (enable_backtrace) {
@@ -124,7 +124,7 @@ source_set("fml") {
     deps += [ "//third_party/abseil-cpp/absl/debugging:symbolize" ]
   }
 
-  configs += [ "//third_party/icu:icu_config" ]
+  configs += [ "//flutter/third_party/icu:icu_config" ]
 
   public_configs = [
     "//flutter:config",

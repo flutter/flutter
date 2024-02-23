@@ -45,10 +45,10 @@ if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme) {
       # only available for Android at the moment
       if (skia_use_runtime_icu && (is_android || is_linux)) {
         sources += skia_unicode_runtime_icu_sources
-        deps += [ "//third_party/icu:headers" ]
+        deps += [ "//flutter/third_party/icu:headers" ]
       } else {
         sources += skia_unicode_builtin_icu_sources
-        deps += [ "//third_party/icu" ]
+        deps += [ "//flutter/third_party/icu" ]
       }
       configs += [ "$_skia_root/third_party/icu/config:no_cxx" ]
     }

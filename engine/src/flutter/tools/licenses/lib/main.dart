@@ -992,6 +992,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
     '/flutter/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
     '/flutter/third_party/freetype2/LICENSE.TXT': _RepositoryFreetypeLicenseFile.new,
+    '/flutter/third_party/icu/LICENSE': _RepositoryIcuLicenseFile.new,
     '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
     '/flutter/third_party/libjpeg-turbo/src/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/README.ijg': _RepositoryReadmeIjgFile.new,
@@ -1001,7 +1002,6 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/third_party/dart/LICENSE': _RepositoryDartLicenseFile.new,
-    '/third_party/icu/LICENSE': _RepositoryIcuLicenseFile.new,
     '/third_party/khronos/LICENSE': _RepositoryKhronosLicenseFile.new,
     '/third_party/libcxx/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
     '/third_party/libcxxabi/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
