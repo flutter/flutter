@@ -88,6 +88,92 @@ void main() {
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
 
+    testWithoutContext('test directory copy with followLinks: true', () async {
+      final Signals signals = Signals.test();
+      final LocalFileSystem fileSystem = LocalFileSystem.test(
+        signals: signals,
+      );
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_copy_directory.');
+      try {
+        const String sourcePath = 'some/origin';
+        final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
+        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('bleh');
+        sourceDirectory.childLink('some_link.txt').createSync(sourceFile1.path);
+        final DateTime writeTime = sourceFile1.lastModifiedSync();
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir')..createSync(recursive: true);
+        sourceSubDirectory.childFile('another_file.txt').createSync(recursive: true);
+        sourceDirectory.childLink('linked_sub_dir').createSync(sourceSubDirectory.path);
+        sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
+
+        const String targetPath = 'some/non-existent/target';
+        final Directory targetDirectory = tempDir.childDirectory(targetPath);
+
+        copyDirectory(sourceDirectory, targetDirectory);
+
+        expect(targetDirectory.existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'bleh');
+        expect(targetDirectory.childFile('some_link.txt').existsSync(), true);
+        expect(targetDirectory.childLink('some_link.txt').existsSync(), false);
+        expect(targetDirectory.childFile('some_link.txt').readAsStringSync(), 'bleh');
+        expect(targetDirectory.childDirectory('sub_dir').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('linked_sub_dir').existsSync(), true);
+        expect(targetDirectory.childLink('linked_sub_dir').existsSync(), false);
+        expect(targetDirectory.childFile('linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
+
+        // Assert that the copy operation hasn't modified the original file in some way.
+        expect(sourceDirectory.childFile('some_file.txt').lastModifiedSync(), writeTime);
+        // There's still 5 things in the original directory as there were initially.
+        expect(sourceDirectory.listSync().length, 5);
+      } finally {
+        tryToDelete(tempDir);
+      }
+    });
+
+    testWithoutContext('test directory copy with followLinks: false', () async {
+      final Signals signals = Signals.test();
+      final LocalFileSystem fileSystem = LocalFileSystem.test(
+        signals: signals,
+      );
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_copy_directory.');
+      try {
+        const String sourcePath = 'some/origin';
+        final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
+        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('bleh');
+        sourceDirectory.childLink('some_link.txt').createSync(sourceFile1.path);
+        final DateTime writeTime = sourceFile1.lastModifiedSync();
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir')..createSync(recursive: true);
+        sourceSubDirectory.childFile('another_file.txt').createSync(recursive: true);
+        sourceDirectory.childLink('linked_sub_dir').createSync(sourceSubDirectory.path);
+        sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
+
+        const String targetPath = 'some/non-existent/target';
+        final Directory targetDirectory = tempDir.childDirectory(targetPath);
+
+        copyDirectory(sourceDirectory, targetDirectory, followLinks: false);
+
+        expect(targetDirectory.existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'bleh');
+        expect(targetDirectory.childLink('some_link.txt').existsSync(), true);
+        expect(targetDirectory.childFile('some_link.txt').readAsStringSync(), 'bleh');
+        expect(targetDirectory.childDirectory('sub_dir').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childLink('linked_sub_dir').existsSync(), true);
+        expect(targetDirectory.childFile('linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
+
+        // Assert that the copy operation hasn't modified the original file in some way.
+        expect(sourceDirectory.childFile('some_file.txt').lastModifiedSync(), writeTime);
+        // There's still 5 things in the original directory as there were initially.
+        expect(sourceDirectory.listSync().length, 5);
+      } finally {
+        tryToDelete(tempDir);
+      }
+    });
+
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final Directory origin = fileSystem.directory('/origin');

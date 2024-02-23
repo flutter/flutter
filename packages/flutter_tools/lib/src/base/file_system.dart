@@ -115,6 +115,7 @@ void copyDirectory(
   bool Function(File srcFile, File destFile)? shouldCopyFile,
   bool Function(Directory)? shouldCopyDirectory,
   void Function(File srcFile, File destFile)? onFileCopied,
+  bool followLinks = true,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -124,7 +125,7 @@ void copyDirectory(
     destDir.createSync(recursive: true);
   }
 
-  for (final FileSystemEntity entity in srcDir.listSync()) {
+  for (final FileSystemEntity entity in srcDir.listSync(followLinks: followLinks)) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
@@ -145,6 +146,7 @@ void copyDirectory(
         destDir.fileSystem.directory(newPath),
         shouldCopyFile: shouldCopyFile,
         onFileCopied: onFileCopied,
+        followLinks: followLinks,
       );
     } else {
       throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
