@@ -152,7 +152,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// A run of selectable text with a single style.
 ///
 /// Consider using [SelectionArea] or [SelectableRegion] instead, which enable
-/// selection on a widget subtree.
+/// selection on a widget subtree, including but not limited to [Text] widgets.
 ///
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
