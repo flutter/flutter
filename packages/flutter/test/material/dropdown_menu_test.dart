@@ -2311,6 +2311,101 @@ void main() {
     expect(controller.text, 'Green');
   });
 
+  testWidgets('DropdownMenu default animation', (WidgetTester tester) async {
+    Widget buildDropdownMenu(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: const Scaffold(
+          body: DropdownMenu<String>(
+            dropdownMenuEntries: <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Yolk',
+                label: 'Yolk',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Eggbert',
+                label: 'Eggbert',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.android, TargetPlatform.fuchsia]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+  });
+
+  testWidgets('DropdownMenu with custom animation style', (WidgetTester tester) async {
+    Widget buildDropdownMenu(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            menuStyle: MenuStyle(
+              animationStyle: AnimationStyle(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.linear,
+              )
+            ),
+            dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Yolk',
+                label: 'Yolk',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Eggbert',
+                label: 'Eggbert',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.macOS,
+      TargetPlatform.linux, TargetPlatform.windows]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+  });
+
   // This is a regression test for https://github.com/flutter/flutter/issues/140596.
   testWidgets('Long text item does not overflow', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
