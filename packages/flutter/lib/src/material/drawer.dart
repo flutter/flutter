@@ -642,35 +642,24 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        return AlignmentDirectional.centerStart;
-      case DrawerAlignment.end:
-        return AlignmentDirectional.centerEnd;
-    }
+    return switch (widget.alignment) {
+      DrawerAlignment.start => AlignmentDirectional.centerStart,
+      DrawerAlignment.end   => AlignmentDirectional.centerEnd,
+    };
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        return AlignmentDirectional.centerEnd;
-      case DrawerAlignment.end:
-        return AlignmentDirectional.centerStart;
-    }
+    return switch (widget.alignment) {
+      DrawerAlignment.start => AlignmentDirectional.centerEnd,
+      DrawerAlignment.end => AlignmentDirectional.centerStart,
+    };
   }
 
   Widget _buildDrawer(BuildContext context) {
-    final bool isDesktop;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        isDesktop = false;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isDesktop = true;
-    }
+    final bool isDesktop = switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+    };
 
     final double dragAreaWidth = widget.edgeDragWidth
       ?? _kEdgeDragWidth + switch ((widget.alignment, Directionality.of(context))) {

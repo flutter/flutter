@@ -731,13 +731,6 @@ class BouncingScrollPhysics extends ScrollPhysics {
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
-      double constantDeceleration;
-      switch (decelerationRate) {
-        case ScrollDecelerationRate.fast:
-          constantDeceleration = 1400;
-        case ScrollDecelerationRate.normal:
-          constantDeceleration = 0;
-      }
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
@@ -745,7 +738,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
-        constantDeceleration: constantDeceleration
+        constantDeceleration: switch (decelerationRate) {
+          ScrollDecelerationRate.fast => 1400,
+          ScrollDecelerationRate.normal => 0,
+        },
       );
     }
     return null;
@@ -783,12 +779,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   double get maxFlingVelocity {
-    switch (decelerationRate) {
-      case ScrollDecelerationRate.fast:
-        return kMaxFlingVelocity * 8.0;
-      case ScrollDecelerationRate.normal:
-        return super.maxFlingVelocity;
-    }
+    return switch (decelerationRate) {
+      ScrollDecelerationRate.fast => kMaxFlingVelocity * 8.0,
+      ScrollDecelerationRate.normal => super.maxFlingVelocity,
+    };
   }
 
   @override
