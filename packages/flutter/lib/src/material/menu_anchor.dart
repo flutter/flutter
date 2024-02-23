@@ -366,7 +366,7 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       _root._close();
     }
     _viewSize = newSize;
-    updateAnimation(widget.style?.animationStyle);
+    updateAnimation();
   }
 
   @override
@@ -385,35 +385,19 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
     }
     assert(_menuController._anchor == this);
     if (oldWidget.style?.animationStyle != widget.style?.animationStyle) {
-      updateAnimation(widget.style?.animationStyle);
+      updateAnimation();
     }
   }
 
-  void updateAnimation(AnimationStyle? style) {
-    final AnimationStyle animationStyle;
-    if (style != null) {
-      animationStyle = style;
-    } else {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          animationStyle = AnimationStyle(
-            curve: Curves.easeIn,
-            reverseCurve: Curves.easeOut,
-            duration: const Duration(milliseconds: 200),
-          );
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          animationStyle = AnimationStyle.noAnimation;
-      }
-    }
+  void updateAnimation() {
+    final AnimationStyle effectiveAnimationStyle = widget.style?.animationStyle
+      ?? MenuTheme.of(context).style?.animationStyle
+      ?? _MenuDefaultsM3(context).animationStyle;
 
-    _animateController.duration = animationStyle.duration;
-    _animateController.reverseDuration = animationStyle.reverseDuration;
-    _menuAnimation.curve = animationStyle.curve ?? _menuAnimation.curve;
-    _menuAnimation.reverseCurve = animationStyle.reverseCurve;
+    _animateController.duration = effectiveAnimationStyle.duration;
+    _animateController.reverseDuration = effectiveAnimationStyle.reverseDuration;
+    _menuAnimation.curve = effectiveAnimationStyle.curve ?? _menuAnimation.curve;
+    _menuAnimation.reverseCurve = effectiveAnimationStyle.reverseCurve;
   }
 
   @override
@@ -3985,6 +3969,24 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   VisualDensity get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  AnimationStyle get animationStyle {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return AnimationStyle(
+          curve: Curves.easeIn,
+          reverseCurve: Curves.easeOut,
+          duration: const Duration(milliseconds: 200),
+        );
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return AnimationStyle.noAnimation;
+    }
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - Menu
