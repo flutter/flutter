@@ -46,7 +46,7 @@ void main(List<String> args) async {
     )
     ..addOption(
       'adb',
-      help: 'Absolute path to the adb tool',
+      help: 'Path to the adb tool',
       defaultsTo: engine != null ? join(
         engine.srcDir.path,
         'third_party',
@@ -54,6 +54,30 @@ void main(List<String> args) async {
         'sdk',
         'platform-tools',
         'adb',
+      ) : null,
+    )
+    ..addOption(
+      'ndk-stack',
+      help: 'Path to the ndk-stack tool',
+      defaultsTo: engine != null ? join(
+        engine.srcDir.path,
+        'third_party',
+        'android_tools',
+        'ndk',
+        'prebuilt',
+        () {
+          if (Platform.isLinux) {
+            return 'linux-x86_64';
+          } else if (Platform.isMacOS) {
+            return 'darwin-x86_64';
+          } else if (Platform.isWindows) {
+            return 'windows-x86_64';
+          } else {
+            throw UnsupportedError('Unsupported platform: ${Platform.operatingSystem}');
+          }
+        }(),
+        'bin',
+        'ndk-stack',
       ) : null,
     )
     ..addOption(
@@ -68,7 +92,7 @@ void main(List<String> args) async {
     )
     ..addOption(
       'smoke-test',
-      help: 'runs a single test to verify the setup',
+      help: 'Runs a single test to verify the setup',
     )
     ..addFlag(
       'use-skia-gold',
@@ -79,8 +103,17 @@ void main(List<String> args) async {
       'enable-impeller',
       help: 'Enable Impeller for the Android app.',
     )
-    ..addOption('output-contents-golden',
-      help: 'Path to a file that will be used to check the contents of the output to make sure everything was created.',
+    ..addOption(
+      'output-contents-golden',
+      help: 'Path to a file that contains the expected filenames of golden files.',
+      defaultsTo: engine != null ? join(
+        engine.srcDir.path,
+        'flutter',
+        'testing',
+        'scenario_app',
+        'android',
+        'expected_golden_output.txt',
+      ) : null,
     )
     ..addOption(
       'impeller-backend',
@@ -123,6 +156,10 @@ void main(List<String> args) async {
         panic(<String>['invalid graphics-backend', results['impeller-backend'] as String? ?? '<null>']);
       }
       final Directory logsDir = Directory(results['logs-dir'] as String? ?? join(outDir.path, 'scenario_app', 'logs'));
+      final String? ndkStack = results['ndk-stack'] as String?;
+      if (ndkStack == null) {
+        panic(<String>['--ndk-stack is required']);
+      }
       await _run(
         verbose: verbose,
         outDir: outDir,
@@ -133,6 +170,7 @@ void main(List<String> args) async {
         impellerBackend: impellerBackend,
         logsDir: logsDir,
         contentsGolden: contentsGolden,
+        ndkStack: ndkStack,
       );
       exit(0);
     },
@@ -172,6 +210,7 @@ Future<void> _run({
   required _ImpellerBackend? impellerBackend,
   required Directory logsDir,
   required String? contentsGolden,
+  required String ndkStack,
 }) async {
   const ProcessManager pm = LocalProcessManager();
 
@@ -187,6 +226,9 @@ Future<void> _run({
   final String logcatPath = join(logsDir.path, 'logcat.txt');
 
   // TODO(matanlurey): Use screenshots/ sub-directory (https://github.com/flutter/flutter/issues/143604).
+  if (!logsDir.existsSync()) {
+    logsDir.createSync(recursive: true);
+  }
   final String screenshotPath = logsDir.path;
   final String apkOutPath = join(scenarioAppPath, 'app', 'outputs', 'apk');
   final File testApk = File(join(apkOutPath, 'androidTest', 'debug', 'app-debug-androidTest.apk'));
@@ -279,6 +321,10 @@ Future<void> _run({
           case null:
             break;
           case 'ActivityManager':
+            // These are mostly noise, i.e. "D ActivityManager: freezing 24632 com.blah".
+            if (adbLogLine!.severity == 'D') {
+              break;
+            }
           // TODO(matanlurey): Figure out why this isn't 'flutter.scenario' or similar.
           // Also, why is there two different names?
           case 'utter.scenario':
@@ -388,6 +434,33 @@ Future<void> _run({
   } finally {
     await server.close();
 
+    await step('Killing logcat process...', () async {
+      final bool delivered = logcatProcess.kill(ProcessSignal.sigkill);
+      assert(delivered);
+      await logcatProcessExitCode;
+    });
+
+    await step('Flush logcat...', () async {
+      await logcat.flush();
+      await logcat.close();
+      log('wrote logcat to $logcatPath');
+    });
+
+    await step('Symbolize stack traces', () async {
+      final ProcessResult result = await pm.run(
+        <String>[
+          ndkStack,
+          '-sym',
+          outDir.path,
+          '-dump',
+          logcatPath,
+        ],
+      );
+      if (result.exitCode != 0) {
+        panic(<String>['Failed to symbolize stack traces']);
+      }
+    });
+
     await step('Remove reverse port...', () async {
       final int exitCode = await pm.runAndForward(<String>[
         adb.path,
@@ -413,12 +486,6 @@ Future<void> _run({
       }
     });
 
-    await step('Killing logcat process...', () async {
-      final bool delivered = logcatProcess.kill(ProcessSignal.sigkill);
-      assert(delivered);
-      await logcatProcessExitCode;
-    });
-
     await step('Wait for Skia gold comparisons...', () async {
       await Future.wait(pendingComparisons);
     });
@@ -426,6 +493,8 @@ Future<void> _run({
     if (contentsGolden != null) {
       // Check the output here.
       await step('Check output files...', () async {
+        // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
+        File(join(screenshotPath, 'noop.txt')).writeAsStringSync('');
         // TODO(gaaclarke): We should move this into dir_contents_diff.
         _withTemporaryCwd(contentsGolden, () {
           final int exitCode = dirContentsDiff(basename(contentsGolden), screenshotPath);
@@ -435,11 +504,5 @@ Future<void> _run({
         });
       });
     }
-
-    await step('Flush logcat...', () async {
-      await logcat.flush();
-      await logcat.close();
-      log('wrote logcat to $logcatPath');
-    });
   }
 }

@@ -5,15 +5,16 @@ the Android-specific native code and tests for the [scenario app](../lib). To
 run the tests, you will need to build the engine with the appropriate
 configuration.
 
-For example, `android_debug_unopt` or `android_debug_unopt_arm64` was built,
-run:
+For example, for the latest `android` build you've made locally:
 
 ```sh
-# From the root of the engine repository
-$ ./testing/scenario_app/run_android_tests.sh android_debug_unopt
+dart ./testing/scenario_app/bin/run_android_tests.dart
+```
 
-# Or, for arm64
-$ ./testing/scenario_app/run_android_tests.sh android_debug_unopt_arm64
+Or for a specific, build, such as `android_debug_unopt_arm64`:
+
+```sh
+dart ./testing/scenario_app/bin/run_android_tests.dart --out-dir=../out/android_debug_unopt_arm64
 ```
 
 ## Debugging
@@ -28,8 +29,7 @@ Locally (or on a temporary PR for CI), you can run the tests with the
 to verify the setup:
 
 ```sh
-# From the root of the engine repository
-$ ./testing/scenario_app/run_android_tests.sh android_debug_unopt_arm64 --smoke-test dev.flutter.scenarios.EngineLaunchE2ETest
+dart ./testing/scenario_app/bin/run_android_tests.dart --smoke-test dev.flutter.scenarios.EngineLaunchE2ETest
 ```
 
 The result of `adb logcat` and screenshots taken during the test will be stored
@@ -43,7 +43,7 @@ You can then view the logs and screenshots on LUCI. [For example](https://ci.chr
 ## CI Configuration
 
 See [`ci/builders/linux_android_emulator.json`](../../../ci/builders/linux_android_emulator.json)
-, and grep for `run_android_tests.sh`.
+, and grep for `run_android_tests.dart`.
 
 The following matrix of configurations is tested on the CI:
 
@@ -67,3 +67,9 @@ The following matrix of configurations is tested on the CI:
 ## Updating Gradle dependencies
 
 See [Updating the Embedding Dependencies](../../../tools/cipd/android_embedding_bundle/README.md).
+
+## Output validation
+
+The generated output will be checked against a golden file
+([`expected_golden_output.txt`](./expected_golden_output.txt)) to make sure all
+output was generated. A patch will be printed to stdout if they don't match.

@@ -59,7 +59,7 @@
                     ]
                 },
                 {
-                    "language": "bash",
+                    "language": "dart",
                     "name": "Android Scenario App Integration Tests (Skia)",
                     "test_dependencies": [
                         {
@@ -74,14 +74,14 @@
                     "contexts": [
                         "android_virtual_device"
                     ],
-                    "script": "flutter/testing/scenario_app/run_android_tests.sh",
+                    "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
                     "parameters": [
-                        "android_emulator_debug_x64",
+                        "--out-dir=../out/android_emulator_debug_x64",
                         "--no-enable-impeller"
                     ]
                 },
                 {
-                    "language": "bash",
+                    "language": "dart",
                     "name": "Android Scenario App Integration Tests (Impeller/Vulkan)",
                     "test_dependencies": [
                         {
@@ -96,9 +96,9 @@
                     "contexts": [
                         "android_virtual_device"
                     ],
-                    "script": "flutter/testing/scenario_app/run_android_tests.sh",
+                    "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
                     "parameters": [
-                        "android_emulator_debug_x64",
+                        "--out-dir=../out/android_emulator_debug_x64",
                         "--enable-impeller",
                         "--impeller-backend=vulkan"
                     ]

@@ -60,6 +60,9 @@ extension type const AdbLogLine._(Match _match) {
   /// The full line of `adb logcat` output.
   String get line => _match.group(0)!;
 
+  /// The character representing the severity of the log message, such as `I`.
+  String get severity => _match.group(2)!;
+
   /// The process name, such as `ActivityManager`.
   String get process => _match.group(3)!;
 
