@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -623,10 +624,12 @@ void main() {
         ..entries['foo.frag'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.shader,
+          transformers: const <AssetTransformerEntry>[],
         )
         ..entries['not.frag'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
         );
 
       final UpdateFSReport report = await devFS.update(
@@ -680,6 +683,7 @@ void main() {
         ..entries['FontManifest.json'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
         );
 
       final UpdateFSReport report = await devFS.update(

@@ -498,3 +498,19 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   }
   return true;
 }
+
+/// Tests for shallow equality on two lists.
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
+}
