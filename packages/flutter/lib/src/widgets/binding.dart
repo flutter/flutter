@@ -393,9 +393,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
+  /// Notifier for [debugShowWidgetInspectorOverride].
   ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
+  /// Disposes the [debugShowWidgetInspectorOverrideNotifier].
+  ///
+  /// Noop if the notifier has not been created.
   void disposeDebugShowWidgetInspectorOverrideNotifier() {
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
