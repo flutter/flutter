@@ -116,10 +116,8 @@ TEST_F(WindowsTest, LaunchCustomEntrypointInEngineRunInvocation) {
 TEST_F(WindowsTest, LaunchHeadlessEngine) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
-  EnginePtr engine{builder.InitializeEngine()};
+  EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
-
-  ASSERT_TRUE(FlutterDesktopEngineRun(engine.get(), nullptr));
 }
 
 // Verify that accessibility features are initialized when a view is created.
