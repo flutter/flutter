@@ -25,10 +25,8 @@ namespace {
 using ::testing::Invoke;
 using ::testing::ReturnRef;
 
-fml::AutoResetWaitableEvent native_latch;
-
-void PostSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
-              const fml::closure& task) {
+static void PostSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
+                     const fml::closure& task) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(task_runner, [&latch, &task] {
     task();
@@ -84,7 +82,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
   MOCK_METHOD(void, EndWarmUpFrame, (), (override));
   MOCK_METHOD(void,
               Render,
-              (int64_t, std::unique_ptr<flutter::LayerTree>, float),
+              (std::unique_ptr<flutter::LayerTree>, float),
               (override));
   MOCK_METHOD(void,
               UpdateSemantics,
@@ -572,66 +570,6 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
   });
 }
 
-TEST_F(EngineTest, AnimatorAcceptsMultipleRenders) {
-  MockAnimatorDelegate animator_delegate;
-  std::unique_ptr<EngineContext> engine_context;
-
-  std::shared_ptr<PlatformMessageHandler> platform_message_handler =
-      std::make_shared<MockPlatformMessageHandler>();
-  EXPECT_CALL(delegate_, GetPlatformMessageHandler)
-      .WillOnce(ReturnRef(platform_message_handler));
-  fml::AutoResetWaitableEvent draw_latch;
-  EXPECT_CALL(animator_delegate, OnAnimatorDraw)
-      .WillOnce(
-          Invoke([&draw_latch](const std::shared_ptr<FramePipeline>& pipeline) {
-            auto status =
-                pipeline->Consume([&](std::unique_ptr<FrameItem> item) {
-                  EXPECT_EQ(item->layer_tree_tasks.size(), 2u);
-                  EXPECT_EQ(item->layer_tree_tasks[0]->view_id, 1);
-                  EXPECT_EQ(item->layer_tree_tasks[1]->view_id, 2);
-                });
-            EXPECT_EQ(status, PipelineConsumeResult::Done);
-            draw_latch.Signal();
-          }));
-  EXPECT_CALL(animator_delegate, OnAnimatorBeginFrame)
-      .WillOnce(Invoke([&engine_context](fml::TimePoint frame_target_time,
-                                         uint64_t frame_number) {
-        engine_context->EngineTaskSync([&](Engine& engine) {
-          engine.BeginFrame(frame_target_time, frame_number);
-        });
-      }));
-
-  native_latch.Reset();
-  AddNativeCallback("NotifyNative", [](auto args) { native_latch.Signal(); });
-
-  std::unique_ptr<Animator> animator;
-  PostSync(task_runners_.GetUITaskRunner(),
-           [&animator, &animator_delegate, &task_runners = task_runners_] {
-             animator = std::make_unique<Animator>(
-                 animator_delegate, task_runners,
-                 static_cast<std::unique_ptr<VsyncWaiter>>(
-                     std::make_unique<testing::ConstantFiringVsyncWaiter>(
-                         task_runners)));
-           });
-
-  engine_context = EngineContext::Create(delegate_, settings_, task_runners_,
-                                         std::move(animator));
-  auto configuration = RunConfiguration::InferFromSettings(settings_);
-  configuration.SetEntrypoint("onDrawFrameRenderAllViews");
-  engine_context->Run(std::move(configuration));
-
-  engine_context->EngineTaskSync([](Engine& engine) {
-    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0});
-  });
-
-  native_latch.Wait();
-
-  engine_context->EngineTaskSync(
-      [](Engine& engine) { engine.ScheduleFrame(); });
-  draw_latch.Wait();
-}
-
 // The animator should submit to the pipeline the implicit view rendered in a
 // warm up frame if there's already a continuation (i.e. Animator::BeginFrame
 // has been called)
@@ -692,74 +630,6 @@ TEST_F(EngineTest, AnimatorSubmitWarmUpImplicitView) {
 
   auto configuration = RunConfiguration::InferFromSettings(settings_);
   configuration.SetEntrypoint("renderWarmUpImplicitView");
-  engine_context->Run(std::move(configuration));
-
-  draw_latch.Wait();
-}
-
-// The warm up frame should work if only some of the registered views are
-// included.
-//
-// This test also verifies that the warm up frame can render multiple views.
-TEST_F(EngineTest, AnimatorSubmitPartialViewsForWarmUp) {
-  MockAnimatorDelegate animator_delegate;
-  std::unique_ptr<EngineContext> engine_context;
-
-  std::shared_ptr<PlatformMessageHandler> platform_message_handler =
-      std::make_shared<MockPlatformMessageHandler>();
-  EXPECT_CALL(delegate_, GetPlatformMessageHandler)
-      .WillOnce(ReturnRef(platform_message_handler));
-
-  fml::AutoResetWaitableEvent continuation_ready_latch;
-  fml::AutoResetWaitableEvent draw_latch;
-  EXPECT_CALL(animator_delegate, OnAnimatorDraw)
-      .WillOnce(
-          Invoke([&draw_latch](const std::shared_ptr<FramePipeline>& pipeline) {
-            auto status =
-                pipeline->Consume([&](std::unique_ptr<FrameItem> item) {
-                  EXPECT_EQ(item->layer_tree_tasks.size(), 2u);
-                  EXPECT_EQ(item->layer_tree_tasks[0]->view_id, 1);
-                  EXPECT_EQ(item->layer_tree_tasks[1]->view_id, 2);
-                });
-            EXPECT_EQ(status, PipelineConsumeResult::Done);
-            draw_latch.Signal();
-          }));
-  EXPECT_CALL(animator_delegate, OnAnimatorBeginFrame)
-      .WillRepeatedly(
-          Invoke([&engine_context, &continuation_ready_latch](
-                     fml::TimePoint frame_target_time, uint64_t frame_number) {
-            continuation_ready_latch.Signal();
-            engine_context->EngineTaskSync([&](Engine& engine) {
-              engine.BeginFrame(frame_target_time, frame_number);
-            });
-          }));
-
-  std::unique_ptr<Animator> animator;
-  PostSync(task_runners_.GetUITaskRunner(),
-           [&animator, &animator_delegate, &task_runners = task_runners_] {
-             animator = std::make_unique<Animator>(
-                 animator_delegate, task_runners,
-                 static_cast<std::unique_ptr<VsyncWaiter>>(
-                     std::make_unique<testing::ConstantFiringVsyncWaiter>(
-                         task_runners)));
-           });
-
-  engine_context = EngineContext::Create(delegate_, settings_, task_runners_,
-                                         std::move(animator));
-
-  engine_context->EngineTaskSync([](Engine& engine) {
-    // Schedule a frame to make the animator create a continuation.
-    engine.ScheduleFrame(true);
-    // Add multiple views.
-    engine.AddView(0, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0});
-  });
-
-  continuation_ready_latch.Wait();
-
-  auto configuration = RunConfiguration::InferFromSettings(settings_);
-  configuration.SetEntrypoint("renderWarmUpView1and2");
   engine_context->Run(std::move(configuration));
 
   draw_latch.Wait();
