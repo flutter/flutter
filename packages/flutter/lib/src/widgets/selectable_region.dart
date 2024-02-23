@@ -2059,10 +2059,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects.map((Rect selectionRect) {
         final Matrix4 transform = getTransformFrom(selectables[index]);
         final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
-        if (drawableArea != null) {
-          return drawableArea.intersect(localRect);
-        }
-        return localRect;
+        return drawableArea?.intersect(localRect) ?? localRect;
       }).where((Rect selectionRect) {
         return selectionRect.isFinite && !selectionRect.isEmpty;
       }).toList();

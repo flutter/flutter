@@ -32,11 +32,7 @@ Future<void> main() async {
         final TaskResult? firstInstallFailure = testResults
           .firstWhereOrNull((TaskResult element) => element.failed);
 
-        if (firstInstallFailure != null) {
-          return firstInstallFailure;
-        }
-
-        return TaskResult.success(null);
+        return firstInstallFailure ?? TaskResult.success(null);
       },
     );
 

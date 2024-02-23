@@ -953,9 +953,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///  * [resolve], which is similar to this function, but returns a
   ///    non-nullable value, and does not allow a null `resolvable` color.
   static Color? maybeResolve(Color? resolvable, BuildContext context) {
-    if (resolvable == null) {
-      return null;
-    }
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;

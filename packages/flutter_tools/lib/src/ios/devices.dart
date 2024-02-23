@@ -1178,12 +1178,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     bool isWirelesslyConnected = false,
     bool isCoreDevice = false,
   }) {
-    final int sdkVersion;
-    if (majorSdkVersion != null) {
-      sdkVersion = majorSdkVersion;
-    } else {
-      sdkVersion = useSyslog ? 12 : 13;
-    }
+    final int sdkVersion = majorSdkVersion ?? (useSyslog ? 12 : 13);
     return IOSDeviceLogReader._(
       iMobileDevice, sdkVersion, '1234', 'test', isWirelesslyConnected, isCoreDevice, 'Runner', usingCISystem);
   }

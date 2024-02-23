@@ -158,13 +158,10 @@ class Version {
     int nextZ = previousVersion.z;
     int? nextM = previousVersion.m;
     int? nextN = previousVersion.n;
-    if (nextVersionType == null) {
-      if (previousVersion.type == VersionType.latest || previousVersion.type == VersionType.gitDescribe) {
-        nextVersionType = VersionType.development;
-      } else {
-        nextVersionType = previousVersion.type;
-      }
-    }
+    nextVersionType ??= switch (previousVersion.type) {
+      VersionType.stable => VersionType.stable,
+      VersionType.latest || VersionType.gitDescribe || VersionType.development => VersionType.development,
+    };
 
     switch (increment) {
       case 'x':

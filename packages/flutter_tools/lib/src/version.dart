@@ -717,11 +717,7 @@ class VersionUpstreamValidator {
   // URLs without ".git" suffix will remain unaffected.
   static final RegExp _patternUrlDotGit = RegExp(r'(.*)(\.git)$');
   static String stripDotGit(String url) {
-    final RegExpMatch? match = _patternUrlDotGit.firstMatch(url);
-    if (match == null) {
-      return url;
-    }
-    return match.group(1)!;
+    return _patternUrlDotGit.firstMatch(url)?.group(1)! ?? url;
   }
 }
 

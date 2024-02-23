@@ -366,10 +366,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return binding.ensureInitialized(environment);
+    return _instance ?? binding.ensureInitialized(environment);
   }
 
   @override

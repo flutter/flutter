@@ -224,10 +224,7 @@ ${migrateConfig.getOutputFileString()}''';
   /// Finds the fallback revision to use when no base revision is found in the migrate config.
   String getFallbackBaseRevision(Logger logger, FlutterVersion flutterVersion) {
     // Use the .metadata file if it exists.
-    if (versionRevision != null) {
-      return versionRevision!;
-    }
-    return flutterVersion.frameworkRevision;
+    return versionRevision ?? flutterVersion.frameworkRevision;
   }
 }
 
