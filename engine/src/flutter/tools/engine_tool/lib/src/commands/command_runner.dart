@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-
 import 'package:engine_build_configs/engine_build_configs.dart';
 
 import '../environment.dart';
-import 'command.dart';
+import 'build_command.dart';
 import 'format_command.dart';
 import 'query_command.dart';
 
@@ -19,14 +18,12 @@ final class ToolCommandRunner extends CommandRunner<int> {
     required this.environment,
     required this.configs,
   }) : super(toolName, toolDescription) {
-    final List<CommandBase> commands = <CommandBase>[
+    final List<Command<int>> commands = <Command<int>>[
       FormatCommand(
         environment: environment,
       ),
-      QueryCommand(
-        environment: environment,
-        configs: configs,
-      ),
+      QueryCommand(environment: environment, configs: configs),
+      BuildCommand(environment: environment, configs: configs),
     ];
     commands.forEach(addCommand);
   }
@@ -38,7 +35,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
   /// The description of the tool reported in the tool's usage and help
   /// messages.
   static const String toolDescription = 'A command line tool for working on '
-                                        'the Flutter Engine.';
+      'the Flutter Engine.';
 
   /// The host system environment.
   final Environment environment;
@@ -48,7 +45,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
 
   @override
   Future<int> run(Iterable<String> args) async {
-    try{
+    try {
       return await runCommand(parse(args)) ?? 0;
     } on FormatException catch (e) {
       environment.logger.error(e);
