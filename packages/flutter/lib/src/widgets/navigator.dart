@@ -3248,7 +3248,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // Do not announce if `next` changes from a just popped route to null. We
     // already announced this change by calling didPopNext.
     return !(
-      nextRoute == null && lastAnnouncedPoppedNextRoute == null
+      nextRoute == null && lastAnnouncedPoppedNextRoute?.target == lastAnnouncedNextRoute
     );
   }
 
