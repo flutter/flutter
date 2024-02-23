@@ -28,8 +28,7 @@ final class QueryCommand extends CommandBase {
         help: 'Restrict the query to a single builder.',
         allowed: <String>[
           for (final MapEntry<String, BuildConfig> entry in configs.entries)
-            if (entry.value.canRunOn(environment.platform))
-              entry.key,
+            if (entry.value.canRunOn(environment.platform)) entry.key,
         ],
         allowedHelp: <String, String>{
           // TODO(zanderso): Add human readable descriptions to the json files.
@@ -45,7 +44,7 @@ final class QueryCommand extends CommandBase {
         negatable: false,
       );
 
-    addSubcommand(QueryBuildsCommand(
+    addSubcommand(QueryBuildersCommand(
       environment: environment,
       configs: configs,
     ));
@@ -59,13 +58,13 @@ final class QueryCommand extends CommandBase {
 
   @override
   String get description => 'Provides information about build configurations '
-                            'and tests.';
+      'and tests.';
 }
 
-// ignore: public_member_api_docs
-final class QueryBuildsCommand extends CommandBase {
-  // ignore: public_member_api_docs
-  QueryBuildsCommand({
+/// The 'query builds' command.
+final class QueryBuildersCommand extends CommandBase {
+  /// Constructs the 'query build' command.
+  QueryBuildersCommand({
     required super.environment,
     required this.configs,
   });
@@ -74,11 +73,11 @@ final class QueryBuildsCommand extends CommandBase {
   final Map<String, BuildConfig> configs;
 
   @override
-  String get name => 'builds';
+  String get name => 'builders';
 
   @override
-  String get description => 'Provides information about CI build '
-                            'configurations';
+  String get description => 'Provides information about CI builder '
+      'configurations';
 
   @override
   Future<int> run() async {
