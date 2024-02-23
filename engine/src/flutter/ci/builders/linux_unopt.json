@@ -46,8 +46,12 @@
                     ]
                 },
                 {
-                    "nane": "test:GeneratedPluginRegistant.java omitted",
-                    "script": "flutter/ci/test/format_no_generated_java_test.sh"
+                    "name": "ban GeneratedPluginRegistrant.java",
+                    "script": "flutter/ci/ban_generated_plugin_registrant_java.sh"
+                },
+                {
+                    "name": "ban_test GeneratedPluginRegistrant.java",
+                    "script": "flutter/ci/test/ban_generated_plugin_registrant_java_test.sh"
                 },
                 {
                     "language": "python3",
