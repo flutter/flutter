@@ -25,6 +25,7 @@ import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
+// TODO(justinmc): Duplicate import.
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 // Examples can assume:
@@ -1636,49 +1637,3 @@ TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
-
-// TODO(justinmc): Explain use of system toolbar.
-/// The default context menu for text selection for the current platform, or
-/// the system-drawn context menu if available.
-///
-/// Must be used with an [EditableText], whose [EditableTextState] is passed as
-/// a parameter. The system menu depends on the existence of active text input.
-class AdaptiveAndSystemTextSelectionToolbar extends StatelessWidget {
-  /// Creates an instance of [AdaptiveAndSystemTextSelectionToolbar] for the
-  /// given [EditableTextState].
-  const AdaptiveAndSystemTextSelectionToolbar.editableText({
-    super.key,
-    this.buttonItems,
-    required this.editableTextState,
-  });
-
-  /// The [ContextMenuButtonItem]s that will be turned into buttons in the menu.
-  ///
-  /// In Flutter-drawn menus, buttonItems are turned into button widgets that
-  /// are styled to match the current platform. In system menus, the buttons are
-  /// drawn by the system and not by Flutter.
-  ///
-  /// If null, the default buttons will be used.
-  final List<ContextMenuButtonItem>? buttonItems;
-
-  final EditableTextState editableTextState;
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
-      return SystemContextMenu.editableText(
-        editableTextState: editableTextState,
-      );
-    }
-    if (buttonItems != null) {
-      return AdaptiveTextSelectionToolbar.buttonItems(
-        buttonItems: buttonItems,
-        anchors: editableTextState.contextMenuAnchors,
-      );
-    }
-    return AdaptiveTextSelectionToolbar.editableText(
-      editableTextState: editableTextState,
-    );
-  }
-}
