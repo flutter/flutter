@@ -63,11 +63,6 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    @Deprecated(
-      'Use panAxis instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
@@ -112,11 +107,6 @@ class InteractiveViewer extends StatefulWidget {
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
-    @Deprecated(
-      'Use panAxis instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    this.alignPanAxis = false,
     this.panAxis = PanAxis.free,
     this.boundaryMargin = EdgeInsets.zero,
     // These default scale values were eyeballed as reasonable limits for common
@@ -161,25 +151,6 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
-
-  /// This property is deprecated, please use [panAxis] instead.
-  ///
-  /// If true, panning is only allowed in the direction of the horizontal axis
-  /// or the vertical axis.
-  ///
-  /// In other words, when this is true, diagonal panning is not allowed. A
-  /// single gesture begun along one axis cannot also cause panning along the
-  /// other axis without stopping and beginning a new gesture. This is a common
-  /// pattern in tables where data is displayed in columns and rows.
-  ///
-  /// See also:
-  ///  * [constrained], which has an example of creating a table that uses
-  ///    alignPanAxis.
-  @Deprecated(
-    'Use panAxis instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  final bool alignPanAxis;
 
   /// When set to [PanAxis.aligned], panning is only allowed in the horizontal
   /// axis or the vertical axis, diagonal panning is not allowed.
