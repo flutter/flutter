@@ -11,6 +11,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -587,15 +588,8 @@ void main() {
   });
 
   group('Shader compilation', () {
-    late FileSystem fileSystem;
-    late ProcessManager processManager;
-
-    setUp(() {
-      fileSystem = MemoryFileSystem.test();
-      processManager = FakeProcessManager.any();
-    });
-
-    testUsingContext('DevFS recompiles shaders', () async {
+    testWithoutContext('DevFS recompiles shaders', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
@@ -609,6 +603,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        config: Config.test(),
       );
 
       await devFS.create();
@@ -647,12 +642,10 @@ void main() {
       expect(report.success, true);
       expect(devFS.shaderPathsToEvict, <String>{'foo.frag'});
       expect(devFS.assetPathsToEvict, <String>{'not.frag'});
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
-    testUsingContext('DevFS tracks when FontManifest is updated', () async {
+    testWithoutContext('DevFS tracks when FontManifest is updated', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[createDevFSRequest],
         httpAddress: Uri.parse('http://localhost'),
@@ -666,6 +659,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        config: Config.test(),
       );
 
       await devFS.create();
@@ -702,9 +696,6 @@ void main() {
       expect(devFS.shaderPathsToEvict, <String>{});
       expect(devFS.assetPathsToEvict, <String>{'FontManifest.json'});
       expect(devFS.didUpdateFontManifest, true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
   });
 }

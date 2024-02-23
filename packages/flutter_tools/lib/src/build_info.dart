@@ -800,6 +800,7 @@ HostPlatform getCurrentHostPlatform() {
 
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
   final Config localConfig = config ?? globals.config;
@@ -825,8 +826,9 @@ String getAotBuildDirectory() {
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
+String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  return (fileSystem ?? globals.fs)
+    .path.join(getBuildDirectory(config, fileSystem), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
