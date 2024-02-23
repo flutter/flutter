@@ -95,33 +95,34 @@ void main() {
       );
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_copy_directory.');
       try {
-        const String sourcePath = 'some/origin';
+        final String sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
         final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('file 1');
-        sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.path);
+        sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.absolute.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir/sub_dir_2')..createSync(recursive: true);
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('dir1').childDirectory('dir2')..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
-        sourceDirectory.childLink('relative_linked_sub_dir').createSync('sub_dir/sub_dir_2');
+        final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
+        sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        const String targetPath = 'some/non-existent/target';
+        final String targetPath = io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
-        copyDirectory(sourceDirectory, targetDirectory);
+        copyDirectory(sourceDirectory, targetDirectory, followLinks: false);
 
         expect(targetDirectory.existsSync(), true);
         expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
         expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'file 1');
         expect(targetDirectory.childFile('absolute_linked.txt').readAsStringSync(), 'file 1');
         expect(targetDirectory.childLink('absolute_linked.txt').existsSync(), false);
-        expect(targetDirectory.childDirectory('sub_dir/sub_dir_2').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').existsSync(), true);
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').childFile('another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').childFile('another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('relative_linked_sub_dir').existsSync(), true);
         expect(targetDirectory.childLink('relative_linked_sub_dir').existsSync(), false);
-        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').childFile('another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').childFile('another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
 
         // Assert that the copy operation hasn't modified the original file in some way.
@@ -140,17 +141,18 @@ void main() {
       );
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_copy_directory.');
       try {
-        const String sourcePath = 'some/origin';
+        final String sourcePath = io.Platform.isWindows ? r'some\origin' : 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
         final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('file 1');
         sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.absolute.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir/sub_dir_2')..createSync(recursive: true);
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('dir1').childDirectory('dir2')..createSync(recursive: true);
         sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
-        sourceDirectory.childLink('relative_linked_sub_dir').createSync('sub_dir/sub_dir_2');
+        final String subdirectorySourcePath = io.Platform.isWindows ? r'dir1\dir2' : 'dir1/dir2';
+        sourceDirectory.childLink('relative_linked_sub_dir').createSync(subdirectorySourcePath);
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
 
-        const String targetPath = 'some/non-existent/target';
+        final String targetPath = io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
         copyDirectory(sourceDirectory, targetDirectory, followLinks: false);
@@ -164,17 +166,17 @@ void main() {
           targetDirectory.childLink('absolute_linked.txt').targetSync(),
           sourceFile1.absolute.path,
         );
-        expect(targetDirectory.childDirectory('sub_dir/sub_dir_2').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').existsSync(), true);
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').childFile('another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('dir1').childDirectory('dir2').childFile('another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('relative_linked_sub_dir').existsSync(), true);
         expect(targetDirectory.childLink('relative_linked_sub_dir').existsSync(), true);
         expect(
           targetDirectory.childLink('relative_linked_sub_dir').targetSync(),
-          'sub_dir/sub_dir_2',
+          subdirectorySourcePath,
         );
-        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').childFile('another_file.txt').existsSync(), true);
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').childFile('another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
 
         // Assert that the copy operation hasn't modified the original file in some way.
