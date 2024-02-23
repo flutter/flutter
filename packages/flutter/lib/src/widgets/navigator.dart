@@ -117,7 +117,8 @@ enum RoutePopDisposition {
 
 /// A placeholder for a route.
 ///
-/// This is used in [Navigator] to represent not announced route.
+/// This is used in [Navigator] to represent not announced route,
+/// where null is used to represent an unknown route.
 class RoutePlaceholder {
   /// Creates a placeholder for a route.
   const RoutePlaceholder();
