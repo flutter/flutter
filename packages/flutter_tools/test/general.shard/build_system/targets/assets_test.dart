@@ -191,11 +191,13 @@ flutter:
   assets:
     - path: input.txt
       transformers:
-        - package: my_transformer
+        - package: my_capitalizer_transformer
           args: ["-a", "-b", "--color", "green"]
 ''');
 
-    await fileSystem.file('input.txt').create(recursive: true);
+    fileSystem.file('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
 
     await const CopyAssets().build(environment);
 
@@ -212,7 +214,7 @@ flutter:
           command: <Pattern>[
             Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
             'run',
-            'my_transformer',
+            'my_capitalizer_transformer',
             RegExp('--input=.*'),
             RegExp('--output=.*'),
             '-a',
@@ -233,7 +235,13 @@ flutter:
             expect(parsedArgs['bbb'], true);
             expect(parsedArgs['color'], 'green');
 
-            fileSystem.file(parsedArgs['output']).createSync();
+            final File input = fileSystem.file(parsedArgs['input'] as String);
+            expect(input, exists);
+            final String inputContents = input.readAsStringSync();
+            expect(inputContents, 'abc');
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputContents.toUpperCase());
           },
         ),
       ],

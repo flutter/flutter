@@ -149,6 +149,7 @@ Future<Depfile> copyAssets(
                   workingDirectory: environment.projectDir.path,
                   transformerEntries: entry.value.transformers,
                 );
+                doCopy = false;
                 if (failure != null) {
                   throwToolExit(failure.message);
                 }
