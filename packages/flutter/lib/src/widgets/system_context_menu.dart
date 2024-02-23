@@ -48,6 +48,8 @@ class SystemContextMenu extends StatefulWidget {
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
+  final SystemContextMenuController _systemContextMenuController = SystemContextMenuController();
+
   @override
   void initState() {
     super.initState();
@@ -56,21 +58,20 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     // widget has no idea, and there's no good way to reshow the menu after
     // that. Also, building two of this widget will result in confusing
     // behavior.
-    ContextMenu.showSystemContextMenu(widget.anchor);
+    _systemContextMenuController.show(widget.anchor);
   }
 
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.anchor != oldWidget.anchor) {
-      ContextMenu.showSystemContextMenu(widget.anchor);
+      _systemContextMenuController.show(widget.anchor);
     }
   }
 
   @override
   void dispose() {
-    print('justin dispose');
-    ContextMenu.hideSystemContextMenu();
+    _systemContextMenuController.hide();
     super.dispose();
   }
 
