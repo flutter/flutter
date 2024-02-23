@@ -321,7 +321,7 @@ template("jit_runner") {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
     ]
@@ -392,7 +392,7 @@ template("aot_runner") {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
     ]
@@ -592,7 +592,7 @@ if (enable_unittests) {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
     ]
@@ -605,7 +605,7 @@ if (enable_unittests) {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
       {
@@ -633,7 +633,7 @@ if (enable_unittests) {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
     ]
@@ -766,11 +766,11 @@ if (enable_unittests) {
 
     resources = [
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl.dat"
       },
       {
-        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
         dest = "icudtl2.dat"
       },
     ]

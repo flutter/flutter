@@ -70,7 +70,7 @@ shared_library("flutter_shell_native") {
 
 bin_to_assembly("icudtl_asm") {
   deps = []
-  input = "//third_party/icu/flutter/icudtl.dat"
+  input = "//flutter/third_party/icu/flutter/icudtl.dat"
   symbol = "_binary_icudtl_dat_start"
   size_symbol = "_binary_icudtl_dat_size"
   executable = false

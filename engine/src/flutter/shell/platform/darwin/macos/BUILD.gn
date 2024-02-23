@@ -162,7 +162,7 @@ shared_library("flutter_framework_dylib") {
 test_fixtures("flutter_desktop_darwin_fixtures") {
   dart_main = "framework/Source/fixtures/flutter_desktop_test.dart"
 
-  fixtures = [ "//third_party/icu/common/icudtl.dat" ]
+  fixtures = [ "//flutter/third_party/icu/common/icudtl.dat" ]
 }
 
 executable("flutter_desktop_darwin_unittests") {
@@ -259,7 +259,7 @@ action("copy_framework_headers") {
 
 copy("copy_framework_icu") {
   visibility = [ ":*" ]
-  sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+  sources = [ "//flutter/third_party/icu/flutter/icudtl.dat" ]
   outputs =
       [ "$_flutter_framework_dir/Versions/A/Resources/{{source_file_part}}" ]
 }

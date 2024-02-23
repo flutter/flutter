@@ -53,7 +53,7 @@ source_set("flutter_framework_source_arc") {
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/darwin/common:framework_common",
-    "//third_party/icu",
+    "//flutter/third_party/icu",
   ]
   public_configs = [ "//flutter:config" ]
 
@@ -407,7 +407,7 @@ action("copy_framework_headers") {
 
 copy("copy_framework_icu") {
   visibility = [ ":*" ]
-  sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+  sources = [ "//flutter/third_party/icu/flutter/icudtl.dat" ]
   outputs = [ "$_flutter_framework_dir/{{source_file_part}}" ]
 }
 

@@ -84,7 +84,7 @@ source_set("txt") {
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/skia",
     "//flutter/third_party/harfbuzz",
-    "//third_party/icu",
+    "//flutter/third_party/icu",
   ]
 
   deps = [
