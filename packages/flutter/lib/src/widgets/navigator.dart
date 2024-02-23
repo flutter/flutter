@@ -115,6 +115,13 @@ enum RoutePopDisposition {
   bubble,
 }
 
+/// A placeholder for a route.
+@visibleForTesting
+class RoutePlaceholder {
+  /// A const constructor for [RoutePlaceholder].
+  const RoutePlaceholder();
+}
+
 /// An abstraction for an entry managed by a [Navigator].
 ///
 /// This class defines an abstract interface between the navigator and the
@@ -138,7 +145,7 @@ enum RoutePopDisposition {
 /// The type argument `T` is the route's return type, as used by
 /// [currentResult], [popped], and [didPop]. The type `void` may be used if the
 /// route does not return a value.
-abstract class Route<T> {
+abstract class Route<T> extends RoutePlaceholder {
   /// Initialize the [Route].
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
@@ -2896,12 +2903,6 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-class _NotAnnounced extends Route<void> {
-  // A placeholder for the lastAnnouncedPreviousRoute, the
-  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
-  // change has been announced.
-}
-
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2937,12 +2938,10 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final Route<dynamic> notAnnounced = _NotAnnounced();
-
   _RouteLifecycle currentState;
-  Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
-  WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
-  Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
+  RoutePlaceholder? lastAnnouncedPreviousRoute = const RoutePlaceholder(); // last argument to Route.didChangePrevious
+  WeakReference<RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<RoutePlaceholder>(const RoutePlaceholder()); // last argument to Route.didPopNext
+  RoutePlaceholder? lastAnnouncedNextRoute = const RoutePlaceholder(); // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is

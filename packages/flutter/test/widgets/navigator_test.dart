@@ -2302,14 +2302,14 @@ void main() {
 
   testWidgets('Route announce correctly for first route and last route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/57133.
-    Route<void>? previousOfFirst = NotAnnounced();
-    Route<void>? nextOfFirst = NotAnnounced();
-    Route<void>? popNextOfFirst = NotAnnounced();
+    RoutePlaceholder? previousOfFirst = const RoutePlaceholder();
+    RoutePlaceholder? nextOfFirst = const RoutePlaceholder();
+    RoutePlaceholder? popNextOfFirst = const RoutePlaceholder();
     Route<void>? firstRoute;
 
-    Route<void>? previousOfSecond = NotAnnounced();
-    Route<void>? nextOfSecond = NotAnnounced();
-    Route<void>? popNextOfSecond = NotAnnounced();
+    RoutePlaceholder? previousOfSecond = const RoutePlaceholder();
+    RoutePlaceholder? nextOfSecond = const RoutePlaceholder();
+    RoutePlaceholder? popNextOfSecond = const RoutePlaceholder();
     Route<void>? secondRoute;
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -2341,11 +2341,11 @@ void main() {
 
     expect(previousOfFirst, isNull);
     expect(nextOfFirst, secondRoute);
-    expect(popNextOfFirst, isA<NotAnnounced>());
+    expect(popNextOfFirst, isA<RoutePlaceholder>());
 
     expect(previousOfSecond, firstRoute);
     expect(nextOfSecond, isNull);
-    expect(popNextOfSecond, isA<NotAnnounced>());
+    expect(popNextOfSecond, isA<RoutePlaceholder>());
 
     navigator.currentState!.pop();
     expect(popNextOfFirst, secondRoute);
@@ -5238,8 +5238,6 @@ void main() {
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
-
-class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
