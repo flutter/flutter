@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -2606,7 +2607,9 @@ class TestRenderTargetAllocator : public RenderTargetAllocator {
 
   void End() override { RenderTargetAllocator::End(); }
 
-  std::vector<TextureDescriptor> GetDescriptors() const { return allocated_; }
+  std::vector<TextureDescriptor> GetAllocatedTextureDescriptors() const {
+    return allocated_;
+  }
 
   void ResetDescriptors() { allocated_.clear(); }
 
@@ -2651,33 +2654,19 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
 
   EXPECT_TRUE(pass->Render(content_context, rt));
 
-  if (test_allocator->GetDescriptors().size() == 6u) {
-    EXPECT_EQ(test_allocator->GetDescriptors()[0].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[1].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[2].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[3].size, ISize(1000, 1000));
+  std::vector<TextureDescriptor> descriptors =
+      test_allocator->GetAllocatedTextureDescriptors();
 
-    EXPECT_EQ(test_allocator->GetDescriptors()[4].size, ISize(200, 200));
-    EXPECT_EQ(test_allocator->GetDescriptors()[5].size, ISize(200, 200));
-  } else if (test_allocator->GetDescriptors().size() == 7u) {
-    // Onscreen render target.
-    EXPECT_EQ(test_allocator->GetDescriptors()[0].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[1].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[2].size, ISize(1000, 1000));
+  auto contains_size = [&descriptors](ISize size) -> bool {
+    return std::find_if(descriptors.begin(), descriptors.end(),
+                        [&size](auto desc) { return desc.size == size; }) !=
+           descriptors.end();
+  };
 
-    EXPECT_EQ(test_allocator->GetDescriptors()[3].size, ISize(200, 200));
-    EXPECT_EQ(test_allocator->GetDescriptors()[4].size, ISize(200, 200));
-    EXPECT_EQ(test_allocator->GetDescriptors()[5].size, ISize(200, 200));
-    EXPECT_EQ(test_allocator->GetDescriptors()[6].size, ISize(200, 200));
-  } else if (test_allocator->GetDescriptors().size() == 4u) {
-    EXPECT_EQ(test_allocator->GetDescriptors()[0].size, ISize(1000, 1000));
-    EXPECT_EQ(test_allocator->GetDescriptors()[1].size, ISize(1000, 1000));
-
-    EXPECT_EQ(test_allocator->GetDescriptors()[2].size, ISize(200, 200));
-    EXPECT_EQ(test_allocator->GetDescriptors()[3].size, ISize(200, 200));
-  } else {
-    EXPECT_TRUE(false);
-  }
+  EXPECT_TRUE(contains_size(ISize(1000, 1000)))
+      << "The root texture wasn't allocated";
+  EXPECT_TRUE(contains_size(ISize(200, 200)))
+      << "The ColorBurned texture wasn't allocated (100x100 scales up 2x)";
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
@@ -2788,7 +2777,11 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
                     .Close()
                     .TakePath();
     GeometryResult result = get_result(path);
-    EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+    if constexpr (ContentContext::kEnableStencilThenCover) {
+      EXPECT_EQ(result.mode, GeometryResult::Mode::kNonZero);
+    } else {
+      EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
+    }
   }
 }
 

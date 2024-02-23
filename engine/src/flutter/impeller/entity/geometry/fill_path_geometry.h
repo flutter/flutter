@@ -42,6 +42,9 @@ class FillPathGeometry final : public Geometry {
                                      const Entity& entity,
                                      RenderPass& pass) const override;
 
+  // |Geometry|
+  GeometryResult::Mode GetResultMode() const override;
+
   Path path_;
   std::optional<Rect> inner_rect_;
 

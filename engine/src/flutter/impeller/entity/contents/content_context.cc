@@ -480,23 +480,25 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     ISize texture_size,
     const SubpassCallback& subpass_callback,
     bool msaa_enabled,
+    bool depth_stencil_enabled,
     int32_t mip_count) const {
   const std::shared_ptr<Context>& context = GetContext();
   RenderTarget subpass_target;
+
+  std::optional<RenderTarget::AttachmentConfig> depth_stencil_config =
+      depth_stencil_enabled ? RenderTarget::kDefaultStencilAttachmentConfig
+                            : std::optional<RenderTarget::AttachmentConfig>();
+
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(
         *context, *GetRenderTargetCache(), texture_size,
         /*mip_count=*/mip_count, SPrintF("%s Offscreen", label.c_str()),
-        RenderTarget::kDefaultColorAttachmentConfigMSAA,
-        std::nullopt  // stencil_attachment_config
-    );
+        RenderTarget::kDefaultColorAttachmentConfigMSAA, depth_stencil_config);
   } else {
     subpass_target = RenderTarget::CreateOffscreen(
         *context, *GetRenderTargetCache(), texture_size,
         /*mip_count=*/mip_count, SPrintF("%s Offscreen", label.c_str()),
-        RenderTarget::kDefaultColorAttachmentConfig,  //
-        std::nullopt  // stencil_attachment_config
-    );
+        RenderTarget::kDefaultColorAttachmentConfig, depth_stencil_config);
   }
   return MakeSubpass(label, subpass_target, subpass_callback);
 }

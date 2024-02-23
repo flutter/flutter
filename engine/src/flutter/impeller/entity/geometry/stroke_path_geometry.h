@@ -42,6 +42,9 @@ class StrokePathGeometry final : public Geometry {
                                      RenderPass& pass) const override;
 
   // |Geometry|
+  GeometryResult::Mode GetResultMode() const override;
+
+  // |Geometry|
   GeometryVertexType GetVertexType() const override;
 
   // |Geometry|

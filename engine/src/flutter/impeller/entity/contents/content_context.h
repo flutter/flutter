@@ -793,6 +793,7 @@ class ContentContext {
       ISize texture_size,
       const SubpassCallback& subpass_callback,
       bool msaa_enabled = true,
+      bool depth_stencil_enabled = false,
       int32_t mip_count = 1) const;
 
   /// Makes a subpass that will render to `subpass_target`.
