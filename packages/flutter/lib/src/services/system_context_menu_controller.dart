@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'system_channels.dart';
 
-// TODO(justinmc): Name.
 /// Allows access to the system context menu.
 ///
 /// The context menu is the menu that appears for example when doing text

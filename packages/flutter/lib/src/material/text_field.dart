@@ -25,7 +25,6 @@ import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-// TODO(justinmc): Duplicate import.
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 // Examples can assume:
