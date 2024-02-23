@@ -1465,6 +1465,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       case SelectionEventType.selectParagraph:
         final SelectParagraphSelectionEvent selectParagraph = event as SelectParagraphSelectionEvent;
         if (selectParagraph.absorb) {
+          debugPrint('absorbingggggggg ${range.textInside(fullText)}');
           _handleSelectAll();
           result = SelectionResult.next;
           _selectableContainsOriginTextBoundary = true;
