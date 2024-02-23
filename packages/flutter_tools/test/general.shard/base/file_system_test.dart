@@ -97,15 +97,13 @@ void main() {
       try {
         const String sourcePath = 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
-        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('bleh');
-        sourceDirectory.childLink('some_link.txt').createSync(sourceFile1.path);
+        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('file 1');
+        sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir')..createSync(recursive: true);
-        sourceSubDirectory.childFile('another_file.txt').createSync(recursive: true);
-        sourceDirectory.childLink('linked_sub_dir').createSync(sourceSubDirectory.path);
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir/sub_dir_2')..createSync(recursive: true);
+        sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
+        sourceDirectory.childLink('relative_linked_sub_dir').createSync('sub_dir/sub_dir_2');
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
-        final File outsideFile = tempDir.childFile('outside/outside_link.txt')..createSync(recursive: true);
-        sourceDirectory.childLink('outside_link.txt').createSync(outsideFile.path);
 
         const String targetPath = 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
@@ -114,29 +112,28 @@ void main() {
 
         expect(targetDirectory.existsSync(), true);
         expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'bleh');
-        expect(targetDirectory.childFile('some_link.txt').existsSync(), true);
-        expect(targetDirectory.childLink('some_link.txt').existsSync(), false);
-        expect(targetDirectory.childFile('some_link.txt').readAsStringSync(), 'bleh');
-        expect(targetDirectory.childDirectory('sub_dir').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childDirectory('linked_sub_dir').existsSync(), true);
-        expect(targetDirectory.childLink('linked_sub_dir').existsSync(), false);
-        expect(targetDirectory.childFile('linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'file 1');
+        expect(targetDirectory.childFile('absolute_linked.txt').readAsStringSync(), 'file 1');
+        expect(targetDirectory.childLink('absolute_linked.txt').existsSync(), false);
+        expect(targetDirectory.childDirectory('sub_dir/sub_dir_2').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').existsSync(), true);
+        expect(targetDirectory.childLink('relative_linked_sub_dir').existsSync(), false);
+        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
-        expect(targetDirectory.childFile('outside_link.txt').existsSync(), true);
-        expect(targetDirectory.childLink('outside_link.txt').existsSync(), false);
 
         // Assert that the copy operation hasn't modified the original file in some way.
         expect(sourceDirectory.childFile('some_file.txt').lastModifiedSync(), writeTime);
         // There's still 5 things in the original directory as there were initially.
-        expect(sourceDirectory.listSync().length, 6);
+        expect(sourceDirectory.listSync().length, 5);
       } finally {
         tryToDelete(tempDir);
       }
     });
 
-    testWithoutContext('test directory copy with followLinks: false and linkToDestinationTarget: true', () async {
+    testWithoutContext('test directory copy with followLinks: false', () async {
       final Signals signals = Signals.test();
       final LocalFileSystem fileSystem = LocalFileSystem.test(
         signals: signals,
@@ -145,76 +142,13 @@ void main() {
       try {
         const String sourcePath = 'some/origin';
         final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
-        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('bleh');
-        sourceDirectory.childLink('some_link.txt').createSync(sourceFile1.path);
+        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('file 1');
+        sourceDirectory.childLink('absolute_linked.txt').createSync(sourceFile1.absolute.path);
         final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir')..createSync(recursive: true);
-        sourceSubDirectory.childFile('another_file.txt').createSync(recursive: true);
-        sourceDirectory.childLink('linked_sub_dir').createSync(sourceSubDirectory.path);
+        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir/sub_dir_2')..createSync(recursive: true);
+        sourceSubDirectory.childFile('another_file.txt').writeAsStringSync('file 2');
+        sourceDirectory.childLink('relative_linked_sub_dir').createSync('sub_dir/sub_dir_2');
         sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
-        final File outsideFile = tempDir.childFile('outside/outside_link.txt')..createSync(recursive: true);
-        sourceDirectory.childLink('outside_link.txt').createSync(outsideFile.path);
-
-        const String targetPath = 'some/non-existent/target';
-        final Directory targetDirectory = tempDir.childDirectory(targetPath);
-
-        copyDirectory(
-          sourceDirectory,
-          targetDirectory,
-          followLinks: false,
-          linkToDestinationTarget: true,
-        );
-
-        expect(targetDirectory.existsSync(), true);
-        expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'bleh');
-        expect(targetDirectory.childLink('some_link.txt').existsSync(), true);
-        expect(
-          targetDirectory.childLink('some_link.txt').targetSync(),
-          targetDirectory.childFile('some_file.txt').path,
-        );
-        expect(targetDirectory.childDirectory('sub_dir').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childLink('linked_sub_dir').existsSync(), true);
-        expect(
-          targetDirectory.childLink('linked_sub_dir').targetSync(),
-          targetDirectory.childDirectory('sub_dir').path,
-        );
-        expect(targetDirectory.childFile('linked_sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
-        expect(targetDirectory.childLink('outside_link.txt').existsSync(), true);
-        expect(
-          targetDirectory.childLink('outside_link.txt').targetSync(),
-          outsideFile.path,
-        );
-
-        // Assert that the copy operation hasn't modified the original file in some way.
-        expect(sourceDirectory.childFile('some_file.txt').lastModifiedSync(), writeTime);
-        // There's still 5 things in the original directory as there were initially.
-        expect(sourceDirectory.listSync().length, 6);
-      } finally {
-        tryToDelete(tempDir);
-      }
-    });
-
-    testWithoutContext('test directory copy with followLinks: false and linkToDestinationTarget: false', () async {
-      final Signals signals = Signals.test();
-      final LocalFileSystem fileSystem = LocalFileSystem.test(
-        signals: signals,
-      );
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_copy_directory.');
-      try {
-        const String sourcePath = 'some/origin';
-        final Directory sourceDirectory = tempDir.childDirectory(sourcePath)..createSync(recursive: true);
-        final File sourceFile1 = sourceDirectory.childFile('some_file.txt')..writeAsStringSync('bleh');
-        sourceDirectory.childLink('some_link.txt').createSync(sourceFile1.path);
-        final DateTime writeTime = sourceFile1.lastModifiedSync();
-        final Directory sourceSubDirectory = sourceDirectory.childDirectory('sub_dir')..createSync(recursive: true);
-        sourceSubDirectory.childFile('another_file.txt').createSync(recursive: true);
-        sourceDirectory.childLink('linked_sub_dir').createSync(sourceSubDirectory.path);
-        sourceDirectory.childDirectory('empty_directory').createSync(recursive: true);
-        final File outsideFile = tempDir.childFile('outside/outside_link.txt')..createSync(recursive: true);
-        sourceDirectory.childLink('outside_link.txt').createSync(outsideFile.path);
 
         const String targetPath = 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
@@ -223,31 +157,30 @@ void main() {
 
         expect(targetDirectory.existsSync(), true);
         expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
-        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'bleh');
-        expect(targetDirectory.childLink('some_link.txt').existsSync(), true);
+        expect(targetDirectory.childFile('some_file.txt').readAsStringSync(), 'file 1');
+        expect(targetDirectory.childFile('absolute_linked.txt').readAsStringSync(), 'file 1');
+        expect(targetDirectory.childLink('absolute_linked.txt').existsSync(), true);
         expect(
-          targetDirectory.childLink('some_link.txt').targetSync(),
-          sourceDirectory.childFile('some_file.txt').path,
+          targetDirectory.childLink('absolute_linked.txt').targetSync(),
+          sourceFile1.absolute.path,
         );
-        expect(targetDirectory.childDirectory('sub_dir').existsSync(), true);
-        expect(targetDirectory.childFile('sub_dir/another_file.txt').existsSync(), true);
-        expect(targetDirectory.childLink('linked_sub_dir').existsSync(), true);
+        expect(targetDirectory.childDirectory('sub_dir/sub_dir_2').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('sub_dir/sub_dir_2/another_file.txt').readAsStringSync(), 'file 2');
+        expect(targetDirectory.childDirectory('relative_linked_sub_dir').existsSync(), true);
+        expect(targetDirectory.childLink('relative_linked_sub_dir').existsSync(), true);
         expect(
-          targetDirectory.childLink('linked_sub_dir').targetSync(),
-          sourceDirectory.childDirectory('sub_dir').path,
+          targetDirectory.childLink('relative_linked_sub_dir').targetSync(),
+          'sub_dir/sub_dir_2',
         );
-        expect(targetDirectory.childFile('linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').existsSync(), true);
+        expect(targetDirectory.childFile('relative_linked_sub_dir/another_file.txt').readAsStringSync(), 'file 2');
         expect(targetDirectory.childDirectory('empty_directory').existsSync(), true);
-        expect(targetDirectory.childLink('outside_link.txt').existsSync(), true);
-        expect(
-          targetDirectory.childLink('outside_link.txt').targetSync(),
-          outsideFile.path,
-        );
 
         // Assert that the copy operation hasn't modified the original file in some way.
         expect(sourceDirectory.childFile('some_file.txt').lastModifiedSync(), writeTime);
         // There's still 5 things in the original directory as there were initially.
-        expect(sourceDirectory.listSync().length, 6);
+        expect(sourceDirectory.listSync().length, 5);
       } finally {
         tryToDelete(tempDir);
       }
