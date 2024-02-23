@@ -560,7 +560,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   double get _width {
     final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
-    // set to _kWidth if drawer not being shown currently
+    // return _kWidth if drawer not being shown currently
     return box?.size.width ?? _kWidth;
   }
 
