@@ -557,11 +557,9 @@ class Cache {
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
-    if (_rootOverride != null) {
-      return _fileSystem.directory(_fileSystem.path.join(_rootOverride.path, 'bin', 'cache'));
-    } else {
-      return _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
-    }
+    return _fileSystem.directory(
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+    );
   }
 
   String getHostPlatformArchName() {

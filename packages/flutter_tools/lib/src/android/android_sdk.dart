@@ -521,11 +521,7 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
-    if (path != null) {
-      return path;
-    }
-    return null;
+    return getCmdlineToolsPath(executable, skipOldTools: true);
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
