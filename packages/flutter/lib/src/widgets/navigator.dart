@@ -116,9 +116,8 @@ enum RoutePopDisposition {
 }
 
 /// A placeholder for a route.
-@visibleForTesting
 class RoutePlaceholder {
-  /// A const constructor for [RoutePlaceholder].
+  /// Creates a placeholder for a route.
   const RoutePlaceholder();
 }
 
