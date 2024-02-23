@@ -47,27 +47,45 @@ class PositionWriter {
 
 class PositionUVWriter {
  public:
-  PositionUVWriter(Point texture_origin,
-                   Size texture_coverage,
+  PositionUVWriter(const Point& texture_origin,
+                   const Size& texture_size,
                    const Matrix& effect_transform)
-      : uv_transform_(Matrix::MakeScale(1 / texture_coverage) *
-                      Matrix::MakeTranslation(-texture_origin) *
-                      effect_transform) {}
+      : texture_origin_(texture_origin),
+        texture_size_(texture_size),
+        effect_transform_(effect_transform) {}
 
-  const std::vector<TextureFillVertexShader::PerVertexData>& GetData() const {
+  const std::vector<TextureFillVertexShader::PerVertexData>& GetData() {
+    if (effect_transform_.IsIdentity()) {
+      auto origin = texture_origin_;
+      auto scale = 1.0 / texture_size_;
+
+      for (auto& pvd : data_) {
+        pvd.texture_coords = (pvd.position - origin) * scale;
+      }
+    } else {
+      auto texture_rect = Rect::MakeOriginSize(texture_origin_, texture_size_);
+      Matrix uv_transform =
+          texture_rect.GetNormalizingTransform() * effect_transform_;
+
+      for (auto& pvd : data_) {
+        pvd.texture_coords = uv_transform * pvd.position;
+      }
+    }
     return data_;
   }
 
   void AppendVertex(const Point& point) {
     data_.emplace_back(TextureFillVertexShader::PerVertexData{
         .position = point,
-        .texture_coords = uv_transform_ * point,
+        // .texture_coords = default, will be filled in during |GetData()|
     });
   }
 
  private:
   std::vector<TextureFillVertexShader::PerVertexData> data_ = {};
-  const Matrix uv_transform_;
+  const Point texture_origin_;
+  const Size texture_size_;
+  const Matrix effect_transform_;
 };
 
 template <typename VertexWriter>

@@ -169,6 +169,26 @@ TEST(EntityGeometryTest, StrokePathGeometryTransformOfLine) {
     auto uv_vertices =
         ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesUV(
             polyline, 10.0f, 10.0f, Join::kBevel, Cap::kButt, 1.0,  //
+            Point(50.0f, 40.0f), Size(20.0f, 40.0f), Matrix());
+    // uvx = (x - 50) / 20
+    // uvy = (y - 40) / 40
+    auto uv = [](const Point& p) {
+      return Point((p.x - 50.0f) / 20.0f,  //
+                   (p.y - 40.0f) / 40.0f);
+    };
+    std::vector<TextureFillVertexShader::PerVertexData> uv_expected;
+    for (size_t i = 0; i < expected.size(); i++) {
+      auto p = expected[i].position;
+      uv_expected.push_back({.position = p, .texture_coords = uv(p)});
+    }
+
+    EXPECT_TEXTURE_VERTICES_NEAR(uv_vertices, uv_expected);
+  }
+
+  {
+    auto uv_vertices =
+        ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesUV(
+            polyline, 10.0f, 10.0f, Join::kBevel, Cap::kButt, 1.0,  //
             Point(50.0f, 40.0f), Size(20.0f, 40.0f),
             Matrix::MakeScale({8.0f, 4.0f, 1.0f}));
     // uvx = ((x * 8) - 50) / 20
