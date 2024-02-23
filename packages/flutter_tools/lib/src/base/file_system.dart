@@ -109,6 +109,16 @@ String getDisplayPath(String fullPath, FileSystem fileSystem) {
 ///
 /// Skips files if [shouldCopyFile] returns `false`.
 /// Does not recurse over directories if [shouldCopyDirectory] returns `false`.
+///
+/// If [followLinks] is false, then any symbolic links found are reported as
+/// [Link] objects, rather than as directories or files, and are not recursed into.
+///
+/// If [followLinks] is true, then working links are reported as directories or
+/// files, depending on what they point to.
+///
+/// If [linkToDestinationTarget] is true, [followLinks] is false, and the symbolic
+/// link target is within the [srcDir], set the target of the copied link to the
+/// corresponding target in the [destDir] rather than the [srcDir].
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
@@ -116,6 +126,7 @@ void copyDirectory(
   bool Function(Directory)? shouldCopyDirectory,
   void Function(File srcFile, File destFile)? onFileCopied,
   bool followLinks = true,
+  bool linkToDestinationTarget = false,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -129,7 +140,13 @@ void copyDirectory(
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
-      newLink.createSync(entity.targetSync());
+      final String target;
+      if (linkToDestinationTarget && !followLinks && entity.targetSync().contains(srcDir.path)) {
+        target = entity.targetSync().replaceFirst(srcDir.path, destDir.path);
+      } else {
+        target = entity.targetSync();
+      }
+      newLink.createSync(target);
     } else if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
       if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
