@@ -19,6 +19,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
@@ -425,6 +426,20 @@ void main() {
   {
     final BufferLogger logger = BufferLogger.test();
     final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[RegExp(r'.*chrome.*')],
+        onRun: (List<String> cmd) {
+          final ProcessException exception = ProcessException(
+            cmd.first,
+            cmd.sublist(1),
+            'Something went wrong trying to spawn ${cmd.first}',
+          );
+          completer.complete();
+          throw exception;
+        },
+      ),
+    ]);
 
     testUsingContext('catches async exceptions thrown from starting Chrome', () async {
       final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
@@ -438,25 +453,12 @@ void main() {
       device.vmService = FakeFlutterVmService();
       expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[device]), isTrue);
       expect(handler.launchedInBrowser, isTrue);
-      //await Future.delayed(Duration(seconds: 1));
       await completer.future;
+      expect(processManager, hasNoRemainingExpectations);
       expect(logger.traceText, contains('Experienced error ProcessException: Something went wrong trying to spawn'));
     }, overrides: <Type, Generator>{
       Logger: () => logger,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[RegExp(r'.*chrome.*')],
-          onRun: (List<String> cmd) {
-            final ProcessException exception = ProcessException(
-              cmd.first,
-              cmd.sublist(1),
-              'Something went wrong trying to spawn ${cmd.first}',
-            );
-            completer.complete();
-            throw exception;
-          },
-        ),
-      ]),
+      ProcessManager: () => processManager,
     });
   }
 

@@ -100,7 +100,7 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    test("runPubProcess doesn't use the pub binary", () {
+    test("runPubProcess doesn't use the pub binary", () async {
       final Platform platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': '/flutter',
@@ -116,7 +116,7 @@ void main() {
       apidocs.FlutterInformation.instance =
           apidocs.FlutterInformation(platform: platform, processManager: processManager, filesystem: memoryFileSystem);
 
-      apidocs.runPubProcess(
+      await apidocs.runPubProcess(
         arguments: <String>['--one', '--two'],
         processManager: processManager,
         filesystem: memoryFileSystem,

@@ -173,6 +173,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       globals.processManager
         .start(<String>[findChromeExecutable(globals.platform, globals.fs)])
         .then<Process?>((Process p) {print('in then'); return p;}, onError: (Object error) {
+          print('in onError');
           globals.printTrace('Experienced error $error while trying to launch Chrome for devtools.');
           return null;
         });
