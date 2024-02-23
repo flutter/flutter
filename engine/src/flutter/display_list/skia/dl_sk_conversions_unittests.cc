@@ -10,6 +10,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "gtest/gtest.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/core/SkTileMode.h"
 
@@ -155,17 +156,24 @@ TEST(DisplayListSkConversions, BlendColorFilterModifiesTransparency) {
              << "]";
     std::string desc = desc_str.str();
     DlBlendColorFilter filter(color, mode);
+    auto srgb = SkColorSpace::MakeSRGB();
     if (filter.modifies_transparent_black()) {
       auto dl_filter = DlBlendColorFilter::Make(color, mode);
       auto sk_filter = ToSk(filter);
       ASSERT_NE(dl_filter, nullptr) << desc;
       ASSERT_NE(sk_filter, nullptr) << desc;
-      ASSERT_TRUE(sk_filter->filterColor(0) != 0) << desc;
+      ASSERT_TRUE(sk_filter->filterColor4f(SkColors::kTransparent, srgb.get(),
+                                           srgb.get()) !=
+                  SkColors::kTransparent)
+          << desc;
     } else {
       auto dl_filter = DlBlendColorFilter::Make(color, mode);
       auto sk_filter = ToSk(filter);
       EXPECT_EQ(dl_filter == nullptr, sk_filter == nullptr) << desc;
-      ASSERT_TRUE(sk_filter == nullptr || sk_filter->filterColor(0) == 0)
+      ASSERT_TRUE(sk_filter == nullptr ||
+                  sk_filter->filterColor4f(SkColors::kTransparent, srgb.get(),
+                                           srgb.get()) ==
+                      SkColors::kTransparent)
           << desc;
     }
   };
@@ -266,9 +274,12 @@ TEST(DisplayListSkConversions, MatrixColorFilterModifiesTransparency) {
     DlMatrixColorFilter filter(matrix);
     auto dl_filter = DlMatrixColorFilter::Make(matrix);
     auto sk_filter = ToSk(filter);
+    auto srgb = SkColorSpace::MakeSRGB();
     EXPECT_EQ(dl_filter == nullptr, sk_filter == nullptr);
     EXPECT_EQ(filter.modifies_transparent_black(),
-              sk_filter && sk_filter->filterColor(0) != 0);
+              sk_filter && sk_filter->filterColor4f(SkColors::kTransparent,
+                                                    srgb.get(), srgb.get()) !=
+                               SkColors::kTransparent);
   };
 
   // Tests identity (matrix[0] already == 1 in an identity filter)
