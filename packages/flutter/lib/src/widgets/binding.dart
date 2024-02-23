@@ -387,13 +387,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
   bool get debugShowWidgetInspectorOverride {
-    return _debugShowWidgetInspectorOverrideNotifier.value;
+    return debugShowWidgetInspectorOverrideNotifier.value;
   }
   set debugShowWidgetInspectorOverride(bool value) {
-    _debugShowWidgetInspectorOverrideNotifier.value = value;
+    debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
+  ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
+  ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
   void _debugAddStackFilters() {
     const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
