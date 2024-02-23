@@ -18,7 +18,9 @@ class TestSpecs {
 
   int get milliseconds => endTime - startTime;
 
-  set endTime(int value) => _endTime = value;
+  set endTime(int value) {
+    _endTime = value;
+  }
 
   int get endTime => _endTime ?? 0;
 
