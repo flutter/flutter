@@ -189,8 +189,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_fuchsia
-    drone_dimensions:
-      - os=Linux
     dimensions:
       kvm: "1"
     # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
@@ -228,8 +226,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: linux_arm_host_engine
-    drone_dimensions:
-      - os=Linux
 
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
@@ -242,8 +238,6 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
-    drone_dimensions:
-      - os=Linux
 
   - name: Linux linux_host_desktop_engine
     recipe: engine_v2/engine_v2
@@ -252,8 +246,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: linux_host_desktop_engine
-    drone_dimensions:
-      - os=Linux
 
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
@@ -262,8 +254,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: linux_android_aot_engine
-    drone_dimensions:
-      - os=Linux
 
   - name: Linux linux_android_debug_engine
     recipe: engine_v2/engine_v2
@@ -272,8 +262,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: linux_android_debug_engine
-    drone_dimensions:
-      - os=Linux
 
   - name: Linux linux_license
     recipe: engine_v2/builder
@@ -289,8 +277,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_web_engine
-    drone_dimensions:
-      - os=Linux
     runIf:
       - DEPS
       - .ci.yaml
@@ -343,8 +329,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: mac_android_aot_engine
-    drone_dimensions:
-      - os=Linux
 
   - name: Mac mac_clang_tidy
     recipe: engine_v2/engine_v2
@@ -382,8 +366,6 @@ targets:
         {
           "sdk_version": "15a240d"
         }
-    drone_dimensions:
-      - os=Mac-13
 
   - name: Mac mac_unopt
     recipe: engine_v2/engine_v2
@@ -403,9 +385,6 @@ targets:
         {
           "sdk_version": "15a240d"
         }
-    drone_dimensions:
-      - os=Mac-13
-      - cpu=x86
 
   - name: Mac impeller-cmake-example
     bringup: true
@@ -422,8 +401,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: windows_android_aot_engine
-    drone_dimensions:
-      - os=Windows
 
   - name: Windows windows_host_engine
     recipe: engine_v2/engine_v2
@@ -432,8 +409,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: windows_host_engine
-    drone_dimensions:
-      - os=Windows
 
   - name: Windows windows_arm_host_engine
     recipe: engine_v2/engine_v2
@@ -444,8 +419,6 @@ targets:
     properties:
       add_recipes_cq: "true"
       config_name: windows_arm_host_engine
-    drone_dimensions:
-      - os=Windows
 
   - name: Windows windows_unopt
     recipe: engine_v2/builder
