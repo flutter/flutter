@@ -64,10 +64,7 @@ class RouteInformation {
     'This feature was deprecated after v3.8.0-3.0.pre.'
   )
   String get location {
-    if (_location != null) {
-      return _location;
-    }
-    return Uri.decodeComponent(
+    return _location ?? Uri.decodeComponent(
       Uri(
         path: uri.path.isEmpty ? '/' : uri.path,
         queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
@@ -1562,10 +1559,7 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
   @override
   Future<bool> popRoute() {
     final NavigatorState? navigator = navigatorKey?.currentState;
-    if (navigator == null) {
-      return SynchronousFuture<bool>(false);
-    }
-    return navigator.maybePop();
+    return navigator?.maybePop() ?? SynchronousFuture<bool>(false);
   }
 }
 

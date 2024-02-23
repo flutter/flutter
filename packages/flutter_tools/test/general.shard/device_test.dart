@@ -1130,10 +1130,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
 
   @override
   bool isDeviceSupportedForProject(Device device) {
-    if (isAlwaysSupportedForProjectOverride != null) {
-      return isAlwaysSupportedForProjectOverride!;
-    }
-    return super.isDeviceSupportedForProject(device);
+    return isAlwaysSupportedForProjectOverride ?? super.isDeviceSupportedForProject(device);
   }
 }
 
