@@ -848,17 +848,6 @@ class _AppBarState extends State<AppBar> {
       defaults.backgroundColor!,
     );
 
-    final Color scrolledUnderBackground = _resolveColor(
-      states,
-      widget.backgroundColor,
-      appBarTheme.backgroundColor,
-      Theme.of(context).colorScheme.surfaceContainer,
-    );
-
-    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
-        ? scrolledUnderBackground
-        : backgroundColor;
-
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
       ?? defaults.foregroundColor!;
@@ -1124,7 +1113,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.systemOverlayStyle
       ?? defaults.systemOverlayStyle
       ?? _systemOverlayStyleForBrightness(
-        ThemeData.estimateBrightnessForColor(effectiveBackgroundColor),
+        ThemeData.estimateBrightnessForColor(backgroundColor),
         // Make the status bar transparent for M3 so the elevation overlay
         // color is picked up by the statusbar.
         theme.useMaterial3 ? const Color(0x00000000) : null,
@@ -1135,7 +1124,7 @@ class _AppBarState extends State<AppBar> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
+          color: backgroundColor,
           elevation: effectiveElevation,
           type: widget.forceMaterialTransparency
               ? MaterialType.transparency
@@ -1145,10 +1134,7 @@ class _AppBarState extends State<AppBar> {
             ?? defaults.shadowColor,
           surfaceTintColor: widget.surfaceTintColor
             ?? appBarTheme.surfaceTintColor
-            // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
-            // here because otherwise, it will cause breaking change for
-            // `scrolledUnderElevation`.
-            ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
+            ?? defaults.surfaceTintColor,
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -2355,7 +2341,7 @@ class _AppBarDefaultsM3 extends AppBarTheme {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
