@@ -1179,6 +1179,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     RendererBinding.instance.initMouseTracker();
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
+
+    /// ????
   }
 }
 

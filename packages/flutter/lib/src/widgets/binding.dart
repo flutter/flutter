@@ -345,6 +345,7 @@ abstract mixin class WidgetsBindingObserver {
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
+    /// ????
     super.initInstances();
     _instance = this;
 
@@ -374,6 +375,25 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
   static WidgetsBinding get instance => BindingBase.checkInstance(_instance);
   static WidgetsBinding? _instance;
+
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows the selection of a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or DevTools.
+  bool get debugShowWidgetInspectorOverride {
+    return _debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  set debugShowWidgetInspectorOverride(bool value) {
+    _debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   void _debugAddStackFilters() {
     const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
