@@ -143,8 +143,6 @@ void copyDirectory(
       String target = entity.targetSync();
       if (linkToDestinationTarget && !followLinks && target.contains(srcDir.path)) {
         target = target.replaceFirst(srcDir.path, destDir.path);
-      } else {
-        target = entity.targetSync();
       }
       newLink.createSync(target);
     } else if (entity is File) {
