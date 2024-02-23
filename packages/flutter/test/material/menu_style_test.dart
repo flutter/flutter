@@ -55,9 +55,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        fixedSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        fixedSize: const MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        animationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
@@ -100,9 +101,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        maximumSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        maximumSize: const MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        animationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
@@ -143,9 +145,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        minimumSize: MaterialStatePropertyAll<Size>(Size(300, 300)),
+                        minimumSize: const MaterialStatePropertyAll<Size>(Size(300, 300)),
+                        animationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
