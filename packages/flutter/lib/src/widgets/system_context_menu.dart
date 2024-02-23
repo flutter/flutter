@@ -51,6 +51,11 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void initState() {
     super.initState();
+    // TODO(justinmc): This whole pattern of being tied to a widget is a little
+    // confusing, because the user may dismiss the menu by tapping, but this
+    // widget has no idea, and there's no good way to reshow the menu after
+    // that. Also, building two of this widget will result in confusing
+    // behavior.
     ContextMenu.showSystemContextMenu(widget.anchor);
   }
 
@@ -64,6 +69,8 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
   @override
   void dispose() {
+    print('justin dispose');
+    ContextMenu.hideSystemContextMenu();
     super.dispose();
   }
 
