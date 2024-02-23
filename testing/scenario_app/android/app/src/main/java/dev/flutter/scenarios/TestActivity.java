@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -156,7 +157,7 @@ public abstract class TestActivity extends TestableFlutterActivity {
    * String[], Handler, Runnable)} invokes its callback when called after initialization.
    */
   protected void testFlutterLoaderCallbackWhenInitializedTwice() {
-    FlutterLoader flutterLoader = new FlutterLoader();
+    FlutterLoader flutterLoader = FlutterInjector.instance().flutterLoader();
 
     // Flutter is probably already loaded in this app based on
     // code that ran before this method. Nonetheless, invoke the
