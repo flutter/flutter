@@ -58,7 +58,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       [&renderer](ContentContextOptions options) {
         return renderer.GetSolidFillPipeline(options);
       };
-  return ColorSourceContents::DrawPositions<VS>(
+  return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [](RenderPass& pass) {
         pass.SetCommandLabel("Solid Fill");

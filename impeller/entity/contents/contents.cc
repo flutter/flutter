@@ -101,7 +101,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
             entity.GetTransform());
         return contents.Render(renderer, sub_entity, pass);
       },
-      msaa_enabled,
+      msaa_enabled, /*depth_stencil_enabled=*/true,
       std::min(mip_count, static_cast<int32_t>(subpass_size.MipCount())));
 
   if (!render_target.ok()) {

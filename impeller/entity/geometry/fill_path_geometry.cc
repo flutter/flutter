@@ -15,21 +15,6 @@ FillPathGeometry::FillPathGeometry(const Path& path,
                                    std::optional<Rect> inner_rect)
     : path_(path), inner_rect_(inner_rect) {}
 
-static GeometryResult::Mode GetGeometryMode(const Path& path) {
-  if (!ContentContext::kEnableStencilThenCover || path.IsConvex()) {
-    return GeometryResult::Mode::kNormal;
-  }
-
-  switch (path.GetFillType()) {
-    case FillType::kNonZero:
-      return GeometryResult::Mode::kNonZero;
-    case FillType::kOdd:
-      return GeometryResult::Mode::kEvenOdd;
-  }
-
-  FML_UNREACHABLE();
-}
-
 GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
@@ -81,7 +66,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = vertex_buffer,
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .mode = GetGeometryMode(path_),
+      .mode = GetResultMode(),
   };
 }
 
@@ -149,8 +134,23 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
       .vertex_buffer =
           vertex_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-      .mode = GetGeometryMode(path_),
+      .mode = GetResultMode(),
   };
+}
+
+GeometryResult::Mode FillPathGeometry::GetResultMode() const {
+  if (!ContentContext::kEnableStencilThenCover || path_.IsConvex()) {
+    return GeometryResult::Mode::kNormal;
+  }
+
+  switch (path_.GetFillType()) {
+    case FillType::kNonZero:
+      return GeometryResult::Mode::kNonZero;
+    case FillType::kOdd:
+      return GeometryResult::Mode::kEvenOdd;
+  }
+
+  FML_UNREACHABLE();
 }
 
 GeometryVertexType FillPathGeometry::GetVertexType() const {

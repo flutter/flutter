@@ -6,6 +6,7 @@
 
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
+#include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
@@ -644,6 +645,10 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
       .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
       .mode = GeometryResult::Mode::kPreventOverdraw,
   };
+}
+
+GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
+  return GeometryResult::Mode::kPreventOverdraw;
 }
 
 GeometryVertexType StrokePathGeometry::GetVertexType() const {

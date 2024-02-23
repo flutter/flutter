@@ -168,6 +168,10 @@ GeometryResult Geometry::GetPositionUVBuffer(Rect texture_coverage,
   return {};
 }
 
+GeometryResult::Mode Geometry::GetResultMode() const {
+  return GeometryResult::Mode::kNormal;
+}
+
 std::shared_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {

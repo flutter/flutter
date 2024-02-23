@@ -219,10 +219,8 @@ bool Canvas::Restore() {
   }
 
   transform_stack_.pop_back();
-  if constexpr (!ContentContext::kEnableStencilThenCover) {
-    if (num_clips > 0) {
-      RestoreClip();
-    }
+  if (num_clips > 0) {
+    RestoreClip();
   }
 
   return true;

@@ -839,6 +839,11 @@ bool EntityPass::RenderElement(Entity& element_entity,
       }
       clip_coverage_stack.resize(restoration_index + 1);
 
+      if constexpr (ContentContext::kEnableStencilThenCover) {
+        // Skip all clip restores when stencil-then-cover is enabled.
+        return true;
+      }
+
       if (!clip_coverage_stack.back().coverage.has_value()) {
         // Running this restore op won't make anything renderable, so skip it.
         return true;
