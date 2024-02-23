@@ -2899,12 +2899,6 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-class _NotAnnounced extends Route<void> {
-  // A placeholder for the lastAnnouncedPreviousRoute, the
-  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
-  // change has been announced.
-}
-
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2940,12 +2934,10 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final Route<dynamic> notAnnounced = _NotAnnounced();
-
   _RouteLifecycle currentState;
-  Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
-  WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
-  Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
+  Route<dynamic>? lastAnnouncedPreviousRoute; // last argument to Route.didChangePrevious
+  WeakReference<Route<dynamic>>? lastAnnouncedPoppedNextRoute; // last argument to Route.didPopNext
+  Route<dynamic>? lastAnnouncedNextRoute; // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
@@ -3256,8 +3248,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // Do not announce if `next` changes from a just popped route to null. We
     // already announced this change by calling didPopNext.
     return !(
-      nextRoute == null &&
-        lastAnnouncedPoppedNextRoute.target == lastAnnouncedNextRoute
+      nextRoute == null && lastAnnouncedPoppedNextRoute == null
     );
   }
 
