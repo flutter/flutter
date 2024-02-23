@@ -118,7 +118,6 @@ targets:
     presubmit: false
     properties:
       cache_name: "builder"
-      cache_root: "cache"
       cache_paths: >-
         [
           "builder",
@@ -138,7 +137,6 @@ targets:
     presubmit: false
     properties:
       cache_name: "builder"
-      cache_root: "cache"
       cache_paths: >-
         [
           "builder",
@@ -157,7 +155,6 @@ targets:
     presubmit: false
     properties:
       cache_name: "builder"
-      cache_root: "cache"
       cache_paths: >-
         [
           "builder",
