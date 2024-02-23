@@ -82,7 +82,7 @@ flutter:
   testUsingContext('Copies files to correct asset directory', () async {
     await const CopyAssets().build(environment);
 
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.bin'), exists);
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
     expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
     // See https://github.com/flutter/flutter/issues/35293

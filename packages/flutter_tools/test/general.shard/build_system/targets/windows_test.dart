@@ -152,7 +152,7 @@ void main() {
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
-    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.bin'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
@@ -181,7 +181,7 @@ void main() {
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\windows\app.so'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.bin'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -208,7 +208,7 @@ void main() {
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\windows\app.so'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.bin'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
