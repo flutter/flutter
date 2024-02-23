@@ -838,7 +838,13 @@ class TextField extends StatefulWidget {
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
-    return AdaptiveAndSystemTextSelectionToolbar(
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
+      return SystemContextMenu.editableText(
+        editableTextState: editableTextState,
+      );
+    }
+    return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
     /*
