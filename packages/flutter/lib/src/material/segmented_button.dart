@@ -985,23 +985,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.1);
+            return _colors.onSecondaryContainer.withOpacity(0.12);
           }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSecondaryContainer.withOpacity(0.1);
+            return _colors.onSecondaryContainer.withOpacity(0.12);
           }
         } else {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSurface.withOpacity(0.1);
+            return _colors.onSurface.withOpacity(0.12);
           }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.1);
+            return _colors.onSurface.withOpacity(0.12);
           }
         }
         return null;
@@ -1026,23 +1026,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor?.withOpacity(0.1);
+          return selectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
           return selectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor?.withOpacity(0.1);
+          return selectedColor?.withOpacity(0.12);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor?.withOpacity(0.1);
+          return unselectedColor?.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
           return unselectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor?.withOpacity(0.1);
+          return unselectedColor?.withOpacity(0.12);
         }
       }
       return Colors.transparent;

@@ -1580,20 +1580,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
-  /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// Deprecated in favor of [boldTextOf].
-  @Deprecated(
-    'Migrate to boldTextOf. '
-    'This feature was deprecated after v3.5.0-9.0.pre.'
-  )
-  static bool boldTextOverride(BuildContext context) => boldTextOf(context);
-
-  /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that

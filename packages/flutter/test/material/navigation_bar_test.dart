@@ -296,8 +296,8 @@ void main() {
       ),
     );
 
-    expect(_getMaterial(tester).color, theme.colorScheme.surfaceContainer);
-    expect(_getMaterial(tester).surfaceTintColor, Colors.transparent);
+    expect(_getMaterial(tester).color, theme.colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);

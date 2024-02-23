@@ -417,7 +417,7 @@ class FilledButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.onSecondaryContainer
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.onSecondaryContainer(0.08)
-  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.1)
+  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.12)
   /// * `shadowColor` - Theme.colorScheme.shadow
   /// * `surfaceTintColor` - Colors.transparent
   /// * `elevation`
@@ -501,13 +501,13 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.1);
+      return overlay.withOpacity(0.12);
     }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.1);
+      return overlay.withOpacity(0.12);
     }
     return null;
   }
@@ -676,13 +676,13 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onPrimary.withOpacity(0.1);
+        return _colors.onPrimary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.1);
+        return _colors.onPrimary.withOpacity(0.12);
       }
       return null;
     });
@@ -798,13 +798,13 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSecondaryContainer.withOpacity(0.1);
+        return _colors.onSecondaryContainer.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.1);
+        return _colors.onSecondaryContainer.withOpacity(0.12);
       }
       return null;
     });

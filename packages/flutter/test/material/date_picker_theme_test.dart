@@ -157,10 +157,10 @@ void main() {
       ),
     );
 
-    expect(m3.backgroundColor, colorScheme.surfaceContainerHigh);
+    expect(m3.backgroundColor, colorScheme.surface);
     expect(m3.elevation, 6);
     expect(m3.shadowColor, const Color(0x00000000)); // Colors.transparent
-    expect(m3.surfaceTintColor, Colors.transparent);
+    expect(m3.surfaceTintColor, colorScheme.surfaceTint);
     expect(m3.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)));
     expect(m3.headerBackgroundColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.headerForegroundColor, colorScheme.onSurfaceVariant);
@@ -175,14 +175,14 @@ void main() {
     expect(m3.dayBackgroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.primary);
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{}), null);
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.1));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.1));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.1));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.1));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.12));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.1));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.primary.withOpacity(0.38));
     expect(m3.todayBorder, BorderSide(color: colorScheme.primary));
@@ -194,10 +194,10 @@ void main() {
     expect(m3.yearBackgroundColor?.resolve(<MaterialState>{MaterialState.selected}), colorScheme.primary);
     expect(m3.yearOverlayColor?.resolve(<MaterialState>{}), null);
     expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.1));
+    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
     expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.1));
-    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.1));
+    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.yearOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.rangePickerElevation, 0);
     expect(m3.rangePickerShape, const RoundedRectangleBorder());
     expect(m3.rangePickerShadowColor, Colors.transparent);

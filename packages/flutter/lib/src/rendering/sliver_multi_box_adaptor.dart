@@ -504,6 +504,48 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     return null;
   }
 
+  /// Returns the number of children preceding the `firstIndex` that need to be
+  /// garbage collected.
+  ///
+  /// See also:
+  ///
+  ///   * [collectGarbage], which takes the leading and trailing number of
+  ///     children to be garbage collected.
+  ///   * [calculateTrailingGarbage], which similarly returns the number of
+  ///     trailing children to be garbage collected.
+  @visibleForTesting
+  @protected
+  int calculateLeadingGarbage({required int firstIndex}) {
+    RenderBox? walker = firstChild;
+    int leadingGarbage = 0;
+    while (walker != null && indexOf(walker) < firstIndex) {
+      leadingGarbage += 1;
+      walker = childAfter(walker);
+    }
+    return leadingGarbage;
+  }
+
+  /// Returns the number of children following the `lastIndex` that need to be
+  /// garbage collected.
+  ///
+  /// See also:
+  ///
+  ///   * [collectGarbage], which takes the leading and trailing number of
+  ///     children to be garbage collected.
+  ///   * [calculateLeadingGarbage], which similarly returns the number of
+  ///     leading children to be garbage collected.
+  @visibleForTesting
+  @protected
+  int calculateTrailingGarbage({required int lastIndex}) {
+    RenderBox? walker = lastChild;
+    int trailingGarbage = 0;
+    while (walker != null && indexOf(walker) > lastIndex) {
+      trailingGarbage += 1;
+      walker = childBefore(walker);
+    }
+    return trailingGarbage;
+  }
+
   /// Called after layout with the number of children that can be garbage
   /// collected at the head and tail of the child list.
   ///
@@ -513,6 +555,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// This method also collects any children that were previously kept alive but
   /// are now no longer necessary. As such, it should be called every time
   /// [performLayout] is run, even if the arguments are both zero.
+  ///
+  /// See also:
+  ///
+  ///   * [calculateLeadingGarbage], which can be used to determine
+  ///     `leadingGarbage` here.
+  ///   * [calculateTrailingGarbage], which can be used to determine
+  ///     `trailingGarbage` here.
   @protected
   void collectGarbage(int leadingGarbage, int trailingGarbage) {
     assert(_debugAssertChildListLocked());
