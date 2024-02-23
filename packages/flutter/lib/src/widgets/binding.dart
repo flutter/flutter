@@ -396,10 +396,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
-  /// Disposes the [debugShowWidgetInspectorOverrideNotifier].
+  /// Resets some internal members to their initial values
   ///
-  /// Noop if the notifier has not been created.
-  void disposeDebugShowWidgetInspectorOverrideNotifier() {
+  /// Is used by test framework.
+  @visibleForTesting
+  @override
+  void resetInternalState() {
+    // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
+    super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
   }
