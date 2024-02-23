@@ -24,6 +24,8 @@ dart bin/android_integration_tests.dart --smoke-test dev.flutter.scenarios.Engin
 
 ## Additional arguments
 
+- `--verbose`: Print additional information about the test run.
+
 - `--adb`: The path to the `adb` tool. Defaults to
   `third_party/android_tools/sdk/platform-tools/adb`.
 

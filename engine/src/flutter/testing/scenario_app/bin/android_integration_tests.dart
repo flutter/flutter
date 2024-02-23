@@ -14,6 +14,7 @@ import 'package:path/path.dart';
 import 'package:process/process.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
 
+import 'utils/adb_logcat_filtering.dart';
 import 'utils/logs.dart';
 import 'utils/process_manager_extension.dart';
 import 'utils/screenshot_transformer.dart';
@@ -36,6 +37,11 @@ void main(List<String> args) async {
     ..addFlag(
       'help',
       help: 'Prints usage information',
+      negatable: false,
+    )
+    ..addFlag(
+      'verbose',
+      help: 'Prints verbose output',
       negatable: false,
     )
     ..addOption(
@@ -74,8 +80,8 @@ void main(List<String> args) async {
       help: 'Enable Impeller for the Android app.',
     )
     ..addOption('output-contents-golden',
-      help:
-        'Path to a file that will be used to check the contents of the output to make sure everything was created.')
+      help: 'Path to a file that will be used to check the contents of the output to make sure everything was created.',
+    )
     ..addOption(
       'impeller-backend',
       help: 'The Impeller backend to use for the Android app.',
@@ -105,6 +111,7 @@ void main(List<String> args) async {
         panic(<String>['--adb is required']);
       }
 
+      final bool verbose = results['verbose'] as bool;
       final Directory outDir = Directory(results['out-dir'] as String);
       final File adb = File(results['adb'] as String);
       final bool useSkiaGold = results['use-skia-gold'] as bool;
@@ -117,6 +124,7 @@ void main(List<String> args) async {
       }
       final Directory logsDir = Directory(results['logs-dir'] as String? ?? join(outDir.path, 'scenario_app', 'logs'));
       await _run(
+        verbose: verbose,
         outDir: outDir,
         adb: adb,
         smokeTestFullPath: smokeTest,
@@ -155,6 +163,7 @@ enum _ImpellerBackend {
 }
 
 Future<void> _run({
+  required bool verbose,
   required Directory outDir,
   required File adb,
   required String? smokeTestFullPath,
@@ -201,13 +210,19 @@ Future<void> _run({
   final List<Future<void>> pendingComparisons = <Future<void>>[];
   await step('Starting server...', () async {
     server = await ServerSocket.bind(InternetAddress.anyIPv4, _tcpPort);
-    stdout.writeln('listening on host ${server.address.address}:${server.port}');
+    if (verbose) {
+      stdout.writeln('listening on host ${server.address.address}:${server.port}');
+    }
     server.listen((Socket client) {
-      stdout.writeln('client connected ${client.remoteAddress.address}:${client.remotePort}');
+      if (verbose) {
+        stdout.writeln('client connected ${client.remoteAddress.address}:${client.remotePort}');
+      }
       client.transform(const ScreenshotBlobTransformer()).listen((Screenshot screenshot) {
         final String fileName = screenshot.filename;
         final Uint8List fileContent = screenshot.fileContent;
-        log('host received ${fileContent.lengthInBytes} bytes for screenshot `$fileName`');
+        if (verbose) {
+          log('host received ${fileContent.lengthInBytes} bytes for screenshot `$fileName`');
+        }
         assert(skiaGoldClient != null, 'expected Skia Gold client');
         late File goldenFile;
         try {
@@ -215,7 +230,9 @@ Future<void> _run({
         } on FileSystemException catch (err) {
           panic(<String>['failed to create screenshot $fileName: $err']);
         }
-        log('wrote ${goldenFile.absolute.path}');
+        if (verbose) {
+          log('wrote ${goldenFile.absolute.path}');
+        }
         if (isSkiaGoldClientAvailable) {
           final Future<void> comparison = skiaGoldClient!
             .addImg(fileName, goldenFile,
@@ -247,8 +264,30 @@ Future<void> _run({
       if (exitCode != 0) {
         panic(<String>['could not clear logs']);
       }
+
       logcatProcess = await pm.start(<String>[adb.path, 'logcat', '-T', '1']);
-      logcatProcessExitCode = pipeProcessStreams(logcatProcess, out: logcat);
+      final (Future<int> logcatExitCode, Stream<String> logcatOutput) = getProcessStreams(logcatProcess);
+
+      logcatProcessExitCode = logcatExitCode;
+      logcatOutput.listen((String line) {
+        // Always write to the full log.
+        logcat.writeln(line);
+
+        // Conditionally parse and write to stderr.
+        final AdbLogLine? adbLogLine = AdbLogLine.tryParse(line);
+        switch (adbLogLine?.process) {
+          case null:
+            break;
+          case 'ActivityManager':
+          // TODO(matanlurey): Figure out why this isn't 'flutter.scenario' or similar.
+          // Also, why is there two different names?
+          case 'utter.scenario':
+          case 'utter.scenarios':
+          case 'flutter':
+          case 'FlutterJNI':
+            log('[adb] $line');
+        }
+      });
     });
 
     await step('Configuring emulator...', () async {
@@ -400,6 +439,7 @@ Future<void> _run({
     await step('Flush logcat...', () async {
       await logcat.flush();
       await logcat.close();
+      log('wrote logcat to $logcatPath');
     });
   }
 }
