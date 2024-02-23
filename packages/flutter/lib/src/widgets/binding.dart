@@ -345,7 +345,6 @@ abstract mixin class WidgetsBindingObserver {
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
-    /// ????
     super.initInstances();
     _instance = this;
 
