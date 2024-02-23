@@ -144,6 +144,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   BindFragmentCallback bind_callback = [this, &renderer, &context,
                                         &descriptor_set_layouts](
                                            RenderPass& pass) {
+    descriptor_set_layouts.clear();
+
     size_t minimum_sampler_index = 100000000;
     size_t buffer_index = 0;
     size_t buffer_offset = 0;
@@ -313,9 +315,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         runtime_stage_->GetEntrypoint(), options, create_callback);
   };
 
-  return ColorSourceContents::DrawPositions<VS>(renderer, entity, pass,
-                                                pipeline_callback,
-                                                VS::FrameInfo{}, bind_callback);
+  return ColorSourceContents::DrawGeometry<VS>(renderer, entity, pass,
+                                               pipeline_callback,
+                                               VS::FrameInfo{}, bind_callback);
 }
 
 }  // namespace impeller

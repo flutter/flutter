@@ -75,7 +75,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
       [&renderer](ContentContextOptions options) {
         return renderer.GetLinearGradientFillPipeline(options);
       };
-  return ColorSourceContents::DrawPositions<VS>(
+  return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer](RenderPass& pass) {
         auto gradient_data = CreateGradientBuffer(colors_, stops_);
@@ -126,7 +126,7 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
       [&renderer](ContentContextOptions options) {
         return renderer.GetLinearGradientSSBOFillPipeline(options);
       };
-  return ColorSourceContents::DrawPositions<VS>(
+  return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
       [this, &renderer](RenderPass& pass) {
         FS::FragInfo frag_info;

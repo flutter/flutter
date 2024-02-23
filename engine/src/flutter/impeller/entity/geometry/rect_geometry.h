@@ -21,7 +21,6 @@ class RectGeometry final : public Geometry {
   // |Geometry|
   bool IsAxisAlignedRect() const override;
 
- private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
@@ -40,6 +39,7 @@ class RectGeometry final : public Geometry {
                                      const Entity& entity,
                                      RenderPass& pass) const override;
 
+ private:
   Rect rect_;
 
   RectGeometry(const RectGeometry&) = delete;

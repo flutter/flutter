@@ -128,6 +128,8 @@ class Geometry {
                                              const Entity& entity,
                                              RenderPass& pass) const = 0;
 
+  virtual GeometryResult::Mode GetResultMode() const;
+
   virtual GeometryVertexType GetVertexType() const = 0;
 
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;

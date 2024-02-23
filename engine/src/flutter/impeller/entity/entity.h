@@ -131,7 +131,7 @@ class Entity {
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   uint32_t clip_depth_ = 0u;
-  uint32_t new_clip_depth_ = 0u;
+  uint32_t new_clip_depth_ = 1u;
   mutable Capture capture_;
 };
 

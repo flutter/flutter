@@ -3537,7 +3537,8 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
                      //            once we switch to the clip depth approach.
 
   auto picture = canvas.EndRecordingAsPicture();
-  std::array<uint32_t, 5> expected = {
+
+  std::vector<uint32_t> expected = {
       2,  // DrawRRect
       4,  // ClipRRect -- Has a depth value equal to the max depth of all the
           //              content it affect. In this case, the SaveLayer and all
@@ -3546,8 +3547,9 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
           //              contents are rendered, so it should have a depth value
           //              greater than all its contents.
       3,  // DrawRRect
-      5,  // Restore (will be removed once we switch to the clip depth approach)
+      5,  // Restore (no longer necessary when clipping on the depth buffer)
   };
+
   std::vector<uint32_t> actual;
 
   picture.pass->IterateAllElements([&](EntityPass::Element& element) -> bool {
