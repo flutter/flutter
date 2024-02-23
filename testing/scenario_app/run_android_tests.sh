@@ -77,10 +77,6 @@ function dumpLogcat {
     -dump "$logcat_file"
   echo "<- Done"
 
-  echo "-> Dump full logcat"
-  cat "$logcat_file"
-  echo "<- Done"
-
   # Output the directory for the logs.
   echo "TIP: Full logs are in $LOGS_DIR"
 }
