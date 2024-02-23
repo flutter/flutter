@@ -109,7 +109,7 @@ void main() {
         final String targetPath = io.Platform.isWindows ? r'some\non-existent\target' : 'some/non-existent/target';
         final Directory targetDirectory = tempDir.childDirectory(targetPath);
 
-        copyDirectory(sourceDirectory, targetDirectory, followLinks: false);
+        copyDirectory(sourceDirectory, targetDirectory);
 
         expect(targetDirectory.existsSync(), true);
         expect(targetDirectory.childFile('some_file.txt').existsSync(), true);
