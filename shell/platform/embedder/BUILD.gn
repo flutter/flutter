@@ -180,7 +180,7 @@ template("embedder_source_set") {
     # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library symbols.
     if (is_android) {
       deps += [ "//flutter/shell/platform/android:icudtl_asm" ]
-      sources += [ "$root_build_dir/gen/flutter/shell/platform/android/third_party/icu/flutter/icudtl.dat.S" ]
+      sources += [ "$root_build_dir/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S" ]
     }
 
     public_configs += [
@@ -459,7 +459,7 @@ if (is_mac && !embedder_for_target) {
 
   copy("copy_icu") {
     visibility = [ ":*" ]
-    sources = [ "//third_party/icu/flutter/icudtl.dat" ]
+    sources = [ "//flutter/third_party/icu/flutter/icudtl.dat" ]
     outputs =
         [ "$_flutter_embedder_framework_dir/Versions/A/Resources/icudtl.dat" ]
   }

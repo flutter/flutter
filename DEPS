@@ -304,7 +304,7 @@ deps = {
   'src/flutter/third_party/flatbuffers':
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
-  'src/third_party/icu':
+  'src/flutter/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'a622de35ac311c5ad390a7af80724634e5dc61ed',
 
    'src/flutter/third_party/gtest-parallel':
