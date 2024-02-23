@@ -396,9 +396,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
-  /// Resets some internal members to their initial values
-  ///
-  /// Is used by test framework.
   @visibleForTesting
   @override
   void resetInternalState() {
