@@ -1,4 +1,4 @@
-Signature: 48f8cb8fae184835da94a2b610092752
+Signature: 3a26c97fc2a992e160a4873d21d32d33
 
 ====================================================================================================
 LIBRARY: etc1
@@ -2409,6 +2409,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkTTCFHeader.h + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkColorFilterShader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderImpl.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderImpl.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderType.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkCanvasStack.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkCanvasStack.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkCanvasStateUtils.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2546,6 +2547,7 @@ FILE: ../../../flutter/third_party/skia/src/sfnt/SkTTCFHeader.h
 FILE: ../../../flutter/third_party/skia/src/shaders/SkColorFilterShader.cpp
 FILE: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderImpl.h
+FILE: ../../../flutter/third_party/skia/src/shaders/SkPerlinNoiseShaderType.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkCanvasStack.cpp
 FILE: ../../../flutter/third_party/skia/src/utils/SkCanvasStack.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkCanvasStateUtils.cpp
