@@ -367,11 +367,6 @@ class ThemeData with Diagnosticable {
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'Use colorScheme.error instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    Color? errorColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -428,7 +423,6 @@ class ThemeData with Diagnosticable {
       dividerColor ??= colorScheme.outline;
       dialogBackgroundColor ??= colorScheme.background;
       indicatorColor ??= onPrimarySurfaceColor;
-      errorColor ??= colorScheme.error;
       applyElevationOverlayColor ??= brightness == Brightness.dark;
     }
     applyElevationOverlayColor ??= false;
@@ -547,7 +541,6 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
 
     // DEPRECATED (newest deprecations at the bottom)
-    errorColor ??= Colors.red[700]!;
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -641,7 +634,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      errorColor: errorColor,
     );
   }
 
@@ -748,17 +740,10 @@ class ThemeData with Diagnosticable {
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'Use colorScheme.error instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    Color? errorColor,
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
-       _errorColor = errorColor,
         // DEPRECATED (newest deprecations at the bottom)
-       assert(errorColor != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -807,7 +792,6 @@ class ThemeData with Diagnosticable {
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
       dialogBackgroundColor: colorScheme.background,
       indicatorColor: onPrimarySurfaceColor,
-      errorColor: colorScheme.error,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
       useMaterial3: useMaterial3,
@@ -1416,15 +1400,6 @@ class ThemeData with Diagnosticable {
 
   // DEPRECATED (newest deprecations at the bottom)
 
-  /// Obsolete property that was used for input validation errors, e.g. in
-  /// [TextField] fields. Use [ColorScheme.error] instead.
-  @Deprecated(
-    'Use colorScheme.error instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  Color get errorColor => _errorColor!;
-  final Color? _errorColor;
-
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1524,11 +1499,6 @@ class ThemeData with Diagnosticable {
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'Use colorScheme.error instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    Color? errorColor,
     @Deprecated(
       'Use a ThemeData constructor (.from, .light, or .dark) instead. '
       'These constructors all have a useMaterial3 argument, '
@@ -1634,7 +1604,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      errorColor: errorColor ?? _errorColor,
     );
   }
 
@@ -1829,7 +1798,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      errorColor: Color.lerp(a.errorColor, b.errorColor, t),
     );
   }
 
@@ -1931,7 +1899,6 @@ class ThemeData with Diagnosticable {
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.errorColor == errorColor;
   }
 
   @override
@@ -2031,7 +1998,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme,
       tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      errorColor,
     ];
     return Object.hashAll(values);
   }
@@ -2132,7 +2098,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
   }
 }
 
