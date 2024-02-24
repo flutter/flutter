@@ -280,7 +280,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
   final BuildContext context;
 
   @override
-  Color? get color => Theme.of(context).bottomAppBarColor;
+  Color? get color => Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
