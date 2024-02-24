@@ -494,18 +494,7 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
 /// in a logical and intuitive way. If you have different preferences or needs,
 /// consider using [MaterialStateTextStyle.resolveWith].
 ///
-/// ```dart
-/// InputDecorationTheme(
-///   floatingLabelStyle: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-///     if (states.contains(MaterialState.error)) {
-///       // your preferred logic here
-///     }
-///     return const TextStyle();
-///   }),
-/// )
-/// ```
-///
-/// Used by [MaterialStateTextStyle.fromStyles].
+/// This class is used by [MaterialStateTextStyle.fromStyles].
 class _MaterialStateFromStyles extends MaterialStateTextStyle {
   /// {@macro flutter.material.MaterialStateTextStyle.fromStyles}
   const _MaterialStateFromStyles({
@@ -519,8 +508,6 @@ class _MaterialStateFromStyles extends MaterialStateTextStyle {
   });
 
   /// The default style to use.
-  /// [normal] is usually active when a different element has focus,
-  /// or when the appropriate style is null.
   final TextStyle normal;
 
   /// The style to use when the enclosing widget has primary focus.
@@ -537,14 +524,14 @@ class _MaterialStateFromStyles extends MaterialStateTextStyle {
   /// and the enclosing widget has primary focus.
   ///
   /// If [focusedError] is not supplied, defaults to [error],
-  /// and if both are null, then defaults to [focused].
+  /// and defaults to [focused] if both are null.
   final TextStyle? focusedError;
 
   /// The style to use when [MaterialState.error] is active
   /// and the enclosing widget is disabled.
   ///
   /// If [disabledError] is not supplied, defaults to [error],
-  /// and if both are null, then defaults to [disabled].
+  /// and defaults to [disabled] if both are null.
   final TextStyle? disabledError;
 
   /// The style to use when the user drags their mouse cursor
