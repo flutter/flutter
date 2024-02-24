@@ -463,7 +463,7 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   /// If a [MaterialStateTextStyle] is passed, the other styles will be ignored,
   /// and the style will be determined using the [resolve] method from [hovered].
   const factory MaterialStateTextStyle.fromStyles({
-    TextStyle normal = const TextStyle(),
+    TextStyle normal,
     TextStyle? focused,
     TextStyle? disabled,
     TextStyle? error,
