@@ -88,6 +88,12 @@ class AssetManager final : public AssetResolver {
       const std::string& asset_pattern,
       const std::optional<std::string>& subdir) const override;
 
+  // |AssetResolver|
+  bool operator==(const AssetResolver& other) const override;
+
+  // |AssetResolver|
+  const AssetManager* as_asset_manager() const override { return this; }
+
  private:
   std::deque<std::unique_ptr<AssetResolver>> resolvers_;
 

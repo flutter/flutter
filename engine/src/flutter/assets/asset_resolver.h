@@ -14,6 +14,10 @@
 
 namespace flutter {
 
+class AssetManager;
+class APKAssetProvider;
+class DirectoryAssetBundle;
+
 class AssetResolver {
  public:
   AssetResolver() = default;
@@ -28,6 +32,14 @@ class AssetResolver {
     kApkAssetProvider,
     kDirectoryAssetBundle
   };
+
+  virtual const AssetManager* as_asset_manager() const { return nullptr; }
+  virtual const APKAssetProvider* as_apk_asset_provider() const {
+    return nullptr;
+  }
+  virtual const DirectoryAssetBundle* as_directory_asset_bundle() const {
+    return nullptr;
+  }
 
   virtual bool IsValid() const = 0;
 
@@ -80,6 +92,12 @@ class AssetResolver {
                 const std::optional<std::string>& subdir) const {
     return {};
   };
+
+  virtual bool operator==(const AssetResolver& other) const = 0;
+
+  bool operator!=(const AssetResolver& other) const {
+    return !operator==(other);
+  }
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(AssetResolver);
