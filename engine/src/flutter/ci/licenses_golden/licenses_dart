@@ -1,4 +1,4 @@
-Signature: e013fbfc058d83a3f380fccc605f4559
+Signature: aee8d76d23570c7efd9439c5f991502a
 
 ====================================================================================================
 LIBRARY: dart
@@ -4094,11 +4094,13 @@ ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.cc + ../../../third_party/
 ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.cc
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.h
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4751,7 +4753,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/7f6eccd6525566adc867a9401347614ae1f2a64d
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/e5e4aaceaf23200d0cf92ebed1506f915f364b4d
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
