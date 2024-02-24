@@ -6926,6 +6926,39 @@ void main() {
     expect(editableText.style.color, Colors.blue);
   });
 
+  testWidgets('MaterialStateTextStyle.fromStyles correctly resolves for material states', (WidgetTester tester) async {
+    final TextEditingController controller = _textEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
+
+    Widget buildFrame(bool enabled) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              enabled: enabled,
+              style: const MaterialStateTextStyle.fromStyles(
+                normal: TextStyle(color: Colors.blue),
+                disabled: TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, Colors.red);
+    await tester.pumpWidget(buildFrame(true));
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, Colors.blue);
+  });
+
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
