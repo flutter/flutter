@@ -2742,20 +2742,24 @@ class InputDecoration {
   /// The style to use for [InputDecoration.labelText] when the label is on top
   /// of the input field.
   ///
+  /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
+  ///
   /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
   /// the input field, the text uses the [floatingLabelStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// Specifying this style will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
   /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
   /// which resolves to a text style whose color depends on the decorator's
   /// error state.
@@ -2772,16 +2776,20 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
-  /// If null, [labelStyle] will be used for the floating label.
+  /// If null, defaults to [labelStyle].
+  ///
+  /// Specifying this style will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
   /// In this example the [floatingLabelStyle] is specified with a
   /// [MaterialStateProperty] which resolves to a text style whose color depends
   /// on the decorator's error state.
@@ -2801,12 +2809,9 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [helperText] can occupy.
@@ -2832,12 +2837,9 @@ class InputDecoration {
 
   /// The style to use for the [hintText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
@@ -3107,12 +3109,9 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3208,12 +3207,9 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective text
+  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3275,12 +3271,9 @@ class InputDecoration {
 
   /// The style to use for the [counterText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
@@ -3919,12 +3912,9 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for [InputDecoration.helperText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
   /// The maximum number of lines the [InputDecoration.helperText] can occupy.
@@ -3942,12 +3932,9 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.hintText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// Also used for the [InputDecoration.labelText] when the
   /// [InputDecoration.labelText] is displayed on top of the input field (i.e.,
@@ -4024,12 +4011,9 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.prefixText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? prefixStyle;
@@ -4045,12 +4029,9 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.suffixText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle? suffixStyle;
@@ -4066,12 +4047,9 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.counterText].
   ///
-  /// This style can be set in multiple ways:
-  /// - [TextStyle], if the style doesn't need to change.
-  /// - [MaterialStateTextStyle.fromStyles], to adapt
-  ///   to the widget's state using multiple [TextStyle]s.
-  /// - [MaterialStateTextStyle.resolveWith], with a callback that
-  ///   resolves to a [TextStyle] based on the given states.
+  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
+  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
   final TextStyle? counterStyle;
