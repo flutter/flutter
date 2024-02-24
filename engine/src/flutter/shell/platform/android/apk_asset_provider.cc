@@ -10,6 +10,7 @@
 #include <sstream>
 #include <utility>
 
+#include "assets/asset_resolver.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -101,6 +102,14 @@ std::unique_ptr<fml::Mapping> APKAssetProvider::GetAsMapping(
 
 std::unique_ptr<APKAssetProvider> APKAssetProvider::Clone() const {
   return std::make_unique<APKAssetProvider>(impl_);
+}
+
+bool APKAssetProvider::operator==(const AssetResolver& other) const {
+  auto other_provider = other.as_apk_asset_provider();
+  if (!other_provider) {
+    return false;
+  }
+  return impl_ == other_provider->impl_;
 }
 
 }  // namespace flutter

@@ -43,6 +43,14 @@ class DirectoryAssetBundle : public AssetResolver {
       const std::string& asset_pattern,
       const std::optional<std::string>& subdir) const override;
 
+  // |AssetResolver|
+  bool operator==(const AssetResolver& other) const override;
+
+  // |AssetResolver|
+  const DirectoryAssetBundle* as_directory_asset_bundle() const override {
+    return this;
+  }
+
   FML_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };
 

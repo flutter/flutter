@@ -20,13 +20,15 @@ class FontCollection {
  public:
   FontCollection();
 
-  ~FontCollection();
+  virtual ~FontCollection();
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
   void SetupDefaultFontManager(uint32_t font_initialization_data);
 
-  void RegisterFonts(const std::shared_ptr<AssetManager>& asset_manager);
+  // Virtual for testing.
+  virtual void RegisterFonts(
+      const std::shared_ptr<AssetManager>& asset_manager);
 
   void RegisterTestFonts();
 

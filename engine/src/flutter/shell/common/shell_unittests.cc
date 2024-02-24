@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <strstream>
-#include "impeller/core/runtime_types.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
@@ -19,6 +18,7 @@
 #include <EGL/egl.h>
 #endif  // SHELL_ENABLE_GL
 
+#include "assets/asset_resolver.h"
 #include "assets/directory_asset_bundle.h"
 #include "common/graphics/persistent_cache.h"
 #include "flutter/flow/layers/backdrop_filter_layer.h"
@@ -47,6 +47,7 @@
 #include "flutter/testing/mock_canvas.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
+#include "impeller/core/runtime_types.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -246,6 +247,10 @@ class TestAssetResolver : public AssetResolver {
     return {};
   };
 
+  bool operator==(const AssetResolver& other) const override {
+    return this == &other;
+  }
+
  private:
   bool valid_;
   AssetResolver::AssetResolverType type_;
@@ -282,6 +287,10 @@ class ThreadCheckingAssetResolver : public AssetResolver {
   }
 
   mutable std::vector<std::string> mapping_requests;
+
+  bool operator==(const AssetResolver& other) const override {
+    return this == &other;
+  }
 
  private:
   std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;

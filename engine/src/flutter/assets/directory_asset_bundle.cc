@@ -110,4 +110,14 @@ std::vector<std::unique_ptr<fml::Mapping>> DirectoryAssetBundle::GetAsMappings(
   return mappings;
 }
 
+bool DirectoryAssetBundle::operator==(const AssetResolver& other) const {
+  auto other_bundle = other.as_directory_asset_bundle();
+  if (!other_bundle) {
+    return false;
+  }
+  return is_valid_after_asset_manager_change_ ==
+             other_bundle->is_valid_after_asset_manager_change_ &&
+         descriptor_.get() == other_bundle->descriptor_.get();
+}
+
 }  // namespace flutter
