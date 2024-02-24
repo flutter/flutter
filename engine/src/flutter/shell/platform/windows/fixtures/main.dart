@@ -43,8 +43,22 @@ void hiPlatformChannels() {
   });
 }
 
+/// Returns a future that completes when
+/// `PlatformDispatcher.instance.onSemanticsEnabledChanged` fires.
+Future<void> get semanticsChanged {
+  final Completer<void> semanticsChanged = Completer<void>();
+  ui.PlatformDispatcher.instance.onSemanticsEnabledChanged =
+      semanticsChanged.complete;
+  return semanticsChanged.future;
+}
+
 @pragma('vm:entry-point')
-void alertPlatformChannel() async {
+void sendAccessibilityAnnouncement() async {
+  // Wait until semantics are enabled.
+  if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
+    await semanticsChanged;
+  }
+
   // Serializers for data types are in the framework, so this will be hardcoded.
   const int valueMap = 13, valueString = 7;
   // Corresponds to:
@@ -78,13 +92,11 @@ void alertPlatformChannel() async {
   ]);
   final ByteData byteData = data.buffer.asByteData();
 
-  final Completer<ByteData?> enabled = Completer<ByteData?>();
-  ui.PlatformDispatcher.instance.sendPlatformMessage('semantics', ByteData(0), (ByteData? reply){
-    enabled.complete(reply);
-  });
-  await enabled.future;
-
-  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/accessibility', byteData, (ByteData? _){});
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
+    'flutter/accessibility',
+    byteData,
+    (ByteData? _) => signal(),
+  );
 }
 
 @pragma('vm:entry-point')
