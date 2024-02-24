@@ -20,6 +20,7 @@ import 'ink_well.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'search_bar_theme.dart';
 import 'search_view_theme.dart';
@@ -438,20 +439,10 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   bool getShowFullScreenView() {
-    if (widget.isFullScreen != null) {
-      return widget.isFullScreen!;
-    }
-
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-    }
+    return widget.isFullScreen ?? switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => true,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
+    };
   }
 
   @override
@@ -811,13 +802,15 @@ class _ViewContentState extends State<_ViewContent> {
   Widget build(BuildContext context) {
     final Widget defaultLeading = IconButton(
       icon: const Icon(Icons.arrow_back),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () { Navigator.of(context).pop(); },
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
     );
 
     final List<Widget> defaultTrailing = <Widget>[
-      IconButton(
+      if (_controller.text.isNotEmpty) IconButton(
         icon: const Icon(Icons.close),
+        tooltip: MaterialLocalizations.of(context).clearButtonTooltip,
         onPressed: () {
           _controller.clear();
         },

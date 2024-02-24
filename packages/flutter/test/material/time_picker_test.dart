@@ -1083,7 +1083,7 @@ void main() {
         // Verify that the time display is not affected by text scale.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 2,
+          textScaler: const TextScaler.linear(2),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1098,7 +1098,7 @@ void main() {
         // Verify that text scale for AM/PM is at most 2x.
         await mediaQueryBoilerplate(
           tester,
-          textScaleFactor: 3,
+          textScaler: const TextScaler.linear(3),
           initialTime: const TimeOfDay(hour: 7, minute: 41),
           materialType: materialType,
         );
@@ -1831,7 +1831,7 @@ void main() {
         final double minuteFieldTop =
             tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
         final double separatorTop =
-            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment')).dy;
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator')).dy;
         expect(hourFieldTop, separatorTop);
         expect(minuteFieldTop, separatorTop);
       });
@@ -1965,6 +1965,32 @@ void main() {
       });
     });
   }
+
+  testWidgets('Material3 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 57.0);
+  });
+
+  testWidgets('Material2 - Time selector separator default text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+    await startPicker(
+      tester,
+      (TimeOfDay? value) { },
+      theme: theme,
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text(':'));
+    expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
+    expect(paragraph.text.style!.fontSize, 56.0);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -1996,7 +2022,7 @@ Future<void> mediaQueryBoilerplate(
   WidgetTester tester, {
   bool alwaysUse24HourFormat = false,
   TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-  double textScaleFactor = 1,
+  TextScaler textScaler = TextScaler.noScaling,
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? helpText,
   String? hourLabelText,
@@ -2020,7 +2046,7 @@ Future<void> mediaQueryBoilerplate(
         child: MediaQuery(
           data: MediaQueryData(
             alwaysUse24HourFormat: alwaysUse24HourFormat,
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
             accessibleNavigation: accessibleNavigation,
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),
@@ -2175,10 +2201,11 @@ Future<Offset?> startPicker(
   ValueChanged<TimeOfDay?> onChanged, {
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
   String? restorationId,
-  required MaterialType materialType,
+  ThemeData? theme,
+  MaterialType? materialType,
 }) async {
   await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+    theme: theme ?? ThemeData(useMaterial3: materialType == MaterialType.material3),
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
     home: _TimePickerLauncher(

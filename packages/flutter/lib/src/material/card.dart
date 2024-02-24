@@ -214,14 +214,11 @@ class Card extends StatelessWidget {
     final CardTheme cardTheme = CardTheme.of(context);
     final CardTheme defaults;
     if (Theme.of(context).useMaterial3) {
-      switch (_variant) {
-        case _CardVariant.elevated:
-          defaults = _CardDefaultsM3(context);
-        case _CardVariant.filled:
-          defaults = _FilledCardDefaultsM3(context);
-        case _CardVariant.outlined:
-          defaults = _OutlinedCardDefaultsM3(context);
-      }
+      defaults = switch (_variant) {
+        _CardVariant.elevated => _CardDefaultsM3(context),
+        _CardVariant.filled   => _FilledCardDefaultsM3(context),
+        _CardVariant.outlined => _OutlinedCardDefaultsM3(context),
+      };
     } else {
       defaults = _CardDefaultsM2(context);
     }

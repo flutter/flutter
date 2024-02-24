@@ -110,7 +110,7 @@ abstract final class CupertinoColors {
   /// or the foreground red theme in various native apps such as HealthKit.
   ///
   /// This is SystemRed in the iOS palette.
-  static const Color destructiveRed = systemRed;
+  static const CupertinoDynamicColor destructiveRed = systemRed;
 
   /// A blue color that can adapt to the given [BuildContext].
   ///
@@ -953,9 +953,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///  * [resolve], which is similar to this function, but returns a
   ///    non-nullable value, and does not allow a null `resolvable` color.
   static Color? maybeResolve(Color? resolvable, BuildContext context) {
-    if (resolvable == null) {
-      return null;
-    }
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
@@ -1013,36 +1010,27 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base]
   /// elevation level).
   CupertinoDynamicColor resolveFrom(BuildContext context) {
-    Brightness brightness = Brightness.light;
-    if (_isPlatformBrightnessDependent) {
-      brightness = CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
-    }
-    bool isHighContrastEnabled = false;
-    if (_isHighContrastDependent) {
-      isHighContrastEnabled = MediaQuery.maybeHighContrastOf(context) ?? false;
-    }
+    final Brightness brightness = _isPlatformBrightnessDependent
+      ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
+      : Brightness.light;
 
     final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
       ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
       : CupertinoUserInterfaceLevelData.base;
 
-    final Color resolved;
-    switch (brightness) {
-      case Brightness.light:
-        switch (level) {
-          case CupertinoUserInterfaceLevelData.base:
-            resolved = isHighContrastEnabled ? highContrastColor : color;
-          case CupertinoUserInterfaceLevelData.elevated:
-            resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-        }
-      case Brightness.dark:
-        switch (level) {
-          case CupertinoUserInterfaceLevelData.base:
-            resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-          case CupertinoUserInterfaceLevelData.elevated:
-            resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-        }
-    }
+    final bool highContrast = _isHighContrastDependent
+      && (MediaQuery.maybeHighContrastOf(context) ?? false);
+
+    final Color resolved = switch ((brightness, level, highContrast)) {
+      (Brightness.light, CupertinoUserInterfaceLevelData.base,     false) => color,
+      (Brightness.light, CupertinoUserInterfaceLevelData.base,     true)  => highContrastColor,
+      (Brightness.light, CupertinoUserInterfaceLevelData.elevated, false) => elevatedColor,
+      (Brightness.light, CupertinoUserInterfaceLevelData.elevated, true)  => highContrastElevatedColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.base,     false) => darkColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.base,     true)  => darkHighContrastColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.elevated, false) => darkElevatedColor,
+      (Brightness.dark,  CupertinoUserInterfaceLevelData.elevated, true)  => darkHighContrastElevatedColor,
+    };
 
     Element? debugContext;
     assert(() {

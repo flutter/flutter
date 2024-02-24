@@ -1562,6 +1562,89 @@ void main() {
     expect(find.text('last tooltip'), findsOneWidget);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/142045.
+  testWidgets('Tooltip shows/hides when the mouse hovers, and then exits and re-enters in quick succession', (WidgetTester tester) async {
+    const Duration waitDuration = Durations.extralong1;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            exitDuration: waitDuration,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> mouseEnterAndWaitUntilVisible() async {
+      await gesture.moveTo(tester.getCenter(find.byType(Tooltip)));
+      await tester.pump();
+      await tester.pump(waitDuration);
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsOne);
+    }
+
+    Future<void> mouseExit() async {
+      await gesture.moveTo(Offset.zero);
+      await tester.pump();
+    }
+
+    Future<void> performSequence(Iterable<Future<void> Function()> actions) async {
+      for (final Future<void> Function() action in actions) {
+        await action();
+      }
+    }
+
+    await performSequence(<Future<void> Function()>[mouseEnterAndWaitUntilVisible]);
+    expect(find.text(tooltipText), findsOne);
+
+    // Wait for reset.
+    await mouseExit();
+    await tester.pump(const Duration(hours: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    await performSequence(<Future<void> Function()>[
+      mouseEnterAndWaitUntilVisible,
+      mouseExit,
+      mouseEnterAndWaitUntilVisible,
+    ]);
+    expect(find.text(tooltipText), findsOne);
+
+    // Wait for reset.
+    await mouseExit();
+    await tester.pump(const Duration(hours: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    await performSequence(<Future<void> Function()>[
+      mouseEnterAndWaitUntilVisible,
+      mouseExit,
+      mouseEnterAndWaitUntilVisible,
+      mouseExit,
+      mouseEnterAndWaitUntilVisible,
+    ]);
+    expect(find.text(tooltipText), findsOne);
+
+    // Wait for reset.
+    await mouseExit();
+    await tester.pump(const Duration(hours: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1930,12 +2013,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Material2 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+  testWidgets('Material2 - Tooltip text scales with textScaler', (WidgetTester tester) async {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Navigator(
@@ -1961,7 +2044,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
@@ -1970,7 +2053,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
@@ -1981,10 +2064,10 @@ void main() {
   });
 
   testWidgets('Material3 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, { required double textScaleFactor }) {
+    Widget buildApp(String text, { required TextScaler textScaler }) {
       return MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
@@ -2007,7 +2090,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: TextScaler.noScaling));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(42.75));
@@ -2017,7 +2100,7 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
 
-    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(tooltipText, textScaler: const TextScaler.linear(4.0)));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)).width, equals(168.75));
@@ -3045,8 +3128,5 @@ Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
 }
 
 SemanticsNode _findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null) {
-    return object.debugSemantics!;
-  }
-  return _findDebugSemantics(object.parent!);
+  return object.debugSemantics ?? _findDebugSemantics(object.parent!);
 }

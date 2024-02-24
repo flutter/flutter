@@ -442,10 +442,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       if (isActive) MaterialState.selected else MaterialState.disabled,
     };
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
-    if (resolvedConnectorColor != null) {
-      return resolvedConnectorColor;
-    }
-    return isActive ? colorScheme.primary : Colors.grey.shade400;
+
+    return resolvedConnectorColor ?? (isActive ? colorScheme.primary : Colors.grey.shade400);
   }
 
   Widget _buildLine(bool visible, bool isActive) {
@@ -588,13 +586,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       );
     }
 
-    final Color cancelColor;
-    switch (Theme.of(context).brightness) {
-      case Brightness.light:
-        cancelColor = Colors.black54;
-      case Brightness.dark:
-        cancelColor = Colors.white70;
-    }
+    final Color cancelColor = switch (Theme.of(context).brightness) {
+      Brightness.light => Colors.black54,
+      Brightness.dark  => Colors.white70,
+    };
 
     final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
@@ -960,12 +955,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       }
       return true;
     }());
-    switch (widget.type) {
-      case StepperType.vertical:
-        return _buildVertical();
-      case StepperType.horizontal:
-        return _buildHorizontal();
-    }
+    return switch (widget.type) {
+      StepperType.vertical   => _buildVertical(),
+      StepperType.horizontal => _buildHorizontal(),
+    };
   }
 }
 

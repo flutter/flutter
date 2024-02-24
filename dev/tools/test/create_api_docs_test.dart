@@ -403,7 +403,7 @@ void main() {
             'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
             '--auto-include-dependencies',
           ],
-          onRun: () {
+          onRun: (_) {
             for (final File canary in generator.canaries) {
               canary.createSync(recursive: true);
             }

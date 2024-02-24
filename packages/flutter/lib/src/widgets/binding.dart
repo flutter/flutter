@@ -24,6 +24,10 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+// Examples can assume:
+// late FlutterView myFlutterView;
+// class MyApp extends StatelessWidget { const MyApp({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// This can be used by any class, not just widgets. It provides an interface
@@ -781,15 +785,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
-    switch (methodCall.method) {
-      case 'popRoute':
-        return handlePopRoute();
-      case 'pushRoute':
-        return handlePushRoute(methodCall.arguments as String);
-      case 'pushRouteInformation':
-        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
-    }
-    return Future<dynamic>.value();
+    return switch (methodCall.method) {
+      'popRoute' => handlePopRoute(),
+      'pushRoute' => handlePushRoute(methodCall.arguments as String),
+      'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
+      _ => Future<dynamic>.value(),
+    };
   }
 
   @override
@@ -1152,14 +1153,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 }
 
-/// Inflate the given widget and attach it to the screen.
+/// Inflate the given widget and attach it to the view.
+///
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
+/// The [runApp] method renders the provided `app` widget into the
+/// [PlatformDispatcher.implicitView] by wrapping it in a [View] widget, which
+/// will bootstrap the render tree for the app. Apps that want to control which
+/// [FlutterView] they render into can use [runWidget] instead.
 ///
 /// The widget is given constraints during layout that force it to fill the
-/// entire screen. If you wish to align your widget to one side of the screen
+/// entire view. If you wish to align your widget to one side of the view
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
 /// your widget, you can also use the [Center] widget.
 ///
-/// Calling [runApp] again will detach the previous root widget from the screen
+/// Calling [runApp] again will detach the previous root widget from the view
 /// and attach the given widget in its place. The new widget tree is compared
 /// against the previous widget tree and any differences are applied to the
 /// underlying render tree, similar to what happens when a [StatefulWidget]
@@ -1167,6 +1174,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
+/// {@template flutter.widgets.runApp.shutdown}
 /// ## Application shutdown
 ///
 /// This widget tree is not torn down when the application shuts down, because
@@ -1178,29 +1186,32 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// Applications are responsible for ensuring that they are well-behaved
 /// even in the face of a rapid unscheduled termination.
 ///
+/// To listen for platform shutdown messages (and other lifecycle changes),
+/// consider the [AppLifecycleListener] API.
+/// {@endtemplate}
+///
 /// To artificially cause the entire widget tree to be disposed, consider
 /// calling [runApp] with a widget such as [SizedBox.shrink].
 ///
-/// To listen for platform shutdown messages (and other lifecycle changes),
-/// consider the [AppLifecycleListener] API.
-///
+/// {@template flutter.widgets.runApp.dismissal}
 /// ## Dismissing Flutter UI via platform native methods
 ///
-/// {@template flutter.widgets.runApp.dismissal}
 /// An application may have both Flutter and non-Flutter UI in it. If the
 /// application calls non-Flutter methods to remove Flutter based UI such as
 /// platform native API to manipulate the platform native navigation stack,
 /// the framework does not know if the developer intends to eagerly free
 /// resources or not. The widget tree remains mounted and ready to render
 /// as soon as it is displayed again.
+/// {@endtemplate}
 ///
 /// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
 /// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
-/// {@endtemplate}
 ///
 /// See also:
 ///
+///  * [runWidget], which bootstraps a widget tree without assuming the
+///    [FlutterView] into which it will be rendered.
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
 ///    widget hierarchy.
 ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
@@ -1209,9 +1220,75 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  assert(binding.debugCheckZone('runApp'));
+  _runWidget(binding.wrapWithDefaultView(app), binding, 'runApp');
+}
+
+/// Inflate the given widget and bootstrap the widget tree.
+///
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
+/// Unlike [runApp], this method does not define a [FlutterView] into which the
+/// provided `app` widget is rendered into. It is up to the caller to include at
+/// least one [View] widget in the provided `app` widget that will bootstrap a
+/// render tree and define the [FlutterView] into which content is rendered.
+/// [RenderObjectWidget]s without an ancestor [View] widget will result in an
+/// exception. Apps that want to render into the default view without dealing
+/// with view management should consider calling [runApp] instead.
+///
+/// {@tool snippet}
+/// The sample shows how to utilize [runWidget] to specify the [FlutterView]
+/// into which the `MyApp` widget will be drawn:
+///
+/// ```dart
+/// runWidget(
+///   View(
+///     view: myFlutterView,
+///     child: const MyApp(),
+///   ),
+/// );
+/// ```
+/// {@end-tool}
+///
+/// Calling [runWidget] again will detach the previous root widget and attach
+/// the given widget in its place. The new widget tree is compared against the
+/// previous widget tree and any differences are applied to the underlying
+/// render tree, similar to what happens when a [StatefulWidget] rebuilds after
+/// calling [State.setState].
+///
+/// Initializes the binding using [WidgetsFlutterBinding] if necessary.
+///
+/// {@macro flutter.widgets.runApp.shutdown}
+///
+/// To artificially cause the entire widget tree to be disposed, consider
+/// calling [runWidget] with a [ViewCollection] that does not specify any
+/// [ViewCollection.views].
+///
+/// ## Dismissing Flutter UI via platform native methods
+///
+/// {@macro flutter.widgets.runApp.dismissal}
+///
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// and use it to remove the [View] whose widget resources should be released
+/// from the `app` widget tree provided to [runWidget].
+///
+/// See also:
+///
+///  * [runApp], which bootstraps a widget tree and renders it into a default
+///    [FlutterView].
+///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///    widget hierarchy.
+///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///    element for the element hierarchy.
+///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///    ensure the widget, element, and render trees are all built.
+void runWidget(Widget app) {
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  _runWidget(app, binding, 'runWidget');
+}
+
+void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
+  assert(binding.debugCheckZone(debugEntryPoint));
   binding
-    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
+    ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
 

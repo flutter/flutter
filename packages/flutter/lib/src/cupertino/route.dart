@@ -158,7 +158,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
-  /// This just check the route's [NavigatorState.userGestureInProgress].
+  /// This just checks the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///
@@ -247,6 +247,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
+      getIsCurrent: () => route.isCurrent,
+      getIsActive: () => route.isActive,
       controller: route.controller!, // protected access
     );
   }
@@ -293,6 +295,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
+          getIsCurrent: () => route.isCurrent,
+          getIsActive: () => route.isActive,
           child: child,
         ),
       );
@@ -596,6 +600,8 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
+    required this.getIsActive,
+    required this.getIsCurrent,
   });
 
   final Widget child;
@@ -603,6 +609,9 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
+
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   @override
   _CupertinoBackGestureDetectorState<T> createState() => _CupertinoBackGestureDetectorState<T>();
@@ -673,12 +682,10 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        return -value;
-      case TextDirection.ltr:
-        return value;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => -value,
+      TextDirection.ltr =>  value,
+    };
   }
 
   @override
@@ -726,12 +733,16 @@ class _CupertinoBackGestureController<T> {
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
   }) {
     navigator.didStartUserGesture();
   }
 
   final AnimationController controller;
   final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -747,12 +758,21 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    final bool isCurrent = getIsCurrent();
     final bool animateForward;
 
-    // If the user releases the page before mid screen with sufficient velocity,
-    // or after mid screen, we should animate the page out. Otherwise, the page
-    // should be animated back in.
-    if (velocity.abs() >= _kMinFlingVelocity) {
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
       animateForward = velocity <= 0;
     } else {
       animateForward = controller.value > 0.5;
@@ -768,8 +788,10 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      navigator.pop();
+      if (isCurrent) {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator.pop();
+      }
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
@@ -953,16 +975,10 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    final double start;
-    final double shadowDirection; // -1 for ltr, 1 for rtl.
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        start = offset.dx + configuration.size!.width;
-        shadowDirection = 1;
-      case TextDirection.ltr:
-        start = offset.dx;
-        shadowDirection = -1;
-    }
+    final (double shadowDirection, double start) = switch (textDirection!) {
+      TextDirection.rtl => (1, offset.dx + configuration.size!.width),
+      TextDirection.ltr => (-1, offset.dx),
+    };
 
     int bandColorIndex = 0;
     for (int dx = 0; dx < shadowWidth; dx += 1) {

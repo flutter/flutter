@@ -144,5 +144,7 @@
   "menuDismissLabel": "मेनु खारेज गर्नुहोस्",
   "lookUpButtonLabel": "माथितिर हेर्नुहोस्",
   "searchWebButtonLabel": "वेबमा खोज्नुहोस्",
-  "shareButtonLabel": "सेयर गर्नुहोस्..."
+  "shareButtonLabel": "सेयर गर्नुहोस्...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

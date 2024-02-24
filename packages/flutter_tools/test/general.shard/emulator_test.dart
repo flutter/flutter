@@ -87,6 +87,18 @@ void main() {
         returnsNormally);
     });
 
+    testUsingContext('printEmulators prints the emualtors information with header', () {
+      Emulator.printEmulators(emulators, testLogger);
+
+      expect(testLogger.statusText, '''
+Id                  • Name          • Manufacturer • Platform
+
+Nexus_5             • Nexus 5       • Google       • android
+Nexus_5X_API_27_x86 • Nexus 5X      • Google       • android
+iOS Simulator       • iOS Simulator • Apple        • android
+''');
+    });
+
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final EmulatorManager emulatorManager = EmulatorManager(

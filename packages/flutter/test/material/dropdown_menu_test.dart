@@ -1932,6 +1932,94 @@ void main() {
 
     expect(find.byType(Scrollbar), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('DropdownMenu.focusNode can focus text input field', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: DropdownMenu<String>(
+          focusNode: focusNode,
+          dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+            DropdownMenuEntry<String>(
+              value: 'Yolk',
+              label: 'Yolk',
+            ),
+            DropdownMenuEntry<String>(
+              value: 'Eggbert',
+              label: 'Eggbert',
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when not focused.
+    expect(box, paints..rrect(color: theme.colorScheme.outline));
+
+    focusNode.requestFocus();
+    await tester.pump();
+    // Advance input decorator animation.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    box = tester.renderObject(find.byType(InputDecorator));
+
+    // Test input border when focused.
+    expect(box, paints..rrect(color: theme.colorScheme.primary));
+  });
+
+  testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
+    int called = 0;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction(
+      (TextEditingValue oldValue, TextEditingValue newValue) {
+        called += 1;
+        return newValue;
+      },
+    );
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            controller: controller,
+            dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Blue',
+                label: 'Blue',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Green',
+                label: 'Green',
+              ),
+            ],
+            inputFormatters: <TextInputFormatter>[
+              formatter,
+              FilteringTextInputFormatter.deny(RegExp('[0-9]'))
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(text: 'Blue'));
+    expect(called, 1);
+    expect(controller.text, 'Blue');
+
+    state.updateEditingValue(const TextEditingValue(text: 'Green'));
+    expect(called, 2);
+    expect(controller.text, 'Green');
+
+    state.updateEditingValue(const TextEditingValue(text: 'Green2'));
+    expect(called, 3);
+    expect(controller.text, 'Green');
+  });
 }
 
 enum TestMenu {

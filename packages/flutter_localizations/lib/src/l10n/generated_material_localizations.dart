@@ -60,6 +60,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Kanselleer';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Maak toe';
 
   @override
@@ -447,6 +450,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Kies jaar';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -548,6 +554,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ይቅር';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ዝጋ';
@@ -937,6 +946,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ዓመት ይምረጡ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -1038,6 +1050,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'الإلغاء';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'الإغلاق';
@@ -1427,6 +1442,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'اختيار العام';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'تم اختيار $selectedRowCount عنصر';
 
   @override
@@ -1528,6 +1546,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল কৰক';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ কৰক';
@@ -1917,6 +1938,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'বছৰ বাছনি কৰক';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -2018,6 +2042,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ləğv edin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Bağlayın';
@@ -2407,6 +2434,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'İl seçin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -2508,6 +2538,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасаваць';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыць';
@@ -2897,6 +2930,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Выберыце год';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
 
   @override
@@ -2998,6 +3034,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Отказ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затваряне';
@@ -3387,6 +3426,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Избиране на година';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -3488,6 +3530,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'বাতিল করুন';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'বন্ধ করুন';
@@ -3877,6 +3922,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'বছর বেছে নিন';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -3978,6 +4026,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Otkaži';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zatvori';
@@ -4367,6 +4418,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
 
   @override
@@ -4468,6 +4522,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel·la';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tanca';
@@ -4857,6 +4914,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selecciona un any';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -4958,6 +5018,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Zrušit';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zavřít';
@@ -5347,6 +5410,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
 
   @override
@@ -5448,6 +5514,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Canslo';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Cau';
@@ -5837,6 +5906,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
 
   @override
@@ -5938,6 +6010,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuller';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Luk';
@@ -6327,6 +6402,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vælg år';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -6428,6 +6506,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -6817,6 +6898,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jahr auswählen';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -6982,6 +7066,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ακύρωση';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Κλείσιμο';
@@ -7371,6 +7458,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Επιλογή έτους';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -7472,6 +7562,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancel';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Close';
@@ -7859,6 +7952,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Select year';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -8782,6 +8878,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Cancelar';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Cerrar';
 
   @override
@@ -9167,6 +9266,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Seleccionar año';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -13135,6 +13237,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Tühista';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Sule';
 
   @override
@@ -13522,6 +13627,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valige aasta';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -13623,6 +13731,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Utzi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Itxi';
@@ -14012,6 +14123,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Hautatu urtea';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -14113,6 +14227,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'لغو';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'بستن';
@@ -14502,6 +14619,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'انتخاب سال';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -14603,6 +14723,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Peru';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sulje';
@@ -14992,6 +15115,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valitse vuosi';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -15093,6 +15219,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Isara';
@@ -15482,6 +15611,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pumili ng taon';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -15583,6 +15715,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuler';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fermer';
@@ -15972,6 +16107,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Sélectionner une année';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -16233,6 +16371,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Pechar';
@@ -16622,6 +16763,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleccionar ano';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -16723,6 +16867,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Abbrechen';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Schließen';
@@ -17112,6 +17259,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jahr auswählen';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -17213,6 +17363,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'રદ કરો';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'બંધ કરો';
@@ -17602,6 +17755,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'વર્ષ પસંદ કરો';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -17703,6 +17859,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ביטול';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'סגירה';
@@ -18092,6 +18251,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'בחירת שנה';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -18193,6 +18355,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द करें';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बंद करें';
@@ -18582,6 +18747,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'साल चुनें';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -18683,6 +18851,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Odustani';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zatvori';
@@ -19072,6 +19243,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
 
   @override
@@ -19173,6 +19347,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Mégse';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Bezárás';
@@ -19562,6 +19739,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Válassza ki az évet';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -19663,6 +19843,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Չեղարկել';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Փակել';
@@ -20052,6 +20235,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Ընտրել տարին';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
 
   @override
@@ -20153,6 +20339,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tutup';
@@ -20542,6 +20731,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pilih tahun';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -20643,6 +20835,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Hætta við';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Loka';
@@ -21032,6 +21227,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velja ár';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -21133,6 +21331,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annulla';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Chiudi';
@@ -21522,6 +21723,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleziona anno';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -21623,6 +21827,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'キャンセル';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '閉じる';
@@ -22012,6 +22219,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '年を選択';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -22113,6 +22323,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'გაუქმება';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'დახურვა';
@@ -22502,6 +22715,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'აირჩიეთ წელი';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -22603,6 +22819,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Бас тарту';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабу';
@@ -22992,6 +23211,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жылды таңдау';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -23093,6 +23315,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'បោះបង់';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'បិទ';
@@ -23482,6 +23707,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ជ្រើសរើសឆ្នាំ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -23583,6 +23811,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
@@ -23972,6 +24203,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -24073,6 +24307,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '취소';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '닫기';
@@ -24462,6 +24699,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '연도 선택';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -24563,6 +24803,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Токтотуу';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Жабуу';
@@ -24952,6 +25195,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жылды тандоо';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -25053,6 +25299,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ຍົກເລີກ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ປິດ';
@@ -25442,6 +25691,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ເລືອກ​ປີ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -25543,6 +25795,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Atšaukti';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Uždaryti';
@@ -25932,6 +26187,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pasirinkite metus';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
 
   @override
@@ -26033,6 +26291,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Atcelt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Aizvērt';
@@ -26422,6 +26683,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Atlasiet gadu';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -26523,6 +26787,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -26912,6 +27179,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Изберете година';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -27013,6 +27283,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'റദ്ദാക്കുക';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'അടയ്ക്കുക';
@@ -27402,6 +27675,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'വർഷം തിരഞ്ഞെടുക്കുക';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -27503,6 +27779,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Цуцлах';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Хаах';
@@ -27892,6 +28171,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Жил сонгох';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -27993,6 +28275,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द करा';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बंद करा';
@@ -28382,6 +28667,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष निवडा';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -28483,6 +28771,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Batal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Tutup';
@@ -28872,6 +29163,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pilih tahun';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -28973,6 +29267,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'မလုပ်တော့';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ပိတ်ရန်';
@@ -29362,6 +29659,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ခုနှစ် ရွေးရန်';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -29463,6 +29763,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Lukk';
@@ -29852,6 +30155,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velg året';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -29953,6 +30259,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'रद्द गर्नुहोस्';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'बन्द गर्नुहोस्';
@@ -30342,6 +30651,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष छान्नुहोस्';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -30443,6 +30755,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Annuleren';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Sluiten';
@@ -30832,6 +31147,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Jaar selecteren';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -30933,6 +31251,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Avbryt';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Lukk';
@@ -31322,6 +31643,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velg året';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -31423,6 +31747,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ବନ୍ଦ କରନ୍ତୁ';
@@ -31812,6 +32139,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ବର୍ଷ ଚୟନ କରନ୍ତୁ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -31913,6 +32243,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ਬੰਦ ਕਰੋ';
@@ -32302,6 +32635,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ਸਾਲ ਚੁਣੋ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -32403,6 +32739,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anuluj';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zamknij';
@@ -32792,6 +33131,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Wybierz rok';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
 
   @override
@@ -32893,6 +33235,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'لغوه کول';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'تړل';
@@ -33282,6 +33627,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Select year';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -33383,6 +33731,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Cancelar';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Fechar';
@@ -33772,6 +34123,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selecione o ano';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -34051,6 +34405,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anulați';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Închideți';
@@ -34440,6 +34797,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selectați anul';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount articole selectate';
 
   @override
@@ -34541,6 +34901,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Отмена';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрыть';
@@ -34930,6 +35293,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Выберите год';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Выбрано $selectedRowCount объекта';
 
   @override
@@ -35031,6 +35397,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'අවලංගු කරන්න';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'වසන්න';
@@ -35420,6 +35789,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'වර්ෂය තෝරන්න';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -35521,6 +35893,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Zrušiť';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zavrieť';
@@ -35910,6 +36285,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount vybraté položky';
 
   @override
@@ -36011,6 +36389,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Prekliči';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Zapri';
@@ -36400,6 +36781,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Izberite leto';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
 
   @override
@@ -36501,6 +36885,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Anulo';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Mbyll';
@@ -36890,6 +37277,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Zgjidh vitin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -36991,6 +37381,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Откажи';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Затвори';
@@ -37378,6 +37771,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Изаберите годину';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
@@ -37830,6 +38226,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Avbryt';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Stäng';
 
   @override
@@ -38217,6 +38616,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Välj år';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -38318,6 +38720,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Ghairi';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Funga';
@@ -38707,6 +39112,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Chagua mwaka';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -38808,6 +39216,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ரத்துசெய்';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'மூடுக';
@@ -39197,6 +39608,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ஆண்டைத் தேர்ந்தெடுக்கவும்';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -39298,6 +39712,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'రద్దు చేయండి';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'మూసివేయండి';
@@ -39687,6 +40104,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'సంవత్సరాన్ని ఎంచుకోండి';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -39788,6 +40208,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'ยกเลิก';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'ปิด';
@@ -40177,6 +40600,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'เลือกปี';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -40278,6 +40704,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Kanselahin';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Isara';
@@ -40667,6 +41096,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pumili ng taon';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -40768,6 +41200,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'İptal';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Kapat';
@@ -41157,6 +41592,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Yılı seçin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -41258,6 +41696,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Скасувати';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Закрити';
@@ -41647,6 +42088,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Виберіть рік';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
 
   @override
@@ -41748,6 +42192,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'منسوخ کریں';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'بند کریں';
@@ -42137,6 +42584,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'سال منتخب کریں';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -42238,6 +42688,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Bekor qilish';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Yopish';
@@ -42627,6 +43080,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Yilni tanlang';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -42728,6 +43184,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => 'Huỷ';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => 'Đóng';
@@ -43117,6 +43576,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Chọn năm';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -43218,6 +43680,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get cancelButtonLabel => '取消';
+
+  @override
+  String get clearButtonTooltip => 'Clear text';
 
   @override
   String get closeButtonLabel => '关闭';
@@ -43490,7 +43955,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '许可';
 
   @override
-  String get lookUpButtonLabel => '向上看';
+  String get lookUpButtonLabel => '查询';
 
   @override
   String get menuBarMenuLabel => '菜单栏的菜单';
@@ -43605,6 +44070,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => '选择年份';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -44251,6 +44719,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'Khansela';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonLabel => 'Vala';
 
   @override
@@ -44636,6 +45107,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Khetha unyaka';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
