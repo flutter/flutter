@@ -433,7 +433,8 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 ///
 /// To use a [MaterialStateTextStyle], you can either:
 ///   1. Create a subclass of [MaterialStateTextStyle] and implement the abstract `resolve` method.
-///   2. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
+///   2. Use [MaterialStateTextStyle.fromStyles].
+///   3. Use [MaterialStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///
 /// If a [MaterialStateTextStyle] is used for a property or a parameter that doesn't
@@ -449,6 +450,28 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   /// const constructors so that they can be used in const expressions.
   const MaterialStateTextStyle();
 
+  /// {@template flutter.material.MaterialStateTextStyle.fromStyles}
+  /// This constructor accepts multiple [TextStyle]s as parameters.
+  /// While the app is running, the relevant style will be applied
+  /// based on which [MaterialState]s are active.
+  /// {@endtemplate}
+  ///
+  /// With the exception of [hovered], none of these styles should be [MaterialStateTextStyle]s.
+  ///
+  /// If a [TextStyle] is passed for [hovered],
+  /// the style will be applied on top of the relevant style using [merge].
+  /// If a [MaterialStateTextStyle] is passed, the other styles will be ignored,
+  /// and the style will be determined using the [resolve] method from [hovered].
+  const factory MaterialStateTextStyle.fromStyles({
+    TextStyle normal = const TextStyle(),
+    TextStyle? focused,
+    TextStyle? disabled,
+    TextStyle? error,
+    TextStyle? focusedError,
+    TextStyle? disabledError,
+    TextStyle? hovered,
+  }) = _MaterialStateFromStyles;
+
   /// Creates a [MaterialStateTextStyle] from a [MaterialPropertyResolver<TextStyle>]
   /// callback function.
   ///
@@ -457,13 +480,118 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
-      _MaterialStateTextStyle(callback);
+  const factory MaterialStateTextStyle.resolveWith(MaterialPropertyResolver<TextStyle> callback) = _MaterialStateTextStyle;
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
   @override
   TextStyle resolve(Set<MaterialState> states);
+}
+
+/// A convenience class for altering [TextStyle]s based on [MaterialState]s.
+///
+/// The [resolve] method makes an attempt to combine the given styles
+/// in a logical and intuitive way. If you have different preferences or needs,
+/// consider using [MaterialStateTextStyle.resolveWith].
+///
+/// ```dart
+/// InputDecorationTheme(
+///   floatingLabelStyle: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+///     if (states.contains(MaterialState.error)) {
+///       // your preferred logic here
+///     }
+///     return const TextStyle();
+///   }),
+/// )
+/// ```
+///
+/// Used by [MaterialStateTextStyle.fromStyles].
+class _MaterialStateFromStyles extends MaterialStateTextStyle {
+  /// {@macro flutter.material.MaterialStateTextStyle.fromStyles}
+  const _MaterialStateFromStyles({
+    this.normal = const TextStyle(),
+    this.focused,
+    this.disabled,
+    this.error,
+    this.focusedError,
+    this.disabledError,
+    this.hovered,
+  });
+
+  /// The default style to use.
+  /// [normal] is usually active when a different element has focus,
+  /// or when the appropriate style is null.
+  final TextStyle normal;
+
+  /// The style to use when the enclosing widget has primary focus.
+  final TextStyle? focused;
+
+  /// The style to use when the enclosing widget is disabled.
+  final TextStyle? disabled;
+
+  /// The style to use when [MaterialState.error] is active,
+  /// often as a result of a failed validation.
+  final TextStyle? error;
+
+  /// The style to use when [MaterialState.error] is active
+  /// and the enclosing widget has primary focus.
+  ///
+  /// If [focusedError] is not supplied, defaults to [error],
+  /// and if both are null, then defaults to [focused].
+  final TextStyle? focusedError;
+
+  /// The style to use when [MaterialState.error] is active
+  /// and the enclosing widget is disabled.
+  ///
+  /// If [disabledError] is not supplied, defaults to [error],
+  /// and if both are null, then defaults to [disabled].
+  final TextStyle? disabledError;
+
+  /// The style to use when the user drags their mouse cursor
+  /// over the enclosing widget.
+  ///
+  /// This can be either a [TextStyle] or a [MaterialStateTextStyle].
+  ///
+  /// If a [TextStyle] is supplied, [hovered] is applied
+  /// on top of the current active style using [merge].
+  ///
+  /// If [hovered] is a [MaterialStateTextStyle], then other styles
+  /// will be ignored while the cursor is over the enclosing widget.
+  ///
+  /// Giving [hovered] its own `hovered` member throws an error.
+  final TextStyle? hovered;
+
+  @override
+  TextStyle resolve(Set<MaterialState> states) {
+    TextStyle? style;
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.disabled)) {
+        style ??= disabledError;
+      } else if (states.contains(MaterialState.focused)) {
+        style ??= focusedError;
+      }
+      style ??= error;
+    }
+    if (states.contains(MaterialState.disabled)) {
+      style ??= disabled;
+    } else if (states.contains(MaterialState.focused)) {
+      style ??= focused;
+    }
+    style ??= normal;
+
+    if (states.contains(MaterialState.hovered)) {
+      switch (hovered) {
+        case final MaterialStateTextStyle hoverStyle:
+          if (hoverStyle is _MaterialStateFromStyles && hoverStyle.hovered != null) {
+            throw UnsupportedError('_MaterialStateFromStyles.hovered cannot have its own "hovered" property.');
+          }
+          return hoverStyle.resolve(states);
+        case TextStyle():
+          return style.merge(hovered);
+      }
+    }
+    return style;
+  }
 }
 
 /// A [MaterialStateTextStyle] created from a [MaterialPropertyResolver<TextStyle>]
@@ -535,7 +663,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [MaterialStateOutlineInputBorder.resolveWith].
 class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
   const _MaterialStateOutlineInputBorder(this._resolve);
 
@@ -598,7 +726,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
 /// If used as a regular input border, the border resolved in the default state will
 /// be used.
 ///
-/// Used by [MaterialStateTextStyle.resolveWith].
+/// Used by [MaterialStateUnderlineInputBorder.resolveWith].
 class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
   const _MaterialStateUnderlineInputBorder(this._resolve);
 
