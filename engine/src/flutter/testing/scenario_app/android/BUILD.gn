@@ -9,6 +9,7 @@ _android_sources = [
   "app/src/androidTest/java/dev/flutter/TestRunner.java",
   "app/src/androidTest/java/dev/flutter/scenarios/EngineLaunchE2ETest.java",
   "app/src/androidTest/java/dev/flutter/scenarios/ExampleInstrumentedTest.java",
+  "app/src/androidTest/java/dev/flutter/scenariosui/DrawSolidBlueScreenTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/ExternalTextureTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/GetBitmapTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/MemoryLeakTests.java",
@@ -23,6 +24,8 @@ _android_sources = [
   "app/src/androidTest/java/dev/flutter/scenariosui/SpawnEngineTests.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/SpawnMultiEngineTest.java",
   "app/src/main/AndroidManifest.xml",
+  "app/src/main/assets/sample.mp4",
+  "app/src/main/java/dev/flutter/scenarios/ExternalTextureFlutterActivity.java",
   "app/src/main/java/dev/flutter/scenarios/GetBitmapActivity.java",
   "app/src/main/java/dev/flutter/scenarios/PlatformViewsActivity.java",
   "app/src/main/java/dev/flutter/scenarios/SpawnMultiEngineActivity.java",
@@ -33,6 +36,10 @@ _android_sources = [
   "app/src/main/java/dev/flutter/scenarios/TestableFlutterActivity.java",
   "app/src/main/java/dev/flutter/scenarios/TextPlatformViewFactory.java",
   "app/src/main/java/dev/flutter/scenarios/TexturePlatformViewFactory.java",
+  "app/src/main/res/values/colors.xml",
+  "app/src/main/res/values/styles.xml",
+  "app/src/main/res/xml/data_extraction_rules.xml",
+  "app/src/main/res/xml/extraction_config_11_and_below.xml",
   "build.gradle",
 ]
 
