@@ -661,7 +661,10 @@ class RuntimeController : public PlatformConfigurationClient {
   void EndWarmUpFrame() override;
 
   // |PlatformConfigurationClient|
-  void Render(Scene* scene, double width, double height) override;
+  void Render(int64_t view_id,
+              Scene* scene,
+              double width,
+              double height) override;
 
   // |PlatformConfigurationClient|
   void UpdateSemantics(SemanticsUpdate* update) override;

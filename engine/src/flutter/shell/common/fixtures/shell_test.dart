@@ -533,6 +533,27 @@ void testReportViewWidths() {
 }
 
 @pragma('vm:entry-point')
+void onDrawFrameRenderAllViews() {
+  PlatformDispatcher.instance.onDrawFrame = () {
+    for (final FlutterView view in PlatformDispatcher.instance.views) {
+      final SceneBuilder builder = SceneBuilder();
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+      final Picture picture = recorder.endRecording();
+      builder.addPicture(Offset.zero, picture);
+
+      final Scene scene = builder.build();
+      view.render(scene);
+
+      scene.dispose();
+      picture.dispose();
+    }
+  };
+  notifyNative();
+}
+
+@pragma('vm:entry-point')
 void renderWarmUpImplicitView() {
   bool beginFrameCalled = false;
 
@@ -557,5 +578,37 @@ void renderWarmUpImplicitView() {
       scene.dispose();
       picture.dispose();
     },
+  );
+}
+
+@pragma('vm:entry-point')
+void renderWarmUpView1and2() {
+  bool beginFrameCalled = false;
+
+  PlatformDispatcher.instance.scheduleWarmUpFrame(
+    beginFrame: () {
+      expect(beginFrameCalled, false);
+      beginFrameCalled = true;
+    },
+    drawFrame: () {
+      expect(beginFrameCalled, true);
+
+      for (final int viewId in <int>[1, 2]) {
+        final FlutterView view = PlatformDispatcher.instance.view(id: viewId)!;
+
+        final SceneBuilder builder = SceneBuilder();
+        final PictureRecorder recorder = PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+        final Picture picture = recorder.endRecording();
+        builder.addPicture(Offset.zero, picture);
+
+        final Scene scene = builder.build();
+        view.render(scene);
+
+        scene.dispose();
+        picture.dispose();
+      }
+    }
   );
 }
