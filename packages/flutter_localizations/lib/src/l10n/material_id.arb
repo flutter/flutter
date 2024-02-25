@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Cari",
   "searchWebButtonLabel": "Telusuri di Web",
   "shareButtonLabel": "Bagikan...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

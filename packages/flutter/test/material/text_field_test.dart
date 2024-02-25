@@ -15222,6 +15222,8 @@ void main() {
     bool isWide = false;
     const double wideWidth = 300.0;
     const double narrowWidth = 200.0;
+    const TextStyle style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
+    const double caretWidth = 2.0;
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       boilerplate(
@@ -15234,6 +15236,7 @@ void main() {
                 key: textFieldKey,
                 controller: controller,
                 textDirection: TextDirection.rtl,
+                style: style,
               ),
             );
           },
@@ -15250,15 +15253,17 @@ void main() {
     expect(inputWidth, narrowWidth);
     expect(cursorRight, inputWidth - kCaretGap);
 
-    // After entering some text, the cursor remains on the right of the input.
-    await tester.enterText(find.byType(TextField), '12345');
+    const String text = '12345';
+    // After entering some text, the cursor is placed to the left of the text
+    // because the paragraph's writing direction is RTL.
+    await tester.enterText(find.byType(TextField), text);
     await tester.pump();
     editable = findRenderEditable(tester);
     cursorRight = editable.getLocalRectForCaret(
       TextPosition(offset: controller.value.text.length),
     ).topRight.dx;
     inputWidth = editable.size.width;
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
 
     // Since increasing the width of the input moves its right edge further to
     // the right, the cursor has followed this change and still appears on the
@@ -15273,7 +15278,7 @@ void main() {
     ).topRight.dx;
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
   });
 
   testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {

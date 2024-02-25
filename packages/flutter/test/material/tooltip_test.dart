@@ -3128,8 +3128,5 @@ Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
 }
 
 SemanticsNode _findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null) {
-    return object.debugSemantics!;
-  }
-  return _findDebugSemantics(object.parent!);
+  return object.debugSemantics ?? _findDebugSemantics(object.parent!);
 }
