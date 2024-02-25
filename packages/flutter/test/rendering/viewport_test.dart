@@ -2395,9 +2395,7 @@ void main() {
         child: CustomScrollView(
           slivers: List<Widget>.generate(
               sliverCount,
-              (_) => _ScrollOffsetCorrectionSliver(
-                    correctionsCount: correctionsCount,
-                  )),
+              (_) => _ScrollOffsetCorrectionSliver(correctionsCount: correctionsCount)),
         ),
       );
     }
