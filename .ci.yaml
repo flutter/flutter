@@ -59,7 +59,27 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
-    timeout: 60
+    timeout: 90
+    runIf:
+      - .ci.yaml
+      - ci/builders/linux_android_emulator.json
+      - DEPS
+      - lib/ui/**
+      - shell/platform/android/**
+      - testing/scenario_app/**
+
+  - name: Linux linux_android_emulator_skia_tests
+    bringup: true
+    enabled_branches:
+      - main
+    recipe: engine_v2/engine_v2
+    properties:
+      config_name: linux_android_emulator_skia
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+    timeout: 90
     runIf:
       - .ci.yaml
       - ci/builders/linux_android_emulator.json
@@ -80,7 +100,7 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
-    timeout: 60
+    timeout: 90
     runIf:
       - .ci.yaml
       - ci/builders/linux_android_emulator.json
