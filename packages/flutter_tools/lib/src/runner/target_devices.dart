@@ -29,7 +29,8 @@ String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
 String _noMatchingDeviceMessage(String deviceId) => 'No supported devices found with name or id '
     "matching '$deviceId'.";
 String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
-    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
+    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security. "
+    'You may also need to open XCode while the device is connected, and say yes when prompted to Trust the device.';
 
 /// This class handles functionality of finding and selecting target devices.
 ///
