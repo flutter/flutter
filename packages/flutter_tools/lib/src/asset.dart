@@ -88,10 +88,12 @@ enum AssetKind {
 final class AssetBundleEntry {
   const AssetBundleEntry(this.content, {
     required this.kind,
+    required this.transformers,
   });
 
   final DevFSContent content;
   final AssetKind kind;
+  final List<AssetTransformerEntry> transformers;
 
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
 }
@@ -264,6 +266,7 @@ class ManifestAssetBundle implements AssetBundle {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       );
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
@@ -272,12 +275,14 @@ class ManifestAssetBundle implements AssetBundle {
           emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes),
         ),
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       );
       // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
         entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
           DevFSStringContent('""'),
           kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
         );
       }
       return 0;
@@ -423,6 +428,7 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= AssetBundleEntry(
           DevFSFileContent(variantFile),
           kind: variant.kind,
+          transformers: variant.transformers,
         );
       }
     }
@@ -456,6 +462,7 @@ class ManifestAssetBundle implements AssetBundle {
           deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(
             DevFSFileContent(variantFile),
             kind: AssetKind.regular,
+            transformers: variant.transformers,
           );
         }
       }
@@ -471,7 +478,11 @@ class ManifestAssetBundle implements AssetBundle {
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
-      entries[asset.entryUri.path] ??= AssetBundleEntry(DevFSFileContent(assetFile), kind: asset.kind);
+      entries[asset.entryUri.path] ??= AssetBundleEntry(
+        DevFSFileContent(assetFile),
+        kind: asset.kind,
+        transformers: const <AssetTransformerEntry>[],
+      );
     }
 
     // Update wildcard directories we can detect changes in them.
@@ -534,6 +545,7 @@ class ManifestAssetBundle implements AssetBundle {
     entries[key] = AssetBundleEntry(
       content,
       kind: assetKind,
+      transformers: const <AssetTransformerEntry>[],
     );
   }
 
@@ -579,6 +591,7 @@ class ManifestAssetBundle implements AssetBundle {
           hintString: 'copyrightsoftwaretothisinandorofthe',
         ),
         kind: AssetKind.regular,
+        transformers: const<AssetTransformerEntry>[],
       );
     }
   }
@@ -684,6 +697,8 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            flavors: assetsEntry.flavors,
+            transformers: assetsEntry.transformers,
           );
         } else {
           _parseAssetFromFile(
@@ -693,6 +708,8 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            flavors: assetsEntry.flavors,
+            transformers: assetsEntry.transformers,
           );
         }
       }
@@ -863,6 +880,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          transformers: assetsEntry.transformers,
         );
       } else {
         _parseAssetFromFile(
@@ -875,6 +893,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          transformers: assetsEntry.transformers,
         );
       }
     }
@@ -900,6 +919,8 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
+        flavors: <String>{},
+        transformers: <AssetTransformerEntry>[],
       );
     }
 
@@ -914,6 +935,8 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         assetKind: AssetKind.model,
+        flavors: <String>{},
+        transformers: <AssetTransformerEntry>[],
       );
     }
 
@@ -927,6 +950,8 @@ class ManifestAssetBundle implements AssetBundle {
           packageName,
           attributedPackage,
           assetKind: AssetKind.font,
+          flavors: <String>{},
+          transformers: <AssetTransformerEntry>[],
         );
         final File baseAssetFile = baseAsset.lookupAssetFile(_fileSystem);
         if (!baseAssetFile.existsSync()) {
@@ -949,7 +974,8 @@ class ManifestAssetBundle implements AssetBundle {
     Uri assetUri, {
     String? packageName,
     Package? attributedPackage,
-    Set<String>? flavors,
+    required Set<String> flavors,
+    required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
     try {
@@ -985,6 +1011,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         originUri: assetUri,
         flavors: flavors,
+        transformers: transformers,
       );
     }
   }
@@ -1000,7 +1027,8 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    Set<String>? flavors,
+    required Set<String> flavors,
+    required List<AssetTransformerEntry> transformers,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -1011,6 +1039,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetKind: assetKind,
       originUri: originUri,
       flavors: flavors,
+      transformers: transformers,
     );
 
     _checkForFlavorConflicts(asset, result.keys.toList());
@@ -1032,6 +1061,8 @@ class ManifestAssetBundle implements AssetBundle {
             relativeUri: relativeUri,
             package: attributedPackage,
             kind: assetKind,
+            flavors: flavors,
+            transformers: transformers,
           ),
         );
       }
@@ -1116,7 +1147,8 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
-    Set<String>? flavors,
+    required Set<String> flavors,
+    required List<AssetTransformerEntry> transformers,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1130,6 +1162,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: assetKind,
         originUri: originUri,
         flavors: flavors,
+        transformers: transformers,
       );
       if (packageAsset != null) {
         return packageAsset;
@@ -1146,6 +1179,7 @@ class ManifestAssetBundle implements AssetBundle {
       originUri: originUri,
       kind: assetKind,
       flavors: flavors,
+      transformers: transformers,
     );
   }
 
@@ -1156,6 +1190,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
     Set<String>? flavors,
+    List<AssetTransformerEntry>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1171,6 +1206,7 @@ class ManifestAssetBundle implements AssetBundle {
           kind: assetKind,
           originUri: originUri,
           flavors: flavors,
+          transformers: transformers,
         );
       }
     }
@@ -1193,7 +1229,10 @@ class _Asset {
     required this.package,
     this.kind = AssetKind.regular,
     Set<String>? flavors,
-  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>{};
+    List<AssetTransformerEntry>? transformers,
+  })  : originUri = originUri ?? entryUri,
+        flavors = flavors ?? const <String>{},
+        transformers = transformers ?? const <AssetTransformerEntry>[];
 
   final String baseDir;
 
@@ -1213,6 +1252,8 @@ class _Asset {
   final AssetKind kind;
 
   final Set<String> flavors;
+
+  final List<AssetTransformerEntry> transformers;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
