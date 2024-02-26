@@ -383,11 +383,17 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   args.custom_task_runners = &custom_task_runners;
 
+  if (!platform_view_plugin_) {
+    platform_view_plugin_ = std::make_unique<PlatformViewPlugin>(
+        messenger_wrapper_.get(), task_runner_.get());
+  }
   if (egl_manager_) {
     auto resolver = [](const char* name) -> void* {
       return reinterpret_cast<void*>(::eglGetProcAddress(name));
     };
 
+    // TODO(schectman) Pass the platform view manager to the compositor
+    // constructors: https://github.com/flutter/flutter/issues/143375
     compositor_ = std::make_unique<CompositorOpenGL>(this, resolver);
   } else {
     compositor_ = std::make_unique<CompositorSoftware>(this);

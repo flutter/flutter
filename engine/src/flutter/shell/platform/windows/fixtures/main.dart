@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Uint8List;
+import 'dart:typed_data' show ByteData, Endian, Uint8List;
 import 'dart:ui' as ui;
 import 'dart:convert';
 
@@ -169,6 +169,37 @@ void enableLifecycleToFrom() async {
   ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform', ByteData.sublistView(utf8.encode('{"method":"System.initializationComplete"}')), (ByteData? data) {
     enabledLifecycle.complete(data);
   });
+}
+
+@pragma('vm:entry-point')
+void sendCreatePlatformViewMethod() async {
+  // The platform view method channel uses the standard method codec.
+  // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
+  // for the implementation of the encoding and magic number identifiers.
+  const int valueString = 7;
+  const int valueMap = 13;
+  const int valueInt32 = 3;
+  const String method = 'create';
+  const String typeKey = 'viewType';
+  const String typeValue = 'type';
+  const String idKey = 'id';
+  final List<int> data = <int>[
+    // Method name
+    valueString, method.length, ...utf8.encode(method),
+    // Method arguments: {'type': 'type':, 'id': 0}
+    valueMap, 2,
+    valueString, typeKey.length, ...utf8.encode(typeKey),
+    valueString, typeValue.length, ...utf8.encode(typeValue),
+    valueString, idKey.length, ...utf8.encode(idKey),
+    valueInt32, 0, 0, 0, 0,
+  ];
+
+  final Completer<ByteData?> completed = Completer<ByteData?>();
+  final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
+  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', bytes, (ByteData? response) {
+    completed.complete(response);
+  });
+  await completed.future;
 }
 
 @pragma('vm:entry-point')

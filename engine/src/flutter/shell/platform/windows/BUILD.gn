@@ -8,6 +8,7 @@ import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
 
 _public_headers = [ "public/flutter_windows.h" ]
+_internal_headers = [ "flutter_windows_internal.h" ]
 
 config("relative_angle_headers") {
   include_dirs = [ "//third_party/angle/include" ]
@@ -24,7 +25,7 @@ config("relative_flutter_windows_headers") {
 # The headers are a separate source set since the client wrapper is allowed
 # to depend on the public headers, but none of the rest of the code.
 source_set("flutter_windows_headers") {
-  public = _public_headers
+  public = _public_headers + _internal_headers
 
   public_deps = [ "//flutter/shell/platform/common:common_cpp_library_headers" ]
 
@@ -98,6 +99,10 @@ source_set("flutter_windows_source") {
     "keyboard_utils.h",
     "platform_handler.cc",
     "platform_handler.h",
+    "platform_view_manager.cc",
+    "platform_view_manager.h",
+    "platform_view_plugin.cc",
+    "platform_view_plugin.h",
     "sequential_id_generator.cc",
     "sequential_id_generator.h",
     "settings_plugin.cc",
@@ -218,6 +223,7 @@ executable("flutter_windows_unittests") {
     "testing/flutter_windows_engine_builder.cc",
     "testing/flutter_windows_engine_builder.h",
     "testing/mock_direct_manipulation.h",
+    "testing/mock_platform_view_manager.h",
     "testing/mock_text_input_manager.cc",
     "testing/mock_text_input_manager.h",
     "testing/mock_window.cc",

@@ -245,6 +245,14 @@ bool FlutterDesktopEngineProcessExternalWindowMessage(
   return lresult.has_value();
 }
 
+void FlutterDesktopEngineRegisterPlatformViewType(
+    FlutterDesktopEngineRef engine,
+    const char* view_type_name,
+    FlutterPlatformViewTypeEntry view_type) {
+  // TODO(schectman): forward to platform view manager.
+  // https://github.com/flutter/flutter/issues/143375
+}
+
 FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {
   // TODO(loicsharma): Add |FlutterDesktopPluginRegistrarGetViewById| and
