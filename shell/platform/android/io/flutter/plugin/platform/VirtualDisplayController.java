@@ -19,9 +19,18 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-@TargetApi(20)
+@TargetApi(21)
 class VirtualDisplayController {
   private static String TAG = "VirtualDisplayController";
+
+  private static VirtualDisplay.Callback callback =
+      new VirtualDisplay.Callback() {
+        @Override
+        public void onPaused() {}
+
+        @Override
+        public void onResumed() {}
+      };
 
   public static VirtualDisplayController create(
       Context context,
@@ -40,6 +49,7 @@ class VirtualDisplayController {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+
     // Virtual Display crashes for some PlatformViews if the width or height is bigger
     // than the physical screen size. We have tried to clamp or scale down the size to prevent
     // the crash, but both solutions lead to unwanted behavior because the
@@ -51,6 +61,7 @@ class VirtualDisplayController {
     // virtual display and AndroidPlatformView widget.
     // https://github.com/flutter/flutter/issues/93115
     renderTarget.resize(width, height);
+    int flags = 0;
     VirtualDisplay virtualDisplay =
         displayManager.createVirtualDisplay(
             "flutter-vd#" + viewId,
@@ -58,7 +69,9 @@ class VirtualDisplayController {
             height,
             metrics.densityDpi,
             renderTarget.getSurface(),
-            0);
+            flags,
+            callback,
+            null /* handler */);
 
     if (virtualDisplay == null) {
       return null;
@@ -148,9 +161,17 @@ class VirtualDisplayController {
     final DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     renderTarget.resize(width, height);
+    int flags = 0;
     virtualDisplay =
         displayManager.createVirtualDisplay(
-            "flutter-vd#" + viewId, width, height, densityDpi, renderTarget.getSurface(), 0);
+            "flutter-vd#" + viewId,
+            width,
+            height,
+            densityDpi,
+            renderTarget.getSurface(),
+            flags,
+            callback,
+            null /* handler */);
 
     final View embeddedView = getView();
     // There's a bug in Android version older than O where view tree observer onDrawListeners don't
@@ -210,12 +231,14 @@ class VirtualDisplayController {
     renderTarget.release();
   }
 
+  // On Android versions 31+ resizing of a Virtual Display's Presentation is natively supported.
   @TargetApi(31)
   private void resize31(
       View embeddedView, int width, int height, final Runnable onNewSizeFrameAvailable) {
     renderTarget.resize(width, height);
-    // On Android versions 31+ resizing of a Virtual Display's Presentation is natively supported.
     virtualDisplay.resize(width, height, densityDpi);
+    // Must update the surface to match the renderTarget's current surface.
+    virtualDisplay.setSurface(renderTarget.getSurface());
     embeddedView.postDelayed(onNewSizeFrameAvailable, 0);
   }
 
