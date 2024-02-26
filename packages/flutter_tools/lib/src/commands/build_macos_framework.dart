@@ -88,11 +88,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         await _produceFlutterFramework(buildInfo, modeDirectory);
       }
 
+      final Directory buildOutput = modeDirectory.childDirectory('macos');
+
       // Build aot, create App.framework. Make XCFrameworks.
-      await _produceAppFramework(buildInfo, modeDirectory);
+      await _produceAppFramework(buildInfo, modeDirectory, buildOutput);
 
       // Build and copy plugins.
-      final Directory buildOutput = modeDirectory.childDirectory('macos');
       await processPodsIfNeeded(project.macos, getMacOSBuildDirectory(), buildInfo.mode);
       if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
@@ -203,15 +204,15 @@ end
   Future<void> _produceAppFramework(
     BuildInfo buildInfo,
     Directory outputBuildDirectory,
+    Directory macosBuildOutput,
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Building App.xcframework...',
     );
-
     try {
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
-        outputDir: outputBuildDirectory,
+        outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: globals.cache.getRoot(),
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
@@ -254,7 +255,7 @@ end
       status.stop();
     }
 
-    final Directory appFramework = outputBuildDirectory.childDirectory('App.framework');
+    final Directory appFramework = macosBuildOutput.childDirectory('App.framework');
     await BuildFrameworkCommand.produceXCFramework(
       <Directory>[appFramework],
       'App',
@@ -288,6 +289,7 @@ end
       copyDirectory(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
+        followLinks: false,
       );
     } finally {
       status.stop();
