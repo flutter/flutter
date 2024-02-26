@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/base/promise.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/thread.h"
 
@@ -231,6 +232,22 @@ TEST(ConditionVariableTest, TestsCriticalSectionAfterWait) {
     threads[i].join();
   }
   ASSERT_EQ(sum, kThreadCount);
+}
+
+TEST(BaseTest, NoExceptionPromiseValue) {
+  NoExceptionPromise<int> wrapper;
+  std::future future = wrapper.get_future();
+  wrapper.set_value(123);
+  ASSERT_EQ(future.get(), 123);
+}
+
+TEST(BaseTest, NoExceptionPromiseEmpty) {
+  auto wrapper = std::make_shared<NoExceptionPromise<int>>();
+  std::future future = wrapper->get_future();
+
+  // Destroy the empty promise with the future still pending. Verify that the
+  // process does not abort while destructing the promise.
+  wrapper.reset();
 }
 
 }  // namespace testing
