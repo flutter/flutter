@@ -9,7 +9,7 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec2 interporlated_texture_coordinates;
+in vec2 interpolated_texture_coordinates;
 
 out vec4 frag_color;
 
@@ -17,8 +17,8 @@ uniform sampler2D contents1;
 uniform sampler2D contents2;
 
 void main() {
-  vec4 tex1 = texture(contents1, interporlated_texture_coordinates);
-  vec4 tex2 = texture(contents2, interporlated_texture_coordinates);
+  vec4 tex1 = texture(contents1, interpolated_texture_coordinates);
+  vec4 tex2 = texture(contents2, interpolated_texture_coordinates);
   frag_color = mix(
       tex1, tex2,
       clamp(frame_info.cursor_position.x / frame_info.window_size.x, 0.0, 1.0));
