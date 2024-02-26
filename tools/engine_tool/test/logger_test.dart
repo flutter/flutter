@@ -78,4 +78,48 @@ void main() {
     logger.info('info', newline: false);
     expect(stringsFromLogs(logger.testLogs), equals(<String>['info']));
   });
+
+  test('fitToWidth', () {
+    expect(Logger.fitToWidth('hello', 0), equals(''));
+    expect(Logger.fitToWidth('hello', 1), equals('.'));
+    expect(Logger.fitToWidth('hello', 2), equals('..'));
+    expect(Logger.fitToWidth('hello', 3), equals('...'));
+    expect(Logger.fitToWidth('hello', 4), equals('...o'));
+    expect(Logger.fitToWidth('hello', 5), equals('hello'));
+
+    expect(Logger.fitToWidth('foobar', 5), equals('f...r'));
+
+    expect(Logger.fitToWidth('foobarb', 5), equals('f...b'));
+    expect(Logger.fitToWidth('foobarb', 6), equals('f...rb'));
+
+    expect(Logger.fitToWidth('foobarba', 5), equals('f...a'));
+    expect(Logger.fitToWidth('foobarba', 6), equals('f...ba'));
+    expect(Logger.fitToWidth('foobarba', 7), equals('fo...ba'));
+
+    expect(Logger.fitToWidth('hello\n', 0), equals('\n'));
+    expect(Logger.fitToWidth('hello\n', 1), equals('.\n'));
+    expect(Logger.fitToWidth('hello\n', 2), equals('..\n'));
+    expect(Logger.fitToWidth('hello\n', 3), equals('...\n'));
+    expect(Logger.fitToWidth('hello\n', 4), equals('...o\n'));
+    expect(Logger.fitToWidth('hello\n', 5), equals('hello\n'));
+
+    expect(Logger.fitToWidth('foobar\n', 5), equals('f...r\n'));
+
+    expect(Logger.fitToWidth('foobarb\n', 5), equals('f...b\n'));
+    expect(Logger.fitToWidth('foobarb\n', 6), equals('f...rb\n'));
+
+    expect(Logger.fitToWidth('foobarba\n', 5), equals('f...a\n'));
+    expect(Logger.fitToWidth('foobarba\n', 6), equals('f...ba\n'));
+    expect(Logger.fitToWidth('foobarba\n', 7), equals('fo...ba\n'));
+  });
+
+  test('Spinner calls onFinish callback', () {
+    final Logger logger = Logger.test();
+    bool called = false;
+    final Spinner spinner = logger.startSpinner(
+      onFinish: () { called = true; },
+    );
+    spinner.finish();
+    expect(called, isTrue);
+  });
 }

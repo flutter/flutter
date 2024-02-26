@@ -13,6 +13,8 @@
 // Keep this list alphabetized.
 const String allFlag = 'all';
 const String builderFlag = 'builder';
+const String configFlag = 'config';
 const String dryRunFlag = 'dry-run';
 const String quietFlag = 'quiet';
+const String runTestsFlag = 'run-tests';
 const String verboseFlag = 'verbose';
