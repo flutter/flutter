@@ -218,8 +218,8 @@ class ManifestAssetBundle implements AssetBundle {
       return true;
     }
 
-    final FileStat stat = _fileSystem.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.notFound) {
+    final FileStat manifestStat = _fileSystem.file(manifestPath).statSync();
+    if (manifestStat.type == FileSystemEntityType.notFound) {
       return true;
     }
 
@@ -235,7 +235,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    return stat.modified.isAfter(lastBuildTimestamp);
+    return manifestStat.modified.isAfter(lastBuildTimestamp);
   }
 
   @override
