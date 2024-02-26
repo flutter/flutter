@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:args/args.dart';
 import 'package:dir_contents_diff/dir_contents_diff.dart' show dirContentsDiff;
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart';
@@ -15,180 +14,73 @@ import 'package:process/process.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
 
 import 'utils/adb_logcat_filtering.dart';
+import 'utils/environment.dart';
 import 'utils/logs.dart';
+import 'utils/options.dart';
 import 'utils/process_manager_extension.dart';
 import 'utils/screenshot_transformer.dart';
 
-void _withTemporaryCwd(String path, void Function() callback) {
-  final String originalCwd = Directory.current.path;
-  Directory.current = Directory(path).parent.path;
-
-  try {
-    callback();
-  } finally {
-    Directory.current = originalCwd;
-  }
-}
-
 // If you update the arguments, update the documentation in the README.md file.
 void main(List<String> args) async {
-  final Engine? engine = Engine.tryFindWithin();
-  final ArgParser parser = ArgParser()
-    ..addFlag(
-      'help',
-      help: 'Prints usage information',
-      negatable: false,
-    )
-    ..addFlag(
-      'verbose',
-      help: 'Prints verbose output',
-      negatable: false,
-    )
-    ..addOption(
-      'adb',
-      help: 'Path to the adb tool',
-      defaultsTo: engine != null
-          ? join(
-              engine.srcDir.path,
-              'third_party',
-              'android_tools',
-              'sdk',
-              'platform-tools',
-              'adb',
-            )
-          : null,
-    )
-    ..addOption(
-      'ndk-stack',
-      help: 'Path to the ndk-stack tool',
-      defaultsTo: engine != null
-          ? join(
-              engine.srcDir.path,
-              'third_party',
-              'android_tools',
-              'ndk',
-              'prebuilt',
-              () {
-                if (Platform.isLinux) {
-                  return 'linux-x86_64';
-                } else if (Platform.isMacOS) {
-                  return 'darwin-x86_64';
-                } else if (Platform.isWindows) {
-                  return 'windows-x86_64';
-                } else {
-                  throw UnsupportedError('Unsupported platform: ${Platform.operatingSystem}');
-                }
-              }(),
-              'bin',
-              'ndk-stack',
-            )
-          : null,
-    )
-    ..addOption(
-      'out-dir',
-      help: 'Out directory',
-      defaultsTo: engine
-          ?.outputs()
-          .where((Output o) => basename(o.path.path).startsWith('android_'))
-          .firstOrNull
-          ?.path
-          .path,
-    )
-    ..addOption(
-      'smoke-test',
-      help: 'Runs a single test to verify the setup',
-    )
-    ..addFlag(
-      'use-skia-gold',
-      help: 'Use Skia Gold to compare screenshots.',
-      defaultsTo: isLuciEnv,
-    )
-    ..addFlag(
-      'enable-impeller',
-      help: 'Enable Impeller for the Android app.',
-    )
-    ..addOption(
-      'output-contents-golden',
-      help: 'Path to a file that contains the expected filenames of golden files.',
-      defaultsTo: engine != null
-          ? join(
-              engine.srcDir.path,
-              'flutter',
-              'testing',
-              'scenario_app',
-              'android',
-              'expected_golden_output.txt',
-            )
-          : null,
-    )
-    ..addOption(
-      'impeller-backend',
-      help: 'The Impeller backend to use for the Android app.',
-      allowed: <String>['vulkan', 'opengles'],
-      defaultsTo: 'vulkan',
-    )
-    ..addOption(
-      'logs-dir',
-      help: 'The directory to store the logs and screenshots. Defaults to '
-          'the value of the FLUTTER_LOGS_DIR environment variable, if set, '
-          'otherwise it defaults to a path within out-dir.',
-      defaultsTo: Platform.environment['FLUTTER_LOGS_DIR'],
+  // Get some basic environment information to guide the rest of the program.
+  final Environment environment = Environment(
+    isCi: Platform.environment['LUCI_CONTEXT'] != null,
+    showVerbose: Options.showVerbose(args),
+    logsDir: Platform.environment['FLUTTER_LOGS_DIR'],
+  );
+
+  // Determine if the CWD is within an engine checkout.
+  final Engine? localEngineDir = Engine.tryFindWithin();
+
+  // Show usage if requested.
+  if (Options.showUsage(args)) {
+    stdout.writeln(Options.usage(
+      environment: environment,
+      localEngineDir: localEngineDir,
+    ));
+    return;
+  }
+
+  // Parse the command line arguments.
+  final Options options;
+  try {
+    options = Options.parse(
+      args,
+      environment: environment,
+      localEngine: localEngineDir,
     );
+  } on FormatException catch (error) {
+    stderr.writeln(error);
+    stderr.writeln(Options.usage(
+      environment: environment,
+      localEngineDir: localEngineDir,
+    ));
+    exitCode = 1;
+    return;
+  }
 
   runZonedGuarded(
     () async {
-      final ArgResults results = parser.parse(args);
-      if (results['help'] as bool) {
-        stdout.writeln(parser.usage);
-        return;
-      }
-
-      if (results['out-dir'] == null) {
-        panic(<String>['--out-dir is required']);
-      }
-      if (results['adb'] == null) {
-        panic(<String>['--adb is required']);
-      }
-
-      final bool verbose = results['verbose'] as bool;
-      final Directory outDir = Directory(results['out-dir'] as String);
-      final File adb = File(results['adb'] as String);
-      final bool useSkiaGold = results['use-skia-gold'] as bool;
-      final String? smokeTest = results['smoke-test'] as String?;
-      final bool enableImpeller = results['enable-impeller'] as bool;
-      final String? contentsGolden = results['output-contents-golden'] as String?;
-      final _ImpellerBackend? impellerBackend = _ImpellerBackend.tryParse(results['impeller-backend'] as String?);
-      if (enableImpeller && impellerBackend == null) {
-        panic(<String>[
-          'invalid graphics-backend',
-          results['impeller-backend'] as String? ?? '<null>'
-        ]);
-      }
-      final Directory logsDir = Directory(results['logs-dir'] as String? ?? join(outDir.path, 'scenario_app', 'logs'));
-      final String? ndkStack = results['ndk-stack'] as String?;
-      if (ndkStack == null) {
-        panic(<String>['--ndk-stack is required']);
-      }
       await _run(
-        verbose: verbose,
-        outDir: outDir,
-        adb: adb,
-        smokeTestFullPath: smokeTest,
-        useSkiaGold: useSkiaGold,
-        enableImpeller: enableImpeller,
-        impellerBackend: impellerBackend,
-        logsDir: logsDir,
-        contentsGolden: contentsGolden,
-        ndkStack: ndkStack,
+        verbose: options.verbose,
+        outDir: Directory(options.outDir),
+        adb: File(options.adb),
+        smokeTestFullPath: options.smokeTest,
+        useSkiaGold: options.useSkiaGold,
+        enableImpeller: options.enableImpeller,
+        impellerBackend: _ImpellerBackend.tryParse(options.impellerBackend),
+        logsDir: Directory(options.logsDir),
+        contentsGolden: options.outputContentsGolden,
+        ndkStack: options.ndkStack,
       );
       exit(0);
     },
     (Object error, StackTrace stackTrace) {
       if (error is! Panic) {
-        stderr.writeln(error);
+        stderr.writeln('Unhandled error: $error');
         stderr.writeln(stackTrace);
       }
-      exit(1);
+      exitCode = 1;
     },
   );
 }
@@ -222,18 +114,6 @@ Future<void> _run({
   required String ndkStack,
 }) async {
   const ProcessManager pm = LocalProcessManager();
-
-  if (!outDir.existsSync()) {
-    panic(<String>[
-      'out-dir does not exist: $outDir',
-      'make sure to build the selected engine variant'
-    ]);
-  }
-
-  if (!adb.existsSync()) {
-    panic(<String>['cannot find adb: $adb', 'make sure to run gclient sync']);
-  }
-
   final String scenarioAppPath = join(outDir.path, 'scenario_app');
   final String logcatPath = join(logsDir.path, 'logcat.txt');
 
@@ -521,7 +401,7 @@ Future<void> _run({
         // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
         File(join(screenshotPath, 'noop.txt')).writeAsStringSync('');
         // TODO(gaaclarke): We should move this into dir_contents_diff.
-        _withTemporaryCwd(contentsGolden, () {
+        _withTemporaryCwd(dirname(contentsGolden), () {
           final int exitCode = dirContentsDiff(basename(contentsGolden), screenshotPath);
           if (exitCode != 0) {
             panic(<String>['Output contents incorrect.']);
@@ -529,5 +409,16 @@ Future<void> _run({
         });
       });
     }
+  }
+}
+
+void _withTemporaryCwd(String path, void Function() callback) {
+  final String originalCwd = Directory.current.path;
+  Directory.current = Directory(path).path;
+
+  try {
+    callback();
+  } finally {
+    Directory.current = originalCwd;
   }
 }
