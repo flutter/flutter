@@ -162,9 +162,8 @@ def flutter_additional_macos_build_settings(target)
       # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
       configuration_engine_dir = (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
     end
-    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/macos-arm64_x86_64\" $(inherited)"
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
-      if xcframework_file.start_with?('macos') # macos-arm64_x86_64, macos-arm64, macos-x86_64
+      if xcframework_file.start_with?('macos-') # Could be macos-arm64_x86_64, macos-arm64, macos-x86_64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       end
     end

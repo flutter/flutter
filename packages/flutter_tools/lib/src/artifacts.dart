@@ -603,7 +603,7 @@ class CachedArtifacts implements Artifacts {
     }
     if (platform != null && artifact == Artifact.flutterMacOSFramework) {
       final String engineDir = _getEngineArtifactsPath(platform, mode)!;
-        return _getMacOSEngineArtifactPath(engineDir, _fileSystem, _platform);
+      return _getMacOSEngineArtifactPath(engineDir, _fileSystem, _platform);
     }
     return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
   }
