@@ -24,11 +24,13 @@ TEST_P(BlitPassTest, BlitAcrossDifferentPixelFormatsFails) {
   TextureDescriptor src_desc;
   src_desc.format = PixelFormat::kA8UNormInt;
   src_desc.size = {100, 100};
+  src_desc.storage_mode = StorageMode::kHostVisible;
   auto src = context->GetResourceAllocator()->CreateTexture(src_desc);
 
   TextureDescriptor dst_format;
   dst_format.format = PixelFormat::kR8G8B8A8UNormInt;
   dst_format.size = {100, 100};
+  dst_format.storage_mode = StorageMode::kHostVisible;
   auto dst = context->GetResourceAllocator()->CreateTexture(dst_format);
 
   EXPECT_FALSE(blit_pass->AddCopy(src, dst));

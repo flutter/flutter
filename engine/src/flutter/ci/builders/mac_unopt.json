@@ -142,7 +142,21 @@
                 "$flutter/osx_sdk": {
                     "sdk_version": "15a240d"
                 }
-            }
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_debug_unopt_arm64",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "host_debug_unopt_arm64",
+                        "--type",
+                        "dart,dart-host,engine",
+                        "--engine-capture-core-dump"
+                    ]
+                }
+            ]
         },
         {
             "properties": {

@@ -644,8 +644,15 @@ TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
 /// Test the layer structure and pixels rendered when using a custom software
 /// compositor.
 ///
+// TODO(143940): Convert this test to use SkiaGold.
+#if FML_OS_MACOSX && FML_ARCH_CPU_ARM64
+TEST_F(EmbedderTest,
+       DISABLED_CompositorMustBeAbleToRenderKnownSceneWithSoftwareCompositor) {
+#else
 TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownSceneWithSoftwareCompositor) {
+#endif  // FML_OS_MACOSX && FML_ARCH_CPU_ARM64
+
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   EmbedderConfigBuilder builder(context);
