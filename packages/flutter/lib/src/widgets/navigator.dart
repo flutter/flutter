@@ -2896,7 +2896,6 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-
 /// Placeholder for a route.
 abstract class _RoutePlaceholder {
   const _RoutePlaceholder();
