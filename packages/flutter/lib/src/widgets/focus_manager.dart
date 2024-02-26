@@ -137,6 +137,8 @@ typedef FocusOnKeyEventCallback = KeyEventResult Function(FocusNode node, KeyEve
 /// to be propagated.
 typedef OnKeyEventCallback = KeyEventResult Function(KeyEvent event);
 
+typedef OnFocusabilityChangedCallback = void Function(bool canRequstFocus);
+
 // Represents a pending autofocus request.
 @immutable
 class _Autofocus {
@@ -517,34 +519,63 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///    focus traversal policy for a widget subtree.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
-  bool get canRequestFocus {
-    if (!_canRequestFocus) {
-      return false;
-    }
-    final FocusScopeNode? scope = enclosingScope;
-    if (scope != null && !scope.canRequestFocus) {
-      return false;
-    }
-    for (final FocusNode ancestor in ancestors) {
-      if (!ancestor.descendantsAreFocusable) {
-        return false;
-      }
-    }
-    return true;
-  }
+  bool get canRequestFocus => _canRequestFocus && ancestors.every(_allowDescendantsToBeFocused);
+  static bool _allowDescendantsToBeFocused(FocusNode ancestor) => ancestor.descendantsAreFocusable;
 
   bool _canRequestFocus;
   @mustCallSuper
   set canRequestFocus(bool value) {
-    if (value != _canRequestFocus) {
-      // Have to set this first before unfocusing, since it checks this to cull
-      // unfocusable, previously-focused children.
-      _canRequestFocus = value;
-      if (hasFocus && !value) {
-        unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
-      }
-      _manager?._markPropertiesChanged(this);
+    if (value == _canRequestFocus) {
+      return;
     }
+    // Have to set this first before unfocusing, since it checks this to cull
+    // unfocusable, previously-focused children.
+    _canRequestFocus = value;
+    if (hasFocus && !value) {
+      unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+    }
+    final OnFocusabilityChangedCallback? focusabilityCallback = onFocusabilityChanged;
+    if (focusabilityCallback != null) {
+      final bool isFocusable = _adjustAncestorListenerCount(value ? 1 : -1) && value;
+      if (_isFocusable != isFocusable) {
+        focusabilityCallback(isFocusable);
+      }
+    }
+    _manager?._markPropertiesChanged(this);
+  }
+
+  //_FocusabilityListeningState? _focusabilityListeningState;
+
+  // The number of nodes that must take action when this node's
+  // `descentantsAreFocusable` value changes.
+  //
+  // This does not include this node if its _canRequestFocus is currently false
+  // and onFocusabilityChanged is set to a non-null value.
+  int _focusabilityListenerCount = 0;
+
+  bool _isFocusable = true;
+  OnFocusabilityChangedCallback? get onFocusabilityChanged => _onFocusabilityChanged;
+  OnFocusabilityChangedCallback? _onFocusabilityChanged;
+  set onFocusabilityChanged(OnFocusabilityChangedCallback? value) {
+    final bool hadCallback = _onFocusabilityChanged != null;
+    _onFocusabilityChanged = value;
+    if ((value != null) == hadCallback) {
+      return;
+    }
+
+    // Whether we need to monitor the path between parent and the closest
+    // ancestor with `descendantsAreFocusable == false` (or the root node).
+    _isFocusable = _canRequestFocus || _adjustAncestorListenerCount(1);
+  }
+
+  bool _adjustAncestorListenerCount(int delta) {
+    for (FocusNode? node = parent; node != null; node = node.parent) {
+      node._focusabilityListenerCount += delta;
+      if (!node.descendantsAreFocusable) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// If false, will disable focus for all of this node's descendants.
@@ -587,7 +618,42 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (!value && hasFocus) {
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
+    if (_focusabilityListenerCount > 0) {
+      _onDescendantsAreFocusableChanged(value);
+    }
     _manager?._markPropertiesChanged(this);
+  }
+
+  void _onDescendantsAreFocusableChanged(bool newValue) {
+    assert(_focusabilityListenerCount >= 0);
+    final int ancestorListenerAdjustment = newValue ? _focusabilityListenerCount : -_focusabilityListenerCount;
+    if (ancestorListenerAdjustment == 0) {
+      return;
+    }
+    final bool ancestorsAllowFocus = _adjustAncestorListenerCount(ancestorListenerAdjustment);
+
+    // If there's an ancestor that disallows focus, this change doesn't affect
+    // the focusability of the descendants. Otherwise, this we need to notify
+    // _focusabilityListenerCount listeners.
+    if (ancestorsAllowFocus) {
+      _dispatchToDescendants(newValue);
+    }
+  }
+
+  void _dispatchToDescendants(bool canRequestFocus) {
+    if (_focusabilityListenerCount == 0) {
+      return;
+    }
+    final OnFocusabilityChangedCallback? callback = onFocusabilityChanged;
+    if (callback != null && _isFocusable != canRequestFocus && _canRequestFocus) {
+      _isFocusable = canRequestFocus;
+      callback(canRequestFocus);
+    }
+    if (descendantsAreFocusable && children.isNotEmpty) {
+      for (final FocusNode child in children) {
+        child._dispatchToDescendants(canRequestFocus);
+      }
+    }
   }
 
   /// If false, tells the focus traversal policy to skip over for all of this
@@ -791,6 +857,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [enclosingScope] to look for scopes above this node.
   FocusScopeNode? get nearestScope => enclosingScope;
 
+  FocusScopeNode? _enclosingScope;
   /// Returns the nearest enclosing scope node above this node, or null if the
   /// node has not yet be added to the focus tree.
   ///
@@ -798,14 +865,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// scope.
   ///
   /// Use [nearestScope] to start at this node instead of above it.
-  FocusScopeNode? get enclosingScope {
-    for (final FocusNode node in ancestors) {
-      if (node is FocusScopeNode) {
-        return node;
-      }
-    }
-    return null;
-  }
+  FocusScopeNode? get enclosingScope => _enclosingScope ??= parent?.nearestScope;
 
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
@@ -1003,6 +1063,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     for (final FocusNode descendant in descendants) {
       descendant._manager = manager;
       descendant._ancestors = null;
+      descendant._enclosingScope = null;
     }
   }
 
@@ -1010,7 +1071,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   void _reparent(FocusNode child) {
     assert(child != this, 'Tried to make a child into a parent of itself.');
-    if (child._parent == this) {
+    final FocusNode? oldParent = child._parent;
+    if (oldParent == this) {
       assert(_children.contains(child), "Found a node that says it's a child, but doesn't appear in the child list.");
       // The child is already a child of this parent.
       return;
@@ -1019,14 +1081,33 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
     final FocusScopeNode? oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
-    child._parent?._removeChild(child, removeScopeFocus: oldScope != nearestScope);
+
+    final int subtreeListeners;
+    final bool childCouldFocus;
+    if (oldParent != null) {
+      oldParent._removeChild(child, removeScopeFocus: oldScope != nearestScope);
+      subtreeListeners = oldParent._focusabilityListenerCount;
+      childCouldFocus = subtreeListeners > 0 && oldParent._adjustAncestorListenerCount(-subtreeListeners);
+    } else {
+      subtreeListeners = (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0)
+                       + (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0);
+      childCouldFocus = true;
+    }
     _children.add(child);
     child._parent = this;
     child._ancestors = null;
+    child._enclosingScope = null;
     child._updateManager(_manager);
     for (final FocusNode ancestor in child.ancestors) {
       ancestor._descendants = null;
     }
+    if (subtreeListeners > 0) {
+      final bool childCanFocus = _adjustAncestorListenerCount(subtreeListeners);
+      if (childCanFocus != childCouldFocus) {
+        _onDescendantsAreFocusableChanged(childCanFocus);
+      }
+    }
+
     if (hadFocus) {
       // Update the focus chain for the current focus without changing it.
       _manager?.primaryFocus?._setAsFocusedChildForScope();
@@ -1268,12 +1349,21 @@ class FocusScopeNode extends FocusNode {
     super.skipTraversal,
     super.canRequestFocus,
     this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
-  })  : super(
-          descendantsAreFocusable: true,
-        );
+  })  : super(descendantsAreFocusable: true);
+
+  @override
+  set canRequestFocus(bool value) {
+    if (value != _canRequestFocus) {
+      super.canRequestFocus = value;
+      _onDescendantsAreFocusableChanged(value);
+    }
+  }
 
   @override
   FocusScopeNode get nearestScope => this;
+
+  @override
+  bool get descendantsAreFocusable => _canRequestFocus && super.descendantsAreFocusable;
 
   /// Controls the transfer of focus beyond the first and the last items of a
   /// [FocusScopeNode].
