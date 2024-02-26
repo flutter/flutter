@@ -506,44 +506,35 @@ class RenderWrap extends RenderBox
   double _getMainAxisExtent(Size childSize) => _getMainAxisExtentInDirection(childSize, direction);
 
   static double _getMainAxisExtentInDirection(Size childSize, Axis direction) {
-    switch (direction) {
-      case Axis.horizontal:
-        return childSize.width;
-      case Axis.vertical:
-        return childSize.height;
-    }
+    return switch (direction) {
+      Axis.horizontal => childSize.width,
+      Axis.vertical => childSize.height,
+    };
   }
 
   double _getCrossAxisExtent(Size childSize) => _getCrossAxisExtentInDirection(childSize, direction);
 
   static double _getCrossAxisExtentInDirection(Size childSize, Axis direction) {
-    switch (direction) {
-      case Axis.horizontal:
-        return childSize.height;
-      case Axis.vertical:
-        return childSize.width;
-    }
+    return switch (direction) {
+      Axis.horizontal => childSize.height,
+      Axis.vertical => childSize.width,
+    };
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
-    switch (direction) {
-      case Axis.horizontal:
-        return Offset(mainAxisOffset, crossAxisOffset);
-      case Axis.vertical:
-        return Offset(crossAxisOffset, mainAxisOffset);
-    }
+    return switch (direction) {
+      Axis.horizontal => Offset(mainAxisOffset, crossAxisOffset),
+      Axis.vertical   => Offset(crossAxisOffset, mainAxisOffset),
+    };
   }
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
     final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
-    switch (crossAxisAlignment) {
-      case WrapCrossAlignment.start:
-        return flipCrossAxis ? freeSpace : 0.0;
-      case WrapCrossAlignment.end:
-        return flipCrossAxis ? 0.0 : freeSpace;
-      case WrapCrossAlignment.center:
-        return freeSpace / 2.0;
-    }
+    return switch (crossAxisAlignment) {
+      WrapCrossAlignment.start  => flipCrossAxis ? freeSpace : 0.0,
+      WrapCrossAlignment.end    => flipCrossAxis ? 0.0 : freeSpace,
+      WrapCrossAlignment.center => freeSpace / 2.0,
+    };
   }
 
   bool _hasVisualOverflow = false;
@@ -557,12 +548,10 @@ class RenderWrap extends RenderBox
       direction: direction, constraints: constraints, firstChild: firstChild, spacing: spacing, runSpacing: runSpacing,
     );
 
-    switch (direction) {
-      case Axis.horizontal:
-        return constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
-      case Axis.vertical:
-        return constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-    }
+    return constraints.constrain(switch (direction) {
+      Axis.horizontal => Size(mainAxisExtent, crossAxisExtent),
+      Axis.vertical   => Size(crossAxisExtent, mainAxisExtent),
+    });
   }
 
   @override
