@@ -2302,14 +2302,14 @@ void main() {
 
   testWidgets('Route announce correctly for first route and last route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/57133.
-    Route<void>? previousOfFirst;
-    Route<void>? nextOfFirst;
-    Route<void>? popNextOfFirst;
+    Route<void>? previousOfFirst = NotAnnounced();
+    Route<void>? nextOfFirst = NotAnnounced();
+    Route<void>? popNextOfFirst = NotAnnounced();
     Route<void>? firstRoute;
 
-    Route<void>? previousOfSecond;
-    Route<void>? nextOfSecond;
-    Route<void>? popNextOfSecond;
+    Route<void>? previousOfSecond = NotAnnounced();
+    Route<void>? nextOfSecond = NotAnnounced();
+    Route<void>? popNextOfSecond = NotAnnounced();
     Route<void>? secondRoute;
 
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -2339,13 +2339,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(previousOfFirst, isNull);
+    expect(previousOfFirst, isA<NotAnnounced>());
     expect(nextOfFirst, secondRoute);
-    expect(popNextOfFirst, isNull);
+    expect(popNextOfFirst, isA<NotAnnounced>());
 
     expect(previousOfSecond, firstRoute);
     expect(nextOfSecond, isNull);
-    expect(popNextOfSecond, isNull);
+    expect(popNextOfSecond, isA<NotAnnounced>());
 
     navigator.currentState!.pop();
     expect(popNextOfFirst, secondRoute);
@@ -5238,6 +5238,8 @@ void main() {
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
+
+class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
