@@ -76,6 +76,10 @@ class EngineModifier {
     engine_->lifecycle_manager_ = std::move(handler);
   }
 
+  void SetPlatformViewPlugin(std::unique_ptr<PlatformViewPlugin>&& manager) {
+    engine_->platform_view_plugin_ = std::move(manager);
+  }
+
  private:
   FlutterWindowsEngine* engine_;
 

@@ -32,6 +32,7 @@
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
+#include "flutter/shell/platform/windows/platform_view_plugin.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
@@ -143,6 +144,8 @@ class FlutterWindowsEngine {
   }
 
   TaskRunner* task_runner() { return task_runner_.get(); }
+
+  BinaryMessenger* messenger_wrapper() { return messenger_wrapper_.get(); }
 
   FlutterWindowsTextureRegistrar* texture_registrar() {
     return texture_registrar_.get();
@@ -433,6 +436,8 @@ class FlutterWindowsEngine {
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
   std::shared_ptr<egl::ProcTable> gl_;
+
+  std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

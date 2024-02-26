@@ -30012,6 +30012,7 @@ ORIGIN: ../../../flutter/shell/platform/windows/flutter_window.h + ../../../flut
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_engine.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_engine.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_internal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/flutter_windows_view.cc + ../../../flutter/LICENSE
@@ -30030,6 +30031,10 @@ ORIGIN: ../../../flutter/shell/platform/windows/keyboard_utils.cc + ../../../flu
 ORIGIN: ../../../flutter/shell/platform/windows/keyboard_utils.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/platform_handler.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/platform_handler.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/platform_view_manager.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/platform_view_manager.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/platform_view_plugin.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/platform_view_plugin.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/public/flutter_windows.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/sequential_id_generator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/sequential_id_generator.h + ../../../flutter/LICENSE
@@ -32873,6 +32878,7 @@ FILE: ../../../flutter/shell/platform/windows/flutter_window.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.h
+FILE: ../../../flutter/shell/platform/windows/flutter_windows_internal.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view.cc
@@ -32891,6 +32897,10 @@ FILE: ../../../flutter/shell/platform/windows/keyboard_utils.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_utils.h
 FILE: ../../../flutter/shell/platform/windows/platform_handler.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.h
+FILE: ../../../flutter/shell/platform/windows/platform_view_manager.cc
+FILE: ../../../flutter/shell/platform/windows/platform_view_manager.h
+FILE: ../../../flutter/shell/platform/windows/platform_view_plugin.cc
+FILE: ../../../flutter/shell/platform/windows/platform_view_plugin.h
 FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.cc
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.h

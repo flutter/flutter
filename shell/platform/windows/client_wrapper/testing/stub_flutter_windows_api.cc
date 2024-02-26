@@ -176,6 +176,16 @@ bool FlutterDesktopEngineProcessExternalWindowMessage(
   return false;
 }
 
+void FlutterDesktopEngineRegisterPlatformViewType(
+    FlutterDesktopEngineRef engine,
+    const char* view_type_name,
+    FlutterPlatformViewTypeEntry view_type) {
+  if (s_stub_implementation) {
+    s_stub_implementation->EngineRegisterPlatformViewType(view_type_name,
+                                                          view_type);
+  }
+}
+
 FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(
     FlutterDesktopPluginRegistrarRef controller) {
   // The stub ignores this, so just return an arbitrary non-zero value.
