@@ -69,7 +69,6 @@ targets:
       - testing/scenario_app/**
 
   - name: Linux linux_android_emulator_skia_tests
-    bringup: true
     enabled_branches:
       - main
     recipe: engine_v2/engine_v2
