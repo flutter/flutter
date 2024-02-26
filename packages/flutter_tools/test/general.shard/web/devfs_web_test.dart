@@ -4,10 +4,15 @@
 
 import 'dart:async';
 import 'dart:io' hide Directory, File;
+import 'dart:typed_data';
 
+import 'package:args/args.dart';
 import 'package:dwds/dwds.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,6 +21,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
@@ -27,7 +33,10 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
+import '../devfs_test.dart';
 
 const List<int> kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
@@ -1301,6 +1310,116 @@ void main() {
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
   }));
+
+  group('Asset transformation', () {
+    testUsingContext('DevFS re-transforms assets with transformers during update', () async {
+      final File asset = globals.fs.file('my-asset.txt')
+        ..createSync()
+        ..writeAsBytesSync(<int>[1, 2, 3]);
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final ResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
+
+      final WebDevFS devFS = WebDevFS(
+        hostname: 'localhost',
+        port: 0,
+        tlsCertPath: null,
+        tlsCertKeyPath: null,
+        packagesFilePath: '.packages',
+        urlTunneller: null,
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        nullAssertions: true,
+        nativeNullAssertions: true,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        enableDds: false,
+        entrypoint: Uri.base,
+        testMode: true,
+        expressionCompiler: null,
+        extraHeaders: const <String, String>{},
+        chromiumLauncher: null,
+        nullSafetyMode: NullSafetyMode.unsound,
+        ddcModuleSystem: usesDdcModuleSystem,
+        webRenderer: WebRendererMode.canvaskit,
+        rootDirectory: globals.fs.currentDirectory,
+      );
+      devFS.flutterJs.createSync(recursive: true);
+      devFS.requireJS.createSync(recursive: true);
+      devFS.stackTraceMapper.createSync(recursive: true);
+      await devFS.create();
+
+      final FakeBundle bundle = FakeBundle()
+        ..entries['my-asset.txt'] = AssetBundleEntry(
+          DevFSFileContent(asset),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: '',
+        pathToReload: '',
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundleFirstUpload: true,
+        bundle: bundle,
+      );
+
+      expect(globals.processManager, hasNoRemainingExpectations);
+      expect(report.success, true);
+
+      final File outputAssetFile = globals.fs.file('build/flutter_assets/my-asset.txt');
+      expect(outputAssetFile, exists);
+      expect(outputAssetFile.readAsBytesSync(), orderedEquals(<int>[2, 3, 4]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      Artifacts: () => Artifacts.test(),
+      ProcessManager: () => FakeProcessManager.list(
+        <FakeCommand>[
+          FakeCommand(
+            command: <Pattern>[
+              globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+              'run',
+              'increment',
+              '--input=/.tmp_rand0/my-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/my-asset.txt-transformOutput1.txt'
+            ],
+            onRun: (List<String> command) {
+              final ArgResults argParseResults = (ArgParser()
+                  ..addOption('input', mandatory: true)
+                  ..addOption('output', mandatory: true))
+                .parse(command);
+
+              final File inputFile = globals.fs.file(argParseResults['input']);
+              final File outputFile = globals.fs.file(argParseResults['output']);
+
+              expect(inputFile, exists);
+              outputFile
+                ..createSync()
+                ..writeAsBytesSync(
+                  Uint8List.fromList(
+                    inputFile.readAsBytesSync().map((int b) => b + 1).toList(),
+                  ),
+                );
+            },
+          ),
+        ],
+      ),
+    });
+  });
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
