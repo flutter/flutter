@@ -2210,22 +2210,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // computing the target position.
       textBoundary = null;
     }
-    if (paragraph.paintBounds.contains(localPosition) && fullText.codeUnits.elementAt(positionInFullText.offset) == PlaceholderSpan.placeholderCodeUnit) {
-      debugPrint('touching placeholder');
-      // Determine if text position is at placeholder.
-      // If it is then try to reach it.
-      _setSelectionPosition(position, isEnd: isEnd);
-      if (position.offset >= range.end) {
-        debugPrint('nexttttttttttt');
-        return SelectionResult.next;
-      }
-
-      if (position.offset <= range.start) {
-        debugPrint('prevvvvvvvvvvvvv');
-        return SelectionResult.previous;
-      }
-
-    }
     final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundaryX(textBoundary, getTextBoundary, position, _getParagraphBoundaryAtPosition, positionInFullText, existingSelectionStart, existingSelectionEnd, localPosition) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
     debugPrint('resulting target $targetPosition');
 
