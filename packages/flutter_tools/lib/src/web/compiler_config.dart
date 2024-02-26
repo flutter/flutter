@@ -148,7 +148,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.wasm;
 
   List<String> toCommandOptions(BuildMode buildMode) {
-    final bool stripSymbols = buildMode == BuildMode.release ? stripWasm : false;
+    final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O$optimizationLevel',
       '--${stripSymbols ? 'no-' : ''}name-section',
