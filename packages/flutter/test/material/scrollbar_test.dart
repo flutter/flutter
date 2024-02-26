@@ -1020,7 +1020,6 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
           ),
         ),
         home: const SingleChildScrollView(
@@ -1160,7 +1159,7 @@ void main() {
     }),
   );
 
-  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('ScrollbarThemeData.trackVisibility', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1219,69 +1218,6 @@ void main() {
           // Hover color
           color: const Color(0x80000000),
         ),
-    );
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-      TargetPlatform.windows,
-    }),
-  );
-
-  testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(
-            thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
-          ),
-        ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pump();
-
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-          color: const Color(0x08000000),
-        )
-        ..line(
-          p1: const Offset(784.0, 0.0),
-          p2: const Offset(784.0, 600.0),
-          strokeWidth: 1.0,
-          color: _kDefaultIdleThumbColor,
-        )
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            _kDefaultThumbRadius,
-          ),
-          // Hover color
-          color: const Color(0x80000000),
-      ),
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{

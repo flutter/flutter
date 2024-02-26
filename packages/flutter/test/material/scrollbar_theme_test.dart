@@ -38,7 +38,6 @@ void main() {
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thumbVisibility: true,
-            showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -363,7 +362,6 @@ void main() {
   testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
     const double thickness = 4.0;
     const double edgeMargin = 2.0;
-    const bool showTrackOnHover = true;
     const Radius radius = Radius.circular(3.0);
     final ScrollController scrollController = ScrollController();
 
@@ -377,7 +375,6 @@ void main() {
           child: Scrollbar(
             thickness: thickness,
             thumbVisibility: true,
-            showTrackOnHover: showTrackOnHover,
             radius: radius,
             controller: scrollController,
             child: SingleChildScrollView(
@@ -473,7 +470,6 @@ void main() {
               behavior: const NoScrollbarBehavior(),
               child: Scrollbar(
                 thumbVisibility: true,
-                showTrackOnHover: true,
                 controller: scrollController,
                 child: SingleChildScrollView(
                   controller: scrollController,
@@ -654,7 +650,6 @@ void main() {
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thumbVisibility: true,
-            showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -702,7 +697,6 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ScrollbarThemeData(
       thickness: MaterialStateProperty.resolveWith(_getThickness),
-      showTrackOnHover: true,
       thumbVisibility: MaterialStateProperty.resolveWith(_getThumbVisibility),
       radius: const Radius.circular(3.0),
       thumbColor: MaterialStateProperty.resolveWith(_getThumbColor),
@@ -721,7 +715,6 @@ void main() {
     expect(description, <String>[
       "thumbVisibility: Instance of '_MaterialStatePropertyWith<bool?>'",
       "thickness: Instance of '_MaterialStatePropertyWith<double?>'",
-      'showTrackOnHover: true',
       'radius: Radius.circular(3.0)',
       "thumbColor: Instance of '_MaterialStatePropertyWith<Color?>'",
       "trackColor: Instance of '_MaterialStatePropertyWith<Color?>'",
@@ -749,7 +742,6 @@ class NoScrollbarBehavior extends ScrollBehavior {
 ScrollbarThemeData _scrollbarTheme({
   MaterialStateProperty<double?>? thickness,
   MaterialStateProperty<bool?>? trackVisibility,
-  bool showTrackOnHover = true,
   MaterialStateProperty<bool?>? thumbVisibility,
   Radius radius = const Radius.circular(6.0),
   MaterialStateProperty<Color?>? thumbColor,
@@ -762,7 +754,6 @@ ScrollbarThemeData _scrollbarTheme({
   return ScrollbarThemeData(
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
     trackVisibility: trackVisibility,
-    showTrackOnHover: showTrackOnHover,
     thumbVisibility: thumbVisibility,
     radius: radius,
     thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
