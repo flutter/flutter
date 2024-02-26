@@ -510,13 +510,7 @@ abstract class ShapeBorder {
     if (identical(a, b)) {
       return a;
     }
-    ShapeBorder? result;
-    if (b != null) {
-      result = b.lerpFrom(a, t);
-    }
-    if (result == null && a != null) {
-      result = a.lerpTo(b, t);
-    }
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
     return result ?? (t < 0.5 ? a : b);
   }
 
@@ -700,13 +694,7 @@ abstract class OutlinedBorder extends ShapeBorder {
     if (identical(a, b)) {
       return a;
     }
-    ShapeBorder? result;
-    if (b != null) {
-      result = b.lerpFrom(a, t);
-    }
-    if (result == null && a != null) {
-      result = a.lerpTo(b, t);
-    }
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
     return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
   }
 }

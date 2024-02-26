@@ -572,12 +572,7 @@ class BlinkTraceEvent {
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
   final num? jsonValue = json[key] as num?;
-
-  if (jsonValue == null) {
-    return null;
-  }
-
-  return jsonValue.toInt();
+  return jsonValue?.toInt();
 }
 
 /// Used by [Chrome.launch] to detect a glibc bug and retry launching the

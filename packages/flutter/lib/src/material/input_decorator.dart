@@ -181,9 +181,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 
   late AnimationController _controller;
   late AnimationController _hoverColorController;
-  late Animation<double> _borderAnimation;
+  late CurvedAnimation _borderAnimation;
   late _InputBorderTween _border;
-  late Animation<double> _hoverAnimation;
+  late CurvedAnimation _hoverAnimation;
   late ColorTween _hoverColorTween;
 
   @override
@@ -218,6 +218,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   void dispose() {
     _controller.dispose();
     _hoverColorController.dispose();
+    _borderAnimation.dispose();
+    _hoverAnimation.dispose();
     super.dispose();
   }
 
@@ -1902,7 +1904,7 @@ class InputDecorator extends StatefulWidget {
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   late final AnimationController _floatingLabelController;
-  late final Animation<double> _floatingLabelAnimation;
+  late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
   static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
@@ -1946,6 +1948,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void dispose() {
     _floatingLabelController.dispose();
+    _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
     super.dispose();
@@ -4653,7 +4656,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
-    return _colors.surfaceContainerHighest;
+    return _colors.surfaceVariant;
   });
 
   @override
