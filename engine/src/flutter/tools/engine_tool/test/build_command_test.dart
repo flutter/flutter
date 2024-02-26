@@ -119,4 +119,39 @@ void main() {
     expect(runHistory[1].length, greaterThanOrEqualTo(1));
     expect(runHistory[1][0], contains('ninja'));
   });
+
+  test('build command invokes generator', () async {
+    final Logger logger = Logger.test();
+    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
+    final ToolCommandRunner runner = ToolCommandRunner(
+      environment: env,
+      configs: configs,
+    );
+    final int result = await runner.run(<String>[
+      'build',
+      '--config',
+      'build_name',
+    ]);
+    expect(result, equals(0));
+    expect(runHistory.length, greaterThanOrEqualTo(3));
+    expect(runHistory[2].length, greaterThanOrEqualTo(2));
+    expect(runHistory[2][0], contains('python3'));
+    expect(runHistory[2][1], contains('gen/script.py'));
+  });
+
+  test('build command does not invoke tests', () async {
+    final Logger logger = Logger.test();
+    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
+    final ToolCommandRunner runner = ToolCommandRunner(
+      environment: env,
+      configs: configs,
+    );
+    final int result = await runner.run(<String>[
+      'build',
+      '--config',
+      'build_name',
+    ]);
+    expect(result, equals(0));
+    expect(runHistory.length, lessThanOrEqualTo(3));
+  });
 }
