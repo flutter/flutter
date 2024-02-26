@@ -1260,7 +1260,10 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   variants_to_skip = ['host_release', 'host_profile']
   if ('engine' in types or 'font-subset' in types) and args.variant not in variants_to_skip:
-    run_cmd(['python3', 'test.py'], cwd=FONT_SUBSET_DIR)
+    cmd = ['python3', 'test.py', '--variant', args.variant]
+    if 'arm64' in args.variant:
+      cmd += ['--target-cpu', 'arm64']
+    run_cmd(cmd, cwd=FONT_SUBSET_DIR)
 
   if 'impeller-golden' in types:
     run_impeller_golden_tests(build_dir)
