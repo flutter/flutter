@@ -212,12 +212,9 @@ abstract interface class ChipAttributes {
   /// Color of the chip's surface tint overlay when its elevation is
   /// greater than 0.
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
-  ///
-  /// If this is null, defaults to [Colors.transparent].
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [ColorScheme.surfaceTint] color is used. Otherwise, it defaults
+  /// to null.
   Color? get surfaceTintColor;
 
   /// Theme used for all icons in the chip.
@@ -902,11 +899,11 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   late AnimationController avatarDrawerController;
   late AnimationController deleteDrawerController;
   late AnimationController enableController;
-  late Animation<double> checkmarkAnimation;
-  late Animation<double> avatarDrawerAnimation;
-  late Animation<double> deleteDrawerAnimation;
-  late Animation<double> enableAnimation;
-  late Animation<double> selectionFade;
+  late CurvedAnimation checkmarkAnimation;
+  late CurvedAnimation avatarDrawerAnimation;
+  late CurvedAnimation deleteDrawerAnimation;
+  late CurvedAnimation enableAnimation;
+  late CurvedAnimation selectionFade;
 
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
@@ -993,6 +990,11 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     avatarDrawerController.dispose();
     deleteDrawerController.dispose();
     enableController.dispose();
+    checkmarkAnimation.dispose();
+    avatarDrawerAnimation.dispose();
+    deleteDrawerAnimation.dispose();
+    enableAnimation.dispose();
+    selectionFade.dispose();
     super.dispose();
   }
 
@@ -2372,7 +2374,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get checkmarkColor => null;

@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
 import 'color_scheme.dart';
-import 'colors.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -154,18 +153,16 @@ class MaterialBanner extends StatefulWidget {
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ColorScheme.surfaceContainerLow] of [ThemeData.colorScheme] is used.
+  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
   /// If null, [MaterialBannerThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [Colors.transparent].
+  /// is also null, the default value is [ColorScheme.surfaceTint].
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
   final Color? surfaceTintColor;
 
   /// The color of the shadow below the [MaterialBanner].
@@ -486,10 +483,10 @@ class _BannerDefaultsM3 extends MaterialBannerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surfaceContainerLow;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get dividerColor => _colors.outlineVariant;

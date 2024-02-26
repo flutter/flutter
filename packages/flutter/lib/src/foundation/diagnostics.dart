@@ -2257,10 +2257,7 @@ class EnumProperty<T extends Enum?> extends DiagnosticsProperty<T> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    if (value == null) {
-      return value.toString();
-    }
-    return value!.name;
+    return value?.name ?? 'null';
   }
 }
 

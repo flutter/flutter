@@ -471,12 +471,7 @@ void main() {
 
         // Theme brightness is preferred, otherwise MediaQuery brightness is
         // used. If both are null, defaults to light.
-        late final Brightness effectiveBrightness;
-        if (themeBrightness != null) {
-          effectiveBrightness = themeBrightness;
-        } else {
-          effectiveBrightness = mediaBrightness ?? Brightness.light;
-        }
+        final Brightness effectiveBrightness = themeBrightness ?? mediaBrightness ?? Brightness.light;
 
         expect(
           text.style!.color!.value,

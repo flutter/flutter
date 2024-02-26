@@ -1086,7 +1086,7 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   Color get color => _colors.primary;
 
   @override
-  Color get linearTrackColor => _colors.surfaceContainerHighest;
+  Color get linearTrackColor => _colors.surfaceVariant;
 
   @override
   double get linearMinHeight => 4.0;

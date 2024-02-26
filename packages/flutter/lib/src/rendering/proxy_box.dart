@@ -468,10 +468,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (height.isFinite) {
       return height * _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMinIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
@@ -479,10 +476,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (height.isFinite) {
       return height * _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMaxIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
@@ -490,10 +484,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (width.isFinite) {
       return width / _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMinIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicHeight(width) ?? 0.0;
   }
 
   @override
@@ -501,10 +492,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (width.isFinite) {
       return width / _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMaxIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicHeight(width) ?? 0.0;
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {

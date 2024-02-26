@@ -147,7 +147,8 @@ class BottomSheet extends StatefulWidget {
   /// The bottom sheet drag handle's color.
   ///
   /// Defaults to [BottomSheetThemeData.dragHandleColor].
-  /// If that is also null, defaults to [ColorScheme.onSurfaceVariant].
+  /// If that is also null, defaults to [ColorScheme.onSurfaceVariant]
+  /// with an opacity of 0.4.
   final Color? dragHandleColor;
 
   /// Defaults to [BottomSheetThemeData.dragHandleSize].
@@ -1404,16 +1405,16 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get backgroundColor => _colors.surfaceContainerLow;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get dragHandleColor => _colors.onSurfaceVariant;
+  Color? get dragHandleColor => _colors.onSurfaceVariant.withOpacity(0.4);
 
   @override
   Size? get dragHandleSize => const Size(32, 4);
