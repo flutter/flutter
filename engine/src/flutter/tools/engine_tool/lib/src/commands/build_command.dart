@@ -5,10 +5,9 @@
 import 'package:engine_build_configs/engine_build_configs.dart';
 
 import '../build_utils.dart';
-
+import '../logger.dart';
 import 'command.dart';
-
-const String _configFlag = 'config';
+import 'flags.dart';
 
 // TODO(johnmccutchan): Should BuildConfig be BuilderConfig and GlobalBuild be BuildConfig?
 // TODO(johnmccutchan): List all available build targets and allow the user
@@ -25,7 +24,7 @@ final class BuildCommand extends CommandBase {
     builds = runnableBuilds(environment, configs);
     // Add options here that are common to all queries.
     argParser.addOption(
-      _configFlag,
+      configFlag,
       abbr: 'c',
       defaultsTo: 'host_debug',
       help: 'Specify the build config to use',
@@ -51,7 +50,7 @@ final class BuildCommand extends CommandBase {
 
   @override
   Future<int> run() async {
-    final String configName = argResults![_configFlag] as String;
+    final String configName = argResults![configFlag] as String;
     final GlobalBuild? build = builds
         .where((GlobalBuild build) => build.name == configName)
         .firstOrNull;
@@ -60,28 +59,38 @@ final class BuildCommand extends CommandBase {
       return 1;
     }
     final GlobalBuildRunner buildRunner = GlobalBuildRunner(
-        platform: environment.platform,
-        processRunner: environment.processRunner,
-        abi: environment.abi,
-        engineSrcDir: environment.engine.srcDir,
-        build: build);
+      platform: environment.platform,
+      processRunner: environment.processRunner,
+      abi: environment.abi,
+      engineSrcDir: environment.engine.srcDir,
+      build: build,
+      runTests: false,
+    );
+
+    Spinner? spinner;
     void handler(RunnerEvent event) {
       switch (event) {
         case RunnerStart():
-          environment.logger.info('$event: ${event.command.join(' ')}');
+          environment.logger.status('$event     ', newline: false);
+          spinner = environment.logger.startSpinner();
         case RunnerProgress(done: true):
+          spinner?.finish();
+          spinner = null;
           environment.logger.clearLine();
           environment.logger.status(event);
-        case RunnerProgress(done: false):
-          {
-            final String percent = '${event.percent.toStringAsFixed(1)}%';
-            final String fraction = '(${event.completed}/${event.total})';
-            final String prefix = '[${event.name}] $percent $fraction ';
-            final String what = event.what;
-            environment.logger.clearLine();
-            environment.logger.status('$prefix$what');
-          }
+        case RunnerProgress(done: false): {
+          spinner?.finish();
+          spinner = null;
+          final String percent = '${event.percent.toStringAsFixed(1)}%';
+          final String fraction = '(${event.completed}/${event.total})';
+          final String prefix = '[${event.name}] $percent $fraction ';
+          final String what = event.what;
+          environment.logger.clearLine();
+          environment.logger.status('$prefix$what', newline: false, fit: true);
+        }
         default:
+          spinner?.finish();
+          spinner = null;
           environment.logger.status(event);
       }
     }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async' show runZoned;
+import 'dart:async' show Timer, runZoned;
 import 'dart:io' as io show
   IOSink,
   stderr,
@@ -29,7 +29,7 @@ import 'package:meta/meta.dart';
 /// which can be inspected by unit tetss.
 class Logger {
   /// Constructs a logger for use in the tool.
-  Logger() : _logger = log.Logger.detached('et') {
+  Logger() : _logger = log.Logger.detached('et'), _test = false {
     _logger.level = statusLevel;
     _logger.onRecord.listen(_handler);
     _setupIoSink(io.stderr);
@@ -38,7 +38,7 @@ class Logger {
 
   /// A logger for tests.
   @visibleForTesting
-  Logger.test() : _logger = log.Logger.detached('et') {
+  Logger.test() : _logger = log.Logger.detached('et'), _test = true {
     _logger.level = statusLevel;
     _logger.onRecord.listen((log.LogRecord r) => _testLogs.add(r));
   }
@@ -94,6 +94,9 @@ class Logger {
 
   final log.Logger _logger;
   final List<log.LogRecord> _testLogs = <log.LogRecord>[];
+  final bool _test;
+
+  Spinner? _status;
 
   /// Get the current logging level.
   log.Level get level => _logger.level;
@@ -104,43 +107,234 @@ class Logger {
   }
 
   /// Record a log message at level [Logger.error].
-  void error(Object? message, {int indent = 0, bool newline = true}) {
-    _emitLog(errorLevel, message, indent, newline);
+  void error(
+    Object? message, {
+    int indent = 0,
+    bool newline = true,
+    bool fit = false,
+  }) {
+    _emitLog(errorLevel, message, indent, newline, fit);
   }
 
   /// Record a log message at level [Logger.warning].
-  void warning(Object? message, {int indent = 0, bool newline = true}) {
-    _emitLog(warningLevel, message, indent, newline);
+  void warning(
+    Object? message, {
+    int indent = 0,
+    bool newline = true,
+    bool fit = false,
+  }) {
+    _emitLog(warningLevel, message, indent, newline, fit);
   }
 
   /// Record a log message at level [Logger.warning].
-  void status(Object? message, {int indent = 0, bool newline = true}) {
-    _emitLog(statusLevel, message, indent, newline);
+  void status(
+    Object? message, {
+    int indent = 0,
+    bool newline = true,
+    bool fit = false,
+  }) {
+    _emitLog(statusLevel, message, indent, newline, fit);
   }
 
   /// Record a log message at level [Logger.info].
-  void info(Object? message, {int indent = 0, bool newline = true}) {
-    _emitLog(infoLevel, message, indent, newline);
+  void info(
+    Object? message, {
+    int indent = 0,
+    bool newline = true,
+    bool fit = false,
+  }) {
+    _emitLog(infoLevel, message, indent, newline, fit);
   }
 
   /// Writes a number of spaces to stdout equal to the width of the terminal
   /// and emits a carriage return.
   void clearLine() {
-    if (!io.stdout.hasTerminal) {
+    if (!io.stdout.hasTerminal || _test) {
+      return;
+    }
+    _status?.pause();
+    _emitClearLine();
+    _status?.resume();
+  }
+
+  /// Starts printing a progress spinner.
+  Spinner startSpinner({
+    void Function()? onFinish,
+  }) {
+    void finishCallback() {
+      onFinish?.call();
+      _status = null;
+    }
+    _status = io.stdout.hasTerminal && !_test
+      ? FlutterSpinner(onFinish: finishCallback)
+      : Spinner(onFinish: finishCallback);
+    _status!.start();
+    return _status!;
+  }
+
+  static void _emitClearLine() {
+    if (io.stdout.supportsAnsiEscapes) {
+      // Go to start of the line and clear the line.
+      _ioSinkWrite(io.stdout, '\r\x1B[K');
       return;
     }
     final int width = io.stdout.terminalColumns;
+    final String backspaces = '\b' * width;
     final String spaces = ' ' * width;
-    _ioSinkWrite(io.stdout, '$spaces\r');
+    _ioSinkWrite(io.stdout, '$backspaces$spaces$backspaces');
   }
 
-  void _emitLog(log.Level level, Object? message, int indent, bool newline) {
-    final String m = '${' ' * indent}$message${newline ? '\n' : ''}';
+  void _emitLog(
+    log.Level level,
+    Object? message,
+    int indent,
+    bool newline,
+    bool fit,
+  ) {
+    String m = '${' ' * indent}$message${newline ? '\n' : ''}';
+    if (fit && io.stdout.hasTerminal) {
+      m = fitToWidth(m, io.stdout.terminalColumns);
+    }
+    _status?.pause();
     _logger.log(level, m);
+    _status?.resume();
+  }
+
+  /// Shorten a string such that its length will be `w` by replacing
+  /// enough characters in the middle with '...'. Trailing whitespace will not
+  /// be preserved or counted against 'w', but if the input ends with a newline,
+  /// then the output will end with a newline that is not counted against 'w'.
+  /// That is, if the input string ends with a newline, the output string will
+  /// have length up to (w + 1) and end with a newline.
+  ///
+  /// If w <= 0, the result will be the empty string.
+  /// If w <= 3, the result will be a string containing w '.'s.
+  /// If there are a different number of non-'...' characters to the right and
+  /// left of '...' in the result, then the right will have one more than the
+  /// left.
+  @visibleForTesting
+  static String fitToWidth(String s, int w) {
+    // Preserve a trailing newline if needed.
+    final String maybeNewline = s.endsWith('\n') ? '\n' : '';
+    if (w <= 0) {
+      return maybeNewline;
+    }
+    if (w <= 3) {
+      return '${'.' * w}$maybeNewline';
+    }
+
+    // But remove trailing whitespace before removing the middle of the string.
+    s = s.trimRight();
+    if (s.length <= w) {
+      return '$s$maybeNewline';
+    }
+
+    // remove (s.length + 3 - w) characters from the middle of `s` and
+    // replace them with '...'.
+    final int diff = (s.length + 3) - w;
+    final int leftEnd = (s.length - diff) ~/ 2;
+    final int rightStart = (s.length + diff) ~/ 2;
+    s = s.replaceRange(leftEnd, rightStart, '...');
+    return s + maybeNewline;
   }
 
   /// In a [Logger] constructed by [Logger.test], this list will contain all of
   /// the [LogRecord]s emitted by the test.
   @visibleForTesting
   List<log.LogRecord> get testLogs => _testLogs;
+}
+
+
+/// A base class for progress spinners, and a no-op implementation that prints
+/// nothing.
+class Spinner {
+  /// Creates a progress spinner. If supplied the `onDone` callback will be
+  /// called when `finish()` is called.
+  Spinner({
+    this.onFinish,
+  });
+
+  /// The callback called when `finish()` is called.
+  final void Function()? onFinish;
+
+  /// Starts the spinner animation.
+  void start() {}
+
+  /// Pauses the spinner animation. That is, this call causes printing to the
+  /// terminal to stop.
+  void pause() {}
+
+  /// Resumes the animation at the same from where `pause()` was called.
+  void resume() {}
+
+  /// Ends an animation, calling the `onFinish` callback if one was provided.
+  void finish() {
+    onFinish?.call();
+  }
+}
+
+/// A [Spinner] implementation that prints an animated "Flutter" banner.
+class FlutterSpinner extends Spinner {
+  // ignore: public_member_api_docs
+  FlutterSpinner({
+    super.onFinish,
+  });
+
+  @visibleForTesting
+  /// The frames of the animation.
+  static const String frames = '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀';
+
+  static final List<String> _flutterAnimation = frames
+      .runes
+      .map<String>((int scalar) => String.fromCharCode(scalar))
+      .toList();
+
+  Timer? _timer;
+  int _ticks = 0;
+  int _lastAnimationFrameLength = 0;
+
+  @override
+  void start() {
+    _startSpinner();
+  }
+
+  void _startSpinner() {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
+    _callback(_timer!);
+  }
+
+  void _callback(Timer timer) {
+    Logger._ioSinkWrite(io.stdout, '\b' * _lastAnimationFrameLength);
+    _ticks += 1;
+    final String newFrame = _currentAnimationFrame;
+    _lastAnimationFrameLength = newFrame.runes.length;
+    Logger._ioSinkWrite(io.stdout, newFrame);
+  }
+
+  String get _currentAnimationFrame {
+    return _flutterAnimation[_ticks % _flutterAnimation.length];
+  }
+
+  @override
+  void pause() {
+    Logger._emitClearLine();
+    _lastAnimationFrameLength = 0;
+    _timer?.cancel();
+  }
+
+  @override
+  void resume() {
+    _startSpinner();
+  }
+
+  @override
+  void finish() {
+    _timer?.cancel();
+    _timer = null;
+    Logger._emitClearLine();
+    _lastAnimationFrameLength = 0;
+    if (onFinish != null) {
+      onFinish!();
+    }
+  }
 }
