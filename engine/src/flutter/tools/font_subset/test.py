@@ -8,46 +8,17 @@
 Tests for font-subset
 '''
 
+import argparse
 import filecmp
 import os
 import subprocess
 import sys
 from zipfile import ZipFile
 
-# Dictionary to map the platform name to the output directory
-# of the font artifacts.
-PLATFORM_2_PATH = {
-    'darwin': 'darwin-x64',
-    'linux': 'linux-x64',
-    'linux2': 'linux-x64',
-    'cygwin': 'windows-x64',
-    'win': 'windows-x64',
-    'win32': 'windows-x64',
-}
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..', '..'))
 MATERIAL_TTF = os.path.join(SCRIPT_DIR, 'fixtures', 'MaterialIcons-Regular.ttf')
 VARIABLE_MATERIAL_TTF = os.path.join(SCRIPT_DIR, 'fixtures', 'MaterialSymbols-Variable.ttf')
-IS_WINDOWS = sys.platform.startswith(('cygwin', 'win'))
-EXE = '.exe' if IS_WINDOWS else ''
-BAT = '.bat' if IS_WINDOWS else ''
-FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug', 'font-subset' + EXE)
-FONT_SUBSET_ZIP = os.path.join(
-    SRC_DIR, 'out', 'host_debug', 'zip_archives', PLATFORM_2_PATH.get(sys.platform, ''),
-    'font-subset.zip'
-)
-if not os.path.isfile(FONT_SUBSET):
-  FONT_SUBSET = os.path.join(SRC_DIR, 'out', 'host_debug_unopt', 'font-subset' + EXE)
-  FONT_SUBSET_ZIP = os.path.join(
-      SRC_DIR, 'out', 'host_debug_unopt', 'zip_archives', PLATFORM_2_PATH.get(sys.platform, ''),
-      'font-subset.zip'
-  )
-if not os.path.isfile(FONT_SUBSET):
-  raise Exception(
-      'Could not locate font-subset%s in host_debug or host_debug_unopt - build before running this script.'
-      % EXE
-  )
 
 COMPARE_TESTS = (
     (True, '1.ttf', MATERIAL_TTF, [r'57347']),
@@ -91,59 +62,61 @@ COMPARE_TESTS = (
     ]),
 )
 
-FAIL_TESTS = [
-    ([FONT_SUBSET, 'output.ttf', 'does-not-exist.ttf'], [
-        '1',
-    ]),  # non-existent input font
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [
-        '0xFFFFFFFF',
-    ]),  # Value too big.
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [
-        '-1',
-    ]),  # invalid value
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [
-        'foo',
-    ]),  # no valid values
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [
-        '0xE003',
-        '0x12',
-        '0xE004',
-    ]),  # codepoint not in font
-    ([FONT_SUBSET, 'non-existent-dir/output.ttf', MATERIAL_TTF], [
-        '0xE003',
-    ]),  # dir doesn't exist
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], [
-        ' ',
-    ]),  # empty input
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], []),  # empty input
-    ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['']),  # empty input
-    # repeat tests with variable input font
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
-        '0xFFFFFFFF',
-    ]),  # Value too big.
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
-        '-1',
-    ]),  # invalid value
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
-        'foo',
-    ]),  # no valid values
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
-        '0xE003',
-        '0x12',
-        '0xE004',
-    ]),  # codepoint not in font
-    ([FONT_SUBSET, 'non-existent-dir/output.ttf', VARIABLE_MATERIAL_TTF], [
-        '0xE003',
-    ]),  # dir doesn't exist
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
-        ' ',
-    ]),  # empty input
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], []),  # empty input
-    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], ['']),  # empty input
-]
+
+def fail_tests(font_subset):
+  return [
+      ([font_subset, 'output.ttf', 'does-not-exist.ttf'], [
+          '1',
+      ]),  # non-existent input font
+      ([font_subset, 'output.ttf', MATERIAL_TTF], [
+          '0xFFFFFFFF',
+      ]),  # Value too big.
+      ([font_subset, 'output.ttf', MATERIAL_TTF], [
+          '-1',
+      ]),  # invalid value
+      ([font_subset, 'output.ttf', MATERIAL_TTF], [
+          'foo',
+      ]),  # no valid values
+      ([font_subset, 'output.ttf', MATERIAL_TTF], [
+          '0xE003',
+          '0x12',
+          '0xE004',
+      ]),  # codepoint not in font
+      ([font_subset, 'non-existent-dir/output.ttf', MATERIAL_TTF], [
+          '0xE003',
+      ]),  # dir doesn't exist
+      ([font_subset, 'output.ttf', MATERIAL_TTF], [
+          ' ',
+      ]),  # empty input
+      ([font_subset, 'output.ttf', MATERIAL_TTF], []),  # empty input
+      ([font_subset, 'output.ttf', MATERIAL_TTF], ['']),  # empty input
+      # repeat tests with variable input font
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+          '0xFFFFFFFF',
+      ]),  # Value too big.
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+          '-1',
+      ]),  # invalid value
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+          'foo',
+      ]),  # no valid values
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+          '0xE003',
+          '0x12',
+          '0xE004',
+      ]),  # codepoint not in font
+      ([font_subset, 'non-existent-dir/output.ttf', VARIABLE_MATERIAL_TTF], [
+          '0xE003',
+      ]),  # dir doesn't exist
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+          ' ',
+      ]),  # empty input
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], []),  # empty input
+      ([font_subset, 'output.ttf', VARIABLE_MATERIAL_TTF], ['']),  # empty input
+  ]
 
 
-def RunCmd(cmd, codepoints, fail=False):
+def run_cmd(cmd, codepoints, fail=False):
   print('Running command:')
   print('       %s' % ' '.join(cmd))
   print('STDIN: "%s"' % ' '.join(codepoints))
@@ -169,34 +142,66 @@ def RunCmd(cmd, codepoints, fail=False):
   return p.returncode
 
 
-def TestZip():
-  with ZipFile(FONT_SUBSET_ZIP, 'r') as zip:
+def test_zip(font_subset_zip, exe):
+  with ZipFile(font_subset_zip, 'r') as zip:
     files = zip.namelist()
-    if 'font-subset%s' % EXE not in files:
-      print('expected %s to contain font-subset%s' % (files, EXE))
+    if 'font-subset%s' % exe not in files:
+      print('expected %s to contain font-subset%s' % (files, exe))
       return 1
     return 0
 
 
+# Maps the platform name to the output directory of the font artifacts.
+def platform_to_path(os, cpu):
+  d = {
+      'darwin': 'darwin-',
+      'linux': 'linux-',
+      'linux2': 'linux-',
+      'cygwin': 'windows-',
+      'win': 'windows-',
+      'win32': 'windows-',
+  }
+  return d[os] + cpu
+
+
 def main():
-  print('Using font subset binary at %s (%s)' % (FONT_SUBSET, FONT_SUBSET_ZIP))
+  parser = argparse.ArgumentParser(description='Runs font-subset tests.')
+  parser.add_argument('--variant', type=str, required=True)
+  parser.add_argument('--target-cpu', type=str, default='x64')
+  args = parser.parse_args()
+  variant = args.variant
+
+  is_windows = sys.platform.startswith(('cygwin', 'win'))
+  exe = '.exe' if is_windows else ''
+  font_subset = os.path.join(SRC_DIR, 'out', variant, 'font-subset' + exe)
+  font_subset_zip = os.path.join(
+      SRC_DIR, 'out', variant, 'zip_archives', platform_to_path(sys.platform, args.target_cpu),
+      'font-subset.zip'
+  )
+  if not os.path.isfile(font_subset):
+    raise Exception(
+        'Could not locate font-subset%s in host_debug or host_debug_unopt - build before running this script.'
+        % exe
+    )
+
+  print('Using font subset binary at %s (%s)' % (font_subset, font_subset_zip))
   failures = 0
 
-  failures += TestZip()
+  failures += test_zip(font_subset_zip, exe)
 
   for should_pass, golden_font, input_font, codepoints in COMPARE_TESTS:
     gen_ttf = os.path.join(SCRIPT_DIR, 'gen', golden_font)
     golden_ttf = os.path.join(SCRIPT_DIR, 'fixtures', golden_font)
-    cmd = [FONT_SUBSET, gen_ttf, input_font]
-    RunCmd(cmd, codepoints)
+    cmd = [font_subset, gen_ttf, input_font]
+    run_cmd(cmd, codepoints)
     cmp = filecmp.cmp(gen_ttf, golden_ttf, shallow=False)
     if (should_pass and not cmp) or (not should_pass and cmp):
       print('Test case %s failed.' % cmd)
       failures += 1
 
   with open(os.devnull, 'w') as devnull:
-    for cmd, codepoints in FAIL_TESTS:
-      if RunCmd(cmd, codepoints, fail=True) == 0:
+    for cmd, codepoints in fail_tests(font_subset):
+      if run_cmd(cmd, codepoints, fail=True) == 0:
         failures += 1
 
   if failures > 0:
