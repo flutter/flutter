@@ -418,7 +418,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
         // Simply log and return.
         Log.i(TAG, "Surface disconnected from ImageWriter", e);
         image.close();
-        return;
       }
 
       Log.v(TAG, "Output image");
