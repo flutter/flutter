@@ -115,16 +115,6 @@ enum RoutePopDisposition {
   bubble,
 }
 
-/// Placeholder for a route.
-abstract class _RoutePlaceholder {
-  const _RoutePlaceholder();
-}
-
-/// Not announced route.
-class _NotAnnouncedRoute extends _RoutePlaceholder {
-  const _NotAnnouncedRoute();
-}
-
 /// An abstraction for an entry managed by a [Navigator].
 ///
 /// This class defines an abstract interface between the navigator and the
@@ -2906,6 +2896,17 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
+
+/// Placeholder for a route.
+abstract class _RoutePlaceholder {
+  const _RoutePlaceholder();
+}
+
+/// Not announced route.
+class _NotAnnounced extends _RoutePlaceholder {
+  const _NotAnnounced();
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2942,9 +2943,9 @@ class _RouteEntry extends RouteTransitionRecord {
   static const int kDebugPopAttemptLimit = 100;
 
   _RouteLifecycle currentState;
-  _RoutePlaceholder? lastAnnouncedPreviousRoute = const _NotAnnouncedRoute(); // last argument to Route.didChangePrevious
-  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_NotAnnouncedRoute>(const _NotAnnouncedRoute()); // last argument to Route.didPopNext
-  _RoutePlaceholder? lastAnnouncedNextRoute = const _NotAnnouncedRoute(); // last argument to Route.didChangeNext
+  _RoutePlaceholder? lastAnnouncedPreviousRoute = const _NotAnnounced(); // last argument to Route.didChangePrevious
+  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_NotAnnounced>(const _NotAnnounced()); // last argument to Route.didPopNext
+  _RoutePlaceholder? lastAnnouncedNextRoute = const _NotAnnounced(); // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
