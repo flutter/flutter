@@ -7,6 +7,7 @@ import 'dart:io';
 bool _supportsAnsi = stdout.supportsAnsiEscapes;
 String _green = _supportsAnsi ? '\u001b[1;32m' : '';
 String _red = _supportsAnsi ? '\u001b[31m' : '';
+String _yellow = _supportsAnsi ? '\u001b[33m' : '';
 String _gray = _supportsAnsi ? '\u001b[90m' : '';
 String _reset = _supportsAnsi? '\u001B[0m' : '';
 
@@ -22,15 +23,27 @@ Future<void> step(String msg, Future<void> Function() fn) async {
   }
 }
 
+void _logWithColor(String color, String msg) {
+  stdout.writeln('$color$msg$_reset');
+}
+
 void log(String msg) {
-  stdout.writeln('$_gray$msg$_reset');
+  _logWithColor(_gray, msg);
+}
+
+void logImportant(String msg) {
+  stdout.writeln(msg);
+}
+
+void logWarning(String msg) {
+  _logWithColor(_yellow, msg);
 }
 
 final class Panic extends Error {}
 
 Never panic(List<String> messages) {
   for (final String message in messages) {
-    stderr.writeln('$_red$message$_reset');
+    _logWithColor(_red, message);
   }
   throw Panic();
 }
