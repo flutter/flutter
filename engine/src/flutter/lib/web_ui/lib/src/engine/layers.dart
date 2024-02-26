@@ -283,6 +283,7 @@ class OpacityOperation implements LayerOperation {
     if (offset != ui.Offset.zero) {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
+      cullRect = cullRect.shift(-offset);
     }
     canvas.saveLayer(
       cullRect,
