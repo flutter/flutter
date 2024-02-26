@@ -119,9 +119,9 @@ enum RoutePopDisposition {
 ///
 /// This is used in [Navigator] to represent not announced route,
 /// where null is used to represent an unknown route.
-class RoutePlaceholder {
-  /// Creates an instance of [RoutePlaceholder] that can be used in const expressions.
-  const RoutePlaceholder();
+class _RoutePlaceholder {
+  /// Creates an instance of [_RoutePlaceholder] that can be used in const expressions.
+  const _RoutePlaceholder();
 }
 
 /// An abstraction for an entry managed by a [Navigator].
@@ -147,7 +147,7 @@ class RoutePlaceholder {
 /// The type argument `T` is the route's return type, as used by
 /// [currentResult], [popped], and [didPop]. The type `void` may be used if the
 /// route does not return a value.
-abstract class Route<T> extends RoutePlaceholder {
+abstract class Route<T> extends _RoutePlaceholder {
   /// Initialize the [Route].
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
@@ -2941,9 +2941,9 @@ class _RouteEntry extends RouteTransitionRecord {
   static const int kDebugPopAttemptLimit = 100;
 
   _RouteLifecycle currentState;
-  RoutePlaceholder? lastAnnouncedPreviousRoute = const RoutePlaceholder(); // last argument to Route.didChangePrevious
-  WeakReference<RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<RoutePlaceholder>(const RoutePlaceholder()); // last argument to Route.didPopNext
-  RoutePlaceholder? lastAnnouncedNextRoute = const RoutePlaceholder(); // last argument to Route.didChangeNext
+  _RoutePlaceholder? lastAnnouncedPreviousRoute = const _RoutePlaceholder(); // last argument to Route.didChangePrevious
+  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_RoutePlaceholder>(const _RoutePlaceholder()); // last argument to Route.didPopNext
+  _RoutePlaceholder? lastAnnouncedNextRoute = const _RoutePlaceholder(); // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
