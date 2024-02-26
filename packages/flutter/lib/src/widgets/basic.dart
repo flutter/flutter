@@ -5582,7 +5582,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * [Wrap], which is the typical parent of [Wrapped]
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Wrapped extends ParentDataWidget<WrapParentData>{
-  /// Creates a widget that controlls how a child of a [Wrap] is layed out.
+  /// Creates a widget that controls how a child of a [Wrap] is layed out.
   const Wrapped({
     super.key,
     this.fit = WrapFit.runTight,
