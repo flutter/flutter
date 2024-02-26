@@ -170,7 +170,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
   }
 
   auto promise = std::make_shared<
-      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
+      NoExceptionPromise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
   auto pipeline_future =
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
   pipelines_[descriptor] = pipeline_future;
