@@ -96,6 +96,7 @@ SKWASM_EXPORT void textStyle_setWordSpacing(TextStyle* style,
 
 SKWASM_EXPORT void textStyle_setHeight(TextStyle* style, SkScalar height) {
   style->setHeight(height);
+  style->setHeightOverride(true);
 }
 
 SKWASM_EXPORT void textStyle_setHalfLeading(TextStyle* style,

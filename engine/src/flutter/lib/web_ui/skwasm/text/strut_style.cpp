@@ -33,6 +33,7 @@ SKWASM_EXPORT void strutStyle_setFontSize(StrutStyle* style,
 
 SKWASM_EXPORT void strutStyle_setHeight(StrutStyle* style, SkScalar height) {
   style->setHeight(height);
+  style->setHeightOverride(true);
 }
 
 SKWASM_EXPORT void strutStyle_setHalfLeading(StrutStyle* style,
