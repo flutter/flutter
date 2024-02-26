@@ -95,6 +95,63 @@ void main() {
         );
       });
 
+      testWithoutContext(
+          'selects uncontested implementation from direct dependency with additional native implementation',
+          () async {
+        final Set<String> directDependencies = <String>{
+          'url_launcher_linux',
+          'url_launcher_macos',
+        };
+        final List<PluginInterfaceResolution> resolutions =
+            resolvePlatformImplementation(
+          <Plugin>[
+            // Following plugin is native only and is not resolved as a dart plugin:
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'package': 'com.example.url_launcher',
+                    'pluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_macos',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'macos': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginMacOS',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ],
+          throwOnPluginPubspecError: false,
+        );
+
+        expect(resolutions.length, equals(1));
+        expect(
+            resolutions[0].toMap(),
+            equals(<String, String>{
+              'pluginName': 'url_launcher_macos',
+              'dartClass': 'UrlLauncherPluginMacOS',
+              'platform': 'macos',
+            }));
+      });
+
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
         final Set<String> directDependencies = <String>{
           'url_launcher_macos',
@@ -538,7 +595,7 @@ void main() {
 
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -627,7 +684,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -684,7 +741,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
