@@ -68,6 +68,11 @@ Future<void> testMain() async {
         layoutWidth: 50, paragraphHeight: 1.5);
   });
 
+  test('text styles - text style height overriding paragraph height', () async {
+    await testTextStyle('text style height and paragraph style height',
+      layoutWidth: 50, paragraphHeight: 1.5, height: 2.0);
+  });
+
   test('text styles - paragraph text height behavior', () async {
     await testTextStyle('paragraph text height behavior',
         layoutWidth: 50,
