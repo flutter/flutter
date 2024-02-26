@@ -24,23 +24,40 @@ dart bin/android_integration_tests.dart --smoke-test dev.flutter.scenarios.Engin
 
 ## Additional arguments
 
-- `--verbose`: Print additional information about the test run.
+```txt
+-v, --verbose                                        Enable verbose logging
+-h, --help                                           Print usage information
+    --[no-]enable-impeller                           Whether to enable Impeller as the graphics backend. If true, the
+                                                     test runner will use --impeller-backend if set, otherwise the
+                                                     default backend will be used. To explicitly run with the Skia
+                                                     backend, set this to false (--no-enable-impeller).
+    --impeller-backend                               The graphics backend to use when --enable-impeller is true. Unlike
+                                                     the similar option when launching an app, there is no fallback;
+                                                     that is, either Vulkan or OpenGLES must be specified.
+                                                     [vulkan (default), opengles]
+    --logs-dir                                       Path to a directory where logs and screenshots are stored.
+    --out-dir=<path/to/out/android_variant>          Path to a out/{variant} directory where the APKs are built.
+                                                     Defaults to the latest updated out/ directory that starts with
+                                                     "android_" if the current working directory is within the engine
+                                                     repository.
+    --smoke-test=<package.ClassName>                 Fully qualified class name of a single test to run. For example try
+                                                     "dev.flutter.scenarios.EngineLaunchE2ETest" or
+                                                     "dev.flutter.scenariosui.ExternalTextureTests".
+    --output-contents-golden=<path/to/golden.txt>    Path to a file that contains the expected filenames of golden
+                                                     files. If the current working directory is within the engine
+                                                     repository, defaults to
+                                                     ./testing/scenario_app/android/expected_golden_output.txt.
+```
 
-- `--adb`: The path to the `adb` tool. Defaults to
-  `third_party/android_tools/sdk/platform-tools/adb`.
+## Advanced usage
 
-- `--out-dir`: The directory containing the build artifacts. Defaults to the
-  last updated build directory in `out/` that starts with `android_`.
-
-- `--logs-dir`: The directory to store logs and screenshots. Defaults to
-  `FLUTTER_LOGS_DIR` if set, or `out/.../scenario_app/logs` otherwise.
-
-- `--use-skia-gold`: Use Skia Gold to compare screenshots. Defaults to true
-  when running on CI, and false otherwise (i.e. when running locally). If
-  set to true, `isSkiaGoldClientAvailable` must be true.
-
-- `--enable-impeller`: Enable Impeller for the Android app. Defaults to
-  false, which means that the app will use Skia as the graphics backend.
-
-- `--impeller-backend`: The Impeller backend to use for the Android app.
-  Defaults to 'vulkan'. Only used when `--enable-impeller` is set to true.
+```txt
+    --[no-]use-skia-gold                             Whether to use Skia Gold to compare screenshots. Defaults to true
+                                                     on CI and false otherwise.
+    --adb=<path/to/adb>                              Path to the Android Debug Bridge (adb) executable. If the current
+                                                     working directory is within the engine repository, defaults to
+                                                     ./third_party/android_tools/sdk/platform-tools/adb.
+    --ndk-stack=<path/to/ndk-stack>                  Path to the NDK stack tool. Defaults to the checked-in version in
+                                                     third_party/android_tools if the current working directory is
+                                                     within the engine repository on a supported platform.
+```
