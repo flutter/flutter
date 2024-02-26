@@ -124,16 +124,16 @@ Future<void> testMain() async {
         );
       }));
 
-      sceneBuilder.pushOpacity(0x7F);
+      sceneBuilder.pushOpacity(0x7F, offset: const ui.Offset(150, 150));
       sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
         final ui.Paint paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
         canvas.drawCircle(
-          const ui.Offset(125, 150),
+          const ui.Offset(-25, 0),
           50,
           paint
         );
         canvas.drawCircle(
-          const ui.Offset(175, 150),
+          const ui.Offset(25, 0),
           50,
           paint
         );
