@@ -703,6 +703,7 @@ class DevFS {
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
+                assetBuildFailed = true;
                 return;
               }
               dirtyEntries[deviceUri] = content;

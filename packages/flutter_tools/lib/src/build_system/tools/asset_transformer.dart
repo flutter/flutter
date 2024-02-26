@@ -191,7 +191,6 @@ final class DevelopmentAssetTransformer {
         workingDirectory: workingDirectory,
       );
       if (failure != null) {
-        // TODO—dontmerge—test for thjs.
         _logger.printError(failure.message);
         return null;
       }
