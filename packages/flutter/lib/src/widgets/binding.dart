@@ -375,6 +375,36 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   static WidgetsBinding get instance => BindingBase.checkInstance(_instance);
   static WidgetsBinding? _instance;
 
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows the selection of a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or DevTools.
+  bool get debugShowWidgetInspectorOverride {
+    return debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  set debugShowWidgetInspectorOverride(bool value) {
+    debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  /// Notifier for [debugShowWidgetInspectorOverride].
+  ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
+  ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
+
+  @visibleForTesting
+  @override
+  void resetInternalState() {
+    // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
+    super.resetInternalState();
+    _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+    _debugShowWidgetInspectorOverrideNotifierObject = null;
+  }
+
   void _debugAddStackFilters() {
     const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
     const PartialStackFrame elementUpdateChild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'updateChild');
