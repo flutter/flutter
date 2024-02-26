@@ -94,8 +94,10 @@ class BottomAppBar extends StatefulWidget {
   /// The bottom app bar's background color.
   ///
   /// If this property is null then [BottomAppBarTheme.color] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
-  /// [ThemeData.bottomAppBarColor] is used.
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null and [ThemeData.useMaterial3]
+  /// is true, the default value is [ColorScheme.surface]; if [ThemeData.useMaterial3]
+  /// is false, then the default value is `Color(0xFF424242)` in dark theme and
+  /// [Colors.white] in light theme.
   final Color? color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
