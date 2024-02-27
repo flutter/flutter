@@ -496,7 +496,7 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
   auto view = std::make_unique<FlutterWindowsView>(
       kImplicitViewId, this, std::move(window), windows_proc_table_);
 
-  view_ = view.get();
+  views_[kImplicitViewId] = view.get();
   InitializeKeyboard();
 
   return std::move(view);
@@ -531,9 +531,12 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
 }
 
 FlutterWindowsView* FlutterWindowsEngine::view(FlutterViewId view_id) const {
-  FML_DCHECK(view_id == kImplicitViewId);
+  auto iterator = views_.find(view_id);
+  if (iterator == views_.end()) {
+    return nullptr;
+  }
 
-  return view_;
+  return iterator->second;
 }
 
 // Returns the currently configured Plugin Registrar.
@@ -672,7 +675,7 @@ void FlutterWindowsEngine::SendSystemLocales() {
 }
 
 void FlutterWindowsEngine::InitializeKeyboard() {
-  if (view_ == nullptr) {
+  if (views_.empty()) {
     FML_LOG(ERROR) << "Cannot initialize keyboard on Windows headless mode.";
   }
 
@@ -762,15 +765,15 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
   if (engine_ && semantics_enabled_ != enabled) {
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
-    if (view_) {
-      view_->UpdateSemanticsEnabled(enabled);
+    for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
+      iterator->second->UpdateSemanticsEnabled(enabled);
     }
   }
 }
 
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
-  if (view_) {
+  if (!views_.empty()) {
     InitializeKeyboard();
   }
 }
@@ -827,7 +830,9 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
 }
 
 void FlutterWindowsEngine::OnDwmCompositionChanged() {
-  view_->OnDwmCompositionChanged();
+  for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
+    iterator->second->OnDwmCompositionChanged();
+  }
 }
 
 void FlutterWindowsEngine::OnWindowStateEvent(HWND hwnd,

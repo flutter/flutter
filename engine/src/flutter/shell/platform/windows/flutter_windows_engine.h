@@ -11,6 +11,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/closure.h"
@@ -119,12 +120,13 @@ class FlutterWindowsEngine {
   // Returns false if stopping the engine fails, or if it was not running.
   virtual bool Stop();
 
-  // Create the view that is displaying this engine's content.
+  // Create a view that can display this engine's content.
   std::unique_ptr<FlutterWindowsView> CreateView(
       std::unique_ptr<WindowBindingHandler> window);
 
-  // The view displaying this engine's content, if any. This will be null for
-  // headless engines.
+  // Get a view that displays this engine's content.
+  //
+  // Returns null if the view does not exist.
   FlutterWindowsView* view(FlutterViewId view_id) const;
 
   // Returns the currently configured Plugin Registrar.
@@ -349,8 +351,8 @@ class FlutterWindowsEngine {
   // AOT data, if any.
   UniqueAotDataPtr aot_data_;
 
-  // The view displaying the content running in this engine, if any.
-  FlutterWindowsView* view_ = nullptr;
+  // The views displaying the content running in this engine, if any.
+  std::unordered_map<FlutterViewId, FlutterWindowsView*> views_;
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
