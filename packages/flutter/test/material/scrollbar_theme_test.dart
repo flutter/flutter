@@ -33,7 +33,17 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
+          )
+        ),
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
@@ -369,6 +379,14 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           colorScheme: const ColorScheme.light(),
+          scrollbarTheme: ScrollbarThemeData(
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
+          ),
         ),
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
@@ -462,10 +480,20 @@ void main() {
   testWidgets('ThemeData colorScheme is used when no ScrollbarTheme is set', (WidgetTester tester) async {
     (ScrollController, Widget) buildFrame(ThemeData appTheme) {
       final ScrollController scrollController = ScrollController();
+      final ThemeData theme = appTheme.copyWith(
+        scrollbarTheme: ScrollbarThemeData(
+          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered)) {
+              return true;
+            }
+            return false;
+          })
+        ),
+      );
       return (
           scrollController,
           MaterialApp(
-            theme: appTheme,
+            theme: theme,
             home: ScrollConfiguration(
               behavior: const NoScrollbarBehavior(),
               child: Scrollbar(
@@ -753,7 +781,12 @@ ScrollbarThemeData _scrollbarTheme({
 }) {
   return ScrollbarThemeData(
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
-    trackVisibility: trackVisibility,
+    trackVisibility: trackVisibility ?? MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return true;
+      }
+      return false;
+    }),
     thumbVisibility: thumbVisibility,
     radius: radius,
     thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),

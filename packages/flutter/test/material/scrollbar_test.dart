@@ -1020,6 +1020,12 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
           ),
         ),
         home: const SingleChildScrollView(
@@ -1285,7 +1291,7 @@ void main() {
           ),
           // Hover color
           color: const Color(0x80000000),
-        ),
+      ),
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1294,7 +1300,6 @@ void main() {
       TargetPlatform.windows,
     }),
   );
-
 
   testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
     Widget viewWithScroll(TargetPlatform platform) {
