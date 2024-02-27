@@ -39,7 +39,9 @@ class EngineModifier {
 
   // Override the engine's implicit view. This is the "default" view
   // that Flutter apps render to.
-  void SetImplicitView(FlutterWindowsView* view) { engine_->view_ = view; }
+  void SetImplicitView(FlutterWindowsView* view) {
+    engine_->views_[kImplicitViewId] = view;
+  }
 
   /// Reset the start_time field that is used to align vsync events.
   void SetStartTime(uint64_t start_time_nanos) {

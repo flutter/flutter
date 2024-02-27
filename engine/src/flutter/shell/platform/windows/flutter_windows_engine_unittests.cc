@@ -34,6 +34,19 @@ using ::testing::Return;
 
 class FlutterWindowsEngineTest : public WindowsTest {};
 
+// The engine can be run without any views.
+TEST_F(FlutterWindowsEngineTest, RunHeadless) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  ASSERT_TRUE(engine->Run());
+  ASSERT_EQ(engine->view(kImplicitViewId), nullptr);
+  ASSERT_EQ(engine->view(123), nullptr);
+}
+
 TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.AddDartEntrypointArgument("arg1");
