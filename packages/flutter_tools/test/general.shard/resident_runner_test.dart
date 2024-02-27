@@ -333,6 +333,50 @@ void main() {
     Usage: () => TestUsage(),
   }));
 
+  testUsingContext('ResidentRunner can handle an RPC exception from debugFrameJankMetrics', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      renderFrameRasterStats,
+    ]);
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+    print('a');
+    await futureAppStart.future;
+    print('b');
+    flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
+
+    final bool result = await residentRunner.debugFrameJankMetrics();
+    print('c');
+    expect(result, true);
+    expect((globals.flutterUsage as TestUsage).events, contains(
+      TestUsageEvent('hot', 'exception', parameters: CustomDimensions(
+        hotEventTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        hotEventSdkName: 'Android',
+        hotEventEmulator: false,
+        hotEventFullRestart: false,
+      )),
+    ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.hotRunnerInfo(
+        label: 'exception',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        sdkName: 'Android',
+        emulator: false,
+        fullRestart: false,
+      ),
+    ));
+    expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => TestUsage(),
+  }));
+
   testUsingContext('ResidentRunner fails its operation if the device initialization is not complete', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,

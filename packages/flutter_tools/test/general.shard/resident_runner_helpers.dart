@@ -114,6 +114,15 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
   },
 );
 
+const FakeVmServiceRequest renderFrameRasterStats = FakeVmServiceRequest(
+  method: kRenderFrameWithRasterStatsMethod,
+  args: <String, Object>{
+    'viewId': 'a',
+    'isolateId': '1',
+  },
+  errorCode: 69,
+);
+
 const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
   args: <String, Object>{
