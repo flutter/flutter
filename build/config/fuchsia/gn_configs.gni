@@ -53,3 +53,14 @@ if (fuchsia_sdk_id == "") {
   _meta = read_file(fuchsia_sdk_manifest_file, "json")
   fuchsia_sdk_id = _meta.id
 }
+
+declare_args() {
+  # Specify a readelf_exec path to use. If not specified, the host's system
+  # executable will be used. Passed to populate_build_id_dir.py and
+  # prepare_package_inputs.py via the --readelf-exec flag.
+  # Must be a GN path (not an absolute path) since it is adjusted with
+  # rebase_path().
+  if (!defined(fuchsia_sdk_readelf_exec)) {
+    fuchsia_sdk_readelf_exec = ""
+  }
+}

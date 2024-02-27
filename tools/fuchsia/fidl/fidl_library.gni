@@ -5,7 +5,9 @@
 import("//flutter/tools/executable_action.gni")
 import("//flutter/tools/fuchsia/fidl/fidl.gni")
 import("//flutter/tools/fuchsia/fidl/toolchain.gni")
-import("//flutter/tools/fuchsia/gn-sdk/config/config.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/config/config.gni")
+
+# TODO(zijiehe): May use fidl_library in gn-sdk if possible. - http://crbug.com/40935282
 
 # Generates some representation of a FIDL library that's consumable by Language
 # bindings generators.
