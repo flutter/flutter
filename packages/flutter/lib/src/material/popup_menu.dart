@@ -8,7 +8,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
-import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
@@ -1195,13 +1194,8 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The color used as an overlay on [color] to indicate elevation.
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
-  ///
   /// If null, [PopupMenuThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [Colors.transparent].
+  /// is also null, the default value is [ColorScheme.surfaceTint].
   ///
   /// See [Material.surfaceTintColor] for more details on how this
   /// overlay is applied.
@@ -1257,8 +1251,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// If this property is null, then [PopupMenuThemeData.color] is used.
   /// If [PopupMenuThemeData.color] is also null, then
-  /// [ThemeData.cardColor] is used in Material 2. In Material3, defaults to
-  /// [ColorScheme.surfaceContainer].
+  /// Theme.of(context).cardColor is used.
   final Color? color;
 
   /// If provided, this color is used for the button icon.
@@ -1520,13 +1513,13 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   }
 
   @override
-  Color? get color => _colors.surfaceContainer;
+  Color? get color => _colors.surface;
 
   @override
   Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
