@@ -216,7 +216,26 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+    if (_isUnfocusAutoValidateMode) {
+      _updateListener(field);
+    }
+  }
+
+  void _unregister(FormFieldState<dynamic> field) {
+    _fields.remove(field);
+    if (_isUnfocusAutoValidateMode) {
+     _updateListener(field, removeListener: true);
+    }
+  }
+
+  void _updateListener(FormFieldState<dynamic> field, {bool removeListener = false}) {
+    if (removeListener) {
+      field._focusNode.removeListener(() {
+        if (!field._focusNode.hasFocus) {
+          _validate();
+        }
+      });
+    } else {
       field._focusNode.addListener(() {
         if (!field._focusNode.hasFocus) {
           _validate();
@@ -225,16 +244,7 @@ class FormState extends State<Form> {
     }
   }
 
-  void _unregister(FormFieldState<dynamic> field) {
-    _fields.remove(field);
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      field._focusNode.removeListener(() {
-        if (!field._focusNode.hasFocus) {
-          _validate();
-        }
-      });
-    }
-  }
+  bool get _isUnfocusAutoValidateMode => widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
   @override
   Widget build(BuildContext context) {
