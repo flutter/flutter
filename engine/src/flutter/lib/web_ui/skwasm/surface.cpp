@@ -28,6 +28,9 @@ Surface::Surface() {
       this);
   // Listen to messages from the worker
   skwasm_registerMessageListener(_thread);
+
+  // Synchronize the time origin for the worker thread
+  skwasm_syncTimeOriginForThread(_thread);
 }
 
 // Main thread only
@@ -39,11 +42,19 @@ void Surface::dispose() {
 }
 
 // Main thread only
-uint32_t Surface::renderPicture(SkPicture* picture) {
+uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
-  picture->ref();
-  skwasm_dispatchRenderPicture(_thread, this, picture, callbackId);
+  std::unique_ptr<sk_sp<SkPicture>[]> picturePointers =
+      std::make_unique<sk_sp<SkPicture>[]>(count);
+  for (int i = 0; i < count; i++) {
+    picturePointers[i] = sk_ref_sp(pictures[i]);
+  }
+
+  // Releasing picturePointers here and will recreate the unique_ptr on the
+  // other thread See surface_renderPicturesOnWorker
+  skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), count,
+                                callbackId);
   return callbackId;
 }
 
@@ -136,20 +147,31 @@ void Surface::_recreateSurface() {
 }
 
 // Worker thread only
-void Surface::renderPictureOnWorker(SkPicture* picture, uint32_t callbackId) {
-  SkRect pictureRect = picture->cullRect();
-  SkIRect roundedOutRect;
-  pictureRect.roundOut(&roundedOutRect);
-  _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
-  SkMatrix matrix =
-      SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
-  makeCurrent(_glContext);
-  auto canvas = _surface->getCanvas();
-  canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
-  canvas->drawPicture(sk_ref_sp<SkPicture>(picture), &matrix, nullptr);
-  _grContext->flush(_surface.get());
-  skwasm_captureImageBitmap(this, _glContext, callbackId,
-                            roundedOutRect.width(), roundedOutRect.height());
+void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
+                                     int pictureCount,
+                                     uint32_t callbackId,
+                                     double rasterStart) {
+  // This is populated by the `captureImageBitmap` call the first time it is
+  // passed in.
+  SkwasmObject imagePromiseArray = __builtin_wasm_ref_null_extern();
+  for (int i = 0; i < pictureCount; i++) {
+    sk_sp<SkPicture> picture = pictures[i];
+    SkRect pictureRect = picture->cullRect();
+    SkIRect roundedOutRect;
+    pictureRect.roundOut(&roundedOutRect);
+    _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
+    SkMatrix matrix =
+        SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
+    makeCurrent(_glContext);
+    auto canvas = _surface->getCanvas();
+    canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
+    canvas->drawPicture(picture, &matrix, nullptr);
+    _grContext->flush(_surface.get());
+    imagePromiseArray =
+        skwasm_captureImageBitmap(_glContext, roundedOutRect.width(),
+                                  roundedOutRect.height(), imagePromiseArray);
+  }
+  skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
 }
 
 void Surface::_rasterizeImage(SkImage* image,
@@ -225,16 +247,22 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
   surface->dispose();
 }
 
-SKWASM_EXPORT uint32_t surface_renderPicture(Surface* surface,
-                                             SkPicture* picture) {
-  return surface->renderPicture(picture);
+SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
+                                              SkPicture** pictures,
+                                              int count) {
+  return surface->renderPictures(pictures, count);
 }
 
-SKWASM_EXPORT void surface_renderPictureOnWorker(Surface* surface,
-                                                 SkPicture* picture,
-                                                 uint32_t callbackId) {
-  surface->renderPictureOnWorker(picture, callbackId);
-  picture->unref();
+SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
+                                                  sk_sp<SkPicture>* pictures,
+                                                  int pictureCount,
+                                                  uint32_t callbackId,
+                                                  double rasterStart) {
+  // This will release the pictures when they leave scope.
+  std::unique_ptr<sk_sp<SkPicture>> picturesPointer =
+      std::unique_ptr<sk_sp<SkPicture>>(pictures);
+  surface->renderPicturesOnWorker(pictures, pictureCount, callbackId,
+                                  rasterStart);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,

@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
+import '../../engine.dart' show FrameTimingRecorder, kProfileApplyFrame, kProfilePrerollFrame;
 import '../display.dart';
 import '../dom.dart';
 import '../picture.dart';
@@ -511,8 +511,9 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     // In the HTML renderer we time the beginning of the rasterization phase
     // (counter-intuitively) in SceneBuilder.build because DOM updates happen
     // here. This is different from CanvasKit.
-    frameTimingsOnBuildFinish();
-    frameTimingsOnRasterStart();
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    recorder?.recordBuildFinish();
+    recorder?.recordRasterStart();
     timeAction<void>(kProfilePrerollFrame, () {
       while (_surfaceStack.length > 1) {
         // Auto-pop layers that were pushed without a corresponding pop.
@@ -528,7 +529,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
       }
       commitScene(_persistedScene);
       _lastFrameScene = _persistedScene;
-      return SurfaceScene(_persistedScene.rootElement);
+      return SurfaceScene(_persistedScene.rootElement, timingRecorder: recorder);
     });
   }
 

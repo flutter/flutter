@@ -10,6 +10,13 @@ mergeInto(LibraryManager.library, {
   $skwasm_support_setup: function() {
     const handleToCanvasMap = new Map();
     const associatedObjectsMap = new Map();
+
+    // This value represents the difference between the time origin of the main
+    // thread and whichever web worker this code is running on. This is so that
+    // when we report frame timings, that they are in the same time domain
+    // regardless of whether they are captured on the main thread or the web
+    // worker.
+    let timeOriginDelta;
     _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
       PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'setAssociatedObject',
@@ -20,6 +27,12 @@ mergeInto(LibraryManager.library, {
     _skwasm_getAssociatedObject = function(pointer) {
       return associatedObjectsMap.get(pointer);
     };
+    _skwasm_syncTimeOriginForThread = function(threadId) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'syncTimeOrigin',
+        timeOrigin: performance.timeOrigin,
+      });
+    }
     _skwasm_registerMessageListener = function(threadId) {
       const eventListener = function({data}) {
         const skwasmMessage = data.skwasmMessage;
@@ -27,11 +40,26 @@ mergeInto(LibraryManager.library, {
           return;
         }
         switch (skwasmMessage) {
-          case 'renderPicture':
-            _surface_renderPictureOnWorker(data.surface, data.picture, data.callbackId);
+          case 'syncTimeOrigin':
+            timeOriginDelta = performance.timeOrigin - data.timeOrigin;
+            return;
+          case 'renderPictures':
+            _surface_renderPicturesOnWorker(
+              data.surface,
+              data.pictures,
+              data.pictureCount,
+              data.callbackId,
+              performance.now() + timeOriginDelta);
             return;
           case 'onRenderComplete':
-            _surface_onRenderComplete(data.surface, data.callbackId, data.imageBitmap);
+            _surface_onRenderComplete(
+              data.surface,
+              data.callbackId, {
+                "imageBitmaps": data.imageBitmaps,
+                "rasterStartMilliseconds": data.rasterStart,
+                "rasterEndMilliseconds": data.rasterEnd,
+              },
+            );
             return;
           case 'setAssociatedObject':
             associatedObjectsMap.set(data.pointer, data.object);
@@ -54,11 +82,12 @@ mergeInto(LibraryManager.library, {
         PThread.pthreads[threadId].addEventListener("message", eventListener);
       }
     };
-    _skwasm_dispatchRenderPicture = function(threadId, surfaceHandle, pictureHandle, callbackId) {
+    _skwasm_dispatchRenderPictures = function(threadId, surfaceHandle, pictures, pictureCount, callbackId) {
       PThread.pthreads[threadId].postMessage({
-        skwasmMessage: 'renderPicture',
+        skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
-        picture: pictureHandle,
+        pictures,
+        pictureCount,
         callbackId,
       });
     };
@@ -85,15 +114,23 @@ mergeInto(LibraryManager.library, {
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = async function(surfaceHandle, contextHandle, callbackId, width, height) {
+    _skwasm_captureImageBitmap = function(contextHandle, width, height, imagePromises) {
+      if (!imagePromises) imagePromises = Array();
       const canvas = handleToCanvasMap.get(contextHandle);
-      const imageBitmap = await createImageBitmap(canvas, 0, 0, width, height);
+      imagePromises.push(createImageBitmap(canvas, 0, 0, width, height));
+      return imagePromises;
+    };
+    _skwasm_resolveAndPostImages = async function(surfaceHandle, imagePromises, rasterStart, callbackId) {
+      const imageBitmaps = imagePromises ? await Promise.all(imagePromises) : [];
+      const rasterEnd = performance.now() + timeOriginDelta;
       postMessage({
         skwasmMessage: 'onRenderComplete',
         surface: surfaceHandle,
         callbackId,
-        imageBitmap,
-      }, [imageBitmap]);
+        imageBitmaps,
+        rasterStart,
+        rasterEnd,
+      }, [...imageBitmaps]);
     };
     _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
@@ -123,16 +160,20 @@ mergeInto(LibraryManager.library, {
   skwasm_getAssociatedObject__deps: ['$skwasm_support_setup'],
   skwasm_disposeAssociatedObjectOnThread: function () {},
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
+  skwasm_syncTimeOriginForThread: function() {},
+  skwasm_syncTimeOriginForThread__deps: ['$skwasm_support_setup'],
   skwasm_registerMessageListener: function() {},
   skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
-  skwasm_dispatchRenderPicture: function() {},
-  skwasm_dispatchRenderPicture__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchRenderPictures: function() {},
+  skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},
   skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
   skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
+  skwasm_resolveAndPostImages: function () {},
+  skwasm_resolveAndPostImages__deps: ['$skwasm_support_setup'],
   skwasm_createGlTextureFromTextureSource: function () {},
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
 });
