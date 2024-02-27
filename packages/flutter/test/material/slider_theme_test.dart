@@ -110,7 +110,7 @@ void main() {
     final ColorScheme colorScheme = theme.colorScheme;
     const double trackHeight = 4.0;
     final Color activeTrackColor = Color(colorScheme.primary.value);
-    final Color inactiveTrackColor = colorScheme.surfaceVariant;
+    final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
     final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
     final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
     final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
@@ -2077,9 +2077,9 @@ void main() {
       expect(
         valueIndicatorBox,
         paints
-          ..rrect(color: const Color(0xfffffbfe))
+          ..rrect(color: const Color(0xfffef7ff))
           ..rrect(color: const Color(0xff6750a4))
-          ..rrect(color: const Color(0xffe7e0ec))
+          ..rrect(color: const Color(0xffe6e0e9))
           ..path(color: Color(theme.colorScheme.primary.value))
       );
 
