@@ -4,19 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
-import 'basic.dart';
-import 'focus_manager.dart';
-import 'focus_scope.dart';
-import 'framework.dart';
-import 'navigator.dart';
-import 'pop_scope.dart';
-import 'restoration.dart';
-import 'restoration_properties.dart';
-import 'routes.dart';
-import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
@@ -226,10 +216,24 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+      field._focusNode.addListener(() {
+        if (!field._focusNode.hasFocus) {
+          _validate();
+        }
+      });
+    }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
     _fields.remove(field);
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+      field._focusNode.removeListener(() {
+        if (!field._focusNode.hasFocus) {
+          _validate();
+        }
+      });
+    }
   }
 
   @override
@@ -241,10 +245,7 @@ class FormState extends State<Form> {
         if (_hasInteractedByUser) {
           _validate();
         }
-      case AutovalidateMode.onFocusChange:
-        if (!FocusScope.of(context).hasPrimaryFocus) {
-          _validate();
-        }
+      case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
         break;
     }
@@ -329,44 +330,47 @@ class FormState extends State<Form> {
   bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
-    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onFocusChange;
+    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
-    // Only validate currently focused field if autovalidateMode is onFocusChange.
-    // Otherwise, validate all fields.
     if (validateOnFocusChange) {
-      final FocusScopeNode focusScope = FocusScope.of(context);
-      final FocusNode? focusedChild = focusScope.focusedChild;
-      if (focusedChild != null) {
-        final FormFieldState<dynamic>? focusedFormField = focusedChild.context?.findAncestorStateOfType<FormFieldState<dynamic>>();
-        if (focusedFormField != null) {
-          hasError = !focusedFormField.validate();
-          errorMessage = focusedFormField.errorText ?? '';
+      for (final FormFieldState<dynamic> field in _fields) {
+        if (!field._focusNode.hasFocus) {
+          final bool isFieldValid = field.validate();
+          hasError = !isFieldValid || hasError;
+          errorMessage += field.errorText ?? '';
+          if (invalidFields != null && !isFieldValid) {
+            invalidFields.add(field);
+          }
         }
       }
-      return !hasError;
-    }
-
-    for (final FormFieldState<dynamic> field in _fields) {
-      final bool isFieldValid = field.validate();
-      hasError = !isFieldValid || hasError;
-      errorMessage += field.errorText ?? '';
-      if (invalidFields != null && !isFieldValid) {
-        invalidFields.add(field);
+    } else{
+        for (final FormFieldState<dynamic> field in _fields) {
+          final bool isFieldValid = field.validate();
+          hasError = !isFieldValid || hasError;
+          errorMessage += field.errorText ?? '';
+          if (invalidFields != null && !isFieldValid) {
+            invalidFields.add(field);
+        }
       }
     }
 
     if (errorMessage.isNotEmpty) {
-      final TextDirection directionality = Directionality.of(context);
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        unawaited(Future<void>(() async {
-          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
-        }));
-      } else {
-        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
-      }
+       _announceErrorMessage(errorMessage, context);
     }
+
     return !hasError;
+  }
+
+  void _announceErrorMessage(String errorMessage, BuildContext context) {
+    final TextDirection directionality = Directionality.of(context);
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      unawaited(Future<void>(() async {
+        await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }));
+    } else {
+      SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+    }
   }
 }
 
@@ -514,6 +518,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
   final RestorableStringN _errorText = RestorableStringN(null);
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
+  final FocusNode _focusNode = FocusNode();
 
   /// The current value of the form field.
   T? get value => _value;
@@ -622,8 +627,21 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if(widget.autovalidateMode == AutovalidateMode.onUnfocus){
+      _focusNode.addListener((){
+        if (!_focusNode.hasFocus) {
+          _validate();
+        }
+     });
+    }
+  }
+
+  @override
   void dispose() {
     _errorText.dispose();
+    _focusNode.dispose();
     _hasInteractedByUser.dispose();
     super.dispose();
   }
@@ -638,16 +656,17 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           if (_hasInteractedByUser.value) {
             _validate();
           }
-        case AutovalidateMode.onFocusChange:
-          if (!FocusScope.of(context).hasPrimaryFocus) {
-            _validate();
-          }
+        case AutovalidateMode.onUnfocus:
         case AutovalidateMode.disabled:
           break;
       }
     }
     Form.maybeOf(context)?._register(this);
-    return widget.builder(this);
+
+    return Focus(
+        focusNode: _focusNode,
+        child: widget.builder(this),
+      );
   }
 }
 
@@ -670,5 +689,5 @@ enum AutovalidateMode {
   ///
   /// If you want validate all fields of a [Form] after the user has interacted
   /// with one, use [always] instead.
-  onFocusChange,
+  onUnfocus,
 }
