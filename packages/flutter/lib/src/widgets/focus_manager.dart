@@ -254,7 +254,6 @@ class FocusAttachment {
       assert(_node.context != null);
       parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
       parent ??= _node.context!.owner!.focusManager.rootScope;
-      print('attatchment reparent: $_node to ${Focus.maybeOf(_node.context!, scopeOk: true)} or ${_node.context!.owner!.focusManager.rootScope}');
       parent._reparent(_node);
     }
   }
@@ -621,7 +620,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (!value && hasFocus) {
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
-      print('now with $value focusable descendants, $this has $_focusabilityListenerCount listeners.');
     if (_focusabilityListenerCount > 0) {
       _onDescendantsAreFocusableChanged(value);
     }
@@ -632,12 +630,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusabilityListenerCount >= 0);
     final int ancestorListenerAdjustment = newValue ? _focusabilityListenerCount : -_focusabilityListenerCount;
     if (ancestorListenerAdjustment == 0) {
-      print('onDescendantsAreFocusableChanged($newValue): skipping $this for no listeners');
       return;
     }
     final bool ancestorsAllowFocus = _adjustAncestorListenerCount(ancestorListenerAdjustment);
 
-    print('onDescendantsAreFocusableChanged($newValue): $this ancestors allow focus? $ancestorsAllowFocus');
     // If there's an ancestor that disallows focus, this change doesn't affect
     // the focusability of the descendants. Otherwise, this we need to notify
     // _focusabilityListenerCount listeners.
@@ -1126,16 +1122,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _children.add(child);
     child._parent = this;
     child._ancestors = null;
-    child._clearEnclosingScopeCache(_enclosingScope);
     child._updateManager(_manager);
     for (final FocusNode ancestor in child.ancestors) {
       ancestor._descendants = null;
     }
 
-    //print('Reparent: $this has $childSubtreeListenerCount listeners. ${oldParent?._focusabilityListenerCount} from oldParent, $child: ${child.descendantsAreFocusable}, ${child._focusabilityListenerCount}. ');
     if (childSubtreeListenerCount > 0) {
       final bool childCanFocus = child._adjustAncestorListenerCount(childSubtreeListenerCount);
-      //print('Reparent: $this has $subtreeListeners listeners. ${oldParent?._focusabilityListenerCount} from oldParent, $child: ${child._focusabilityListenerCount}. $childCouldFocus => $childCanFocus');
       if (childCanFocus != childCouldFocus) {
         _dispatchToDescendants(childCanFocus);
       }
@@ -1145,7 +1138,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // Update the focus chain for the current focus without changing it.
       _manager?.primaryFocus?._setAsFocusedChildForScope();
     }
-      print('reparent: $child to $this');
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
       FocusTraversalGroup.maybeOf(child.context!)?.changedScope(node: child, oldScope: oldScope);
     }
