@@ -4,7 +4,7 @@
 
 import("//build_overrides/vulkan_validation_layers.gni")
 
-_checkout_dir = "//third_party/vulkan-deps/vulkan-validation-layers/src"
+_checkout_dir = "//flutter/third_party/vulkan-deps/vulkan-validation-layers/src"
 
 vulkan_undefine_configs = []
 if (is_win) {

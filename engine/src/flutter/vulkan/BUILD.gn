@@ -51,5 +51,5 @@ source_set("vulkan") {
   public_configs = [ "//flutter:config" ]
 
   public_deps =
-      [ "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers" ]
+      [ "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers" ]
 }

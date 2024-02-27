@@ -279,7 +279,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '21b1b9f2645fada701885108e86aefbcb3b1cca0',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '2f684abc6e6bfba9062bd372929a8d458e03940a',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -302,7 +302,7 @@ deps = {
   'src/flutter/third_party/shaderc':
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '37e25539ce199ecaf19fb7f7d27818716d36686d',
 
-  'src/third_party/vulkan-deps':
+  'src/flutter/third_party/vulkan-deps':
    Var('chromium_git') + '/vulkan-deps' + '@' + '014f44e134a1de387791bffacc32ff9d8db71176',
 
   'src/flutter/third_party/flatbuffers':
@@ -1063,7 +1063,7 @@ deps = {
 }
 
 recursedeps = [
-  'src/third_party/vulkan-deps',
+  'src/flutter/third_party/vulkan-deps',
 ]
 
 hooks = [
