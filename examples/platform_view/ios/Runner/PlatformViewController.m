@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Foundation/Foundation.h>
 #import "PlatformViewController.h"
 
+#import <Foundation/Foundation.h>
+
 @interface PlatformViewController ()
-@property (weak, nonatomic) IBOutlet UILabel *incrementLabel;
+@property(weak, nonatomic) IBOutlet UILabel* incrementLabel;
 @end
 
 @implementation PlatformViewController
@@ -27,9 +28,8 @@
 }
 
 - (void)setIncrementLabelText {
-  NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.",
-                    self.counter,
-                    (self.counter == 1) ? @"time" : @"times"];
+  NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.", self.counter,
+                                              (self.counter == 1) ? @"time" : @"times"];
   self.incrementLabel.text = text;
 }
 
