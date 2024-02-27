@@ -55,8 +55,8 @@ class Command {
   /// The file on which the command operates.
   late final String filePath;
 
-  static final RegExp _pathRegex = RegExp(r'\S*clang/bin/clang');
-  static final RegExp _argRegex = RegExp(r'-MF \S*');
+  static final RegExp _pathRegex = RegExp(r'\S*clang/bin/clang(\+\+)?');
+  static final RegExp _argRegex = RegExp(r'-MF\s+\S+\s+');
 
   // Filter out any extra commands that were appended to the compile command.
   static final RegExp _extraCommandRegex = RegExp(r'&&.*$');
@@ -67,6 +67,11 @@ class Command {
   String get tidyArgs {
     return _tidyArgs ??= (() {
       String result = command;
+      result = result.replaceAll(r'\s+', ' ');
+      // Remove everything that comes before the compiler command.
+      result = result.split(' ')
+                     .skipWhile((String s) => !_pathRegex.hasMatch(s))
+                     .join(' ');
       result = result.replaceAll(_pathRegex, '');
       result = result.replaceAll(_argRegex, '');
       result = result.replaceAll(_extraCommandRegex, '');
@@ -81,7 +86,7 @@ class Command {
     return _tidyPath ??= _pathRegex.stringMatch(command)?.replaceAll(
       'clang/bin/clang',
       'clang/bin/clang-tidy',
-    ) ?? '';
+    ).replaceAll('clang-tidy++', 'clang-tidy') ?? '';
   }
 
   /// Whether this command operates on any of the files in `queries`.

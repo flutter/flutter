@@ -586,5 +586,29 @@ Future<int> main(List<String> args) async {
     expect(command.tidyArgs.trim(), 'filename');
   });
 
+  test('Command filters out the -MF flag', () {
+    final Command command = Command.fromMap(<String, String>{
+        'directory': '/unused',
+        'command':
+          '../../buildtools/mac-x64/clang/bin/clang -MF stuff filename ',
+        'file': 'unused',
+    });
+    expect(command.tidyArgs.trim(), 'filename');
+  });
+
+  test('Command filters out rewrapper command before a compile command', () {
+    final Command command = Command.fromMap(<String, String>{
+        'directory': '/unused',
+        'command':
+          'flutter/engine/src/buildtools/mac-arm64/reclient/rewrapper '
+          '--cfg=flutter/engine/src/flutter/build/rbe/rewrapper-mac-arm64.cfg '
+          '--exec_root=flutter/engine/src/ '
+          '--labels=type=compile,compiler=clang,lang=cpp '
+          '../../buildtools/mac-x64/clang/bin/clang++ filename ',
+        'file': 'unused',
+    });
+    expect(command.tidyArgs.trim(), 'filename');
+  });
+
   return 0;
 }

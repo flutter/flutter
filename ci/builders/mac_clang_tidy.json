@@ -7,7 +7,8 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--runtime-mode",
@@ -16,7 +17,9 @@
                 "--no-lto",
                 "--force-mac-arm64",
                 "--target-dir",
-                "host_debug_clang_tidy"
+                "host_debug_clang_tidy",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug_clang_tidy",
             "ninja": {
@@ -30,7 +33,8 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--ios",
@@ -40,7 +44,9 @@
                 "--no-lto",
                 "--force-mac-arm64",
                 "--target-dir",
-                "ios_debug_sim_clang_tidy"
+                "ios_debug_sim_clang_tidy",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ios_debug_sim_clang_tidy",
             "ninja": {
