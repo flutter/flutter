@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-// This library parses Engine build config data out of the "Engine v2" build
+// This library parses Engine builder config data out of the "Engine v2" build
 // config JSON files with the format described at:
 //   https://github.com/flutter/engine/blob/main/ci/builders/README.md
 
@@ -31,10 +31,10 @@ sealed class BuildConfigBase {
   }
 }
 
-/// The build configuration is a json file containing a list of builds, tests,
+/// The builder configuration is a json file containing a list of builds, tests,
 /// generators and archives.
 ///
-/// Each build config file contains a top-level json map with the following
+/// Each builder config file contains a top-level json map with the following
 /// fields:
 /// {
 ///    "builds": [],
@@ -44,25 +44,31 @@ sealed class BuildConfigBase {
 ///    },
 ///    "archives": []
 /// }
-final class BuildConfig extends BuildConfigBase {
+final class BuilderConfig extends BuildConfigBase {
   /// Load build configuration data into an instance of this class.
   ///
   /// [path] should be the file system path to the file that the JSON data comes
   /// from. [map] must be the JSON data returned by e.g. `JsonDecoder.convert`.
-  factory BuildConfig.fromJson({
+  factory BuilderConfig.fromJson({
     required String path,
     required Map<String, Object?> map,
   }) {
     final List<String> errors = <String>[];
 
     // Parse the "builds" field.
-    final List<GlobalBuild>? builds = objListOfJson<GlobalBuild>(
-      map, 'builds', errors, GlobalBuild.fromJson,
+    final List<Build>? builds = objListOfJson<Build>(
+      map,
+      'builds',
+      errors,
+      Build.fromJson,
     );
 
     // Parse the "tests" field.
     final List<GlobalTest>? tests = objListOfJson<GlobalTest>(
-      map, 'tests', errors, GlobalTest.fromJson,
+      map,
+      'tests',
+      errors,
+      GlobalTest.fromJson,
     );
 
     // Parse the "generators" field.
@@ -83,19 +89,22 @@ final class BuildConfig extends BuildConfigBase {
 
     // Parse the "archives" field.
     final List<GlobalArchive>? archives = objListOfJson<GlobalArchive>(
-      map, 'archives', errors, GlobalArchive.fromJson,
+      map,
+      'archives',
+      errors,
+      GlobalArchive.fromJson,
     );
 
     if (builds == null ||
         tests == null ||
         generators == null ||
         archives == null) {
-      return BuildConfig._invalid(path, errors);
+      return BuilderConfig._invalid(path, errors);
     }
-    return BuildConfig._(path, builds, tests, generators, archives);
+    return BuilderConfig._(path, builds, tests, generators, archives);
   }
 
-  BuildConfig._(
+  BuilderConfig._(
     this.path,
     this.builds,
     this.tests,
@@ -103,18 +112,18 @@ final class BuildConfig extends BuildConfigBase {
     this.archives,
   ) : super(null);
 
-  BuildConfig._invalid(this.path, super.errors) :
-    builds = <GlobalBuild>[],
-    tests = <GlobalTest>[],
-    generators = <TestTask>[],
-    archives = <GlobalArchive>[];
+  BuilderConfig._invalid(this.path, super.errors)
+      : builds = <Build>[],
+        tests = <GlobalTest>[],
+        generators = <TestTask>[],
+        archives = <GlobalArchive>[];
 
   /// The path to the JSON file.
   final String path;
 
   /// A list of independent builds that have no dependencies among them. They
   /// can run in parallel if need be.
-  final List<GlobalBuild> builds;
+  final List<Build> builds;
 
   /// A list of tests. The tests may have dependencies on one or more of the
   /// builds.
@@ -133,7 +142,7 @@ final class BuildConfig extends BuildConfigBase {
     final List<String> errors = <String>[];
     errors.addAll(super.check(path));
     for (int i = 0; i < builds.length; i++) {
-      final GlobalBuild build = builds[i];
+      final Build build = builds[i];
       errors.addAll(build.check('$path/builds[$i]'));
     }
     for (int i = 0; i < tests.length; i++) {
@@ -151,10 +160,10 @@ final class BuildConfig extends BuildConfigBase {
     return errors;
   }
 
-  /// Returns true if any of the [GlobalBuild]s it contains can run on
+  /// Returns true if any of the [Build]s it contains can run on
   /// `platform`, and false otherwise.
   bool canRunOn(Platform platform) {
-    return builds.any((GlobalBuild b) => b.canRunOn(platform));
+    return builds.any((Build b) => b.canRunOn(platform));
   }
 }
 
@@ -175,19 +184,27 @@ final class BuildConfig extends BuildConfigBase {
 ///   "drone_dimensions": [""],
 ///   "gclient_variables": {}
 /// }
-final class GlobalBuild extends BuildConfigBase {
-  factory GlobalBuild.fromJson(Map<String, Object?> map) {
+final class Build extends BuildConfigBase {
+  factory Build.fromJson(Map<String, Object?> map) {
     final List<String> errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final List<String>? gn = stringListOfJson(map, 'gn', errors);
     final List<BuildTest>? tests = objListOfJson(
-      map, 'tests', errors, BuildTest.fromJson,
+      map,
+      'tests',
+      errors,
+      BuildTest.fromJson,
     );
     final List<BuildArchive>? archives = objListOfJson(
-      map, 'archives', errors, BuildArchive.fromJson,
+      map,
+      'archives',
+      errors,
+      BuildArchive.fromJson,
     );
     final List<String>? droneDimensions = stringListOfJson(
-      map, 'drone_dimensions', errors,
+      map,
+      'drone_dimensions',
+      errors,
     );
 
     final BuildNinja? ninja;
@@ -237,15 +254,21 @@ final class GlobalBuild extends BuildConfigBase {
         generators == null ||
         droneDimensions == null ||
         gclientVariables == null) {
-      return GlobalBuild._invalid(errors);
+      return Build._invalid(errors);
     }
-    return GlobalBuild._(
-      name, gn, ninja, tests, generators, archives, droneDimensions,
+    return Build._(
+      name,
+      gn,
+      ninja,
+      tests,
+      generators,
+      archives,
+      droneDimensions,
       gclientVariables,
     );
   }
 
-  GlobalBuild._(
+  Build._(
     this.name,
     this.gn,
     this.ninja,
@@ -256,15 +279,15 @@ final class GlobalBuild extends BuildConfigBase {
     this.gclientVariables,
   ) : super(null);
 
-  GlobalBuild._invalid(super.errors) :
-    name = '',
-    gn = <String>[],
-    ninja = BuildNinja.nop(),
-    tests = <BuildTest>[],
-    generators = <BuildTask>[],
-    archives = <BuildArchive>[],
-    droneDimensions = <String>[],
-    gclientVariables = <String, Object?>{};
+  Build._invalid(super.errors)
+      : name = '',
+        gn = <String>[],
+        ninja = BuildNinja.nop(),
+        tests = <BuildTest>[],
+        generators = <BuildTask>[],
+        archives = <BuildArchive>[],
+        droneDimensions = <String>[],
+        gclientVariables = <String, Object?>{};
 
   /// The name of the build which may also be used to reference it as a
   /// depdendency of a global test.
@@ -337,14 +360,14 @@ final class BuildNinja extends BuildConfigBase {
 
   BuildNinja._(this.config, this.targets) : super(null);
 
-  BuildNinja._invalid(super.errors) :
-    config = '',
-    targets = <String>[];
+  BuildNinja._invalid(super.errors)
+      : config = '',
+        targets = <String>[];
 
-  BuildNinja.nop() :
-    config = '',
-    targets = <String>[],
-    super(null);
+  BuildNinja.nop()
+      : config = '',
+        targets = <String>[],
+        super(null);
 
   /// The name of the configuration created by gn.
   ///
@@ -371,10 +394,14 @@ final class BuildTest extends BuildConfigBase {
     final String? language = stringOfJson(map, 'language', errors);
     final String? script = stringOfJson(map, 'script', errors);
     final List<String>? parameters = stringListOfJson(
-      map, 'parameters', errors,
+      map,
+      'parameters',
+      errors,
     );
     final List<String>? contexts = stringListOfJson(
-      map, 'contexts', errors,
+      map,
+      'contexts',
+      errors,
     );
     if (name == null ||
         language == null ||
@@ -394,12 +421,12 @@ final class BuildTest extends BuildConfigBase {
     this.contexts,
   ) : super(null);
 
-  BuildTest._invalid(super.errors) :
-    name = '',
-    language = '',
-    script = '',
-    parameters = <String>[],
-    contexts = <String>[];
+  BuildTest._invalid(super.errors)
+      : name = '',
+        language = '',
+        script = '',
+        parameters = <String>[],
+        contexts = <String>[];
 
   /// The human readable description of the test.
   final String name;
@@ -444,7 +471,9 @@ final class BuildTask extends BuildConfigBase {
     final String? language = stringOfJson(map, 'language', errors);
     final List<String>? scripts = stringListOfJson(map, 'scripts', errors);
     final List<String>? parameters = stringListOfJson(
-      map, 'parameters', errors,
+      map,
+      'parameters',
+      errors,
     );
     if (name == null ||
         language == null ||
@@ -455,14 +484,14 @@ final class BuildTask extends BuildConfigBase {
     return BuildTask._(name, language, scripts, parameters);
   }
 
-  BuildTask._invalid(super.errors) :
-    name = '',
-    language = '',
-    scripts = <String>[],
-    parameters = <String>[];
+  BuildTask._invalid(super.errors)
+      : name = '',
+        language = '',
+        scripts = <String>[],
+        parameters = <String>[];
 
-  BuildTask._(this.name, this.language, this.scripts, this.parameters) :
-    super(null);
+  BuildTask._(this.name, this.language, this.scripts, this.parameters)
+      : super(null);
 
   /// The human readable name of the step running the script.
   final String name;
@@ -496,7 +525,9 @@ final class BuildArchive extends BuildConfigBase {
     final String? basePath = stringOfJson(map, 'base_path', errors);
     final String? realm = stringOfJson(map, 'realm', errors);
     final List<String>? includePaths = stringListOfJson(
-      map, 'include_paths', errors,
+      map,
+      'include_paths',
+      errors,
     );
     if (name == null ||
         type == null ||
@@ -508,12 +539,12 @@ final class BuildArchive extends BuildConfigBase {
     return BuildArchive._(name, type, basePath, realm, includePaths);
   }
 
-  BuildArchive._invalid(super.error) :
-    name = '',
-    type = '',
-    basePath = '',
-    realm = '',
-    includePaths = <String>[];
+  BuildArchive._invalid(super.error)
+      : name = '',
+        type = '',
+        basePath = '',
+        realm = '',
+        includePaths = <String>[];
 
   BuildArchive._(
     this.name,
@@ -553,16 +584,26 @@ final class GlobalTest extends BuildConfigBase {
     final String? name = stringOfJson(map, 'name', errors);
     final String? recipe = stringOfJson(map, 'recipe', errors);
     final List<String>? droneDimensions = stringListOfJson(
-      map, 'drone_dimensions', errors,
+      map,
+      'drone_dimensions',
+      errors,
     );
     final List<String>? dependencies = stringListOfJson(
-      map, 'dependencies', errors,
+      map,
+      'dependencies',
+      errors,
     );
     final List<TestDependency>? testDependencies = objListOfJson(
-      map, 'test_dependencies', errors, TestDependency.fromJson,
+      map,
+      'test_dependencies',
+      errors,
+      TestDependency.fromJson,
     );
     final List<TestTask>? tasks = objListOfJson(
-      map, 'tasks', errors, TestTask.fromJson,
+      map,
+      'tasks',
+      errors,
+      TestTask.fromJson,
     );
     if (name == null ||
         recipe == null ||
@@ -573,16 +614,16 @@ final class GlobalTest extends BuildConfigBase {
       return GlobalTest._invalid(errors);
     }
     return GlobalTest._(
-      name, recipe, droneDimensions, dependencies, testDependencies, tasks);
+        name, recipe, droneDimensions, dependencies, testDependencies, tasks);
   }
 
-  GlobalTest._invalid(super.errors) :
-    name = '',
-    recipe = '',
-    droneDimensions = <String>[],
-    dependencies = <String>[],
-    testDependencies = <TestDependency>[],
-    tasks = <TestTask>[];
+  GlobalTest._invalid(super.errors)
+      : name = '',
+        recipe = '',
+        droneDimensions = <String>[],
+        dependencies = <String>[],
+        testDependencies = <TestDependency>[],
+        tasks = <TestTask>[];
 
   GlobalTest._(
     this.name,
@@ -648,7 +689,9 @@ final class TestDependency extends BuildConfigBase {
     return TestDependency._(dependency, version);
   }
 
-  TestDependency._invalid(super.error) : dependency = '', version = '';
+  TestDependency._invalid(super.error)
+      : dependency = '',
+        version = '';
 
   TestDependency._(this.dependency, this.version) : super(null);
 
@@ -673,9 +716,12 @@ final class TestTask extends BuildConfigBase {
     final String? name = stringOfJson(map, 'name', errors);
     final String? language = stringOfJson(map, 'language', errors);
     final String? script = stringOfJson(map, 'script', errors);
-    final int? maxAttempts = intOfJson(map, 'max_attempts', fallback: 1, errors);
+    final int? maxAttempts =
+        intOfJson(map, 'max_attempts', fallback: 1, errors);
     final List<String>? parameters = stringListOfJson(
-      map, 'parameters', errors,
+      map,
+      'parameters',
+      errors,
     );
     if (name == null ||
         language == null ||
@@ -687,12 +733,12 @@ final class TestTask extends BuildConfigBase {
     return TestTask._(name, language, script, maxAttempts, parameters);
   }
 
-  TestTask._invalid(super.error) :
-    name = '',
-    language = '',
-    script = '',
-    maxAttempts = 0,
-    parameters = <String>[];
+  TestTask._invalid(super.error)
+      : name = '',
+        language = '',
+        script = '',
+        maxAttempts = 0,
+        parameters = <String>[];
 
   TestTask._(
     this.name,
@@ -732,21 +778,18 @@ final class GlobalArchive extends BuildConfigBase {
     final String? source = stringOfJson(map, 'source', errors);
     final String? destination = stringOfJson(map, 'destination', errors);
     final String? realm = stringOfJson(map, 'realm', errors);
-    if (source == null ||
-        destination == null ||
-        realm == null) {
+    if (source == null || destination == null || realm == null) {
       return GlobalArchive._invalid(errors);
     }
     return GlobalArchive._(source, destination, realm);
   }
 
-  GlobalArchive._invalid(super.error) :
-    source = '',
-    destination = '',
-    realm = '';
+  GlobalArchive._invalid(super.error)
+      : source = '',
+        destination = '',
+        realm = '';
 
-  GlobalArchive._(this.source, this.destination, this.realm) :
-    super(null);
+  GlobalArchive._(this.source, this.destination, this.realm) : super(null);
 
   /// The path of the artifact relative to the engine checkout.
   final String source;
@@ -764,7 +807,8 @@ bool _canRunOn(List<String> droneDimensions, Platform platform) {
   for (final String dimension in droneDimensions) {
     os ??= switch (dimension.split('=')) {
       ['os', 'Linux'] => Platform.linux,
-      ['os', final String win] when win.startsWith('Windows') => Platform.windows,
+      ['os', final String win] when win.startsWith('Windows') =>
+        Platform.windows,
       ['os', final String mac] when mac.startsWith('Mac') => Platform.macOS,
       _ => null,
     };
@@ -813,7 +857,9 @@ List<T>? objListOfJson<T>(
     }
   }
   return (map[field]! as List<Object?>)
-    .cast<Map<String, Object?>>().map<T>(fn).toList();
+      .cast<Map<String, Object?>>()
+      .map<T>(fn)
+      .toList();
 }
 
 List<String>? stringListOfJson(
