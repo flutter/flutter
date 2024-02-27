@@ -342,24 +342,13 @@ class FormState extends State<Form> {
     String errorMessage = '';
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
-    if (validateOnFocusChange) {
-      for (final FormFieldState<dynamic> field in _fields) {
-        if (!field._focusNode.hasFocus) {
-          final bool isFieldValid = field.validate();
-          hasError = !isFieldValid || hasError;
-          errorMessage += field.errorText ?? '';
-          if (invalidFields != null && !isFieldValid) {
-            invalidFields.add(field);
-          }
-        }
-      }
-    } else{
-        for (final FormFieldState<dynamic> field in _fields) {
-          final bool isFieldValid = field.validate();
-          hasError = !isFieldValid || hasError;
-          errorMessage += field.errorText ?? '';
-          if (invalidFields != null && !isFieldValid) {
-            invalidFields.add(field);
+    for (final FormFieldState<dynamic> field in _fields) {
+      if (!validateOnFocusChange || (!field._focusNode.hasFocus && validateOnFocusChange)) {
+        final bool isFieldValid = field.validate();
+        hasError = !isFieldValid || hasError;
+        errorMessage += field.errorText ?? '';
+        if (invalidFields != null && !isFieldValid) {
+          invalidFields.add(field);
         }
       }
     }
