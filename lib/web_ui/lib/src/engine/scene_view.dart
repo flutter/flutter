@@ -20,6 +20,7 @@ typedef RenderResult = ({
 // composite pictures into the canvases in the DOM tree it builds.
 abstract class PictureRenderer {
   FutureOr<RenderResult> renderPictures(List<ScenePicture> picture);
+  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
 }
 
 class _SceneRender {
@@ -86,12 +87,41 @@ class EngineSceneView {
     }
   }
 
+  ScenePicture _clipPictureIfNeeded(ScenePicture picture, ui.Rect clip) {
+    final ui.Rect pictureRect = picture.cullRect;
+    if (pictureRect.left >= clip.left &&
+        pictureRect.top >= clip.top &&
+        pictureRect.right <= clip.right &&
+        pictureRect.bottom <= clip.bottom) {
+      // The picture is already within the clip bounds.
+      return picture;
+    }
+
+    return pictureRenderer.clipPicture(picture, clip);
+  }
+
+  ui.Rect? _getScreenBounds() {
+    final DomScreen? screen = domWindow.screen;
+    if (screen == null) {
+      return null;
+    }
+    return ui.Rect.fromLTWH(0, 0, screen.width, screen.height);
+  }
+
   Future<void> _renderScene(EngineScene scene, FrameTimingRecorder? recorder) async {
+    final ui.Rect? screenBounds = _getScreenBounds();
+    if (screenBounds == null) {
+      // The browser isn't displaying the document. Skip rendering.
+      return;
+    }
     final List<LayerSlice> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
+    final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
     for (final LayerSlice slice in slices) {
-      if (slice is PictureSlice) {
-        picturesToRender.add(slice.picture);
+      if (slice is PictureSlice && !slice.picture.cullRect.isEmpty) {
+        originalPicturesToRender.add(slice.picture);
+        final ScenePicture clippedPicture = _clipPictureIfNeeded(slice.picture, screenBounds);
+        picturesToRender.add(clippedPicture);
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
@@ -99,7 +129,7 @@ class EngineSceneView {
       final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
       renderMap = <ScenePicture, DomImageBitmap>{
         for (int i = 0; i < picturesToRender.length; i++)
-          picturesToRender[i]: renderResult.imageBitmaps[i],
+          originalPicturesToRender[i]: renderResult.imageBitmaps[i],
       };
       recorder?.recordRasterStart(renderResult.rasterStartMicros);
       recorder?.recordRasterFinish(renderResult.rasterEndMicros);
@@ -125,10 +155,11 @@ class EngineSceneView {
             }
           }
 
+          final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
           if (container != null) {
-            container.bounds = slice.picture.cullRect;
+            container.bounds = clippedBounds;
           } else {
-            container = PictureSliceContainer(slice.picture.cullRect);
+            container = PictureSliceContainer(clippedBounds);
           }
           container.updateContents();
           container.renderBitmap(renderMap[slice.picture]!);
