@@ -2936,7 +2936,7 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final _RoutePlaceholder notAnnounced = const _RoutePlaceholder();
+  static const _RoutePlaceholder notAnnounced = _RoutePlaceholder();
 
   _RouteLifecycle currentState;
   _RoutePlaceholder? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
