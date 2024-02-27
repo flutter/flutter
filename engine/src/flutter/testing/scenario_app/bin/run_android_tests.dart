@@ -401,8 +401,9 @@ Future<void> _run({
         // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
         File(join(screenshotPath, 'noop.txt')).writeAsStringSync('');
         // TODO(gaaclarke): We should move this into dir_contents_diff.
-        _withTemporaryCwd(dirname(contentsGolden), () {
-          final int exitCode = dirContentsDiff(basename(contentsGolden), screenshotPath);
+        final String diffScreenhotPath = absolute(screenshotPath);
+        _withTemporaryCwd(absolute(dirname(contentsGolden)), () {
+          final int exitCode = dirContentsDiff(basename(contentsGolden), diffScreenhotPath);
           if (exitCode != 0) {
             panic(<String>['Output contents incorrect.']);
           }
