@@ -254,6 +254,7 @@ class FocusAttachment {
       assert(_node.context != null);
       parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
       parent ??= _node.context!.owner!.focusManager.rootScope;
+      print('attatchment reparent: $_node to ${Focus.maybeOf(_node.context!, scopeOk: true)} or ${_node.context!.owner!.focusManager.rootScope}');
       parent._reparent(_node);
     }
   }
@@ -538,13 +539,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (focusabilityCallback != null) {
       final bool isFocusable = _adjustAncestorListenerCount(value ? 1 : -1) && value;
       if (_isFocusable != isFocusable) {
+        _isFocusable = isFocusable;
         focusabilityCallback(isFocusable);
       }
     }
     _manager?._markPropertiesChanged(this);
   }
-
-  //_FocusabilityListeningState? _focusabilityListeningState;
 
   // The number of nodes that must take action when this node's
   // `descentantsAreFocusable` value changes.
@@ -565,12 +565,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
     // Whether we need to monitor the path between parent and the closest
     // ancestor with `descendantsAreFocusable == false` (or the root node).
-    _isFocusable = _canRequestFocus || _adjustAncestorListenerCount(1);
+    _isFocusable = _canRequestFocus && _adjustAncestorListenerCount(1);
   }
 
   bool _adjustAncestorListenerCount(int delta) {
+    assert(delta != 0);
     for (FocusNode? node = parent; node != null; node = node.parent) {
+      assert(delta > 0 || node._focusabilityListenerCount + delta >= 0, '$node currently have ${node._focusabilityListenerCount} listeners. ($delta)');
       node._focusabilityListenerCount += delta;
+      //print('$node now has ${node._focusabilityListenerCount} listeners. $delta');
       if (!node.descendantsAreFocusable) {
         return false;
       }
@@ -618,6 +621,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (!value && hasFocus) {
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
+      print('now with $value focusable descendants, $this has $_focusabilityListenerCount listeners.');
     if (_focusabilityListenerCount > 0) {
       _onDescendantsAreFocusableChanged(value);
     }
@@ -628,10 +632,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusabilityListenerCount >= 0);
     final int ancestorListenerAdjustment = newValue ? _focusabilityListenerCount : -_focusabilityListenerCount;
     if (ancestorListenerAdjustment == 0) {
+      print('onDescendantsAreFocusableChanged($newValue): skipping $this for no listeners');
       return;
     }
     final bool ancestorsAllowFocus = _adjustAncestorListenerCount(ancestorListenerAdjustment);
 
+    print('onDescendantsAreFocusableChanged($newValue): $this ancestors allow focus? $ancestorsAllowFocus');
     // If there's an ancestor that disallows focus, this change doesn't affect
     // the focusability of the descendants. Otherwise, this we need to notify
     // _focusabilityListenerCount listeners.
@@ -641,18 +647,21 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   void _dispatchToDescendants(bool canRequestFocus) {
-    if (_focusabilityListenerCount == 0) {
-      return;
+    for (final FocusNode child in children) {
+      __dispatchToDescendants(child, canRequestFocus);
     }
-    final OnFocusabilityChangedCallback? callback = onFocusabilityChanged;
-    if (callback != null && _isFocusable != canRequestFocus && _canRequestFocus) {
-      _isFocusable = canRequestFocus;
+  }
+
+  static void __dispatchToDescendants(FocusNode node, bool canRequestFocus) {
+    final OnFocusabilityChangedCallback? callback = node.onFocusabilityChanged;
+    if (callback != null && node._isFocusable != canRequestFocus && node._canRequestFocus) {
+      assert(canRequestFocus == node.canRequestFocus);
+      node._isFocusable = canRequestFocus;
       callback(canRequestFocus);
     }
-    if (descendantsAreFocusable && children.isNotEmpty) {
-      for (final FocusNode child in children) {
-        child._dispatchToDescendants(canRequestFocus);
-      }
+
+    if (node._focusabilityListenerCount == 0 || (node.descendantsAreFocusable && node.children.isNotEmpty)) {
+      node._dispatchToDescendants(canRequestFocus);
     }
   }
 
@@ -858,6 +867,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusScopeNode? get nearestScope => enclosingScope;
 
   FocusScopeNode? _enclosingScope;
+  void _clearEnclosingScopeCache(FocusScopeNode? scope) {
+      print('clearing scope cache: $this, $scope');
+    if (scope != null && identical(scope, _enclosingScope)) {
+      _enclosingScope = null;
+      for (final FocusNode child in children) {
+        child._clearEnclosingScopeCache(scope);
+      }
+    }
+  }
   /// Returns the nearest enclosing scope node above this node, or null if the
   /// node has not yet be added to the focus tree.
   ///
@@ -865,7 +883,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// scope.
   ///
   /// Use [nearestScope] to start at this node instead of above it.
-  FocusScopeNode? get enclosingScope => _enclosingScope ??= parent?.nearestScope;
+  FocusScopeNode? get enclosingScope {
+    final FocusScopeNode? enclosingScope =_enclosingScope ??= parent?.nearestScope;
+    assert(enclosingScope == parent?.nearestScope, '$this => $enclosingScope, parent = $parent, ${parent?.nearestScope}');
+    return enclosingScope;
+  }
 
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
@@ -1082,29 +1104,33 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     final FocusScopeNode? oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
 
-    final int subtreeListeners;
+    final int childSubtreeListenerCount;
     final bool childCouldFocus;
     if (oldParent != null) {
+      childSubtreeListenerCount = oldParent._focusabilityListenerCount;
+      childCouldFocus = childSubtreeListenerCount > 0 && _adjustAncestorListenerCount(childSubtreeListenerCount);
       oldParent._removeChild(child, removeScopeFocus: oldScope != nearestScope);
-      subtreeListeners = oldParent._focusabilityListenerCount;
-      childCouldFocus = subtreeListeners > 0 && oldParent._adjustAncestorListenerCount(-subtreeListeners);
     } else {
-      subtreeListeners = (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0)
-                       + (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0);
       childCouldFocus = true;
+      childSubtreeListenerCount = (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0)
+       + (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0);
     }
+
     _children.add(child);
     child._parent = this;
     child._ancestors = null;
-    child._enclosingScope = null;
+    child._clearEnclosingScopeCache(_enclosingScope);
     child._updateManager(_manager);
     for (final FocusNode ancestor in child.ancestors) {
       ancestor._descendants = null;
     }
-    if (subtreeListeners > 0) {
-      final bool childCanFocus = _adjustAncestorListenerCount(subtreeListeners);
+
+    //print('Reparent: $this has $childSubtreeListenerCount listeners. ${oldParent?._focusabilityListenerCount} from oldParent, $child: ${child.descendantsAreFocusable}, ${child._focusabilityListenerCount}. ');
+    if (childSubtreeListenerCount > 0) {
+      final bool childCanFocus = child._adjustAncestorListenerCount(childSubtreeListenerCount);
+      //print('Reparent: $this has $subtreeListeners listeners. ${oldParent?._focusabilityListenerCount} from oldParent, $child: ${child._focusabilityListenerCount}. $childCouldFocus => $childCanFocus');
       if (childCanFocus != childCouldFocus) {
-        _onDescendantsAreFocusableChanged(childCanFocus);
+        _dispatchToDescendants(childCanFocus);
       }
     }
 
@@ -1112,6 +1138,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // Update the focus chain for the current focus without changing it.
       _manager?.primaryFocus?._setAsFocusedChildForScope();
     }
+      print('reparent: $child to $this');
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
       FocusTraversalGroup.maybeOf(child.context!)?.changedScope(node: child, oldScope: oldScope);
     }

@@ -2126,6 +2126,170 @@ void main() {
       expect(childFocusNode.canRequestFocus, isTrue);
     });
   });
+
+  group('focusability listener', () {
+    bool? isFocusable;
+    int focusabilityChangeCount = 0;
+    void focusabilityCallback(bool value) {
+      isFocusable = value;
+      focusabilityChangeCount += 1;
+    }
+
+    setUp(() {
+      isFocusable = null;
+      focusabilityChangeCount = 0;
+    });
+
+    testWidgets('canRequestFocus affects child focusability', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
+      final FocusNode node3 = FocusNode(debugLabel: 'node 3');
+      addTearDown(scopeNode1.dispose);
+      addTearDown(scopeNode2.dispose);
+      addTearDown(node1.dispose);
+      addTearDown(node2.dispose);
+      addTearDown(node3.dispose);
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: node1,
+                child: Container(),
+              ),
+              Focus(
+                focusNode: node2,
+                child: FocusScope(
+                  node: scopeNode2,
+                  child: Focus(focusNode: node3, child: const SizedBox()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      node3.onFocusabilityChanged = focusabilityCallback;
+      bool? node1CanFocus;
+      node1.onFocusabilityChanged = (bool canRequstFocus) => node1CanFocus = canRequstFocus;
+
+      scopeNode1.canRequestFocus = false;
+      expect(isFocusable, isFalse);
+      expect(node1CanFocus, isFalse);
+      expect(focusabilityChangeCount, 1);
+
+      scopeNode2.canRequestFocus = false;
+      expect(isFocusable, isFalse);
+      expect(node1CanFocus, isFalse);
+      expect(focusabilityChangeCount, 1);
+
+      scopeNode1.canRequestFocus = true;
+      expect(isFocusable, isFalse);
+      expect(node1CanFocus, isTrue);
+      expect(focusabilityChangeCount, 1);
+
+      scopeNode2.canRequestFocus = true;
+      expect(isFocusable, isTrue);
+      expect(node1CanFocus, isTrue);
+      expect(focusabilityChangeCount, 2);
+    });
+
+    testWidgets('onFocusabilityCallback invoked on mount, if not focusable', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1', canRequestFocus: false);
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
+      addTearDown(scopeNode1.dispose);
+      addTearDown(node1.dispose);
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: node1,
+                child: Container(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(isFocusable, isFalse);
+      expect(focusabilityChangeCount, 1);
+    });
+
+    testWidgets('onFocusabilityCallback is not invoked on mount, if focusable', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
+      addTearDown(scopeNode1.dispose);
+      addTearDown(node1.dispose);
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: node1,
+                child: Container(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(focusabilityChangeCount, 0);
+    });
+
+    testWidgets('onFocusabilityCallback on scope node', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
+      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2')..onFocusabilityChanged = focusabilityCallback;
+      addTearDown(scopeNode1.dispose);
+      addTearDown(scopeNode2.dispose);
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scopeNode1,
+          child: FocusScope(node: scopeNode2, child: Container())
+        ),
+      );
+
+      expect(focusabilityChangeCount, 0);
+
+      scopeNode2.canRequestFocus = false;
+      expect(focusabilityChangeCount, 1);
+      expect(isFocusable, isFalse);
+
+      scopeNode2.canRequestFocus = true;
+      expect(focusabilityChangeCount, 2);
+      expect(isFocusable, isTrue);
+
+      // scope 2 has no descendants.
+      scopeNode2.descendantsAreFocusable = false;
+      expect(focusabilityChangeCount, 2);
+      expect(isFocusable, isTrue);
+
+      scopeNode1.descendantsAreFocusable = false;
+      expect(focusabilityChangeCount, 3);
+      expect(isFocusable, isFalse);
+
+      scopeNode1.descendantsAreFocusable = true;
+      expect(focusabilityChangeCount, 4);
+      expect(isFocusable, isTrue);
+
+      scopeNode1.canRequestFocus = false;
+      expect(focusabilityChangeCount, 5);
+      expect(isFocusable, isFalse);
+
+      scopeNode1.canRequestFocus = true;
+      expect(focusabilityChangeCount, 6);
+      expect(isFocusable, isTrue);
+    });
+  });
 }
 
 class TestFocus extends StatefulWidget {
