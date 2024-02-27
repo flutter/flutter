@@ -348,7 +348,6 @@ void main() {
       enableDevTools: true,
     ));
     await futureAppStart.future;
-    flutterDevice.reportError = vm_service.RPCError('something bad happened', 666, '');
 
     final bool result = await residentRunner.debugFrameJankMetrics();
     expect(result, true);
