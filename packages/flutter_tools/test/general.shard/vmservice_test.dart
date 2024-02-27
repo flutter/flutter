@@ -320,7 +320,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          error: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -339,7 +339,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          error: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -358,7 +358,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          error: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -377,7 +377,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          error: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -396,7 +396,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          error: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -436,26 +436,26 @@ void main() {
           args: <String, Object>{
             'viewId': '1234',
           },
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kScreenshotSkpMethod,
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
           args: <String, dynamic>{
             'recordedStreams': <String>['test'],
           },
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'getVMTimeline',
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kRenderFrameWithRasterStatsMethod,
@@ -463,7 +463,7 @@ void main() {
             'viewId': '1',
             'isolateId': '12',
           },
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]
     );
@@ -806,14 +806,14 @@ void main() {
         ),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'streamCancel',
           args: <String, Object>{
             'streamId': 'Isolate',
           },
-          error: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]);
 
