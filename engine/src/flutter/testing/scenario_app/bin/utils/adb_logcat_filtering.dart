@@ -30,6 +30,8 @@
 /// See also: <https://developer.android.com/tools/logcat>.
 library;
 
+import 'package:meta/meta.dart';
+
 import 'logs.dart';
 
 /// Represents a line of `adb logcat` output parsed into a structured form.
@@ -74,6 +76,34 @@ extension type const AdbLogLine._(Match _match) {
     return null;
   }
 
+  @visibleForTesting
+  static const Set<String> knownNoiseTags = <String>{
+    'CCodec',
+    'CCodecBufferChannel',
+    'CCodecConfig',
+    'Codec2Client',
+    'ColorUtils',
+    'DMABUFHEAPS',
+    'Gralloc4',
+    'MediaCodec',
+    'MonitoringInstr',
+    'ResourceExtractor',
+    'UsageTrackerFacilitator',
+    'hw-BpHwBinder',
+    'ziparchive',
+  };
+
+  @visibleForTesting
+  static const Set<String> knownUsefulTags = <String>{
+    'ActivityManager',
+  };
+
+  @visibleForTesting
+  static const Set<String> knownUsefulErrorTags = <String>{
+    'androidemu',
+    'THREAD_STATE',
+  };
+
   /// Returns `true` if the log line is verbose.
   bool isVerbose({String? filterProcessId}) => !_isRelevant(filterProcessId: filterProcessId);
   bool _isRelevant({String? filterProcessId}) {
@@ -82,37 +112,31 @@ extension type const AdbLogLine._(Match _match) {
       return true;
     }
 
-    // Debug logs are rarely useful.
-    if (severity == 'D') {
+    // Verbose and debug logs are rarely useful.
+    if (severity == 'V' || severity == 'D') {
       return false;
     }
 
-    // These are "known" noise tags.
-    if (const <String>{
-      'MonitoringInstr',
-      'ResourceExtractor',
-      'THREAD_STATE',
-      'ziparchive',
-    }.contains(name)) {
+    if (knownNoiseTags.contains(name)) {
       return false;
     }
 
-    // These are "known" tags useful for debugging.
-    if (const <String>{
-      'utter.scenario',
-      'utter.scenarios',
-      'TestRunner',
-    }.contains(name)) {
+    if (knownUsefulTags.contains(name)) {
+      return true;
+    }
+
+    if (severity == 'E' && knownUsefulErrorTags.contains(name)) {
       return true;
     }
 
     // If a process ID is specified, exclude logs _not_ from that process.
-    if (filterProcessId != null && process != filterProcessId) {
-      return false;
+    if (filterProcessId == null) {
+      // YOLO, let's keep it anyway.
+      return name.toLowerCase().contains('flutter') ||
+          message.toLowerCase().contains('flutter');
     }
 
-    // And... whatever, include anything with the word "flutter".
-    return name.toLowerCase().contains('flutter') || message.toLowerCase().contains('flutter');
+    return process == filterProcessId;
   }
 
   /// Logs the line to the console.

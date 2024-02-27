@@ -25,9 +25,14 @@ dependencies:
   vector_math: any
   skia_gold_client: any
 
+dev_dependencies:
+  litetest: any
+
 dependency_overrides:
   args:
     path: ../../../third_party/dart/third_party/pkg/args
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
   collection:
     path: ../../../third_party/dart/third_party/pkg/collection
   crypto:
@@ -36,8 +41,12 @@ dependency_overrides:
     path: ../../tools/dir_contents_diff
   engine_repo_tools:
     path: ../../tools/pkg/engine_repo_tools
+  expect:
+    path: ../../../third_party/dart/pkg/expect
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
+  litetest:
+    path: ../litetest
   meta:
     path: ../../../third_party/dart/pkg/meta
   path:
@@ -48,6 +57,8 @@ dependency_overrides:
     path: ../../third_party/pkg/process
   skia_gold_client:
     path: ../../testing/skia_gold_client
+  smith:
+    path: ../../../third_party/dart/pkg/smith
   sky_engine:
     path: ../../sky/packages/sky_engine
   typed_data:

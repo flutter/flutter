@@ -18,7 +18,7 @@ See also:
 - [`ios/`](ios/), the iOS-side native code and tests.
 - [`android/`](android/), the Android-side native code and tests.
 
-[file_issue]: https://github.com/flutter/flutter/issues/new?labels=e:%20scenario-app,engine,platform-android,fyi-android,team-engine
+[file_issue]: https://github.com/flutter/flutter/issues/new?labels=e:%20scenario-app,engine,team-engine
 
 ## Running a smoke test on Firebase TestLab
 
