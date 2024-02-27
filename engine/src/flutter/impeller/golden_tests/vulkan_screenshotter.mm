@@ -29,6 +29,7 @@ std::unique_ptr<Screenshot> ReadTexture(
   buffer_desc.storage_mode = StorageMode::kHostVisible;
   buffer_desc.size =
       texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  buffer_desc.readback = true;
   std::shared_ptr<DeviceBuffer> device_buffer =
       surface_context->GetResourceAllocator()->CreateBuffer(buffer_desc);
   FML_CHECK(device_buffer);
@@ -52,6 +53,7 @@ std::unique_ptr<Screenshot> ReadTexture(
           .ok();
   FML_CHECK(success);
   latch.Wait();
+  device_buffer->Invalidate();
 
   // TODO(gaaclarke): Replace CoreImage requirement with something
   // crossplatform.
