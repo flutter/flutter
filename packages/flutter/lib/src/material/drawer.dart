@@ -175,14 +175,12 @@ class Drawer extends StatelessWidget {
   /// The color used as a surface tint overlay on the drawer's background color,
   /// which reflects the drawer's [elevation].
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
+  /// If [ThemeData.useMaterial3] is false property has no effect.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.surfaceTint] will be used.
   ///
   /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
-  ///
-  /// Defaults to [Colors.transparent].
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
@@ -793,10 +791,10 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   late final TextDirection direction = Directionality.of(context);
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surfaceContainerLow;
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;

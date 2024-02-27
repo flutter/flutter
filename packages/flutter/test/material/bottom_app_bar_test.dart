@@ -358,7 +358,7 @@ void main() {
         theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
         home: Scaffold(
           bottomNavigationBar: BottomAppBar(
-            color: colorScheme.surfaceContainer,
+            color: colorScheme.surface,
           ),
         ),
       ),
@@ -367,9 +367,8 @@ void main() {
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     const double elevation = 3.0; // Default for M3.
-    final Color overlayColor = ElevationOverlay.applySurfaceTint(colorScheme.surfaceContainer, colorScheme.surfaceTint, elevation);
-    expect(physicalShape.color, isNot(overlayColor));
-    expect(physicalShape.color, colorScheme.surfaceContainer);
+    final Color overlayColor = ElevationOverlay.applySurfaceTint(colorScheme.surface, colorScheme.surfaceTint, elevation);
+    expect(physicalShape.color, overlayColor);
   });
 
   // This is a regression test for a bug we had where toggling the notch on/off

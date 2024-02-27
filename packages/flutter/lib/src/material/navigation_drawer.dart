@@ -68,7 +68,7 @@ class NavigationDrawer extends StatelessWidget {
   /// contents.
   ///
   /// If this is null, then [NavigationDrawerThemeData.backgroundColor] is used.
-  /// If that is also null, then it falls back to [ColorScheme.surfaceContainerLow].
+  /// If that is also null, then it falls back to [ColorScheme.surface].
   final Color? backgroundColor;
 
   /// The color used for the drop shadow to indicate elevation.
@@ -80,16 +80,11 @@ class NavigationDrawer extends StatelessWidget {
   /// See [Material.shadowColor] for more details on drop shadows.
   final Color? shadowColor;
 
-  /// The surface tint of the [Material] that holds the [NavigationDrawer]'s
+  ///  The surface tint of the [Material] that holds the [NavigationDrawer]'s
   /// contents.
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
-  ///
   /// If this is null, then [NavigationDrawerThemeData.surfaceTintColor] is used.
-  /// If that is also null, the default value is [Colors.transparent].
+  /// If that is also null, then it falls back to [Material.surfaceTintColor]'s default.
   final Color? surfaceTintColor;
 
   /// The elevation of the [NavigationDrawer] itself.
@@ -716,10 +711,10 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surfaceContainerLow;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;

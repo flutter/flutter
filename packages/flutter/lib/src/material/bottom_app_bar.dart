@@ -94,9 +94,8 @@ class BottomAppBar extends StatefulWidget {
   /// The bottom app bar's background color.
   ///
   /// If this property is null then [BottomAppBarTheme.color] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null and [ThemeData.useMaterial3]
-  /// is true, the default value is [ColorScheme.surfaceContainer]; If that's null
-  /// and [ThemeData.useMaterial3] is false, then [ThemeData.bottomAppBarColor] is used.
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
+  /// [ThemeData.bottomAppBarColor] is used.
   final Color? color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -130,16 +129,17 @@ class BottomAppBar extends StatefulWidget {
 
   /// A custom color for the Material 3 surface-tint elevation effect.
   ///
-  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
-  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
-  /// which provide more flexibility. The intention is to eventually remove surface tint color from
-  /// the framework.
+  /// In Material 3, a "surface tint" with an opacity related to [elevation]
+  /// will be applied to the [BottomAppBar]'s background.
+  /// Use this property to override the default color of that tint.
   ///
   /// If this property is null, then [BottomAppBarTheme.surfaceTintColor]
-  /// of [ThemeData.bottomAppBarTheme] is used. If that is also null, the default
-  /// value is [Colors.transparent].
+  /// of [ThemeData.bottomAppBarTheme] is used.
+  /// If that is also null, [ColorScheme.surfaceTint] is used.
   ///
   /// Ignored if [ThemeData.useMaterial3] is false.
+  ///
+  /// The default is null.
   ///
   /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
   final Color? surfaceTintColor;
@@ -308,10 +308,10 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => _colors.surfaceContainer;
+  Color? get color => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;

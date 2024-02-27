@@ -4656,7 +4656,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
-    return _colors.surfaceContainerHighest;
+    return _colors.surfaceVariant;
   });
 
   @override

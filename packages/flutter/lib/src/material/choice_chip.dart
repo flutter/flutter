@@ -307,7 +307,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
       }
       return _chipVariant == _ChipVariant.flat
         ? null
-        : _colors.surfaceContainerLow;
+        : null;
     });
 
   @override
@@ -316,7 +316,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Colors.transparent;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get checkmarkColor => isEnabled
