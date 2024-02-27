@@ -548,11 +548,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // The number of nodes that must take action when this node's
   // `descentantsAreFocusable` value changes.
   //
-  // This does not include this node if its _canRequestFocus is currently false
-  // and onFocusabilityChanged is set to a non-null value.
+  // This does not include nodes with `_canRequestFocus` set to false.
   int _focusabilityListenerCount = 0;
 
   bool _isFocusable = true;
+
   OnFocusabilityChangedCallback? get onFocusabilityChanged => _onFocusabilityChanged;
   OnFocusabilityChangedCallback? _onFocusabilityChanged;
   set onFocusabilityChanged(OnFocusabilityChangedCallback? value) {
@@ -565,6 +565,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     // Whether we need to monitor the path between parent and the closest
     // ancestor with `descendantsAreFocusable == false` (or the root node).
     _isFocusable = _canRequestFocus && _adjustAncestorListenerCount(1);
+    if (!_isFocusable) {
+      value?.call(false);
+    }
   }
 
   bool _adjustAncestorListenerCount(int delta) {
@@ -572,7 +575,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     for (FocusNode? node = parent; node != null; node = node.parent) {
       assert(delta > 0 || node._focusabilityListenerCount + delta >= 0, '$node currently have ${node._focusabilityListenerCount} listeners. ($delta)');
       node._focusabilityListenerCount += delta;
-      //print('$node now has ${node._focusabilityListenerCount} listeners. $delta');
       if (!node.descendantsAreFocusable) {
         return false;
       }
@@ -1107,17 +1109,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     final FocusScopeNode? oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
 
-    final int childSubtreeListenerCount;
-    final bool childCouldFocus;
-    if (oldParent != null) {
-      childSubtreeListenerCount = oldParent._focusabilityListenerCount;
-      childCouldFocus = childSubtreeListenerCount > 0 && _adjustAncestorListenerCount(childSubtreeListenerCount);
-      oldParent._removeChild(child, removeScopeFocus: oldScope != nearestScope);
-    } else {
-      childCouldFocus = true;
-      childSubtreeListenerCount = (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0)
-       + (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0);
-    }
+    final int childSubtreeListenerCount = (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0)
+                                        + (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0);
+    // If childSubtreeListenerCount == 0, we don't care if child could focus.
+    final bool childCouldFocus = childSubtreeListenerCount > 0
+                              && child._adjustAncestorListenerCount(childSubtreeListenerCount);
+    oldParent?._removeChild(child, removeScopeFocus: oldScope != nearestScope);
 
     _children.add(child);
     child._parent = this;
