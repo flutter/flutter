@@ -2221,7 +2221,7 @@ void main() {
       expect(focusabilityChangeCount, 0);
     });
 
-    testWidgets('canRequestFocus affects focusability of the node', (WidgetTester tester) async {
+    testWidgets('Reparenting affects focusability of the node', (WidgetTester tester) async {
       bool? node3Focusable;
       void node3Callback(bool newValue) => node3Focusable = newValue;
       final FocusNode node1 = FocusNode(debugLabel: 'node 1');
@@ -2331,6 +2331,27 @@ void main() {
       expect(isFocusable, isFalse);
       expect(focusabilityChangeCount, 3);
       expect(node3Focusable, isFalse);
+    });
+
+    testWidgets('does not get called in dispose', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..onFocusabilityChanged = focusabilityCallback;
+
+      await tester.pumpWidget(
+        Focus(
+          descendantsAreFocusable: false,
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: node1, child: Container()),
+              Focus(focusNode: node2, child: Container()),
+            ],
+          ),
+        ),
+      );
+      expect(focusabilityChangeCount, 2);
+
+      await tester.pumpWidget(const SizedBox());
+      expect(focusabilityChangeCount, 2);
     });
   });
 
