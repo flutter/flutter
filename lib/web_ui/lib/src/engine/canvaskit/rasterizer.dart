@@ -131,6 +131,7 @@ abstract class DisplayCanvas {
 typedef RenderRequest = ({
   ui.Scene scene,
   Completer<void> completer,
+  FrameTimingRecorder? recorder,
 });
 
 /// A per-view queue of render requests. Only contains the current render

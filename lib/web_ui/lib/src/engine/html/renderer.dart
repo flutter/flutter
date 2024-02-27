@@ -323,8 +323,11 @@ class HtmlRenderer implements Renderer {
   @override
   Future<void> renderScene(ui.Scene scene, ui.FlutterView view) async {
     final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
-    implicitView.dom.setScene((scene as SurfaceScene).webOnlyRootElement!);
-    frameTimingsOnRasterFinish();
+    scene as SurfaceScene;
+    implicitView.dom.setScene(scene.webOnlyRootElement!);
+    final FrameTimingRecorder? recorder = scene.timingRecorder;
+    recorder?.recordRasterFinish();
+    recorder?.submitTimings();
   }
 
   @override
