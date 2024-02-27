@@ -541,12 +541,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (hasFocus && !value) {
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
-    final OnFocusabilityChangedCallback? focusabilityCallback = onFocusabilityChanged;
-    if (focusabilityCallback != null) {
+    final bool hasFocusabilityListeners = _focusabilityListenable?.hasListeners ?? false;
+    if (hasFocusabilityListeners) {
       final bool ancestorsAllowFocus = _adjustAncestorListenerCount(value ? 1 : -1);
-      assert(ancestorsAllowFocus == _ancestorsAllowFocus);
+      assert(ancestorsAllowFocus == _focusabilityListenable?._ancestorsAllowFocus);
       if (ancestorsAllowFocus) {
-        focusabilityCallback(value);
+        _focusabilityListenable?.notifyListeners();
       }
     }
     _manager?._markPropertiesChanged(this);
@@ -559,24 +559,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // they have a listener.
   int _focusabilityListenerCount = 0;
 
-  // True if all ancestors of this node have `descentantsAreFocusable` set to
-  // true. The value is only maintained when the `onFocusabilityChanged`
-  // callback is set and `_canRequestFocus` is true.
-  bool _ancestorsAllowFocus = true;
-
-  late final _FocusabilityListenable _focusabilityListenable = _FocusabilityListenable(this);
-  ValueListenable<bool> get focusabilityListenable => _focusabilityListenable;
-
-  OnFocusabilityChangedCallback? get onFocusabilityChanged => _onFocusabilityChanged;
-  OnFocusabilityChangedCallback? _onFocusabilityChanged;
-  set onFocusabilityChanged(OnFocusabilityChangedCallback? value) {
-    final bool hadCallback = _onFocusabilityChanged != null;
-    _onFocusabilityChanged = value;
-    if ((value != null) == hadCallback || !_canRequestFocus) {
-      return;
-    }
-    _ancestorsAllowFocus = _adjustAncestorListenerCount(value != null ? 1 : -1);
-  }
+  ValueListenable<bool> get focusabilityListenable => _focusabilityListenable ??= _FocusabilityListenable(this);
+  _FocusabilityListenable? _focusabilityListenable;
 
   // Returns whether all parents allow this node to gain focus.
   bool _adjustAncestorListenerCount(int delta) {
@@ -656,12 +640,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   void _notifyFocusabilityListenersIfNeeded(bool ancestorsAllowFocus) {
-    final OnFocusabilityChangedCallback? callback = onFocusabilityChanged;
-    if (callback != null && _canRequestFocus) {
+    final _FocusabilityListenable? focusabilityListenable = _focusabilityListenable;
+    if (_canRequestFocus && focusabilityListenable != null && focusabilityListenable.hasListeners) {
       assert(ancestorsAllowFocus == canRequestFocus);
-      assert(_ancestorsAllowFocus != ancestorsAllowFocus);
-      _ancestorsAllowFocus = ancestorsAllowFocus;
-      callback(ancestorsAllowFocus);
+      assert(focusabilityListenable._ancestorsAllowFocus != ancestorsAllowFocus);
+      focusabilityListenable._ancestorsAllowFocus = ancestorsAllowFocus;
+      focusabilityListenable.notifyListeners();
     }
 
     if (_focusabilityListenerCount > 0 && descendantsAreFocusable) {
@@ -1101,7 +1085,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     for (final FocusNode descendant in descendants) {
       descendant._manager = manager;
       descendant._ancestors = null;
-      descendant._enclosingScope = null;
     }
   }
 
@@ -1119,10 +1102,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
     final FocusScopeNode? oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
-    //print('reparenting $child from ${child._parent} to $this');
 
+    final _FocusabilityListenable? childFocusabilityListenable = child._focusabilityListenable;
     final int childSubtreeListenerCount = (child.descendantsAreFocusable ? child._focusabilityListenerCount : 0)
-                                        + (child.onFocusabilityChanged != null && child._canRequestFocus ? 1 : 0);
+                                        + (child._canRequestFocus && childFocusabilityListenable != null && childFocusabilityListenable.hasListeners ? 1 : 0);
     // If childSubtreeListenerCount == 0, we don't care about focusability since
     // there's no listeners.
     final bool childCouldFocus = childSubtreeListenerCount > 0
@@ -1189,7 +1172,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    _onFocusabilityChanged = null;
+    _focusabilityListenable?.dispose();
+    _focusabilityListenable = null;
     // Detaching will also unfocus and clean up the manager's data structures.
     _attachment?.detach();
     super.dispose();
@@ -1547,8 +1531,29 @@ class _FocusabilityListenable extends ChangeNotifier implements ValueListenable<
   @override
   bool get value => node.canRequestFocus;
 
-  void addListener()
+  // True if all ancestors of this node have `descentantsAreFocusable` set to
+  // true. The value is only maintained when the `onFocusabilityChanged`
+  // callback is set and `_canRequestFocus` is true.
+  bool _ancestorsAllowFocus = true;
 
+  @override
+  void addListener(VoidCallback listener) {
+    final bool hadListener = hasListeners;
+    super.addListener(listener);
+    assert(hasListeners);
+    if (!hadListener && node._canRequestFocus) {
+      _ancestorsAllowFocus = node._adjustAncestorListenerCount(1);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    final bool hadListener = hasListeners;
+    super.removeListener(listener);
+    if (node._canRequestFocus && hadListener && !hasListeners) {
+      _ancestorsAllowFocus = node._adjustAncestorListenerCount(1);
+    }
+  }
 }
 
 /// An enum to describe which kind of focus highlight behavior to use when
