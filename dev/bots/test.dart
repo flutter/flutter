@@ -1728,9 +1728,9 @@ List<String> binariesWithEntitlements(String flutterRoot) {
 /// cache.
 List<String> binariesWithoutEntitlements(String flutterRoot) {
   return <String>[
-    'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',
     'artifacts/engine/darwin-x64/impellerc',
     'artifacts/engine/darwin-x64/libpath_ops.dylib',
@@ -1764,6 +1764,9 @@ List<String> signedXcframeworks(String flutterRoot) {
     'artifacts/engine/ios-release/extension_safe/Flutter.xcframework',
     'artifacts/engine/ios/Flutter.xcframework',
     'artifacts/engine/ios/extension_safe/Flutter.xcframework',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
   ]
   .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }

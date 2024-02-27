@@ -944,14 +944,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
-
-      final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
-      if (frameworkZip.existsSync()) {
-        final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
-        ErrorHandlingFileSystem.deleteIfExists(framework, recursive: true);
-        framework.createSync();
-        operatingSystemUtils.unzip(frameworkZip, framework);
-      }
     }
 
     final File licenseSource = cache.getLicenseFile();
