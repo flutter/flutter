@@ -677,6 +677,54 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncement) {
   }
 }
 
+// Verify the app can send accessibility announcements while in headless mode.
+TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncementHeadless) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder{context};
+  builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
+
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  windows_engine->UpdateSemanticsEnabled(true);
+
+  // Rely on timeout mechanism in CI.
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+}
+
+// Verify the engine does not crash if it receives an accessibility event
+// it does not support yet.
+TEST_F(FlutterWindowsEngineTest, AccessibilityTooltip) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder{context};
+  builder.SetDartEntrypoint("sendAccessibilityTooltipEvent");
+
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine);
+  windows_engine->UpdateSemanticsEnabled(true);
+
+  // Rely on timeout mechanism in CI.
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+}
+
 class MockWindowsLifecycleManager : public WindowsLifecycleManager {
  public:
   MockWindowsLifecycleManager(FlutterWindowsEngine* engine)

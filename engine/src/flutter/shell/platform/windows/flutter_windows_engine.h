@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
+#include "flutter/shell/platform/windows/accessibility_plugin.h"
 #include "flutter/shell/platform/windows/compositor.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
 #include "flutter/shell/platform/windows/egl/manager.h"
@@ -338,9 +339,6 @@ class FlutterWindowsEngine {
   // Send the currently enabled accessibility features to the engine.
   void SendAccessibilityFeatures();
 
-  void HandleAccessibilityMessage(FlutterDesktopMessengerRef messenger,
-                                  const FlutterDesktopMessage* message);
-
   // The handle to the embedder.h engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
 
@@ -383,6 +381,9 @@ class FlutterWindowsEngine {
 
   // The plugin registrar managing internal plugins.
   std::unique_ptr<PluginRegistrar> internal_plugin_registrar_;
+
+  // Handler for accessibility events.
+  std::unique_ptr<AccessibilityPlugin> accessibility_plugin_;
 
   // Handler for cursor events.
   std::unique_ptr<CursorHandler> cursor_handler_;

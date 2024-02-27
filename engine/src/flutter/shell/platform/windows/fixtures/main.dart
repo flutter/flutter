@@ -59,36 +59,65 @@ void sendAccessibilityAnnouncement() async {
     await semanticsChanged;
   }
 
-  // Serializers for data types are in the framework, so this will be hardcoded.
+  // Standard message codec magic number identifiers.
+  // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
   const int valueMap = 13, valueString = 7;
-  // Corresponds to:
-  // Map<String, Object> data =
-  // {"type": "announce", "data": {"message": ""}};
+
+  // Corresponds to: {"type": "announce", "data": {"message": "hello"}}
+  // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L86
   final Uint8List data = Uint8List.fromList([
-    valueMap, // _valueMap
-    2, // Size
-    // key: "type"
-    valueString,
-    'type'.length,
-    ...'type'.codeUnits,
-    // value: "announce"
-    valueString,
-    'announce'.length,
-    ...'announce'.codeUnits,
-    // key: "data"
-    valueString,
-    'data'.length,
-    ...'data'.codeUnits,
-    // value: map
-    valueMap, // _valueMap
-    1, // Size
-    // key: "message"
-    valueString,
-    'message'.length,
-    ...'message'.codeUnits,
-    // value: ""
-    valueString,
-    0, // Length of empty string == 0.
+    // Map with 2 entries
+    valueMap, 2,
+    // Map key: "type"
+    valueString, 'type'.length, ...'type'.codeUnits,
+    // Map value: "announce"
+    valueString, 'announce'.length, ...'announce'.codeUnits,
+    // Map key: "data"
+    valueString, 'data'.length, ...'data'.codeUnits,
+    // Map value: map with 1 entry
+    valueMap, 1,
+    // Map key: "message"
+    valueString, 'message'.length, ...'message'.codeUnits,
+    // Map value: "hello"
+    valueString, 'hello'.length, ...'hello'.codeUnits,
+  ]);
+  final ByteData byteData = data.buffer.asByteData();
+
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
+    'flutter/accessibility',
+    byteData,
+    (ByteData? _) => signal(),
+  );
+}
+
+@pragma('vm:entry-point')
+void sendAccessibilityTooltipEvent() async {
+  // Wait until semantics are enabled.
+  if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
+    await semanticsChanged;
+  }
+
+  // Standard message codec magic number identifiers.
+  // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
+  const int valueMap = 13, valueString = 7;
+
+  // Corresponds to: {"type": "tooltip", "data": {"message": "hello"}}
+  // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L120
+  final Uint8List data = Uint8List.fromList([
+    // Map with 2 entries
+    valueMap, 2,
+    // Map key: "type"
+    valueString, 'type'.length, ...'type'.codeUnits,
+    // Map value: "tooltip"
+    valueString, 'tooltip'.length, ...'tooltip'.codeUnits,
+    // Map key: "data"
+    valueString, 'data'.length, ...'data'.codeUnits,
+    // Map value: map with 1 entry
+    valueMap, 1,
+    // Map key: "message"
+    valueString, 'message'.length, ...'message'.codeUnits,
+    // Map value: "hello"
+    valueString, 'hello'.length, ...'hello'.codeUnits,
   ]);
   final ByteData byteData = data.buffer.asByteData();
 
