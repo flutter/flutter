@@ -249,55 +249,36 @@ void main() {
 
   test('can generate a light scheme from a seed color', () {
     final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
-    expect(scheme.primary, const Color(0xff36618e));
+    expect(scheme.primary, const Color(0xff0061a4));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, const Color(0xffd1e4ff));
     expect(scheme.onPrimaryContainer, const Color(0xff001d36));
-    expect(scheme.primaryFixed, const Color(0xffd1e4ff));
-    expect(scheme.primaryFixedDim, const Color(0xffa0cafd));
-    expect(scheme.onPrimaryFixed, const Color(0xff001d36));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff194975));
     expect(scheme.secondary, const Color(0xff535f70));
     expect(scheme.onSecondary, const Color(0xffffffff));
     expect(scheme.secondaryContainer, const Color(0xffd7e3f7));
     expect(scheme.onSecondaryContainer, const Color(0xff101c2b));
-    expect(scheme.secondaryFixed, const Color(0xffd7e3f7));
-    expect(scheme.secondaryFixedDim, const Color(0xffbbc7db));
-    expect(scheme.onSecondaryFixed, const Color(0xff101c2b));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff3b4858));
     expect(scheme.tertiary, const Color(0xff6b5778));
     expect(scheme.onTertiary, const Color(0xffffffff));
     expect(scheme.tertiaryContainer, const Color(0xfff2daff));
     expect(scheme.onTertiaryContainer, const Color(0xff251431));
-    expect(scheme.tertiaryFixed, const Color(0xfff2daff));
-    expect(scheme.tertiaryFixedDim, const Color(0xffd6bee4));
-    expect(scheme.onTertiaryFixed, const Color(0xff251431));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff523f5f));
     expect(scheme.error, const Color(0xffba1a1a));
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, const Color(0xffffdad6));
     expect(scheme.onErrorContainer, const Color(0xff410002));
     expect(scheme.outline, const Color(0xff73777f));
     expect(scheme.outlineVariant, const Color(0xffc3c7cf));
-    expect(scheme.background, const Color(0xfff8f9ff));
-    expect(scheme.onBackground, const Color(0xff191c20));
-    expect(scheme.surface, const Color(0xfff8f9ff));
-    expect(scheme.surfaceBright, const Color(0xfff8f9ff));
-    expect(scheme.surfaceDim, const Color(0xffd8dae0));
-    expect(scheme.surfaceContainerLowest, const Color(0xffffffff));
-    expect(scheme.surfaceContainerLow, const Color(0xfff2f3fa));
-    expect(scheme.surfaceContainer, const Color(0xffeceef4));
-    expect(scheme.surfaceContainerHigh, const Color(0xffe6e8ee));
-    expect(scheme.surfaceContainerHighest, const Color(0xffe1e2e8));
-    expect(scheme.onSurface, const Color(0xff191c20));
+    expect(scheme.background, const Color(0xfffdfcff));
+    expect(scheme.onBackground, const Color(0xff1a1c1e));
+    expect(scheme.surface, const Color(0xfffdfcff));
+    expect(scheme.onSurface, const Color(0xff1a1c1e));
     expect(scheme.surfaceVariant, const Color(0xffdfe2eb));
     expect(scheme.onSurfaceVariant, const Color(0xff43474e));
-    expect(scheme.inverseSurface, const Color(0xff2e3135));
-    expect(scheme.onInverseSurface, const Color(0xffeff0f7));
-    expect(scheme.inversePrimary, const Color(0xffa0cafd));
+    expect(scheme.inverseSurface, const Color(0xff2f3033));
+    expect(scheme.onInverseSurface, const Color(0xfff1f0f4));
+    expect(scheme.inversePrimary, const Color(0xff9ecaff));
     expect(scheme.shadow, const Color(0xff000000));
     expect(scheme.scrim, const Color(0xff000000));
-    expect(scheme.surfaceTint, const Color(0xff36618e));
+    expect(scheme.surfaceTint, const Color(0xff0061a4));
     expect(scheme.brightness, Brightness.light);
   });
 
@@ -308,26 +289,14 @@ void main() {
       onPrimary: const Color(0x00000002),
       primaryContainer: const Color(0x00000003),
       onPrimaryContainer: const Color(0x00000004),
-      primaryFixed: const Color(0x0000001D),
-      primaryFixedDim: const Color(0x0000001E),
-      onPrimaryFixed: const Color(0x0000001F),
-      onPrimaryFixedVariant: const Color(0x00000020),
       secondary: const Color(0x00000005),
       onSecondary: const Color(0x00000006),
       secondaryContainer: const Color(0x00000007),
       onSecondaryContainer: const Color(0x00000008),
-      secondaryFixed: const Color(0x00000021),
-      secondaryFixedDim: const Color(0x00000022),
-      onSecondaryFixed: const Color(0x00000023),
-      onSecondaryFixedVariant: const Color(0x00000024),
       tertiary: const Color(0x00000009),
       onTertiary: const Color(0x0000000A),
       tertiaryContainer: const Color(0x0000000B),
       onTertiaryContainer: const Color(0x0000000C),
-      tertiaryFixed: const Color(0x00000025),
-      tertiaryFixedDim: const Color(0x00000026),
-      onTertiaryFixed: const Color(0x00000027),
-      onTertiaryFixedVariant: const Color(0x00000028),
       error: const Color(0x0000000D),
       onError: const Color(0x0000000E),
       errorContainer: const Color(0x0000000F),
@@ -335,13 +304,6 @@ void main() {
       background: const Color(0x00000011),
       onBackground: const Color(0x00000012),
       surface: const Color(0x00000013),
-      surfaceDim: const Color(0x00000029),
-      surfaceBright: const Color(0x0000002A),
-      surfaceContainerLowest: const Color(0x0000002B),
-      surfaceContainerLow: const Color(0x0000002C),
-      surfaceContainer: const Color(0x0000002D),
-      surfaceContainerHigh: const Color(0x0000002E),
-      surfaceContainerHighest: const Color(0x0000002F),
       onSurface: const Color(0x00000014),
       surfaceVariant: const Color(0x00000015),
       onSurfaceVariant: const Color(0x00000016),
@@ -360,26 +322,14 @@ void main() {
     expect(scheme.onPrimary, const Color(0x00000002));
     expect(scheme.primaryContainer, const Color(0x00000003));
     expect(scheme.onPrimaryContainer, const Color(0x00000004));
-    expect(scheme.primaryFixed, const Color(0x0000001D));
-    expect(scheme.primaryFixedDim, const Color(0x0000001E));
-    expect(scheme.onPrimaryFixed, const Color(0x0000001F));
-    expect(scheme.onPrimaryFixedVariant, const Color(0x00000020));
     expect(scheme.secondary, const Color(0x00000005));
     expect(scheme.onSecondary, const Color(0x00000006));
     expect(scheme.secondaryContainer, const Color(0x00000007));
     expect(scheme.onSecondaryContainer, const Color(0x00000008));
-    expect(scheme.secondaryFixed, const Color(0x00000021));
-    expect(scheme.secondaryFixedDim, const Color(0x00000022));
-    expect(scheme.onSecondaryFixed, const Color(0x00000023));
-    expect(scheme.onSecondaryFixedVariant, const Color(0x00000024));
     expect(scheme.tertiary, const Color(0x00000009));
     expect(scheme.onTertiary, const Color(0x0000000A));
     expect(scheme.tertiaryContainer, const Color(0x0000000B));
     expect(scheme.onTertiaryContainer, const Color(0x0000000C));
-    expect(scheme.tertiaryFixed, const Color(0x00000025));
-    expect(scheme.tertiaryFixedDim, const Color(0x00000026));
-    expect(scheme.onTertiaryFixed, const Color(0x00000027));
-    expect(scheme.onTertiaryFixedVariant, const Color(0x00000028));
     expect(scheme.error, const Color(0x0000000D));
     expect(scheme.onError, const Color(0x0000000E));
     expect(scheme.errorContainer, const Color(0x0000000F));
@@ -387,13 +337,6 @@ void main() {
     expect(scheme.background, const Color(0x00000011));
     expect(scheme.onBackground, const Color(0x00000012));
     expect(scheme.surface, const Color(0x00000013));
-    expect(scheme.surfaceDim, const Color(0x00000029));
-    expect(scheme.surfaceBright, const Color(0x0000002A));
-    expect(scheme.surfaceContainerLowest, const Color(0x0000002B));
-    expect(scheme.surfaceContainerLow, const Color(0x0000002C));
-    expect(scheme.surfaceContainer, const Color(0x0000002D));
-    expect(scheme.surfaceContainerHigh, const Color(0x0000002E));
-    expect(scheme.surfaceContainerHighest, const Color(0x0000002F));
     expect(scheme.onSurface, const Color(0x00000014));
     expect(scheme.surfaceVariant, const Color(0x00000015));
     expect(scheme.onSurfaceVariant, const Color(0x00000016));
@@ -409,55 +352,36 @@ void main() {
 
   test('can generate a dark scheme from a seed color', () {
     final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
-    expect(scheme.primary, const Color(0xffa0cafd));
+    expect(scheme.primary, const Color(0xff9ecaff));
     expect(scheme.onPrimary, const Color(0xff003258));
-    expect(scheme.primaryContainer, const Color(0xff194975));
+    expect(scheme.primaryContainer, const Color(0xff00497d));
     expect(scheme.onPrimaryContainer, const Color(0xffd1e4ff));
-    expect(scheme.primaryFixed, const Color(0xffd1e4ff));
-    expect(scheme.primaryFixedDim, const Color(0xffa0cafd));
-    expect(scheme.onPrimaryFixed, const Color(0xff001d36));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff194975));
     expect(scheme.secondary, const Color(0xffbbc7db));
     expect(scheme.onSecondary, const Color(0xff253140));
     expect(scheme.secondaryContainer, const Color(0xff3b4858));
     expect(scheme.onSecondaryContainer, const Color(0xffd7e3f7));
-    expect(scheme.secondaryFixed, const Color(0xffd7e3f7));
-    expect(scheme.secondaryFixedDim, const Color(0xffbbc7db));
-    expect(scheme.onSecondaryFixed, const Color(0xff101c2b));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff3b4858));
     expect(scheme.tertiary, const Color(0xffd6bee4));
     expect(scheme.onTertiary, const Color(0xff3b2948));
     expect(scheme.tertiaryContainer, const Color(0xff523f5f));
     expect(scheme.onTertiaryContainer, const Color(0xfff2daff));
-    expect(scheme.tertiaryFixed, const Color(0xfff2daff));
-    expect(scheme.tertiaryFixedDim, const Color(0xffd6bee4));
-    expect(scheme.onTertiaryFixed, const Color(0xff251431));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff523f5f));
     expect(scheme.error, const Color(0xffffb4ab));
     expect(scheme.onError, const Color(0xff690005));
     expect(scheme.errorContainer, const Color(0xff93000a));
-    expect(scheme.onErrorContainer, const Color(0xffffdad6));
+    expect(scheme.onErrorContainer, const Color(0xffffb4ab));
     expect(scheme.outline, const Color(0xff8d9199));
     expect(scheme.outlineVariant, const Color(0xff43474e));
-    expect(scheme.background, const Color(0xff111418));
-    expect(scheme.onBackground, const Color(0xffe1e2e8));
-    expect(scheme.surface, const Color(0xff111418));
-    expect(scheme.surfaceDim, const Color(0xff111418));
-    expect(scheme.surfaceBright, const Color(0xff36393e));
-    expect(scheme.surfaceContainerLowest, const Color(0xff0b0e13));
-    expect(scheme.surfaceContainerLow, const Color(0xff191c20));
-    expect(scheme.surfaceContainer, const Color(0xff1d2024));
-    expect(scheme.surfaceContainerHigh, const Color(0xff272a2f));
-    expect(scheme.surfaceContainerHighest, const Color(0xff32353a));
-    expect(scheme.onSurface, const Color(0xffe1e2e8));
+    expect(scheme.background, const Color(0xff1a1c1e));
+    expect(scheme.onBackground, const Color(0xffe2e2e6));
+    expect(scheme.surface, const Color(0xff1a1c1e));
+    expect(scheme.onSurface, const Color(0xffe2e2e6));
     expect(scheme.surfaceVariant, const Color(0xff43474e));
     expect(scheme.onSurfaceVariant, const Color(0xffc3c7cf));
-    expect(scheme.inverseSurface, const Color(0xffe1e2e8));
-    expect(scheme.onInverseSurface, const Color(0xff2e3135));
-    expect(scheme.inversePrimary, const Color(0xff36618e));
+    expect(scheme.inverseSurface, const Color(0xffe2e2e6));
+    expect(scheme.onInverseSurface, const Color(0xff2f3033));
+    expect(scheme.inversePrimary, const Color(0xff0061a4));
     expect(scheme.shadow, const Color(0xff000000));
     expect(scheme.scrim, const Color(0xff000000));
-    expect(scheme.surfaceTint, const Color(0xffa0cafd));
+    expect(scheme.surfaceTint, const Color(0xff9ecaff));
     expect(scheme.brightness, Brightness.dark);
   });
 
@@ -473,26 +397,14 @@ void main() {
     expect(scheme.onPrimary, baseScheme.onPrimary);
     expect(scheme.primaryContainer, baseScheme.primaryContainer);
     expect(scheme.onPrimaryContainer, baseScheme.onPrimaryContainer);
-    expect(scheme.primaryFixed, baseScheme.primaryFixed);
-    expect(scheme.primaryFixedDim, baseScheme.primaryFixedDim);
-    expect(scheme.onPrimaryFixed, baseScheme.onPrimaryFixed);
-    expect(scheme.onPrimaryFixedVariant, baseScheme.onPrimaryFixedVariant);
     expect(scheme.secondary, baseScheme.secondary);
     expect(scheme.onSecondary, baseScheme.onSecondary);
     expect(scheme.secondaryContainer, baseScheme.secondaryContainer);
     expect(scheme.onSecondaryContainer, baseScheme.onSecondaryContainer);
-    expect(scheme.secondaryFixed, baseScheme.secondaryFixed);
-    expect(scheme.secondaryFixedDim, baseScheme.secondaryFixedDim);
-    expect(scheme.onSecondaryFixed, baseScheme.onSecondaryFixed);
-    expect(scheme.onSecondaryFixedVariant, baseScheme.onSecondaryFixedVariant);
     expect(scheme.tertiary, baseScheme.tertiary);
     expect(scheme.onTertiary, baseScheme.onTertiary);
     expect(scheme.tertiaryContainer, baseScheme.tertiaryContainer);
     expect(scheme.onTertiaryContainer, baseScheme.onTertiaryContainer);
-    expect(scheme.tertiaryFixed, baseScheme.tertiaryFixed);
-    expect(scheme.tertiaryFixedDim, baseScheme.tertiaryFixedDim);
-    expect(scheme.onTertiaryFixed, baseScheme.onTertiaryFixed);
-    expect(scheme.onTertiaryFixedVariant, baseScheme.onTertiaryFixedVariant);
     expect(scheme.error, baseScheme.error);
     expect(scheme.onError, baseScheme.onError);
     expect(scheme.errorContainer, baseScheme.errorContainer);
@@ -502,13 +414,6 @@ void main() {
     expect(scheme.background, baseScheme.background);
     expect(scheme.onBackground, baseScheme.onBackground);
     expect(scheme.surface, baseScheme.surface);
-    expect(scheme.surfaceBright, baseScheme.surfaceBright);
-    expect(scheme.surfaceDim, baseScheme.surfaceDim);
-    expect(scheme.surfaceContainerLowest, baseScheme.surfaceContainerLowest);
-    expect(scheme.surfaceContainerLow, baseScheme.surfaceContainerLow);
-    expect(scheme.surfaceContainer, baseScheme.surfaceContainer);
-    expect(scheme.surfaceContainerHigh, baseScheme.surfaceContainerHigh);
-    expect(scheme.surfaceContainerHighest, baseScheme.surfaceContainerHighest);
     expect(scheme.onSurface, baseScheme.onSurface);
     expect(scheme.surfaceVariant, baseScheme.surfaceVariant);
     expect(scheme.onSurfaceVariant, baseScheme.onSurfaceVariant);
@@ -529,55 +434,36 @@ void main() {
         await ColorScheme.fromImageProvider(provider: image);
 
     expect(scheme.brightness, Brightness.light);
-    expect(scheme.primary, const Color(0xff575992));
+    expect(scheme.primary, const Color(0xff4040f3));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.onPrimaryContainer, const Color(0xff13144b));
-    expect(scheme.primaryFixed, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
-    expect(scheme.onPrimaryFixed, const Color(0xff13144b));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
+    expect(scheme.onPrimaryContainer, const Color(0xff06006c));
     expect(scheme.secondary, const Color(0xff5d5c72));
     expect(scheme.onSecondary, const Color(0xffffffff));
     expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
     expect(scheme.onSecondaryContainer, const Color(0xff191a2c));
-    expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
-    expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
     expect(scheme.tertiary, const Color(0xff79536a));
     expect(scheme.onTertiary, const Color(0xffffffff));
     expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
     expect(scheme.onTertiaryContainer, const Color(0xff2e1125));
-    expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
-    expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
     expect(scheme.error, const Color(0xffba1a1a));
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, const Color(0xffffdad6));
     expect(scheme.onErrorContainer, const Color(0xff410002));
-    expect(scheme.background, const Color(0xfffcf8ff));
-    expect(scheme.onBackground, const Color(0xff1b1b21));
-    expect(scheme.surface, const Color(0xfffcf8ff));
-    expect(scheme.surfaceDim, const Color(0xffdcd9e0));
-    expect(scheme.surfaceBright, const Color(0xfffcf8ff));
-    expect(scheme.surfaceContainerLowest, const Color(0xffffffff));
-    expect(scheme.surfaceContainerLow, const Color(0xfff6f2fa));
-    expect(scheme.surfaceContainer, const Color(0xfff0ecf4));
-    expect(scheme.surfaceContainerHigh, const Color(0xffeae7ef));
-    expect(scheme.surfaceContainerHighest, const Color(0xffe4e1e9));
-    expect(scheme.onSurface, const Color(0xff1b1b21));
+    expect(scheme.background, const Color(0xfffffbff));
+    expect(scheme.onBackground, const Color(0xff1c1b1f));
+    expect(scheme.surface, const Color(0xfffffbff));
+    expect(scheme.onSurface, const Color(0xff1c1b1f));
     expect(scheme.surfaceVariant, const Color(0xffe4e1ec));
     expect(scheme.onSurfaceVariant, const Color(0xff46464f));
     expect(scheme.outline, const Color(0xff777680));
     expect(scheme.outlineVariant, const Color(0xffc8c5d0));
     expect(scheme.shadow, const Color(0xff000000));
     expect(scheme.scrim, const Color(0xff000000));
-    expect(scheme.inverseSurface, const Color(0xff303036));
-    expect(scheme.onInverseSurface, const Color(0xfff3eff7));
+    expect(scheme.inverseSurface, const Color(0xff313034));
+    expect(scheme.onInverseSurface, const Color(0xfff3eff4));
     expect(scheme.inversePrimary, const Color(0xffc0c1ff));
-    expect(scheme.surfaceTint, const Color(0xff575992));
+    expect(scheme.surfaceTint, const Color(0xff4040f3));
   }, skip: isBrowser, // [intended] uses dart:typed_data.
 );
 
@@ -589,51 +475,32 @@ void main() {
         provider: image, brightness: Brightness.dark);
 
     expect(scheme.primary, const Color(0xffc0c1ff));
-    expect(scheme.onPrimary, const Color(0xff292a60));
-    expect(scheme.primaryContainer, const Color(0xff3f4178));
+    expect(scheme.onPrimary, const Color(0xff0f00aa));
+    expect(scheme.primaryContainer, const Color(0xff2218dd));
     expect(scheme.onPrimaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixed, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
-    expect(scheme.onPrimaryFixed, const Color(0xff13144b));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
     expect(scheme.secondary, const Color(0xffc6c4dd));
     expect(scheme.onSecondary, const Color(0xff2e2f42));
     expect(scheme.secondaryContainer, const Color(0xff454559));
     expect(scheme.onSecondaryContainer, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
-    expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
     expect(scheme.tertiary, const Color(0xffe9b9d3));
     expect(scheme.onTertiary, const Color(0xff46263a));
     expect(scheme.tertiaryContainer, const Color(0xff5f3c51));
     expect(scheme.onTertiaryContainer, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
-    expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
     expect(scheme.error, const Color(0xffffb4ab));
     expect(scheme.onError, const Color(0xff690005));
     expect(scheme.errorContainer, const Color(0xff93000a));
-    expect(scheme.onErrorContainer, const Color(0xffffdad6));
-    expect(scheme.background, const Color(0xff131318));
-    expect(scheme.onBackground, const Color(0xffe4e1e9));
-    expect(scheme.surface, const Color(0xff131318));
-    expect(scheme.surfaceDim, const Color(0xff131318));
-    expect(scheme.surfaceBright, const Color(0xff39383f));
-    expect(scheme.surfaceContainerLowest, const Color(0xff0e0e13));
-    expect(scheme.surfaceContainerLow, const Color(0xff1b1b21));
-    expect(scheme.surfaceContainer, const Color(0xff1f1f25));
-    expect(scheme.surfaceContainerHigh, const Color(0xff2a292f));
-    expect(scheme.surfaceContainerHighest, const Color(0xff35343a));
-    expect(scheme.onSurface, const Color(0xffe4e1e9));
+    expect(scheme.onErrorContainer, const Color(0xffffb4ab));
+    expect(scheme.background, const Color(0xff1c1b1f));
+    expect(scheme.onBackground, const Color(0xffe5e1e6));
+    expect(scheme.surface, const Color(0xff1c1b1f));
+    expect(scheme.onSurface, const Color(0xffe5e1e6));
     expect(scheme.surfaceVariant, const Color(0xff46464f));
     expect(scheme.onSurfaceVariant, const Color(0xffc8c5d0));
     expect(scheme.outline, const Color(0xff918f9a));
     expect(scheme.outlineVariant, const Color(0xff46464f));
-    expect(scheme.inverseSurface, const Color(0xffe4e1e9));
-    expect(scheme.onInverseSurface, const Color(0xff303036));
-    expect(scheme.inversePrimary, const Color(0xff575992));
+    expect(scheme.inverseSurface, const Color(0xffe5e1e6));
+    expect(scheme.onInverseSurface, const Color(0xff313034));
+    expect(scheme.inversePrimary, const Color(0xff4040f3));
     expect(scheme.surfaceTint, const Color(0xffc0c1ff));
   }, skip: isBrowser, // [intended] uses dart:isolate and io.
   );

@@ -975,35 +975,35 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.error.withOpacity(0.1);
+          return _colors.error.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.error.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.1);
+          return _colors.error.withOpacity(0.12);
         }
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.1);
+          return _colors.onSurface.withOpacity(0.12);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.1);
+          return _colors.primary.withOpacity(0.12);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.1);
+        return _colors.onSurface.withOpacity(0.12);
       }
       return Colors.transparent;
     });
