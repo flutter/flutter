@@ -223,23 +223,17 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
   // If the relevant value of textDirection or verticalDirection is null, this returns null too.
   switch (direction) {
     case Axis.horizontal:
-      switch (textDirection) {
-        case TextDirection.ltr:
-          return true;
-        case TextDirection.rtl:
-          return false;
-        case null:
-          return null;
-      }
+      return switch (textDirection) {
+        TextDirection.ltr => true,
+        TextDirection.rtl => false,
+        null => null,
+      };
     case Axis.vertical:
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          return true;
-        case VerticalDirection.up:
-          return false;
-        case null:
-          return null;
-      }
+      return switch (verticalDirection) {
+        VerticalDirection.down => true,
+        VerticalDirection.up => false,
+        null => null,
+      };
   }
 }
 
@@ -656,21 +650,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   double _getCrossSize(Size size) {
-    switch (_direction) {
-      case Axis.horizontal:
-        return size.height;
-      case Axis.vertical:
-        return size.width;
-    }
+    return switch (_direction) {
+      Axis.horizontal => size.height,
+      Axis.vertical => size.width,
+    };
   }
 
   double _getMainSize(Size size) {
-    switch (_direction) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (_direction) {
+      Axis.horizontal => size.width,
+      Axis.vertical => size.height,
+    };
   }
 
   @override
@@ -700,12 +690,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       constraints: constraints,
     );
 
-    switch (_direction) {
-      case Axis.horizontal:
-        return constraints.constrain(Size(sizes.mainSize, sizes.crossSize));
-      case Axis.vertical:
-        return constraints.constrain(Size(sizes.crossSize, sizes.mainSize));
-    }
+    return constraints.constrain(switch (_direction) {
+      Axis.horizontal => Size(sizes.mainSize, sizes.crossSize),
+      Axis.vertical   => Size(sizes.crossSize, sizes.mainSize),
+    });
   }
 
   FlutterError? _debugCheckConstraints({required BoxConstraints constraints, required bool reportParentConstraints}) {
@@ -797,13 +785,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
-    final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.infinity;
+    final double maxMainSize = _getMainSize(constraints.biggest);
+    final bool canFlex = maxMainSize.isFinite;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     RenderBox? child = firstChild;
     RenderBox? lastFlexChild;
+    final bool stretched = switch (crossAxisAlignment) {
+      CrossAxisAlignment.start    => false,
+      CrossAxisAlignment.center   => false,
+      CrossAxisAlignment.end      => false,
+      CrossAxisAlignment.baseline => false,
+      CrossAxisAlignment.stretch  => true,
+    };
     while (child != null) {
       final FlexParentData childParentData = child.parentData! as FlexParentData;
       final int flex = _getFlex(child);
@@ -811,22 +806,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         totalFlex += flex;
         lastFlexChild = child;
       } else {
-        final BoxConstraints innerConstraints;
-        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
-            case Axis.vertical:
-              innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
-          }
-        } else {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-            case Axis.vertical:
-              innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-          }
-        }
+        final BoxConstraints innerConstraints = switch ((stretched, _direction)) {
+          (true,  Axis.horizontal) => BoxConstraints.tightFor(height: constraints.maxHeight),
+          (true,  Axis.vertical)   => BoxConstraints.tightFor(width: constraints.maxWidth),
+          (false, Axis.horizontal) => BoxConstraints(maxHeight: constraints.maxHeight),
+          (false, Axis.vertical)   => BoxConstraints(maxWidth: constraints.maxWidth),
+        };
         final Size childSize = layoutChild(child, innerConstraints);
         allocatedSize += _getMainSize(childSize);
         crossSize = math.max(crossSize, _getCrossSize(childSize));
@@ -844,49 +829,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.infinity;
-          late final double minChildExtent;
-          switch (_getFit(child)) {
-            case FlexFit.tight:
-              assert(maxChildExtent < double.infinity);
-              minChildExtent = maxChildExtent;
-            case FlexFit.loose:
-              minChildExtent = 0.0;
-          }
-          final BoxConstraints innerConstraints;
-          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-            switch (_direction) {
-              case Axis.horizontal:
-                innerConstraints = BoxConstraints(
-                  minWidth: minChildExtent,
-                  maxWidth: maxChildExtent,
-                  minHeight: constraints.maxHeight,
-                  maxHeight: constraints.maxHeight,
-                );
-              case Axis.vertical:
-                innerConstraints = BoxConstraints(
-                  minWidth: constraints.maxWidth,
-                  maxWidth: constraints.maxWidth,
-                  minHeight: minChildExtent,
-                  maxHeight: maxChildExtent,
-                );
-            }
-          } else {
-            switch (_direction) {
-              case Axis.horizontal:
-                innerConstraints = BoxConstraints(
-                  minWidth: minChildExtent,
-                  maxWidth: maxChildExtent,
-                  maxHeight: constraints.maxHeight,
-                );
-              case Axis.vertical:
-                innerConstraints = BoxConstraints(
-                  maxWidth: constraints.maxWidth,
-                  minHeight: minChildExtent,
-                  maxHeight: maxChildExtent,
-                );
-            }
-          }
+          final double maxChildExtent = switch (canFlex) {
+            true when child == lastFlexChild => freeSpace - allocatedFlexSpace,
+            true => spacePerFlex * flex,
+            false => double.infinity,
+          };
+          final double minChildExtent = switch (_getFit(child)) {
+            FlexFit.tight => maxChildExtent,
+            FlexFit.loose => 0.0,
+          };
+          assert(minChildExtent.isFinite);
+          final double minCrossSize = stretched ? _getCrossSize(constraints.biggest) : 0.0;
+          final BoxConstraints innerConstraints = switch (_direction) {
+            Axis.horizontal => constraints.copyWith(minHeight: minCrossSize, minWidth: minChildExtent, maxWidth: maxChildExtent),
+            Axis.vertical   => constraints.copyWith(minWidth: minCrossSize, minHeight: minChildExtent, maxHeight: maxChildExtent),
+          };
           final Size childSize = layoutChild(child, innerConstraints);
           final double childMainSize = _getMainSize(childSize);
           assert(childMainSize <= maxChildExtent);
@@ -899,7 +856,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
     }
 
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    final double idealSize = switch (mainAxisSize) {
+      MainAxisSize.max when canFlex => maxMainSize,
+      MainAxisSize.max || MainAxisSize.min => allocatedSize,
+    };
     return _LayoutSizes(
       mainSize: idealSize,
       crossSize: crossSize,
@@ -974,34 +934,28 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double actualSizeDelta = actualSize - allocatedSize;
     _overflow = math.max(0.0, -actualSizeDelta);
     final double remainingSpace = math.max(0.0, actualSizeDelta);
-    late final double leadingSpace;
-    late final double betweenSpace;
+    final double betweenSpace = switch (_mainAxisAlignment) {
+      MainAxisAlignment.start || MainAxisAlignment.end || MainAxisAlignment.center => 0.0,
+      MainAxisAlignment.spaceBetween when childCount > 1 => remainingSpace / (childCount - 1),
+      MainAxisAlignment.spaceAround when childCount > 0 => remainingSpace / childCount,
+      MainAxisAlignment.spaceEvenly when childCount > 0 => remainingSpace / (childCount + 1),
+      MainAxisAlignment.spaceBetween || MainAxisAlignment.spaceAround || MainAxisAlignment.spaceEvenly => 0.0,
+    };
+    final double leadingSpace = switch (_mainAxisAlignment) {
+      MainAxisAlignment.start => 0.0,
+      MainAxisAlignment.end => remainingSpace,
+      MainAxisAlignment.center => remainingSpace / 2.0,
+      MainAxisAlignment.spaceBetween => 0.0,
+      MainAxisAlignment.spaceAround => betweenSpace / 2.0,
+      MainAxisAlignment.spaceEvenly => betweenSpace,
+    };
+
     // flipMainAxis is used to decide whether to lay out
     // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
     // (true). The _startIsTopLeft will return null if there's only one child
     // and the relevant direction is null, in which case we arbitrarily decide
     // to flip, but that doesn't have any detectable effect.
     final bool flipMainAxis = !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
-    switch (_mainAxisAlignment) {
-      case MainAxisAlignment.start:
-        leadingSpace = 0.0;
-        betweenSpace = 0.0;
-      case MainAxisAlignment.end:
-        leadingSpace = remainingSpace;
-        betweenSpace = 0.0;
-      case MainAxisAlignment.center:
-        leadingSpace = remainingSpace / 2.0;
-        betweenSpace = 0.0;
-      case MainAxisAlignment.spaceBetween:
-        leadingSpace = 0.0;
-        betweenSpace = childCount > 1 ? remainingSpace / (childCount - 1) : 0.0;
-      case MainAxisAlignment.spaceAround:
-        betweenSpace = childCount > 0 ? remainingSpace / childCount : 0.0;
-        leadingSpace = betweenSpace / 2.0;
-      case MainAxisAlignment.spaceEvenly:
-        betweenSpace = childCount > 0 ? remainingSpace / (childCount + 1) : 0.0;
-        leadingSpace = betweenSpace;
-    }
 
     // Position elements
     double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
@@ -1036,12 +990,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       if (flipMainAxis) {
         childMainPosition -= _getMainSize(child.size);
       }
-      switch (_direction) {
-        case Axis.horizontal:
-          childParentData.offset = Offset(childMainPosition, childCrossPosition);
-        case Axis.vertical:
-          childParentData.offset = Offset(childCrossPosition, childMainPosition);
-      }
+      childParentData.offset = switch (_direction) {
+        Axis.horizontal => Offset(childMainPosition, childCrossPosition),
+        Axis.vertical   => Offset(childCrossPosition, childMainPosition),
+      };
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {
@@ -1104,13 +1056,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
-      final Rect overflowChildRect;
-      switch (_direction) {
-        case Axis.horizontal:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
-        case Axis.vertical:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
-      }
+      final Rect overflowChildRect = switch (_direction) {
+        Axis.horizontal => Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0),
+        Axis.vertical   => Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow),
+      };
       paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
       return true;
     }());

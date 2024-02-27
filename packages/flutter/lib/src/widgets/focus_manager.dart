@@ -867,15 +867,21 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusScopeNode? get nearestScope => enclosingScope;
 
   FocusScopeNode? _enclosingScope;
-  void _clearEnclosingScopeCache(FocusScopeNode? scope) {
-      print('clearing scope cache: $this, $scope');
-    if (scope != null && identical(scope, _enclosingScope)) {
-      _enclosingScope = null;
+  void _clearEnclosingScopeCache() {
+    final FocusScopeNode? cachedScope = _enclosingScope;
+    if (cachedScope == null) {
+      return;
+    }
+    _enclosingScope = null;
+    if (children.isNotEmpty) {
       for (final FocusNode child in children) {
-        child._clearEnclosingScopeCache(scope);
+        if (identical(cachedScope, child._enclosingScope)) {
+          child._clearEnclosingScopeCache();
+        }
       }
     }
   }
+
   /// Returns the nearest enclosing scope node above this node, or null if the
   /// node has not yet be added to the focus tree.
   ///
@@ -884,8 +890,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
-    final FocusScopeNode? enclosingScope =_enclosingScope ??= parent?.nearestScope;
-    assert(enclosingScope == parent?.nearestScope, '$this => $enclosingScope, parent = $parent, ${parent?.nearestScope}');
+    final FocusScopeNode? enclosingScope = _enclosingScope ??= parent?.nearestScope;
+    assert(enclosingScope == parent?.nearestScope, '$this has invalid scope cache: $_enclosingScope != ${parent?.nearestScope}');
     return enclosingScope;
   }
 
@@ -1072,6 +1078,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
 
     node._parent = null;
+    node._clearEnclosingScopeCache();
     _children.remove(node);
     for (final FocusNode ancestor in ancestors) {
       ancestor._descendants = null;
