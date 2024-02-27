@@ -185,14 +185,14 @@ class IconButtonTemplate extends TokenTemplate {
   }
 
   String _minimumSize() {
-    if (tokenAvailable('$tokenGroup.container.height') && tokenAvailable('$tokenGroup.container.width')) {
+    if (tokenAvailable('$tokenGroup.container.size')) {
       return '''
 
-    const MaterialStatePropertyAll<Size>(Size(${getToken('$tokenGroup.container.width')}, ${getToken('$tokenGroup.container.height')}))''';
+    const MaterialStatePropertyAll<Size>(Size(${getToken('$tokenGroup.container.size')}, ${getToken('$tokenGroup.container.size')}))''';
     } else {
       return '''
 
-    const MaterialStatePropertyAll<Size>(Size(40.0, 40.0))''';
+    const MaterialStatePropertyAll<Size>(Size(${getToken('$tokenGroup.state-layer.size')}, ${getToken('$tokenGroup.state-layer.size')}))''';
     }
   }
 

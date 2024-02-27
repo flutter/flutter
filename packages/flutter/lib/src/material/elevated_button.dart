@@ -358,15 +358,15 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `textStyle` - Theme.textTheme.labelLarge
   /// * `backgroundColor`
   ///   * disabled - Theme.colorScheme.onSurface(0.12)
-  ///   * others - Theme.colorScheme.surfaceContainerLow
+  ///   * others - Theme.colorScheme.surface
   /// * `foregroundColor`
   ///   * disabled - Theme.colorScheme.onSurface(0.38)
   ///   * others - Theme.colorScheme.primary
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.primary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.primary(0.1)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   /// * `shadowColor` - Theme.colorScheme.shadow
-  /// * `surfaceTintColor` - Colors.transparent
+  /// * `surfaceTintColor` - Theme.colorScheme.surfaceTint
   /// * `elevation`
   ///   * disabled - 0
   ///   * default - 1
@@ -472,13 +472,13 @@ class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.1);
+      return overlay.withOpacity(0.24);
     }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.1);
+      return overlay.withOpacity(0.24);
     }
     return null;
   }
@@ -629,7 +629,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
-      return _colors.surfaceContainerLow;
+      return _colors.surface;
     });
 
   @override
@@ -645,13 +645,13 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.1);
+        return _colors.primary.withOpacity(0.12);
       }
       return null;
     });
@@ -662,7 +662,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    const MaterialStatePropertyAll<Color>(Colors.transparent);
+    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
 
   @override
   MaterialStateProperty<double>? get elevation =>
