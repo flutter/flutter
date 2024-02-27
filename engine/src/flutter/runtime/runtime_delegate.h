@@ -27,8 +27,7 @@ class RuntimeDelegate {
 
   virtual void EndWarmUpFrame() = 0;
 
-  virtual void Render(int64_t view_id,
-                      std::unique_ptr<flutter::LayerTree> layer_tree,
+  virtual void Render(std::unique_ptr<flutter::LayerTree> layer_tree,
                       float device_pixel_ratio) = 0;
 
   virtual void UpdateSemantics(SemanticsNodeUpdates update,
