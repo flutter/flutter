@@ -157,6 +157,7 @@ Future<void> _run({
   late final ServerSocket server;
   final List<Future<void>> pendingComparisons = <Future<void>>[];
   final List<Socket> pendingConnections = <Socket>[];
+  int comparisonsFailed = 0;
   await step('Starting server...', () async {
     server = await ServerSocket.bind(InternetAddress.anyIPv4, _tcpPort);
     if (verbose) {
@@ -186,8 +187,9 @@ Future<void> _run({
         if (isSkiaGoldClientAvailable) {
           final Future<void> comparison = skiaGoldClient!
               .addImg(fileName, goldenFile, screenshotSize: screenshot.pixelCount)
-              .catchError((dynamic err) {
-            panic(<String>['skia gold comparison failed: $err']);
+              .catchError((Object error) {
+            logWarning('skia gold comparison failed: $error');
+            comparisonsFailed++;
           });
           pendingComparisons.add(comparison);
         }
@@ -354,6 +356,8 @@ Future<void> _run({
       if (out.toString().contains('FAILURES!!!')) {
         stdout.write(out);
         panic(<String>['1 or more tests failed']);
+      } else if (comparisonsFailed > 0) {
+        panic(<String>['$comparisonsFailed Skia Gold comparisons failed']);
       }
     });
   } finally {
