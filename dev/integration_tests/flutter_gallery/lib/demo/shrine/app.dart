@@ -114,12 +114,10 @@ const ColorScheme kShrineColorScheme = ColorScheme(
   primary: kShrinePink100,
   secondary: kShrinePink50,
   surface: kShrineSurfaceWhite,
-  background: kShrineBackgroundWhite,
   error: kShrineErrorRed,
   onPrimary: kShrineBrown900,
   onSecondary: kShrineBrown900,
   onSurface: kShrineBrown900,
-  onBackground: kShrineBrown900,
   onError: kShrineSurfaceWhite,
   brightness: Brightness.light,
 );
