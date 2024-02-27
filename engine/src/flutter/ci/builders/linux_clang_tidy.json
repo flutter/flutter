@@ -6,13 +6,18 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--android",
                 "--android-cpu",
                 "arm64",
                 "--no-lto",
                 "--target-dir",
-                "android_debug_arm64_clang_tidy"
+                "android_debug_arm64_clang_tidy",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "android_debug_arm64_clang_tidy",
             "ninja": {
@@ -25,13 +30,18 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
             "gn": [
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--target-dir",
-                "host_debug_clang_tidy"
+                "host_debug_clang_tidy",
+                "--rbe",
+                "--no-goma"
             ],
             "name": "host_debug_clang_tidy",
             "ninja": {
@@ -58,6 +68,7 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
+                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -87,6 +98,7 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
+                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -116,6 +128,7 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
+                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -145,6 +158,7 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
+                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -172,6 +186,7 @@
                 {
                     "name": "test: lint android_debug_arm64",
                     "parameters": [
+                        "--verbose",
                         "--variant",
                         "android_debug_arm64_clang_tidy",
                         "--lint-all",
