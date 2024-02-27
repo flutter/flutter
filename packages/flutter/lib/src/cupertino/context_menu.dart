@@ -56,15 +56,6 @@ typedef _DismissCallback = void Function(
   double opacity,
 );
 
-/// A function that produces the preview when the CupertinoContextMenu is open.
-///
-/// Called every time the animation value changes.
-typedef ContextMenuPreviewBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  Widget child,
-);
-
 /// A function that builds the child and handles the transition between the
 /// default child and the preview when the CupertinoContextMenu is open.
 typedef CupertinoContextMenuBuilder = Widget Function(
@@ -95,22 +86,16 @@ enum _ContextMenuLocation {
 
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
-/// When open, the [CupertinoContextMenu] shows the child, or the widget returned
-/// by [previewBuilder] if given, in a large full-screen [Overlay] with a list
-/// of buttons specified by [actions]. The child/preview is placed in an
-/// [Expanded] widget so that it will grow to fill the Overlay if its size is
-/// unconstrained.
+/// When open, the [CupertinoContextMenu] shows the child in a large full-screen
+/// [Overlay] with a list of buttons specified by [actions]. The child/preview is
+/// placed in an [Expanded] widget so that it will grow to fill the Overlay if
+/// its size is unconstrained.
 ///
 /// When closed, the [CupertinoContextMenu] displays the child as if the
 /// [CupertinoContextMenu] were not there. Sizing and positioning is unaffected.
 /// The menu can be closed like other [PopupRoute]s, such as by tapping the
 /// background or by calling `Navigator.pop(context)`. Unlike [PopupRoute], it can
 /// also be closed by swiping downwards.
-///
-/// The [previewBuilder] parameter is most commonly used to display a slight
-/// variation of [child]. See [previewBuilder] for an example of rounding the
-/// child's corners and allowing its aspect ratio to expand, similar to the
-/// Photos app on iOS.
 ///
 /// {@tool dartpad}
 /// This sample shows a very simple [CupertinoContextMenu] for the Flutter logo.
@@ -352,10 +337,9 @@ class CupertinoContextMenu extends StatefulWidget {
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
   /// When the [CupertinoContextMenu] is long-pressed, the menu will open and
-  /// this widget (or the widget returned by [previewBuilder], if provided) will
-  /// be moved to the new route and placed inside of an [Expanded] widget. This
-  /// allows the child to resize to fit in its place in the new route, if it
-  /// doesn't size itself.
+  /// this widget will be moved to the new route and placed inside of an
+  /// [Expanded] widget. This allows the child to resize to fit in its place in
+  /// the new route, if it doesn't size itself.
   ///
   /// When the [CupertinoContextMenu] is "closed", this widget acts like a
   /// [Container], i.e. it does not constrain its child's size or affect its
@@ -445,6 +429,19 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     return _ContextMenuLocation.left;
   }
 
+  /// The default preview builder if none is provided. It makes a rectangle
+  /// around the child widget with rounded borders, matching the iOS 16 opened
+  /// context menu eyeballed on the XCode iOS simulator.
+  static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+        child: child,
+      ),
+    );
+  }
+
   // Push the new route and open the CupertinoContextMenu overlay.
   void _openContextMenu() {
     setState(() {
@@ -461,8 +458,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
-        final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
-        return widget.builder(context, localAnimation);
+        if (widget.child == null) {
+          final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
+          return widget.builder(context, localAnimation);
+        }
+        return _defaultPreviewBuilder(context, animation, widget.child!);
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route!);
