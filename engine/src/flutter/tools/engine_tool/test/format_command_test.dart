@@ -54,7 +54,7 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
       'format',
@@ -70,15 +70,17 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
-      'format', '--$dryRunFlag',
+      'format',
+      '--$dryRunFlag',
     ]);
     expect(result, equals(0));
   });
 
-  test('exit code is non-zero when ci/bin/format.dart exit code was non zero', () async {
+  test('exit code is non-zero when ci/bin/format.dart exit code was non zero',
+      () async {
     final Logger logger = Logger.test();
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
@@ -87,7 +89,7 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
       'format',
@@ -103,10 +105,11 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
-      'format', '--$allFlag',
+      'format',
+      '--$allFlag',
     ]);
     expect(result, equals(0));
   });
@@ -119,10 +122,11 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
-      'format', '--$verboseFlag',
+      'format',
+      '--$verboseFlag',
     ]);
     expect(result, equals(0));
   });
@@ -137,10 +141,11 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
-      'format', '--$quietFlag',
+      'format',
+      '--$quietFlag',
     ]);
     expect(result, equals(0));
     expect(stringsFromLogs(logger.testLogs), equals(<String>['error\n']));
@@ -152,14 +157,17 @@ void main() {
       expectedFlags: <String>['--fix'],
       stdout: <String>[
         'To fix, run `et format` or:',
-        'many', 'lines', 'of', 'output',
+        'many',
+        'lines',
+        'of',
+        'output',
         'DONE',
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
       'format',
@@ -174,32 +182,39 @@ void main() {
       expectedFlags: <String>[],
       stdout: <String>[
         'To fix, run `et format` or:',
-        'many', 'lines', 'of', 'output',
+        'many',
+        'lines',
+        'of',
+        'output',
         'DONE',
       ].join('\n'),
     );
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
-      'format', '--$dryRunFlag',
+      'format',
+      '--$dryRunFlag',
     ]);
     expect(result, equals(0));
     expect(
-      stringsFromLogs(logger.testLogs),
-      equals(<String>[
-      'To fix, run `et format` or:\n',
-      'many\n', 'lines\n', 'of\n', 'output\n',
-      'DONE\n',
-    ]));
+        stringsFromLogs(logger.testLogs),
+        equals(<String>[
+          'To fix, run `et format` or:\n',
+          'many\n',
+          'lines\n',
+          'of\n',
+          'output\n',
+          'DONE\n',
+        ]));
   });
 
   test('progress lines are followed by a carriage return', () async {
     final Logger logger = Logger.test();
     const String progressLine = 'diff Jobs:  46% done, 1528/3301 completed,  '
-                                '7 in progress, 1753 pending,  13 failed.';
+        '7 in progress, 1753 pending,  13 failed.';
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: progressLine,
@@ -207,15 +222,14 @@ void main() {
     final Environment env = linuxEnv(logger, manager);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
-      configs: <String, BuildConfig>{},
+      configs: <String, BuilderConfig>{},
     );
     final int result = await runner.run(<String>[
       'format',
     ]);
     expect(result, equals(0));
     expect(
-      stringsFromLogs(logger.testLogs),
-      equals(<String>['$progressLine\r']));
+        stringsFromLogs(logger.testLogs), equals(<String>['$progressLine\r']));
   });
 }
 
@@ -239,11 +253,12 @@ FakeProcessManager _formatProcessManager({
       _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
     },
     onStart: (List<String> cmd) => switch (cmd) {
-      [final String exe, final String fmt, ... final List<String> rest]
-        when exe.endsWith('dart') &&
-        fmt.endsWith('ci/bin/format.dart') &&
-        rest.length == expectedFlags.length &&
-        expectedFlags.every(rest.contains) => formatProcess,
+      [final String exe, final String fmt, ...final List<String> rest]
+          when exe.endsWith('dart') &&
+              fmt.endsWith('ci/bin/format.dart') &&
+              rest.length == expectedFlags.length &&
+              expectedFlags.every(rest.contains) =>
+        formatProcess,
       _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
     },
   );

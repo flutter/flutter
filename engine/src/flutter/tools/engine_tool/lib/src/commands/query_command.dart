@@ -27,12 +27,12 @@ final class QueryCommand extends CommandBase {
         abbr: 'b',
         help: 'Restrict the query to a single builder.',
         allowed: <String>[
-          for (final MapEntry<String, BuildConfig> entry in configs.entries)
+          for (final MapEntry<String, BuilderConfig> entry in configs.entries)
             if (entry.value.canRunOn(environment.platform)) entry.key,
         ],
         allowedHelp: <String, String>{
           // TODO(zanderso): Add human readable descriptions to the json files.
-          for (final MapEntry<String, BuildConfig> entry in configs.entries)
+          for (final MapEntry<String, BuilderConfig> entry in configs.entries)
             if (entry.value.canRunOn(environment.platform))
               entry.key: entry.value.path,
         },
@@ -51,7 +51,7 @@ final class QueryCommand extends CommandBase {
   }
 
   /// Build configurations loaded from the engine from under ci/builders.
-  final Map<String, BuildConfig> configs;
+  final Map<String, BuilderConfig> configs;
 
   @override
   String get name => 'query';
@@ -70,7 +70,7 @@ final class QueryBuildersCommand extends CommandBase {
   });
 
   /// Build configurations loaded from the engine from under ci/builders.
-  final Map<String, BuildConfig> configs;
+  final Map<String, BuilderConfig> configs;
 
   @override
   String get name => 'builders';
@@ -97,13 +97,13 @@ final class QueryBuildersCommand extends CommandBase {
         continue;
       }
 
-      final BuildConfig config = configs[key]!;
+      final BuilderConfig config = configs[key]!;
       if (!config.canRunOn(environment.platform) && !all) {
         continue;
       }
 
       environment.logger.status('"$key" builder:');
-      for (final GlobalBuild build in config.builds) {
+      for (final Build build in config.builds) {
         if (!build.canRunOn(environment.platform) && !all) {
           continue;
         }

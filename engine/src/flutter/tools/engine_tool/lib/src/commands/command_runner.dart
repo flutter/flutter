@@ -41,7 +41,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
   final Environment environment;
 
   /// Build configurations loaded from the engine from under ci/builders.
-  final Map<String, BuildConfig> configs;
+  final Map<String, BuilderConfig> configs;
 
   @override
   Future<int> run(Iterable<String> args) async {
