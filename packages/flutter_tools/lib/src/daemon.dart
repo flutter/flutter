@@ -340,7 +340,7 @@ class DaemonConnection {
           // This is an error response.
           _logger.printTrace('<- Error response received from daemon, id = $id');
           final Object error = data['error']!;
-          final String stackTrace = data['stackTrace'] as String? ?? '';
+          final String stackTrace = data['trace'] as String? ?? '';
           _outgoingRequestCompleters.remove(id)?.completeError(error, StackTrace.fromString(stackTrace));
         } else {
           _logger.printTrace('<- Response received from daemon, id = $id');
