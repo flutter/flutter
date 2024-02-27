@@ -618,6 +618,8 @@ def to_gn_args(args):
   if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64', 'arm64']:
     gn_args['dart_use_compressed_pointers'] = True
 
+  if args.target_os == 'fuchsia':
+    gn_args['gn_configs_path'] = '//flutter/build/config/fuchsia/gn_configs.gni'
   if args.fuchsia_target_api_level is not None:
     gn_args['fuchsia_target_api_level'] = args.fuchsia_target_api_level
   elif args.target_os == 'fuchsia':

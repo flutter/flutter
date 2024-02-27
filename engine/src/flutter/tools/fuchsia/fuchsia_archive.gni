@@ -5,46 +5,30 @@
 import("//build/fuchsia/config.gni")
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
-import("//flutter/tools/fuchsia/gn-sdk/config/config.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/cmc.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
-# Compiles a CML file for a V2 component.
-#
-# manifest (required):
-#   The path to the .cml file for the component. Should include the file extension.
-# output (optional):
-#   The path for the output .cm file. Should include the file extension.
+# Alias of cmc_compile in gn-sdk/src/cmc.gni
 template("_compile_cml") {
   assert(defined(invoker.manifest), "_compile_cml must define manifest")
 
-  action(target_name) {
+  # Create an empty depfile, it's not used in flutter.
+  write_file("${target_gen_dir}/${target_name}/${target_name}.d",
+             [],
+             "list lines")
+
+  cmc_compile(target_name) {
     forward_variables_from(invoker,
                            [
                              "deps",
+                             "manifest",
                              "testonly",
-                             "visibility",
                            ])
-    script = "//flutter/tools/fuchsia/compile_cml.py"
-
-    inputs = [ "$fuchsia_tool_dir/cmc" ]
-    sources = [ invoker.manifest ]
-
-    args = [
-      "--cmc-bin",
-      rebase_path("$fuchsia_tool_dir/cmc"),
-      "--manifest-file",
-      rebase_path(invoker.manifest),
-      "--output",
-      rebase_path(invoker.output, root_build_dir),
-      "--includepath",
-      rebase_path("$fuchsia_sdk/pkg/", root_build_dir),
-      "--includepath",
-      get_path_info(invoker.manifest, "dir"),
-      "--includepath",
-      rebase_path("//"),
-    ]
-    outputs = [ invoker.output ]
+    output_file = invoker.output
   }
 }
+
+# TODO(zijiehe): May use fuchsia_package in gn-sdk if possible. - http://crbug.com/40935282
 
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
 #

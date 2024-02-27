@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 {
     include: [
-        "gtest_runner.shard.cml",
+        "sys/testing/gtest_runner.shard.cml",
         "sys/component/realm_builder_absolute.shard.cml",
 
         // This test needs both the vulkan facet and the hermetic-tier-2 facet,

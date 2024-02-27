@@ -139,3 +139,6 @@ app.*.symbols
 
 # The test-scripts from Chromium and managed by DEPS and gclient.
 /tools/fuchsia/test_scripts
+
+# The gn-sdk from Chromium and managed by DEPS and gclient.
+/tools/fuchsia/gn-sdk
