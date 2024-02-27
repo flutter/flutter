@@ -13,6 +13,6 @@ executable("vulkan_glfw") {
   deps = [
     "//flutter/shell/platform/embedder:embedder",
     "//flutter/third_party/glfw",
-    "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
   ]
 }

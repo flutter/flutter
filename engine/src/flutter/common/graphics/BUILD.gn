@@ -33,7 +33,8 @@ source_set("graphics") {
 
   public_configs = [ "//flutter:config" ]
   if (shell_enable_vulkan) {
-    public_deps =
-        [ "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers" ]
+    public_deps = [
+      "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    ]
   }
 }
