@@ -24,6 +24,38 @@ void main() {
     ]);
   });
 
+  test('verify FlutterMacOS.xcframework artifact', () {
+    final String flutterRoot = getFlutterRoot();
+
+    final Directory xcframeworkArtifact = fileSystem.directory(
+      fileSystem.path.join(
+        flutterRoot,
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'darwin-x64',
+        'FlutterMacOS.xcframework',
+      ),
+    );
+
+    final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
+
+    // Pre-cache iOS engine Flutter.xcframework artifacts.
+    final ProcessResult result = processManager.runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'precache',
+        '--macos',
+      ],
+      workingDirectory: tempDir.path,
+    );
+
+    expect(result, const ProcessResultMatcher());
+    expect(xcframeworkArtifact.existsSync(), isTrue);
+  });
+
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
