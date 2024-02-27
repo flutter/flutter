@@ -141,8 +141,8 @@ typedef OnKeyEventCallback = KeyEventResult Function(KeyEvent event);
 /// the focusability changes of a [FocusNode] in the focus tree.
 ///
 /// The `canRequestFocus` argument represents the focusability of a [FocusNode],
-/// which is typically determined by the [FocusNode]'s [canRequestFocus] value,
-/// and whether all of its ancestors in the focus tree have
+/// which is only true when the [FocusNode]'s [canRequestFocus] value is true,
+/// and all of its ancestors in the focus tree have
 /// [FocusNode.descendantsAreFocusable] set true.
 typedef OnFocusabilityChangedCallback = void Function(bool canRequestFocus);
 
@@ -559,24 +559,23 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // they have a listener.
   int _focusabilityListenerCount = 0;
 
-  // True if this node doesn't have an ancestor with `descentantsAreFocusable`
-  // set to true. The value is only maintained when the `onFocusabilityChanged`
-  // callback is set and _canRequestFocus is true.
+  // True if all ancestors of this node have `descentantsAreFocusable` set to
+  // true. The value is only maintained when the `onFocusabilityChanged`
+  // callback is set and `_canRequestFocus` is true.
   bool _ancestorsAllowFocus = true;
+
+  late final _FocusabilityListenable _focusabilityListenable = _FocusabilityListenable(this);
+  ValueListenable<bool> get focusabilityListenable => _focusabilityListenable;
 
   OnFocusabilityChangedCallback? get onFocusabilityChanged => _onFocusabilityChanged;
   OnFocusabilityChangedCallback? _onFocusabilityChanged;
   set onFocusabilityChanged(OnFocusabilityChangedCallback? value) {
     final bool hadCallback = _onFocusabilityChanged != null;
     _onFocusabilityChanged = value;
-    if ((value != null) == hadCallback) {
+    if ((value != null) == hadCallback || !_canRequestFocus) {
       return;
     }
-
-    final bool canRequestFocus = _canRequestFocus && (_ancestorsAllowFocus = _adjustAncestorListenerCount(1));
-    if (!canRequestFocus) {
-      value?.call(false);
-    }
+    _ancestorsAllowFocus = _adjustAncestorListenerCount(value != null ? 1 : -1);
   }
 
   // Returns whether all parents allow this node to gain focus.
@@ -1538,6 +1537,18 @@ class FocusScopeNode extends FocusNode {
     properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: const Iterable<String>.empty()));
     properties.add(DiagnosticsProperty<TraversalEdgeBehavior>('traversalEdgeBehavior', traversalEdgeBehavior, defaultValue: TraversalEdgeBehavior.closedLoop));
   }
+}
+
+class _FocusabilityListenable extends ChangeNotifier implements ValueListenable<bool> {
+  _FocusabilityListenable(this.node);
+
+  final FocusNode node;
+
+  @override
+  bool get value => node.canRequestFocus;
+
+  void addListener()
+
 }
 
 /// An enum to describe which kind of focus highlight behavior to use when
