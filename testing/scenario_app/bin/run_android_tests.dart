@@ -199,7 +199,7 @@ Future<void> _run({
 
   late Process logcatProcess;
   late Future<int> logcatProcessExitCode;
-  bool seenImpeller = false;
+  _ImpellerBackend? actualImpellerBackend;
 
   final IOSink logcat = File(logcatPath).openWrite();
   try {
@@ -222,8 +222,16 @@ Future<void> _run({
       logcatOutput.listen((String line) {
         // Always write to the full log.
         logcat.writeln(line);
-        if (enableImpeller && !seenImpeller) {
-          seenImpeller = line.contains('Using the Impeller rendering backend');
+        if (enableImpeller && actualImpellerBackend == null && line.contains('Using the Impeller rendering backend')) {
+          if (line.contains('OpenGLES')) {
+            actualImpellerBackend = _ImpellerBackend.opengles;
+          } else if (line.contains('Vulkan')) {
+            actualImpellerBackend = _ImpellerBackend.vulkan;
+          } else {
+            panic(<String>[
+              'Impeller was enabled, but $line did not contain "OpenGLES" or "Vulkan".',
+            ]);
+          }
         }
 
         // Conditionally parse and write to stderr.
@@ -375,9 +383,10 @@ Future<void> _run({
 
     if (enableImpeller) {
       await step('Validating Impeller...', () async {
-        if (!seenImpeller) {
+        final _ImpellerBackend expectedImpellerBackend = impellerBackend ?? _ImpellerBackend.vulkan;
+        if (actualImpellerBackend != expectedImpellerBackend) {
           panic(<String>[
-            '--enable-impeller was specified, but Impeller was not used.',
+            '--enable-impeller was specified and expected to find "${expectedImpellerBackend.name}", which did not match "${actualImpellerBackend?.name ?? '<impeller disabled>'}".',
           ]);
         }
       });
