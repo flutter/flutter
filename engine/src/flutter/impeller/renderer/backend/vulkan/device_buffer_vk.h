@@ -69,6 +69,9 @@ class DeviceBufferVK final : public DeviceBuffer,
   // |DeviceBuffer|
   void Flush(std::optional<Range> range) const override;
 
+  // |DeviceBuffer|
+  void Invalidate(std::optional<Range> range) const override;
+
   DeviceBufferVK(const DeviceBufferVK&) = delete;
 
   DeviceBufferVK& operator=(const DeviceBufferVK&) = delete;

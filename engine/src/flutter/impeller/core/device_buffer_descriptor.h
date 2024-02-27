@@ -14,6 +14,9 @@ namespace impeller {
 struct DeviceBufferDescriptor {
   StorageMode storage_mode = StorageMode::kDeviceTransient;
   size_t size = 0u;
+  // Perhaps we could combine this with storage mode and create appropriate
+  // host-write and host-read flags.
+  bool readback = false;
 };
 
 }  // namespace impeller

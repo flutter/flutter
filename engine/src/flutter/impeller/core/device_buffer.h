@@ -49,6 +49,8 @@ class DeviceBuffer {
   /// If the range is not provided, the entire buffer is flushed.
   virtual void Flush(std::optional<Range> range = std::nullopt) const;
 
+  virtual void Invalidate(std::optional<Range> range = std::nullopt) const;
+
  protected:
   const DeviceBufferDescriptor desc_;
 

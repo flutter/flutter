@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "impeller/base/validation.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/sampler_gles.h"
@@ -269,7 +270,7 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
     const auto& member = metadata->members[i];
     auto location = locations[i];
     // Void type or inactive uniform.
-    if (location == -1) {
+    if (location == -1 || member.type == ShaderType::kVoid) {
       continue;
     }
 
@@ -351,7 +352,7 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
       case ShaderType::kSampledImage:
       case ShaderType::kSampler:
         VALIDATION_LOG << "Could not bind uniform buffer data for key: "
-                       << member.name;
+                       << member.name << " : " << static_cast<int>(member.type);
         return false;
     }
   }

@@ -12,6 +12,8 @@ DeviceBuffer::~DeviceBuffer() = default;
 
 void DeviceBuffer::Flush(std::optional<Range> range) const {}
 
+void DeviceBuffer::Invalidate(std::optional<Range> range) const {}
+
 // static
 BufferView DeviceBuffer::AsBufferView(std::shared_ptr<DeviceBuffer> buffer) {
   BufferView view;
