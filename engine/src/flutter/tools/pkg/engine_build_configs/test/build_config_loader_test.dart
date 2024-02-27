@@ -33,7 +33,10 @@ int main() {
   test('BuildConfigLoader gives an empty config when no configs found', () {
     final FileSystem fs = MemoryFileSystem();
     final String buildConfigPath = fs.path.join(
-      'flutter', 'ci', 'builders', 'linux_test_build.json',
+      'flutter',
+      'ci',
+      'builders',
+      'linux_test_build.json',
     );
     final Directory buildConfigsDir = fs.directory(buildConfigPath);
     final BuildConfigLoader loader = BuildConfigLoader(
@@ -41,10 +44,12 @@ int main() {
     );
 
     expect(loader.configs, isNotNull);
-    expect(loader.errors[0], equals(
-      'flutter/ci/builders/linux_test_build.json does not exist.',
-    ));
-    expect(loader.configs, equals(<String, BuildConfig>{}));
+    expect(
+        loader.errors[0],
+        equals(
+          'flutter/ci/builders/linux_test_build.json does not exist.',
+        ));
+    expect(loader.configs, equals(<String, BuilderConfig>{}));
   });
   return 0;
 }

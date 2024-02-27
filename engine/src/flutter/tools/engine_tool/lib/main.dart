@@ -28,7 +28,9 @@ void main(List<String> args) async {
 
   // Find and parse the engine build configs.
   final io.Directory buildConfigsDir = io.Directory(p.join(
-    engine.flutterDir.path, 'ci', 'builders',
+    engine.flutterDir.path,
+    'ci',
+    'builders',
   ));
   final BuildConfigLoader loader = BuildConfigLoader(
     buildConfigsDir: buildConfigsDir,
@@ -36,7 +38,7 @@ void main(List<String> args) async {
 
   // Treat it as an error if no build configs were found. The caller likely
   // expected to find some.
-  final Map<String, BuildConfig> configs = loader.configs;
+  final Map<String, BuilderConfig> configs = loader.configs;
   if (configs.isEmpty) {
     io.stderr.writeln(
       'Error: No build configs found under ${buildConfigsDir.path}',

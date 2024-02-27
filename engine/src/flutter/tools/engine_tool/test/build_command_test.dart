@@ -29,25 +29,25 @@ void main() {
     return;
   }
 
-  final BuildConfig linuxTestConfig = BuildConfig.fromJson(
+  final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
     map: convert.jsonDecode(fixtures.testConfig('Linux'))
         as Map<String, Object?>,
   );
 
-  final BuildConfig macTestConfig = BuildConfig.fromJson(
+  final BuilderConfig macTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/mac_test_config.json',
     map: convert.jsonDecode(fixtures.testConfig('Mac-12'))
         as Map<String, Object?>,
   );
 
-  final BuildConfig winTestConfig = BuildConfig.fromJson(
+  final BuilderConfig winTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/win_test_config.json',
     map: convert.jsonDecode(fixtures.testConfig('Windows-11'))
         as Map<String, Object?>,
   );
 
-  final Map<String, BuildConfig> configs = <String, BuildConfig>{
+  final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
     'linux_test_config': linuxTestConfig,
     'linux_test_config2': linuxTestConfig,
     'mac_test_config': macTestConfig,
@@ -79,7 +79,7 @@ void main() {
   test('can find host runnable build', () async {
     final Logger logger = Logger.test();
     final (Environment env, _) = linuxEnv(logger);
-    final List<GlobalBuild> result = runnableBuilds(env, configs);
+    final List<Build> result = runnableBuilds(env, configs);
     expect(result.length, equals(2));
     expect(result[0].name, equals('build_name'));
   });
