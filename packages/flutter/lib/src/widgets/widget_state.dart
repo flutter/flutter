@@ -176,6 +176,8 @@ class _WidgetStateColor extends WidgetStateColor {
 
   final WidgetPropertyResolver<Color> _resolve;
 
+  static const Set<WidgetState> _defaultStates = <WidgetState>{};
+
   @override
   Color resolve(Set<WidgetState> states) => _resolve(states);
 }
