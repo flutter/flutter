@@ -1426,6 +1426,7 @@
 ../../../flutter/third_party/pkg/process
 ../../../flutter/third_party/pkg/process_runner
 ../../../flutter/third_party/pkg/vector_math
+../../../flutter/third_party/protobuf
 ../../../flutter/third_party/pyyaml
 ../../../flutter/third_party/rapidjson/.git
 ../../../flutter/third_party/rapidjson/.gitattributes
@@ -3081,7 +3082,6 @@
 ../../../third_party/perfetto/ui/src/plugins/dev.perfetto.AndroidPerf/OWNERS
 ../../../third_party/perfetto/ui/src/plugins/dev.perfetto.LargeScreensPerf/OWNERS
 ../../../third_party/perfetto/ui/src/test
-../../../third_party/protobuf
 ../../../third_party/vulkan-deps/.git
 ../../../third_party/vulkan-deps/.gitattributes
 ../../../third_party/vulkan-deps/.gitignore

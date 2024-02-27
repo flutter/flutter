@@ -328,11 +328,13 @@ deps = {
   'src/third_party/perfetto':
    Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
 
-  'src/third_party/protobuf':
+  'src/flutter/third_party/protobuf':
    Var('flutter_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
 
-  'src/flutter/build/secondary/third_party/protobuf':
-   Var('flutter_git') + '/third_party/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
+  # TODO(67373): These are temporarily checked in, but this dep can be restored
+  # once the buildmoot is completed.
+  # 'src/flutter/build/secondary/third_party/protobuf':
+  #  Var('flutter_git') + '/third_party/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
 
   'src/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),

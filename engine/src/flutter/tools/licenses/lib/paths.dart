@@ -90,6 +90,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/pkg/process',
   r'flutter/third_party/pkg/process_runner',
   r'flutter/third_party/pkg/vector_math',
+  r'flutter/third_party/protobuf', // build-time dependency only
   r'flutter/third_party/pyyaml', // build-time dependency only
   r'flutter/third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
   r'flutter/third_party/rapidjson/doc', // documentation
@@ -187,7 +188,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/perfetto/src/trace_processor', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
-  r'third_party/protobuf', // build-time dependency only
   r'third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
   r'third_party/vulkan-deps/glslang/src/glslang/OSDependent/Web', // we only use glslang in impellerc, not in web apps
