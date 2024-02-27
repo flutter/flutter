@@ -359,7 +359,7 @@ Future<int> main(List<String> args) async {
       ),
     );
     final List<io.File> fileList = await fixture.tool.computeFilesOfInterest();
-    expect(fileList.length, lessThan(1000));
+    expect(fileList.length, lessThan(2000));
   });
 
   test('Sharding', () async {

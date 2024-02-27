@@ -129,8 +129,10 @@ app.*.symbols
 # Prebuilt binaries.
 /prebuilts/
 
+# TODO(67373): This entry is temporarily disabled, but can be restored once the
+# buildmoot is completed.
 # GN build support for protobufs vended by Fuchsia.
-/build/secondary/third_party/protobuf
+# /build/secondary/third_party/protobuf
 
 # RBE support configurations and scripts vended from CIPD
 /build/rbe
