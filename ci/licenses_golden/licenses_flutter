@@ -29967,6 +29967,8 @@ ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h + .
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/accessibility_plugin.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/windows/accessibility_plugin.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/dart_project.h + ../../../flutter/LICENSE
@@ -32840,6 +32842,8 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h
+FILE: ../../../flutter/shell/platform/windows/accessibility_plugin.cc
+FILE: ../../../flutter/shell/platform/windows/accessibility_plugin.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/dart_project.h
