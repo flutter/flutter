@@ -140,7 +140,7 @@ void main() {
       ...vmServiceSetup,
       const FakeVmServiceRequest(
         method: 'getVMTimeline',
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: RPCErrorCodes.kServiceDisappeared,
       ),
       const FakeVmServiceRequest(
         method: 'setVMTimelineFlags',

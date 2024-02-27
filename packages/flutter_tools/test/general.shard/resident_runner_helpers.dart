@@ -120,7 +120,10 @@ const FakeVmServiceRequest renderFrameRasterStats = FakeVmServiceRequest(
     'viewId': 'a',
     'isolateId': '1',
   },
-  errorCode: 69,
+  error: FakeRPCError(
+    code: RPCErrorCodes.kServerError,
+    error: 'Raster status not supported on Impeller backend',
+  ),
 );
 
 const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(

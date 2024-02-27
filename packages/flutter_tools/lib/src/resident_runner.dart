@@ -733,9 +733,11 @@ abstract class ResidentHandlers {
             logger.printWarning('Unable to get jank metrics.');
           }
         }
-      } on vm_service.RPCError catch (_) {
-        print('caught');
-        rethrow;
+      } on vm_service.RPCError catch (err) {
+        if (err.code != -32000 || !err.message.contains('Raster status not supported on Impeller backend')) {
+          rethrow;
+        }
+        logger.printWarning('Unable to get jank metrics for Impeller renderer');
       }
     }
     return true;

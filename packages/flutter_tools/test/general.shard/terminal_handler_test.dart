@@ -1125,7 +1125,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.dwds.screenshot',
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: RPCErrorCodes.kInternalError,
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
@@ -1165,7 +1165,7 @@ void main() {
             'enabled': 'true',
           },
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: RPCErrorCodes.kInternalError,
         ),
       ],
       logger: logger,
