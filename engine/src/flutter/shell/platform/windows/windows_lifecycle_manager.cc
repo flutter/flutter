@@ -192,9 +192,6 @@ void WindowsLifecycleManager::BeginProcessingExit() {
   process_exit_ = true;
 }
 
-// TODO(schectman): Wait until the platform channel is registered to send
-// the platform message.
-// https://github.com/flutter/flutter/issues/131616
 void WindowsLifecycleManager::SetLifecycleState(AppLifecycleState state) {
   if (state_ == state) {
     return;
