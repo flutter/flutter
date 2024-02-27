@@ -61,6 +61,8 @@
                 {
                     "language": "dart",
                     "name": "Android Scenario App Integration Tests (Impeller/Vulkan)",
+                    "test_timeout_secs": 900,
+                    "max_attempts": 2,
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",

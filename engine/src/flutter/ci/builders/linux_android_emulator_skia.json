@@ -37,6 +37,8 @@
                 {
                     "language": "dart",
                     "name": "Android Scenario App Integration Tests (Skia)",
+                    "test_timeout_secs": 900,
+                    "max_attempts": 2,
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
