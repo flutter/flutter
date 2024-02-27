@@ -59,8 +59,14 @@ void main(List<String> args) async {
     return;
   }
 
+  // Capture CTRL-C.
+  late final StreamSubscription<void> onSigint;
   runZonedGuarded(
     () async {
+      onSigint = ProcessSignal.sigint.watch().listen((_) {
+        onSigint.cancel();
+        panic(<String>['Received SIGINT']);
+      });
       await _run(
         verbose: options.verbose,
         outDir: Directory(options.outDir),
@@ -73,9 +79,11 @@ void main(List<String> args) async {
         contentsGolden: options.outputContentsGolden,
         ndkStack: options.ndkStack,
       );
+      onSigint.cancel();
       exit(0);
     },
     (Object error, StackTrace stackTrace) {
+      onSigint.cancel();
       if (error is! Panic) {
         stderr.writeln('Unhandled error: $error');
         stderr.writeln(stackTrace);
@@ -146,8 +154,9 @@ Future<void> _run({
   // for the screenshots.
   // On LUCI, the host uploads the screenshots to Skia Gold.
   SkiaGoldClient? skiaGoldClient;
-  late ServerSocket server;
+  late final ServerSocket server;
   final List<Future<void>> pendingComparisons = <Future<void>>[];
+  final List<Socket> pendingConnections = <Socket>[];
   await step('Starting server...', () async {
     server = await ServerSocket.bind(InternetAddress.anyIPv4, _tcpPort);
     if (verbose) {
@@ -157,8 +166,8 @@ Future<void> _run({
       if (verbose) {
         stdout.writeln('client connected ${client.remoteAddress.address}:${client.remotePort}');
       }
-      client.transform(const ScreenshotBlobTransformer()).listen(
-          (Screenshot screenshot) {
+      pendingConnections.add(client);
+      client.transform(const ScreenshotBlobTransformer()).listen((Screenshot screenshot) {
         final String fileName = screenshot.filename;
         final Uint8List fileContent = screenshot.fileContent;
         if (verbose) {
@@ -182,9 +191,9 @@ Future<void> _run({
           });
           pendingComparisons.add(comparison);
         }
-      }, onError: (dynamic err) {
-        panic(<String>['error while receiving bytes: $err']);
-      }, cancelOnError: true);
+      }, onDone: () {
+        pendingConnections.remove(client);
+      });
     });
   });
 
@@ -335,6 +344,16 @@ Future<void> _run({
     });
   } finally {
     await server.close();
+    for (final Socket client in pendingConnections.toList()) {
+      client.close();
+    }
+
+    await step('Killing test app and test runner...', () async {
+      final int exitCode = await pm.runAndForward(<String>[adb.path, 'shell', 'am', 'force-stop', 'dev.flutter.scenarios']);
+      if (exitCode != 0) {
+        panic(<String>['could not kill test app']);
+      }
+    });
 
     await step('Killing logcat process...', () async {
       final bool delivered = logcatProcess.kill(ProcessSignal.sigkill);
