@@ -679,10 +679,12 @@ class Text extends StatelessWidget {
       ),
     );
     if (registrar != null) {
-      result = SelectionContainer(delegate: _selectionDelegate!, child: result);
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-        child: result,
+        child: SelectionContainer(
+          delegate: _selectionDelegate!,
+          child: result,
+        ),
       );
     }
     if (semanticsLabel != null) {
@@ -859,39 +861,21 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
     assert((isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1));
     SelectionResult? finalResult;
-    // Determines if the edge being adjusted is within the current viewport.
-    //  - If so, we begin the search for the new selection edge position at the
-    //    currentSelectionEndIndex/currentSelectionStartIndex.
-    //  - If not, we attempt to locate the new selection edge starting from
-    //    the opposite end.
-    //  - If neither edge is in the current viewport, the search for the new
-    //    selection edge position begins at 0.
-    //
-    // This can happen when there is a scrollable child and the edge being adjusted
-    // has been scrolled out of view.
-    // final bool isCurrentEdgeWithinViewport = isEnd ? value.endSelectionPoint != null : value.startSelectionPoint != null;
-    // final bool isOppositeEdgeWithinViewport = isEnd ? value.startSelectionPoint != null : value.endSelectionPoint != null;
-    final bool isCurrentEdgeWithinViewport = isEnd ? currentSelectionEndIndex != -1 : currentSelectionStartIndex != -1;
-    final bool isOppositeEdgeWithinViewport = isEnd ? currentSelectionStartIndex != -1 : currentSelectionEndIndex != -1;
-    int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
-      (true, true, true) => currentSelectionEndIndex,
-      (true, true, false) => currentSelectionEndIndex,
-      (true, false, true) => currentSelectionStartIndex,
-      (true, false, false) => 0,
-      (false, true, true) => currentSelectionStartIndex,
-      (false, true, false) => currentSelectionStartIndex,
-      (false, false, true) => currentSelectionEndIndex,
-      (false, false, false) => 0,
+    // Begin the search for the selection edge at the opposite edge if it exists.
+    final bool hasOppositeEdge = isEnd ? currentSelectionStartIndex != -1 : currentSelectionEndIndex != -1;
+    int newIndex = switch ((isEnd, hasOppositeEdge)) {
+      (true, true) => currentSelectionStartIndex,
+      (true, false) => 0,
+      (false, true) => currentSelectionEndIndex,
+      (false, false) => 0,
     };
     debugPrint('init start start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex $isEnd ${paragraph.text.toPlainText()}');
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
     // the direction of the search.
-    //  - currentSelectionEndIndex/currentSelectionStartIndex if the current edge
-    //    is in the current viewport.
-    //  - The opposite edge index if the current edge is not in the current viewport.
-    //  - Index 0 if neither edge is in the current viewport.
+    //  - The opposite edge index if it exists.
+    //  - Index 0 if the opposite edge index does not exist.
     //
     // If the result is `SelectionResult.next`, this loop look backward.
     // Otherwise, it looks forward.
@@ -907,7 +891,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         case SelectionResult.end:
         case SelectionResult.pending:
         case SelectionResult.none:
-          // forward = null;
           finalResult = currentSelectableResult;
         case SelectionResult.next:
           if (forward == false) {
@@ -934,22 +917,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       }
     }
     if (isEnd) {
-      final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-      debugPrint('is forward selection $forwardSelection');
-      // if (!forwardSelection && (!(forward ?? false) ?? false)) {
-      //   currentSelectionStartIndex = currentSelectionEndIndex;
-      // }
-      // if (forwardSelection && (forward ?? false)) {
-      //   currentSelectionStartIndex = currentSelectionEndIndex;
-      // }
-      // final bool shouldSwap = forwardSelection != forward;
-      // final bool shouldSwap = (forwardSelection && forward!) || (!forwardSelection && !forward!);
-
-      // debugPrint('should swap $shouldSwap $forwardSelection $forward ${forwardSelection != forward}');
-      if (forward != null && ((!forwardSelection && forward! && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward! && newIndex <= currentSelectionStartIndex))) {
-        debugPrint('swapping text-container');
-        currentSelectionStartIndex = currentSelectionEndIndex;
-      }
       currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
@@ -1016,7 +983,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         case SelectionResult.end:
         case SelectionResult.pending:
         case SelectionResult.none:
-          // forward = null;
           finalResult = currentSelectableResult;
         case SelectionResult.next:
           if (forward == false) {

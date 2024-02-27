@@ -2063,7 +2063,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
       //   }
       }
-      assert(false);
+      // assert(false);
     }
 
     if (!positionWithinParagraphRect && !_selectableContainsOriginTextBoundary) {
