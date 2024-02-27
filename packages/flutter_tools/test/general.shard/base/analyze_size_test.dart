@@ -67,7 +67,7 @@ void main() {
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       flutterUsage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     final Archive archive = Archive()
@@ -152,7 +152,7 @@ void main() {
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       flutterUsage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     final Archive archive = Archive()
@@ -195,7 +195,7 @@ void main() {
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       flutterUsage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -239,7 +239,7 @@ void main() {
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       flutterUsage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')..createSync(recursive: true);

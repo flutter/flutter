@@ -125,7 +125,7 @@ void testUsingContext(
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           BuildTargets: () => const BuildTargetsImpl(),
-          Analytics: () => NoOpAnalytics(),
+          Analytics: () => const NoOpAnalytics(),
         },
         body: () {
           // To catch all errors thrown by the test, even uncaught async errors, we use a zone.

@@ -17,8 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
-// TODO(goderbauer): Fix this ignore when https://github.com/dart-lang/tools/issues/234 is resolved.
-import 'package:unified_analytics/src/enums.dart' show DevicePlatform; // ignore: implementation_imports
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fakes.dart';
