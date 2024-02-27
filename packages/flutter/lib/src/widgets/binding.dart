@@ -991,12 +991,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     TimingsCallback? firstFrameCallback;
-    late final bool sendFramesToEngineAfterDrawing;
+    bool debugFrameWasSentToEngine = false;
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
       firstFrameCallback = (List<FrameTiming> timings) {
-        assert(sendFramesToEngineAfterDrawing);
+        assert(debugFrameWasSentToEngine);
         if (!kReleaseMode) {
           // Change the current user tag back to the default tag. At this point,
           // the user tag should be set to "AppStartUp" (originally set in the
@@ -1021,7 +1021,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         buildOwner!.buildScope(rootElement!);
       }
       super.drawFrame();
-      sendFramesToEngineAfterDrawing = sendFramesToEngine;
+      assert(() {
+        debugFrameWasSentToEngine = sendFramesToEngine;
+        return true;
+      }());
       buildOwner!.finalizeTree();
     } finally {
       assert(() {
