@@ -1515,6 +1515,12 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
       if (includeDevtools) {
+        if (_residentDevtoolsHandler!.printDtdUri) {
+          final Uri? dtdUri = residentDevtoolsHandler!.hostedDartToolingDaemon;
+          if (dtdUri != null) {
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
+          }
+        }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
@@ -1932,6 +1938,26 @@ abstract class DevtoolsLauncher {
     } else {
       _readyCompleter = Completer<void>();
     }
+  }
+
+  /// The Dart Tooling Daemon URI for the DTD instance being served by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter 
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri => _dtdUri;
+  Uri? _dtdUri;
+  @protected
+  set dtdUri(Uri? value) => _dtdUri = value;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri => dtdUri != null && (_printDtdUri ?? false);
+  bool? _printDtdUri;
+  set printDtdUri(bool value) {
+    _printDtdUri = value;
   }
 
   /// The URL of the current DevTools server.

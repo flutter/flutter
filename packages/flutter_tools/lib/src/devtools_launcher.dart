@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -16,8 +14,8 @@ import 'base/logger.dart';
 import 'convert.dart';
 import 'resident_runner.dart';
 
-/// An implementation of the devtools launcher that uses `pub global activate` to
-/// start a server instance.
+/// An implementation of the devtools launcher that uses `dart devtools` to
+/// start a DevTools server instance.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     required ProcessManager processManager,
@@ -42,6 +40,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
+  static final RegExp _serveDtdPattern =
+      RegExp(r'Serving the Dart Tooling Daemon at (ws:\/\/[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
 
   @override
   Future<void> get processStart => _processStartCompleter.future;
@@ -55,21 +55,30 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _dartExecutable,
         'devtools',
         '--no-launch-browser',
+        // TODO(kenz): add the `--print-dtd-uri` flag here once the Dart CLI
+        // supports it. See https://github.com/dart-lang/sdk/issues/55034.
+        // if (printDtdUri ?? false) '--print-dtd-uri',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
         ...?additionalArguments,
       ]);
       _processStartCompleter.complete();
-      final Completer<Uri> completer = Completer<Uri>();
+
+      final Completer<Uri> devToolsCompleter = Completer<Uri>();
       _devToolsProcess!.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
-            final Match? match = _serveDevToolsPattern.firstMatch(line);
-            if (match != null) {
-              final String url = match[1]!;
-              completer.complete(Uri.parse(url));
-            }
-         });
+        final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
+        if (dtdMatch != null) {
+          final String uri = dtdMatch[1]!;
+          dtdUri = Uri.parse(uri);
+        }
+        final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
+        if (devToolsMatch != null) {
+          final String url = devToolsMatch[1]!;
+          devToolsCompleter.complete(Uri.parse(url));
+        }
+      });
       _devToolsProcess!.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -84,7 +93,11 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         }
       );
 
-      devToolsUrl = await completer.future;
+      // We do not need to wait for a [Completer] holding the DTD URI because
+      // the DTD URI will be output to stdout before the DevTools URI. Awaiting
+      // a [Completer] for the DevTools URI ensures both values will be
+      // populated before returning.
+      devToolsUrl = await devToolsCompleter.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
