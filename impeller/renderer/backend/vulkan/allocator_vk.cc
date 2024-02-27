@@ -30,16 +30,23 @@ ToVKBufferMemoryPropertyFlags(StorageMode mode) {
 }
 
 static VmaAllocationCreateFlags ToVmaAllocationBufferCreateFlags(
-    StorageMode mode) {
+    StorageMode mode,
+    bool readback) {
   VmaAllocationCreateFlags flags = 0;
   switch (mode) {
     case StorageMode::kHostVisible:
-      flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+      if (!readback) {
+        flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+      } else {
+        flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+      }
       flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
       return flags;
     case StorageMode::kDevicePrivate:
+      FML_DCHECK(!readback);
       return flags;
     case StorageMode::kDeviceTransient:
+      FML_DCHECK(!readback);
       return flags;
   }
   FML_UNREACHABLE();
@@ -62,8 +69,8 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   allocation_info.usage = VMA_MEMORY_USAGE_AUTO;
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
       ToVKBufferMemoryPropertyFlags(StorageMode::kHostVisible));
-  allocation_info.flags =
-      ToVmaAllocationBufferCreateFlags(StorageMode::kHostVisible);
+  allocation_info.flags = ToVmaAllocationBufferCreateFlags(
+      StorageMode::kHostVisible, /*readback=*/false);
 
   uint32_t memTypeIndex;
   auto result = vk::Result{vmaFindMemoryTypeIndexForBufferInfo(
@@ -455,8 +462,10 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   allocation_info.usage = ToVMAMemoryUsage();
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
-  allocation_info.flags = ToVmaAllocationBufferCreateFlags(desc.storage_mode);
-  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible) {
+  allocation_info.flags =
+      ToVmaAllocationBufferCreateFlags(desc.storage_mode, desc.readback);
+  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible &&
+      !desc.readback) {
     allocation_info.pool = staging_buffer_pool_.get().pool;
   }
 

@@ -159,6 +159,18 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
                                image_copy           //
   );
 
+  // If the buffer is used for readback, then apply a transfer -> host memory
+  // barrier.
+  if (destination->GetDeviceBufferDescriptor().readback) {
+    vk::MemoryBarrier barrier;
+    barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+    barrier.dstAccessMask = vk::AccessFlagBits::eHostRead;
+
+    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                               vk::PipelineStageFlagBits::eHost, {}, 1,
+                               &barrier, 0, {}, 0, {});
+  }
+
   return true;
 }
 
