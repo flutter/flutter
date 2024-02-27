@@ -639,7 +639,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void initState() {
     super.initState();
-    if(widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       _focusNode.addListener((){
         if (!_focusNode.hasFocus) {
           _validate();
