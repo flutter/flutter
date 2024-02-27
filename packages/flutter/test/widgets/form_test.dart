@@ -1127,7 +1127,7 @@ void main() {
     expect(find.text('test_error'), findsNothing);
   });
 
-  testWidgets('AutovalidateMode.onFocusChange', (WidgetTester tester) async {
+  testWidgets('AutovalidateMode.onUnfocus', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
 
@@ -1141,7 +1141,7 @@ void main() {
             child: Center(
               child: Form(
                 key: formKey,
-                autovalidateMode: AutovalidateMode.onFocusChange,
+                autovalidateMode: AutovalidateMode.onUnfocus,
                 child: Material(
                   child: Column(
                     children: <Widget>[
