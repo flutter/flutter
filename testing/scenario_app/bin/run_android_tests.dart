@@ -199,6 +199,7 @@ Future<void> _run({
 
   late Process logcatProcess;
   late Future<int> logcatProcessExitCode;
+  bool seenImpeller = false;
 
   final IOSink logcat = File(logcatPath).openWrite();
   try {
@@ -221,6 +222,9 @@ Future<void> _run({
       logcatOutput.listen((String line) {
         // Always write to the full log.
         logcat.writeln(line);
+        if (enableImpeller && !seenImpeller) {
+          seenImpeller = line.contains('Using the Impeller rendering backend');
+        }
 
         // Conditionally parse and write to stderr.
         final AdbLogLine? adbLogLine = AdbLogLine.tryParse(line);
@@ -325,11 +329,13 @@ Future<void> _run({
         'am',
         'instrument',
         '-w',
-        if (smokeTestFullPath != null) '-e class $smokeTestFullPath',
-        'dev.flutter.scenarios.test/dev.flutter.TestRunner',
-        if (enableImpeller) '-e enable-impeller',
+        if (smokeTestFullPath != null)
+          '-e class $smokeTestFullPath',
+        if (enableImpeller)
+          '-e enable-impeller true',
         if (impellerBackend != null)
           '-e impeller-backend ${impellerBackend.name}',
+        'dev.flutter.scenarios.test/dev.flutter.TestRunner',
       ]);
       if (exitCode != 0) {
         panic(<String>['instrumented tests failed to run']);
@@ -366,6 +372,16 @@ Future<void> _run({
       await logcat.close();
       log('wrote logcat to $logcatPath');
     });
+
+    if (enableImpeller) {
+      await step('Validating Impeller...', () async {
+        if (!seenImpeller) {
+          panic(<String>[
+            '--enable-impeller was specified, but Impeller was not used.',
+          ]);
+        }
+      });
+    }
 
     await step('Symbolize stack traces', () async {
       final ProcessResult result = await pm.run(
