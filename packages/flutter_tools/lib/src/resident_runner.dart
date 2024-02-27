@@ -1943,7 +1943,7 @@ abstract class DevtoolsLauncher {
   /// The Dart Tooling Daemon URI for the DTD instance being served by
   /// DevTools server.
   ///
-  /// This will be null if the DevTools server is not served through Flutter 
+  /// This will be null if the DevTools server is not served through Flutter
   /// tools (e.g. if it is served from an IDE).
   Uri? get dtdUri => _dtdUri;
   Uri? _dtdUri;

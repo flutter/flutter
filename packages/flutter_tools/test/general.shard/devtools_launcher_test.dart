@@ -45,6 +45,40 @@ void main() {
     final DevToolsServerAddress? address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
+    expect(launcher.printDtdUri, false);
+    expect(launcher.dtdUri, isNull);
+  });
+
+  testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      dartExecutable: 'dart',
+      logger: logger,
+      botDetector: const FakeBotDetector(false),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'dart',
+            'devtools',
+            '--no-launch-browser',
+            // TODO(kenz): uncomment once the Dart CLI supports this flag. See
+            // https://github.com/dart-lang/sdk/issues/55034.
+            // '--print-dtd-uri',
+          ],
+          stdout: '''
+Serving the Dart Tooling Daemon at ws://127.0.0.1:53449/
+Serving DevTools at http://127.0.0.1:9100.
+''',
+          completer: completer,
+        ),
+      ]),
+    )..printDtdUri = true;
+
+    final DevToolsServerAddress? address = await launcher.serve();
+    expect(address?.host, '127.0.0.1');
+    expect(address?.port, 9100);
+    expect(launcher.printDtdUri, true);
+    expect(launcher.dtdUri?.toString(), 'ws://127.0.0.1:53449/');
   });
 
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
