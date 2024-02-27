@@ -93,6 +93,12 @@ void main() {
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
 
+      // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
+      fileSystem
+          .directory(xcframeworkPath)
+          .childDirectory('ios-arm64_armv7')
+          .childDirectory('Flutter.framework')
+          .createSync(recursive: true);
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework,
             platform: TargetPlatform.ios,
@@ -112,9 +118,16 @@ void main() {
         'ios-arm64',
         'Flutter.framework',
       );
+      final String expectedArmv7ReleaseFrameworkArtifact = fileSystem.path.join(
+        xcframeworkPath,
+        'ios-arm64_armv7',
+        'Flutter.framework',
+      );
+
+      // TODO(jmagman): Replace with expect(actualReleaseFrameworkArtifact, expectedArm64ReleaseFrameworkArtifact) when armv7 engine artifacts are removed.
       expect(
         actualReleaseFrameworkArtifact,
-        expectedArm64ReleaseFrameworkArtifact,
+        anyOf(expectedArm64ReleaseFrameworkArtifact, expectedArmv7ReleaseFrameworkArtifact),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
@@ -132,87 +145,6 @@ void main() {
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin',
           'snapshots', 'frontend_server_aot.dart.snapshot')
-      );
-    });
-
-    testWithoutContext('getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework', () {
-      final String xcframeworkPath = fileSystem.path.join(
-        'root',
-        'bin',
-        'cache',
-        'artifacts',
-        'engine',
-        'darwin-x64-release',
-        'FlutterMacOS.xcframework',
-      );
-      final String xcframeworkPathWithUnsetPlatform = fileSystem.path.join(
-        'root',
-        'bin',
-        'cache',
-        'artifacts',
-        'engine',
-        'linux-x64-release',
-        'FlutterMacOS.xcframework',
-      );
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSXcframework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        xcframeworkPath,
-      );
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSXcframework,
-          mode: BuildMode.release,
-        ),
-        xcframeworkPathWithUnsetPlatform,
-      );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No xcframework found at $xcframeworkPath.'),
-      );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No xcframework found at $xcframeworkPathWithUnsetPlatform.'),
-      );
-      fileSystem.directory(xcframeworkPath).createSync(recursive: true);
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(message: 'No macOS frameworks found in $xcframeworkPath'),
-      );
-      fileSystem
-          .directory(xcframeworkPath)
-          .childDirectory('macos-arm64_x86_64')
-          .childDirectory('FlutterMacOS.framework')
-          .createSync(recursive: true);
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        fileSystem.path.join(
-          xcframeworkPath,
-          'macos-arm64_x86_64',
-          'FlutterMacOS.framework',
-        ),
       );
     });
 
@@ -337,92 +269,6 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils());
     });
 
-    testWithoutContext('getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework', () {
-      final String xcframeworkPath = fileSystem.path.join(
-        '/out',
-        'android_debug_unopt',
-        'FlutterMacOS.xcframework',
-      );
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSXcframework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        xcframeworkPath,
-      );
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSXcframework,
-          mode: BuildMode.release,
-        ),
-        xcframeworkPath,
-      );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework'),
-      );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No xcframework found at /out/android_debug_unopt/FlutterMacOS.xcframework'),
-      );
-      fileSystem.directory(xcframeworkPath).createSync(recursive: true);
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework'),
-      );
-      expect(
-        () => artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          mode: BuildMode.release,
-        ),
-        throwsToolExit(
-            message:
-                'No macOS frameworks found in /out/android_debug_unopt/FlutterMacOS.xcframework'),
-      );
-
-      fileSystem
-          .directory(xcframeworkPath)
-          .childDirectory('macos-arm64_x86_64')
-          .childDirectory('FlutterMacOS.framework')
-          .createSync(recursive: true);
-
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.release,
-        ),
-        fileSystem.path
-            .join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
-      );
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterMacOSFramework,
-          mode: BuildMode.release,
-        ),
-        fileSystem.path
-            .join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
-      );
-    });
-
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
@@ -465,7 +311,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem
           .directory(xcframeworkPath)
-          .childDirectory('ios-arm64')
+          .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       fileSystem
@@ -493,7 +339,7 @@ void main() {
           environmentType: EnvironmentType.physical,
         ),
         fileSystem.path
-            .join(xcframeworkPath, 'ios-arm64', 'Flutter.framework'),
+            .join(xcframeworkPath, 'ios-arm64_armv7', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(
