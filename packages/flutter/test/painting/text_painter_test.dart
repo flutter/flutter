@@ -1632,7 +1632,7 @@ void main() {
       expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 10 + 10 * 7.5);
     });
 
-    test('force strut height', () {
+    test('strut no half leading + force strut height', () {
       const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
       final TextPainter painter = TextPainter(
         textDirection: TextDirection.ltr,
@@ -1645,6 +1645,34 @@ void main() {
         painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
         const <ui.TextBox>[TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr)],
       );
+    });
+
+    test('strut half leading + force strut height', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true, leadingDistribution: TextLeadingDistribution.even);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 45 + 7.5;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr)],
+      );
+    });
+
+   test('force strut height applies to widget spans', () {
+      const Size placeholderSize = Size(1000, 1000);
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const WidgetSpan(child: SizedBox()),
+        strutStyle: strut,
+      )
+      ..setPlaceholderDimensions(const <PlaceholderDimensions>[PlaceholderDimensions(size: placeholderSize, alignment: PlaceholderAlignment.bottom)])
+      ..layout();
+      expect(painter.height, 100);
     });
   }, skip: kIsWeb && !isCanvasKit); // [intended] strut spport for HTML renderer https://github.com/flutter/flutter/issues/32243.
 

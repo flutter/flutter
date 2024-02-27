@@ -683,12 +683,6 @@ class TextPainter {
     }
   }
 
-  @Deprecated(  // flutter_ignore: deprecation_syntax (see analyze.dart)
-    'The disableStrutHalfLeading flag is for internal migration purposes only and should not be used.'
-  )
-  /// Migration only flag, do not use.
-  static bool disableStrutHalfLeading = true;
-
   // Whether textWidthBasis has changed after the most recent `layout` call.
   bool _debugNeedsRelayout = true;
   // The result of the most recent `layout` call.
@@ -1024,25 +1018,6 @@ class TextPainter {
   ui.ParagraphStyle _createParagraphStyle([ TextAlign? textAlignOverride ]) {
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     final TextStyle baseStyle = _text?.style ?? const TextStyle();
-    final StrutStyle? strutStyle = _strutStyle;
-
-    final bool applyMigration = !kIsWeb && TextPainter.disableStrutHalfLeading
-                             && strutStyle != null && (strutStyle.forceStrutHeight ?? false)
-                             && strutStyle.leadingDistribution == TextLeadingDistribution.even;
-    final StrutStyle? strutStyleForMigration = !applyMigration
-      ? strutStyle
-      : StrutStyle(
-        fontFamily: strutStyle.fontFamily,
-        fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: strutStyle.fontSize,
-        height: strutStyle.height,
-        leadingDistribution: TextLeadingDistribution.proportional,
-        leading: strutStyle.leading,
-        fontWeight: strutStyle.fontWeight,
-        fontStyle: strutStyle.fontStyle,
-        forceStrutHeight: strutStyle.forceStrutHeight,
-      );
-
     return baseStyle.getParagraphStyle(
       textAlign: textAlignOverride ?? textAlign,
       textDirection: textDirection,
@@ -1051,7 +1026,7 @@ class TextPainter {
       textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
-      strutStyle: strutStyleForMigration,
+      strutStyle: _strutStyle,
     );
   }
 
