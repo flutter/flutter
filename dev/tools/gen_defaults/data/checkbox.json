@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v0_206",
 
   "md.comp.checkbox.container.size": 18.0,
   "md.comp.checkbox.error.focus.state-layer.color": "error",
@@ -8,6 +8,9 @@
   "md.comp.checkbox.error.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
   "md.comp.checkbox.error.pressed.state-layer.color": "error",
   "md.comp.checkbox.error.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
+  "md.comp.checkbox.focus.indicator.color": "secondary",
+  "md.comp.checkbox.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.checkbox.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.checkbox.icon.size": 18.0,
   "md.comp.checkbox.selected.container.color": "primary",
   "md.comp.checkbox.selected.disabled.container.color": "onSurface",

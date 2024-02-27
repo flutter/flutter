@@ -586,7 +586,7 @@ class _SnackBarState extends State<SnackBar> {
               primary: colorScheme.onPrimary,
               secondary: buttonColor,
               surface: colorScheme.onSurface,
-              background: defaults.backgroundColor!,
+              background: defaults.backgroundColor,
               error: colorScheme.onError,
               onPrimary: colorScheme.primary,
               onSecondary: colorScheme.secondary,
