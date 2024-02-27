@@ -16,6 +16,6 @@ source_set("procs") {
 
   public_deps = [
     "//flutter/fml",
-    "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
   ]
 }
