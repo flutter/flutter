@@ -1446,7 +1446,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.primary.withOpacity(0.12)),
+      paints..circle(color: colors.primary.withOpacity(0.1)),
       reason: 'Default inactive pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1456,7 +1456,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12)),
+      paints..circle(color: colors.onSurface.withOpacity(0.1)),
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1467,7 +1467,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12)),
+      paints..circle(color: colors.onSurface.withOpacity(0.1)),
       reason: 'Focused Checkbox should use default focused overlay color',
     );
 
@@ -2025,7 +2025,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.1))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -2057,7 +2057,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.1))
         ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();

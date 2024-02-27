@@ -330,9 +330,17 @@ class Radio<T> extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [RadioThemeData.overlayColor] is used. If that is also null,
-  /// then the value of [ColorScheme.secondary] with alpha
+  /// then in Material 2, the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
-  /// is used in the pressed, focused and hovered state.
+  /// is used in the pressed, focused and hovered state. In Material3, the default
+  /// values are:
+  ///   * selected
+  ///     * pressed - Theme.colorScheme.onSurface(0.1)
+  ///     * hovered - Theme.colorScheme.primary(0.08)
+  ///     * focused - Theme.colorScheme.primary(0.1)
+  ///   * pressed - Theme.colorScheme.primary(0.1)
+  ///   * hovered - Theme.colorScheme.onSurface(0.08)
+  ///   * focused - Theme.colorScheme.onSurface(0.1)
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.radio.splashRadius}
@@ -672,24 +680,24 @@ class _RadioDefaultsM3 extends RadioThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;
     });

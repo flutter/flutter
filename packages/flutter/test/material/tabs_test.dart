@@ -429,7 +429,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]));
   });
 
   testWidgets('Tab color - match', (WidgetTester tester) async {
@@ -439,7 +439,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(color: const Color(0xff2196f3), child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.white));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.white));
   });
 
   testWidgets('Tab color - transparency', (WidgetTester tester) async {
@@ -449,7 +449,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(theme: theme, home: Material(type: MaterialType.transparency, child: tabBar)),
     );
-    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
+    expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]));
   });
 
   testWidgets('TabBar default selected/unselected label style (primary)', (WidgetTester tester) async {
@@ -592,7 +592,7 @@ void main() {
       paints
         // Divider
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
         )
         // Tab indicator
         ..line(
@@ -626,7 +626,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -636,7 +636,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
   });
@@ -663,7 +663,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -673,7 +673,7 @@ void main() {
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
   });
 
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
@@ -4368,7 +4368,7 @@ void main() {
     await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT'));
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox, paints..line(
-      color: material3 ? theme.colorScheme.surfaceVariant : Colors.white,
+      color: material3 ? theme.colorScheme.outlineVariant : Colors.white,
     ));
   });
 
@@ -4380,7 +4380,7 @@ void main() {
      await tester.pumpWidget(buildLeftRightApp(themeData: theme, tabs: tabs, value: 'LEFT', automaticIndicatorColorAdjustment: false));
      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
      expect(tabBarBox, paints..line(
-       color: material3 ? theme.colorScheme.surfaceVariant : const Color(0xff2196f3),
+       color: material3 ? theme.colorScheme.outlineVariant : const Color(0xff2196f3),
      ));
   });
 
@@ -6192,14 +6192,14 @@ void main() {
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
         ))
     );
     expect(
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ))
     );
 
@@ -6210,7 +6210,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
         ),
     );
 
@@ -6221,7 +6221,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
   });
@@ -6241,7 +6241,7 @@ void main() {
       inkFeatures,
       isNot(paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ))
     );
 
@@ -6252,7 +6252,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
 
@@ -6267,7 +6267,7 @@ void main() {
       inkFeatures,
       paints
         ..rect(
-          color: theme.colorScheme.primary.withOpacity(0.12),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
     );
   });
