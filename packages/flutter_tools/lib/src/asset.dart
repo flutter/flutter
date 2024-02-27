@@ -425,7 +425,7 @@ class ManifestAssetBundle implements AssetBundle {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
         inputFiles.add(variantFile);
         assert(variantFile.existsSync());
-        entries[variant.entryUri.path] ??= AssetBundleEntry(
+        entries[variant.entryUri.path] = AssetBundleEntry(
           DevFSFileContent(variantFile),
           kind: variant.kind,
           transformers: variant.transformers,
@@ -459,7 +459,7 @@ class ManifestAssetBundle implements AssetBundle {
         for (final _Asset variant in assetsMap[asset]!) {
           final File variantFile = variant.lookupAssetFile(_fileSystem);
           assert(variantFile.existsSync());
-          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(
+          deferredComponentsEntries[componentName]![variant.entryUri.path] = AssetBundleEntry(
             DevFSFileContent(variantFile),
             kind: AssetKind.regular,
             transformers: variant.transformers,
@@ -478,7 +478,7 @@ class ManifestAssetBundle implements AssetBundle {
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
-      entries[asset.entryUri.path] ??= AssetBundleEntry(
+      entries[asset.entryUri.path] = AssetBundleEntry(
         DevFSFileContent(assetFile),
         kind: asset.kind,
         transformers: const <AssetTransformerEntry>[],
@@ -487,7 +487,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     // Update wildcard directories we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
-      _wildcardDirectories[uri] ??= _fileSystem.directory(uri);
+      _wildcardDirectories[uri] = _fileSystem.directory(uri);
     }
 
     final Map<String, List<String>> assetManifest =

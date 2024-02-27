@@ -519,6 +519,7 @@ class FakeDevFS extends Fake implements DevFS {
     String? target,
     AssetBundle? bundle,
     DateTime? firstBuildTime,
+    bool bundleDirty = false,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,

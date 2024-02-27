@@ -576,6 +576,7 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
+        bundleDirty: bundleDirty,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
