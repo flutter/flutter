@@ -112,18 +112,4 @@ void main() {
     State createState() => _MyWidgetState();
   }
 
-  class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
-
-    @override
-    Widget build(BuildContext context) {
-      return ColoredBox(
-        key: key,
-        color: widget.evaluator(this) ? trueColor : falseColor,
-        child: _InnerWidget(
-          onValueChanged: updateMaterialState(widget.materialState),
-          controller: widget.controller,
-        ),
-      );
-    }
-  }
 }

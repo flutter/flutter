@@ -53,11 +53,6 @@ import 'material_state.dart';
 ///  * [WidgetStateMixin], the generic version of `MaterialStatesController`
 ///    that can be used with non-Material widgets.
 @optionalTypeArgs
-@Deprecated(
-  'Use WidgetStateMixin instead. '
-  'Moved to the Widgets layer to make code available outside of Material. '
-  'This feature was deprecated after v3.19.0-0.3.pre.'
-)
 mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Managed set of active [MaterialState] values; designed to be passed to
   /// [MaterialStateProperty.resolve] methods.
