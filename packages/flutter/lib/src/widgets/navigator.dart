@@ -2897,13 +2897,8 @@ enum _RouteLifecycle {
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
 /// Placeholder for a route.
-abstract class _RoutePlaceholder {
+class _RoutePlaceholder {
   const _RoutePlaceholder();
-}
-
-/// Not announced route.
-class _NotAnnounced extends _RoutePlaceholder {
-  const _NotAnnounced();
 }
 
 class _RouteEntry extends RouteTransitionRecord {
@@ -2941,10 +2936,12 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
+  static final _RoutePlaceholder notAnnounced = const _RoutePlaceholder();
+
   _RouteLifecycle currentState;
-  _RoutePlaceholder? lastAnnouncedPreviousRoute = const _NotAnnounced(); // last argument to Route.didChangePrevious
-  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_NotAnnounced>(const _NotAnnounced()); // last argument to Route.didPopNext
-  _RoutePlaceholder? lastAnnouncedNextRoute = const _NotAnnounced(); // last argument to Route.didChangeNext
+  _RoutePlaceholder? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_RoutePlaceholder>(notAnnounced); // last argument to Route.didPopNext
+  _RoutePlaceholder? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
