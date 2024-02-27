@@ -16,7 +16,11 @@ public class TestRunner extends AndroidJUnitRunner {
     String[] engineArguments = null;
     if ("true".equals(arguments.getString("enable-impeller"))) {
       // Set up the global settings object so that Impeller is enabled for all tests.
-      engineArguments = new String[] {"--enable-impeller=true"};
+      engineArguments =
+          new String[] {
+            "--enable-impeller=true",
+            "--impeller-backend=" + arguments.getString("impeller-backend", "vulkan")
+          };
     }
     // For consistency, just always initilaize FlutterJNI etc.
     FlutterInjector.instance().flutterLoader().startInitialization(getTargetContext());
