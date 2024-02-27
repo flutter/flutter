@@ -186,7 +186,7 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
   s.osx.deployment_target = '10.14'
   s.vendored_frameworks   = 'FlutterMacOS.framework'
