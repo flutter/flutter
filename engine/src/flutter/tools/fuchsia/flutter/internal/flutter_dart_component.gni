@@ -7,8 +7,8 @@ import("//flutter/tools/fuchsia/dart/config.gni")
 import("//flutter/tools/fuchsia/dart/dart.gni")
 import("//flutter/tools/fuchsia/dart/dart_package_config.gni")
 import("//flutter/tools/fuchsia/dart/kernel/dart_kernel.gni")
-import("//flutter/tools/fuchsia/gn-sdk/cmc.gni")
-import("//flutter/tools/fuchsia/gn-sdk/component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/cmc.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/component.gni")
 
 # Defines a component which will run in a flutter_runner or dart_runner
 #

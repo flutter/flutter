@@ -6,7 +6,7 @@ import("//build/fuchsia/sdk.gni")
 
 import("//flutter/tools/fuchsia/dart/dart_component.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
-import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
 dart_library("lib") {
   testonly = true

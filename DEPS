@@ -254,6 +254,10 @@ vars = {
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
   'fuchsia_test_scripts_version': 'vf8imeAzGv_gjYQDoqub2laI-6nkB3gQNiGuVaFForMC',
+
+  # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
+  # used altogether with fuchsia-sdk to generate gn based build rules.
+  'fuchsia_gn_sdk_version': 'l8zShEOXGGjtLYRulEX5CjT2RemKvUPOT6L-uXy41tMC',
 }
 
 gclient_gn_args_file = 'src/third_party/dart/build/config/gclient_args.gni'
@@ -1017,6 +1021,16 @@ deps = {
        }
      ],
      'condition': 'run_fuchsia_emu',
+     'dep_type': 'cipd',
+   },
+
+  'src/flutter/tools/fuchsia/gn-sdk': {
+     'packages': [
+       {
+        'package': 'chromium/fuchsia/gn-sdk',
+        'version': Var('fuchsia_gn_sdk_version'),
+       }
+     ],
      'dep_type': 'cipd',
    },
 

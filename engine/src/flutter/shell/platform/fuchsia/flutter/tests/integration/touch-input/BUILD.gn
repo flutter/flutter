@@ -6,7 +6,7 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
-import("//flutter/tools/fuchsia/gn-sdk/package.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
 group("tests") {
   testonly = true
