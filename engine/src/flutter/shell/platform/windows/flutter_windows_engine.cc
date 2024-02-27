@@ -183,14 +183,6 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::make_unique<BinaryMessengerImpl>(messenger_->ToRef());
   message_dispatcher_ =
       std::make_unique<IncomingMessageDispatcher>(messenger_->ToRef());
-  message_dispatcher_->SetMessageCallback(
-      kAccessibilityChannelName,
-      [](FlutterDesktopMessengerRef messenger,
-         const FlutterDesktopMessage* message, void* data) {
-        FlutterWindowsEngine* engine = static_cast<FlutterWindowsEngine*>(data);
-        engine->HandleAccessibilityMessage(messenger, message);
-      },
-      static_cast<void*>(this));
 
   texture_registrar_ =
       std::make_unique<FlutterWindowsTextureRegistrar>(this, gl_);
@@ -219,6 +211,11 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   // https://github.com/flutter/flutter/issues/71099
   internal_plugin_registrar_ =
       std::make_unique<PluginRegistrar>(plugin_registrar_.get());
+
+  accessibility_plugin_ = std::make_unique<AccessibilityPlugin>(this);
+  AccessibilityPlugin::SetUp(messenger_wrapper_.get(),
+                             accessibility_plugin_.get());
+
   cursor_handler_ =
       std::make_unique<CursorHandler>(messenger_wrapper_.get(), this);
   platform_handler_ =
@@ -765,7 +762,9 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
   if (engine_ && semantics_enabled_ != enabled) {
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
-    view_->UpdateSemanticsEnabled(enabled);
+    if (view_) {
+      view_->UpdateSemanticsEnabled(enabled);
+    }
   }
 }
 
@@ -811,27 +810,6 @@ void FlutterWindowsEngine::SendAccessibilityFeatures() {
 
   embedder_api_.UpdateAccessibilityFeatures(
       engine_, static_cast<FlutterAccessibilityFeature>(flags));
-}
-
-void FlutterWindowsEngine::HandleAccessibilityMessage(
-    FlutterDesktopMessengerRef messenger,
-    const FlutterDesktopMessage* message) {
-  const auto& codec = StandardMessageCodec::GetInstance();
-  auto data = codec.DecodeMessage(message->message, message->message_size);
-  EncodableMap map = std::get<EncodableMap>(*data);
-  std::string type = std::get<std::string>(map.at(EncodableValue("type")));
-  if (type.compare("announce") == 0) {
-    if (semantics_enabled_) {
-      EncodableMap data_map =
-          std::get<EncodableMap>(map.at(EncodableValue("data")));
-      std::string text =
-          std::get<std::string>(data_map.at(EncodableValue("message")));
-      std::wstring wide_text = fml::Utf8ToWideString(text);
-      view_->AnnounceAlert(wide_text);
-    }
-  }
-  SendPlatformMessageResponse(message->response_handle,
-                              reinterpret_cast<const uint8_t*>(""), 0);
 }
 
 void FlutterWindowsEngine::RequestApplicationQuit(HWND hwnd,

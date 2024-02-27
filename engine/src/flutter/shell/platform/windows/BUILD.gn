@@ -41,6 +41,8 @@ source_set("flutter_windows_source") {
   sources = [
     "accessibility_bridge_windows.cc",
     "accessibility_bridge_windows.h",
+    "accessibility_plugin.cc",
+    "accessibility_plugin.h",
     "compositor.h",
     "compositor_opengl.cc",
     "compositor_opengl.h",
