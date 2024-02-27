@@ -2264,11 +2264,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   SelectionResult _handleClearSelection() {
     _textSelectionStart = null;
     _textSelectionEnd = null;
-    // debugPrint('clear? ${range.textInside(fullText)}');
-    // debugPrint('clear selection $_selectableContainsOriginTextBoundary');
-    if (range.textInside(fullText).contains('This is some normal text in a text widget.') && _selectableContainsOriginTextBoundary) {
-      debugPrint('insanityyy');
-    }
     _selectableContainsOriginTextBoundary = false;
     return SelectionResult.none;
   }
