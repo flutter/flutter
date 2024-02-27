@@ -9,12 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   LiveTestWidgetsFlutterBinding();
   testWidgets('ReportTiming callback records the sendFramesToEngine when it was scheduled', (WidgetTester tester) async {
-    // At the beginning of a `testWidgets`, `TestWidgetsFlutterBinding` pumps a
-    // fixed dummy widget, then `resetFirstFrameSent`. Although the dummy widget
-    // is rendered, its reportTiming callback from the engine has not arrived
-    // yet.
-    expect(tester.binding.sendFramesToEngine, true);
+    // This test needs LiveTestWidgetsFlutterBinding for multiple reasons.
+    // First, this was the environment that this bug was discovered.
+    // Second, LiveTestWidgetsFlutterBinding doesn't override
+    // scheduleWarmUpFrame, so that the test can start with no frames rendered
+    // allowing deferFirstFrame to work (see below).
 
+    // At the beginning of a `testWidgets`, `TestWidgetsFlutterBinding` pumps a
+    // fixed dummy widget using `runApp`, then `resetFirstFrameSent`. Although
+    // the dummy widget is rendered, its reportTiming callback from the engine
+    // has not arrived yet.
+    //
+    // Note that the `runApp` call also schedules a warm up frame, which would
+    // have directly rendered the frame if the test had used
+    // `AutomatedTestWidgetsFlutterBinding`.
+    expect(tester.binding.sendFramesToEngine, true);
     // Push the widget with runApp instead of tester.pump, avoiding rendering a
     // frame is rendered, which is needed for `deferFirstFrame` later to work.
     runApp(const DummyWidget());
