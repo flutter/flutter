@@ -43,7 +43,14 @@ class StubPictureRenderer implements PictureRenderer {
     );
   }
 
+  @override
+  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
+    clipRequests[picture] = clip;
+    return picture;
+  }
+
   List<ScenePicture> renderedPictures = <ScenePicture>[];
+  Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
 void testMain() {
@@ -148,5 +155,22 @@ void testMain() {
     expect(stubPictureRenderer.renderedPictures.length, 2);
     expect(stubPictureRenderer.renderedPictures.first, pictures.first);
     expect(stubPictureRenderer.renderedPictures.last, pictures.last);
+  });
+
+  test('SceneView clips pictures that are outside the window screen', () async {
+      final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(
+        -50,
+        -50,
+        100,
+        120,
+      ));
+
+      final EngineRootLayer rootLayer = EngineRootLayer();
+      rootLayer.slices.add(PictureSlice(picture));
+      final EngineScene scene = EngineScene(rootLayer);
+      await sceneView.renderScene(scene, null);
+
+      expect(stubPictureRenderer.renderedPictures.length, 1);
+      expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
   });
 }
