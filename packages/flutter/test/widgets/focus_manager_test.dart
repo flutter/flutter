@@ -2109,23 +2109,20 @@ void main() {
   });
 
   group('focusability listener', () {
-    bool? isFocusable;
     int focusabilityChangeCount = 0;
-    void focusabilityCallback(bool value) {
-      isFocusable = value;
+    void focusabilityCallback() {
       focusabilityChangeCount += 1;
     }
 
     setUp(() {
-      isFocusable = null;
       focusabilityChangeCount = 0;
     });
 
     testWidgets('canRequestFocus affects focusability of the node', (WidgetTester tester) async {
-      bool? node2Focusable;
-      void node2Callback(bool newValue) => node2Focusable = newValue;
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
-      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..onFocusabilityChanged = node2Callback;
+      int node2CallbackCounter = 0;
+      void node2Callback() { node2CallbackCounter += 1; }
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..focusabilityListenable.addListener(node2Callback);
 
       addTearDown(node1.dispose);
       addTearDown(node2.dispose);
@@ -2140,33 +2137,38 @@ void main() {
         ),
       );
 
-      expect(node2Focusable, isNull);
-      expect(isFocusable, isNull);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
 
       node1.canRequestFocus = false;
-      expect(node2Focusable, isNull);
-      expect(isFocusable, isFalse);
+      expect(node1.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
 
       node1.canRequestFocus = true;
-      expect(node2Focusable, isNull);
-      expect(isFocusable, isTrue);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
 
       node2.canRequestFocus = false;
-      expect(node2Focusable, isFalse);
-      expect(isFocusable, isTrue);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isFalse);
+      expect(node2CallbackCounter, 1);
 
       node2.canRequestFocus = true;
-      expect(node2Focusable, isTrue);
-      expect(isFocusable, isTrue);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
     });
 
     testWidgets('canRequestFocus = false invokes the callback on mount', (WidgetTester tester) async {
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1', canRequestFocus: false)..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1', canRequestFocus: false)..focusabilityListenable.addListener(focusabilityCallback);
       await tester.pumpWidget(
         Focus(
           focusNode: node1,
@@ -2174,19 +2176,19 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isFalse);
+      expect(node1.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
 
       node1.canRequestFocus = true;
-      expect(isFocusable, isTrue);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
     });
 
     testWidgets('descendantsAreFocusable affects focusability of the descendants', (WidgetTester tester) async {
-      bool? node2Focusable;
-      void node2Callback(bool newValue) => node2Focusable = newValue;
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
-      final FocusNode node2 = FocusNode(debugLabel: 'node 2', descendantsAreFocusable: false)..onFocusabilityChanged = node2Callback;
+      int node2CallbackCounter = 0;
+      void node2Callback() { node2CallbackCounter += 1; }
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2', descendantsAreFocusable: false)..focusabilityListenable.addListener(node2Callback);
 
       addTearDown(node1.dispose);
       addTearDown(node2.dispose);
@@ -2201,33 +2203,37 @@ void main() {
         ),
       );
 
-      expect(node2Focusable, isNull);
-      expect(isFocusable, isNull);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
 
       node1.descendantsAreFocusable = false;
-      expect(node2Focusable, isFalse);
-      expect(isFocusable, isNull);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isFalse);
+      expect(node2CallbackCounter, 1);
 
       node1.descendantsAreFocusable = true;
-      expect(node2Focusable, isTrue);
-      expect(isFocusable, isNull);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
 
       node2.descendantsAreFocusable = false;
-      expect(node2Focusable, isTrue);
-      expect(isFocusable, isNull);
+      expect(node1.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
     });
 
     testWidgets('Reparenting affects focusability of the node', (WidgetTester tester) async {
-      bool? node3Focusable;
-      void node3Callback(bool newValue) => node3Focusable = newValue;
+      int node3CallbackCounter = 0;
+      void node3Callback() { node3CallbackCounter += 1; }
       final FocusNode node1 = FocusNode(debugLabel: 'node 1');
       final FocusNode node2 = FocusNode(debugLabel: 'node 2', descendantsAreFocusable: false);
-      final FocusNode node3 = FocusNode(debugLabel: 'node 3')..onFocusabilityChanged = node3Callback;
-      final FocusNode node4 = FocusNode(debugLabel: 'node 4')..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node3 = FocusNode(debugLabel: 'node 3')..focusabilityListenable.addListener(node3Callback);
+      final FocusNode node4 = FocusNode(debugLabel: 'node 4')..focusabilityListenable.addListener(focusabilityCallback);
       addTearDown(node1.dispose);
       addTearDown(node2.dispose);
       addTearDown(node3.dispose);
@@ -2248,9 +2254,11 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isFalse);
+      // The listeners are notified on reparent.
+      expect(node4.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
-      expect(node3Focusable, isFalse);
+      expect(node3.focusabilityListenable.value, isFalse);
+      expect(node3CallbackCounter, 1);
 
       // Swap node 1 and node 3.
       await tester.pumpWidget(
@@ -2268,9 +2276,10 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isFalse);
+      expect(node4.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
-      expect(node3Focusable, isTrue);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
 
       // Swap node 1 and node 2.
       await tester.pumpWidget(
@@ -2288,9 +2297,10 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isTrue);
+      expect(node4.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
-      expect(node3Focusable, isTrue);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
 
       // Swap node 2 and node 4.
       await tester.pumpWidget(
@@ -2308,9 +2318,10 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isTrue);
+      expect(node4.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
-      expect(node3Focusable, isTrue);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
 
       // Return to the initial state
       await tester.pumpWidget(
@@ -2328,14 +2339,15 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isFalse);
+      expect(node4.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 3);
-      expect(node3Focusable, isFalse);
+      expect(node3.focusabilityListenable.value, isFalse);
+      expect(node3CallbackCounter, 3);
     });
 
     testWidgets('does not get called in dispose', (WidgetTester tester) async {
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
-      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..focusabilityListenable.addListener(focusabilityCallback);
 
       await tester.pumpWidget(
         Focus(
