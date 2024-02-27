@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   LiveTestWidgetsFlutterBinding();
   testWidgets('ReportTiming callback records the sendFramesToEngine when it was scheduled', (WidgetTester tester) async {
+    // Addresses https://github.com/flutter/flutter/issues/144261
     // This test needs LiveTestWidgetsFlutterBinding for multiple reasons.
     //
     // First, this was the environment that this bug was discovered.
@@ -29,18 +30,19 @@ void main() {
     // `resetFirstFrameSent`, the framework thinks no frames have been rendered.
 
     expect(tester.binding.sendFramesToEngine, true);
-    // Push the widget with runApp instead of tester.pump, avoiding rendering a
-    // frame, which is needed for `deferFirstFrame` later to work.
+    // Push the widget with `runApp` instead of `tester.pump`, avoiding
+    // rendering a frame, which is needed for `deferFirstFrame` later to work.
     runApp(const DummyWidget());
     // Verify that no widget tree is built and nothing is rendered.
     expect(find.text('First frame'), findsNothing);
-    // Defer the first frame, making sendFramesToEngine false, so that widget
+    // Defer the first frame, making `sendFramesToEngine` false, so that widget
     // tree will be built but not sent to the engine.
     tester.binding.deferFirstFrame();
     expect(tester.binding.sendFramesToEngine, false);
-    // Wait for the reportTiming callback (which completes the future below) to
-    // run. If the reportTiming callback were to assume that
-    // `sendFramesToEngine` is true, the callback would crash.
+    // Pump a frame, letting the reportTiming callback to run. If the
+    // reportTiming callback were to assume that `sendFramesToEngine` is true,
+    // the callback would crash.
+    await tester.pump(const Duration(milliseconds: 1));
     await tester.binding.waitUntilFirstFrameRasterized;
     expect(find.text('First frame'), findsOne);
   });
