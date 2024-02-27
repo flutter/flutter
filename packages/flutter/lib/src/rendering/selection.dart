@@ -389,6 +389,8 @@ class SelectParagraphSelectionEvent extends SelectionEvent {
   /// The position in global coordinates to select paragraph at.
   final Offset globalPosition;
 
+  /// Whether the selectable receiving the event should be absorbed into
+  /// an encompassing paragraph.
   final bool absorb;
 }
 

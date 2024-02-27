@@ -820,7 +820,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
           if (lastNextIndex != null && selectionAtStartOfSelectable) {
             startIndex = lastNextIndex + 1;
           } else {
-            startIndex = lastNextIndex == null ? 0 : index;
+            startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
           }
           for (int i = startIndex; i < index; i += 1) {
             final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
@@ -835,10 +835,17 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         return SelectionResult.previous;// return end?
       }
       if (selectables[index].value != existingGeometry) {
+        if (!foundStart && lastNextIndex == null) {
+          currentSelectionStartIndex = 0;
+          for (int i = 0; i < index; i += 1) {
+            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+          }
+        }
         currentSelectionEndIndex = index;
         // Geometry has changed as a result of select paragraph, need to clear the
         // selection of other selectables to keep selection in sync.
-        debugPrint('paragraph $currentSelectionStartIndex $currentSelectionEndIndex');
+        debugPrint('paragraph $currentSelectionStartIndex $currentSelectionEndIndex $foundStart $lastNextIndex');
         _flushInactiveSelections();
       }
       return SelectionResult.end;
