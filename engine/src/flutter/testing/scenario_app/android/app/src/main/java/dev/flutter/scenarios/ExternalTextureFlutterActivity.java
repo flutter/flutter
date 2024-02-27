@@ -11,6 +11,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
+import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
@@ -35,7 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.util.Supplier;
-import io.flutter.view.TextureRegistry;
+import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   private final CountDownLatch firstFrameLatch = new CountDownLatch(2);
 
   private long textureId = 0;
-  private TextureRegistry.SurfaceProducer surfaceProducer;
+  private SurfaceTextureEntry surfaceTextureEntry;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -142,18 +143,19 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   public void onPause() {
     surfaceViewRenderer.destroy();
     flutterRenderer.destroy();
-    surfaceProducer.release();
+    surfaceTextureEntry.release();
     super.onPause();
   }
 
   @Override
   public void onFlutterUiDisplayed() {
-    surfaceProducer =
-        Objects.requireNonNull(getFlutterEngine()).getRenderer().createSurfaceProducer();
-    surfaceProducer.setSize(SURFACE_WIDTH, SURFACE_HEIGHT);
-    flutterRenderer.attach(surfaceProducer.getSurface(), firstFrameLatch);
+    surfaceTextureEntry =
+        Objects.requireNonNull(getFlutterEngine()).getRenderer().createSurfaceTexture();
+    SurfaceTexture surfaceTexture = surfaceTextureEntry.surfaceTexture();
+    surfaceTexture.setDefaultBufferSize(SURFACE_WIDTH, SURFACE_HEIGHT);
+    flutterRenderer.attach(new Surface(surfaceTexture), firstFrameLatch);
     flutterRenderer.repaint();
-    textureId = surfaceProducer.id();
+    textureId = surfaceTextureEntry.id();
 
     super.onFlutterUiDisplayed();
   }
