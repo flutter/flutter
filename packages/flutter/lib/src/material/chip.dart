@@ -1191,6 +1191,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
           // Keeps the splash from being constrained to the icon alone.
           splashFactory: _UnconstrainedInkSplashFactory(Theme.of(context).splashFactory),
+          customBorder: const CircleBorder(),
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
