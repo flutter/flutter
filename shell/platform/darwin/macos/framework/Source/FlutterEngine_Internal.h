@@ -137,6 +137,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 - (void)addViewController:(FlutterViewController*)viewController;
 
 /**
+ * Notify the engine that a view for the given view controller has been loaded.
+ */
+- (void)viewControllerViewDidLoad:(FlutterViewController*)viewController;
+
+/**
  * Dissociate the given view controller from this engine.
  *
  * If the view controller is not associated with this engine, this call throws an

@@ -69,8 +69,9 @@
  * and can be used to perform additional work, such as mutating platform views. It is guaranteed be
  * called in the same CATransaction.
  */
-- (void)present:(nonnull NSArray<FlutterSurfacePresentInfo*>*)surfaces
-         notify:(nullable dispatch_block_t)notify;
+- (void)presentSurfaces:(nonnull NSArray<FlutterSurfacePresentInfo*>*)surfaces
+                 atTime:(CFTimeInterval)presentationTime
+                 notify:(nullable dispatch_block_t)notify;
 
 @end
 

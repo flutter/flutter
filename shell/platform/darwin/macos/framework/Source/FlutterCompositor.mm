@@ -69,10 +69,17 @@ bool FlutterCompositor::Present(FlutterViewId view_id,
     }
   }
 
-  [view.surfaceManager present:surfaces
-                        notify:^{
-                          PresentPlatformViews(view, layers, layers_count);
-                        }];
+  CFTimeInterval presentation_time = 0;
+
+  if (layers_count > 0 && layers[0]->presentation_time != 0) {
+    presentation_time = layers[0]->presentation_time / 1'000'000'000.0;
+  }
+
+  [view.surfaceManager presentSurfaces:surfaces
+                                atTime:presentation_time
+                                notify:^{
+                                  PresentPlatformViews(view, layers, layers_count);
+                                }];
 
   return true;
 }
