@@ -3459,7 +3459,6 @@ targets:
   - name: Mac framework_tests_impeller
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
