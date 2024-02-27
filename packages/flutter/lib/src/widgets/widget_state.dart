@@ -171,20 +171,10 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   static const WidgetStateColor transparent = _WidgetStateColorTransparent();
 }
 
-/// A [WidgetStateColor] created from a [WidgetPropertyResolver<Color>]
-/// callback alone.
-///
-/// If used as a regular color, the color resolved in the default state will
-/// be used.
-///
-/// Used by [WidgetStateColor.resolveWith].
 class _WidgetStateColor extends WidgetStateColor {
   _WidgetStateColor(this._resolve) : super(_resolve(_defaultStates).value);
 
   final WidgetPropertyResolver<Color> _resolve;
-
-  /// The default state for a component, the empty set of interaction states.
-  static const Set<WidgetState> _defaultStates = <WidgetState>{};
 
   @override
   Color resolve(Set<WidgetState> states) => _resolve(states);
@@ -241,8 +231,6 @@ abstract class WidgetStateMouseCursor extends MouseCursor implements WidgetState
 
   /// Returns a [MouseCursor] that's to be used when a component is in the
   /// specified state.
-  ///
-  /// This method should never return null.
   @override
   MouseCursor resolve(Set<WidgetState> states);
 
@@ -362,17 +350,11 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   ///   }),
   /// ),
   /// ```
-  static WidgetStateBorderSide resolveWith(WidgetPropertyResolver<BorderSide?> callback) =>
-      _WidgetStateBorderSide(callback);
+  static WidgetStateBorderSide resolveWith(WidgetPropertyResolver<BorderSide?> callback) {
+    return _WidgetStateBorderSide(callback);
+  }
 }
 
-/// A [WidgetStateBorderSide] created from a
-/// [WidgetPropertyResolver<BorderSide>] callback alone.
-///
-/// If used as a regular side, the side resolved in the default state will
-/// be used.
-///
-/// Used by [WidgetStateBorderSide.resolveWith].
 class _WidgetStateBorderSide extends WidgetStateBorderSide {
   const _WidgetStateBorderSide(this._resolve);
 
@@ -470,13 +452,6 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   TextStyle resolve(Set<WidgetState> states);
 }
 
-/// A [WidgetStateTextStyle] created from a [WidgetPropertyResolver<TextStyle>]
-/// callback alone.
-///
-/// If used as a regular text style, the style resolved in the default state will
-/// be used.
-///
-/// Used by [WidgetStateTextStyle.resolveWith].
 class _WidgetStateTextStyle extends WidgetStateTextStyle {
   const _WidgetStateTextStyle(this._resolve);
 
