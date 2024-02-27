@@ -34,6 +34,8 @@
   // FLTEnableSurfaceDebugInfo value in main bundle Info.plist.
   NSNumber* _enableSurfaceDebugInfo;
   CATextLayer* _infoLayer;
+
+  CFTimeInterval _lastPresentationTime;
 }
 
 /**
@@ -213,10 +215,35 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
   return size;
 }
 
-- (void)present:(NSArray<FlutterSurfacePresentInfo*>*)surfaces notify:(dispatch_block_t)notify {
+- (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
+                 atTime:(CFTimeInterval)presentationTime
+                 notify:(dispatch_block_t)notify {
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
   [commandBuffer commit];
   [commandBuffer waitUntilScheduled];
+
+  if (presentationTime > 0) {
+    // Enforce frame pacing. It seems that the target timestamp of CVDisplayLink does not
+    // exactly correspond to core animation deadline. Especially with 120hz, setting the frame
+    // contents too close after previous target timestamp will result in uneven frame pacing.
+    // Empirically setting the content in the second half of frame interval seems to work
+    // well for both 60hz and 120hz.
+    //
+    // The easiest way to ensure that the content is not set too early is to delay raster thread.
+    // At this point raster thread should be idle (the next frame vsync has not been signalled yet).
+    // This will show on a timeline as "FlutterCompositionPresentLayers" but should not cause jank
+    // because the waiting interval is calculated relative to presentation time.
+    //
+    // Alternative to blocking raster thread would be to copy all presentation info provided by
+    // embedder and schedule a presentation timer. This would require additional coordination with
+    // FlutterThreadSynchronizer.
+    CFTimeInterval minPresentationTime = (presentationTime + _lastPresentationTime) / 2.0;
+    CFTimeInterval now = CACurrentMediaTime();
+    if (now < minPresentationTime) {
+      [NSThread sleepForTimeInterval:minPresentationTime - now];
+    }
+  }
+  _lastPresentationTime = presentationTime;
 
   // Get the actual dimensions of the frame (relevant for thread synchronizer).
   CGSize size = GetRequiredFrameSize(surfaces);
