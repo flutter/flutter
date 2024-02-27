@@ -2025,45 +2025,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           }
         }
       }
-
-      if (positionWithinParagraphRect && !positionWithinLocalRect) {
-        debugPrint('inside paragraph but not local rect');
-        // Can we use normal logic? I think so.......
-      }
-      debugPrint('$positionWithinEncompassingParagraph $positionWithinParagraphRect $positionWithinLocalRect');
-
-      if (positionWithinLocalRect) {
-        debugPrint('inside local rect');
-      //   // Can use normal logic?. I think so......
-      //   if (_selectableContainsOriginTextBoundary) {
-      //     assert(existingSelectionStart != null && existingSelectionEnd != null);
-      //     final TextPosition rootPosition = (rootParagraph as RenderParagraph).getPositionForOffset(rootParagraphLocalPosition);
-      //     final _TextBoundaryRecord rootParagraphBoundary = _getParagraphBoundaryAtPosition(rootPosition, useRootText: true);
-      //     final TextPosition placeholderPosition = _getPositionInRootText();
-      //     final _TextBoundaryRecord paragraphBoundaryContainingPlaceholder = _getParagraphBoundaryAtPosition(placeholderPosition, useRootText: true);
-      //     final TextRange rootPlaceholderRange = TextRange(start: placeholderPosition.offset, end: placeholderPosition.offset + 1);
-      //     final TextRange? intersectRange = _intersect(rootPlaceholderRange, TextRange(start: rootParagraphBoundary.boundaryStart.offset, end: rootParagraphBoundary.boundaryEnd.offset));
-      //     final bool forwardSelection = existingSelectionEnd!.offset >= existingSelectionStart!.offset;
-
-      //     if (forwardSelection) {
-      //       final bool shouldSwapEdges = rootPosition.offset < paragraphBoundaryContainingPlaceholder.boundaryStart.offset;
-      //       if (shouldSwapEdges) {
-      //         debugPrint('swapping');
-      //         _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
-      //         _setSelectionPosition(position, isEnd: isEnd);
-      //         return SelectionResult.previous;
-      //       } else {
-      //         _setSelectionPosition(existingSelectionEnd, isEnd: isEnd);
-      //         return SelectionResult.end;
-      //       }
-      //     } else {
-
-      //     }
-      //   } else {
-
-      //   }
-      }
-      // assert(false);
     }
 
     if (!positionWithinParagraphRect && !_selectableContainsOriginTextBoundary) {
