@@ -7,7 +7,6 @@ import("//flutter/testing/rules/android.gni")
 _android_sources = [
   "app/build.gradle",
   "app/src/androidTest/java/dev/flutter/TestRunner.java",
-  "app/src/androidTest/java/dev/flutter/scenarios/EngineLaunchE2ETest.java",
   "app/src/androidTest/java/dev/flutter/scenarios/ExampleInstrumentedTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/DrawSolidBlueScreenTest.java",
   "app/src/androidTest/java/dev/flutter/scenariosui/ExternalTextureTests.java",
