@@ -196,8 +196,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       throwOnError: true,
       <String>[
         ...sharedCommandOptions,
-        if (buildMode == BuildMode.profile) '--no-minify',
-        ...compilerConfig.toCommandOptions(),
+        ...compilerConfig.toCommandOptions(buildMode),
         '-o',
         outputJSFile.path,
         environment.buildDir.childFile('app.dill').path, // dartfile
@@ -279,7 +278,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
 
-      ...compilerConfig.toCommandOptions(),
+      ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
       environment.buildDir.childFile('main.dart').path, // dartfile
