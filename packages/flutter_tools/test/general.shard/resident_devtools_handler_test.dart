@@ -429,22 +429,6 @@ void main() {
   });
 }
 
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  @override
-  DevToolsServerAddress? activeDevToolsServer;
-
-  @override
-  Uri? devToolsUrl;
-
-  @override
-  Future<DevToolsServerAddress?> serve() async => null;
-
-  @override
-  Future<void> get ready => readyCompleter.future;
-
-  Completer<void> readyCompleter = Completer<void>()..complete();
-}
-
 class FakeResidentRunner extends Fake implements ResidentRunner {
   @override
   bool supportsServiceProtocol = true;

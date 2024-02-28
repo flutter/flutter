@@ -42,11 +42,13 @@ void main() {
       ]),
     );
 
+    expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, false);
     final DevToolsServerAddress? address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
-    expect(launcher.printDtdUri, false);
     expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, false);
   });
 
   testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
@@ -74,11 +76,13 @@ Serving DevTools at http://127.0.0.1:9100.
       ]),
     )..printDtdUri = true;
 
+    expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, false);
     final DevToolsServerAddress? address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
-    expect(launcher.printDtdUri, true);
     expect(launcher.dtdUri?.toString(), 'ws://127.0.0.1:53449/');
+    expect(launcher.printDtdUri, true);
   });
 
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {

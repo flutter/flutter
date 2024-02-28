@@ -29,7 +29,7 @@ abstract class ResidentDevtoolsHandler {
   ///
   /// This will be null if the DevTools server is not served through Flutter
   /// tools (e.g. if it is served from an IDE).
-  Uri? get hostedDartToolingDaemon;
+  Uri? get dtdUri;
 
   /// Whether to print the Dart Tooling Daemon URI.
   ///
@@ -77,10 +77,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
-  Uri? get hostedDartToolingDaemon {
-    assert(!_readyToAnnounce || _devToolsLauncher?.dtdUri != null);
-    return _devToolsLauncher?.dtdUri;
-  }
+  Uri? get dtdUri => _devToolsLauncher?.dtdUri;
 
   @override
   bool get printDtdUri => _devToolsLauncher?.printDtdUri ?? false;
@@ -361,7 +358,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
-  Uri? get hostedDartToolingDaemon => null;
+  Uri? get dtdUri => null;
 
   @override
   bool get printDtdUri => false;

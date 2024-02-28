@@ -1516,7 +1516,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
       if (includeDevtools) {
         if (_residentDevtoolsHandler!.printDtdUri) {
-          final Uri? dtdUri = residentDevtoolsHandler!.hostedDartToolingDaemon;
+          final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
           if (dtdUri != null) {
             globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
           }
@@ -1940,7 +1940,7 @@ abstract class DevtoolsLauncher {
     }
   }
 
-  /// The Dart Tooling Daemon URI for the DTD instance being served by
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
   /// DevTools server.
   ///
   /// This will be null if the DevTools server is not served through Flutter
