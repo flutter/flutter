@@ -39,8 +39,10 @@ FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
 ENCODING = 'UTF-8'
 
+LOG_FILE = os.path.join(OUT_DIR, 'run_tests.log')
 logger = logging.getLogger(__name__)
-logger_handler = logging.StreamHandler()
+console_logger_handler = logging.StreamHandler()
+file_logger_handler = logging.FileHandler(LOG_FILE)
 
 
 # Override print so that it uses the logger instead of stdout directly.
@@ -953,7 +955,8 @@ def run_benchmark_tests(build_dir):
 def worker_init(queue, level):
   queue_handler = logging.handlers.QueueHandler(queue)
   log = logging.getLogger(__name__)
-  log.setLevel(level)
+  log.setLevel(logging.INFO)
+  queue_handler.setLevel(level)
   log.addHandler(queue_handler)
 
 
@@ -972,7 +975,12 @@ def run_engine_tasks_in_parallel(tasks):
     max_processes = 60
 
   queue = multiprocessing.Queue()
-  queue_listener = logging.handlers.QueueListener(queue, logger_handler)
+  queue_listener = logging.handlers.QueueListener(
+      queue,
+      console_logger_handler,
+      file_logger_handler,
+      respect_handler_level=True,
+  )
   queue_listener.start()
 
   failures = []
@@ -1166,12 +1174,23 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       default=False,
       help='Only emit output when there is an error.'
   )
+  parser.add_argument(
+      '--logs-dir',
+      dest='logs_dir',
+      type=str,
+      help='The directory that verbose logs will be copied to in --quiet mode.',
+  )
 
   args = parser.parse_args()
 
-  logger.addHandler(logger_handler)
-  if not args.quiet:
-    logger.setLevel(logging.INFO)
+  logger.addHandler(console_logger_handler)
+  logger.addHandler(file_logger_handler)
+  logger.setLevel(logging.INFO)
+  if args.quiet:
+    file_logger_handler.setLevel(logging.INFO)
+    console_logger_handler.setLevel(logging.WARNING)
+  else:
+    console_logger_handler.setLevel(logging.INFO)
 
   if args.type == 'all':
     types = all_types
@@ -1268,6 +1287,9 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   if 'impeller-golden' in types:
     run_impeller_golden_tests(build_dir)
+
+  if args.quiet and args.logs_dir:
+    shutil.copy(LOG_FILE, os.path.join(args.logs_dir, 'run_tests.log'))
 
   return 0 if success else 1
 
