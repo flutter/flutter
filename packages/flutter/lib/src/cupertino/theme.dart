@@ -63,7 +63,7 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
   }
 
@@ -83,7 +83,7 @@ class CupertinoTheme extends StatelessWidget {
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
@@ -103,7 +103,7 @@ class CupertinoTheme extends StatelessWidget {
   /// * [brightnessOf], which throws if no valid [CupertinoTheme] or
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
@@ -114,7 +114,7 @@ class CupertinoTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedCupertinoTheme(
+    return InheritedCupertinoTheme(
       theme: this,
       child: IconTheme(
         data: CupertinoIconThemeData(color: data.primaryColor),
@@ -130,12 +130,16 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-class _InheritedCupertinoTheme extends InheritedTheme {
-  const _InheritedCupertinoTheme({
+/// The InheritedCupertinoTheme
+class InheritedCupertinoTheme extends InheritedTheme {
+  /// The InheritedCupertinoTheme
+  const InheritedCupertinoTheme({
+    super.key,
     required this.theme,
     required super.child,
   });
 
+  /// The theme data.
   final CupertinoTheme theme;
 
   @override
@@ -144,7 +148,7 @@ class _InheritedCupertinoTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;
+  bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].
