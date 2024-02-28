@@ -4,8 +4,6 @@
 
 package dev.flutter.plugins.integration_test;
 
-import androidx.test.runner.AndroidJUnitRunner;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
