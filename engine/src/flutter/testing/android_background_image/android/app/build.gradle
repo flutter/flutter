@@ -24,7 +24,7 @@ android {
     }
     defaultConfig {
         applicationId 'dev.flutter.android_background_image'
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName '1.0'

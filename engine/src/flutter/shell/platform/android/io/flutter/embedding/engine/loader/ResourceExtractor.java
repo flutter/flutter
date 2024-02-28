@@ -4,8 +4,6 @@
 
 package io.flutter.embedding.engine.loader;
 
-import static java.util.Arrays.asList;
-
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -16,7 +14,6 @@ import androidx.annotation.WorkerThread;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.CancellationException;
@@ -26,7 +23,7 @@ import java.util.concurrent.ExecutionException;
 class ResourceExtractor {
   private static final String TAG = "ResourceExtractor";
   private static final String TIMESTAMP_PREFIX = "res_timestamp-";
-  private static final String[] SUPPORTED_ABIS = getSupportedAbis();
+  private static final String[] SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
 
   @SuppressWarnings("deprecation")
   static long getVersionCode(@NonNull PackageInfo packageInfo) {
@@ -247,17 +244,6 @@ class ResourceExtractor {
     byte[] buf = new byte[16 * 1024];
     for (int i; (i = in.read(buf)) >= 0; ) {
       out.write(buf, 0, i);
-    }
-  }
-
-  @SuppressWarnings("deprecation")
-  private static String[] getSupportedAbis() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      return Build.SUPPORTED_ABIS;
-    } else {
-      ArrayList<String> cpuAbis = new ArrayList<String>(asList(Build.CPU_ABI, Build.CPU_ABI2));
-      cpuAbis.removeAll(asList(null, ""));
-      return cpuAbis.toArray(new String[0]);
     }
   }
 }
