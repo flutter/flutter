@@ -1,4 +1,4 @@
-Signature: 3b1064ea4b1586797cc4541abad51d3e
+Signature: da2201e1be5beefb3f9907bd8b7c2cfe
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3963,7 +3963,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkUniformHandler.h
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/VulkanExtensions.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/opts/SkSwizzler_opts.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/opts/SkSwizzler_opts.inc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkBitmapKey.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFDocumentPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -4267,7 +4267,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkUniformHandler.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkVaryingHandler.h
 FILE: ../../../flutter/third_party/skia/src/gpu/vk/VulkanExtensions.cpp
-FILE: ../../../flutter/third_party/skia/src/opts/SkSwizzler_opts.h
+FILE: ../../../flutter/third_party/skia/src/opts/SkSwizzler_opts.inc
 FILE: ../../../flutter/third_party/skia/src/pdf/SkBitmapKey.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFDocumentPriv.h
 FILE: ../../../flutter/third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.cpp
