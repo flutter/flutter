@@ -4,43 +4,42 @@
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 
 import '../utils.dart';
 import 'analyze.dart';
 
-const String _desc = r"Don't use Future.catchError.";
-
-const String _details = r'''
-**DON'T** call Future.catchError.
-
-TODO explain.
-
-**BAD:**
-
-```dart
-Future<Object?> doSomething() {
-  return doSomethingAsync().catchError((_) => null);
-}
-Future<Object?> doSomethingAsync() => Future<Object?>.value(1);
-```
-
-**GOOD:**
-
-```dart
-Future<Object?> doSomething() {
-  return doSomethingAsync().then(
-    (Object? obj) => obj,
-    onError: (_) => null,
-  );
-}
-Future<Object?> doSomethingAsync() => Future<Object?>.value(1);
-```
-''';
-
-
+/// Don't use Future.catchError.
+///
+/// See https://github.com/flutter/flutter/pull/130662 for more context.
+///
+/// **BAD:**
+///
+/// ```dart
+/// Future<Object?> doSomething() {
+///   return doSomethingAsync().catchError((_) => null);
+/// }
+///
+/// Future<Object?> doSomethingAsync() {
+///   return Future<Object>.error(Exception('error'));
+/// }
+/// ```
+///
+/// **GOOD:**
+///
+/// ```dart
+/// Future<Object?> doSomething() {
+///   return doSomethingAsync().then(
+///     (Object? obj) => obj,
+///     onError: (_) => null,
+///   );
+/// }
+///
+/// Future<Object?> doSomethingAsync() {
+///   return Future<Object>.error(Exception('error'));
+/// }
+/// ```
 class AvoidFutureCatchError extends AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
