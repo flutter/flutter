@@ -4,8 +4,7 @@
 
 #include "flutter/testing/assertions_skia.h"
 
-namespace flutter {
-namespace testing {
+namespace std {
 
 std::ostream& operator<<(std::ostream& os, const SkClipOp& o) {
   switch (o) {
@@ -100,5 +99,4 @@ std::ostream& operator<<(std::ostream& os, const SkSamplingOptions& s) {
   }
 }
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace std

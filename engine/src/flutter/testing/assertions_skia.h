@@ -16,8 +16,7 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 
-namespace flutter {
-namespace testing {
+namespace std {
 
 extern std::ostream& operator<<(std::ostream& os, const SkClipOp& o);
 extern std::ostream& operator<<(std::ostream& os, const SkMatrix& m);
@@ -33,7 +32,6 @@ extern std::ostream& operator<<(std::ostream& os, const SkColor4f& r);
 extern std::ostream& operator<<(std::ostream& os, const SkPaint& r);
 extern std::ostream& operator<<(std::ostream& os, const SkSamplingOptions& s);
 
-}  // namespace testing
-}  // namespace flutter
+}  // namespace std
 
 #endif  // FLUTTER_TESTING_ASSERTIONS_SKIA_H_
