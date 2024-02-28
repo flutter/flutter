@@ -78,6 +78,7 @@ void main(List<String> args) async {
         logsDir: Directory(options.logsDir),
         contentsGolden: options.outputContentsGolden,
         ndkStack: options.ndkStack,
+        forceSurfaceProducerSurfaceTexture: options.forceSurfaceProducerSurfaceTexture,
       );
       onSigint.cancel();
       exit(0);
@@ -120,6 +121,7 @@ Future<void> _run({
   required Directory logsDir,
   required String? contentsGolden,
   required String ndkStack,
+  required bool forceSurfaceProducerSurfaceTexture,
 }) async {
   const ProcessManager pm = LocalProcessManager();
   final String scenarioAppPath = join(outDir.path, 'scenario_app');
@@ -290,6 +292,7 @@ Future<void> _run({
       final Map<String, String> dimensions = <String, String>{
         'AndroidAPILevel': connectedDeviceAPILevel,
         'GraphicsBackend': enableImpeller ? 'impeller-${impellerBackend!.name}' : 'skia',
+        'ForceSurfaceProducerSurfaceTexture': '$forceSurfaceProducerSurfaceTexture'
       };
       log('using dimensions: ${json.encode(dimensions)}');
       skiaGoldClient = SkiaGoldClient(
@@ -345,6 +348,8 @@ Future<void> _run({
           '-e enable-impeller true',
         if (impellerBackend != null)
           '-e impeller-backend ${impellerBackend.name}',
+        if (forceSurfaceProducerSurfaceTexture)
+          '-e force-surface-producer-surface-texture true',
         'dev.flutter.scenarios.test/dev.flutter.TestRunner',
       ]);
       if (exitCode != 0) {
