@@ -1,50 +1,40 @@
 This pull request is created by [automatic cherry pick workflow](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process#automatically-creates-a-cherry-pick-request)
 Please fill in the form below, and a flutter domain expert will evaluate this cherry pick request.
 
----
-#### Issue Link:
-What is the link to the issue this cherry-pick is addressing?<br>
+### Issue Link:
+What is the link to the issue this cherry-pick is addressing?
 
-- [ ] My answer:
+< Replace with issue link here >
 
+### Changelog Description:
+Explain this cherry pick in one line that is accessible to most Flutter developers. See [best practices](https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices) for examples
 
----
-#### Changelog Description:
-Explain this cherry pick in one line that is accessible to most Flutter developers. See [best practices](https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices) for examples <br>
+< Replace with changelog description here >
 
-- [ ] My answer:
+### impact_description:
+What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)
 
+< Replace with impact description here >
 
----
-#### impact_description:
-What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)<br>
-
-- [ ] My answer:
-
----
-#### Workaround:
+### Workaround:
 Is there a workaround for this issue?
 
-- [ ] My answer:
+< Replace with workaround here >
 
-
----
-#### Risk:
+### Risk:
 What is the risk level of this cherry-pick?
 
   - [ ] Low
   - [ ] Medium
   - [ ] High
----
-#### Test Coverage:
+
+### Test Coverage:
 Are you confident that your fix is well-tested by automated tests?
 
   - [ ] Yes
   - [ ] No
 
----
-#### Validation Steps:
+### Validation Steps:
 What are the steps to validate that this fix works?
 
-- [ ] My answer:
-
+< Replace with validation steps here >
