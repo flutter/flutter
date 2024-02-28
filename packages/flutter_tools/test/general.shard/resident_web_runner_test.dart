@@ -973,7 +973,7 @@ void main() {
       const FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        errorCode: RPCErrorCodes.kInternalError,
+        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
       ),
     ]);
     setupMocks();

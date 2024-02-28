@@ -264,14 +264,14 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
       const FakeVmServiceRequest(
         method: 'streamCancel',
         args: <String, Object>{
           'streamId': 'Isolate',
         },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
@@ -340,14 +340,14 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
       const FakeVmServiceRequest(
         method: 'streamCancel',
         args: <String, Object>{
           'streamId': 'Isolate',
         },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:5678'));
 
