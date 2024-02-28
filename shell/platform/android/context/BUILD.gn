@@ -14,6 +14,7 @@ source_set("context") {
   public_configs = [ "//flutter:config" ]
 
   deps = [
+    "//flutter/common",
     "//flutter/fml",
     "//flutter/impeller/renderer",
     "//flutter/skia",

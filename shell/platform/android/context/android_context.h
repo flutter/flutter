@@ -5,21 +5,13 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 
+#include "common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/impeller/renderer/context.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
-
-enum class AndroidRenderingAPI {
-  kSoftware,
-  kOpenGLES,
-  kVulkan,
-  /// @brief Attempt to create a Vulkan surface, if that fails then fall back
-  /// to GLES.
-  kAutoselect,
-};
 
 //------------------------------------------------------------------------------
 /// @brief      Holds state that is shared across Android surfaces.
