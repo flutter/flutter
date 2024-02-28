@@ -167,7 +167,7 @@ void main() {
 
       final PhysicalShape widget = _getBabRenderObject(tester);
 
-      expect(widget.color, theme.colorScheme.surface);
+      expect(widget.color, theme.colorScheme.surfaceContainer);
       expect(widget.elevation, equals(3.0));
     });
 
