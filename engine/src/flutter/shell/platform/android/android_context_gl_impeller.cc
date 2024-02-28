@@ -91,7 +91,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 AndroidContextGLImpeller::AndroidContextGLImpeller(
     std::unique_ptr<impeller::egl::Display> display,
     bool enable_gpu_tracing)
-    : AndroidContext(AndroidRenderingAPI::kOpenGLES),
+    : AndroidContext(AndroidRenderingAPI::kImpellerOpenGLES),
       reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
       display_(std::move(display)) {
   if (!display_ || !display_->IsValid()) {

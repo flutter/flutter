@@ -23,6 +23,9 @@ class FlutterMain {
 
   const flutter::Settings& GetSettings() const;
 
+  static AndroidRenderingAPI SelectedRenderingAPI(
+      const flutter::Settings& settings);
+
  private:
   const flutter::Settings settings_;
   DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
