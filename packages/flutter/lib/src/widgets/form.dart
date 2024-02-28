@@ -364,22 +364,18 @@ class FormState extends State<Form> {
     }
 
     if (errorMessage.isNotEmpty) {
-       _announceErrorMessage(errorMessage, context);
+       final TextDirection directionality = Directionality.of(context);
+       if (defaultTargetPlatform == TargetPlatform.iOS) {
+        unawaited(Future<void>(() async {
+         await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+        }));
+       } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
     }
 
     return !hasError;
-  }
-
-  void _announceErrorMessage(String errorMessage, BuildContext context) {
-    final TextDirection directionality = Directionality.of(context);
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      unawaited(Future<void>(() async {
-        await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
-      }));
-    } else {
-      SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
-    }
   }
 }
 
@@ -672,10 +668,14 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
     Form.maybeOf(context)?._register(this);
 
+    if(widget.autovalidateMode != AutovalidateMode.onUnfocus) {
+      return widget.builder(this);
+    }
+
     return Focus(
-        focusNode: _focusNode,
-        child: widget.builder(this),
-      );
+      focusNode: _focusNode,
+      child: widget.builder(this),
+    );
   }
 }
 
