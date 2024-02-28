@@ -63,8 +63,8 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
 
     plugin->Announce(*message);
   } else {
-    FML_LOG(ERROR) << "Accessibility message type '" << *type
-                   << "' is not supported.";
+    FML_LOG(WARNING) << "Accessibility message type '" << *type
+                     << "' is not supported.";
   }
 }
 
