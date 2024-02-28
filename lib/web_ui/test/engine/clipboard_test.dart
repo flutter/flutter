@@ -58,7 +58,7 @@ Future<void> testMain() async {
       const MethodCodec codec = JSONMethodCodec();
       final Completer<ByteData> completer = Completer<ByteData>();
       void callback(ByteData? data) {
-        completer.complete(data);
+        completer.complete(data!);
       }
 
       clipboardMessageHandler.setDataMethodCall(
