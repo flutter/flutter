@@ -158,15 +158,18 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
     pass_target_.target_.SetDepthAttachment(depth.value());
   }
 
+  auto depth = pass_target_.GetRenderTarget().GetDepthAttachment();
   auto stencil = pass_target_.GetRenderTarget().GetStencilAttachment();
-  if (!stencil.has_value()) {
-    VALIDATION_LOG << "Stencil attachment unexpectedly missing from the "
+  if (!depth.has_value() || !stencil.has_value()) {
+    VALIDATION_LOG << "Stencil/Depth attachment unexpectedly missing from the "
                       "EntityPass render target.";
     return {};
   }
-
   stencil->load_action = LoadAction::kClear;
   stencil->store_action = StoreAction::kDontCare;
+  depth->load_action = LoadAction::kClear;
+  depth->store_action = StoreAction::kDontCare;
+  pass_target_.target_.SetDepthAttachment(depth);
   pass_target_.target_.SetStencilAttachment(stencil.value());
   pass_target_.target_.SetColorAttachment(color0, 0);
 

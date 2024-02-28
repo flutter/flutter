@@ -142,9 +142,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
                                       LoadAction::kDontCare,       //
                                       StoreAction::kDontCare       //
     );
-  }
-
-  if (desc.HasStencilAttachmentDescriptors()) {
+  } else if (desc.HasStencilAttachmentDescriptors()) {
     builder.SetStencilAttachment(desc.GetStencilPixelFormat(),  //
                                  desc.GetSampleCount(),         //
                                  LoadAction::kDontCare,         //
