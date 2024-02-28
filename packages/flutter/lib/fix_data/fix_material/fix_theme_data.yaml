@@ -1697,4 +1697,15 @@ transforms:
       - kind: 'removeParameter'
         name: 'useMaterial3'
 
+  # Changes made in TBD.
+  - title: "Remove 'buttonBarTheme'"
+    date: 2024-04-28
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonBarTheme'
+
 # Before adding a new fix: read instructions at the top of this file.
