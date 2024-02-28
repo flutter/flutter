@@ -1691,7 +1691,7 @@ void main() {
       matching: find.byType(InkWell),
     ));
 
-    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && (!kIsWeb || isCanvasKit)) {
       expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
     } else {
       expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
