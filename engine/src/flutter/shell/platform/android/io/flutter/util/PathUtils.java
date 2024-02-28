@@ -32,8 +32,12 @@ public final class PathUtils {
   @NonNull
   public static String getCacheDirectory(@NonNull Context applicationContext) {
     File cacheDir;
-    cacheDir = applicationContext.getCodeCacheDir();
-    if (cacheDir == null) {
+    if (Build.VERSION.SDK_INT >= 21) {
+      cacheDir = applicationContext.getCodeCacheDir();
+      if (cacheDir == null) {
+        cacheDir = applicationContext.getCacheDir();
+      }
+    } else {
       cacheDir = applicationContext.getCacheDir();
     }
     if (cacheDir == null) {

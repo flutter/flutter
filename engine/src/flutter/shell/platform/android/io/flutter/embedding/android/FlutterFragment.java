@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.view.ViewTreeObserver.OnWindowFocusChangeListener;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -25,6 +27,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.ViewUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,7 +107,7 @@ public class FlutterFragment extends Fragment
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  public static final int FLUTTER_VIEW_ID = View.generateViewId();
+  public static final int FLUTTER_VIEW_ID = ViewUtils.generateViewId(0xF1F2);
 
   private static final String TAG = "FlutterFragment";
 
@@ -167,15 +170,18 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_SHOULD_AUTOMATICALLY_HANDLE_ON_BACK_PRESSED =
       "should_automatically_handle_on_back_pressed";
 
+  @RequiresApi(18)
   private final OnWindowFocusChangeListener onWindowFocusChangeListener =
-      new OnWindowFocusChangeListener() {
-        @Override
-        public void onWindowFocusChanged(boolean hasFocus) {
-          if (stillAttachedForEvent("onWindowFocusChanged")) {
-            delegate.onWindowFocusChanged(hasFocus);
+      Build.VERSION.SDK_INT >= 18
+          ? new OnWindowFocusChangeListener() {
+            @Override
+            public void onWindowFocusChanged(boolean hasFocus) {
+              if (stillAttachedForEvent("onWindowFocusChanged")) {
+                delegate.onWindowFocusChanged(hasFocus);
+              }
+            }
           }
-        }
-      };
+          : null;
 
   /**
    * Creates a {@code FlutterFragment} with a default configuration.
@@ -1122,15 +1128,20 @@ public class FlutterFragment extends Fragment
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    view.getViewTreeObserver().addOnWindowFocusChangeListener(onWindowFocusChangeListener);
+    if (Build.VERSION.SDK_INT >= 18) {
+      view.getViewTreeObserver().addOnWindowFocusChangeListener(onWindowFocusChangeListener);
+    }
   }
 
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    requireView()
-        .getViewTreeObserver()
-        .removeOnWindowFocusChangeListener(onWindowFocusChangeListener);
+    if (Build.VERSION.SDK_INT >= 18) {
+      // onWindowFocusChangeListener is API 18+ only.
+      requireView()
+          .getViewTreeObserver()
+          .removeOnWindowFocusChangeListener(onWindowFocusChangeListener);
+    }
     if (stillAttachedForEvent("onDestroyView")) {
       delegate.onDestroyView();
     }

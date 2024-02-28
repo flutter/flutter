@@ -1297,17 +1297,22 @@ public class FlutterJNI {
       String countryCode = strings[i + 1];
       String scriptCode = strings[i + 2];
       // Convert to Locales via LocaleBuilder if available (API 21+) to include scriptCode.
-      Locale.Builder localeBuilder = new Locale.Builder();
-      if (!languageCode.isEmpty()) {
-        localeBuilder.setLanguage(languageCode);
+      if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        Locale.Builder localeBuilder = new Locale.Builder();
+        if (!languageCode.isEmpty()) {
+          localeBuilder.setLanguage(languageCode);
+        }
+        if (!countryCode.isEmpty()) {
+          localeBuilder.setRegion(countryCode);
+        }
+        if (!scriptCode.isEmpty()) {
+          localeBuilder.setScript(scriptCode);
+        }
+        supportedLocales.add(localeBuilder.build());
+      } else {
+        // Pre-API 21, we fall back on scriptCode-less locales.
+        supportedLocales.add(new Locale(languageCode, countryCode));
       }
-      if (!countryCode.isEmpty()) {
-        localeBuilder.setRegion(countryCode);
-      }
-      if (!scriptCode.isEmpty()) {
-        localeBuilder.setScript(scriptCode);
-      }
-      supportedLocales.add(localeBuilder.build());
     }
 
     Locale result = localizationPlugin.resolveNativeLocale(supportedLocales);
@@ -1318,7 +1323,11 @@ public class FlutterJNI {
     String[] output = new String[localeDataLength];
     output[0] = result.getLanguage();
     output[1] = result.getCountry();
-    output[2] = result.getScript();
+    if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      output[2] = result.getScript();
+    } else {
+      output[2] = "";
+    }
     return output;
   }
 

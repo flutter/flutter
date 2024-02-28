@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Handler;
@@ -446,7 +447,14 @@ public class FlutterView extends SurfaceView
       return super.onTouchEvent(event);
     }
 
-    requestUnbufferedDispatch(event);
+    // TODO(abarth): This version check might not be effective in some
+    // versions of Android that statically compile code and will be upset
+    // at the lack of |requestUnbufferedDispatch|. Instead, we should factor
+    // version-dependent code into separate classes for each supported
+    // version and dispatch dynamically.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      requestUnbufferedDispatch(event);
+    }
 
     return androidTouchProcessor.onTouchEvent(event);
   }
@@ -536,7 +544,8 @@ public class FlutterView extends SurfaceView
   // be padded. When the on-screen keyboard is detected, we want to include the full inset
   // but when the inset is just the hidden nav bar, we want to provide a zero inset so the space
   // can be used.
-
+  @TargetApi(20)
+  @RequiresApi(20)
   private int guessBottomKeyboardInset(WindowInsets insets) {
     int screenHeight = getRootView().getHeight();
     // Magic number due to this being a heuristic. This should be replaced, but we have not
@@ -557,6 +566,8 @@ public class FlutterView extends SurfaceView
   // caused by usage of Android Q APIs. These calls are safe because they are
   // guarded.
   @Override
+  @TargetApi(20)
+  @RequiresApi(20)
   @SuppressLint({"InlinedApi", "NewApi"})
   public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
     // getSystemGestureInsets() was introduced in API 29 and immediately deprecated in 30.
@@ -655,6 +666,28 @@ public class FlutterView extends SurfaceView
 
     updateViewportMetrics();
     return super.onApplyWindowInsets(insets);
+  }
+
+  @Override
+  @SuppressWarnings("deprecation")
+  protected boolean fitSystemWindows(Rect insets) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+      // Status bar, left/right system insets partially obscure content (padding).
+      mMetrics.physicalViewPaddingTop = insets.top;
+      mMetrics.physicalViewPaddingRight = insets.right;
+      mMetrics.physicalViewPaddingBottom = 0;
+      mMetrics.physicalViewPaddingLeft = insets.left;
+
+      // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
+      mMetrics.physicalViewInsetTop = 0;
+      mMetrics.physicalViewInsetRight = 0;
+      mMetrics.physicalViewInsetBottom = insets.bottom;
+      mMetrics.physicalViewInsetLeft = 0;
+      updateViewportMetrics();
+      return true;
+    } else {
+      return super.fitSystemWindows(insets);
+    }
   }
 
   private boolean isAttached() {
@@ -898,12 +931,19 @@ public class FlutterView extends SurfaceView
       this.id = id;
       this.textureWrapper = new SurfaceTextureWrapper(surfaceTexture);
 
-      // The callback relies on being executed on the UI thread (unsynchronised read of
-      // mNativeView
-      // and also the engine code check for platform thread in
-      // Shell::OnPlatformViewMarkTextureFrameAvailable),
-      // so we explicitly pass a Handler for the current thread.
-      this.surfaceTexture().setOnFrameAvailableListener(onFrameListener, new Handler());
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        // The callback relies on being executed on the UI thread (unsynchronised read of
+        // mNativeView
+        // and also the engine code check for platform thread in
+        // Shell::OnPlatformViewMarkTextureFrameAvailable),
+        // so we explicitly pass a Handler for the current thread.
+        this.surfaceTexture().setOnFrameAvailableListener(onFrameListener, new Handler());
+      } else {
+        // Android documentation states that the listener can be called on an arbitrary thread.
+        // But in practice, versions of Android that predate the newer API will call the listener
+        // on the thread where the SurfaceTexture was constructed.
+        this.surfaceTexture().setOnFrameAvailableListener(onFrameListener);
+      }
     }
 
     private SurfaceTexture.OnFrameAvailableListener onFrameListener =

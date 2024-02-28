@@ -290,6 +290,7 @@ public class FlutterView extends FrameLayout
    * <p>{@code FlutterView} requires an {@code Activity} instead of a generic {@code Context} to be
    * compatible with {@link PlatformViewsController}.
    */
+  @TargetApi(19)
   public FlutterView(@NonNull Context context, @NonNull FlutterImageView flutterImageView) {
     this(context, null, flutterImageView);
   }
@@ -356,6 +357,7 @@ public class FlutterView extends FrameLayout
     init();
   }
 
+  @TargetApi(19)
   private FlutterView(
       @NonNull Context context,
       @Nullable AttributeSet attrs,
@@ -641,7 +643,8 @@ public class FlutterView extends FrameLayout
   //
   // This method is replaced by Android API 30 (R/11) getInsets() method which can take the
   // android.view.WindowInsets.Type.ime() flag to find the keyboard inset.
-
+  @TargetApi(20)
+  @RequiresApi(20)
   private int guessBottomKeyboardInset(WindowInsets insets) {
     int screenHeight = getRootView().getHeight();
     // Magic number due to this being a heuristic. This should be replaced, but we have not
@@ -667,7 +670,8 @@ public class FlutterView extends FrameLayout
    * wider than expected padding when the status and navigation bars are hidden.
    */
   @Override
-
+  @TargetApi(20)
+  @RequiresApi(20)
   // The annotations to suppress "InlinedApi" and "NewApi" lints prevent lint warnings
   // caused by usage of Android Q APIs. These calls are safe because they are
   // guarded.
@@ -798,6 +802,53 @@ public class FlutterView extends FrameLayout
     sendViewportMetricsToFlutter();
     return newInsets;
   }
+
+  /**
+   * Invoked when Android's desired window insets change, i.e., padding.
+   *
+   * <p>{@code fitSystemWindows} is an earlier version of {@link
+   * #onApplyWindowInsets(WindowInsets)}. See that method for more details about how window insets
+   * relate to Flutter.
+   */
+  @Override
+  @SuppressWarnings("deprecation")
+  protected boolean fitSystemWindows(@NonNull Rect insets) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+      // Status bar, left/right system insets partially obscure content (padding).
+      viewportMetrics.viewPaddingTop = insets.top;
+      viewportMetrics.viewPaddingRight = insets.right;
+      viewportMetrics.viewPaddingBottom = 0;
+      viewportMetrics.viewPaddingLeft = insets.left;
+
+      // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
+      viewportMetrics.viewInsetTop = 0;
+      viewportMetrics.viewInsetRight = 0;
+      viewportMetrics.viewInsetBottom = insets.bottom;
+      viewportMetrics.viewInsetLeft = 0;
+
+      Log.v(
+          TAG,
+          "Updating window insets (fitSystemWindows()):\n"
+              + "Status bar insets: Top: "
+              + viewportMetrics.viewPaddingTop
+              + ", Left: "
+              + viewportMetrics.viewPaddingLeft
+              + ", Right: "
+              + viewportMetrics.viewPaddingRight
+              + "\n"
+              + "Keyboard insets: Bottom: "
+              + viewportMetrics.viewInsetBottom
+              + ", Left: "
+              + viewportMetrics.viewInsetLeft
+              + ", Right: "
+              + viewportMetrics.viewInsetRight);
+
+      sendViewportMetricsToFlutter();
+      return true;
+    } else {
+      return super.fitSystemWindows(insets);
+    }
+  }
   // ------- End: Process View configuration that Flutter cares about. --------
 
   // -------- Start: Process UI I/O that Flutter cares about. -------
@@ -879,7 +930,14 @@ public class FlutterView extends FrameLayout
       return super.onTouchEvent(event);
     }
 
-    requestUnbufferedDispatch(event);
+    // TODO(abarth): This version check might not be effective in some
+    // versions of Android that statically compile code and will be upset
+    // at the lack of |requestUnbufferedDispatch|. Instead, we should factor
+    // version-dependent code into separate classes for each supported
+    // version and dispatch dynamically.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      requestUnbufferedDispatch(event);
+    }
 
     return androidTouchProcessor.onTouchEvent(event);
   }

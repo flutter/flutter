@@ -19,6 +19,7 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+@TargetApi(21)
 class VirtualDisplayController {
   private static String TAG = "VirtualDisplayController";
 

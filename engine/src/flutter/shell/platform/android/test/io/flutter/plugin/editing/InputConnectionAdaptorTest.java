@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.Selection;
@@ -1073,6 +1074,9 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testExtractedText_monitoring() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      return;
+    }
     ListenableEditingState editable = sampleEditable(5, 5);
     View testView = new View(ctx);
     InputConnectionAdaptor adaptor =
@@ -1124,6 +1128,10 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testCursorAnchorInfo() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      return;
+    }
+
     ListenableEditingState editable = sampleEditable(5, 5);
     View testView = new View(ctx);
     InputConnectionAdaptor adaptor =

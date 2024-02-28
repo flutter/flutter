@@ -412,7 +412,12 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     }
 
     // Possible values: armeabi, armeabi-v7a, arm64-v8a, x86, x86_64, mips, mips64
-    String abi = Build.SUPPORTED_ABIS[0];
+    String abi;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      abi = Build.SUPPORTED_ABIS[0];
+    } else {
+      abi = Build.CPU_ABI;
+    }
     String pathAbi = abi.replace("-", "_"); // abis are represented with underscores in paths.
 
     // TODO(garyq): Optimize this apk/file discovery process to use less i/o and be more
@@ -426,12 +431,14 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     Queue<File> searchFiles = new LinkedList<>();
     // Downloaded modules are stored here
     searchFiles.add(context.getFilesDir());
-    // The initial installed apks are provided by `sourceDirs` in ApplicationInfo.
-    // The jniLibs we want are in the splits not the baseDir. These
-    // APKs are only searched as a fallback, as base libs generally do not need
-    // to be fully path referenced.
-    for (String path : context.getApplicationInfo().splitSourceDirs) {
-      searchFiles.add(new File(path));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      // The initial installed apks are provided by `sourceDirs` in ApplicationInfo.
+      // The jniLibs we want are in the splits not the baseDir. These
+      // APKs are only searched as a fallback, as base libs generally do not need
+      // to be fully path referenced.
+      for (String path : context.getApplicationInfo().splitSourceDirs) {
+        searchFiles.add(new File(path));
+      }
     }
 
     while (!searchFiles.isEmpty()) {

@@ -3,6 +3,7 @@ package io.flutter.embedding.engine.mutatorsstack;
 import static android.view.View.OnFocusChangeListener;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -22,6 +23,7 @@ import io.flutter.util.ViewUtils;
  * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack} to
  * its children.
  */
+@TargetApi(19)
 public class FlutterMutatorView extends FrameLayout {
   private FlutterMutatorsStack mutatorsStack;
   private float screenDensity;

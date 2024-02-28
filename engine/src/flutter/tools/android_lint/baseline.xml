@@ -2,6 +2,61 @@
 <issues format="6" by="lint 8.1.0 [10406996] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.1.0 [10406996] ">
 
     <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER_PORTRAIT`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="274"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER_LANDSCAPE`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="278"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 18 (current min is 16): `android.content.pm.ActivityInfo#SCREEN_ORIENTATION_FULL_USER`"
+        errorLine1="        return ActivityInfo.SCREEN_ORIENTATION_FULL_USER;"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
+            line="282"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_LTR`"
+        errorLine1="    return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="991"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 17 (current min is 16): `android.view.View#LAYOUT_DIRECTION_RTL`"
+        errorLine1="    return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;"
+        errorLine2="                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
+            line="991"
+            column="67"/>
+    </issue>
+
+    <issue
         id="HardcodedDebugMode"
         message="Avoid hardcoding the debug mode; leaving it out allows debug and release builds to automatically assign one"
         errorLine1="    &lt;application android:label=&quot;Flutter Shell&quot; android:name=&quot;FlutterApplication&quot; android:debuggable=&quot;true&quot;>"
