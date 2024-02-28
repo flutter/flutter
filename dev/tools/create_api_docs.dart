@@ -744,7 +744,7 @@ class DartdocGenerator {
     // arguments.
     // Just use "master" for any branch other than the LUCI_BRANCH.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'main';
     final List<String> argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
