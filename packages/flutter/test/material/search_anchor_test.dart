@@ -1128,8 +1128,8 @@ void main() {
     await tester.pumpAndSettle();
     final Material material = getSearchViewMaterial(tester);
     expect(material.elevation, 6.0);
-    expect(material.color, colorScheme.surface);
-    expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.color, colorScheme.surfaceContainerHigh);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
@@ -2684,7 +2684,7 @@ void main() {
 
     // Test the search view background color.
     Material material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
 
     // Change the theme brightness.
     theme = ThemeData(brightness: Brightness.dark);
@@ -2693,7 +2693,7 @@ void main() {
 
     // Test the search view background color.
     material = getSearchViewMaterial(tester);
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerHigh);
   });
 
   testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
@@ -2744,7 +2744,7 @@ void main() {
 
     // Test the search view background color.
     final Material searchViewMaterial = getSearchViewMaterial(tester);
-    expect(searchViewMaterial.color, localTheme.colorScheme.surface);
+    expect(searchViewMaterial.color, localTheme.colorScheme.surfaceContainerHigh);
 
     // Test the search view icons background color.
     final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
@@ -3096,10 +3096,10 @@ Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme
   expect(material.borderOnForeground, true);
   expect(material.borderRadius, null);
   expect(material.clipBehavior, Clip.none);
-  expect(material.color, colorScheme.surface);
+  expect(material.color, colorScheme.surfaceContainerHigh);
   expect(material.elevation, 6.0);
   expect(material.shadowColor, colorScheme.shadow);
-  expect(material.surfaceTintColor, colorScheme.surfaceTint);
+  expect(material.surfaceTintColor, Colors.transparent);
   expect(material.shape, const StadiumBorder());
 
   final Text helperText = tester.widget(find.text('hint text'));

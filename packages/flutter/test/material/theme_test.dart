@@ -598,7 +598,7 @@ void main() {
 
       expect(themeM3.brightness, Brightness.light);
       expect(themeM3.primaryColor, const Color(0xff6750a4));
-      expect(themeM3.scaffoldBackgroundColor, const Color(0xfffffbfe)); // ColorScheme.background
+      expect(themeM3.scaffoldBackgroundColor, const Color(0xfffef7ff)); // ColorScheme.background
       expect(themeM3.primaryContrastingColor, Colors.white);
       expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
@@ -621,7 +621,7 @@ void main() {
       expect(themeM3.brightness, Brightness.dark);
       expect(themeM3.primaryColor, const Color(0xffd0bcff));
       expect(themeM3.primaryContrastingColor, const Color(0xff381e72));
-      expect(themeM3.scaffoldBackgroundColor, const Color(0xff1c1b1f));
+      expect(themeM3.scaffoldBackgroundColor, const Color(0xff141218));
       expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
