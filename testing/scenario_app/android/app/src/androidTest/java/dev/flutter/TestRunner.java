@@ -9,11 +9,13 @@ import androidx.annotation.Nullable;
 import androidx.test.runner.AndroidJUnitRunner;
 import dev.flutter.scenariosui.ScreenshotUtil;
 import io.flutter.FlutterInjector;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 
 public class TestRunner extends AndroidJUnitRunner {
   @Override
   public void onCreate(@Nullable Bundle arguments) {
     String[] engineArguments = null;
+    assert arguments != null;
     if ("true".equals(arguments.getString("enable-impeller"))) {
       // Set up the global settings object so that Impeller is enabled for all tests.
       engineArguments =
@@ -21,6 +23,10 @@ public class TestRunner extends AndroidJUnitRunner {
             "--enable-impeller=true",
             "--impeller-backend=" + arguments.getString("impeller-backend", "vulkan")
           };
+    }
+    if ("true".equals(arguments.getString("force-surface-producer-surface-texture"))) {
+      // Set a test flag to force the SurfaceProducer to use SurfaceTexture.
+      FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
     }
     // For consistency, just always initilaize FlutterJNI etc.
     FlutterInjector.instance().flutterLoader().startInitialization(getTargetContext());

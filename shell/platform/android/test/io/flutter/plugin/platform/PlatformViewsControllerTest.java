@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterImageView;
@@ -1555,6 +1556,7 @@ public class PlatformViewsControllerTest {
           @Override
           public SurfaceTextureEntry registerSurfaceTexture(SurfaceTexture surfaceTexture) {
             return new SurfaceTextureEntry() {
+              @NonNull
               @Override
               public SurfaceTexture surfaceTexture() {
                 return mock(SurfaceTexture.class);
