@@ -171,7 +171,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -220,7 +219,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -266,7 +264,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -313,7 +310,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -360,7 +356,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
-    expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.backgroundColor, theme.colorScheme.background);
@@ -812,7 +807,6 @@ void main() {
       toggleableActiveColor: Colors.black,
       errorColor: Colors.black,
       backgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -932,7 +926,6 @@ void main() {
       toggleableActiveColor: Colors.white,
       errorColor: Colors.white,
       backgroundColor: Colors.white,
-      bottomAppBarColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1033,7 +1026,6 @@ void main() {
       toggleableActiveColor: otherTheme.toggleableActiveColor,
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
-      bottomAppBarColor: otherTheme.bottomAppBarColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1135,7 +1127,6 @@ void main() {
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
-    expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1268,7 +1259,6 @@ void main() {
       'toggleableActiveColor',
       'errorColor',
       'backgroundColor',
-      'bottomAppBarColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
