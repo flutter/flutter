@@ -137,8 +137,8 @@ def flutter_additional_macos_build_settings(target)
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
-  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
-  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
+  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64', 'FlutterMacOS.xcframework'), __FILE__)
+  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release', 'FlutterMacOS.xcframework'), __FILE__)
   application_path = File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
   # Find the local engine path, if any.
   local_engine = application_path.nil? ?
@@ -156,9 +156,17 @@ def flutter_additional_macos_build_settings(target)
     # Skip other updates if it does not depend on Flutter (including transitive dependency)
     next unless depends_on_flutter(target, 'FlutterMacOS')
 
-    # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
-    configuration_engine_dir = local_engine || (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
-    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+    if local_engine
+      configuration_engine_dir = File.expand_path(File.join(local_engine, 'FlutterMacOS.xcframework'), __FILE__)
+    else
+      # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+      configuration_engine_dir = (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
+    end
+    Dir.new(configuration_engine_dir).each_child do |xcframework_file|
+      if xcframework_file.start_with?('macos-') # Could be macos-arm64_x86_64, macos-arm64, macos-x86_64
+        build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+      end
+    end
 
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
