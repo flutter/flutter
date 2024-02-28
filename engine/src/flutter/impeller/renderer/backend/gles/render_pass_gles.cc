@@ -214,12 +214,11 @@ struct RenderPassData {
                 pass_data.clear_color.alpha   // alpha
   );
   if (pass_data.depth_attachment) {
-    // TODO(bdero): Desktop GL for Apple requires glClearDepth. glClearDepthf
-    //              throws GL_INVALID_OPERATION.
-    //              https://github.com/flutter/flutter/issues/136322
-#if !FML_OS_MACOSX
-    gl.ClearDepthf(pass_data.clear_depth);
-#endif
+    if (gl.DepthRangef.IsAvailable()) {
+      gl.ClearDepthf(pass_data.clear_depth);
+    } else {
+      gl.ClearDepth(pass_data.clear_depth);
+    }
   }
   if (pass_data.stencil_attachment) {
     gl.ClearStencil(pass_data.clear_stencil);
@@ -242,6 +241,9 @@ struct RenderPassData {
   gl.Disable(GL_CULL_FACE);
   gl.Disable(GL_BLEND);
   gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  gl.DepthMask(GL_TRUE);
+  gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
+  gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
 
   gl.Clear(clear_bits);
 
@@ -315,12 +317,11 @@ struct RenderPassData {
                 viewport.rect.GetHeight()       // height
     );
     if (pass_data.depth_attachment) {
-      // TODO(bdero): Desktop GL for Apple requires glDepthRange. glDepthRangef
-      //              throws GL_INVALID_OPERATION.
-      //              https://github.com/flutter/flutter/issues/136322
-#if !FML_OS_MACOSX
-      gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
-#endif
+      if (gl.DepthRangef.IsAvailable()) {
+        gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
+      } else {
+        gl.DepthRange(viewport.depth_range.z_near, viewport.depth_range.z_far);
+      }
     }
 
     //--------------------------------------------------------------------------
