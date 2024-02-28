@@ -2510,6 +2510,7 @@
 ../../../third_party/abseil-cpp/absl/log/scoped_mock_log_test.cc
 ../../../third_party/abseil-cpp/absl/log/stripping_test.cc
 ../../../third_party/abseil-cpp/absl/log/structured_test.cc
+../../../third_party/abseil-cpp/absl/log/vlog_is_on_test.cc
 ../../../third_party/abseil-cpp/absl/memory/BUILD.bazel
 ../../../third_party/abseil-cpp/absl/memory/CMakeLists.txt
 ../../../third_party/abseil-cpp/absl/memory/memory_test.cc
