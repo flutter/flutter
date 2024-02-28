@@ -565,8 +565,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   bool _adjustListeningNodeCountForAncestors(int delta) {
     assert(delta != 0);
     for (FocusNode? node = parent; node != null; node = node.parent) {
-      assert(delta > 0 || node._focusabilityListeningDescendantCount + delta >= 0, '$node currently have ${node._focusabilityListeningDescendantCount} listeners. ($delta)');
       node._focusabilityListeningDescendantCount += delta;
+      assert(node._focusabilityListeningDescendantCount >= 0, '$node currently have ${node._focusabilityListeningDescendantCount} listeners. ($delta)');
       if (!node.descendantsAreFocusable) {
         return false;
       }
@@ -631,12 +631,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (notifyChildren) {
       assert(children.isNotEmpty);
       for (final FocusNode child in children) {
-        child._notifyFocusabilityListenersIfNeeded(newValue);
+        child._notifyFocusabilityListenersInSubtree(newValue);
       }
     }
   }
 
-  void _notifyFocusabilityListenersIfNeeded(bool ancestorsAllowFocus) {
+  void _notifyFocusabilityListenersInSubtree(bool ancestorsAllowFocus) {
     final _FocusabilityListenable? focusabilityListenable = _focusabilityListenable;
     if (_canRequestFocus && focusabilityListenable != null && focusabilityListenable.hasListeners) {
       assert(ancestorsAllowFocus == canRequestFocus);
@@ -648,9 +648,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (_focusabilityListeningDescendantCount > 0 && descendantsAreFocusable) {
       // Further propagate to children whose focusability is determined by this
       // node's ancestors.
-      assert(children.isNotEmpty);
+      assert(children.isNotEmpty, '$this, $_focusabilityListeningDescendantCount');
       for (final FocusNode child in children) {
-        child._notifyFocusabilityListenersIfNeeded(ancestorsAllowFocus);
+        child._notifyFocusabilityListenersInSubtree(ancestorsAllowFocus);
       }
     }
   }
@@ -1103,10 +1103,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     final _FocusabilityListenable? childFocusabilityListenable = child._focusabilityListenable;
     final int childSubtreeListenerCount = (child.descendantsAreFocusable ? child._focusabilityListeningDescendantCount : 0)
                                         + (child._canRequestFocus && childFocusabilityListenable != null && childFocusabilityListenable.hasListeners ? 1 : 0);
-    // If childSubtreeListenerCount == 0, we don't care about focusability since
-    // there's no listeners.
+    // If childSubtreeListenerCount == 0, we don't care about focusability since there are no listeners.
     final bool childCouldFocus = childSubtreeListenerCount > 0
-                              && child._adjustListeningNodeCountForAncestors(childSubtreeListenerCount);
+                              && child._adjustListeningNodeCountForAncestors(-childSubtreeListenerCount);
     oldParent?._removeChild(child, removeScopeFocus: oldScope != nearestScope);
 
     _children.add(child);
@@ -1120,7 +1119,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (childSubtreeListenerCount > 0) {
       final bool childCanFocus = child._adjustListeningNodeCountForAncestors(childSubtreeListenerCount);
       if (childCanFocus != childCouldFocus) {
-        child._notifyFocusabilityListenersIfNeeded(childCanFocus);
+        child._notifyFocusabilityListenersInSubtree(childCanFocus);
       }
     }
 

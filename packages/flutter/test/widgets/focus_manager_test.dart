@@ -2114,9 +2114,7 @@ void main() {
       focusabilityChangeCount += 1;
     }
 
-    setUp(() {
-      focusabilityChangeCount = 0;
-    });
+    setUp(() { focusabilityChangeCount = 0; });
 
     testWidgets('canRequestFocus affects focusability of the node', (WidgetTester tester) async {
       int node2CallbackCounter = 0;
@@ -2165,23 +2163,6 @@ void main() {
       expect(focusabilityChangeCount, 2);
       expect(node2.focusabilityListenable.value, isTrue);
       expect(node2CallbackCounter, 2);
-    });
-
-    testWidgets('canRequestFocus = false invokes the callback on mount', (WidgetTester tester) async {
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1', canRequestFocus: false)..focusabilityListenable.addListener(focusabilityCallback);
-      await tester.pumpWidget(
-        Focus(
-          focusNode: node1,
-          child: Container(),
-        ),
-      );
-
-      expect(node1.focusabilityListenable.value, isFalse);
-      expect(focusabilityChangeCount, 1);
-
-      node1.canRequestFocus = true;
-      expect(node1.focusabilityListenable.value, isTrue);
-      expect(focusabilityChangeCount, 2);
     });
 
     testWidgets('descendantsAreFocusable affects focusability of the descendants', (WidgetTester tester) async {

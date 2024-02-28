@@ -2128,17 +2128,12 @@ void main() {
   });
 
   group('focusability listener', () {
-    bool? isFocusable;
     int focusabilityChangeCount = 0;
-    void focusabilityCallback(bool value) {
-      isFocusable = value;
+    void focusabilityCallback() {
       focusabilityChangeCount += 1;
     }
 
-    setUp(() {
-      isFocusable = null;
-      focusabilityChangeCount = 0;
-    });
+    setUp(() { focusabilityChangeCount = 0; });
 
     testWidgets('canRequestFocus affects child focusability', (WidgetTester tester) async {
       final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
@@ -2173,34 +2168,38 @@ void main() {
         ),
       );
 
-      node3.onFocusabilityChanged = focusabilityCallback;
-      bool? node1CanFocus;
-      node1.onFocusabilityChanged = (bool canRequstFocus) => node1CanFocus = canRequstFocus;
+      node3.focusabilityListenable.addListener(focusabilityCallback);
+      int node1FocusabilityCallbackCount = 0;
+      node1.focusabilityListenable.addListener(() => node1FocusabilityCallbackCount += 1);
 
       scopeNode1.canRequestFocus = false;
-      expect(isFocusable, isFalse);
-      expect(node1CanFocus, isFalse);
+      expect(node3.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
+      expect(node1.focusabilityListenable.value, isFalse);
+      expect(node1FocusabilityCallbackCount, 1);
 
       scopeNode2.canRequestFocus = false;
-      expect(isFocusable, isFalse);
-      expect(node1CanFocus, isFalse);
+      expect(node3.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
+      expect(node1.focusabilityListenable.value, isFalse);
+      expect(node1FocusabilityCallbackCount, 1);
 
       scopeNode1.canRequestFocus = true;
-      expect(isFocusable, isFalse);
-      expect(node1CanFocus, isTrue);
+      expect(node3.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(node1FocusabilityCallbackCount, 2);
 
       scopeNode2.canRequestFocus = true;
-      expect(isFocusable, isTrue);
-      expect(node1CanFocus, isTrue);
+      expect(node3.focusabilityListenable.value, isTrue);
       expect(focusabilityChangeCount, 2);
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(node1FocusabilityCallbackCount, 2);
     });
 
     testWidgets('onFocusabilityCallback invoked on mount, if not focusable', (WidgetTester tester) async {
       final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1', canRequestFocus: false);
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
       addTearDown(scopeNode1.dispose);
       addTearDown(node1.dispose);
 
@@ -2218,13 +2217,13 @@ void main() {
         ),
       );
 
-      expect(isFocusable, isFalse);
+      expect(node1.focusabilityListenable.value, isFalse);
       expect(focusabilityChangeCount, 1);
     });
 
     testWidgets('onFocusabilityCallback is not invoked on mount, if focusable', (WidgetTester tester) async {
       final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..onFocusabilityChanged = focusabilityCallback;
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
       addTearDown(scopeNode1.dispose);
       addTearDown(node1.dispose);
 
@@ -2247,7 +2246,7 @@ void main() {
 
     testWidgets('onFocusabilityCallback on scope node', (WidgetTester tester) async {
       final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
-      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2')..onFocusabilityChanged = focusabilityCallback;
+      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2')..focusabilityListenable.addListener(focusabilityCallback);
       addTearDown(scopeNode1.dispose);
       addTearDown(scopeNode2.dispose);
 
@@ -2262,32 +2261,32 @@ void main() {
 
       scopeNode2.canRequestFocus = false;
       expect(focusabilityChangeCount, 1);
-      expect(isFocusable, isFalse);
+      expect(scopeNode2.focusabilityListenable.value, isFalse);
 
       scopeNode2.canRequestFocus = true;
       expect(focusabilityChangeCount, 2);
-      expect(isFocusable, isTrue);
+      expect(scopeNode2.focusabilityListenable.value, isTrue);
 
       // scope 2 has no descendants.
       scopeNode2.descendantsAreFocusable = false;
       expect(focusabilityChangeCount, 2);
-      expect(isFocusable, isTrue);
+      expect(scopeNode2.focusabilityListenable.value, isTrue);
 
       scopeNode1.descendantsAreFocusable = false;
       expect(focusabilityChangeCount, 3);
-      expect(isFocusable, isFalse);
+      expect(scopeNode2.focusabilityListenable.value, isFalse);
 
       scopeNode1.descendantsAreFocusable = true;
       expect(focusabilityChangeCount, 4);
-      expect(isFocusable, isTrue);
+      expect(scopeNode2.focusabilityListenable.value, isTrue);
 
       scopeNode1.canRequestFocus = false;
       expect(focusabilityChangeCount, 5);
-      expect(isFocusable, isFalse);
+      expect(scopeNode2.focusabilityListenable.value, isFalse);
 
       scopeNode1.canRequestFocus = true;
       expect(focusabilityChangeCount, 6);
-      expect(isFocusable, isTrue);
+      expect(scopeNode2.focusabilityListenable.value, isTrue);
     });
   });
 }
