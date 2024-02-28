@@ -110,14 +110,17 @@ void main() {
           decoration: TextDecoration.underline,
           wordSpacing: 2.0,
         ),
-        menuStyle: const MenuStyle(
-          backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-          shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-          surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-          elevation: MaterialStatePropertyAll<double>(10.0),
-          shape: MaterialStatePropertyAll<OutlinedBorder>(
+        menuStyle: MenuStyle(
+          backgroundColor: const MaterialStatePropertyAll<Color>(Colors.grey),
+          shadowColor: const MaterialStatePropertyAll<Color>(Colors.brown),
+          surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.amberAccent),
+          elevation: const MaterialStatePropertyAll<double>(10.0),
+          shape: const MaterialStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           ),
+          animationStyle: AnimationStyle(
+            duration: const Duration(milliseconds: 700),
+          )
         ),
         inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
       )
@@ -154,11 +157,15 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
+    final Finder item0 = find.widgetWithText(MenuItemButton, 'Item 0').hitTestable();
+    expect(item0, findsNothing);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(item0, findsOneWidget);
 
     final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
+      of: item0,
       matching: find.byType(Material),
-    ).at(1);
+    ).first;
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
@@ -188,13 +195,16 @@ void main() {
         decoration: TextDecoration.underline,
         wordSpacing: 2.0,
       ),
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-        elevation: MaterialStatePropertyAll<double>(10.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+      menuStyle: MenuStyle(
+        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.grey),
+        shadowColor: const MaterialStatePropertyAll<Color>(Colors.brown),
+        surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.amberAccent),
+        elevation: const MaterialStatePropertyAll<double>(10.0),
+        shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+        ),
+        animationStyle: AnimationStyle(
+          duration: const Duration(milliseconds: 200),
         ),
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
@@ -209,14 +219,15 @@ void main() {
         decoration: TextDecoration.lineThrough,
         wordSpacing: 5.0,
       ),
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.yellow),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.green),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
-        elevation: MaterialStatePropertyAll<double>(15.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+      menuStyle: MenuStyle(
+        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.yellow),
+        shadowColor: const MaterialStatePropertyAll<Color>(Colors.green),
+        surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.teal),
+        elevation: const MaterialStatePropertyAll<double>(15.0),
+        shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
+        animationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
@@ -257,11 +268,14 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
+    final Finder item0 = find.widgetWithText(MenuItemButton, 'Item 0').hitTestable();
+    // DropdownMenuTheme has no animation, so menu should show immediately.
+    expect(item0, findsOneWidget);
 
     final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
+      of: item0,
       matching: find.byType(Material),
-    ).at(1);
+    ).first;
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
@@ -291,14 +305,15 @@ void main() {
         decoration: TextDecoration.underline,
         wordSpacing: 2.0,
       ),
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.brown),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.amberAccent),
-        elevation: MaterialStatePropertyAll<double>(10.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+      menuStyle: MenuStyle(
+        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.grey),
+        shadowColor: const MaterialStatePropertyAll<Color>(Colors.brown),
+        surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.amberAccent),
+        elevation: const MaterialStatePropertyAll<double>(10.0),
+        shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
+        animationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
@@ -312,14 +327,15 @@ void main() {
         decoration: TextDecoration.lineThrough,
         wordSpacing: 5.0,
       ),
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.yellow),
-        shadowColor: MaterialStatePropertyAll<Color>(Colors.green),
-        surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.teal),
-        elevation: MaterialStatePropertyAll<double>(15.0),
-        shape: MaterialStatePropertyAll<OutlinedBorder>(
+      menuStyle: MenuStyle(
+        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.yellow),
+        shadowColor: const MaterialStatePropertyAll<Color>(Colors.green),
+        surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.teal),
+        elevation: const MaterialStatePropertyAll<double>(15.0),
+        shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
+        animationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
@@ -341,14 +357,17 @@ void main() {
                   decoration: TextDecoration.overline,
                   wordSpacing: 3.0,
                 ),
-                menuStyle: const MenuStyle(
-                  backgroundColor: MaterialStatePropertyAll<Color>(Colors.limeAccent),
-                  shadowColor: MaterialStatePropertyAll<Color>(Colors.deepOrangeAccent),
-                  surfaceTintColor: MaterialStatePropertyAll<Color>(Colors.lightBlue),
-                  elevation: MaterialStatePropertyAll<double>(21.0),
-                  shape: MaterialStatePropertyAll<OutlinedBorder>(
+                menuStyle: MenuStyle(
+                  backgroundColor: const MaterialStatePropertyAll<Color>(Colors.limeAccent),
+                  shadowColor: const MaterialStatePropertyAll<Color>(Colors.deepOrangeAccent),
+                  surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.lightBlue),
+                  elevation: const MaterialStatePropertyAll<double>(21.0),
+                  shape: const MaterialStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
+                  animationStyle: AnimationStyle(
+                    duration: const Duration(milliseconds: 300),
+                  )
                 ),
                 inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
                 dropdownMenuEntries: const <DropdownMenuEntry<int>>[
@@ -378,11 +397,15 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
+    final Finder item0 = find.widgetWithText(MenuItemButton, 'Item 0').hitTestable();
+    expect(item0, findsNothing);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(item0, findsOneWidget);
 
     final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
+      of: item0,
       matching: find.byType(Material),
-    ).at(1);
+    ).first;
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);
