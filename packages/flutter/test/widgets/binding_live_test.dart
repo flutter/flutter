@@ -45,7 +45,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     await tester.binding.waitUntilFirstFrameRasterized;
     expect(find.text('First frame'), findsOne);
-  });
+  }, skip: kIsWeb, // [intended] Web doesn't use LiveTestWidgetsFlutterBinding
 }
 
 class DummyWidget extends StatelessWidget {
