@@ -580,7 +580,7 @@ std::shared_ptr<CommandQueue> ContextVK::GetCommandQueue() const {
 void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
   RenderTargetAllocator rt_allocator(GetResourceAllocator());
   RenderTarget render_target =
-      RenderTarget::CreateOffscreenMSAA(*this, rt_allocator, {1, 1}, 1);
+      rt_allocator.CreateOffscreenMSAA(*this, {1, 1}, 1);
 
   RenderPassBuilderVK builder;
   for (const auto& [bind_point, color] : render_target.GetColorAttachments()) {
