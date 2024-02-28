@@ -184,7 +184,7 @@ void main() {
         }, overrides: <Type, Generator>{
           DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
         });
-        
+
         testUsingContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
           await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtdUri}']);
