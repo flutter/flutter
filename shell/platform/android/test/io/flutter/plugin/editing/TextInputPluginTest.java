@@ -1246,6 +1246,9 @@ public class TextInputPluginTest {
   @SuppressWarnings("deprecation") // InputMethodSubtype
   @Test
   public void inputConnection_finishComposingTextUpdatesIMM() throws JSONException {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      return;
+    }
     ShadowBuild.setManufacturer("samsung");
     InputMethodSubtype inputMethodSubtype =
         new InputMethodSubtype(0, 0, /*locale=*/ "en", "", "", false, false);
