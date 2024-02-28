@@ -668,10 +668,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
     Form.maybeOf(context)?._register(this);
 
-    if (widget.autovalidateMode != AutovalidateMode.onUnfocus) {
-      return widget.builder(this);
-    }
-
     return Focus(
       focusNode: _focusNode,
       child: widget.builder(this),
