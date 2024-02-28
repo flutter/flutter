@@ -100,11 +100,13 @@ def main():
   find_subprocess.wait()
   xargs_subprocess.wait()
 
+  process_framework(dst, args, fat_framework, fat_framework_binary)
+
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
   create_xcframework(location=dst, name='FlutterMacOS', frameworks=xcframeworks)
 
-  process_framework(dst, args, fat_framework, fat_framework_binary)
+  zip_framework(dst, args)
 
   return 0
 
@@ -168,6 +170,8 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
 
     subprocess.check_call(['strip', '-x', '-S', fat_framework_binary])
 
+
+def zip_framework(dst, args):
   # Zip FlutterMacOS.framework.
   if args.zip:
     filepath_with_entitlements = ''
