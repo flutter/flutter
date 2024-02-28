@@ -10,7 +10,7 @@ import 'package:analyzer/dart/element/type.dart';
 import '../utils.dart';
 import 'analyze.dart';
 
-/// Don't use Future.catchError.
+/// Don't use Future.catchError or Future.onError.
 ///
 /// See https://github.com/flutter/flutter/pull/130662 for more context.
 ///
@@ -67,7 +67,7 @@ class AvoidFutureCatchError extends AnalyzeRule {
   }
 
   @override
-  String toString() => 'Avoid "Future.catchError"';
+  String toString() => 'Avoid "Future.catchError" and "Future.onError"';
 }
 
 class _Visitor extends RecursiveAstVisitor<void> {
