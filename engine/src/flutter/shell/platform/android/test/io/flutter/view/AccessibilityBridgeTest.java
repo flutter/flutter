@@ -64,6 +64,7 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
+@TargetApi(19)
 public class AccessibilityBridgeTest {
 
   @Test
@@ -858,6 +859,7 @@ public class AccessibilityBridgeTest {
   }
 
   @Config(sdk = 21)
+  @TargetApi(21)
   @Test
   public void itCanPerformSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -897,6 +899,7 @@ public class AccessibilityBridgeTest {
   }
 
   @Config(sdk = 21)
+  @TargetApi(21)
   @Test
   public void itCanPredictSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -936,6 +939,7 @@ public class AccessibilityBridgeTest {
   }
 
   @Config(sdk = 21)
+  @TargetApi(21)
   @Test
   public void itBuildsAttributedString() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1002,6 +1006,7 @@ public class AccessibilityBridgeTest {
   }
 
   @Config(sdk = 21)
+  @TargetApi(21)
   @Test
   public void itSetsTextCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1137,6 +1142,7 @@ public class AccessibilityBridgeTest {
   }
 
   @Config(sdk = 21)
+  @TargetApi(21)
   @Test
   public void itCanCreateAccessibilityNodeInfoWithSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);

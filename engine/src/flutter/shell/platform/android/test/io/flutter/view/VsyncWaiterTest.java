@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.annotation.TargetApi;
 import android.hardware.display.DisplayManager;
 import android.os.Looper;
 import android.view.Display;
@@ -49,6 +50,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 10l), eq(1l));
   }
 
+  @TargetApi(17)
   @Test
   public void itSetsFpsWhenDisplayManagerUpdates() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
@@ -84,6 +86,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 60l), eq(1l));
   }
 
+  @TargetApi(17)
   @Test
   public void itSetsFpsWhenDisplayManagerDoesNotUpdate() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);

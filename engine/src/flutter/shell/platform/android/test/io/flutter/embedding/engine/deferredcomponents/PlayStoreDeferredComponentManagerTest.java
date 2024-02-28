@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -32,6 +33,7 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
+@TargetApi(21)
 public class PlayStoreDeferredComponentManagerTest {
   private class TestFlutterJNI extends FlutterJNI {
     public int loadDartDeferredLibraryCalled = 0;

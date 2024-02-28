@@ -47,6 +47,7 @@ public class ExternalTextureTests {
   }
 
   @Test
+  @SdkSuppress(minSdkVersion = VERSION_CODES.LOLLIPOP)
   public void testMediaSurface() throws Exception {
     intent.putExtra("scenario_name", "display_texture");
     intent.putExtra("surface_renderer", "media");
@@ -55,6 +56,7 @@ public class ExternalTextureTests {
   }
 
   @Test
+  @SdkSuppress(minSdkVersion = VERSION_CODES.LOLLIPOP)
   public void testRotatedMediaSurface_90() throws Exception {
     intent.putExtra("scenario_name", "display_texture");
     intent.putExtra("surface_renderer", "media");
@@ -64,6 +66,7 @@ public class ExternalTextureTests {
   }
 
   @Test
+  @SdkSuppress(minSdkVersion = VERSION_CODES.LOLLIPOP)
   public void testRotatedMediaSurface_180() throws Exception {
     intent.putExtra("scenario_name", "display_texture");
     intent.putExtra("surface_renderer", "media");
@@ -73,6 +76,7 @@ public class ExternalTextureTests {
   }
 
   @Test
+  @SdkSuppress(minSdkVersion = VERSION_CODES.LOLLIPOP)
   public void testRotatedMediaSurface_270() throws Exception {
     intent.putExtra("scenario_name", "display_texture");
     intent.putExtra("surface_renderer", "media");

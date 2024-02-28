@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ClipData;
@@ -205,7 +206,9 @@ public class PlatformPlugin {
         }
         break;
       case SELECTION_CLICK:
-        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        }
         break;
     }
   }
@@ -217,10 +220,20 @@ public class PlatformPlugin {
   @SuppressWarnings("deprecation")
   private void setSystemChromeApplicationSwitcherDescription(
       PlatformChannel.AppSwitcherDescription description) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      return;
+    }
+
+    // Linter refuses to believe we're only executing this code in API 28 unless we
+    // use distinct if
+    // blocks and
+    // hardcode the API 28 constant.
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P
+        && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
       activity.setTaskDescription(
           new TaskDescription(description.label, /* icon= */ null, description.color));
-    } else {
+    }
+    if (Build.VERSION.SDK_INT >= 28) {
       TaskDescription taskDescription =
           new TaskDescription(description.label, 0, description.color);
       activity.setTaskDescription(taskDescription);
@@ -278,7 +291,8 @@ public class PlatformPlugin {
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE) {
+    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE
+        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // IMMERSIVE
       // Available starting at 19
       // Should not show overlays, swipe from edges to reveal overlays, needs onChange callback
@@ -293,7 +307,8 @@ public class PlatformPlugin {
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE_STICKY) {
+    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE_STICKY
+        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // STICKY IMMERSIVE
       // Available starting at 19
       // Should not show overlays, swipe from edges to reveal overlays. The app will also receive
@@ -337,7 +352,10 @@ public class PlatformPlugin {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-    if (overlaysToShow.size() == 0) {
+    // The SYSTEM_UI_FLAG_IMMERSIVE_STICKY flag was introduced in API 19, so we
+    // apply it
+    // if desired, and if the current Android version is 19 or greater.
+    if (overlaysToShow.size() == 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     }
 
@@ -379,6 +397,7 @@ public class PlatformPlugin {
   }
 
   @SuppressWarnings("deprecation")
+  @TargetApi(21)
   private void setSystemChromeSystemUIOverlayStyle(
       PlatformChannel.SystemChromeStyle systemChromeStyle) {
     Window window = activity.getWindow();
