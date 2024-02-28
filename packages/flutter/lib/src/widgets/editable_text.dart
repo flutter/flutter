@@ -685,6 +685,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [PasteTextIntent]                       | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
 ///
 /// ## Text Editing [Shortcuts]
+///
 /// It's also possible to directly remap keyboard shortcuts to new [Intent]s by
 /// inserting a [Shortcuts] widget above this in the widget tree. When using
 /// [WidgetsApp], the large set of default text editing keyboard shortcuts are
@@ -692,7 +693,9 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// and any [Shortcuts] widget between it and this [EditableText] will override
 /// those defaults.
 ///
+/// {@template flutter.widgets.editableText.shortcutsAndTextInput}
 /// ### Interactions Between [Shortcuts] and Text Input
+///
 /// Shortcuts prevent text input fields from receiving their keystrokes as text
 /// input. For example, placing a [Shortcuts] widget in the widget tree above
 /// a text input field and creating a shortcut for [LogicalKeyboardKey.keyA]
@@ -704,7 +707,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// When a keystroke is received in Flutter's engine, it first gives the
 /// framework the opportunity to handle it as a raw key event through
 /// [SystemChannels.keyEvent]. This is what [Shortcuts] listens to indirectly
-/// through its [FocusNode]. If it is not handled, then it will procede to try
+/// through its [FocusNode]. If it is not handled, then it will proceed to try
 /// handling it as text input through [SystemChannels.textInput], which is what
 /// [EditableTextState] listens to through [TextInputClient].
 ///
@@ -713,6 +716,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// mapping the desired key stroke(s) to [DoNothingAndStopPropagationIntent].
 /// The key event will be reported as unhandled by the framework and will then
 /// be sent as text input as usual.
+/// {@endtemplate}
 ///
 /// ## Gesture Events Handling
 ///
