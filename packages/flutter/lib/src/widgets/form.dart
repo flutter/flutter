@@ -4,9 +4,19 @@
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
+import 'framework.dart';
+import 'navigator.dart';
+import 'pop_scope.dart';
+import 'restoration.dart';
+import 'restoration_properties.dart';
+import 'routes.dart';
+import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
