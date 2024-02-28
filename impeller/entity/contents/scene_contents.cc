@@ -46,9 +46,8 @@ bool SceneContents::Render(const ContentContext& renderer,
 
   RenderTarget subpass_target;
   if (renderer.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
-    subpass_target = RenderTarget::CreateOffscreenMSAA(
+    subpass_target = renderer.GetRenderTargetCache()->CreateOffscreenMSAA(
         *renderer.GetContext(),             // context
-        *renderer.GetRenderTargetCache(),   // allocator
         ISize(coverage.value().GetSize()),  // size
         /*mip_count=*/1,
         "SceneContents",  // label
@@ -65,9 +64,8 @@ bool SceneContents::Render(const ContentContext& renderer,
         }  // stencil_attachment_config
     );
   } else {
-    subpass_target = RenderTarget::CreateOffscreen(
+    subpass_target = renderer.GetRenderTargetCache()->CreateOffscreen(
         *renderer.GetContext(),             // context
-        *renderer.GetRenderTargetCache(),   // allocator
         ISize(coverage.value().GetSize()),  // size
         /*mip_count=*/1,
         "SceneContents",  // label

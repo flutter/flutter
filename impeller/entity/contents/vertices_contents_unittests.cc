@@ -60,10 +60,10 @@ TEST_P(EntityTest, RendersDstPerColorWithAlpha) {
 
   auto content_context = GetContentContext();
   auto buffer = content_context->GetContext()->CreateCommandBuffer();
-  auto render_target = RenderTarget::CreateOffscreenMSAA(
-      *content_context->GetContext(),
-      *GetContentContext()->GetRenderTargetCache(), {100, 100},
-      /*mip_count=*/1);
+  auto render_target =
+      GetContentContext()->GetRenderTargetCache()->CreateOffscreenMSAA(
+          *content_context->GetContext(), {100, 100},
+          /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
   auto recording_pass = std::make_shared<RecordingRenderPass>(
       render_pass, GetContext(), render_target);

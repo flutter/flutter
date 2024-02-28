@@ -292,9 +292,8 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
 
   RenderTarget target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
-    target = RenderTarget::CreateOffscreenMSAA(
+    target = renderer.GetRenderTargetCache()->CreateOffscreenMSAA(
         /*context=*/*context,
-        /*allocator=*/*renderer.GetRenderTargetCache(),
         /*size=*/size,
         /*mip_count=*/mip_count,
         /*label=*/"EntityPass",
@@ -308,10 +307,9 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
         /*stencil_attachment_config=*/
         kDefaultStencilConfig);
   } else {
-    target = RenderTarget::CreateOffscreen(
-        *context,                          // context
-        *renderer.GetRenderTargetCache(),  // allocator
-        size,                              // size
+    target = renderer.GetRenderTargetCache()->CreateOffscreen(
+        *context,  // context
+        size,      // size
         /*mip_count=*/mip_count,
         "EntityPass",  // label
         RenderTarget::AttachmentConfig{
@@ -485,7 +483,7 @@ bool EntityPass::Render(ContentContext& renderer,
   // provided by the caller.
   else {
     root_render_target.SetupDepthStencilAttachments(
-        *renderer.GetContext(), *renderer.GetRenderTargetCache(),
+        *renderer.GetContext(), *renderer.GetContext()->GetResourceAllocator(),
         color0.texture->GetSize(),
         renderer.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
         "ImpellerOnscreen", kDefaultStencilConfig);
