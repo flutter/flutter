@@ -46,6 +46,7 @@ void main() {
   late Platform windows;
   late FakeHttpServer httpServer;
   late BufferLogger logger;
+  const bool usesDdcModuleSystem = false;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -66,6 +67,7 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
       );
       releaseAssetServer = ReleaseAssetServer(
@@ -292,6 +294,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
+      usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
 
@@ -312,6 +315,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.unsound,
+      usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
 
@@ -334,6 +338,7 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
@@ -355,6 +360,7 @@ void main() {
         <String, String>{},
         <String, String>{},
         NullSafetyMode.unsound,
+        usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
       ),
       throwsToolExit(),
@@ -652,7 +658,7 @@ void main() {
     expect(httpServer.closed, true);
   }));
 
-  test('Can start web server with specified assets', () => testbed.run(() async {
+  test('Can start web server with specified AMD module system assets', () => testbed.run(() async {
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -689,6 +695,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -698,13 +705,13 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path;
     globals.fs.currentDirectory
       .childDirectory('lib')
       .childFile('web_entrypoint.dart')
@@ -799,6 +806,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -813,13 +821,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path;
     final String webPrecompiledSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdkSourcemaps).path;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdk).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-      .getHostArtifact(HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps).path;
+      .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps).path;
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -908,6 +916,7 @@ void main() {
         extraHeaders: const <String, String>{},
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
+        ddcModuleSystem: usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
       );
       webDevFS.requireJS.createSync(recursive: true);
@@ -970,6 +979,7 @@ void main() {
       nullAssertions: true,
       nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1016,6 +1026,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1063,6 +1074,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.sound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.auto,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1111,6 +1123,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1219,6 +1232,7 @@ void main() {
       <String, String>{},
       <String, String>{},
       NullSafetyMode.sound,
+      usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
 
@@ -1262,6 +1276,7 @@ void main() {
       extraHeaders: const <String, String>{},
       chromiumLauncher: null,
       nullSafetyMode: NullSafetyMode.unsound,
+      ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
     );
     webDevFS.requireJS.createSync(recursive: true);
