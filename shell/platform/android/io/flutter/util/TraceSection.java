@@ -4,11 +4,9 @@
 
 package io.flutter.util;
 
-import android.annotation.TargetApi;
 import androidx.annotation.NonNull;
 import androidx.tracing.Trace;
 
-@TargetApi(19)
 public final class TraceSection implements AutoCloseable {
   /**
    * Factory used to support the try-with-resource construct.

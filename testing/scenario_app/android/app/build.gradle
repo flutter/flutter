@@ -26,7 +26,7 @@ android {
     }
     defaultConfig {
         applicationId 'dev.flutter.scenarios'
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName '1.0'

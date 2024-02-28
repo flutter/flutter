@@ -47,6 +47,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterImageView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyData.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityLaunchConfigs.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/SurfaceTextureSurfaceProducer.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/RenderSurface.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java" />
@@ -108,6 +109,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/SurfaceTexturePlatformViewRenderTarget.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRenderTarget.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/ImageReaderPlatformViewRenderTarget.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/SurfaceProducerPlatformViewRenderTarget.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java" />
@@ -159,5 +161,6 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/BuildConfig.java" />
   </module>
 </project>

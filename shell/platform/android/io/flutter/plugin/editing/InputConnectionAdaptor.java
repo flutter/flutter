@@ -118,9 +118,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   private CursorAnchorInfo getCursorAnchorInfo() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      return null;
-    }
     if (mCursorAnchorInfoBuilder == null) {
       mCursorAnchorInfoBuilder = new CursorAnchorInfo.Builder();
     } else {
@@ -226,9 +223,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
 
   @Override
   public boolean requestCursorUpdates(int cursorUpdateMode) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      return false;
-    }
     if ((cursorUpdateMode & CURSOR_UPDATE_IMMEDIATE) != 0) {
       mImm.updateCursorAnchorInfo(mFlutterView, getCursorAnchorInfo());
     }
@@ -569,9 +563,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
         mEditable.getComposingStart(),
         mEditable.getComposingEnd());
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      return;
-    }
     if (mExtractRequest != null) {
       mImm.updateExtractedText(
           mFlutterView, mExtractRequest.token, getExtractedText(mExtractRequest));

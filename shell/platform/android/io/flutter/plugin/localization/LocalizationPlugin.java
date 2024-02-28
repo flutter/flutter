@@ -7,7 +7,6 @@ package io.flutter.plugin.localization;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import androidx.annotation.NonNull;
@@ -39,19 +38,9 @@ public class LocalizationPlugin {
           if (localeString != null) {
             Locale locale = localeFromString(localeString);
 
-            // setLocale and createConfigurationContext is only available on API >= 17
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-              Configuration config = new Configuration(context.getResources().getConfiguration());
-              config.setLocale(locale);
-              localContext = context.createConfigurationContext(config);
-            } else {
-              // In API < 17, we have to update the locale in Configuration.
-              Resources resources = context.getResources();
-              Configuration config = resources.getConfiguration();
-              savedLocale = config.locale;
-              config.locale = locale;
-              resources.updateConfiguration(config, null);
-            }
+            Configuration config = new Configuration(context.getResources().getConfiguration());
+            config.setLocale(locale);
+            localContext = context.createConfigurationContext(config);
           }
 
           String packageName = context.getPackageName();
@@ -59,14 +48,6 @@ public class LocalizationPlugin {
           if (resId != 0) {
             // 0 means the resource is not found.
             stringToReturn = localContext.getResources().getString(resId);
-          }
-
-          // In API < 17, we had to restore the original locale after using.
-          if (localeString != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Resources resources = context.getResources();
-            Configuration config = resources.getConfiguration();
-            config.locale = savedLocale;
-            resources.updateConfiguration(config, null);
           }
 
           return stringToReturn;
@@ -200,31 +181,26 @@ public class LocalizationPlugin {
    */
   @NonNull
   public static Locale localeFromString(@NonNull String localeString) {
-    // Use Locale.forLanguageTag if available (API 21+).
-    if (false && Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-      return Locale.forLanguageTag(localeString);
-    } else {
-      // Normalize the locale string, replace all underscores with hyphens.
-      localeString = localeString.replace('_', '-');
+    // Normalize the locale string, replace all underscores with hyphens.
+    localeString = localeString.replace('_', '-');
 
-      // Pre-API 21, we fall back to manually parsing the locale tag.
-      String parts[] = localeString.split("-", -1);
+    // Pre-API 21, we fall back to manually parsing the locale tag.
+    String parts[] = localeString.split("-", -1);
 
-      // Assume the first part is always the language code.
-      String languageCode = parts[0];
-      String scriptCode = "";
-      String countryCode = "";
-      int index = 1;
-      if (parts.length > index && parts[index].length() == 4) {
-        scriptCode = parts[index];
-        index++;
-      }
-      if (parts.length > index && parts[index].length() >= 2 && parts[index].length() <= 3) {
-        countryCode = parts[index];
-        index++;
-      }
-      // Ignore the rest of the locale for this purpose.
-      return new Locale(languageCode, countryCode, scriptCode);
+    // Assume the first part is always the language code.
+    String languageCode = parts[0];
+    String scriptCode = "";
+    String countryCode = "";
+    int index = 1;
+    if (parts.length > index && parts[index].length() == 4) {
+      scriptCode = parts[index];
+      index++;
     }
+    if (parts.length > index && parts[index].length() >= 2 && parts[index].length() <= 3) {
+      countryCode = parts[index];
+      index++;
+    }
+    // Ignore the rest of the locale for this purpose.
+    return new Locale(languageCode, countryCode, scriptCode);
   }
 }
