@@ -57,7 +57,7 @@ class _SliverCoordinatorExampleState extends State<SliverCoordinatorExample> {
     final SliverGeometry geometry = alignedItem.getSliverGeometry(data);
     final double scrollOffset = constraints.scrollOffset;
     final double overflow = geometry.maxPaintExtent - geometry.paintExtent;
-    if (overflow < geometry.scrollExtent) { // indicates partial visibility
+    if (overflow > 0 && overflow < geometry.scrollExtent) { // indicates partial visibility
       if (scrollOffset > 0) {
         autoScrollTo(constraints.precedingScrollExtent); // top
       } else if (scrollOffset == 0) {
