@@ -7,8 +7,7 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "use_rbe": true
+                "download_android_deps": false
             },
             "gn": [
                 "--runtime-mode",
@@ -17,9 +16,7 @@
                 "--no-lto",
                 "--force-mac-arm64",
                 "--target-dir",
-                "host_debug_clang_tidy",
-                "--rbe",
-                "--no-goma"
+                "host_debug_clang_tidy"
             ],
             "name": "host_debug_clang_tidy",
             "ninja": {
@@ -33,8 +30,7 @@
                 "cpu=arm64"
             ],
             "gclient_variables": {
-                "download_android_deps": false,
-                "use_rbe": true
+                "download_android_deps": false
             },
             "gn": [
                 "--ios",
@@ -44,9 +40,7 @@
                 "--no-lto",
                 "--force-mac-arm64",
                 "--target-dir",
-                "ios_debug_sim_clang_tidy",
-                "--rbe",
-                "--no-goma"
+                "ios_debug_sim_clang_tidy"
             ],
             "name": "ios_debug_sim_clang_tidy",
             "ninja": {
@@ -114,7 +108,7 @@
                         "--shard-id=1",
                         "--shard-variants=host_debug_clang_tidy,host_debug_clang_tidy,host_debug_clang_tidy"
                     ],
-            "max_attempts": 1,
+                    "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
@@ -146,7 +140,7 @@
                         "--shard-id=2",
                         "--shard-variants=host_debug_clang_tidy,host_debug_clang_tidy,host_debug_clang_tidy"
                     ],
-            "max_attempts": 1,
+                    "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
@@ -178,7 +172,7 @@
                         "--shard-id=3",
                         "--shard-variants=host_debug_clang_tidy,host_debug_clang_tidy,host_debug_clang_tidy"
                     ],
-            "max_attempts": 1,
+                    "max_attempts": 1,
                     "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
