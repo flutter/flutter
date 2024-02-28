@@ -1265,7 +1265,13 @@ void main() {
   testWidgets('The onSelected gets called only when a selection is made', (WidgetTester tester) async {
     int selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          animationStyle: AnimationStyle.noAnimation,
+        )
+      )
+    );
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
