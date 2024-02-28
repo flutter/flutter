@@ -25,20 +25,37 @@ class RenderTargetCache : public RenderTargetAllocator {
   // |RenderTargetAllocator|
   void End() override;
 
-  // |RenderTargetAllocator|
-  std::shared_ptr<Texture> CreateTexture(
-      const TextureDescriptor& desc) override;
+  RenderTarget CreateOffscreen(
+      const Context& context,
+      ISize size,
+      int mip_count,
+      const std::string& label = "Offscreen",
+      RenderTarget::AttachmentConfig color_attachment_config =
+          RenderTarget::kDefaultColorAttachmentConfig,
+      std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
+          RenderTarget::kDefaultStencilAttachmentConfig) override;
+
+  RenderTarget CreateOffscreenMSAA(
+      const Context& context,
+      ISize size,
+      int mip_count,
+      const std::string& label = "Offscreen MSAA",
+      RenderTarget::AttachmentConfigMSAA color_attachment_config =
+          RenderTarget::kDefaultColorAttachmentConfigMSAA,
+      std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
+          RenderTarget::kDefaultStencilAttachmentConfig) override;
 
   // visible for testing.
   size_t CachedTextureCount() const;
 
  private:
-  struct TextureData {
+  struct RenderTargetData {
     bool used_this_frame;
-    std::shared_ptr<Texture> texture;
+    RenderTargetConfig config;
+    RenderTarget render_target;
   };
 
-  std::vector<TextureData> texture_data_;
+  std::vector<RenderTargetData> render_target_data_;
 
   RenderTargetCache(const RenderTargetCache&) = delete;
 
@@ -46,13 +63,14 @@ class RenderTargetCache : public RenderTargetAllocator {
 
  public:
   /// Visible for testing.
-  std::vector<TextureData>::const_iterator GetTextureDataBegin() const {
-    return texture_data_.begin();
+  std::vector<RenderTargetData>::const_iterator GetRenderTargetDataBegin()
+      const {
+    return render_target_data_.begin();
   }
 
   /// Visible for testing.
-  std::vector<TextureData>::const_iterator GetTextureDataEnd() const {
-    return texture_data_.end();
+  std::vector<RenderTargetData>::const_iterator GetRenderTargetDataEnd() const {
+    return render_target_data_.end();
   }
 };
 

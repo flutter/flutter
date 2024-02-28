@@ -24,10 +24,10 @@ TEST_P(EntityPassTargetTest, SwapWithMSAATexture) {
   }
   auto content_context = GetContentContext();
   auto buffer = content_context->GetContext()->CreateCommandBuffer();
-  auto render_target = RenderTarget::CreateOffscreenMSAA(
-      *content_context->GetContext(),
-      *GetContentContext()->GetRenderTargetCache(), {100, 100},
-      /*mip_count=*/1);
+  auto render_target =
+      GetContentContext()->GetRenderTargetCache()->CreateOffscreenMSAA(
+          *content_context->GetContext(), {100, 100},
+          /*mip_count=*/1);
 
   auto entity_pass_target = EntityPassTarget(render_target, false, false);
 

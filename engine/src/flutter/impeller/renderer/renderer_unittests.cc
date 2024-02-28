@@ -1178,10 +1178,8 @@ TEST_P(RendererTest, StencilMask) {
       stencil_config.load_action = LoadAction::kLoad;
       stencil_config.store_action = StoreAction::kDontCare;
       stencil_config.storage_mode = StorageMode::kHostVisible;
-      auto render_target_allocator =
-          RenderTargetAllocator(context->GetResourceAllocator());
       render_target.SetupDepthStencilAttachments(
-          *context, render_target_allocator,
+          *context, *context->GetResourceAllocator(),
           render_target.GetRenderTargetSize(), true, "stencil", stencil_config);
       // Fill the stencil buffer with an checkerboard pattern.
       const auto target_width = render_target.GetRenderTargetSize().width;
@@ -1280,8 +1278,8 @@ TEST_P(RendererTest, CanLookupRenderTargetProperties) {
   auto render_target_cache = std::make_shared<RenderTargetAllocator>(
       GetContext()->GetResourceAllocator());
 
-  auto render_target = RenderTarget::CreateOffscreen(
-      *context, *render_target_cache, {100, 100}, /*mip_count=*/1);
+  auto render_target = render_target_cache->CreateOffscreen(
+      *context, {100, 100}, /*mip_count=*/1);
   auto render_pass = cmd_buffer->CreateRenderPass(render_target);
 
   EXPECT_EQ(render_pass->GetSampleCount(), render_target.GetSampleCount());
@@ -1300,8 +1298,8 @@ TEST_P(RendererTest,
   auto render_target_cache = std::make_shared<RenderTargetAllocator>(
       GetContext()->GetResourceAllocator());
 
-  RenderTarget render_target = RenderTarget::CreateOffscreenMSAA(
-      *context, *render_target_cache, {100, 100}, /*mip_count=*/1);
+  RenderTarget render_target = render_target_cache->CreateOffscreenMSAA(
+      *context, {100, 100}, /*mip_count=*/1);
   EXPECT_EQ(render_target.GetDepthAttachment()
                 ->texture->GetTextureDescriptor()
                 .format,

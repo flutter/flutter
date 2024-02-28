@@ -490,13 +490,13 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
                             : std::optional<RenderTarget::AttachmentConfig>();
 
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
-    subpass_target = RenderTarget::CreateOffscreenMSAA(
-        *context, *GetRenderTargetCache(), texture_size,
+    subpass_target = GetRenderTargetCache()->CreateOffscreenMSAA(
+        *context, texture_size,
         /*mip_count=*/mip_count, SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfigMSAA, depth_stencil_config);
   } else {
-    subpass_target = RenderTarget::CreateOffscreen(
-        *context, *GetRenderTargetCache(), texture_size,
+    subpass_target = GetRenderTargetCache()->CreateOffscreen(
+        *context, texture_size,
         /*mip_count=*/mip_count, SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfig, depth_stencil_config);
   }
