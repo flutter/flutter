@@ -10,7 +10,7 @@
 #include <sstream>
 #include <utility>
 
-#include "assets/asset_resolver.h"
+#include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {
