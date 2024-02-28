@@ -331,10 +331,10 @@ class _TextLayout {
   /// (text.length, downstream), unless maxLines is set to a non-null value, in
   /// which case the caret is placed at the visual end of the last visible line.
   ///
-  /// This should not be called when the paragraph is emtpy as the implementation
+  /// This should not be called when the paragraph is empty as the implementation
   /// relies on line metrics.
   ///
-  /// When the last bidi level run in the paragraph and the parargraph's bidi
+  /// When the last bidi level run in the paragraph and the paragraph's bidi
   /// levels have opposite parities (which implies opposite writing directions),
   /// this makes sure the caret is placed at the same "end" of the line as if the
   /// line ended with a line feed.
@@ -1045,6 +1045,7 @@ class TextPainter {
   }
 
   ui.Paragraph _getOrCreateLayoutTemplate() => _layoutTemplate ??= _createLayoutTemplate();
+
   /// The height of a space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height
@@ -1305,8 +1306,6 @@ class TextPainter {
     return isLowSurrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
-  // Get the caret metrics (in logical pixels) based off the trailing edge of the
-  // character upstream from the given string offset.
   static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
     return switch ((textAlign, textDirection)) {
       (TextAlign.left, _) => 0.0,
@@ -1327,7 +1326,7 @@ class TextPainter {
     final _LineCaretMetrics? caretMetrics = _computeCaretMetrics(position);
 
     if (caretMetrics == null) {
-        final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
+      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.
@@ -1357,8 +1356,10 @@ class TextPainter {
     final TextBox textBox = _getOrCreateLayoutTemplate().getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut).single;
     return textBox.toRect().height;
   }
+
   bool _isNewlineAtOffset(int offset) => 0 <= offset && offset < plainText.length
                                       && WordBoundary._isNewline(plainText.codeUnitAt(offset));
+
   // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
   // [getFullHeightForCaret] in a row without performing redundant and expensive
   // get rect calls to the paragraph.
@@ -1464,7 +1465,7 @@ class TextPainter {
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
     if (boxes.isNotEmpty) {
       final TextBox box = boxes.single;
-      metrics =_LineCaretMetrics(
+      metrics = _LineCaretMetrics(
         offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
         writingDirection: box.direction,
       );
