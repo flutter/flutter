@@ -760,15 +760,15 @@ class OffsetPair {
 
   /// Creates a [OffsetPair] from [PointerEvent.localPosition] and
   /// [PointerEvent.position].
-  factory OffsetPair.fromEventPosition(PointerEvent event) {
-    return OffsetPair(local: event.localPosition, global: event.position);
-  }
+  OffsetPair.fromEventPosition(PointerEvent event)
+      : local = event.localPosition,
+        global = event.position;
 
   /// Creates a [OffsetPair] from [PointerEvent.localDelta] and
   /// [PointerEvent.delta].
-  factory OffsetPair.fromEventDelta(PointerEvent event) {
-    return OffsetPair(local: event.localDelta, global: event.delta);
-  }
+  OffsetPair.fromEventDelta(PointerEvent event)
+      : local = event.localDelta,
+        global = event.delta;
 
   /// A [OffsetPair] where both [Offset]s are [Offset.zero].
   static const OffsetPair zero = OffsetPair(local: Offset.zero, global: Offset.zero);

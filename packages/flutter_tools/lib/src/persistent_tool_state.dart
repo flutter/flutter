@@ -18,19 +18,12 @@ abstract class PersistentToolState {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-  }) => _DefaultPersistentToolState(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-  );
+  }) = _DefaultPersistentToolState;
 
   factory PersistentToolState.test({
     required Directory directory,
     required Logger logger,
-  }) => _DefaultPersistentToolState.test(
-    directory: directory,
-    logger: logger,
-  );
+  }) = _DefaultPersistentToolState.test;
 
   static PersistentToolState? get instance => context.get<PersistentToolState>();
 
