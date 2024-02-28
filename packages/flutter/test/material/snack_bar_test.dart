@@ -625,7 +625,6 @@ void main() {
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,

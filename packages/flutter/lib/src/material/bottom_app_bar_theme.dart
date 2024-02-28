@@ -39,8 +39,6 @@ class BottomAppBarTheme with Diagnosticable {
   });
 
   /// Overrides the default value for [BottomAppBar.color].
-  ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
   final Color? color;
 
   /// Overrides the default value for [BottomAppBar.elevation].

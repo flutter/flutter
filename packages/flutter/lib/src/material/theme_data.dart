@@ -384,11 +384,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -441,7 +436,6 @@ class ThemeData with Diagnosticable {
       primaryColor ??= primarySurfaceColor;
       canvasColor ??= colorScheme.background;
       scaffoldBackgroundColor ??= colorScheme.background;
-      bottomAppBarColor ??= colorScheme.surface;
       cardColor ??= colorScheme.surface;
       dividerColor ??= colorScheme.outline;
       backgroundColor ??= colorScheme.background;
@@ -569,7 +563,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
-    bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -667,7 +660,6 @@ class ThemeData with Diagnosticable {
       toggleableActiveColor: toggleableActiveColor,
       errorColor: errorColor,
       backgroundColor: backgroundColor,
-      bottomAppBarColor: bottomAppBarColor,
     );
   }
 
@@ -791,18 +783,12 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
     Color? backgroundColor,
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _toggleableActiveColor = toggleableActiveColor,
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
-       _bottomAppBarColor = bottomAppBarColor,
        assert(toggleableActiveColor != null),
         // DEPRECATED (newest deprecations at the bottom)
        assert(errorColor != null),
@@ -851,7 +837,6 @@ class ThemeData with Diagnosticable {
       primaryColor: primarySurfaceColor,
       canvasColor: colorScheme.background,
       scaffoldBackgroundColor: colorScheme.background,
-      bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
       backgroundColor: colorScheme.background,
@@ -1183,14 +1168,6 @@ class ThemeData with Diagnosticable {
   final VisualDensity visualDensity;
 
   // COLOR
-
-  /// The default color of the [BottomAppBar].
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-  Color get bottomAppBarColor => _bottomAppBarColor!;
-  final Color? _bottomAppBarColor;
 
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
@@ -1620,11 +1597,6 @@ class ThemeData with Diagnosticable {
     )
     Color? backgroundColor,
     @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-    Color? bottomAppBarColor,
-    @Deprecated(
       'Use a ThemeData constructor (.from, .light, or .dark) instead. '
       'These constructors all have a useMaterial3 argument, '
       'and they set appropriate default values based on its value. '
@@ -1732,7 +1704,6 @@ class ThemeData with Diagnosticable {
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
-      bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
     );
   }
 
@@ -1930,7 +1901,6 @@ class ThemeData with Diagnosticable {
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
     );
   }
 
@@ -2034,8 +2004,7 @@ class ThemeData with Diagnosticable {
         // DEPRECATED (newest deprecations at the bottom)
         other.toggleableActiveColor == toggleableActiveColor &&
         other.errorColor == errorColor &&
-        other.backgroundColor == backgroundColor &&
-        other.bottomAppBarColor == bottomAppBarColor;
+        other.backgroundColor == backgroundColor;
   }
 
   @override
@@ -2138,7 +2107,6 @@ class ThemeData with Diagnosticable {
       toggleableActiveColor,
       errorColor,
       backgroundColor,
-      bottomAppBarColor,
     ];
     return Object.hashAll(values);
   }
@@ -2242,7 +2210,6 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
   }
 }
 
