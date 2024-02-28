@@ -517,7 +517,7 @@ void main() {
           fileSystem: fileSystem,
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         );
       });
 

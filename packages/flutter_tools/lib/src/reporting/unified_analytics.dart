@@ -39,7 +39,7 @@ Analytics getAnalytics({
       runningOnBot ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
-    return NoOpAnalytics();
+    return const NoOpAnalytics();
   }
 
   // Providing an override of the [Analytics] instance is preferred when

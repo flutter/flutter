@@ -73,7 +73,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
   });
 
@@ -186,7 +186,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -513,7 +513,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -540,7 +540,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
@@ -567,7 +567,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       usage: TestUsage(),
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
 
     expect(() => xcodeProjectInterpreter.getInfo(workingDirectory), throwsToolExit(message: stderr));
