@@ -36,7 +36,7 @@ abstract final class FlutterGlobalOptions {
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
   static const String kPrefixedErrorsFlag = 'prefixed-errors';
-  static const String kPrintDtdUri = 'print-dtd-uri';
+  static const String kPrintDtd = 'print-dtd';
   static const String kQuietFlag = 'quiet';
   static const String kShowTestDeviceFlag = 'show-test-device';
   static const String kShowWebServerDeviceFlag = 'show-web-server-device';
@@ -119,9 +119,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
     argParser.addFlag(
-      FlutterGlobalOptions.kPrintDtdUri,
+      FlutterGlobalOptions.kPrintDtd,
       negatable: false,
-      help: 'Print the URI of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
+      help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
       hide: !verboseHelp,
     );
     if (verboseHelp) {
@@ -366,7 +366,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
 
-        final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtdUri] as bool? ?? false;
+        final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
 
         await super.runCommand(topLevelResults);

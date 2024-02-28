@@ -176,7 +176,7 @@ void main() {
         Analytics: () => fakeAnalytics,
       });
 
-      group('${FlutterGlobalOptions.kPrintDtdUri} flag', () {
+      group('${FlutterGlobalOptions.kPrintDtd} flag', () {
         testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
           await runner.run(<String>[]);
@@ -187,7 +187,7 @@ void main() {
 
         testUsingContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtdUri}']);
+          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
           expect(DevtoolsLauncher.instance!.printDtdUri, true);
         }, overrides: <Type, Generator>{
           DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
