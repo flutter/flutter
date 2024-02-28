@@ -517,7 +517,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///    focus traversal policy for a widget subtree.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
-  bool get canRequestFocus => _canRequestFocus && ancestors.every(_allowDescendantsToBeFocused);
+  bool get canRequestFocus => _canRequestFocus && (_focusabilityListenable?.value ?? _computeAncestorsAllowFocus());
+  bool _computeAncestorsAllowFocus() => ancestors.every(_allowDescendantsToBeFocused);
   static bool _allowDescendantsToBeFocused(FocusNode ancestor) => ancestor.descendantsAreFocusable;
 
   bool _canRequestFocus;
@@ -550,14 +551,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // their focusability listenable has listeners.
   int _focusabilityListeningDescendantCount = 0;
 
-/// Signature of a callback used by [FocusNode.onFocusabilityChanged], to monitor
-/// the focusability changes of a [FocusNode] in the focus tree.
-///
-/// The `canRequestFocus` argument represents the focusability of a [FocusNode],
-/// which is only true when the [FocusNode]'s [canRequestFocus] value is true,
-/// and all of its ancestors in the focus tree have
-/// [FocusNode.descendantsAreFocusable] set true.
-
+  /// A [ValueListenable] that notifies registered listeners when the
+  /// focusability of this [FocusNode] changes.
+  ///
+  /// The [ValueListenable]'s `value` indicates the whether this [FocusNode] can
+  /// request primary focus. It's value is always consistent with the return
+  /// value of the [canRequestFocus] getter, which only returns true when the
+  /// [FocusNode]'s [canRequestFocus] setter is set to true, and all of its
+  /// ancestors in the focus tree have [FocusNode.descendantsAreFocusable] set
+  /// true.
+  ///
+  /// The [ValueListenable] is managed by this [FocusNode]. It must not be
+  /// retained after the [FocusNode] is disposed.
   ValueListenable<bool> get focusabilityListenable => _focusabilityListenable ??= _FocusabilityListenable(this);
   _FocusabilityListenable? _focusabilityListenable;
 
@@ -1525,11 +1530,14 @@ class _FocusabilityListenable extends ChangeNotifier implements ValueListenable<
   final FocusNode node;
 
   @override
-  bool get value => hasListeners ? node._canRequestFocus && _ancestorsAllowFocus : node.canRequestFocus;
+  bool get value {
+    assert(!hasListeners || _ancestorsAllowFocus == node._computeAncestorsAllowFocus());
+    return node._canRequestFocus && (hasListeners ? _ancestorsAllowFocus : node._computeAncestorsAllowFocus());
+  }
 
   // True if all ancestors of `node` have `descentantsAreFocusable` set to
-  // true. The value is only maintained when there are listeners and
-  // `_canRequestFocus` is true.
+  // true. The value is only maintained when there are listeners, and
+  // `node._canRequestFocus` is true.
   bool _ancestorsAllowFocus = true;
 
   @override

@@ -2346,6 +2346,35 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       expect(focusabilityChangeCount, 2);
     });
+
+    testWidgets('Adding removing listeners many times', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
+
+      for (int i = 0; i < 100; i += 1) {
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+        node1.focusabilityListenable.addListener(focusabilityCallback);
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+      }
+      node1.focusabilityListenable.addListener(focusabilityCallback);
+      node1.focusabilityListenable.addListener(focusabilityCallback);
+      node2.focusabilityListenable.addListener(focusabilityCallback);
+      expect(focusabilityChangeCount, 0);
+
+      await tester.pumpWidget(
+        Focus(
+          descendantsAreFocusable: false,
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: node1, child: Container()),
+              Focus(focusNode: node2, child: Container()),
+            ],
+          ),
+        ),
+      );
+      expect(focusabilityChangeCount, 3);
+    });
   });
 
   testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
