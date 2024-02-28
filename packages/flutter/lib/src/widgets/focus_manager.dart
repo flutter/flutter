@@ -561,6 +561,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// ancestors in the focus tree have [FocusNode.descendantsAreFocusable] set to
   /// true.
   ///
+  /// Unlike listeners added to the [FocusNode] itself, which won't be notified
+  /// until focus changes are applied in microtasks, listeners added to
+  /// [focusabilityListenable] are notified immediately as the [FocusNode]'s
+  /// focusability changes.
+  ///
   /// This can be used to monitor, for example, whether a text field is currently
   /// disabled, or in an inactive route, thus isn't receiving user interactions,
   /// so that text field can unsubscribe itself from system services such as
