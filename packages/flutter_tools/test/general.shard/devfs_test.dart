@@ -48,13 +48,13 @@ const FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
   args: <String, Object>{
     'fsName': 'test',
   },
-  errorCode: RPCErrorCodes.kServiceDisappeared,
+  error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
 );
 
 const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
   method: '_deleteDevFS',
   args: <String, dynamic>{'fsName': 'test'},
-  errorCode: RPCErrorCodes.kServiceDisappeared,
+  error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
 );
 
 void main() {
