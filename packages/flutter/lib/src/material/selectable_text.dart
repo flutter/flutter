@@ -151,6 +151,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
 /// A run of selectable text with a single style.
 ///
+/// Consider using [SelectionArea] or [SelectableRegion] instead, which enable
+/// selection on a widget subtree, including but not limited to [Text] widgets.
+///
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
 /// the same line depending on the layout constraints.
@@ -214,6 +217,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 ///
 ///  * [Text], which is the non selectable version of this widget.
 ///  * [TextField], which is the editable version of this widget.
+///  * [SelectionArea], which enables the selection of multiple [Text] widgets
+///    and of other widgets.
 class SelectableText extends StatefulWidget {
   /// Creates a selectable text widget.
   ///
