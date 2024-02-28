@@ -54,7 +54,7 @@ abstract class SyntaxHighlighter {
 class DartSyntaxHighlighter extends SyntaxHighlighter {
   DartSyntaxHighlighter([this._style]) {
     _spans = <_HighlightSpan>[];
-    _style ??= SyntaxHighlighterStyle.darkThemeStyle();
+    _style ??= const SyntaxHighlighterStyle.darkThemeStyle();
   }
 
   SyntaxHighlighterStyle? _style;

@@ -44,9 +44,9 @@ void main() {
   });
 
   test('TableBorder.symmetric constructor', () {
-    final TableBorder border3 = TableBorder.symmetric(
-      inside: const BorderSide(width: 3.0),
-      outside: const BorderSide(color: Color(0xFFFF0000)),
+    const TableBorder border3 = TableBorder.symmetric(
+      inside: BorderSide(width: 3.0),
+      outside: BorderSide(color: Color(0xFFFF0000)),
     );
     expect(border3.top, const BorderSide(color: Color(0xFFFF0000)));
     expect(border3.right, const BorderSide(color: Color(0xFFFF0000)));
@@ -56,8 +56,8 @@ void main() {
     expect(border3.verticalInside, const BorderSide(width: 3.0));
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
-    expect(border3.scale(0.0), TableBorder.symmetric(
-      outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
+    expect(border3.scale(0.0), const TableBorder.symmetric(
+      outside: BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
     ));
   });
 
