@@ -112,11 +112,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
           throw new RuntimeException("ImageSurfaceRenderer not supported");
         }
       case "media":
-        if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-          return new MediaSurfaceRenderer(this::createMediaExtractor, extras.getInt("rotation", 0));
-        } else {
-          throw new RuntimeException("MediaSurfaceRenderer not supported");
-        }
+        return new MediaSurfaceRenderer(this::createMediaExtractor, extras.getInt("rotation", 0));
       case "canvas":
       default:
         return new CanvasSurfaceRenderer();
@@ -226,7 +222,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   }
 
   /** Decodes a sample video into the attached Surface. */
-  @RequiresApi(VERSION_CODES.LOLLIPOP)
   private static class MediaSurfaceRenderer implements SurfaceRenderer {
     private final Supplier<MediaExtractor> extractorSupplier;
     private final int rotation;
