@@ -17,6 +17,13 @@ Or for a specific, build, such as `android_debug_unopt_arm64`:
 dart ./testing/scenario_app/bin/run_android_tests.dart --out-dir=../out/android_debug_unopt_arm64
 ```
 
+See also:
+
+- [File an issue][file_issue] with the `e: scenario-app, platform-android`
+  labels.
+
+[file_issue]: https://github.com/flutter/flutter/issues/new?labels=e:%20scenario-app,engine,platform-android,fyi-android,team-engine
+
 ## Debugging
 
 Debugging the tests on CI is not straightforward but is being improved:
@@ -38,31 +45,51 @@ or locally in `out/.../scenario_app/logs`.
 
 You can then view the logs and screenshots on LUCI. [For example](https://ci.chromium.org/ui/p/flutter/builders/try/Linux%20Engine%20Drone/2003164/overview):
 
-![Screenshot of the Logs on LUCI](https://github.com/flutter/engine/assets/168174/79dc864c-c18b-4df9-a733-fd55301cc69c).
+![Screenshot of the Logs on LUCI](https://github.com/flutter/engine/assets/168174/79dc864c-c18b-4df9-a733-fd55301cc69c)
+
+For a full list of flags, see [the runner](../bin/README.md).
 
 ## CI Configuration
 
-See [`ci/builders/linux_android_emulator.json`](../../../ci/builders/linux_android_emulator.json)
-, and grep for `run_android_tests.dart`.
+See [`ci/builders`](../../../ci/builders) and grep for `run_android_tests.dart`.
 
-The following matrix of configurations is tested on the CI:
+### Skia
 
-<!-- TODO(matanlurey): Blocked by https://github.com/flutter/flutter/issues/143471.
-| 28          | Skia                | [Android 28 + Skia][skia-gold-skia-28]                           | Older Android devices (without `ImageReader`) on Skia.     |
-| 28          | Impeller (OpenGLES) | [Android 28 + Impeller OpenGLES][skia-gold-impeller-opengles-28] | Older Android devices (without `ImageReader`) on Impeller. |
-[skia-gold-skia-28]: https://flutter-engine-gold.skia.org/search?left_filter=AndroidAPILevel%3D28%26GraphicsBackend%3Dskia&negative=true&positive=true&right_filter=AndroidAPILevel%3D28%26GraphicsBackend%3Dskia
-[skia-gold-impeller-opengles-28]: https://flutter-engine-gold.skia.org/search?left_filter=AndroidAPILevel%3D28%26GraphicsBackend%3Dimpeller-opengles&negative=true&positive=true&right_filter=AndroidAPILevel%3D28%26GraphicsBackend%3Dimpeller-opengles
--->
+> [!NOTE]
+> As of 2024-02-28, Flutter on Android defaults to the Skia graphics backend.
 
-| API Version | Graphics Backend    | Skia Gold                                                        | Rationale                                        |
-| ----------- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------------ |
-| 34          | Skia                | [Android 34 + Skia][skia-gold-skia-34]                           | Newer Android devices on Skia.                   |
-| 34          | Impeller (OpenGLES) | [Android 34 + Impeller OpenGLES][skia-gold-impeller-opengles-34] | Newer Android devices on Impeller with OpenGLES. |
-| 34          | Impeller (Vulkan)   | [Android 34 + Impeller Vulkan][skia-gold-impeller-vulkan-34]     | Newer Android devices on Impeller.               |
+There are two code branches we test using `scenario_app`:
 
-[skia-gold-skia-34]: https://flutter-engine-gold.skia.org/search?left_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dskia&negative=true&positive=true&right_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dskia
-[skia-gold-impeller-opengles-34]: https://flutter-engine-gold.skia.org/search?left_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dimpeller-opengles&negative=true&positive=true&right_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dimpeller-opengles
-[skia-gold-impeller-vulkan-34]: https://flutter-engine-gold.skia.org/search?left_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dimpeller-vulkan&negative=true&positive=true&right_filter=AndroidAPILevel%3D34%26GraphicsBackend%3Dimpeller-vulkan
+- Older Android devices, that use `SurfaceTexture`.
+  - CI Configuration (TODO: Link)
+  - CI History (TODO: Link)
+  - Skia Gold (TODO: Link)
+- Newer Android devices, (API 34) that use `ImageReader`.
+  - CI Configuration (TODO: Link)
+  - CI History (TODO: Link)
+  - Skia Gold (TODO: Link)
+
+### Impeller with OpenGLES
+
+There are two code branches we test using `scenario_app`:
+
+- Older Android devices, that use `SurfaceTexture`.
+  - CI Configuration (TODO: Link)
+  - CI History (TODO: Link)
+  - Skia Gold (TODO: Link)
+- Newer Android devices, (API 34) that use `ImageReader`.
+  - CI Configuration (TODO: Link)
+  - CI History (TODO: Link)
+  - Skia Gold (TODO: Link)
+
+### Impeller with Vulkan
+
+There is only a single code branch we test using `scenario_app`:
+
+- Newer Android devices, (API 34)
+  - CI Configuration (TODO: Link)
+  - CI History (TODO: Link)
+  - Skia Gold (TODO: Link)
 
 ## Updating Gradle dependencies
 

@@ -1,16 +1,9 @@
-# `android_integration_tests` runner
+# Scenario App Android Test Runner
 
 This directory contains code specific to running Android integration tests.
 
 The tests are uploaded and run on the device using `adb`, and screenshots are
 captured and compared using Skia Gold (if available, for example on CI).
-
-See also:
-
-- [File an issue][file_issue] with the `e: scenario-app, platform-android`
-  labels.
-
-[file_issue]: https://github.com/flutter/flutter/issues/new?labels=e:%20scenario-app,engine,platform-android,fyi-android,team-engine
 
 ## Usage
 
