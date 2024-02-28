@@ -1147,9 +1147,9 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
       animationStyle: switch (Theme.of(context).platform) {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia
           => AnimationStyle(
-            curve: Curves.easeIn,
-            reverseCurve: Curves.easeOut,
-            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutCubicEmphasized,
+            reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+            duration: const Duration(milliseconds: 500),
           ),
         TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows
           => AnimationStyle.noAnimation,
