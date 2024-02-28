@@ -68,9 +68,7 @@ static std::vector<vk::ClearValue> GetVKClearValues(
   if (depth.has_value()) {
     clears.emplace_back(VKClearValueFromDepthStencil(
         stencil ? stencil->clear_stencil : 0u, depth->clear_depth));
-  }
-
-  if (stencil.has_value()) {
+  } else if (stencil.has_value()) {
     clears.emplace_back(VKClearValueFromDepthStencil(
         stencil->clear_stencil, depth ? depth->clear_depth : 0.0f));
   }
@@ -116,10 +114,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         depth->store_action                                   //
     );
     TextureVK::Cast(*depth->texture).SetLayout(barrier);
-  }
-
-  if (auto stencil = render_target_.GetStencilAttachment();
-      stencil.has_value()) {
+  } else if (auto stencil = render_target_.GetStencilAttachment();
+             stencil.has_value()) {
     builder.SetStencilAttachment(
         stencil->texture->GetTextureDescriptor().format,        //
         stencil->texture->GetTextureDescriptor().sample_count,  //

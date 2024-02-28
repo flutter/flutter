@@ -600,10 +600,8 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         depth->load_action,                                   //
         depth->store_action                                   //
     );
-  }
-
-  if (auto stencil = render_target.GetStencilAttachment();
-      stencil.has_value()) {
+  } else if (auto stencil = render_target.GetStencilAttachment();
+             stencil.has_value()) {
     builder.SetStencilAttachment(
         stencil->texture->GetTextureDescriptor().format,        //
         stencil->texture->GetTextureDescriptor().sample_count,  //
