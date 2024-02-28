@@ -554,24 +554,30 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// A [ValueListenable] that notifies registered listeners when the
   /// focusability of this [FocusNode] changes.
   ///
-  /// The [ValueListenable]'s `value` indicates the whether this [FocusNode] can
+  /// The [ValueListenable]'s `value` indicates whether this [FocusNode] can
   /// request primary focus. It's value is always consistent with the return
   /// value of the [canRequestFocus] getter, which only returns true when the
   /// [FocusNode]'s [canRequestFocus] setter is set to true, and all of its
-  /// ancestors in the focus tree have [FocusNode.descendantsAreFocusable] set
+  /// ancestors in the focus tree have [FocusNode.descendantsAreFocusable] set to
   /// true.
   ///
-  /// The [ValueListenable] is managed by this [FocusNode]. It must not be
-  /// retained after the [FocusNode] is disposed.
+  /// This can be used to monitor, for example, whether a text field is currently
+  /// disabled, or in an inactive route, thus isn't receiving user interactions,
+  /// so that text field can unsubscribe itself from system services such as
+  /// scribble and autofill when it becomes unfocusable, and re-subscribe when it
+  /// becomes focusable again.
+  ///
+  /// This [ValueListenable] is managed by this [FocusNode]. It must not be used
+  /// after the [FocusNode] itself is disposed.
   ValueListenable<bool> get focusabilityListenable => _focusabilityListenable ??= _FocusabilityListenable(this);
   _FocusabilityListenable? _focusabilityListenable;
 
-  // Returns whether all parents allow this node to gain focus.
+  // Returns whether all ancestors have `descendantsAreFocusable` set to true.
   bool _adjustListeningNodeCountForAncestors(int delta) {
     assert(delta != 0);
     for (FocusNode? node = parent; node != null; node = node.parent) {
       node._focusabilityListeningDescendantCount += delta;
-      assert(node._focusabilityListeningDescendantCount >= 0, '$node currently have ${node._focusabilityListeningDescendantCount} listeners. ($delta)');
+      assert(node._focusabilityListeningDescendantCount >= 0);
       if (!node.descendantsAreFocusable) {
         return false;
       }
@@ -628,9 +634,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     final int ancestorListenerAdjustment = newValue ? _focusabilityListeningDescendantCount : -_focusabilityListeningDescendantCount;
 
     // If there's an ancestor that disallows focus, changing the
-    // `descendantsAreFocusable` of this node never affect the focusability of
-    // the descendants. Notify _focusabilityListenerCount listeners only when
-    // this is not the case.
+    // `descendantsAreFocusable` value of this node never affects the
+    // focusability of the descendants. Notify _focusabilityListenerCount
+    // listeners only when this is not the case.
     final bool notifyChildren = ancestorListenerAdjustment != 0
                              && _adjustListeningNodeCountForAncestors(ancestorListenerAdjustment);
     if (notifyChildren) {
