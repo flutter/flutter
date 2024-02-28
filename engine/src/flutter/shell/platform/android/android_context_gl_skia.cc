@@ -65,11 +65,10 @@ static bool TeardownContext(EGLDisplay display, EGLContext context) {
 }
 
 AndroidContextGLSkia::AndroidContextGLSkia(
-    AndroidRenderingAPI rendering_api,
     fml::RefPtr<AndroidEnvironmentGL> environment,
     const TaskRunners& task_runners,
     uint8_t msaa_samples)
-    : AndroidContext(AndroidRenderingAPI::kOpenGLES),
+    : AndroidContext(AndroidRenderingAPI::kSkiaOpenGLES),
       environment_(std::move(environment)),
       task_runners_(task_runners) {
   if (!environment_->IsValid()) {

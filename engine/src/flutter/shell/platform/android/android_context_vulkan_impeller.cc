@@ -19,7 +19,8 @@ namespace flutter {
 static std::shared_ptr<impeller::Context> CreateImpellerContext(
     const fml::RefPtr<fml::NativeLibrary>& vulkan_dylib,
     bool enable_vulkan_validation,
-    bool enable_gpu_tracing) {
+    bool enable_gpu_tracing,
+    bool quiet) {
   if (!vulkan_dylib) {
     VALIDATION_LOG << "Could not open the Vulkan dylib.";
     return nullptr;
@@ -57,12 +58,14 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 
   auto context = impeller::ContextVK::Create(std::move(settings));
 
-  if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
-                     .AreValidationsEnabled()) {
-    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
-                          "Validation Layers).";
-  } else {
-    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+  if (!quiet) {
+    if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
+                       .AreValidationsEnabled()) {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
+                            "Validation Layers).";
+    } else {
+      FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+    }
   }
 
   return context;
@@ -70,11 +73,12 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 
 AndroidContextVulkanImpeller::AndroidContextVulkanImpeller(
     bool enable_validation,
-    bool enable_gpu_tracing)
-    : AndroidContext(AndroidRenderingAPI::kVulkan),
+    bool enable_gpu_tracing,
+    bool quiet)
+    : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
   auto impeller_context = CreateImpellerContext(
-      vulkan_dylib_, enable_validation, enable_gpu_tracing);
+      vulkan_dylib_, enable_validation, enable_gpu_tracing, quiet);
   SetImpellerContext(impeller_context);
   is_valid_ = !!impeller_context;
 }
