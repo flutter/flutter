@@ -207,7 +207,7 @@ class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
-  late final AutovalidateMode autovalidateMode;
+  late final AutovalidateMode _autovalidateMode;
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -260,7 +260,7 @@ class FormState extends State<Form> {
   @override
   void initState() {
     super.initState();
-    autovalidateMode = widget.autovalidateMode;
+    _autovalidateMode = widget.autovalidateMode;
   }
 
   @override
@@ -648,7 +648,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final AutovalidateMode autovalidateMode = Form.maybeOf(context)?.autovalidateMode ?? AutovalidateMode.disabled;
+    final AutovalidateMode autovalidateMode = Form.maybeOf(context)?._autovalidateMode ?? AutovalidateMode.disabled;
 
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
