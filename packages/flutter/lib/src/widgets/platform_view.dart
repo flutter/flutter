@@ -358,6 +358,19 @@ class AppKitView extends _DarwinView {
   State<AppKitView> createState() => _AppKitViewState();
 }
 
+
+/// A windows platform view implemented using a win32 HWND.
+class Win32View extends StatefulWidget {
+  Win32View({
+    required this.viewType,
+  });
+
+  final String viewType;
+
+  @override
+  State<Win32View> createState() => _WindowsViewState();
+}
+
 /// Callback signature for when the platform view's DOM element was created.
 ///
 /// [element] is the DOM element that was created.
@@ -748,6 +761,64 @@ class _AppKitViewState extends _DarwinViewState<AppKitView, AppKitViewController
   }
 }
 
+class _WindowsViewState extends State<Win32View> {
+  bool _initialized = false;
+  Win32ViewController? _controller;
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _createNewWin32View();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeOnce();
+  }
+
+  @override
+  void didUpdateWidget(Win32View oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.viewType != widget.viewType) {
+      _controller = null;
+      _createNewWin32View();
+    }
+  }
+  
+  Future<void> _createNewWin32View() async {
+    final int id = platformViewsRegistry.getNextPlatformViewId();
+    final Win32ViewController controller = await PlatformViewsService.initWindowsView(
+      id: id,
+      viewType: widget.viewType,
+      onFocus: () {
+        // TODO(schectman): Move widget focus to platform view focus node
+      },
+      onLoseFocus: (int reason) {
+        // TODO(schectman): Move widget focus to previous or next widget in tree
+      });
+      setState(() {
+        _controller = controller;
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Win32ViewController? controller = _controller;
+    if (controller == null) {
+      return const SizedBox.expand();
+    }
+    // TODO(schectman): Surround with Focus widgets to pick up keyboard focus
+    return Semantics(
+      child: _Win32PlatformView(controller: controller),
+    );
+  }
+
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     required this.controller,
@@ -823,6 +894,25 @@ class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, Rend
       hitTestBehavior: hitTestBehavior,
       gestureRecognizers: gestureRecognizers,
     );
+  }
+}
+
+class _Win32PlatformView extends LeafRenderObjectWidget {
+  const _Win32PlatformView({
+    required this.controller,
+  });
+
+  final Win32ViewController controller;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderWin32View(controller);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderWin32View renderObject) {
+    renderObject
+      .viewController = controller;
   }
 }
 

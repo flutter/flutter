@@ -61,6 +61,11 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+/// Callback for keyboard navigation moving out of a platform view.
+///
+/// The 'reason' parameter represents the direction in which focus moves.
+typedef LoseFocusCallback = void Function(int reason);
+
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
@@ -78,6 +83,13 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
+      case 'navigatedOut':
+        final Map<dynamic, dynamic> arguments = call.arguments as Map<dynamic, dynamic>;
+        final int id = arguments['id'] as int;
+        final int reason = arguments['reason'] as int;
+        if (_loseFocusCallbacks.containsKey(id)) {
+          _loseFocusCallbacks[id]!(reason);
+        }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -88,6 +100,9 @@ class PlatformViewsService {
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
+  /// Maps platform view IDs to focus loss callbacks.
+  final Map<int, LoseFocusCallback> _loseFocusCallbacks = <int, LoseFocusCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -291,6 +306,41 @@ class PlatformViewsService {
       _instance._focusCallbacks[id] = onFocus;
     }
     return AppKitViewController._(id, layoutDirection);
+  }
+
+  /// Factory method to create a Win32ViewController.
+  static Future<Win32ViewController> initWindowsView({
+    required int id,
+    required String viewType,
+    VoidCallback? onFocus,
+    LoseFocusCallback? onLoseFocus,
+  }) async {
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    if (onLoseFocus != null) {
+      _instance._loseFocusCallbacks[id] = onLoseFocus;
+    }
+    return Win32ViewController._(id);
+  }
+
+  /// Request that keyboard focus move to the provided platform view.
+  static Future<void> focusWin32View({
+    required int id,
+    required bool focus,
+    int direction = 0,
+  }) async {
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'focus': focus,
+      'direction': direction,
+    };
+    await SystemChannels.platform_views.invokeMethod('focus', args);
   }
 }
 
@@ -1460,6 +1510,19 @@ class AppKitViewController extends DarwinPlatformViewController {
     super.id,
     super.layoutDirection,
   );
+}
+
+/// Controller for a Windows platform view.
+class Win32ViewController {
+  Win32ViewController._(this.id);
+
+  /// Integer identifier of this platform view instance.
+  final int id;
+
+  /// Invoke setting the keyboard focus to the platform view.
+  Future<void> focus(bool focus, int dir) async {
+    // TODO(schectman): invoke platform service
+  }
 }
 
 /// An interface for controlling a single platform view.
