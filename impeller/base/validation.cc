@@ -11,7 +11,7 @@
 namespace impeller {
 
 static std::atomic_int32_t sValidationLogsDisabledCount = 0;
-static bool sValidationLogsAreFatal = false;
+static std::atomic_int32_t sValidationLogsAreFatal = 0;
 
 void ImpellerValidationErrorsSetFatal(bool fatal) {
   sValidationLogsAreFatal = fatal;
@@ -23,6 +23,14 @@ ScopedValidationDisable::ScopedValidationDisable() {
 
 ScopedValidationDisable::~ScopedValidationDisable() {
   sValidationLogsDisabledCount--;
+}
+
+ScopedValidationFatal::ScopedValidationFatal() {
+  sValidationLogsAreFatal++;
+}
+
+ScopedValidationFatal::~ScopedValidationFatal() {
+  sValidationLogsAreFatal--;
 }
 
 ValidationLog::ValidationLog() = default;
@@ -43,7 +51,7 @@ void ImpellerValidationBreak(const char* message) {
   std::stringstream stream;
   stream << "Break on '" << __FUNCTION__
          << "' to inspect point of failure: " << message;
-  if (sValidationLogsAreFatal) {
+  if (sValidationLogsAreFatal > 0) {
     FML_LOG(FATAL) << stream.str();
   } else {
     FML_LOG(ERROR) << stream.str();
