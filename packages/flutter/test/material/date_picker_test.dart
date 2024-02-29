@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/clipboard_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1577,6 +1578,13 @@ void main() {
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
+      // Fill the clipboard so that the Paste option is available in the text
+      // selection menu.
+      final MockClipboard mockClipboard = MockClipboard();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+      await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+
       final SemanticsHandle semantics = tester.ensureSemantics();
 
       initialEntryMode = DatePickerEntryMode.input;
@@ -1596,7 +1604,22 @@ void main() {
           isFocusable: true,
         ));
 
-        // The semantics of the InputDatePickerFormField are tested in its tests.
+        expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
+          label: 'Enter Date',
+          isEnabled: true,
+          hasEnabledState: true,
+          isTextField: true,
+          isFocused: true,
+          value: '01/15/2016',
+          hasTapAction: true,
+          hasSetTextAction: true,
+          hasSetSelectionAction: true,
+          hasCopyAction: true,
+          hasCutAction: true,
+          hasPasteAction: true,
+          hasMoveCursorBackwardByCharacterAction: true,
+          hasMoveCursorBackwardByWordAction: true,
+        ));
 
         // Ok/Cancel buttons
         expect(tester.getSemantics(find.text('OK')), matchesSemantics(
