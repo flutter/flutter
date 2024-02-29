@@ -236,6 +236,9 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
            "software rendering or disable impeller.";
     return AndroidRenderingAPI::kSoftware;
   }
+  constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
+      AndroidRenderingAPI::kSkiaOpenGLES;
+
   // Debug/Profile only functionality for testing a specific
   // backend configuration.
 #ifndef FLUTTER_RELEASE
@@ -258,7 +261,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // feature.
     int api_level = android_get_device_api_level();
     if (api_level < kMinimumAndroidApiLevelForVulkan) {
-      return AndroidRenderingAPI::kImpellerOpenGLES;
+      return kVulkanUnsupportedFallback;
     }
     // Determine if Vulkan is supported by creating a Vulkan context and
     // checking if it is valid.
@@ -268,7 +271,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
         /*enable_vulkan_gpu_tracing=*/false,
         /*quiet=*/true);
     if (!vulkan_backend->IsValid()) {
-      return AndroidRenderingAPI::kImpellerOpenGLES;
+      return kVulkanUnsupportedFallback;
     }
     return AndroidRenderingAPI::kImpellerVulkan;
   }
