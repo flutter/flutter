@@ -2210,8 +2210,23 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   }
 }
 
-class CupertinoBasedMaterialThemeData extends ThemeData {
+/// CupertinoBased
+class CupertinoBasedMaterialThemeData {
 
+  /// Constructor
+  CupertinoBasedMaterialThemeData({
+    required CupertinoThemeData themeData,
+  }) : materialTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: themeData.primaryColor,
+        brightness: themeData.brightness ?? Brightness.light,
+        primary: themeData.primaryColor,
+        onPrimary: themeData.primaryContrastingColor,
+      )
+    );
+
+  /// The Material Theme.
+  final ThemeData materialTheme;
 }
 
 @immutable
