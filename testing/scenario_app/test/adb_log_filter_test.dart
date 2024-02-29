@@ -21,7 +21,7 @@ void main() {
 
   test('should always retain fatal logs', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     process.fatal('Something', 'A bad thing happened');
 
     final Iterable<String> filtered = filter(logcat.drain());
@@ -31,7 +31,7 @@ void main() {
 
   test('should never retain debug logs', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     final String tag = AdbLogLine.knownNoiseTags.first;
     process.debug(tag, 'A debug message');
 
@@ -41,7 +41,7 @@ void main() {
 
   test('should never retain logs from known "noise" tags', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     final String tag = AdbLogLine.knownNoiseTags.first;
     process.info(tag, 'Flutter flutter flutter');
 
@@ -51,7 +51,7 @@ void main() {
 
   test('should always retain logs from known "useful" tags', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     final String tag = AdbLogLine.knownUsefulTags.first;
     process.info(tag, 'A useful message');
 
@@ -62,7 +62,7 @@ void main() {
 
   test('if a process ID is passed, retain the log', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     process.info('SomeTag', 'A message');
 
     final Iterable<String> filtered = filter(logcat.drain(), filterProcessId: process.processId);
@@ -72,7 +72,7 @@ void main() {
 
   test('even if a process ID passed, retain logs containing "flutter"', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     process.info('SomeTag', 'A message with flutter');
 
     final Iterable<String> filtered = filter(logcat.drain(), filterProcessId: process.processId);
@@ -82,7 +82,7 @@ void main() {
 
   test('should retain E-level flags from known "useful" error tags', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
     final String tag = AdbLogLine.knownUsefulErrorTags.first;
     process.error(tag, 'An error message');
     process.info(tag, 'An info message');
@@ -94,7 +94,7 @@ void main() {
 
   test('should filter out error logs from unimportant processes', () {
     final FakeAdbLogcat logcat = FakeAdbLogcat();
-    final FakeAdbProcess process = logcat.withProcess();
+    final FakeAdbProcess process = logcat.process();
 
     // I hate this one.
     const String tag = 'gs.intelligence';
@@ -102,5 +102,27 @@ void main() {
 
     final Iterable<String> filtered = filter(logcat.drain());
     expect(filtered, isEmpty);
+  });
+
+  test('should filter the flutter-launched process, not just any process', () {
+    final FakeAdbLogcat logcat = FakeAdbLogcat();
+
+    final FakeAdbProcess device = logcat.process();
+    final FakeAdbProcess unrelated = logcat.process();
+    final FakeAdbProcess flutter = logcat.process();
+
+    device.info(AdbLogLine.activityManagerTag, 'Start proc ${unrelated.processId}:com.example.unrelated');
+
+    List<String> rawLines = logcat.drain();
+    expect(rawLines, hasLength(1));
+    AdbLogLine parsedLogLine = AdbLogLine.tryParse(rawLines.single)!;
+    expect(parsedLogLine.tryParseProcess(), isNull);
+
+    device.info(AdbLogLine.activityManagerTag, 'Start proc ${flutter.processId}:${AdbLogLine.flutterProcessName}');
+
+    rawLines = logcat.drain();
+    expect(rawLines, hasLength(1));
+    parsedLogLine = AdbLogLine.tryParse(rawLines.single)!;
+    expect(parsedLogLine.tryParseProcess(), '${flutter.processId}');
   });
 }
