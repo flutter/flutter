@@ -68,13 +68,19 @@ extension type const AdbLogLine._(Match _match) {
 
   /// Tries to parse the process that was started, if the log line is about it.
   String? tryParseProcess() {
-    if (name == 'ActivityManager' && message.startsWith('Start proc')) {
-      // Start proc 6840:d
-      final RegExpMatch? match = RegExp(r'Start proc (\d+):').firstMatch(message);
+    if (name == activityManagerTag && message.startsWith('Start proc')) {
+      // ActivityManager: Start proc 4475:dev.flutter.scenarios/u0a190 for added application ...
+      final RegExpMatch? match = RegExp('Start proc (\\d+):$flutterProcessName').firstMatch(message);
       return match?.group(1);
     }
     return null;
   }
+
+  @visibleForTesting
+  static const String activityManagerTag = 'ActivityManager';
+
+  @visibleForTesting
+  static const String flutterProcessName = 'dev.flutter.scenarios';
 
   @visibleForTesting
   static const Set<String> knownNoiseTags = <String>{
@@ -95,7 +101,7 @@ extension type const AdbLogLine._(Match _match) {
 
   @visibleForTesting
   static const Set<String> knownUsefulTags = <String>{
-    'ActivityManager',
+    activityManagerTag
   };
 
   @visibleForTesting
