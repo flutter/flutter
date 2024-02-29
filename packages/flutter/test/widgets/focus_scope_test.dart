@@ -1964,6 +1964,21 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
+    testWidgets('Focus does not update the focusNode attributes when the widget updates if withExternalFocusNode is used 2', (WidgetTester tester) async {
+      final TestExternalFocusNode focusNode = TestExternalFocusNode();
+      assert(!focusNode.isModified);
+      addTearDown(focusNode.dispose);
+
+      final Focus focusWidget = Focus.withExternalFocusNode(
+        focusNode: focusNode,
+        child: Container(),
+      );
+
+      await tester.pumpWidget(focusWidget);
+      expect(focusNode.isModified, isFalse);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
       await tester.pumpWidget(
         Focus(
@@ -2192,5 +2207,46 @@ class TestFocusState extends State<TestFocus> {
         ),
       ),
     );
+  }
+}
+
+class TestExternalFocusNode extends FocusNode {
+  TestExternalFocusNode();
+
+  bool isModified = false;
+
+  @override
+  FocusOnKeyEventCallback? get onKeyEvent => _onKeyEvent;
+  FocusOnKeyEventCallback? _onKeyEvent;
+  @override
+  set onKeyEvent(FocusOnKeyEventCallback? newValue) {
+    if (newValue != _onKeyEvent) {
+      _onKeyEvent = newValue;
+      isModified = true;
+    }
+  }
+
+  @override
+  set descendantsAreFocusable(bool newValue) {
+    super.descendantsAreFocusable = newValue;
+    isModified = true;
+  }
+
+  @override
+  set descendantsAreTraversable(bool newValue) {
+    super.descendantsAreTraversable = newValue;
+    isModified = true;
+  }
+
+  @override
+  set skipTraversal(bool newValue) {
+    super.skipTraversal = newValue;
+    isModified = true;
+  }
+
+  @override
+  set canRequestFocus(bool newValue) {
+    super.canRequestFocus = newValue;
+    isModified = true;
   }
 }
