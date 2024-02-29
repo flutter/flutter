@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
@@ -62,6 +64,7 @@ class IndexHtml {
   void applySubstitutions({
     required String baseHref,
     required String? serviceWorkerVersion,
+    required File flutterJsFile,
     String? buildConfig,
   }) {
     if (_content.contains(kBaseHrefPlaceholder)) {
@@ -86,6 +89,13 @@ class IndexHtml {
       _content = _content.replaceFirst(
         '{{flutter_build_config}}',
         buildConfig,
+      );
+    }
+
+    if (_content.contains('{{flutter_js}}')) {
+      _content = _content.replaceFirst(
+        '{{flutter_js}}',
+        flutterJsFile.readAsStringSync(),
       );
     }
   }

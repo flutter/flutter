@@ -367,11 +367,12 @@ class WebReleaseBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    final FileSystem fileSystem = environment.fileSystem;
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      final String basename = environment.fileSystem.path.basename(outputFile.path);
+      final String basename = fileSystem.path.basename(outputFile.path);
       if (buildFiles.contains(basename)) {
         outputFile.copySync(
-          environment.outputDir.childFile(environment.fileSystem.path.basename(outputFile.path)).path
+          environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path
         );
       }
     }
@@ -400,9 +401,9 @@ class WebReleaseBundle extends Target {
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
-      final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
+      final File outputFile = fileSystem.file(fileSystem.path.join(
         environment.outputDir.path,
-        environment.fileSystem.path.relative(inputFile.path, from: webResources.path)));
+        fileSystem.path.relative(inputFile.path, from: webResources.path)));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -410,7 +411,7 @@ class WebReleaseBundle extends Target {
       // insert a random hash into the requests for service_worker.js. This is not a content hash,
       // because it would need to be the hash for the entire bundle and not just the resource
       // in question.
-      if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
+      if (fileSystem.path.basename(inputFile.path) == 'index.html') {
         final List<Map<String, Object?>> buildDescriptions = compileTargets.map(
           (Dart2WebTarget target) => target.buildConfig
         ).toList();
@@ -420,10 +421,16 @@ class WebReleaseBundle extends Target {
         };
         final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
         final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
+        final File flutterJsFile = fileSystem.file(fileSystem.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+          'flutter.js',
+        ));
+
         indexHtml.applySubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: Random().nextInt(4294967296).toString(),
           buildConfig: buildConfigString,
+          flutterJsFile: flutterJsFile,
         );
         outputFile.writeAsStringSync(indexHtml.content);
         continue;

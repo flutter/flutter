@@ -538,11 +538,17 @@ class WebAssetServer implements AssetReader {
     };
     final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
 
+    final File flutterJsFile = globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ));
+
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
       buildConfig: buildConfigString,
+      flutterJsFile: flutterJsFile
     );
 
     final Map<String, String> headers = <String, String>{
