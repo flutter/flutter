@@ -29,15 +29,15 @@ G_DECLARE_FINAL_TYPE(FlViewAccessible,
  */
 
 /**
- * fl_view_accessible_handle_update_semantics_node:
+ * fl_view_accessible_handle_update_semantics:
  * @accessible: an #FlViewAccessible.
- * @node: semantic node information.
+ * @update: semantic update information.
  *
- * Handle a semantics node update from Flutter.
+ * Handle a semantics update from Flutter.
  */
-void fl_view_accessible_handle_update_semantics_node(
+void fl_view_accessible_handle_update_semantics(
     FlViewAccessible* accessible,
-    const FlutterSemanticsNode* node);
+    const FlutterSemanticsUpdate2* update);
 
 G_END_DECLS
 

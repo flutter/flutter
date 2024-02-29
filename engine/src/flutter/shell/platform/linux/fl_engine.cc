@@ -59,9 +59,9 @@ struct _FlEngine {
   GDestroyNotify platform_message_handler_destroy_notify;
 
   // Function to call when a semantic node is received.
-  FlEngineUpdateSemanticsNodeHandler update_semantics_node_handler;
-  gpointer update_semantics_node_handler_data;
-  GDestroyNotify update_semantics_node_handler_destroy_notify;
+  FlEngineUpdateSemanticsHandler update_semantics_handler;
+  gpointer update_semantics_handler_data;
+  GDestroyNotify update_semantics_handler_destroy_notify;
 
   // Function to call right before the engine is restarted.
   FlEngineOnPreEngineRestartHandler on_pre_engine_restart_handler;
@@ -333,13 +333,13 @@ static void fl_engine_platform_message_cb(const FlutterPlatformMessage* message,
 }
 
 // Called when a semantic node update is received from the engine.
-static void fl_engine_update_semantics_node_cb(const FlutterSemanticsNode* node,
-                                               void* user_data) {
+static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
+                                          void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
-  if (self->update_semantics_node_handler != nullptr) {
-    self->update_semantics_node_handler(
-        self, node, self->update_semantics_node_handler_data);
+  if (self->update_semantics_handler != nullptr) {
+    self->update_semantics_handler(self, update,
+                                   self->update_semantics_handler_data);
   }
 }
 
@@ -425,12 +425,12 @@ static void fl_engine_dispose(GObject* object) {
   self->platform_message_handler_data = nullptr;
   self->platform_message_handler_destroy_notify = nullptr;
 
-  if (self->update_semantics_node_handler_destroy_notify) {
-    self->update_semantics_node_handler_destroy_notify(
-        self->update_semantics_node_handler_data);
+  if (self->update_semantics_handler_destroy_notify) {
+    self->update_semantics_handler_destroy_notify(
+        self->update_semantics_handler_data);
   }
-  self->update_semantics_node_handler_data = nullptr;
-  self->update_semantics_node_handler_destroy_notify = nullptr;
+  self->update_semantics_handler_data = nullptr;
+  self->update_semantics_handler_destroy_notify = nullptr;
 
   if (self->on_pre_engine_restart_handler_destroy_notify) {
     self->on_pre_engine_restart_handler_destroy_notify(
@@ -527,7 +527,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.command_line_argv =
       reinterpret_cast<const char* const*>(command_line_args->pdata);
   args.platform_message_callback = fl_engine_platform_message_cb;
-  args.update_semantics_node_callback = fl_engine_update_semantics_node_cb;
+  args.update_semantics_callback2 = fl_engine_update_semantics_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;
   args.on_pre_engine_restart_callback = fl_engine_on_pre_engine_restart_cb;
@@ -610,21 +610,21 @@ void fl_engine_set_platform_message_handler(
   self->platform_message_handler_destroy_notify = destroy_notify;
 }
 
-void fl_engine_set_update_semantics_node_handler(
+void fl_engine_set_update_semantics_handler(
     FlEngine* self,
-    FlEngineUpdateSemanticsNodeHandler handler,
+    FlEngineUpdateSemanticsHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  if (self->update_semantics_node_handler_destroy_notify) {
-    self->update_semantics_node_handler_destroy_notify(
-        self->update_semantics_node_handler_data);
+  if (self->update_semantics_handler_destroy_notify) {
+    self->update_semantics_handler_destroy_notify(
+        self->update_semantics_handler_data);
   }
 
-  self->update_semantics_node_handler = handler;
-  self->update_semantics_node_handler_data = user_data;
-  self->update_semantics_node_handler_destroy_notify = destroy_notify;
+  self->update_semantics_handler = handler;
+  self->update_semantics_handler_data = user_data;
+  self->update_semantics_handler_destroy_notify = destroy_notify;
 }
 
 void fl_engine_set_on_pre_engine_restart_handler(

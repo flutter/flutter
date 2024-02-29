@@ -8,7 +8,6 @@
 
 #include <cstring>
 
-#include "flutter/shell/platform/linux/fl_accessibility_plugin.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
@@ -46,7 +45,6 @@ struct _FlView {
   GdkWindowState window_state;
 
   // Flutter system channel handlers.
-  FlAccessibilityPlugin* accessibility_plugin;
   FlKeyboardManager* keyboard_manager;
   FlScrollingManager* scrolling_manager;
   FlTextInputPlugin* text_input_plugin;
@@ -225,14 +223,15 @@ static void handle_geometry_changed(FlView* self) {
   }
 }
 
-// Called when the engine updates accessibility nodes.
-static void update_semantics_node_cb(FlEngine* engine,
-                                     const FlutterSemanticsNode* node,
-                                     gpointer user_data) {
+// Called when the engine updates accessibility.
+static void update_semantics_cb(FlEngine* engine,
+                                const FlutterSemanticsUpdate2* update,
+                                gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  fl_accessibility_plugin_handle_update_semantics_node(
-      self->accessibility_plugin, node);
+  AtkObject* accessible = gtk_widget_get_accessible(GTK_WIDGET(self));
+  fl_view_accessible_handle_update_semantics(FL_VIEW_ACCESSIBLE(accessible),
+                                             update);
 }
 
 // Invoked by the engine right before the engine is restarted.
@@ -559,8 +558,8 @@ static void fl_view_constructed(GObject* object) {
 
   self->renderer = FL_RENDERER(fl_renderer_gl_new());
   self->engine = fl_engine_new(self->project, self->renderer);
-  fl_engine_set_update_semantics_node_handler(
-      self->engine, update_semantics_node_cb, self, nullptr);
+  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
+                                         self, nullptr);
   fl_engine_set_on_pre_engine_restart_handler(
       self->engine, on_pre_engine_restart_cb, self, nullptr);
 
@@ -569,7 +568,6 @@ static void fl_view_constructed(GObject* object) {
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
-  self->accessibility_plugin = fl_accessibility_plugin_new(self);
   init_scrolling(self);
   self->mouse_cursor_plugin = fl_mouse_cursor_plugin_new(messenger, self);
   self->platform_plugin = fl_platform_plugin_new(messenger);
@@ -666,8 +664,8 @@ static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
 
   if (self->engine != nullptr) {
-    fl_engine_set_update_semantics_node_handler(self->engine, nullptr, nullptr,
-                                                nullptr);
+    fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
+                                           nullptr);
     fl_engine_set_on_pre_engine_restart_handler(self->engine, nullptr, nullptr,
                                                 nullptr);
   }
@@ -681,7 +679,6 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->project);
   g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
-  g_clear_object(&self->accessibility_plugin);
   g_clear_object(&self->keyboard_manager);
   if (self->keymap_keys_changed_cb_id != 0) {
     g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);

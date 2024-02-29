@@ -10,30 +10,23 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_signal_handler.h"
 
-static const FlutterSemanticsNode kBatchEndNode = {
-    .id = kFlutterSemanticsNodeIdBatchEnd};
-
 TEST(FlViewAccessibleTest, BuildTree) {
   g_autoptr(FlEngine) engine = make_mock_engine();
   g_autoptr(FlViewAccessible) accessible = FL_VIEW_ACCESSIBLE(
       g_object_new(fl_view_accessible_get_type(), "engine", engine, nullptr));
 
-  const int32_t children[] = {111, 222};
-  const FlutterSemanticsNode root_node = {
+  int32_t children[] = {111, 222};
+  FlutterSemanticsNode2 root_node = {
       .id = 0,
       .label = "root",
       .child_count = 2,
       .children_in_traversal_order = children,
   };
-  fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-  const FlutterSemanticsNode child1_node = {.id = 111, .label = "child 1"};
-  fl_view_accessible_handle_update_semantics_node(accessible, &child1_node);
-
-  const FlutterSemanticsNode child2_node = {.id = 222, .label = "child 2"};
-  fl_view_accessible_handle_update_semantics_node(accessible, &child2_node);
-
-  fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+  FlutterSemanticsNode2 child1_node = {.id = 111, .label = "child 1"};
+  FlutterSemanticsNode2 child2_node = {.id = 222, .label = "child 2"};
+  FlutterSemanticsNode2* nodes[3] = {&root_node, &child1_node, &child2_node};
+  FlutterSemanticsUpdate2 update = {.node_count = 3, .nodes = nodes};
+  fl_view_accessible_handle_update_semantics(accessible, &update);
 
   AtkObject* root_object =
       atk_object_ref_accessible_child(ATK_OBJECT(accessible), 0);
@@ -59,14 +52,14 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
   g_autoptr(FlViewAccessible) accessible = FL_VIEW_ACCESSIBLE(
       g_object_new(fl_view_accessible_get_type(), "engine", engine, nullptr));
 
-  FlutterSemanticsNode root_node = {
+  FlutterSemanticsNode2 root_node = {
       .id = 0,
       .label = "root",
       .child_count = 0,
   };
-  fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-  fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+  FlutterSemanticsNode2* nodes[1] = {&root_node};
+  FlutterSemanticsUpdate2 update = {.node_count = 1, .nodes = nodes};
+  fl_view_accessible_handle_update_semantics(accessible, &update);
 
   AtkObject* root_object =
       atk_object_ref_accessible_child(ATK_OBJECT(accessible), 0);
@@ -74,21 +67,19 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
 
   // add child1
   AtkObject* child1_object = nullptr;
+  FlutterSemanticsNode2 child1_node = {.id = 111, .label = "child 1"};
   {
     flutter::testing::MockSignalHandler2<gint, AtkObject*> child1_added(
         root_object, "children-changed::add");
     EXPECT_SIGNAL2(child1_added, ::testing::Eq(0), ::testing::A<AtkObject*>())
         .WillOnce(::testing::SaveArg<1>(&child1_object));
 
-    const int32_t children[] = {111};
+    int32_t children[] = {111};
     root_node.child_count = 1;
     root_node.children_in_traversal_order = children;
-    fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-    const FlutterSemanticsNode child1_node = {.id = 111, .label = "child 1"};
-    fl_view_accessible_handle_update_semantics_node(accessible, &child1_node);
-
-    fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+    FlutterSemanticsNode2* nodes[2] = {&root_node, &child1_node};
+    FlutterSemanticsUpdate2 update = {.node_count = 2, .nodes = nodes};
+    fl_view_accessible_handle_update_semantics(accessible, &update);
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 1);
@@ -101,21 +92,19 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
 
   // add child2
   AtkObject* child2_object = nullptr;
+  FlutterSemanticsNode2 child2_node = {.id = 222, .label = "child 2"};
   {
     flutter::testing::MockSignalHandler2<gint, AtkObject*> child2_added(
         root_object, "children-changed::add");
     EXPECT_SIGNAL2(child2_added, ::testing::Eq(1), ::testing::A<AtkObject*>())
         .WillOnce(::testing::SaveArg<1>(&child2_object));
 
-    const int32_t children[] = {111, 222};
+    int32_t children[] = {111, 222};
     root_node.child_count = 2;
     root_node.children_in_traversal_order = children;
-    fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-    const FlutterSemanticsNode child2_node = {.id = 222, .label = "child 2"};
-    fl_view_accessible_handle_update_semantics_node(accessible, &child2_node);
-
-    fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+    FlutterSemanticsNode2* nodes[3] = {&root_node, &child1_node, &child2_node};
+    FlutterSemanticsUpdate2 update = {.node_count = 3, .nodes = nodes};
+    fl_view_accessible_handle_update_semantics(accessible, &update);
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 2);
@@ -142,9 +131,9 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
     const int32_t children[] = {222};
     root_node.child_count = 1;
     root_node.children_in_traversal_order = children;
-    fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-    fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+    FlutterSemanticsNode2* nodes[3] = {&root_node, &child2_node};
+    FlutterSemanticsUpdate2 update = {.node_count = 2, .nodes = nodes};
+    fl_view_accessible_handle_update_semantics(accessible, &update);
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 1);
@@ -163,9 +152,9 @@ TEST(FlViewAccessibleTest, AddRemoveChildren) {
                    ::testing::Eq(child2_object));
 
     root_node.child_count = 0;
-    fl_view_accessible_handle_update_semantics_node(accessible, &root_node);
-
-    fl_view_accessible_handle_update_semantics_node(accessible, &kBatchEndNode);
+    FlutterSemanticsNode2* nodes[1] = {&root_node};
+    FlutterSemanticsUpdate2 update = {.node_count = 1, .nodes = nodes};
+    fl_view_accessible_handle_update_semantics(accessible, &update);
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 0);
