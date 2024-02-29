@@ -1017,17 +1017,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     if (isEnd) {
       final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-      debugPrint('is forward selection $forwardSelection');
-      // if (!forwardSelection && (!(forward ?? false) ?? false)) {
-      //   currentSelectionStartIndex = currentSelectionEndIndex;
-      // }
-      // if (forwardSelection && (forward ?? false)) {
-      //   currentSelectionStartIndex = currentSelectionEndIndex;
-      // }
-      // final bool shouldSwap = forwardSelection != forward;
-      // final bool shouldSwap = (forwardSelection && forward!) || (!forwardSelection && !forward!);
-
-      // debugPrint('should swap $shouldSwap $forwardSelection $forward ${forwardSelection != forward}');
       if (forward != null && ((!forwardSelection && forward! && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward! && newIndex <= currentSelectionStartIndex))) {
         debugPrint('swapping text-container');
         currentSelectionStartIndex = currentSelectionEndIndex;
