@@ -15,6 +15,7 @@
 #include "impeller/base/comparable.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/test/recording_render_pass.h"
@@ -50,6 +51,9 @@ class FakeTexture : public Texture {
   bool OnSetContents(const uint8_t* contents,
                      size_t length,
                      size_t slice) override {
+    if (GetTextureDescriptor().GetByteSizeOfBaseMipLevel() != length) {
+      return false;
+    }
     did_set_contents = true;
     return true;
   }
@@ -209,11 +213,15 @@ class FakeCommandBuffer : public CommandBuffer {
 class FakeContext : public Context,
                     public std::enable_shared_from_this<FakeContext> {
  public:
-  explicit FakeContext(const std::string& gpu_model = "")
+  explicit FakeContext(
+      const std::string& gpu_model = "",
+      PixelFormat default_color_format = PixelFormat::kR8G8B8A8UNormInt)
       : Context(),
         allocator_(std::make_shared<FakeAllocator>()),
-        capabilities_(
-            std::shared_ptr<Capabilities>(CapabilitiesBuilder().Build())),
+        capabilities_(std::shared_ptr<Capabilities>(
+            CapabilitiesBuilder()
+                .SetDefaultColorFormat(default_color_format)
+                .Build())),
         pipelines_(std::make_shared<FakePipelineLibrary>()),
         queue_(std::make_shared<CommandQueue>()),
         shader_library_(std::make_shared<FakeShaderLibrary>()),
@@ -327,7 +335,10 @@ TEST(ContentContext, InvalidatesAllPipelinesWithSameUniqueNameOnClear) {
 }
 
 TEST(ContentContext, InitializeCommonlyUsedShadersIfNeeded) {
-  auto context = std::make_shared<FakeContext>("Mali G70");
+  ScopedValidationFatal fatal_validations;
+  // Set a pixel format that is larger than 32bpp.
+  auto context = std::make_shared<FakeContext>("Mali G70",
+                                               PixelFormat::kR16G16B16A16Float);
   ContentContext content_context(context, nullptr);
 
   FakeAllocator& fake_allocator =
