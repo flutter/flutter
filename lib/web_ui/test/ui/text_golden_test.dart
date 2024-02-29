@@ -392,6 +392,16 @@ Future<void> testMain() async {
     );
   });
 
+  test('strut style - override height', () async {
+    await testTextStyle(
+      'strut style',
+      paragraphStrutStyle: ui.StrutStyle(
+        forceStrutHeight: true,
+        height: 2,
+      ),
+    );
+  });
+
   test('sample Chinese text', () async {
     await testSampleText(
       'chinese',
