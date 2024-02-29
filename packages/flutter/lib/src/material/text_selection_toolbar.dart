@@ -511,7 +511,6 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     double fitWidth = 0.0;
     final RenderBox navButton = firstChild!;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
-    double overflowWidth = 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
@@ -540,8 +539,10 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
       } else {
         childParentData.offset = Offset(0.0, overflowHeight);
         overflowHeight += child.size.height;
-        overflowWidth = math.max(child.size.width, nextSize.width);
-        nextSize = Size(overflowWidth, overflowHeight);
+        nextSize = Size(
+          math.max(child.size.width, nextSize.width),
+          overflowHeight,
+        );
       }
     });
 
@@ -568,36 +569,38 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     size = nextSize;
   }
 
-  // Horizontally expand the children when the menu overflow so they can react to
+  // Horizontally expand the children when the menu overflows so they can react to
   // pointer events into their whole area.
   void _resizeChildrenWhenOverflow() {
-    if (overflowOpen) {
-      final RenderBox navButton = firstChild!;
-      int i = -1;
-
-      visitChildren((RenderObject renderObjectChild) {
-        final RenderBox child = renderObjectChild as RenderBox;
-        final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
-
-        i++;
-
-        // Ignore the navigation button.
-        if (renderObjectChild == navButton) {
-          return;
-        }
-
-        // There is no need to update children that won't be painted.
-        if (!_shouldPaintChild(renderObjectChild, i)) {
-          childParentData.shouldPaint = false;
-          return;
-        }
-
-        child.layout(
-          BoxConstraints.tightFor(width: size.width),
-          parentUsesSize: true,
-        );
-      });
+    if (!overflowOpen) {
+      return;
     }
+
+    final RenderBox navButton = firstChild!;
+    int i = -1;
+
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+
+      i++;
+
+      // Ignore the navigation button.
+      if (renderObjectChild == navButton) {
+        return;
+      }
+
+      // There is no need to update children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
+        childParentData.shouldPaint = false;
+        return;
+      }
+
+      child.layout(
+        BoxConstraints.tightFor(width: size.width),
+        parentUsesSize: true,
+      );
+    });
   }
 
   @override
