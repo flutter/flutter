@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
+  testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
     await tester.pumpWidget(Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -47,7 +46,7 @@ void main() {
     expect(renderObject.elevation, 0.0);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - floating and pinned - correct semantics', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating and pinned - correct semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('en', 'us'),
@@ -242,7 +241,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -295,7 +294,7 @@ void main() {
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
   });
 
-  testWidgetsWithLeakTracking('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
+  testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -342,7 +341,7 @@ void main() {
     expect(render.geometry!.layoutExtent, 0.0);
   });
 
-  testWidgetsWithLeakTracking('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
@@ -376,7 +375,7 @@ void main() {
     expect(render.geometry!.paintOrigin, -scrollDistance);
   });
 
-  testWidgetsWithLeakTracking('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
@@ -409,7 +408,7 @@ void main() {
     expect(render.geometry!.paintOrigin, -scrollDistance);
   });
 
-  testWidgetsWithLeakTracking('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(

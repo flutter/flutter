@@ -119,6 +119,10 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     FocusOnKeyEventCallback? onKeyEvent,
+    @Deprecated(
+      'Use onKeyEvent instead. '
+      'This feature was deprecated after v3.18.0-2.0.pre.',
+    )
     FocusOnKeyCallback? onKey,
     bool? canRequestFocus,
     bool? skipTraversal,
@@ -228,8 +232,7 @@ class Focus extends StatefulWidget {
   /// A handler for keys that are pressed when this object or one of its
   /// children has focus.
   ///
-  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
-  /// future. Prefer [onKeyEvent] instead.
+  /// This property is deprecated and will be removed. Use [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -241,6 +244,10 @@ class Focus extends StatefulWidget {
   /// keyboards in general. For text input, consider [TextField],
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
+  @Deprecated(
+    'Use onKeyEvent instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   FocusOnKeyCallback? get onKey => _onKey ?? focusNode?.onKey;
   final FocusOnKeyCallback? _onKey;
 
@@ -504,7 +511,7 @@ class _FocusWithExternalFocusNode extends Focus {
 
 class _FocusState extends State<Focus> {
   FocusNode? _internalNode;
-  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
+  FocusNode get focusNode => widget.focusNode ?? (_internalNode ??= _createNode());
   late bool _hadPrimaryFocus;
   late bool _couldRequestFocus;
   late bool _descendantsWereFocusable;
@@ -519,17 +526,13 @@ class _FocusState extends State<Focus> {
   }
 
   void _initNode() {
-    if (widget.focusNode == null) {
-      // Only create a new node if the widget doesn't have one.
-      // This calls a function instead of just allocating in place because
-      // _createNode is overridden in _FocusScopeState.
-      _internalNode ??= _createNode();
-    }
-    focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
-    focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
-    focusNode.skipTraversal = widget.skipTraversal;
-    if (widget._canRequestFocus != null) {
-      focusNode.canRequestFocus = widget._canRequestFocus!;
+    if (!widget._usingExternalFocus) {
+      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+      focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
+      focusNode.skipTraversal = widget.skipTraversal;
+      if (widget._canRequestFocus != null) {
+        focusNode.canRequestFocus = widget._canRequestFocus!;
+      }
     }
     _couldRequestFocus = focusNode.canRequestFocus;
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;

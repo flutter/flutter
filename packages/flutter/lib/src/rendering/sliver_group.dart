@@ -37,14 +37,11 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
   @override
   double childCrossAxisPosition(RenderSliver child) {
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dx;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dy;
-    }
+    final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
+    return switch (constraints.axis) {
+      Axis.vertical   => paintOffset.dx,
+      Axis.horizontal => paintOffset.dy,
+    };
   }
 
   @override
@@ -113,12 +110,10 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
         : 0.0;
       final double childExtent = child.geometry!.crossAxisExtent ?? extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
       // Set child parent data.
-      switch (constraints.axis) {
-        case Axis.vertical:
-          childParentData.paintOffset = Offset(offset, -paintCorrection);
-        case Axis.horizontal:
-          childParentData.paintOffset = Offset(-paintCorrection, offset);
-      }
+      childParentData.paintOffset = switch (constraints.axis) {
+        Axis.vertical   => Offset(offset, -paintCorrection),
+        Axis.horizontal => Offset(-paintCorrection, offset),
+      };
       offset += childExtent;
       child = childAfter(child);
     }
@@ -207,15 +202,36 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
   }
 
   @override
-  double childMainAxisPosition(RenderSliver child) {
-    switch (constraints.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dy;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return (child.parentData! as SliverPhysicalParentData).paintOffset.dx;
+  double? childScrollOffset(RenderObject child) {
+    assert(child.parent == this);
+    final GrowthDirection growthDirection = constraints.growthDirection;
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        double childScrollOffset = 0.0;
+        RenderSliver? current = childBefore(child as RenderSliver);
+        while (current != null) {
+          childScrollOffset += current.geometry!.scrollExtent;
+          current = childBefore(current);
+        }
+        return childScrollOffset;
+      case GrowthDirection.reverse:
+        double childScrollOffset = 0.0;
+        RenderSliver? current = childAfter(child as RenderSliver);
+        while (current != null) {
+          childScrollOffset -= current.geometry!.scrollExtent;
+          current = childAfter(current);
+        }
+        return childScrollOffset;
     }
+  }
+
+  @override
+  double childMainAxisPosition(RenderSliver child) {
+    final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
+    return switch (constraints.axis) {
+      Axis.horizontal => paintOffset.dx,
+      Axis.vertical   => paintOffset.dy,
+    };
   }
 
   @override
@@ -248,15 +264,22 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       );
       final SliverGeometry childLayoutGeometry = child.geometry!;
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
-      switch (constraints.axis) {
-        case Axis.vertical:
-          childParentData.paintOffset = Offset(0.0, beforeOffsetPaintExtent);
-        case Axis.horizontal:
-          childParentData.paintOffset = Offset(beforeOffsetPaintExtent, 0.0);
-      }
+      childParentData.paintOffset = switch (constraints.axis) {
+        Axis.vertical   => Offset(0.0, beforeOffsetPaintExtent),
+        Axis.horizontal => Offset(beforeOffsetPaintExtent, 0.0),
+      };
       offset += childLayoutGeometry.scrollExtent;
       maxPaintExtent += child.geometry!.maxPaintExtent;
       child = childAfter(child);
+      assert(() {
+        if (child != null && maxPaintExtent.isInfinite) {
+          throw FlutterError(
+            'Unreachable sliver found, you may have a sliver behind '
+            'a sliver with infinite extent. '
+          );
+        }
+        return true;
+      }());
     }
 
     final double totalScrollExtent = offset;
@@ -274,19 +297,29 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       final double remainingExtent = totalScrollExtent - constraints.scrollOffset;
       if (childLayoutGeometry.paintExtent > remainingExtent) {
         final double paintCorrection = childLayoutGeometry.paintExtent - remainingExtent;
-        switch (constraints.axis) {
-          case Axis.vertical:
-            childParentData.paintOffset = Offset(0.0, beforeOffsetPaintExtent - paintCorrection);
-          case Axis.horizontal:
-            childParentData.paintOffset = Offset(beforeOffsetPaintExtent - paintCorrection, 0.0);
-        }
+        childParentData.paintOffset = switch (constraints.axis) {
+          Axis.vertical   => Offset(0.0, beforeOffsetPaintExtent - paintCorrection),
+          Axis.horizontal => Offset(beforeOffsetPaintExtent - paintCorrection, 0.0),
+        };
       }
       offset += child.geometry!.scrollExtent;
       child = childAfter(child);
     }
+
+    final double paintExtent = calculatePaintOffset(
+      constraints,
+      from: math.min(constraints.scrollOffset, 0),
+      to: totalScrollExtent,
+    );
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: math.min(constraints.scrollOffset, 0),
+      to: totalScrollExtent,
+    );
     geometry = SliverGeometry(
       scrollExtent: totalScrollExtent,
-      paintExtent: calculatePaintOffset(constraints, from: 0, to: totalScrollExtent),
+      paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
       maxPaintExtent: maxPaintExtent,
       hasVisualOverflow: totalScrollExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );

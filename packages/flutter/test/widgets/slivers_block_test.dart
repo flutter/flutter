@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> test(WidgetTester tester, double offset) {
   final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
@@ -68,7 +67,7 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Viewport+SliverBlock basic test', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -101,7 +100,7 @@ void main() {
     ], 'ab');
   });
 
-  testWidgetsWithLeakTracking('Viewport+SliverBlock basic test with constant SliverChildListDelegate', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock basic test with constant SliverChildListDelegate', (WidgetTester tester) async {
     await testWithConstChildDelegate(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -134,7 +133,7 @@ void main() {
     ], 'ab');
   });
 
-  testWidgetsWithLeakTracking('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
     final Key key1 = GlobalKey();
     final ViewportOffset offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
@@ -248,7 +247,7 @@ void main() {
     ], 'acb');
   });
 
-  testWidgetsWithLeakTracking('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
+  testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
     final ViewportOffset offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 
@@ -326,7 +325,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgetsWithLeakTracking('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
+  testWidgets('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
     final ViewportOffset offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 

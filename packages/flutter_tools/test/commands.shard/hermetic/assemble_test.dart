@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,6 +25,14 @@ void main() {
   Cache.disableLocking();
   Cache.flutterRoot = '';
   final StackTrace stackTrace = StackTrace.current;
+  late FakeAnalytics fakeAnalytics;
+
+  setUp(() {
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+  });
 
   testUsingContext('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
@@ -83,6 +92,31 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter assemble sends usage values correctly with platform', () async {
+    final AssembleCommand command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
+
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'assemble',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'darwin',
+          buildBundleIsModule: false,
+        ),
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {

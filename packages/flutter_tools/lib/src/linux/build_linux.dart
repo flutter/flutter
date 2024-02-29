@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -155,7 +157,13 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   if (result != 0) {
     throwToolExit('Unable to generate build files');
   }
-  globals.flutterUsage.sendTiming('build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'cmake-linux', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'cmake-linux',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }
 
 Future<void> _runBuild(Directory buildDir) async {
@@ -185,5 +193,11 @@ Future<void> _runBuild(Directory buildDir) async {
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  globals.flutterUsage.sendTiming('build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'linux-ninja', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'linux-ninja',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }

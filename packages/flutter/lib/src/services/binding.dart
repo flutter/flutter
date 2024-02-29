@@ -16,6 +16,7 @@ import 'debug.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
+import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
@@ -66,6 +67,13 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The global singleton instance of [KeyEventManager], which is used
   /// internally to dispatch key messages.
+  ///
+  /// This property is deprecated, and will be removed. See
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Add a handler to HardwareKeyboard instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;
 
@@ -89,8 +97,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
 
-  /// A token that represents the root isolate, used for coordinating with background
-  /// isolates.
+  /// A token that represents the root isolate, used for coordinating with
+  /// background isolates.
   ///
   /// This property is primarily intended for use with
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
@@ -281,12 +289,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (previousState == state) {
       return const <AppLifecycleState>[];
     }
-    if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
-      // Handle the wrap-around from paused to detached
-      return const <AppLifecycleState>[
-        AppLifecycleState.detached,
-      ];
-    }
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
       // If there was no previous state, just jump directly to the new state.
@@ -296,7 +298,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       final int stateIndex = AppLifecycleState.values.indexOf(state);
       assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
       assert(stateIndex != -1, 'State $state missing in stateOrder array');
-      if (previousStateIndex > stateIndex) {
+      if (state == AppLifecycleState.detached) {
+        for (int i = previousStateIndex + 1; i < AppLifecycleState.values.length; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+        stateChanges.add(AppLifecycleState.detached);
+      } else if (previousStateIndex > stateIndex) {
         for (int i = stateIndex; i < previousStateIndex; ++i) {
           stateChanges.insert(0, AppLifecycleState.values[i]);
         }
@@ -328,30 +335,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // Any transition to itself shouldn't happen.
       return false;
     }
-    switch (starting) {
-      case AppLifecycleState.detached:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.resumed:
-        // Can't go from resumed to detached directly (must go through paused).
-        if (ending == AppLifecycleState.inactive) {
-          return true;
-        }
-      case AppLifecycleState.inactive:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
-          return true;
-        }
-      case AppLifecycleState.hidden:
-        if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.paused:
-        if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
-          return true;
-        }
-    }
-    return false;
+    return switch (starting) {
+      // Can't go from resumed to detached directly (must go through paused).
+      AppLifecycleState.resumed  => ending == AppLifecycleState.inactive,
+      AppLifecycleState.detached => ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused,
+      AppLifecycleState.inactive => ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden,
+      AppLifecycleState.hidden   => ending == AppLifecycleState.paused  || ending == AppLifecycleState.inactive,
+      AppLifecycleState.paused   => ending == AppLifecycleState.hidden  || ending == AppLifecycleState.detached,
+    };
   }
 
 
@@ -384,19 +375,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.hidden':
-        return AppLifecycleState.hidden;
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
+    return switch (message) {
+      'AppLifecycleState.resumed'  => AppLifecycleState.resumed,
+      'AppLifecycleState.inactive' => AppLifecycleState.inactive,
+      'AppLifecycleState.hidden'   => AppLifecycleState.hidden,
+      'AppLifecycleState.paused'   => AppLifecycleState.paused,
+      'AppLifecycleState.detached' => AppLifecycleState.detached,
+      _ => null,
+    };
   }
 
   /// Handles any requests for application exit that may be received on the

@@ -36,5 +36,6 @@
   "menuDismissLabel": "Zamknij menu",
   "lookUpButtonLabel": "Sprawdź",
   "searchWebButtonLabel": "Szukaj w internecie",
-  "shareButtonLabel": "Udostępnij…"
+  "shareButtonLabel": "Udostępnij…",
+  "clearButtonLabel": "Clear"
 }

@@ -300,10 +300,10 @@ class AnimationController extends Animation<double>
     _internalSetValue(value);
   }
 
-  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
   void _maybeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterAnimationLibrary,
         className: '$AnimationController',
         object: this,
@@ -598,20 +598,15 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _animateToInternal(double target, { Duration? duration, Curve curve = Curves.linear }) {
-    double scale = 1.0;
-    if (SemanticsBinding.instance.disableAnimations) {
-      switch (animationBehavior) {
-        case AnimationBehavior.normal:
-          // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
-          // duration to limit most animations to a single frame.
-          // Ideally, the framework would be able to handle zero duration animations, however, the common
-          // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
-          // for at least one frame.
-          scale = 0.05;
-        case AnimationBehavior.preserve:
-          break;
-      }
-    }
+    final double scale = switch (animationBehavior) {
+      // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
+      // duration to limit most animations to a single frame.
+      // Ideally, the framework would be able to handle zero duration animations, however, the common
+      // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
+      // for at least one frame.
+      AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 0.05,
+      AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
+    };
     Duration? simulationDuration = duration;
     if (simulationDuration == null) {
       assert(!(this.duration == null && _direction == _AnimationDirection.forward));
@@ -721,16 +716,12 @@ class AnimationController extends Animation<double>
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
-    double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance.disableAnimations) {
-      switch (behavior) {
-        case AnimationBehavior.normal:
-          scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
-        case AnimationBehavior.preserve:
-          break;
-      }
-    }
+    final double scale = switch (behavior) {
+      // This is arbitrary (it was chosen because it worked for the drawer widget).
+      AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 200.0,
+      AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
+    };
     final SpringSimulation simulation = SpringSimulation(springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     assert(
@@ -833,7 +824,7 @@ class AnimationController extends Animation<double>
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _ticker!.dispose();
     _ticker = null;
@@ -919,7 +910,7 @@ typedef _DirectionSetter = void Function(_AnimationDirection direction);
 class _RepeatingSimulation extends Simulation {
   _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period, this.directionSetter)
       : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
-        _initialT = (max == min) ? 0.0 : (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
+        _initialT = (max == min) ? 0.0 : ((clampDouble(initialValue, min, max) - min) / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
   }

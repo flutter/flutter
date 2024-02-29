@@ -15,7 +15,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
 ///
@@ -46,6 +45,7 @@ abstract class AndroidAssetBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
+
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets')
@@ -67,7 +67,7 @@ abstract class AndroidAssetBundle extends Target {
       outputDirectory,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.impellerAndroid,
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,

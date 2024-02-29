@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: '.SF UI Display',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -43,7 +43,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
@@ -52,15 +52,15 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
-  fontSize: 20.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
 
 const TextStyle _kActionSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -71,7 +71,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
-const double _kDividerThickness = 1.0;
+const double _kDividerThickness = 0.3;
 
 // Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
@@ -87,8 +87,8 @@ const double _kDialogMinButtonFontSize = 10.0;
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetEdgeVerticalPadding = 10.0;
-const double _kActionSheetContentHorizontalPadding = 40.0;
-const double _kActionSheetContentVerticalPadding = 14.0;
+const double _kActionSheetContentHorizontalPadding = 16.0;
+const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
@@ -149,8 +149,9 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  final double? factor = MediaQuery.maybeTextScalerOf(context)?.textScaleFactor;
-  return factor != null && factor > _kMaxRegularTextScaleFactor;
+  const double defaultFontSize = 14.0;
+  final double? scaledFontSize = MediaQuery.maybeTextScalerOf(context)?.scale(defaultFontSize);
+  return scaledFontSize != null && scaledFontSize > defaultFontSize * _kMaxRegularTextScaleFactor;
 }
 
 /// An iOS-style alert dialog.
@@ -264,7 +265,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
   Widget _buildContent(BuildContext context) {
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    const double defaultFontSize = 14.0;
+    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
     final List<Widget> children = <Widget>[
       if (widget.title != null || widget.content != null)
@@ -278,12 +280,12 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
               bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
-              top: _kDialogEdgePadding * textScaleFactor,
+              top: _kDialogEdgePadding * effectiveTextScaleFactor,
             ),
             messagePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: _kDialogEdgePadding * textScaleFactor,
+              bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
               top: widget.title == null ? _kDialogEdgePadding : 1.0,
             ),
             titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
@@ -559,16 +561,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: const EdgeInsets.only(
+        titlePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
+          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
           top: _kActionSheetContentVerticalPadding,
         ),
         messagePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: widget.title == null ? _kActionSheetContentVerticalPadding : 22.0,
+          bottom: _kActionSheetContentVerticalPadding,
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
         titleTextStyle: widget.message == null
@@ -577,7 +579,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         messageTextStyle: widget.title == null
             ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
             : _kActionSheetContentStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 8.0),
+        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
     }
@@ -819,7 +821,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness / MediaQuery.devicePixelRatioOf(context),
+      dividerThickness: _kDividerThickness,
       isInAccessibilityMode: _isInAccessibilityMode(context) && !isActionSheet,
       dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
       isActionSheet: isActionSheet,
@@ -1483,7 +1485,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < children.length; i += 1) {
@@ -1500,7 +1501,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          dividerThickness: _kDividerThickness / devicePixelRatio,
+          dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
         ),
@@ -1654,10 +1655,6 @@ class CupertinoDialogAction extends StatelessWidget {
   /// value.
   bool get enabled => onPressed != null;
 
-  double _calculatePadding(BuildContext context) {
-    return 8.0 * MediaQuery.textScalerOf(context).textScaleFactor;
-  }
-
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
   //
@@ -1666,6 +1663,7 @@ class CupertinoDialogAction extends StatelessWidget {
     required BuildContext context,
     required TextStyle textStyle,
     required Widget content,
+    required double padding,
   }) {
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double dialogWidth = isInAccessibilityMode
@@ -1676,7 +1674,6 @@ class CupertinoDialogAction extends StatelessWidget {
     // buttons. This ratio information is used to automatically scale down action
     // button text to fit the available space.
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) / _kDialogMinButtonFontSize;
-    final double padding = _calculatePadding(context);
 
     return IntrinsicHeight(
       child: SizedBox(
@@ -1725,8 +1722,7 @@ class CupertinoDialogAction extends StatelessWidget {
         isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    );
-    style = style.merge(textStyle);
+    ).merge(textStyle);
 
     if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
@@ -1735,7 +1731,10 @@ class CupertinoDialogAction extends StatelessWidget {
     if (!enabled) {
       style = style.copyWith(color: style.color!.withOpacity(0.5));
     }
-
+    final double fontSize = style.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double padding = 8.0 * effectiveTextScale;
     // Apply a sizing policy to the action button's content based on whether or
     // not the device is in accessibility mode.
     // TODO(mattcarroll): The following logic is not entirely correct. It is also
@@ -1751,6 +1750,7 @@ class CupertinoDialogAction extends StatelessWidget {
             context: context,
             textStyle: style,
             content: child,
+            padding: padding,
           );
 
     return MouseRegion(
@@ -1765,7 +1765,7 @@ class CupertinoDialogAction extends StatelessWidget {
           ),
           child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.all(_calculatePadding(context)),
+            padding: EdgeInsets.all(padding),
             child: sizedContent,
           ),
         ),

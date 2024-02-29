@@ -14,10 +14,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Image filter - blur', (WidgetTester tester) async {
+  testWidgets('Image filter - blur', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -32,7 +31,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - blur with offset', (WidgetTester tester) async {
+  testWidgets('Image filter - blur with offset', (WidgetTester tester) async {
     final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
@@ -52,7 +51,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - dilate', (WidgetTester tester) async {
+  testWidgets('Image filter - dilate', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -67,7 +66,7 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
-  testWidgetsWithLeakTracking('Image filter - erode', (WidgetTester tester) async {
+  testWidgets('Image filter - erode', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
@@ -83,7 +82,7 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
-  testWidgetsWithLeakTracking('Image filter - matrix', (WidgetTester tester) async {
+  testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
       0.5, 0.0, 0.0, 0.0, //
       0.0, 0.5, 0.0, 0.0, //
@@ -97,6 +96,7 @@ void main() {
           child: MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             home: Scaffold(
               appBar: AppBar(
                 title: const Text('Matrix ImageFilter Test'),
@@ -120,7 +120,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - matrix with offset', (WidgetTester tester) async {
+  testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
     final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
     final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
     final Key key = GlobalKey();
@@ -134,6 +134,7 @@ void main() {
             child: MaterialApp(
               title: 'Flutter Demo',
               theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
+              debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
               home: Scaffold(
                 appBar: AppBar(
                   title: const Text('Matrix ImageFilter Test'),
@@ -158,7 +159,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Image filter - reuses its layer', (WidgetTester tester) async {
+  testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {
       await tester.pumpWidget(
         RepaintBoundary(
@@ -179,7 +180,7 @@ void main() {
     expect(renderObject.debugLayer, same(originalLayer));
   });
 
-  testWidgetsWithLeakTracking('Image filter - enabled and disabled', (WidgetTester tester) async {
+  testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
     Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(

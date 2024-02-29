@@ -23,6 +23,26 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
+/// The `CandidateType` of finders that search for and filter substrings,
+/// within static text rendered by [RenderParagraph]s.
+final class TextRangeContext {
+  const TextRangeContext._(this.view, this.renderObject, this.textRange);
+
+  /// The [View] containing the static text.
+  ///
+  /// This is used for hit-testing.
+  final View view;
+
+  /// The RenderObject that contains the static text.
+  final RenderParagraph renderObject;
+
+  /// The [TextRange] of the substring within [renderObject]'s text.
+  final TextRange textRange;
+
+  @override
+  String toString() => 'TextRangeContext($view, $renderObject, $textRange)';
+}
+
 /// Some frequently used [Finder]s and [SemanticsFinder]s.
 const CommonFinders find = CommonFinders._();
 
@@ -41,6 +61,9 @@ class CommonFinders {
 
   /// Some frequently used semantics finders.
   CommonSemanticsFinders get semantics => const CommonSemanticsFinders._();
+
+  /// Some frequently used text range finders.
+  CommonTextRangeFinders get textRange => const CommonTextRangeFinders._();
 
   /// Finds [Text], [EditableText], and optionally [RichText] widgets
   /// containing string equal to the `text` argument.
@@ -530,7 +553,7 @@ class CommonSemanticsFinders {
     return _PredicateSemanticsFinder(
       predicate,
       describeMatch,
-      _rootFromView(view),
+      view,
     );
   }
 
@@ -666,14 +689,34 @@ class CommonSemanticsFinders {
       return pattern == target;
     }
   }
+}
 
-  SemanticsNode _rootFromView(FlutterView? view) {
-    view ??= TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView;
-    assert(view != null, 'The given view was not available. Ensure WidgetTester.view is available or pass in a specific view using WidgetTester.viewOf.');
-    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
-      .firstWhere((RenderView r) => r.flutterView == view);
+/// Provides lightweight syntax for getting frequently used text range finders.
+///
+/// This class is instantiated once, as [CommonFinders.textRange], under [find].
+final class CommonTextRangeFinders {
+  const CommonTextRangeFinders._();
 
-    return renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+  /// Finds all non-overlapping occurrences of the given `substring` in the
+  /// static text widgets and returns the [TextRange]s.
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// static text inside widgets that are [Offstage], or that are from inactive
+  /// [Route]s.
+  ///
+  /// If the `descendentOf` argument is non-null, this method only searches in
+  /// the descendants of that parameter for the given substring.
+  ///
+  /// This finder uses the [Pattern.allMatches] method to match the substring in
+  /// the text. After finding a matching substring in the text, the method
+  /// continues the search from the end of the match, thus skipping overlapping
+  /// occurrences of the substring.
+  FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf }) {
+    final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage, findRichText: true);
+    final Finder elementFinder = descendentOf == null
+      ? textWidgetFinder
+      : _DescendantWidgetFinder(descendentOf, textWidgetFinder, matchRoot: true, skipOffstage: skipOffstage);
+    return _StaticTextRangeFinder(elementFinder, substring);
   }
 }
 
@@ -998,7 +1041,7 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
   @override
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
-      Plurality.zero ||Plurality.many => 'widgets with $description',
+      Plurality.zero || Plurality.many => 'widgets with $description',
       Plurality.one => 'widget with $description',
     };
   }
@@ -1013,16 +1056,99 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
 
 /// A base class for creating finders that search the semantics tree.
 abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
-  /// Creates a new [SemanticsFinder] that will search starting at the given
-  /// `root`.
-  SemanticsFinder(this.root);
+  /// Creates a new [SemanticsFinder] that will search within the given [view] or
+  /// within all views if [view] is null.
+  SemanticsFinder(this.view);
 
-  /// The root of the semantics tree that this finder will search.
-  final SemanticsNode root;
+  /// The [FlutterView] whose semantics tree this finder will search.
+  ///
+  /// If null, the finder will search within all views.
+  final FlutterView? view;
+
+  /// Returns the root [SemanticsNode]s of all the semantics trees that this
+  /// finder will search.
+  Iterable<SemanticsNode> get roots {
+    if (view == null) {
+      return _allRoots;
+    }
+    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
+        .firstWhere((RenderView r) => r.flutterView == view);
+    return <SemanticsNode>[
+      renderView.owner!.semanticsOwner!.rootSemanticsNode!
+    ];
+  }
 
   @override
   Iterable<SemanticsNode> get allCandidates {
-    return collectAllSemanticsNodesFrom(root);
+    return roots.expand((SemanticsNode root) => collectAllSemanticsNodesFrom(root));
+  }
+
+  static Iterable<SemanticsNode> get _allRoots {
+    final List<SemanticsNode> roots = <SemanticsNode>[];
+    void collectSemanticsRoots(PipelineOwner owner) {
+      final SemanticsNode? root = owner.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        roots.add(root);
+      }
+      owner.visitChildren(collectSemanticsRoots);
+    }
+    collectSemanticsRoots(TestWidgetsFlutterBinding.instance.rootPipelineOwner);
+    return roots;
+  }
+}
+
+/// A base class for creating finders that search for static text rendered by a
+/// [RenderParagraph].
+class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
+  /// Creates a new [_StaticTextRangeFinder] that searches for the given
+  /// `pattern` in the [Element]s found by `_parent`.
+  _StaticTextRangeFinder(this._parent, this.pattern);
+
+  final FinderBase<Element> _parent;
+  final Pattern pattern;
+
+  Iterable<TextRangeContext> _flatMap(Element from) {
+    final RenderObject? renderObject = from.renderObject;
+    // This is currently only exposed on text matchers. Only consider RenderBoxes.
+    if (renderObject is! RenderBox) {
+      return const Iterable<TextRangeContext>.empty();
+    }
+
+    final View view = from.findAncestorWidgetOfExactType<View>()!;
+    final List<RenderParagraph> paragraphs = <RenderParagraph>[];
+
+    void visitor(RenderObject child) {
+      switch (child) {
+        case RenderParagraph():
+          paragraphs.add(child);
+          // No need to continue, we are piggybacking off of a text matcher, so
+          // inline text widgets will be reported separately.
+        case RenderBox():
+          child.visitChildren(visitor);
+        case _:
+      }
+    }
+    visitor(renderObject);
+    Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
+      final String text = paragraph.text.toPlainText(includeSemanticsLabels: false);
+      return pattern.allMatches(text)
+        .map((Match match) => TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)));
+    }
+    return paragraphs.expand(searchInParagraph);
+  }
+
+  @override
+  Iterable<TextRangeContext> findInCandidates(Iterable<TextRangeContext> candidates) => candidates;
+
+  @override
+  Iterable<TextRangeContext> get allCandidates => _parent.evaluate().expand(_flatMap);
+
+  @override
+  String describeMatch(Plurality plurality) {
+    return switch (plurality) {
+      Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
+      Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
+    };
   }
 }
 
@@ -1432,7 +1558,7 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 
 class _PredicateSemanticsFinder extends SemanticsFinder
     with MatchFinderMixin<SemanticsNode> {
-  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.root)
+  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
     : _describeMatch = describeMatch;
 
   final SemanticsNodePredicate predicate;

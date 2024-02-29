@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ required this.log, this.name });
@@ -41,7 +40,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Control test for custom painting', (WidgetTester tester) async {
+  testWidgets('Control test for custom painting', (WidgetTester tester) async {
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
@@ -63,7 +62,7 @@ void main() {
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
-  testWidgetsWithLeakTracking('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
@@ -119,7 +118,7 @@ void main() {
     expect(error.toStringDeep(), contains('2 more times'));
   });
 
-  testWidgetsWithLeakTracking('CustomPaint sizing', (WidgetTester tester) async {
+  testWidgets('CustomPaint sizing', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     await tester.pumpWidget(Center(
@@ -154,7 +153,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Raster cache hints', (WidgetTester tester) async {
+  testWidgets('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     final List<String?> log = <String?>[];

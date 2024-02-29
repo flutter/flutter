@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// TODO(gspencergoog): Delete this example when deprecated RawKeyEvent API is
+// removed.
+
 /// Flutter code sample for [KeyEventManager.keyMessageHandler].
 
 void main() {

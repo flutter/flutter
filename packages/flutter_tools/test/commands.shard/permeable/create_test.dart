@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
 import 'package:flutter_tools/src/android/java.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
@@ -71,6 +73,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late BufferLogger logger;
   late FakeStdio mockStdio;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -88,6 +91,10 @@ void main() {
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: fakeFlutterVersion,
+    );
   });
 
   tearDown(() {
@@ -171,10 +178,24 @@ void main() {
       ],
     );
     expect(logger.statusText, contains('In order to run your application, type:'));
-    // check that we're telling them about documentation
+    // Check that we're telling them about documentation
     expect(logger.statusText, contains('https://docs.flutter.dev/'));
     expect(logger.statusText, contains('https://api.flutter.dev/'));
-    // check that the tests run clean
+
+    // Check for usage values sent in analytics
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'create',
+          commandHasTerminal: false,
+          createAndroidLanguage: 'java',
+          createIosLanguage: 'objc',
+        ),
+      ),
+    );
+
+    // Check that the tests run clean
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
@@ -187,6 +208,7 @@ void main() {
       stdio: mockStdio,
     ),
     Logger: () => logger,
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
@@ -1263,7 +1285,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1344,7 +1366,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1589,7 +1611,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('path = "flutter_project.app";'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
 
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'));
@@ -2014,6 +2036,26 @@ void main() {
       isNot(contains('#')));
     expect(projectDir.childFile('README.md').readAsStringSync(),
       isNot(contains('Getting Started')));
+  });
+
+
+  testUsingContext("can't create an empty non-application project", () async {
+    final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--empty',
+      '--template=plugin',
+      outputDir,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(
+        message: 'The --empty flag is only supported for the app template.',
+    ));
   });
 
   testUsingContext('can create a sample-based project', () async {
@@ -2807,7 +2849,7 @@ void main() {
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
 
-  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+  testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     Cache.flutterRoot = '../..';
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot!,
@@ -2840,7 +2882,7 @@ void main() {
 
     for (final String templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '12.0'"));
     }
 
     final CreateCommand command = CreateCommand();
@@ -2850,7 +2892,7 @@ void main() {
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
         exists);
     final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '12.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -2865,9 +2907,10 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
-    expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
+    expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);
+    expect(buildContent.contains('minSdk = flutter.minSdkVersion'), true);
+    expect(buildContent.contains('targetSdk = flutter.targetSdkVersion'), true);
   });
 
   testUsingContext('Android Java plugin contains namespace', () async {
@@ -2889,7 +2932,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2912,7 +2955,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2936,7 +2979,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2959,10 +3002,10 @@ void main() {
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
     // Each build file should contain the expected namespace.
-    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    const String expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
-    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    const String expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
     expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.

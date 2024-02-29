@@ -74,6 +74,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.multitouchDragStrategy = MultitouchDragStrategy.latestPointer,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
@@ -110,6 +111,26 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// instead set to [DragStartBehavior.start], [onStart] will be called with
   /// position (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
+
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
+  /// Configure the multi-finger drag strategy on multi-touch devices.
+  ///
+  /// If set to [MultitouchDragStrategy.latestPointer], the drag gesture recognizer
+  /// will only track the latest active (accepted by this recognizer) pointer, which
+  /// appears to be only one finger dragging.
+  ///
+  /// If set to [MultitouchDragStrategy.sumAllPointers],
+  /// all active pointers will be tracked together and the scrolling offset
+  /// is the sum of the offsets of all active pointers
+  /// {@endtemplate}
+  ///
+  /// By default, the strategy is [MultitouchDragStrategy.latestPointer].
+  ///
+  /// See also:
+  ///
+  ///  * [MultitouchDragStrategy], which defines two different drag strategies for
+  ///  multi-finger drag.
+  MultitouchDragStrategy multitouchDragStrategy;
 
   /// A pointer has contacted the screen with a primary button and might begin
   /// to move.
@@ -255,6 +276,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
+  late OffsetPair _finalPosition;
   Duration? _lastPendingEventTimestamp;
 
   /// When asserts are enabled, returns the last tracked pending event timestamp
@@ -330,6 +352,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+      _finalPosition = _initialPosition;
       _pendingDragOffset = OffsetPair.zero;
       _globalDistanceMoved = 0.0;
       _lastPendingEventTimestamp = event.timeStamp;
@@ -359,6 +382,17 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _addPointer(event);
   }
 
+  bool _shouldTrackMoveEvent(int pointer) {
+    final bool result;
+    switch (multitouchDragStrategy) {
+      case MultitouchDragStrategy.sumAllPointers:
+        result = true;
+      case MultitouchDragStrategy.latestPointer:
+        result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
+    }
+    return result;
+  }
+
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
@@ -380,11 +414,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _giveUpPointer(event.pointer);
       return;
     }
-    if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+    if ((event is PointerMoveEvent || event is PointerPanZoomUpdateEvent)
+        && _shouldTrackMoveEvent(event.pointer)) {
       final Offset delta = (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
       final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
       final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
+      _finalPosition = OffsetPair(local: localPosition, global: position);
       if (_state == _DragState.accepted) {
         _checkUpdate(
           sourceTimeStamp: event.timeStamp,
@@ -419,7 +455,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  final Set<int> _acceptedActivePointers = <int>{};
+  final List<int> _acceptedActivePointers = <int>[];
 
   @override
   void acceptGesture(int pointer) {
@@ -567,7 +603,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         ? () => '$estimate; fling at ${details!.velocity}.'
         : () => '$estimate; judged to not be a fling.';
     }
-    details ??= DragEndDetails(primaryVelocity: 0.0);
+    details ??= DragEndDetails(
+      primaryVelocity: 0.0,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
+    );
 
     invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
   }
@@ -627,6 +667,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(0, dy)),
       primaryVelocity: dy,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
     );
   }
 
@@ -682,6 +724,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(dx, 0)),
       primaryVelocity: dx,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
     );
   }
 
@@ -732,7 +776,11 @@ class PanGestureRecognizer extends DragGestureRecognizer {
     }
     final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
         .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-    return DragEndDetails(velocity: velocity);
+    return DragEndDetails(
+      velocity: velocity,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
+    );
   }
 
   @override

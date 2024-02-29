@@ -10,9 +10,11 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for iOS.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from iOS'
 /// `UIKey` interface.
@@ -20,8 +22,16 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataIos extends RawKeyEventData {
   /// Creates a key event data structure specific for iOS.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataIos({
     this.characters = '',
     this.charactersIgnoringModifiers = '',
@@ -135,21 +145,19 @@ class RawKeyEventDataIos extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
-    // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed. Handles the case where iOS
-    // supplies just the "either" modifier flag, but not the left/right flag.
-    // (e.g. modifierShift but not modifierLeftShift).
-    final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0 || anyOnly;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0 || anyOnly;
+    if (modifiers & (leftMask | rightMask | anyMask) == anyMask) {
+      // If only the "anyMask" bit is set, then we respond true for requests of
+      // whether either left or right is pressed. Handles the case where iOS
+      // supplies just the "either" modifier flag, but not the left/right flag.
+      // (e.g. modifierShift but not modifierLeftShift).
+      return true;
     }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => modifiers & leftMask != 0 && modifiers & rightMask != 0,
+      KeyboardSide.left  => modifiers & leftMask != 0,
+      KeyboardSide.right => modifiers & rightMask != 0,
+    };
   }
 
   @override

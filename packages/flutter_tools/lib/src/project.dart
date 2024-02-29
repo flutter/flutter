@@ -455,11 +455,15 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
+
+  /// Pattern used to find the assignment of the "group" property in Gradle.
+  /// Expected example: `group "dev.flutter.plugin"`
+  /// Regex is used in both Groovy and Kotlin Gradle files.
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -534,7 +538,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
-        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        final bool managed = line.contains(RegExp('def flutterPluginVersion = [\'"]managed[\'"]'));
         if (fileBasedApply || declarativeApply || managed) {
           return true;
         }
@@ -552,10 +556,54 @@ class AndroidProject extends FlutterProjectPlatform {
     return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets top-level Gradle build file.
+  /// See https://developer.android.com/build#top-level.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get hostAppGradleFile {
+    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
+    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
+
   /// Gets the module-level build.gradle file.
   /// See https://developer.android.com/build#module-level.
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
-      .childFile('build.gradle');
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get appGradleFile {
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    final File buildGroovy = appDir.childFile('build.gradle');
+    final File buildKotlin = appDir.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
 
   File get appManifestFile {
     if (isUsingGradle) {
@@ -652,7 +700,7 @@ $javaGradleCompatUrl
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return hostAppGradleFile.existsSync();
   }
 
   String? get applicationId {
@@ -671,8 +719,7 @@ $javaGradleCompatUrl
   }
 
   String? get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+    return firstMatchInFile(hostAppGradleFile, _groupPattern)?.group(1);
   }
 
   /// The build directory where the Android artifacts are placed.

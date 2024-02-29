@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -160,7 +162,13 @@ Future<void> buildMacOS({
     throwToolExit('Build process failed');
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
-  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
+  globals.analytics.send(Event.timing(
+    workflow: 'build',
+    variableName: 'xcode-macos',
+    elapsedMilliseconds: elapsedDuration.inMilliseconds,
+  ));
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
@@ -173,11 +181,25 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
-  final String arch = DarwinArch.x86_64.name;
-  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('snapshot.$arch.json');
-  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('trace.$arch.json');
+  final File? aotSnapshot = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('snapshot.${arch.name}.json');
+    // Pick the first if there are multiple for simplicity
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (aotSnapshot == null) {
+    throw StateError('No code size snapshot file (snapshot.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
+  final File? precompilerTrace = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('trace.${arch.name}.json');
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (precompilerTrace == null) {
+    throw StateError('No precompiler trace file (trace.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
 
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.

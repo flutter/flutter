@@ -56,6 +56,18 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebResourcesCdnFlag();
 
     //
+    // Common compilation options among JavaScript and Wasm
+    //
+    argParser.addOption(
+      'optimization-level',
+      abbr: 'O',
+      help:
+          'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
+      defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
+      allowed: const <String>['1', '2', '3', '4'],
+    );
+
+    //
     // JavaScript compilation options
     //
     argParser.addSeparator('JavaScript compilation options');
@@ -72,10 +84,9 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
-          'Valid values range from O1 to O4.',
-      defaultsTo: JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
-      allowed: const <String>['O1', 'O2', 'O3', 'O4'],
-    );
+            'Deprecated: Please use "-O=<level>" / "--optimization-level=<level>".',
+       allowed: const <String>['O1', 'O2', 'O3', 'O4'],
+     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
           'information about the generated code is a .js.info.json file.'
@@ -98,19 +109,9 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
-      'omit-type-checks',
-      help: 'Omit type checks in Wasm output.\n'
-          'Reduces code size and improves performance, but may affect runtime correctness. Use with care.',
-      negatable: false,
-      hide: !featureFlags.isFlutterWebWasmEnabled,
-    );
-    argParser.addOption(
-      'wasm-opt',
-      help:
-          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.',
-      defaultsTo: WasmOptLevel.defaultValue.cliName,
-      allowed: WasmOptLevel.values.map<String>((WasmOptLevel e) => e.cliName),
-      allowedHelp: CliEnum.allowedHelp(WasmOptLevel.values),
+      'strip-wasm',
+      help: 'Whether to strip the resulting wasm file of static symbol names.',
+      defaultsTo: true,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
   }
@@ -138,24 +139,57 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final WebCompilerConfig compilerConfig;
+    final int optimizationLevel = int.parse(stringArg('optimization-level')!);
+
+    final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
+    final int jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
+        ? int.parse(dart2jsOptimizationLevelValue.substring(1))
+        : optimizationLevel;
+
+    final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
       if (!featureFlags.isFlutterWebWasmEnabled) {
-        throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+        throwToolExit('Compiling to WebAssembly (wasm) is only available on the beta and master channels.');
       }
-      compilerConfig = WasmCompilerConfig(
-        omitTypeChecks: boolArg('omit-type-checks'),
-        wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
+      if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
+        throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
+      }
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  $kWasmMoreInfo''',
       );
+
+      compilerConfigs = <WebCompilerConfig>[
+        WasmCompilerConfig(
+          optimizationLevel: optimizationLevel,
+          stripWasm: boolArg('strip-wasm'),
+          renderer: WebRendererMode.skwasm,
+        ),
+        JsCompilerConfig(
+          csp: boolArg('csp'),
+          optimizationLevel: jsOptimizationLevel,
+          dumpInfo: boolArg('dump-info'),
+          nativeNullAssertions: boolArg('native-null-assertions'),
+          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          sourceMaps: boolArg('source-maps'),
+          renderer: WebRendererMode.canvaskit,
+        )];
     } else {
-      compilerConfig = JsCompilerConfig(
+      WebRendererMode webRenderer = WebRendererMode.auto;
+      if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
+        webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
+      }
+      compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
         csp: boolArg('csp'),
-        optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+        optimizationLevel: jsOptimizationLevel,
         dumpInfo: boolArg('dump-info'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: boolArg('source-maps'),
-      );
+        renderer: webRenderer,
+      )];
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
@@ -166,7 +200,10 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
-      throwToolExit('base-href should start and end with /');
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
     }
     if (!flutterProject.web.existsSync()) {
       throwToolExit('Missing index.html.');
@@ -202,7 +239,7 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
-      compilerConfig: compilerConfig,
+      compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,
     );

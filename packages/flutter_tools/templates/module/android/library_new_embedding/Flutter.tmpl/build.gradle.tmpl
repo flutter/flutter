@@ -1,56 +1,56 @@
 // Generated file. Do not edit.
 
 def localProperties = new Properties()
-def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
+def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, "local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
+    localPropertiesFile.withReader("UTF-8") { reader ->
         localProperties.load(reader)
     }
 }
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
+def flutterRoot = localProperties.getProperty("flutter.sdk")
 if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
 if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+    flutterVersionCode = "1"
 }
 
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = "1.0"
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-group '{{androidIdentifier}}'
-version '1.0'
+group = "{{androidIdentifier}}"
+version = "1.0"
 
 android {
     // Conditional for compatibility with AGP <4.2.
     if (project.android.hasProperty("namespace")) {
-        namespace '{{androidIdentifier}}'
+        namespace = "{{androidIdentifier}}"
     }
 
-    compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
     }
 }
 
 flutter {
-    source '../..'
+    source = "../.."
 }

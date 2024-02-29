@@ -19,7 +19,7 @@ import 'stack.dart' show RelativeRect;
 /// Used by [RenderConstraintsTransformBox] and [ConstraintsTransformBox].
 /// Typically the caller requires the returned [BoxConstraints] to be
 /// [BoxConstraints.isNormalized].
-typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints);
+typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints constraints);
 
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
@@ -671,25 +671,21 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   bool get sizedByParent {
-    switch (fit) {
-      case OverflowBoxFit.max:
-        return true;
-      case OverflowBoxFit.deferToChild:
-        // If deferToChild, the size will be as small as its child when non-overflowing,
-        // thus it cannot be sizedByParent.
-        return false;
-    }
+    return switch (fit) {
+      OverflowBoxFit.max => true,
+      // If deferToChild, the size will be as small as its child when non-overflowing,
+      // thus it cannot be sizedByParent.
+      OverflowBoxFit.deferToChild => false,
+    };
   }
 
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    switch (fit) {
-      case OverflowBoxFit.max:
-        return constraints.biggest;
-      case OverflowBoxFit.deferToChild:
-        return child?.getDryLayout(constraints) ?? constraints.smallest;
-    }
+    return switch (fit) {
+      OverflowBoxFit.max => constraints.biggest,
+      OverflowBoxFit.deferToChild => child?.getDryLayout(constraints) ?? constraints.smallest,
+    };
   }
 
   @override

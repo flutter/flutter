@@ -22,7 +22,6 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
-import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -89,17 +88,18 @@ class HotRunner extends ResidentRunner {
     super.stayResident,
     bool super.ipv6 = false,
     super.machine,
-    this.multidexEnabled = false,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    NativeAssetsBuildRunner? buildRunner,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
-        _buildRunner = buildRunner,
+        _nativeAssetsBuilder = nativeAssetsBuilder,
+        _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
           hotMode: true,
@@ -113,7 +113,6 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File? applicationBinary;
   final bool hostIsIde;
-  final bool multidexEnabled;
 
   /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
   /// each attached device's devfs. Replacing the existing file is not safe and does
@@ -139,7 +138,10 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  NativeAssetsBuildRunner? _buildRunner;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
+  final String? _nativeAssetsYamlFile;
+
+  String? flavor;
 
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
@@ -265,10 +267,7 @@ class HotRunner extends ResidentRunner {
       await device!.initLogReader();
       device
         .developmentShaderCompiler
-        .configureCompiler(
-          device.targetPlatform,
-          impellerStatus: debuggingOptions.enableImpeller,
-        );
+        .configureCompiler(device.targetPlatform);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -369,19 +368,19 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(
-      projectUri,
-      debuggingOptions.buildInfo.packageConfig,
-      fileSystem,
-      globals.logger,
-    );
-    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: _buildRunner!,
-      flutterDevices: flutterDevices,
-    );
+    final Uri? nativeAssetsYaml;
+    if (_nativeAssetsYamlFile != null) {
+      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
+    } else {
+      final Uri projectUri = Uri.directory(projectRootPath);
+      nativeAssetsYaml = await _nativeAssetsBuilder?.dryRun(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        flutterDevices: flutterDevices,
+        logger: logger,
+        packageConfig: debuggingOptions.buildInfo.packageConfig,
+      );
+    }
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -494,7 +493,10 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(packagesPath: '.packages');
+      final int result = await assetBundle.build(
+        packagesPath: '.packages',
+        flavor: debuggingOptions.buildInfo.flavor,
+      );
       if (result != 0) {
         return UpdateFSReport();
       }
@@ -534,7 +536,6 @@ class HotRunner extends ResidentRunner {
         bundleFirstUpload: isFirstUpload,
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
-        projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
         invalidatedFiles: invalidationResult.uris!,
         packageConfig: invalidationResult.packageConfig!,
@@ -713,7 +714,13 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
-    globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+    final Duration elapsedDuration = restartTimer.elapsed;
+    globals.flutterUsage.sendTiming('hot', 'restart', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'hot',
+      variableName: 'restart',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     // Toggle the main dill name after successfully uploading.
     _swap =! _swap;
@@ -1112,6 +1119,11 @@ class HotRunner extends ResidentRunner {
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleResult.reassembleViews.length == 1) && !reassembleResult.failedReassemble && shouldReportReloadTime) {
       globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
+      _analytics.send(Event.timing(
+        workflow: 'hot',
+        variableName: 'reload',
+        elapsedMilliseconds: reloadDuration.inMilliseconds,
+      ));
     }
     return OperationResult(
       reassembleResult.failedReassemble ? 1 : OperationResult.ok.code,
@@ -1708,4 +1720,16 @@ class ReasonForCancelling {
   String toString() {
     return '$message.\nTry performing a hot restart instead.';
   }
+}
+
+/// An interface to enable overriding native assets build logic in other
+/// build systems.
+abstract class HotRunnerNativeAssetsBuilder {
+  Future<Uri?> dryRun({
+    required Uri projectUri,
+    required FileSystem fileSystem,
+    required List<FlutterDevice> flutterDevices,
+    required PackageConfig packageConfig,
+    required Logger logger,
+  });
 }

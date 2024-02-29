@@ -286,10 +286,10 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top - insets.top,
       rect.right + insets.right,
       rect.bottom + insets.bottom,
-      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero),
+      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero),
     );
   }
 
@@ -299,10 +299,10 @@ abstract class BoxBorder extends ShapeBorder {
       rect.top + insets.top,
       rect.right - insets.right,
       rect.bottom - insets.bottom,
-      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero),
+      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero),
     );
   }
 
@@ -1013,16 +1013,11 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
-    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (BorderSide left, BorderSide right) = switch (textDirection!) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors();

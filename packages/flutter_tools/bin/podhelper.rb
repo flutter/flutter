@@ -19,6 +19,20 @@ def flutter_ios_podfile_setup; end
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup; end
 
+# Determine whether the target depends on Flutter (including transitive dependency)
+def depends_on_flutter(target, engine_pod_name)
+  target.dependencies.any? do |dependency|
+    if dependency.name == engine_pod_name
+      return true
+    end
+
+    if depends_on_flutter(dependency.target, engine_pod_name)
+      return true
+    end
+  end
+  return false
+end
+
 # Add iOS build settings to pod targets.
 #
 # @example
@@ -32,7 +46,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 12
 
   # ARC code targeting iOS 8 does not build on Xcode 14.3.
   force_to_arc_supported_min = target.deployment_target[/\d+/].to_i < 9
@@ -68,13 +82,14 @@ def flutter_additional_ios_build_settings(target)
     # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'Flutter')
 
     # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+    # TODO(stuartmorgan): Handle local engines here; see https://github.com/flutter/flutter/issues/132228
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
       next if xcframework_file.start_with?('.') # Hidden file, possibly on external disk.
@@ -122,8 +137,12 @@ def flutter_additional_macos_build_settings(target)
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
-  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64'), __FILE__)
-  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release'), __FILE__)
+  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64', 'FlutterMacOS.xcframework'), __FILE__)
+  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'darwin-x64-release', 'FlutterMacOS.xcframework'), __FILE__)
+  application_path = File.dirname(defined_in_file.realpath) if respond_to?(:defined_in_file)
+  # Find the local engine path, if any.
+  local_engine = application_path.nil? ?
+    nil : flutter_get_local_engine_dir(File.join(application_path, 'Flutter', 'ephemeral', 'Flutter-Generated.xcconfig'))
 
   unless Dir.exist?(debug_framework_dir)
     # macOS artifacts have not been downloaded.
@@ -134,12 +153,20 @@ def flutter_additional_macos_build_settings(target)
     # ARC code targeting macOS 10.10 does not build on Xcode 14.3. Force to at least macOS 10.11.
     build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
 
-    # Skip other updates if it's not a Flutter plugin (transitive dependency).
-    next unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
+    # Skip other updates if it does not depend on Flutter (including transitive dependency)
+    next unless depends_on_flutter(target, 'FlutterMacOS')
 
-    # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
-    configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
-    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+    if local_engine
+      configuration_engine_dir = File.expand_path(File.join(local_engine, 'FlutterMacOS.xcframework'), __FILE__)
+    else
+      # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+      configuration_engine_dir = (build_configuration.type == :debug ? debug_framework_dir : release_framework_dir)
+    end
+    Dir.new(configuration_engine_dir).each_child do |xcframework_file|
+      if xcframework_file.start_with?('macos-') # Could be macos-arm64_x86_64, macos-arm64, macos-x86_64
+        build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+      end
+    end
 
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
@@ -206,7 +233,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '11.0'
+        s.ios.deployment_target = '12.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -318,4 +345,37 @@ def flutter_relative_path_from_podfile(path)
   pathname = Pathname.new File.expand_path(path)
   relative = pathname.relative_path_from project_directory_pathname
   relative.to_s
+end
+
+def flutter_parse_xcconfig_file(file)
+  file_abs_path = File.expand_path(file)
+  if !File.exist? file_abs_path
+    return [];
+  end
+  entries = Hash.new
+  skip_line_start_symbols = ["#", "/"]
+  File.foreach(file_abs_path) { |line|
+    next if skip_line_start_symbols.any? { |symbol| line =~ /^\s*#{symbol}/ }
+    key_value_pair = line.split(pattern = '=')
+    if key_value_pair.length == 2
+      entries[key_value_pair[0].strip()] = key_value_pair[1].strip();
+    else
+      puts "Invalid key/value pair: #{line}"
+    end
+  }
+  return entries
+end
+
+def flutter_get_local_engine_dir(xcconfig_file)
+  file_abs_path = File.expand_path(xcconfig_file)
+  if !File.exist? file_abs_path
+    return nil
+  end
+  config = flutter_parse_xcconfig_file(xcconfig_file)
+  local_engine = config['LOCAL_ENGINE']
+  base_dir = config['FLUTTER_ENGINE']
+  if !local_engine.nil? && !base_dir.nil?
+    return File.join(base_dir, 'out', local_engine)
+  end
+  return nil
 end

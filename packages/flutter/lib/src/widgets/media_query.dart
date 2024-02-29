@@ -290,7 +290,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [FlutterView.physicalSize], which returns the size in physical pixels.
+  /// * [FlutterView.physicalSize], which returns the size of the view in physical pixels.
+  /// * [FlutterView.display], which returns reports display information like size, and refresh rate.
   /// * [MediaQuery.sizeOf], a method to find and depend on the size defined for
   ///   a [BuildContext].
   final Size size;
@@ -1577,20 +1578,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
-
-  /// Returns the [MediaQueryData.boldText] accessibility setting for the
-  /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// Deprecated in favor of [boldTextOf].
-  @Deprecated(
-    'Migrate to boldTextOf. '
-    'This feature was deprecated after v3.5.0-9.0.pre.'
-  )
-  static bool boldTextOverride(BuildContext context) => boldTextOf(context);
 
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.

@@ -4,7 +4,9 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../base/config.dart';
 import '../base/io.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../version.dart';
 
@@ -22,6 +24,7 @@ Analytics getAnalytics({
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
   required String? clientIde,
+  required Config config,
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
@@ -36,7 +39,7 @@ Analytics getAnalytics({
       runningOnBot ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
-    return NoOpAnalytics();
+    return const NoOpAnalytics();
   }
 
   // Providing an override of the [Analytics] instance is preferred when
@@ -52,7 +55,22 @@ Analytics getAnalytics({
     dartVersion: flutterVersion.dartSdkVersion,
     enableAsserts: enableAsserts,
     clientIde: clientIde,
+    enabledFeatures: getEnabledFeatures(config),
   );
+}
+
+/// Uses the [Config] object to get enabled features.
+String? getEnabledFeatures(Config config) {
+  // Create string with all enabled features to send as user property
+  final Iterable<Feature> enabledFeatures = allFeatures.where((Feature feature) {
+    final String? configSetting = feature.configSetting;
+    return configSetting != null && config.getValue(configSetting) == true;
+  });
+  return enabledFeatures.isNotEmpty
+      ? enabledFeatures
+          .map((Feature feature) => feature.configSetting)
+          .join(',')
+      : null;
 }
 
 /// Function to safely grab the max rss from [ProcessInfo].
