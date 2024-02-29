@@ -551,17 +551,19 @@ class _MaterialStateFromStyles extends MaterialStateTextStyle {
   @override
   TextStyle resolve(Set<MaterialState> states) {
     TextStyle? style;
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.disabled)) {
+    if (states.contains(MaterialState.disabled)) {
+      if (states.contains(MaterialState.error)) {
         style ??= disabledError;
-      } else if (states.contains(MaterialState.focused)) {
+      }
+      style ??= disabled;
+    }
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.focused)) {
         style ??= focusedError;
       }
       style ??= error;
     }
-    if (states.contains(MaterialState.disabled)) {
-      style ??= disabled;
-    } else if (states.contains(MaterialState.focused)) {
+    if (states.contains(MaterialState.focused)) {
       style ??= focused;
     }
     style ??= normal;
