@@ -99,17 +99,17 @@ TEST(FlutterSurfaceManager, BackBufferCacheDoesNotLeak) {
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 
   auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface1) ] notify:nil];
 
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 
   auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(110, 110)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface2) ] atTime:0 notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface2) ] notify:nil];
 
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
   auto surface3 = [surfaceManager surfaceForSize:CGSizeMake(120, 120)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface3) ] atTime:0 notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface3) ] notify:nil];
 
   // Cache should be cleaned during present and only contain the last visible
   // surface(s).
@@ -117,10 +117,10 @@ TEST(FlutterSurfaceManager, BackBufferCacheDoesNotLeak) {
   auto surfaceFromCache = [surfaceManager surfaceForSize:CGSizeMake(110, 110)];
   EXPECT_EQ(surfaceFromCache, surface2);
 
-  [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
+  [surfaceManager present:@[] notify:nil];
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
-  [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
+  [surfaceManager present:@[] notify:nil];
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 }
 
@@ -138,7 +138,7 @@ TEST(FlutterSurfaceManager, SurfacesAreRecycled) {
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
   EXPECT_EQ(surfaceManager.frontSurfaces.count, 0ul);
 
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface1) ] notify:nil];
 
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
   EXPECT_EQ(surfaceManager.frontSurfaces.count, 1ul);
@@ -151,7 +151,7 @@ TEST(FlutterSurfaceManager, SurfacesAreRecycled) {
 
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface2) ] atTime:0 notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface2) ] notify:nil];
 
   // Check that current front surface returns to cache.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
@@ -174,16 +174,14 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   EXPECT_EQ(testView.layer.sublayers.count, 0ul);
 
   auto surface1_1 = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1_1, CGPointMake(20, 10)) ]
-                           atTime:0
-                           notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface1_1, CGPointMake(20, 10)) ] notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 1ul);
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(70, 40)));
 
   auto surface2_1 = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
   auto surface2_2 = [surfaceManager surfaceForSize:CGSizeMake(20, 20)];
-  [surfaceManager presentSurfaces:@[
+  [surfaceManager present:@[
     CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
     CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
                       {
@@ -191,8 +189,7 @@ TEST(FlutterSurfaceManager, LayerManagement) {
                           FlutterRect{40, 0, 60, 20},
                       })
   ]
-                           atTime:0
-                           notify:nil];
+                   notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 2ul);
   EXPECT_EQ(testView.layer.sublayers[0].zPosition, 1.0);
@@ -211,15 +208,14 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(70, 70)));
 
   // Check second overlay sublayer is removed while first is reused and updated
-  [surfaceManager presentSurfaces:@[
+  [surfaceManager present:@[
     CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
     CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
                       {
                           FlutterRect{0, 10, 20, 20},
                       })
   ]
-                           atTime:0
-                           notify:nil];
+                   notify:nil];
   EXPECT_EQ(testView.layer.sublayers.count, 2ul);
   {
     NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
@@ -229,7 +225,7 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   }
 
   // Check that second overlay sublayer is added back while first is reused and updated
-  [surfaceManager presentSurfaces:@[
+  [surfaceManager present:@[
     CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
     CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
                       {
@@ -237,8 +233,7 @@ TEST(FlutterSurfaceManager, LayerManagement) {
                           FlutterRect{40, 0, 60, 20},
                       })
   ]
-                           atTime:0
-                           notify:nil];
+                   notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 2ul);
   {
@@ -251,15 +246,13 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   }
 
   auto surface3_1 = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface3_1, CGPointMake(20, 10)) ]
-                           atTime:0
-                           notify:nil];
+  [surfaceManager present:@[ CreatePresentInfo(surface3_1, CGPointMake(20, 10)) ] notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 1ul);
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(70, 40)));
 
   // Check removal of all surfaces.
-  [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
+  [surfaceManager present:@[] notify:nil];
   EXPECT_EQ(testView.layer.sublayers.count, 0ul);
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(0, 0)));
 }

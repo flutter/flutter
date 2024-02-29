@@ -448,7 +448,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [self configureTrackingArea];
   [self.view setAllowedTouchTypes:NSTouchTypeMaskIndirect];
   [self.view setWantsRestingTouches:YES];
-  [_engine viewControllerViewDidLoad:self];
 }
 
 - (void)viewWillAppear {
