@@ -96,7 +96,6 @@ source_set("flutter_linux_sources") {
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
   sources = [
-    "fl_accessibility_plugin.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_backing_store_provider.cc",
