@@ -2524,7 +2524,7 @@ void main() {
   testWidgets('disabled and hovered OutlinedButton.icon responds to mouse-exit', (WidgetTester tester) async {
     int onHoverCount = 0;
     late bool hover;
-
+    const Key key = Key('OutlinedButton.icon');
     Widget buildFrame({ required bool enabled }) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -2533,6 +2533,7 @@ void main() {
             width: 100,
             height: 100,
             child: OutlinedButton.icon(
+              key: key,
               onPressed: enabled ? () { } : null,
               onHover: (bool value) {
                 onHoverCount += 1;
@@ -2550,7 +2551,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
 
-    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)));
+    await gesture.moveTo(tester.getCenter(find.byKey(key)));
     await tester.pumpAndSettle();
     expect(onHoverCount, 1);
     expect(hover, true);
@@ -2563,7 +2564,7 @@ void main() {
     expect(onHoverCount, 2);
     expect(hover, false);
 
-    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)));
+    await gesture.moveTo(tester.getCenter(find.byKey(key)));
     await tester.pumpAndSettle();
     // We no longer see hover events because the OutlinedButton is disabled
     // and it's no longer in the "hovering" state.
@@ -2577,7 +2578,7 @@ void main() {
     expect(onHoverCount, 2);
     expect(hover, false);
 
-    await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)) - const Offset(1, 1));
+    await gesture.moveTo(tester.getCenter(find.byKey(key)) - const Offset(1, 1));
     await tester.pumpAndSettle();
     // Moving the mouse a little within the OutlinedButton doesn't change anything.
     expect(onHoverCount, 2);
