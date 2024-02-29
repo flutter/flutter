@@ -714,23 +714,30 @@ abstract class ResidentHandlers {
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
-        final Map<String, Object?>? rasterData =
-          await device.vmService!.renderFrameWithRasterStats(
-            viewId: view.id,
-            uiIsolateId: view.uiIsolate!.id,
-          );
-        if (rasterData != null) {
-          final File tempFile = globals.fsUtils.getUniqueFile(
-            globals.fs.currentDirectory,
-            'flutter_jank_metrics',
-            'json',
-          );
-          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
-        } else {
-          logger.printWarning('Unable to get jank metrics.');
+      try {
+        for (final FlutterView view in views) {
+          final Map<String, Object?>? rasterData =
+            await device.vmService!.renderFrameWithRasterStats(
+              viewId: view.id,
+              uiIsolateId: view.uiIsolate!.id,
+            );
+          if (rasterData != null) {
+            final File tempFile = globals.fsUtils.getUniqueFile(
+              globals.fs.currentDirectory,
+              'flutter_jank_metrics',
+              'json',
+            );
+            tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+            logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          } else {
+            logger.printWarning('Unable to get jank metrics.');
+          }
         }
+      } on vm_service.RPCError catch (err) {
+        if (err.code != RPCErrorCodes.kServerError || !err.message.contains('Raster status not supported on Impeller backend')) {
+          rethrow;
+        }
+        logger.printWarning('Unable to get jank metrics for Impeller renderer');
       }
     }
     return true;

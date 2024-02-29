@@ -4,22 +4,24 @@
 
 package dev.flutter.plugins.integration_test;
 
-import androidx.test.runner.AndroidJUnitRunner;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.runner.RunWith;
+
 import android.app.Activity;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.embedding.android.FlutterView;
 
-public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
+@RunWith(AndroidJUnit4.class)
+public class FlutterDeviceScreenshotTest {
     @Test
     public void getFlutterView_returnsNullForNonFlutterActivity() {
         Activity mockActivity = mock(Activity.class);
