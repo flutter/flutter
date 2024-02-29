@@ -47,11 +47,9 @@ Future<void> bootstrapEngine({
   final FlutterLoader? loader = flutter?.loader;
   if (loader == null || loader.isAutoStart) {
     // The user does not want control of the app, bootstrap immediately.
-    domWindow.console.debug('Flutter Web Bootstrap: Auto.');
     await bootstrap.autoStart();
   } else {
     // Yield control of the bootstrap procedure to the user.
-    domWindow.console.debug('Flutter Web Bootstrap: Programmatic.');
     loader.didCreateEngineInitializer(bootstrap.prepareEngineInitializer());
   }
 }
