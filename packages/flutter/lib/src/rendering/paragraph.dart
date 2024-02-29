@@ -1438,7 +1438,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition);
+            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getClampedParagraphBoundaryAtPosition);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1670,7 +1670,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           // When the selection is inverted by the new position it is necessary to
           // swap the end edge (moving edge) with the start edge (static edge) to
           // maintain the origin text boundary within the selection.
-          final _TextBoundaryRecord localTextBoundary = getTextBoundary(existingSelectionStart);
+          final _TextBoundaryRecord localTextBoundary = _getClampedParagraphBoundaryAtPosition(existingSelectionStart);//probably clamp.
+          assert(localTextBoundary.boundaryStart.offset >= range.start && localTextBoundary.boundaryEnd.offset <= range.end);
           _setSelectionPosition(existingSelectionStart.offset == localTextBoundary.boundaryStart.offset ? localTextBoundary.boundaryEnd : localTextBoundary.boundaryStart, isEnd: false);
         } else {
           debugPrint('not swapping $isSelectionInverted');
@@ -1693,8 +1694,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         if (existingSelectionStart != null) {
           // If the start edge exists and the end edge is being moved, then the
           // end edge is moved to encompass the entire boundary at the new position.
+          final _TextBoundaryRecord originTextBoundary = getTextBoundary(existingSelectionStart);
           final bool backwardSelection = existingSelectionStart != null && existingSelectionEnd == null && existingSelectionStart!.offset == range.end || existingSelectionStart == existingSelectionEnd && existingSelectionStart!.offset == range.end || existingSelectionStart != null && existingSelectionEnd != null && existingSelectionStart.offset > existingSelectionEnd.offset;
-          final int pivotOffset = backwardSelection ? textBoundary.boundaryEnd.offset : textBoundary.boundaryStart.offset;
+          final int pivotOffset = backwardSelection ? originTextBoundary.boundaryEnd.offset : originTextBoundary.boundaryStart.offset;
           debugPrint('not in origin $pivotOffset $backwardSelection');
           if (position.offset < pivotOffset) {
             debugPrint('setting boundary start');
@@ -1721,7 +1723,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         final bool isSelectionInverted = existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges = isSelectionInverted != (position.offset < existingSelectionStart.offset) || isSamePosition;
         if (shouldSwapEdges) {
-          final _TextBoundaryRecord localTextBoundary = getTextBoundary(existingSelectionStart);
+          final _TextBoundaryRecord localTextBoundary = _getClampedParagraphBoundaryAtPosition(existingSelectionStart);
+          assert(localTextBoundary.boundaryStart.offset >= range.start && localTextBoundary.boundaryEnd.offset <= range.end);
           _setSelectionPosition(isSelectionInverted ? localTextBoundary.boundaryStart : localTextBoundary.boundaryEnd, isEnd: false);
         }
       }
@@ -2036,8 +2039,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    final _TextBoundaryRecord? textBoundary = positionWithinParagraphRect || positionWithinLocalRect ? getTextBoundary(positionInFullText) : null;
-    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(textBoundary, getTextBoundary, positionInFullText, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
+    _TextBoundaryRecord? textBoundary = positionWithinLocalRect ? getTextBoundary(position) : positionWithinParagraphRect ? _getParagraphBoundaryAtPosition(positionInFullText) : null;
+    final TextPosition positionInText = positionWithinLocalRect ? position : positionInFullText;
+    final _TextBoundaryAtPosition getTextBoundaryInText = positionWithinLocalRect ? getTextBoundary : _getParagraphBoundaryAtPosition;
+    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(textBoundary, getTextBoundaryInText, positionInText, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
     debugPrint('resulting target $targetPosition');
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
