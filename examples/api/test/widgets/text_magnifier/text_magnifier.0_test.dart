@@ -94,7 +94,10 @@ void main() {
       find.byType(example.TextMagnifierExampleApp),
       matchesGoldenFile('text_magnifier.0_test.png'),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+  );
 
 
   testWidgets('should show custom magnifier in RTL', (WidgetTester tester) async {
