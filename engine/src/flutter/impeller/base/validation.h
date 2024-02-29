@@ -49,6 +49,16 @@ struct ScopedValidationDisable {
   ScopedValidationDisable& operator=(const ScopedValidationDisable&) = delete;
 };
 
+struct ScopedValidationFatal {
+  ScopedValidationFatal();
+
+  ~ScopedValidationFatal();
+
+  ScopedValidationFatal(const ScopedValidationFatal&) = delete;
+
+  ScopedValidationFatal& operator=(const ScopedValidationFatal&) = delete;
+};
+
 }  // namespace impeller
 
 //------------------------------------------------------------------------------
