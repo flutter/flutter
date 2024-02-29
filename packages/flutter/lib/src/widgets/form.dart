@@ -207,7 +207,6 @@ class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
-  late final AutovalidateMode _autovalidateMode;
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -227,40 +226,30 @@ class FormState extends State<Form> {
 
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
-    if (_isUnfocusAutoValidateMode) {
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       _updateListener(field);
     }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
     _fields.remove(field);
-    if (_isUnfocusAutoValidateMode) {
+    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
      _updateListener(field, removeListener: true);
     }
   }
 
   void _updateListener(FormFieldState<dynamic> field, {bool removeListener = false}) {
     if (removeListener) {
-      field._focusNode.removeListener(() {
-        if (!field._focusNode.hasFocus) {
-          _validate();
-        }
-      });
+      field._focusNode.removeListener(()=> _updateField(field));
     } else {
-      field._focusNode.addListener(() {
-        if (!field._focusNode.hasFocus) {
-          _validate();
-        }
-      });
+      field._focusNode.addListener(() => _updateField(field));
     }
   }
 
-  bool get _isUnfocusAutoValidateMode => widget.autovalidateMode == AutovalidateMode.onUnfocus;
-
-  @override
-  void initState() {
-    super.initState();
-    _autovalidateMode = widget.autovalidateMode;
+  void _updateField(FormFieldState<dynamic> field) {
+    if(!field._focusNode.hasFocus) {
+      _validate();
+    }
   }
 
   @override
@@ -371,7 +360,7 @@ class FormState extends State<Form> {
     }
 
     if (errorMessage.isNotEmpty) {
-       final TextDirection directionality = Directionality.of(context);
+      final TextDirection directionality = Directionality.of(context);
        if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {
          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
@@ -648,8 +637,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final AutovalidateMode autovalidateMode = Form.maybeOf(context)?._autovalidateMode ?? AutovalidateMode.disabled;
-
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
@@ -666,7 +653,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
-    if (autovalidateMode == AutovalidateMode.onUnfocus || widget.autovalidateMode == AutovalidateMode.onUnfocus){
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus|| widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: true,
         descendantsAreTraversable: true,
@@ -698,11 +685,6 @@ enum AutovalidateMode {
   /// interaction.
   onUserInteraction,
 
-  /// Used to auto-validate current [FormField] when unfocused.
-  ///
-  /// This mode is useful when you want to validate a [FormField] after the user
-  /// has interacted with another one.
-  ///
   /// If you want validate all fields of a [Form] after the user has interacted
   /// with one, use [always] instead.
   onUnfocus,
