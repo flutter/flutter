@@ -631,9 +631,10 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// This widget provides default [Action]s for handling common text editing
 /// [Intent]s such as deleting, copying and pasting in the text field. These
 /// [Action]s can be directly invoked using [Actions.invoke] or the
-/// [Actions.maybeInvoke] method. The default text editing keyboard [Shortcuts]
-/// also use these [Intent]s and [Action]s to perform the text editing
-/// operations they are bound to.
+/// [Actions.maybeInvoke] method. The default text editing keyboard [Shortcuts],
+/// typically declared in [DefaultTextEditingShortcuts], also use these
+/// [Intent]s and [Action]s to perform the text editing operations they are
+/// bound to.
 ///
 /// The default handling of a specific [Intent] can be overridden by placing an
 /// [Actions] widget above this widget. See the [Action] class and the
@@ -682,6 +683,40 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// | [UpdateSelectionIntent]                 | Updates the current selection in the input field's [TextEditingController], and triggers the [onSelectionChanged] callback. |
 /// | [CopySelectionTextIntent]               | Copies or cuts the selected text into the clipboard |
 /// | [PasteTextIntent]                       | Inserts the current text in the clipboard after the caret location, or replaces the selected text if the selection is not collapsed. |
+///
+/// ## Text Editing [Shortcuts]
+///
+/// It's also possible to directly remap keyboard shortcuts to new [Intent]s by
+/// inserting a [Shortcuts] widget above this in the widget tree. When using
+/// [WidgetsApp], the large set of default text editing keyboard shortcuts are
+/// declared near the top of the widget tree in [DefaultTextEditingShortcuts],
+/// and any [Shortcuts] widget between it and this [EditableText] will override
+/// those defaults.
+///
+/// {@template flutter.widgets.editableText.shortcutsAndTextInput}
+/// ### Interactions Between [Shortcuts] and Text Input
+///
+/// Shortcuts prevent text input fields from receiving their keystrokes as text
+/// input. For example, placing a [Shortcuts] widget in the widget tree above
+/// a text input field and creating a shortcut for [LogicalKeyboardKey.keyA]
+/// will prevent the field from receiving that key as text input. In other
+/// words, typing key "A" into the field will trigger the shortcut and will not
+/// insert a letter "a" into the field.
+///
+/// This happens because of the way that key strokes are handled in Flutter.
+/// When a keystroke is received in Flutter's engine, it first gives the
+/// framework the opportunity to handle it as a raw key event through
+/// [SystemChannels.keyEvent]. This is what [Shortcuts] listens to indirectly
+/// through its [FocusNode]. If it is not handled, then it will proceed to try
+/// handling it as text input through [SystemChannels.textInput], which is what
+/// [EditableTextState] listens to through [TextInputClient].
+///
+/// This behavior, where a shortcut prevents text input into some field, can be
+/// overridden by using another [Shortcuts] widget lower in the widget tree and
+/// mapping the desired key stroke(s) to [DoNothingAndStopPropagationIntent].
+/// The key event will be reported as unhandled by the framework and will then
+/// be sent as text input as usual.
+/// {@endtemplate}
 ///
 /// ## Gesture Events Handling
 ///
