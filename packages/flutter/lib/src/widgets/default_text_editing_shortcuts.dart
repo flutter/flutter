@@ -25,6 +25,8 @@ import 'text_editing_intents.dart';
 /// cause CJK input methods to discard more text than they should when the
 /// backspace key is pressed during text composition on iOS.
 ///
+/// {@macro flutter.widgets.editableText.shortcutsAndTextInput}
+///
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override

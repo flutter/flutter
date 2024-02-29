@@ -11,6 +11,7 @@ import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
@@ -656,6 +657,7 @@ class _SnackBarState extends State<SnackBar> {
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
             onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           )
         : null;
 

@@ -1587,6 +1587,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
               return Semantics(
+                enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
                 onTap: widget.readOnly ? null : () {

@@ -976,7 +976,7 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
+          const Rect.fromLTWH(193.83334350585938, -0.916666666666668, 3.0, 20.0),
           const Radius.circular(1.0),
         ),
         color: const Color(0xbf2196f3),
@@ -994,7 +994,7 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(719.3333333333333, -0.9166666666666679, 721.3333333333333, 17.083333333333332),
+          const Rect.fromLTWH(719.3333333333333, -0.9166666666666679, 2.0, 18.0),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff999999),
