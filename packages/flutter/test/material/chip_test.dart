@@ -144,6 +144,7 @@ Widget chipWithOptionalDeleteButton({
   TextDirection textDirection = TextDirection.ltr,
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
+  double? size,
   VoidCallback? onPressed = doNothing,
   ThemeData? themeData,
 }) {
@@ -156,7 +157,11 @@ Widget chipWithOptionalDeleteButton({
           tooltip: chipTooltip,
           onPressed: onPressed,
           onDeleted: deletable ? doNothing : null,
-          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          deleteIcon: Icon(
+            key: deleteButtonKey,
+            size: size,
+            Icons.close,
+          ),
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
@@ -1852,6 +1857,7 @@ void main() {
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -1957,6 +1963,7 @@ void main() {
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
