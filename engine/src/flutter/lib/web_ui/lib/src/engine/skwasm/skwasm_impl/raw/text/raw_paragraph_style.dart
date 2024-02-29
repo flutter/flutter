@@ -49,3 +49,6 @@ external void paragraphStyleSetStrutStyle(ParagraphStyleHandle handle, StrutStyl
 
 @Native<Void Function(ParagraphStyleHandle, TextStyleHandle)>(symbol: 'paragraphStyle_setTextStyle', isLeaf: true)
 external void paragraphStyleSetTextStyle(ParagraphStyleHandle handle, TextStyleHandle textStyle);
+
+@Native<Void Function(ParagraphStyleHandle, Bool)>(symbol: 'paragraphStyle_setApplyRoundingHack', isLeaf: true)
+external void paragraphStyleSetApplyRoundingHack(ParagraphStyleHandle handle, bool applyRoundingHack);
