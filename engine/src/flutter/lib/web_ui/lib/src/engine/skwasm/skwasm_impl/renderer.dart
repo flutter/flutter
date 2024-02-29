@@ -413,7 +413,7 @@ class SkwasmRenderer implements Renderer {
   EngineSceneView _getSceneViewForView(EngineFlutterView view) {
     // TODO(mdebbar): Support multi-view mode.
     if (_sceneView == null) {
-      _sceneView = EngineSceneView(SkwasmPictureRenderer(surface));
+      _sceneView = EngineSceneView(SkwasmPictureRenderer(surface), view);
       final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.dom.setScene(_sceneView!.sceneElement);
     }
@@ -482,4 +482,14 @@ class SkwasmPictureRenderer implements PictureRenderer {
   @override
   FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures) =>
     surface.renderPictures(pictures.cast<SkwasmPicture>());
+
+  @override
+  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, clip);
+    canvas.clipRect(clip);
+    canvas.drawPicture(picture);
+
+    return recorder.endRecording() as ScenePicture;
+  }
 }
