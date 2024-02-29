@@ -73,7 +73,7 @@ class DaemonCommand extends FlutterCommand {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
 
-      await _DaemonServer(
+      await DaemonServer(
         port: port,
         logger: StdoutLogger(
           terminal: globals.terminal,
@@ -100,12 +100,14 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-class _DaemonServer {
-  _DaemonServer({
+@visibleForTesting
+class DaemonServer {
+  DaemonServer({
     this.port,
     required this.logger,
     this.notifyingLogger,
-  });
+    @visibleForTesting Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+  }) : _bind = bind;
 
   final int? port;
 
@@ -115,17 +117,19 @@ class _DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
+  final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
+
   Future<void> run() async {
     ServerSocket? serverSocket;
     try {
-      serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+      serverSocket = await _bind(InternetAddress.loopbackIPv4, port!);
     } on SocketException {
       logger.printTrace('Bind on $port failed with IPv4, retrying on IPv6');
     }
 
     // If binding on IPv4 failed, try binding on IPv6.
     // Omit try catch here, let the failure fallthrough.
-    serverSocket ??= await ServerSocket.bind(InternetAddress.loopbackIPv6, port!);
+    serverSocket ??= await _bind(InternetAddress.loopbackIPv6, port!);
 
     logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
