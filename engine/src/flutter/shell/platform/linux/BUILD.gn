@@ -105,7 +105,6 @@ source_set("flutter_linux_sources") {
     "fl_dart_project.cc",
     "fl_engine.cc",
     "fl_event_channel.cc",
-    "fl_gl_area.cc",
     "fl_gnome_settings.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
@@ -126,7 +125,7 @@ source_set("flutter_linux_sources") {
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_renderer.cc",
-    "fl_renderer_gl.cc",
+    "fl_renderer_gdk.cc",
     "fl_renderer_headless.cc",
     "fl_scrolling_manager.cc",
     "fl_scrolling_view_delegate.cc",
@@ -246,7 +245,10 @@ executable("flutter_linux_unittests") {
 
   public_configs = [ "//flutter:config" ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:epoxy",
+  ]
 
   defines = [
     "FLUTTER_ENGINE_NO_PROTOTYPES",
