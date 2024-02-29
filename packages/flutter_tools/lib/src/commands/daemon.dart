@@ -116,7 +116,17 @@ class _DaemonServer {
   final NotifyingLogger? notifyingLogger;
 
   Future<void> run() async {
-    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+    ServerSocket? serverSocket;
+    try {
+      serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+    } on SocketException {
+      logger.printTrace('Bind on $port failed with IPv4, retrying on IPv6');
+    }
+
+    // If binding on IPv4 failed, try binding on IPv6.
+    // Omit try catch here, let the failure fallthrough.
+    serverSocket ??= await ServerSocket.bind(InternetAddress.loopbackIPv6, port!);
+
     logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
