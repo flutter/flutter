@@ -1263,7 +1263,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
     final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
+
+
+    final bool isAccessibilityOn = MediaQuery.of(context).accessibleNavigation;
+    final double toolbarOpacity = !isAccessibilityOn &&(!pinned || isPinnedWithOpacityFade)
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
     final Widget? effectiveTitle = switch (variant) {

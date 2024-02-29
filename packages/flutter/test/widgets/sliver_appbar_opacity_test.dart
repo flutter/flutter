@@ -27,6 +27,29 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
+  testWidgets('a11y mode ===> 1.0 opacity', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child:  _TestWidget(
+          pinned: false,
+          floating: false,
+          bottom: false,
+          controller: controller,
+        ),
+      ),
+    );
+
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
+    expect(render.text.style!.color!.opacity, 1.0);
+
+    controller.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity, 1.0);
+  });
+
   testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
