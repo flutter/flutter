@@ -29,6 +29,12 @@ FlutterViewController::~FlutterViewController() {
   }
 }
 
+FlutterViewId FlutterViewController::view_id() const {
+  auto view_id = FlutterDesktopViewControllerGetViewId(controller_);
+
+  return static_cast<FlutterViewId>(view_id);
+}
+
 void FlutterViewController::ForceRedraw() {
   FlutterDesktopViewControllerForceRedraw(controller_);
 }

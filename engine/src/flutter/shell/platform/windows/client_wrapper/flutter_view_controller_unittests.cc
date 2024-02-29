@@ -70,6 +70,15 @@ TEST(FlutterViewControllerTest, CreateDestroy) {
   EXPECT_FALSE(test_api->engine_destroyed());
 }
 
+TEST(FlutterViewControllerTest, GetViewId) {
+  DartProject project(L"data");
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestWindowsApi>());
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  FlutterViewController controller(100, 100, project);
+  EXPECT_EQ(controller.view_id(), 1);
+}
+
 TEST(FlutterViewControllerTest, GetEngine) {
   DartProject project(L"data");
   testing::ScopedStubFlutterWindowsApi scoped_api_stub(
