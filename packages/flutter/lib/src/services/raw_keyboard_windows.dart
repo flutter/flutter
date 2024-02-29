@@ -62,7 +62,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   final int characterCodePoint;
 
   /// A mask of the current modifiers. The modifier values must be in sync with
-  /// the ones defined in https://github.com/flutter/engine/blob/master/shell/platform/windows/key_event_handler.cc
+  /// the ones defined in https://github.com/flutter/engine/blob/main/shell/platform/windows/key_event_handler.cc
   final int modifiers;
 
   @override
