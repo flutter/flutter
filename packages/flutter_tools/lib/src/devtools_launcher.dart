@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
@@ -19,16 +20,17 @@ import 'resident_runner.dart';
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     required ProcessManager processManager,
-    required String dartExecutable,
     required Logger logger,
     required BotDetector botDetector,
+    required Artifacts artifacts,
   })  : _processManager = processManager,
-        _dartExecutable = dartExecutable,
         _logger = logger,
-        _botDetector = botDetector;
+        _botDetector = botDetector,
+        _artifacts = artifacts;
 
   final ProcessManager _processManager;
-  final String _dartExecutable;
+  final Artifacts _artifacts;
+  late final String _dartExecutable = _artifacts.getArtifactPath(Artifact.engineDartBinary);
   final Logger _logger;
   final BotDetector _botDetector;
   final Completer<void> _processStartCompleter = Completer<void>();
