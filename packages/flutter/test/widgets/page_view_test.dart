@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
@@ -15,10 +14,7 @@ import 'states.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('PageView.builder respects findChildIndexCallback',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -419,10 +415,7 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
-  testWidgets('PageView in zero-size container',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -602,10 +595,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
-  testWidgets('Page snapping disable and reenable',
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     Widget build({ required bool pageSnapping }) {
@@ -1330,20 +1320,20 @@ void main() {
     }
 
     Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
-      int curentVisiblePage() {
+      int currentVisiblePage() {
         return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
       }
 
-      final int initialPageInView = curentVisiblePage();
+      final int initialPageInView = currentVisiblePage();
 
       for (int i = 0; i < 3; i++) {
         if (controls) {
           controller.jumpToPage(i);
           await tester.pumpAndSettle();
-          expect(curentVisiblePage(), i);
+          expect(currentVisiblePage(), i);
         } else {
           expect(()=> controller.jumpToPage(i), throwsAssertionError);
-          expect(curentVisiblePage(), initialPageInView);
+          expect(currentVisiblePage(), initialPageInView);
         }
       }
     }

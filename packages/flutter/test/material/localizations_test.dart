@@ -11,6 +11,7 @@ void main() {
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);
+    expect(localizations.clearButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
     expect(localizations.deleteButtonTooltip, isNotNull);
     expect(localizations.moreButtonTooltip, isNotNull);
@@ -136,6 +137,7 @@ void main() {
     expect(localizations.currentDateLabel, isNotNull);
     expect(localizations.scrimLabel, isNotNull);
     expect(localizations.bottomSheetLabel, isNotNull);
+    expect(localizations.selectedDateLabel, isNotNull);
 
     expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 

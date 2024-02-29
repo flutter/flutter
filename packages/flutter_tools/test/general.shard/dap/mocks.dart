@@ -104,9 +104,22 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
     await preAppStart?.call(this);
 
+    void sendLaunchProgress({required bool finished, String? message}) {
+      assert(finished == (message == null));
+      simulateStdoutMessage(<String, Object?>{
+        'event': 'app.progress',
+        'params': <String, Object?>{
+          'id': 'launch',
+          'message': message,
+          'finished': finished,
+        }
+      });
+    }
+
     // Simulate the app starting by triggering handling of events that Flutter
     // would usually write to stdout.
     if (simulateAppStarted) {
+      sendLaunchProgress(message: 'Step 1…', finished: false);
       simulateStdoutMessage(<String, Object?>{
         'event': 'app.start',
         'params': <String, Object?>{
@@ -116,6 +129,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
           'mode': 'debug',
         }
       });
+      sendLaunchProgress(message: 'Step 2…', finished: false);
+      sendLaunchProgress(finished: true);
       simulateStdoutMessage(<String, Object?>{
         'event': 'app.started',
       });

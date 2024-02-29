@@ -296,8 +296,8 @@ void main() {
       ),
     );
 
-    expect(_getMaterial(tester).color, theme.colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(_getMaterial(tester).color, theme.colorScheme.surfaceContainer);
+    expect(_getMaterial(tester).surfaceTintColor, Colors.transparent);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
@@ -422,6 +422,71 @@ void main() {
 
     if (!kIsWeb || isCanvasKit) {
       expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
+    }
+  });
+
+    testWidgets('Material3 - NavigationBar label can scale and has maxScaleFactor', (WidgetTester tester) async {
+    const String label = 'A';
+
+    Widget buildApp({ required TextScaler textScaler }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MaterialApp(
+            home: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: NavigationBar(
+                        destinations: const <NavigationDestination>[
+                          NavigationDestination(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                          ),
+                          NavigationDestination(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
+    expect(find.text(label), findsOneWidget);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
+    await tester.pumpAndSettle();
+
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.3)));
+
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
     }
   });
 
@@ -1498,4 +1563,9 @@ class IconWithRandomColor extends StatelessWidget {
     final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     return Icon(icon, color: randomColor);
   }
+}
+
+
+bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
+  return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
 }

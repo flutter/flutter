@@ -27,7 +27,7 @@ void main() {
 
   LeakTesting.settings = LeakTesting.settings
       .withTrackedAll()
-      .withTracked(allNotDisposed: true, allNotGCed: true)
+      .withTracked(allNotDisposed: true, experimentalAllNotGCed: true)
       .withIgnored(
     createdByTestHelpers: true,
     testHelperExceptions: <RegExp>[

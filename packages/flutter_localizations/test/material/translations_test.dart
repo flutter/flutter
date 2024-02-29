@@ -55,6 +55,7 @@ void main() {
       expect(localizations.collapsedHint, isNotNull);
       expect(localizations.expandedHint, isNotNull);
       expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
+      expect(localizations.selectedDateLabel, isNotNull);
 
       // Regression test for https://github.com/flutter/flutter/issues/136090
       expect(localizations.remainingTextFieldCharacterCount(0), isNot(contains('TBD')));
@@ -548,5 +549,14 @@ void main() {
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationEn>());
     expect(localizations.shareButtonLabel, 'Share');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/141764
+  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations.lookUpButtonLabel, '查询');
   });
 }

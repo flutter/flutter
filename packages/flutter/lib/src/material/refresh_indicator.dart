@@ -413,15 +413,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       });
       return false;
     }
-    bool? indicatorAtTopNow;
-    switch (notification.metrics.axisDirection) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        indicatorAtTopNow = true;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        indicatorAtTopNow = null;
-    }
+    final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
+      AxisDirection.down || AxisDirection.up    => true,
+      AxisDirection.left || AxisDirection.right => null,
+    };
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_mode == RefreshIndicatorStatus.drag ||
           _mode == RefreshIndicatorStatus.armed) {

@@ -43,7 +43,7 @@ void main() {
     listener?.dispose();
     listener = null;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    binding.resetLifecycleState();
+    binding.resetInternalState();
     binding.platformDispatcher.resetInitialLifecycleState();
     assert(TestAppLifecycleListener.registerCount == 0,
         'There were ${TestAppLifecycleListener.registerCount} listeners that were not disposed of in tests.');
@@ -129,10 +129,11 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(transitions, equals(<String>['restart', 'show', 'resume']));
 
-    // Generates intermediate states.
+    // Generates intermediate states from lower to higher lifecycle states.
     transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.paused);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause']));
+
     // Wraps around from pause to detach.
     await setAppLifeCycleState(AppLifecycleState.detached);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach']));
@@ -140,14 +141,16 @@ void main() {
     expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach', 'resume']));
     await setAppLifeCycleState(AppLifecycleState.paused);
     expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach', 'resume', 'inactive', 'hide', 'pause']));
+
+    // Generates intermediate states from higher to lower lifecycle states.
     transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(transitions, equals(<String>['restart', 'show', 'resume']));
 
-    // Asserts on bad transitions
-    await expectLater(() => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
-    await setAppLifeCycleState(AppLifecycleState.paused);
+    // Go to detached
+    transitions.clear();
     await setAppLifeCycleState(AppLifecycleState.detached);
+    expect(transitions, equals(<String>['inactive', 'hide', 'pause', 'detach']));
   });
 
   testWidgets('Receives exit requests', (WidgetTester tester) async {

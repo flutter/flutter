@@ -144,5 +144,7 @@
   "menuDismissLabel": "بستن منو",
   "lookUpButtonLabel": "جستجو",
   "searchWebButtonLabel": "جستجو در وب",
-  "shareButtonLabel": "هم‌رسانی…"
+  "shareButtonLabel": "هم‌رسانی…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

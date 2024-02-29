@@ -78,12 +78,14 @@ class WebDriverService extends DriverService {
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
+          webRenderer: debuggingOptions.webRenderer,
         )
         : DebuggingOptions.enabled(
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
           disablePortPublication: debuggingOptions.disablePortPublication,
+          webRenderer: debuggingOptions.webRenderer,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),

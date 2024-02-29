@@ -1380,7 +1380,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -1394,7 +1394,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -2016,10 +2016,6 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'leading: Text',
-        'title: Text',
-        'subtitle: Text',
-        'trailing: Text',
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',

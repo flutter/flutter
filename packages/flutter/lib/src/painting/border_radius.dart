@@ -238,13 +238,7 @@ abstract class BorderRadiusGeometry {
     if (visual != null && logical != null) {
       return '$visual + $logical';
     }
-    if (visual != null) {
-      return visual;
-    }
-    if (logical != null) {
-      return logical;
-    }
-    return 'BorderRadius.zero';
+    return visual ?? logical ?? 'BorderRadius.zero';
   }
 
   @override
