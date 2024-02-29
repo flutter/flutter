@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "تفصیل دیکھیں",
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

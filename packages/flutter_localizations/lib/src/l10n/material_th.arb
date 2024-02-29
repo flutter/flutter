@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "ค้นหา",
   "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
   "shareButtonLabel": "แชร์...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

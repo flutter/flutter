@@ -47,9 +47,9 @@ void main() {
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
     // Bump up plugin compileSdk version to 31
-    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdk ([0-9]+|flutter.compileSdkVersion)');
+    final RegExp androidCompileSdkVersionRegExp = RegExp(r'compileSdk = ([0-9]+|flutter.compileSdkVersion)');
     final String newPluginGradleFile = pluginBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdk 31');
+      androidCompileSdkVersionRegExp, 'compileSdk = 31');
     pluginGradleFile.writeAsStringSync(newPluginGradleFile);
 
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');
@@ -61,7 +61,7 @@ void main() {
 
     // Bump down plugin example app compileSdk version to 30
     final String newProjectGradleFile = projectBuildGradle.replaceAll(
-      androidCompileSdkVersionRegExp, 'compileSdk 30');
+      androidCompileSdkVersionRegExp, 'compileSdk = 30');
     projectGradleFile.writeAsStringSync(newProjectGradleFile);
 
     // Run flutter build apk to build plugin example project

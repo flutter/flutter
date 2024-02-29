@@ -1237,20 +1237,22 @@ bool hasPlugins(FlutterProject project) {
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
 // TODO(stuartmorgan): Expand implementation to apply to all implementations,
-// not just Dart-only, per the federated plugin spec.
+//  not just Dart-only, per the federated plugin spec.
+// TODO(gustl22): The flag [throwOnPluginPubspecError] is currently only used
+//  for testing dart plugins as the logic is not working correctly.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
-  final List<String> platforms = <String>[
+  const Iterable<String> platformKeys = <String>[
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, List<PluginInterfaceResolution>> possibleResolutions
-      = <String, List<PluginInterfaceResolution>>{};
+  final Map<String, List<PluginInterfaceResolution>> possibleResolutions =
+      <String, List<PluginInterfaceResolution>>{};
   final Map<String, String> defaultImplementations = <String, String>{};
   // Generates a key for the maps above.
   String getResolutionKey({required String platform, required String packageName}) {
@@ -1258,18 +1260,19 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   }
 
   bool hasPubspecError = false;
-  for (final Plugin plugin in plugins) {
-    for (final String platform in platforms) {
-      if (plugin.platforms[platform] == null &&
-          plugin.defaultPackagePlatforms[platform] == null) {
+  for (final String platformKey in platformKeys) {
+    for (final Plugin plugin in plugins) {
+      if (plugin.platforms[platformKey] == null &&
+          plugin.defaultPackagePlatforms[platformKey] == null) {
         // The plugin doesn't implement this platform.
         continue;
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
-        final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
+        final String? defaultImplementation =
+            plugin.defaultPackagePlatforms[platformKey];
         final bool hasInlineDartImplementation =
-          plugin.pluginDartClassPlatforms[platform] != null;
+            plugin.pluginDartClassPlatforms[platformKey] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
           if (throwOnPluginPubspecError) {
             globals.printError(
@@ -1279,27 +1282,27 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
               'flutter:\n'
               '  plugin:\n'
               '    platforms:\n'
-              '      $platform:\n'
+              '      $platformKey:\n'
               '        $kDartPluginClass: <plugin-class>\n'
               '\n'
               'To set a default implementation, use:\n'
               'flutter:\n'
               '  plugin:\n'
               '    platforms:\n'
-              '      $platform:\n'
+              '      $platformKey:\n'
               '        $kDefaultPackage: <plugin-implementation>\n'
               '\n'
               'To implement an interface, use:\n'
               'flutter:\n'
               '  plugin:\n'
               '    implements: <plugin-interface>'
-              '\n'
+              '\n',
             );
           }
           hasPubspecError = true;
           continue;
         }
-        final String defaultImplementationKey = getResolutionKey(platform: platform, packageName: plugin.name);
+        final String defaultImplementationKey = getResolutionKey(platform: platformKey, packageName: plugin.name);
         if (defaultImplementation != null) {
           defaultImplementations[defaultImplementationKey] = defaultImplementation;
           continue;
@@ -1313,7 +1316,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           // - the plugin requires at least Flutter 2.11 (when this opt-in logic
           //   was added), so that existing plugins continue to work.
           // See https://github.com/flutter/flutter/issues/87862 for details.
-          final bool isDesktop = platform == 'linux' || platform == 'macos' || platform == 'windows';
+          final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
           final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
           final semver.Version? minFlutterVersion = flutterConstraint != null &&
             flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
@@ -1330,25 +1333,23 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         }
       }
       // If there's no Dart implementation, there's nothing to register.
-      if (plugin.pluginDartClassPlatforms[platform] == null ||
-          plugin.pluginDartClassPlatforms[platform] == 'none') {
+      if (plugin.pluginDartClassPlatforms[platformKey] == null ||
+          plugin.pluginDartClassPlatforms[platformKey] == 'none') {
         continue;
       }
 
       // If it hasn't been skipped, it's a candidate for auto-registration, so
       // add it as a possible resolution.
-      final String resolutionKey = getResolutionKey(platform: platform, packageName: implementsPackage);
-      if (!possibleResolutions.containsKey(resolutionKey)) {
-        possibleResolutions[resolutionKey] = <PluginInterfaceResolution>[];
-      }
+      final String resolutionKey = getResolutionKey(platform: platformKey, packageName: implementsPackage);
+      possibleResolutions.putIfAbsent(resolutionKey, () => <PluginInterfaceResolution>[]);
       possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
         plugin: plugin,
-        platform: platform,
+        platform: platformKey,
       ));
     }
   }
   if (hasPubspecError && throwOnPluginPubspecError) {
-    throwToolExit('Please resolve the errors');
+    throwToolExit('Please resolve the pubspec errors');
   }
 
   // Now resolve all the possible resolutions to a single option for each
@@ -1401,7 +1402,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     }
   }
   if (hasResolutionError) {
-    throwToolExit('Please resolve the errors');
+    throwToolExit('Please resolve the plugin implementation selection errors');
   }
   return finalResolution;
 }

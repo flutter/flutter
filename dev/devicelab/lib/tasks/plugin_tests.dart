@@ -118,6 +118,12 @@ class PluginTest {
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
     if (buildTarget == 'macos') {
+      // When using a local engine, podhelper.rb will search for a "macos-"
+      // directory within the FlutterMacOS.xcframework, so create a dummy one.
+      Directory(
+        path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'),
+      ).createSync(recursive: true);
+
       // Clean before regenerating the config to ensure that the pod steps run.
       await inDirectory(Directory(app.rootPath), () async {
         await evalFlutter('clean');
@@ -429,7 +435,7 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '11.0'"
+        ? "s.platform = :ios, '12.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {

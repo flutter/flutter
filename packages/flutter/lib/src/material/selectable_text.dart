@@ -151,6 +151,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
 /// A run of selectable text with a single style.
 ///
+/// Consider using [SelectionArea] or [SelectableRegion] instead, which enable
+/// selection on a widget subtree, including but not limited to [Text] widgets.
+///
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
 /// the same line depending on the layout constraints.
@@ -202,10 +205,20 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// To make [SelectableText] react to touch events, use callback [onTap] to achieve
 /// the desired behavior.
 ///
+/// ## Scrolling Considerations
+///
+/// If this [SelectableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [SelectableText] to ensure proper scroll coordination for [SelectableText]
+/// and its components like [TextSelectionOverlay].
+///
 /// See also:
 ///
 ///  * [Text], which is the non selectable version of this widget.
 ///  * [TextField], which is the editable version of this widget.
+///  * [SelectionArea], which enables the selection of multiple [Text] widgets
+///    and of other widgets.
 class SelectableText extends StatefulWidget {
   /// Creates a selectable text widget.
   ///
@@ -494,15 +507,13 @@ class SelectableText extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier used when the text is selected.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override

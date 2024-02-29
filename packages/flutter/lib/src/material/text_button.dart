@@ -87,6 +87,7 @@ class TextButton extends ButtonStyleButton {
     super.statesController,
     super.isSemanticButton,
     required Widget super.child,
+    super.iconAlignment,
   });
 
   /// Create a text button from a pair of widgets that serve as the button's
@@ -94,6 +95,11 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 8 logical pixels
   /// at the ends, with an 8 pixel gap in between.
+  ///
+  /// If [icon] is null, will create a [TextButton] instead.
+  ///
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  ///
   factory TextButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -107,6 +113,7 @@ class TextButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
+    IconAlignment iconAlignment = IconAlignment.start,
   }) {
      if (icon == null) {
       return TextButton(
@@ -135,6 +142,7 @@ class TextButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
+      iconAlignment: iconAlignment,
     );
   }
 
@@ -342,7 +350,7 @@ class TextButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.primary
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.primary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.1)
   ///   * others - null
   /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
@@ -450,13 +458,13 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return primary.withOpacity(0.12);
+      return primary.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return primary.withOpacity(0.04);
+      return primary.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return primary.withOpacity(0.12);
+      return primary.withOpacity(0.1);
     }
     return null;
   }
@@ -497,9 +505,15 @@ class _TextButtonWithIcon extends TextButton {
     super.statesController,
     required Widget icon,
     required Widget label,
+    super.iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
-         child: _TextButtonWithIconChild(icon: icon, label: label, buttonStyle: style),
+         child: _TextButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
       );
 
   @override
@@ -525,11 +539,13 @@ class _TextButtonWithIconChild extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.buttonStyle,
+    required this.iconAlignment,
   });
 
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -538,7 +554,9 @@ class _TextButtonWithIconChild extends StatelessWidget {
     final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
+      children: iconAlignment == IconAlignment.start
+        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -582,13 +600,13 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       return null;
     });

@@ -529,8 +529,11 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,],
                         textDirection: TextDirection.ltr,
@@ -6941,7 +6944,7 @@ void main() {
       // the arrow should not point exactly to the caret because the caret is
       // too close to the right.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       await tester.pumpWidget(
         CupertinoApp(
           debugShowCheckedModeBanner: false,
@@ -7002,7 +7005,7 @@ void main() {
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -7829,9 +7832,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
@@ -7866,9 +7866,6 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
@@ -10034,7 +10031,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+  testWidgets('text selection toolbar is hidden on tap down on desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -10077,7 +10074,7 @@ void main() {
     expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
   },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+    variant: TargetPlatformVariant.all(excluding: TargetPlatformVariant.mobile().values),
   );
 
   testWidgets('Does not shrink in height when enters text when there is large single-line placeholder', (WidgetTester tester) async {
