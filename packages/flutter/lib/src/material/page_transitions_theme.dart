@@ -500,68 +500,100 @@ class AndroidBackGestureTransition extends StatelessWidget {
     super.key,
     required this.animation,
     required this.secondaryAnimation,
-    required this.startBackEvent,
-    required this.currentBackEvent,
+    required this.getIsCurrent,
     required this.child,
   });
 
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
-  final AndroidBackEvent? startBackEvent;
-  final AndroidBackEvent? currentBackEvent;
+  final ValueGetter<bool> getIsCurrent;
   final Widget child;
-
-  double get _startTouchY => startBackEvent?.touchY ?? 0;
-
-  double get _currentTouchY => currentBackEvent?.touchY ?? 0;
-
-  SwipeEdge get _currentSwipeEdge =>
-      currentBackEvent?.swipeEdge ?? SwipeEdge.left;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: animation,
-      builder: _animatedBuilder,
-      child: child,
+      animation: secondaryAnimation,
+      builder: _secondaryAnimatedBuilder,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: _primaryAnimatedBuilder,
+        child: child,
+      ),
     );
   }
 
-  Widget _animatedBuilder(BuildContext context, Widget? child) {
+  Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
     final double screenWidth = size.width;
-    final double screenHeight = size.height;
     final double xShift = (screenWidth / 20) - 8;
-    final double yShiftMax = (screenHeight / 20) - 8;
 
-    final double rawYShift = _currentTouchY - _startTouchY;
-    final double easedYShift = Curves.easeOut
-            .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
-        rawYShift.sign *
-        yShiftMax;
-    final double yShift = easedYShift.clamp(-yShiftMax, yShiftMax);
-
-    final Tween<double> xShiftTween = Tween<double>(
-        begin: _currentSwipeEdge == SwipeEdge.left ? xShift : -xShift,
-        end: 0.0);
-    final Tween<double> scaleTween = Tween<double>(begin: 0.9, end: 1.0);
-    final Tween<double> gapTween = Tween<double>(begin: 8.0, end: 0.0);
-    final Tween<double> borderRadiusTween =
-        Tween<double>(begin: 32.0, end: 0.0);
+    final bool isCurrent = getIsCurrent();
+    final Tween<double> xShiftTween = isCurrent
+        ? ConstantTween<double>(0)
+        : Tween<double>(begin: xShift, end: 0);
+    final Animatable<double> scaleTween = isCurrent
+        ? ConstantTween<double>(1)
+        : TweenSequence<double>(<TweenSequenceItem<double>>[
+            TweenSequenceItem<double>(
+                tween: Tween<double>(begin: 0.95, end: 1), weight: 65.0),
+            TweenSequenceItem<double>(
+                tween: Tween<double>(begin: 1, end: 1), weight: 35.0),
+          ]);
+    final Animatable<double> fadeTween = isCurrent
+        ? ConstantTween<double>(1)
+        : TweenSequence<double>(<TweenSequenceItem<double>>[
+            TweenSequenceItem<double>(
+                tween: Tween<double>(begin: 1.0, end: 0.8), weight: 65.0),
+            TweenSequenceItem<double>(
+                tween: Tween<double>(begin: 1, end: 1), weight: 35.0),
+          ]);
 
     return Transform.translate(
-      offset: Offset(xShiftTween.animate(animation).value, yShift),
+      offset: Offset(xShiftTween.animate(secondaryAnimation).value, 0),
+      child: Transform.scale(
+        scale: scaleTween.animate(secondaryAnimation).value,
+        child: Opacity(
+          opacity: fadeTween.animate(secondaryAnimation).value,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _primaryAnimatedBuilder(BuildContext context, Widget? child) {
+    final Size size = MediaQuery.sizeOf(context);
+    final double screenWidth = size.width;
+    final double xShift = (screenWidth / 20) - 8;
+
+    final Animatable<double> xShiftTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.0, end: 0.0), weight: 65.0),
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: xShift, end: 0.0), weight: 35.0),
+    ]);
+    final Animatable<double> scaleTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 1.0, end: 1.0), weight: 65.0),
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.95, end: 1.0), weight: 35.0),
+    ]);
+    final Animatable<double> fadeTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.0, end: 0.0), weight: 65.0),
+      TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 0.95, end: 1.0), weight: 35.0),
+    ]);
+
+    return Transform.translate(
+      offset: Offset(xShiftTween.animate(animation).value, 0),
       child: Transform.scale(
         scale: scaleTween.animate(animation).value,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: gapTween.animate(animation).value),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              borderRadiusTween.animate(animation).value,
-            ),
-            child: child,
-          ),
+        child: Opacity(
+          opacity: fadeTween.animate(animation).value,
+          child: child,
         ),
       ),
     );
@@ -785,12 +817,10 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     return AndroidBackGestureDetector(
       controller: route.controller!, // protected access
       navigator: route.navigator!,
-      enabledCallback: () =>
-          CupertinoRouteTransitionMixin.isPopGestureEnabled(route),
+      enabledCallback: () => PageRoute.isPopGestureEnabled(route),
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
-        final bool linearTransition =
-            CupertinoRouteTransitionMixin.isPopGestureInProgress(route);
+        final bool linearTransition = PageRoute.isPopGestureInProgress(route);
 
         if (linearTransition) {
           return backGestureTransitionBuilder(
@@ -827,8 +857,7 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     return AndroidBackGestureTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      startBackEvent: startBackEvent,
-      currentBackEvent: currentBackEvent,
+      getIsCurrent: () => route.isCurrent,
       child: child,
     );
   }

@@ -71,7 +71,7 @@ class AndroidBackEvent {
   /// Determines if the event was triggered by a button press.
   ///
   /// It returns true when the back button is pressed, such as when the user
-  /// opts for 3-button navigation. In cases of Gesture Navigation, it returns
+  /// opts for 3-button navigation. In cases of gesture navigation, it returns
   /// false.
   bool get isBackPressed =>
       touchX == null || touchY == null || (touchX == 0 && touchY == 0);
@@ -92,12 +92,7 @@ class AndroidBackEvent {
   }
 
   @override
-  int get hashCode => Object.hash(
-        touchX,
-        touchY,
-        progress,
-        swipeEdge,
-      );
+  int get hashCode => Object.hash(touchX, touchY, progress, swipeEdge);
 
   @override
   String toString() {

@@ -58,6 +58,11 @@ abstract final class SystemChannels {
       JSONMethodCodec(),
   );
 
+  static const MethodChannel backGesture = OptionalMethodChannel(
+    'flutter/backGesture',
+    JSONMethodCodec(),
+  );
+
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
   ///
   /// The following outgoing methods are defined for this channel (invoked using

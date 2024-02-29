@@ -370,6 +370,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.backGesture.setMethodCallHandler(
+      _handleBackGestureInvocation,
+    );
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -873,7 +876,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       'popRoute' => handlePopRoute(),
       'pushRoute' => handlePushRoute(methodCall.arguments as String),
       'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
-	  'startBackGesture' => handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
+      _ => Future<dynamic>.value(),
+    };
+  }
+
+  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
+    return switch (methodCall.method) {
+      'startBackGesture' => handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
       'updateBackGestureProgress' => handleUpdateBackGestureProgress(methodCall.arguments as Map<dynamic, dynamic>),
       'commitBackGesture' => handleCommitBackGesture(),
       'cancelBackGesture' => handleCancelBackGesture(),
