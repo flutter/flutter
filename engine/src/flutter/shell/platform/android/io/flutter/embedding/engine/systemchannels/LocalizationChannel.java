@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.systemchannels;
 
-import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -91,8 +90,7 @@ public class LocalizationChannel {
               + ")");
       data.add(locale.getLanguage());
       data.add(locale.getCountry());
-      // locale.getScript() was added in API 21.
-      data.add(Build.VERSION.SDK_INT >= 21 ? locale.getScript() : "");
+      data.add(locale.getScript());
       data.add(locale.getVariant());
     }
     channel.invokeMethod("setLocale", data);
