@@ -96,7 +96,7 @@ void main() {
   });
 
   testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
@@ -116,6 +116,7 @@ void main() {
 
     expect(caughtForegroundImageError, true);
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    // addTearDown(box.dispose);
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
