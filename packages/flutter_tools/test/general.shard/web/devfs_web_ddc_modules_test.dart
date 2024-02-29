@@ -909,7 +909,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.flutterJs.createSync(recursive: true);
@@ -1045,7 +1044,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.flutterJs.createSync(recursive: true);
@@ -1181,7 +1179,6 @@ void main() {
                 nullSafetyMode: NullSafetyMode.sound,
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
-                rootDirectory: globals.fs.currentDirectory,
               );
               webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
               webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1254,7 +1251,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1303,7 +1299,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1354,7 +1349,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1407,7 +1401,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1578,7 +1571,6 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
-              rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
             webDevFS.stackTraceMapper.createSync(recursive: true);

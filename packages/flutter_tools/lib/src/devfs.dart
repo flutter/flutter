@@ -587,7 +587,6 @@ class DevFS {
     String? target,
     AssetBundle? bundle,
     DateTime? firstBuildTime,
-    bool bundleDirty = false,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     File? dartPluginRegistrant,
@@ -640,7 +639,7 @@ class DevFS {
       bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!bundleDirty && (!entry.content.isModified || bundleFirstUpload)) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.

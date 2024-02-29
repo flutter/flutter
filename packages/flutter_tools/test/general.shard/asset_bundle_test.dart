@@ -428,60 +428,6 @@ flutter:
         ),
       );
     });
-
-    testWithoutContext('updates existing entries that were modified between builds', () async {
-      final FileSystem fileSystem = MemoryFileSystem();
-      fileSystem.file('asset1.txt').createSync(recursive: true);
-
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
-      final String flutterRoot = Cache.defaultFlutterRoot(
-        platform: platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
-      );
-      fileSystem.file('.packages').createSync();
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-name: example
-flutter:
-  assets:
-    - asset1.txt
-''');
-      final ManifestAssetBundle bundle = ManifestAssetBundle(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        flutterRoot: flutterRoot,
-      );
-
-      await bundle.build(
-        packagesPath: '.packages',
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      );
-
-      expect(bundle.entries, contains('asset1.txt'));
-
-      fileSystem.file('pubspec.yaml')
-        .writeAsStringSync(r'''
-name: example
-flutter:
-  assets:
-    - path: asset1.txt
-      transformers:
-        - package: my_transformer
-''');
-
-      await bundle.build(
-        packagesPath: '.packages',
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        flavor: 'vanilla',
-      );
-
-      expect(bundle.entries.keys, contains('asset1.txt'));
-      expect(bundle.entries['asset1.txt']!.transformers.length, 1);
-    });
   });
 
   group('AssetBundle.build (web builds)', () {
