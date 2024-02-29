@@ -30,8 +30,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-// TODO(goderbauer): Fix this ignore when https://github.com/dart-lang/tools/issues/234 is resolved.
-import 'package:unified_analytics/src/enums.dart' show DashEvent; // ignore: implementation_imports
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -330,6 +329,32 @@ void main() {
       ),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => TestUsage(),
+  }));
+
+  testUsingContext('ResidentRunner can handle an RPC exception from debugFrameJankMetrics', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      renderFrameRasterStats,
+    ]);
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+    await futureAppStart.future;
+
+    final bool result = await residentRunner.debugFrameJankMetrics();
+    expect(result, true);
+    expect((globals.flutterUsage as TestUsage).events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
+    expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+    expect((globals.logger as BufferLogger).warningText, contains('Unable to get jank metrics for Impeller renderer'));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));

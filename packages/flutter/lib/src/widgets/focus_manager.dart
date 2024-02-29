@@ -546,7 +546,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // The number of descendant focus nodes whose focusability must be
   // re-evaluated, when this node's `descentantsAreFocusable` value changes.
-  //
   // This does not include nodes with `_canRequestFocus` set to false, even when
   // their focusability listenable has listeners.
   int _focusabilityListeningDescendantCount = 0;
