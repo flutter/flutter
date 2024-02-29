@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
-import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';

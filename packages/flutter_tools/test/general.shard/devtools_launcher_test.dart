@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -15,18 +16,15 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
-  late BufferLogger logger;
-
   Cache.flutterRoot = '';
 
-  setUp(() {
-    logger = BufferLogger.test();
-  });
+  (BufferLogger, Artifacts) getTestState() => (BufferLogger.test(), Artifacts.test());
 
   testWithoutContext('DevtoolsLauncher launches DevTools from the SDK and saves the URI', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -52,9 +50,10 @@ void main() {
   });
 
   testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -86,9 +85,10 @@ Serving DevTools at http://127.0.0.1:9100.
   });
 
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -115,6 +115,7 @@ Serving DevTools at http://127.0.0.1:9100.
   });
 
   testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -128,7 +129,7 @@ Serving DevTools at http://127.0.0.1:9100.
       ),
     ]);
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(false),
       processManager: processManager,
@@ -141,8 +142,9 @@ Serving DevTools at http://127.0.0.1:9100.
   });
 
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(false),
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -164,9 +166,10 @@ Serving DevTools at http://127.0.0.1:9100.
   });
 
   testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final Completer<void> completer = Completer<void>();
     final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
-      dartExecutable: 'dart',
+      artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(true),
       processManager: FakeProcessManager.list(<FakeCommand>[
