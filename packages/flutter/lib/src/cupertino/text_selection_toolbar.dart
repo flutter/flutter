@@ -1008,7 +1008,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     final double subsequentPageButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
-    late double firstPageWidth;
     int currentPage = 0;
     int i = -1;
     visitChildren((RenderObject renderObjectChild) {
@@ -1031,7 +1030,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       // The width of the menu is set by the first page.
       child.layout(
         BoxConstraints(
-          maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
+          maxWidth: constraints.maxWidth - paginationButtonsWidth,
           minHeight: greatestHeight,
           maxHeight: greatestHeight,
         ),
@@ -1047,7 +1046,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         paginationButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
         child.layout(
           BoxConstraints(
-            maxWidth: firstPageWidth - paginationButtonsWidth,
+            maxWidth: constraints.maxWidth - paginationButtonsWidth,
             minHeight: greatestHeight,
             maxHeight: greatestHeight,
           ),
@@ -1058,9 +1057,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       currentButtonPosition += child.size.width + dividerWidth;
       childParentData.shouldPaint = currentPage == page;
 
-      if (currentPage == 0) {
-        firstPageWidth = currentButtonPosition + _nextButton!.size.width;
-      }
       if (currentPage == page) {
         toolbarWidth = currentButtonPosition;
       }

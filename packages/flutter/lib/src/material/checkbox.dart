@@ -508,13 +508,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? checkboxTheme.visualDensity
       ?? defaults.visualDensity!;
-    Size size;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-    }
+    Size size = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
+    };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
@@ -978,35 +975,35 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.error.withOpacity(0.12);
+          return _colors.error.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.error.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.12);
+          return _colors.error.withOpacity(0.1);
         }
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;
     });

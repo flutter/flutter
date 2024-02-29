@@ -66,17 +66,10 @@ class RelativeRect {
     required double end,
     required double bottom,
   }) {
-    double left;
-    double right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
-
+    final (double left, double right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return RelativeRect.fromLTRB(left, top, right, bottom);
   }
 

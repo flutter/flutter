@@ -455,15 +455,15 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
   /// Regex is used in both Groovy and Kotlin Gradle files.
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -538,7 +538,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
-        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        final bool managed = line.contains(RegExp('def flutterPluginVersion = [\'"]managed[\'"]'));
         if (fileBasedApply || declarativeApply || managed) {
           return true;
         }

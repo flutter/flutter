@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -52,10 +51,6 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  tearDown(() {
-    MacOSDesignedForIPadDevices.allowDiscovery = false;
-  });
-
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -162,7 +157,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -226,7 +221,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -296,7 +291,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -366,7 +361,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -437,7 +432,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -512,7 +507,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -587,7 +582,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -1067,7 +1062,6 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
-      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -1208,6 +1202,8 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool ipv6 = false,
     FlutterProject? flutterProject,
     Analytics? analytics,
+    String? nativeAssetsYamlFile,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {

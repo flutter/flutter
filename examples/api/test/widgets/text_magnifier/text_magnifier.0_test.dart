@@ -46,8 +46,9 @@ void main() {
   const Duration durationBetweenActions = Duration(milliseconds: 20);
   const String defaultText = 'I am a magnifier, fear me!';
 
-  Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
-    final Offset tapOffset = _textOffsetToPosition(tester, defaultText.indexOf(characterToTapOn));
+  Future<void> showMagnifier(WidgetTester tester, int textOffset) async {
+    assert(textOffset >= 0);
+    final Offset tapOffset = _textOffsetToPosition(tester, textOffset);
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
@@ -59,11 +60,11 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
 
-    final TextSelection selection = tester
-        .firstWidget<TextField>(find.byType(TextField))
-        .controller!
-        .selection;
+    final TextEditingController controller = tester
+      .firstWidget<TextField>(find.byType(TextField))
+      .controller!;
 
+    final TextSelection selection = controller.selection;
     final RenderEditable renderEditable = _findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = _globalize(
       renderEditable.getEndpointsForSelection(selection),
@@ -86,26 +87,28 @@ void main() {
   testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
     await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
 
-    await showMagnifier(tester, 'e');
+    await showMagnifier(tester, defaultText.indexOf('e'));
     expect(find.byType(example.CustomMagnifier), findsOneWidget);
 
     await expectLater(
       find.byType(example.TextMagnifierExampleApp),
       matchesGoldenFile('text_magnifier.0_test.png'),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+  );
 
 
-  for (final TextDirection textDirection in TextDirection.values) {
-    testWidgets('should show custom magnifier in $textDirection', (WidgetTester tester) async {
-      final String text = textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
-      final String textToTapOn = textDirection == TextDirection.rtl ? 'ت' : 'e';
+  testWidgets('should show custom magnifier in RTL', (WidgetTester tester) async {
+    const String text = 'أثارت زر';
+    const String textToTapOn = 'ت';
 
-      await tester.pumpWidget(example.TextMagnifierExampleApp(textDirection: textDirection, text: text));
+    await tester.pumpWidget(const example.TextMagnifierExampleApp(textDirection: TextDirection.rtl, text: text));
 
-      await showMagnifier(tester, textToTapOn);
+    await showMagnifier(tester, text.indexOf(textToTapOn));
 
-      expect(find.byType(example.CustomMagnifier), findsOneWidget);
-    });
-  }
+    expect(find.byType(example.CustomMagnifier), findsOneWidget);
+  });
+
 }

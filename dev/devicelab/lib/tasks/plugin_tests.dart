@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -117,6 +118,12 @@ class PluginTest {
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
     if (buildTarget == 'macos') {
+      // When using a local engine, podhelper.rb will search for a "macos-"
+      // directory within the FlutterMacOS.xcframework, so create a dummy one.
+      Directory(
+        path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'),
+      ).createSync(recursive: true);
+
       // Clean before regenerating the config to ensure that the pod steps run.
       await inDirectory(Directory(app.rootPath), () async {
         await evalFlutter('clean');
@@ -328,8 +335,9 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'x64', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
+          path.join(rootPath, 'build', 'windows', arch, 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
           <String>[],
           canFail: true,
         ) != 0) {
@@ -427,7 +435,7 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '11.0'"
+        ? "s.platform = :ios, '12.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {

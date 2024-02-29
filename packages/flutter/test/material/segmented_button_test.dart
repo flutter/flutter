@@ -606,7 +606,7 @@ void main() {
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
@@ -751,7 +751,6 @@ void main() {
       of: find.byType(SegmentedButton<int>),
       matching: find.byType(Material),
     ).first);
-    expect(material.shape, styleFromStyle.shape?.resolve(enabled)?.copyWith(side: BorderSide.none));
     expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
     expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
     expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
@@ -812,6 +811,49 @@ void main() {
     // Check the states after the rebuild.
     state = tester.state(find.byType(SegmentedButton<int>));
     expect(state.statesControllers.values.first.value, states);
+  });
+
+  testWidgets('Min button hit target height is 48.0 and min (painted) button height is 40 '
+    'by default with standard density and MaterialTapTargetSize.padded', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              children: <Widget>[
+                SegmentedButton<int>(
+                  segments: const <ButtonSegment<int>>[
+                    ButtonSegment<int>(value: 0, label: Text('Day'), icon: Icon(Icons.calendar_view_day)),
+                    ButtonSegment<int>(value: 1, label: Text('Week'), icon: Icon(Icons.calendar_view_week)),
+                    ButtonSegment<int>(value: 2, label: Text('Month'), icon: Icon(Icons.calendar_view_month)),
+                    ButtonSegment<int>(value: 3, label: Text('Year'), icon: Icon(Icons.calendar_today)),
+                  ],
+                  selected: const <int>{0},
+                  onSelectionChanged: (Set<int> value) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(theme.visualDensity, VisualDensity.standard);
+    expect(theme.materialTapTargetSize, MaterialTapTargetSize.padded);
+
+    final Finder button = find.byType(SegmentedButton<int>);
+    expect(tester.getSize(button).height, 48.0);
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..rrect(
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+        // Button border height is button.bottom(43.5) - button.top(4.5) + stoke width(1) = 40.
+        rrect: RRect.fromLTRBR(0.5, 4.5, 497.5, 43.5, const Radius.circular(19.5))
+      )
+    );
   });
 }
 
