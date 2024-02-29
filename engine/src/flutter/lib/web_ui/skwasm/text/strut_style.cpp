@@ -8,7 +8,9 @@
 using namespace skia::textlayout;
 
 SKWASM_EXPORT StrutStyle* strutStyle_create() {
-  return new StrutStyle();
+  auto style = new StrutStyle();
+  style->setStrutEnabled(true);
+  return style;
 }
 
 SKWASM_EXPORT void strutStyle_dispose(StrutStyle* style) {

@@ -78,3 +78,8 @@ SKWASM_EXPORT void paragraphStyle_setTextStyle(ParagraphStyle* style,
                                                TextStyle* textStyle) {
   style->setTextStyle(*textStyle);
 }
+
+SKWASM_EXPORT void paragraphStyle_setApplyRoundingHack(ParagraphStyle* style,
+                                                       bool applyRoundingHack) {
+  style->setApplyRoundingHack(applyRoundingHack);
+}
