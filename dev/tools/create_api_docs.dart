@@ -742,15 +742,15 @@ class DartdocGenerator {
 
     // Check a "dartpad" example, any one will do, and check for the correct URL
     // arguments.
-    // Just use "master" for any branch other than the LUCI_BRANCH.
+    // Just use "main" for any branch other than "stable", just like it is done
+    // in the snippet generator at https://github.com/flutter/assets-for-api-docs/blob/cc56972b8f03552fc5f9f9f1ef309efc6c93d7bc/packages/snippets/lib/src/snippet_generator.dart#L104.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+    final String expectedChannel = luciBranch == 'stable' ? 'stable' : 'main';
     final List<String> argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
       r'sample_id=widgets\.Listener\.\d+',
-      'sample_channel=$expectedBranch',
-      'channel=$expectedBranch',
+      'channel=$expectedChannel',
     ];
     for (final String argumentRegExp in argumentRegExps) {
       _sanityCheckExample(

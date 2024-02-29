@@ -441,7 +441,7 @@ void main() {
   </code>
 </pre>
 ''');
-            const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&sample_channel=master&channel=master';
+            const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>
