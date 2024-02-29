@@ -742,13 +742,14 @@ class DartdocGenerator {
 
     // Check a "dartpad" example, any one will do, and check for the correct URL
     // arguments.
-    // Just use "main" for any branch other than the LUCI_BRANCH.
+    // Just use "master" for any branch other than the LUCI_BRANCH.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'main';
+    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
     final List<String> argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
       r'sample_id=widgets\.Listener\.\d+',
+      'sample_channel=$expectedBranch',
       'channel=$expectedBranch',
     ];
     for (final String argumentRegExp in argumentRegExps) {
