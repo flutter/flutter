@@ -217,22 +217,14 @@ static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
 
 static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  g_autoptr(GError) error = nullptr;
-  gboolean result = fl_renderer_make_current(self->renderer, &error);
-  if (!result) {
-    g_warning("%s", error->message);
-  }
-  return result;
+  fl_renderer_make_current(self->renderer);
+  return true;
 }
 
 static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  g_autoptr(GError) error = nullptr;
-  gboolean result = fl_renderer_clear_current(self->renderer, &error);
-  if (!result) {
-    g_warning("%s", error->message);
-  }
-  return result;
+  fl_renderer_clear_current(self->renderer);
+  return true;
 }
 
 static uint32_t fl_engine_gl_get_fbo(void* user_data) {
@@ -248,12 +240,8 @@ static bool fl_engine_gl_present(void* user_data) {
 
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  g_autoptr(GError) error = nullptr;
-  gboolean result = fl_renderer_make_resource_current(self->renderer, &error);
-  if (!result) {
-    g_warning("%s", error->message);
-  }
-  return result;
+  fl_renderer_make_resource_current(self->renderer);
+  return true;
 }
 
 // Called by the engine to retrieve an external texture.
