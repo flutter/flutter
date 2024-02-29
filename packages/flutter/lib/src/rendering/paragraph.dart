@@ -1795,7 +1795,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     debugPrint('start $existingSelectionStart, end $existingSelectionEnd');
 
     final bool positionWithinParagraphRect = paragraph.paintBounds.contains(localPosition);
-    final bool positionWithinLocalRect = _boundingBoxesContains(localPosition);
+    // When the RenderParagraph does not fragment its contents we should use its
+    // paintBounds as its rect.
+    final bool positionWithinLocalRect = range.textInside(fullText) == fullText ? paragraph.paintBounds.contains(localPosition) : _boundingBoxesContains(localPosition);
     debugPrint('in paragraph rect? $localPosition ${paragraph.paintBounds} $positionWithinParagraphRect');
     debugPrint('in local recT? $_rect $positionWithinLocalRect');
     debugPrint('test in rect? ${_rect.contains(localPosition)}');
@@ -2013,16 +2015,13 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         }
       }
 
-      if (positionWithinParagraphRect && !positionWithinLocalRect) {
-
+      if (positionWithinParagraphRect || positionWithinLocalRect) {
+        final _TextBoundaryRecord textBoundary = getTextBoundary(positionInFullText);
+        final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(textBoundary, getTextBoundary, positionInFullText, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
+        _setSelectionPosition(targetPosition, isEnd: isEnd);
+        return _getResultBasedOnParagraphBoundary(positionInFullText);
       }
-
-      if (positionWithinLocalRect) {
-        // the position is within the local rect of a placeholder fragment.
-        // Ideally we would've just let it use the code below.
-        // However, we want the SelectionResult that this returns to be based on the paragraph
-        // that encompasses this placeholder and not the paragraph in this placeholder.
-      }
+      assert(false);
     }
 
     if (!positionWithinParagraphRect && !_selectableContainsOriginTextBoundary) {
@@ -2040,17 +2039,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
     debugPrint('do we make it here');
-    _TextBoundaryRecord? textBoundary = positionWithinParagraphRect || positionWithinLocalRect ? getTextBoundary(positionInFullText) : null;
-    // _TextBoundaryRecord? textBoundary = positionWithinLocalRect ? getTextBoundary(position) : positionWithinParagraphRect ? _getParagraphBoundaryAtPosition(positionInFullText) : null;
-    // if (textBoundary != null
-    //     && (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start
-    //     || textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end)) {
-    //   // When the position is located at a placeholder inside of the text, then we may compute
-    //   // a text boundary that does not belong to the current selectable fragment. In this case
-    //   // we should invalidate the text boundary so that it is not taken into account when
-    //   // computing the target position.
-    //   textBoundary = null;
-    // }
+    final _TextBoundaryRecord? textBoundary = positionWithinParagraphRect || positionWithinLocalRect ? getTextBoundary(positionInFullText) : null;
     final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(textBoundary, getTextBoundary, positionInFullText, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, getTextBoundary, position, existingSelectionStart, existingSelectionEnd));
     debugPrint('resulting target $targetPosition');
 
