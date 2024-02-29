@@ -1920,30 +1920,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
               } else {
                 _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: isEnd);
               }
-
-              final _TextBoundaryRecord rootParagraphBoundaryAtPosition = _getParagraphBoundaryAtPosition(rootTextPosition, useRootText: true);
-              final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
-              // return _atPlaceholderGetResultBasedOnParagraphBoundary(positionInFullText);
-              final TextRange? intersectRange = _intersect(rootParagraphPlaceholderRange, TextRange(start: rootParagraphBoundaryAtPosition.boundaryStart.offset, end: rootParagraphBoundaryAtPosition.boundaryEnd.offset));
-              debugPrint('checking placeholder intersect $rootParagraphPlaceholderTextPosition $intersectRange $rootParagraphBoundaryAtPosition $rootParagraphPlaceholderRange');
-              if (intersectRange == null) {
-                debugPrint('no intersect placeholder');
-                if (rootParagraphBoundaryAtPosition.boundaryStart.offset < rootParagraphPlaceholderRange.start && rootParagraphBoundaryAtPosition.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
-                  return SelectionResult.previous;
-                } else if (rootParagraphBoundaryAtPosition.boundaryStart.offset > rootParagraphPlaceholderRange.end && rootParagraphBoundaryAtPosition.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
-                  return SelectionResult.next;
-                }
-              }
-              if (intersectRange!.end == rootParagraphBoundaryAtPosition.boundaryEnd.offset) {
-                debugPrint('end placeholder $intersectRange $rootParagraphBoundaryAtPosition $rootParagraphPlaceholderRange');
-                return SelectionResult.end;
-              }
-              if (rootParagraphBoundaryAtPosition.boundaryEnd.offset > intersectRange!.end) {
-                debugPrint('next placeholder');
-                return SelectionResult.next;
-              }
-              debugPrint('prev placeholder');
-              return SelectionResult.previous;
+              return _atPlaceholderGetResultBasedOnParagraphBoundary(positionInFullText);
             }
           } else {
             debugPrint('mbackward');
@@ -1960,52 +1937,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
                   debugPrint('maintain $existingSelectionEnd');
                   _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: isEnd);
                 }
-
-                final _TextBoundaryRecord rootParagraphBoundaryAtPosition = _getParagraphBoundaryAtPosition(rootTextPosition, useRootText: true);
-                final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
-                // return _atPlaceholderGetResultBasedOnParagraphBoundary(positionInFullText);
-                final TextRange? intersectRange = _intersect(rootParagraphPlaceholderRange, TextRange(start: rootParagraphBoundaryAtPosition.boundaryStart.offset, end: rootParagraphBoundaryAtPosition.boundaryEnd.offset));
-                debugPrint('checking placeholder intersect $rootParagraphPlaceholderTextPosition $intersectRange $rootParagraphBoundaryAtPosition $rootParagraphPlaceholderRange');
-
-                if (shouldSwapEdges) {
-                  if (intersectRange == null) {
-                    debugPrint('no intersect placeholder');
-                    if (rootParagraphBoundaryAtPosition.boundaryStart.offset < rootParagraphPlaceholderRange.start && rootParagraphBoundaryAtPosition.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
-                      return SelectionResult.previous;
-                    } else if (rootParagraphBoundaryAtPosition.boundaryStart.offset > rootParagraphPlaceholderRange.end && rootParagraphBoundaryAtPosition.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
-                      return SelectionResult.next;
-                    }
-                  }
-                  if (intersectRange!.end == rootParagraphBoundaryAtPosition.boundaryEnd.offset) {
-                    debugPrint('end placeholder $intersectRange $rootParagraphBoundaryAtPosition $rootParagraphPlaceholderRange');
-                    return SelectionResult.end;
-                  }
-                  if (rootParagraphBoundaryAtPosition.boundaryEnd.offset > intersectRange!.end) {
-                    debugPrint('next placeholder');
-                    return SelectionResult.next;
-                  }
-                  debugPrint('prev placeholder');
-                  return SelectionResult.previous;
-                } else {
-                  if (intersectRange == null) {
-                    debugPrint('no intersect placeholder');
-                    if (rootParagraphBoundaryAtPosition.boundaryStart.offset < rootParagraphPlaceholderRange.start && rootParagraphBoundaryAtPosition.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
-                      return SelectionResult.previous;
-                    } else if (rootParagraphBoundaryAtPosition.boundaryStart.offset > rootParagraphPlaceholderRange.end && rootParagraphBoundaryAtPosition.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
-                      return SelectionResult.next;
-                    }
-                  }
-                  if (intersectRange!.start == rootParagraphBoundaryAtPosition.boundaryStart.offset) {
-                    debugPrint('end placeholder $intersectRange $rootParagraphBoundaryAtPosition $rootParagraphPlaceholderRange');
-                    return SelectionResult.end;
-                  }
-                  if (rootParagraphBoundaryAtPosition.boundaryEnd.offset < intersectRange!.start) {
-                    debugPrint('prev placeholder');
-                    return SelectionResult.previous;
-                  }
-                  debugPrint('next placeholder');
-                  return SelectionResult.next;
-                }
+                return _atPlaceholderGetResultBasedOnParagraphBoundary(positionInFullText);
             }
 
             if (position.offset == range.start) {
@@ -2136,16 +2068,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   RenderObject? _getEncompassingRect() {
     RenderObject? current = paragraph.parent;
     RenderObject? lastParagraph;
-    debugPrint('wowza start');
     while (current != null) {
       if (current is RenderParagraph) {
         lastParagraph = current;
-        debugPrint('wowza ${(lastParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false)}');
-        // return current;///maybe we should just look up to the next parent.
       }
       current = current.parent;
     }
-    debugPrint('wowza end ${(lastParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false)}');
     return lastParagraph;
   }
 
@@ -2187,16 +2115,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final TextPosition rootParagraphPlaceholderTextPosition = _getPositionInRootText();
     final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
     if (isSelectionInverted) {
-      debugPrint('inverted');
       if (paragraphBoundary.boundaryStart.offset == rootParagraphPlaceholderRange.start) {
-        debugPrint('end');
         return SelectionResult.end;
       }
       if (paragraphBoundary.boundaryStart.offset < rootParagraphPlaceholderRange.start) {
-        debugPrint('prev');
         return SelectionResult.previous;
       }
-      debugPrint('next');
       return SelectionResult.next;
     } else {
       if (paragraphBoundary.boundaryEnd.offset == rootParagraphPlaceholderRange.end) {
