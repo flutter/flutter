@@ -887,7 +887,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
-      // DEPRECATED (newest deprecations at the bottom)
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -1002,8 +1001,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
-
-      // DEPRECATED (newest deprecations at the bottom)
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1099,8 +1096,6 @@ void main() {
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       tooltipTheme: otherTheme.tooltipTheme,
-
-      // DEPRECATED (newest deprecations at the bottom)
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1197,8 +1192,6 @@ void main() {
     expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
     expect(themeDataCopy.toggleButtonsTheme, equals(otherTheme.toggleButtonsTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
-
-    // DEPRECATED (newest deprecations at the bottom)
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1325,7 +1318,6 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
-      // DEPRECATED (newest deprecations at the bottom)
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
