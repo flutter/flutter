@@ -38,11 +38,14 @@ class FlutterViewController {
   FlutterViewController(FlutterViewController const&) = delete;
   FlutterViewController& operator=(FlutterViewController const&) = delete;
 
+  // Returns the view controller's view ID.
+  FlutterViewId view_id() const;
+
   // Returns the engine running Flutter content in this view.
-  FlutterEngine* engine() { return engine_.get(); }
+  FlutterEngine* engine() const { return engine_.get(); }
 
   // Returns the view managed by this controller.
-  FlutterView* view() { return view_.get(); }
+  FlutterView* view() const { return view_.get(); }
 
   // Requests new frame from the engine and repaints the view.
   void ForceRedraw();

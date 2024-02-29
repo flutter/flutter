@@ -307,6 +307,18 @@ TEST_F(WindowsTest, NextFrameCallback) {
   captures.frame_drawn_latch.Wait();
 }
 
+// Implicit view has the implicit view ID.
+TEST_F(WindowsTest, GetViewId) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  FlutterDesktopViewId view_id =
+      FlutterDesktopViewControllerGetViewId(controller.get());
+
+  ASSERT_EQ(view_id, static_cast<FlutterDesktopViewId>(kImplicitViewId));
+}
+
 TEST_F(WindowsTest, GetGraphicsAdapter) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
