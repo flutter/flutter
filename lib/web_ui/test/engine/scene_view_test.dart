@@ -43,7 +43,60 @@ class StubPictureRenderer implements PictureRenderer {
     );
   }
 
+  @override
+  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
+    clipRequests[picture] = clip;
+    return picture;
+  }
+
   List<ScenePicture> renderedPictures = <ScenePicture>[];
+  Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
+}
+
+class StubFlutterView implements ui.FlutterView {
+  @override
+  double get devicePixelRatio => throw UnimplementedError();
+
+  @override
+  ui.Display get display => throw UnimplementedError();
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => throw UnimplementedError();
+
+  @override
+  ui.GestureSettings get gestureSettings => throw UnimplementedError();
+
+  @override
+  ui.ViewPadding get padding => throw UnimplementedError();
+
+  @override
+  ui.ViewConstraints get physicalConstraints => throw UnimplementedError();
+
+  @override
+  ui.Size get physicalSize => const ui.Size(1000, 1000);
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
+
+  @override
+  void render(ui.Scene scene, {ui.Size? size}) {
+  }
+
+  @override
+  ui.ViewPadding get systemGestureInsets => throw UnimplementedError();
+
+  @override
+  void updateSemantics(ui.SemanticsUpdate update) {
+  }
+
+  @override
+  int get viewId => throw UnimplementedError();
+
+  @override
+  ui.ViewPadding get viewInsets => throw UnimplementedError();
+
+  @override
+  ui.ViewPadding get viewPadding => throw UnimplementedError();
 }
 
 void testMain() {
@@ -56,7 +109,7 @@ void testMain() {
 
   setUp(() {
     stubPictureRenderer = StubPictureRenderer();
-    sceneView = EngineSceneView(stubPictureRenderer);
+    sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView());
   });
 
   test('SceneView places canvas according to device-pixel ratio', () async {
@@ -148,5 +201,22 @@ void testMain() {
     expect(stubPictureRenderer.renderedPictures.length, 2);
     expect(stubPictureRenderer.renderedPictures.first, pictures.first);
     expect(stubPictureRenderer.renderedPictures.last, pictures.last);
+  });
+
+  test('SceneView clips pictures that are outside the window screen', () async {
+      final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(
+        -50,
+        -50,
+        100,
+        120,
+      ));
+
+      final EngineRootLayer rootLayer = EngineRootLayer();
+      rootLayer.slices.add(PictureSlice(picture));
+      final EngineScene scene = EngineScene(rootLayer);
+      await sceneView.renderScene(scene, null);
+
+      expect(stubPictureRenderer.renderedPictures.length, 1);
+      expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
   });
 }
