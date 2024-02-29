@@ -902,7 +902,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.black,
       errorColor: Colors.black,
       backgroundColor: Colors.black,
     );
@@ -1021,7 +1020,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.white,
       errorColor: Colors.white,
       backgroundColor: Colors.white,
     );
@@ -1121,7 +1119,6 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: otherTheme.toggleableActiveColor,
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
     );
@@ -1222,7 +1219,6 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
   });
@@ -1354,7 +1350,6 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'toggleableActiveColor',
       'errorColor',
       'backgroundColor',
     };

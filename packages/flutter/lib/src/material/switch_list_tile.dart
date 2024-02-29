@@ -297,7 +297,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// {@macro flutter.material.switch.activeTrackColor}
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? activeTrackColor;

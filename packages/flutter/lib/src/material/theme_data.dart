@@ -368,13 +368,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v3.4.0-19.0.pre.',
-    )
-    Color? toggleableActiveColor,
-    @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
@@ -451,7 +444,6 @@ class ThemeData with Diagnosticable {
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
     final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
-    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (colorScheme?.secondary ?? primarySwatch[600]!);
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
     shadowColor ??= Colors.black;
@@ -657,7 +649,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: toggleableActiveColor,
       errorColor: errorColor,
       backgroundColor: backgroundColor,
     );
@@ -767,13 +758,6 @@ class ThemeData with Diagnosticable {
     required this.tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v3.4.0-19.0.pre.',
-    )
-    Color? toggleableActiveColor,
-    @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
@@ -786,10 +770,8 @@ class ThemeData with Diagnosticable {
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
-       _toggleableActiveColor = toggleableActiveColor,
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
-       assert(toggleableActiveColor != null),
         // DEPRECATED (newest deprecations at the bottom)
        assert(errorColor != null),
        assert(backgroundColor != null);
@@ -1469,17 +1451,6 @@ class ThemeData with Diagnosticable {
   Color get backgroundColor => _backgroundColor!;
   final Color? _backgroundColor;
 
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'For more information, consult the migration guide at '
-    'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-    'This feature was deprecated after v3.4.0-19.0.pre.',
-  )
-  Color get toggleableActiveColor => _toggleableActiveColor!;
-  final Color? _toggleableActiveColor;
-
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1579,13 +1550,6 @@ class ThemeData with Diagnosticable {
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'For more information, consult the migration guide at '
-      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after v3.4.0-19.0.pre.',
-    )
-    Color? toggleableActiveColor,
     @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
@@ -1701,7 +1665,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
     );
@@ -1898,7 +1861,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
     );
@@ -2002,7 +1964,6 @@ class ThemeData with Diagnosticable {
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.toggleableActiveColor == toggleableActiveColor &&
         other.errorColor == errorColor &&
         other.backgroundColor == backgroundColor;
   }
@@ -2104,7 +2065,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme,
       tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor,
       errorColor,
       backgroundColor,
     ];
@@ -2207,7 +2167,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
   }
