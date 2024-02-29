@@ -45,6 +45,11 @@ class SliverCoordinatorData {
     return _idToInfo[id] as T?;
   }
 
+  // Remove an entry from the layout information table.
+  T? _remove<T extends _SliverLayoutInfo>(Object id) {
+    return _idToInfo.remove(id) as T?;
+  }
+
   // Clear the contents of the layout information table.
   @protected
   void _clear() => _idToInfo.clear();
@@ -185,6 +190,11 @@ class CoordinatedSliver extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderCoordinatedSliver renderObject) {
     renderObject.id = this;
     renderObject.data = SliverCoordinator._of(context);
+  }
+
+  @override
+  void didUnmountRenderObject(RenderCoordinatedSliver renderObject) {
+    renderObject.data._remove<_SliverLayoutInfo>(this);
   }
 
   /// True if [getSliverConstraints] and [getSliverGeometry] are safe to call

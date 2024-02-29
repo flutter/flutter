@@ -81,7 +81,7 @@ void main() {
     expect(callbackData, isNull);
     expect(callbackNotification, isNull);
 
-    // Scroll the sliver to the top of the viewport
+    // Scroll the coordinated sliver to the top of the viewport
     await scrollVertical(-800);
     await tester.pumpAndSettle();
 
@@ -93,7 +93,7 @@ void main() {
     testSliverConstraints(0, 800, 600);
     testSliverGeometry(300, 300, 300); // paintExtent = 300
 
-    // Scroll the sliver 50% of the top of the viewport.
+    // Scroll the coordinated sliver 50% of the top of the viewport.
     await scrollVertical(-150);
     await tester.pumpAndSettle();
 
@@ -105,14 +105,14 @@ void main() {
     testSliverConstraints(150, 800, 600);
     testSliverGeometry(300, 150, 300); // paintExtent = 150
 
-    // Scroll the remainder of the sliver off the top of the viewport.
+    // Scroll the remainder of the coordinated sliver off the top of the viewport.
     await scrollVertical(-150);
     await tester.pumpAndSettle();
 
     expect(findSizedBox('CoordinatedSliver'), findsNothing);
 
-    // Even though the sliver is no longer visible, it was laid out when the
-    // scroll view was scrolled.
+    // Even though the coordinated sliver is no longer visible, it was
+    // laid out when the scroll view was scrolled.
     expect(callbackData, isNotNull);
     expect(callbackNotification, isNotNull);
     expect(sliver.hasLayoutInfo(callbackData!), isTrue);
@@ -120,7 +120,7 @@ void main() {
     testSliverConstraints(300, 800, 600);
     testSliverGeometry(300, 0, 300); // paintExent = 0
 
-    // Scroll the sliver down to the top of the viewport again
+    // Scroll the coordinated sliver down to the top of the viewport again
     await scrollVertical(300);
     await tester.pumpAndSettle();
 
@@ -131,5 +131,66 @@ void main() {
 
     testSliverConstraints(0, 800, 600);
     testSliverGeometry(300, 300, 300); // paintExtent = 300
+  });
+
+  testWidgets('CoordinatedSliver removed from SliverCoordinatorData', (WidgetTester tester) async {
+    late CoordinatedSliver sliver1;
+    late CoordinatedSliver sliver2;
+    SliverCoordinatorData? callbackData;
+
+    void sliverCoordinatorCallback(ScrollNotification notification, SliverCoordinatorData data) {
+      callbackData = data;
+    }
+
+    // The sliverHeight parameter is just to avoid analyzer complaints about
+    // the CoordinatedSlivers not being const.
+    Widget buildFrame(double sliverHeight) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SliverCoordinator(
+            callback: sliverCoordinatorCallback,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                sliver1 = CoordinatedSliver(
+                  sliver: SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: sliverHeight,
+                      child: const Text('CoordinatedSliver1')),
+                  ),
+                ),
+                sliver2 = CoordinatedSliver(
+                  sliver: SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: sliverHeight,
+                      child: const Text('CoordinatedSliver2')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(400));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+    await tester.pumpAndSettle();
+
+    expect(sliver1.hasLayoutInfo(callbackData!), isTrue);
+    expect(sliver2.hasLayoutInfo(callbackData!), isTrue);
+
+    final CoordinatedSliver oldSliver1 = sliver1;
+    final CoordinatedSliver oldSliver2 = sliver2;
+
+    await tester.pumpWidget(buildFrame(400));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+    await tester.pumpAndSettle();
+
+    expect(oldSliver1.hasLayoutInfo(callbackData!), isFalse);
+    expect(oldSliver2.hasLayoutInfo(callbackData!), isFalse);
+
+    expect(sliver1.hasLayoutInfo(callbackData!), isTrue);
+    expect(sliver2.hasLayoutInfo(callbackData!), isTrue);
+
   });
 }
