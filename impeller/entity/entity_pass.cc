@@ -459,29 +459,11 @@ bool EntityPass::Render(ContentContext& renderer,
   // this method.
   auto color0 = root_render_target.GetColorAttachments().find(0u)->second;
 
-  // If a root stencil was provided by the caller, then verify that it has a
-  // configuration which can be used to render this pass.
   auto stencil_attachment = root_render_target.GetStencilAttachment();
   auto depth_attachment = root_render_target.GetDepthAttachment();
-  if (stencil_attachment.has_value() && depth_attachment.has_value()) {
-    auto stencil_texture = stencil_attachment->texture;
-    if (!stencil_texture) {
-      VALIDATION_LOG << "The root RenderTarget must have a stencil texture.";
-      return false;
-    }
-
-    auto stencil_storage_mode =
-        stencil_texture->GetTextureDescriptor().storage_mode;
-    if (reads_from_onscreen_backdrop &&
-        stencil_storage_mode == StorageMode::kDeviceTransient) {
-      VALIDATION_LOG << "The given root RenderTarget stencil needs to be read, "
-                        "but it's marked as transient.";
-      return false;
-    }
-  }
-  // Setup a new root stencil with an optimal configuration if one wasn't
-  // provided by the caller.
-  else {
+  if (!stencil_attachment.has_value() || !depth_attachment.has_value()) {
+    // Setup a new root stencil with an optimal configuration if one wasn't
+    // provided by the caller.
     root_render_target.SetupDepthStencilAttachments(
         *renderer.GetContext(), *renderer.GetContext()->GetResourceAllocator(),
         color0.texture->GetSize(),
