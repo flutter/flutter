@@ -52,6 +52,12 @@ void FlutterDesktopViewControllerDestroy(
   }
 }
 
+FlutterDesktopViewId FlutterDesktopViewControllerGetViewId(
+    FlutterDesktopViewControllerRef controller) {
+  // The stub ignores this, so just return an arbitrary non-zero value.
+  return static_cast<FlutterDesktopViewId>(1);
+}
+
 FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
     FlutterDesktopViewControllerRef controller) {
   // The stub ignores this, so just return an arbitrary non-zero value.

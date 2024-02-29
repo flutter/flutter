@@ -9,6 +9,9 @@
 
 namespace flutter {
 
+// The unique identifier for a view.
+typedef int64_t FlutterViewId;
+
 // A view displaying Flutter content.
 class FlutterView {
  public:

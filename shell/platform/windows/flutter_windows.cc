@@ -110,6 +110,12 @@ void FlutterDesktopViewControllerDestroy(FlutterDesktopViewControllerRef ref) {
   delete controller;
 }
 
+FlutterDesktopViewId FlutterDesktopViewControllerGetViewId(
+    FlutterDesktopViewControllerRef ref) {
+  auto controller = ViewControllerFromHandle(ref);
+  return static_cast<FlutterDesktopViewId>(controller->view()->view_id());
+}
+
 FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
     FlutterDesktopViewControllerRef ref) {
   auto controller = ViewControllerFromHandle(ref);
