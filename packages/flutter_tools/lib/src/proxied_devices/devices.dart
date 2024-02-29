@@ -810,7 +810,9 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
       await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
-      await connection.sendRequest('device.shutdownDartDevelopmentService');
+      await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{
+        'deviceId': deviceId,
+      });
     }
   }
 
