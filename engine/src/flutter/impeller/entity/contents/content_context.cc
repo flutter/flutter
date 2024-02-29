@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/content_context.h"
 
 #include <memory>
+#include <utility>
 
 #include "fml/trace_event.h"
 #include "impeller/base/strings.h"
@@ -599,17 +600,7 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
 
 void ContentContext::RecordCommandBuffer(
     std::shared_ptr<CommandBuffer> command_buffer) const {
-  // Metal systems seem to have a limit on the number of command buffers that
-  // can be created concurrently, which appears to be in the range of 50 or so
-  // command buffers. When this limit is hit, creation of further command
-  // buffers will fail. To work around this, we regularly flush the
-  // command buffers on the metal backend.
-  if (GetContext()->GetBackendType() == Context::BackendType::kMetal) {
-    GetContext()->GetCommandQueue()->Submit({command_buffer});
-  } else {
-    pending_command_buffers_->command_buffers.push_back(
-        std::move(command_buffer));
-  }
+  GetContext()->GetCommandQueue()->Submit({std::move(command_buffer)});
 }
 
 void ContentContext::FlushCommandBuffers() const {
