@@ -446,7 +446,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   void dispose() {
-    _disposeRecognizerIfInactive();
+    _recognizer?.dispose();
     super.dispose();
   }
 
