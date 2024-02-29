@@ -258,7 +258,7 @@ List<FlutterCommand> generateCommands({
   ),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
-  UpdatePackagesCommand(),
+  UpdatePackagesCommand(context),
 ];
 
 /// An abstraction for instantiation of the correct logger type.

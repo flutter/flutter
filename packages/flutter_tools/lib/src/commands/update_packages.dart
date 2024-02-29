@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -22,7 +23,7 @@ import '../update_packages_pins.dart';
 import '../version.dart';
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand() {
+  UpdatePackagesCommand(this.ctx) {
     argParser
       ..addFlag(
         'force-upgrade',
@@ -113,11 +114,15 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden = true;
 
+  final AppContext ctx;
+
+  late final Logger logger = ctx.get<Logger>()!;
+  late final ProcessManager processManager = ctx.get<ProcessManager()!;
 
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net = Net(
     httpClientFactory: context.get<HttpClientFactory>(),
-    logger: globals.logger,
+    logger: logger,
     platform: globals.platform,
   );
 
@@ -496,6 +501,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }) async {
     Directory? temporaryFlutterSdk;
     final Directory syntheticPackageDir = tempDir.childDirectory('synthetic_package');
+    processManager;
     final File fakePackage = _pubspecFor(syntheticPackageDir);
     fakePackage.createSync(recursive: true);
     fakePackage.writeAsStringSync(
@@ -509,7 +515,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
       temporaryFlutterSdk = createTemporaryFlutterSdk(
-        globals.logger,
+        logger,
         globals.fs,
         globals.fs.directory(Cache.flutterRoot),
         pubspecs,
@@ -593,7 +599,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // warmed the cache above, running them in parallel could be dangerous due
     // to contention when unpacking downloaded dependencies, but since we have
     // downloaded all that we need, it is safe to run them in parallel.
-    final Status status = globals.logger.startProgress(
+    final Status status = logger.startProgress(
       'Running "flutter pub get" in affected packages...',
     );
     try {
