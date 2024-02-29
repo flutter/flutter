@@ -61,7 +61,7 @@ final class FakeAdbLogcat {
   ///
   /// Optionally specify a [processId] to use for the process, otherwise a
   /// simple default is used (sequential numbers starting from 1000).
-  FakeAdbProcess withProcess({int? processId}) {
+  FakeAdbProcess process({int? processId}) {
     processId ??= 1000 + _processById.length;
     return _processById.putIfAbsent(
       processId,
@@ -76,7 +76,7 @@ final class FakeAdbLogcat {
 
 /// A stateful fixture that represents a fake process writing to `adb logcat`.
 ///
-/// See [FakeAdbLogcat.withProcess] for how to create this fixture.
+/// See [FakeAdbLogcat.process] for how to create this fixture.
 final class FakeAdbProcess {
   const FakeAdbProcess._(
     this._logcat, {
