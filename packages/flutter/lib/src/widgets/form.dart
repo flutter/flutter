@@ -207,6 +207,7 @@ class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
+  late final AutovalidateMode autovalidateMode;
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -255,6 +256,12 @@ class FormState extends State<Form> {
   }
 
   bool get _isUnfocusAutoValidateMode => widget.autovalidateMode == AutovalidateMode.onUnfocus;
+
+  @override
+  void initState() {
+    super.initState();
+    autovalidateMode = widget.autovalidateMode;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -632,18 +639,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      _focusNode.addListener((){
-        if (!_focusNode.hasFocus) {
-          _validate();
-        }
-     });
-    }
-  }
-
-  @override
   void dispose() {
     _errorText.dispose();
     _focusNode.dispose();
@@ -653,6 +648,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
+    final AutovalidateMode autovalidateMode = Form.maybeOf(context)?.autovalidateMode ?? AutovalidateMode.disabled;
+
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
@@ -666,12 +663,26 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           break;
       }
     }
+
     Form.maybeOf(context)?._register(this);
 
-    return Focus(
-      focusNode: _focusNode,
-      child: widget.builder(this),
-    );
+    if (autovalidateMode == AutovalidateMode.onUnfocus || widget.autovalidateMode == AutovalidateMode.onUnfocus){
+      return Focus(
+        canRequestFocus: true,
+        descendantsAreTraversable: true,
+        onFocusChange: (bool value) {
+          if (!value) {
+            setState(() {
+              _validate();
+            });
+          }
+        },
+        focusNode: _focusNode,
+        child: widget.builder(this),
+      );
+    }
+
+    return widget.builder(this);
   }
 }
 
