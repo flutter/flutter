@@ -71,23 +71,6 @@ public class PlatformPluginTest {
     clipboardFormat = ClipboardContentFormat.PLAIN_TEXT;
   }
 
-  @Config(sdk = Build.VERSION_CODES.KITKAT)
-  @Test
-  public void itIgnoresNewHapticEventsOnOldAndroidPlatforms() {
-    View fakeDecorView = mock(View.class);
-    Window fakeWindow = mock(Window.class);
-    Activity mockActivity = mock(Activity.class);
-    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
-    when(mockActivity.getWindow()).thenReturn(fakeWindow);
-    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
-
-    // HEAVY_IMPACT haptic response is only available on "M" (23) and later.
-    platformPlugin.vibrateHapticFeedback(PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
-
-    // SELECTION_CLICK haptic response is only available on "LOLLIPOP" (21) and later.
-    platformPlugin.vibrateHapticFeedback(PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
-  }
-
   @Test
   public void platformPlugin_getClipboardDataIsNonNullWhenPlainTextCopied() throws IOException {
     View fakeDecorView = mock(View.class);
