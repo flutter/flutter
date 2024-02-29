@@ -18,12 +18,10 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 
@@ -461,29 +459,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // Proxy to allow plugins, channels to hold a weak reference to the binary messenger (self).
   FlutterBinaryMessengerRelay* _binaryMessenger;
-
-  // Map from ViewId to vsync waiter. Note that this is modified on main thread
-  // but accessed on UI thread, so access must be @synchronized.
-  NSMapTable<NSNumber*, FlutterVSyncWaiter*>* _vsyncWaiters;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
-}
-
-static const int kMainThreadPriority = 47;
-
-static void SetThreadPriority(FlutterThreadPriority priority) {
-  if (priority == kDisplay || priority == kRaster) {
-    pthread_t thread = pthread_self();
-    sched_param param;
-    int policy;
-    if (!pthread_getschedparam(thread, &policy, &param)) {
-      param.sched_priority = kMainThreadPriority;
-      pthread_setschedparam(thread, policy, &param);
-    }
-    pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
-  }
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix
@@ -535,8 +514,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   } else {
     _terminationHandler = nil;
   }
-
-  _vsyncWaiters = [NSMapTable strongToStrongObjectsMapTable];
 
   return self;
 }
@@ -647,7 +624,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
       .platform_task_runner = &cocoa_task_runner_description,
-      .thread_priority_setter = SetThreadPriority};
+  };
   flutterArguments.custom_task_runners = &custom_task_runners;
 
   [self loadAOTData:_project.assetsPath];
@@ -660,11 +637,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   flutterArguments.on_pre_engine_restart_callback = [](void* user_data) {
     FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
     [engine engineCallbackOnPreEngineRestart];
-  };
-
-  flutterArguments.vsync_callback = [](void* user_data, intptr_t baton) {
-    FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
-    [engine onVSync:baton];
   };
 
   FlutterRendererConfig rendererConfig = [_renderer createRendererConfig];
@@ -731,36 +703,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [controller setUpWithEngine:self viewId:viewId threadSynchronizer:_threadSynchronizer];
   NSAssert(controller.viewId == viewId, @"Failed to assign view ID.");
   [_viewControllers setObject:controller forKey:@(viewId)];
-
-  if (controller.viewLoaded) {
-    [self viewControllerViewDidLoad:controller];
-  }
-}
-
-- (void)viewControllerViewDidLoad:(FlutterViewController*)viewController {
-  __weak FlutterEngine* weakSelf = self;
-  FlutterVSyncWaiter* waiter = [[FlutterVSyncWaiter alloc]
-      initWithDisplayLink:[FlutterDisplayLink displayLinkWithView:viewController.view]
-                    block:^(CFTimeInterval timestamp, CFTimeInterval targetTimestamp,
-                            uintptr_t baton) {
-                      // CAMediaTime and flutter time are both mach_absolute_time.
-                      uint64_t timeNanos = timestamp * 1000000000;
-                      uint64_t targetTimeNanos = targetTimestamp * 1000000000;
-                      FlutterEngine* engine = weakSelf;
-                      if (engine) {
-                        // It is a bit unfortunate that embedder requires OnVSync call on
-                        // platform thread just to immediately redispatch it to UI thread.
-                        // We are already on UI thread right now, but have to do the
-                        // extra hop to main thread.
-                        [engine->_threadSynchronizer performOnPlatformThread:^{
-                          engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
-                        }];
-                      }
-                    }];
-  FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewId)] == nil);
-  @synchronized(_vsyncWaiters) {
-    [_vsyncWaiters setObject:waiter forKey:@(viewController.viewId)];
-  }
 }
 
 - (void)deregisterViewControllerForId:(FlutterViewId)viewId {
@@ -768,9 +710,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (oldController != nil) {
     [oldController detachFromEngine];
     [_viewControllers removeObjectForKey:@(viewId)];
-  }
-  @synchronized(_vsyncWaiters) {
-    [_vsyncWaiters removeObjectForKey:@(viewId)];
   }
 }
 
@@ -1092,14 +1031,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   FlutterViewController* nextViewController;
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
-  }
-}
-
-- (void)onVSync:(uintptr_t)baton {
-  @synchronized(_vsyncWaiters) {
-    // TODO(knopp): Use vsync waiter for correct view.
-    FlutterVSyncWaiter* waiter = [_vsyncWaiters objectForKey:@(kFlutterImplicitViewId)];
-    [waiter waitForVSync:baton];
   }
 }
 
