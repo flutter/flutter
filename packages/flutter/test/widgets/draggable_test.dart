@@ -2542,7 +2542,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
   testWidgets('Draggable plays nice with onTap',
-  // TODO(polina-c): fix the leak https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
+  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     late final OverlayEntry entry;
