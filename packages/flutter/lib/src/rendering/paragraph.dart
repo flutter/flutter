@@ -697,7 +697,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    return (_textIntrinsics..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild))..layout())
+    return (_textIntrinsics
+      ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild))
+      ..layout(minWidth: width, maxWidth: _adjustMaxWidth(width)))
       .height;
   }
 
