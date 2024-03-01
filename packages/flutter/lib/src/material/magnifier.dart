@@ -17,7 +17,7 @@ import 'package:flutter/foundation.dart';
 /// - The focal point never contains anything out of the bounds of the text
 ///   field or other widget being magnified (the [MagnifierInfo.fieldBounds]).
 ///
-/// - The focal point always remains aligned with the _y_ cordinate of the touch.
+/// - The focal point always remains aligned with the _y_ coordinate of the touch.
 ///
 /// - The loupe always remains on the screen.
 ///
