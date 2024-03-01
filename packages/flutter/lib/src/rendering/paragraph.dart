@@ -2077,12 +2077,16 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   RenderObject? _getEncompassingRect() {
     RenderObject? current = paragraph.parent;
     RenderObject? lastParagraph;
+    debugPrint('wowza start');
     while (current != null) {
       if (current is RenderParagraph) {
         lastParagraph = current;
+        debugPrint('wowza ${(lastParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false)}');
+        // return current;///maybe we should just look up to the next parent.
       }
       current = current.parent;
     }
+    debugPrint('wowza end ${(lastParagraph as RenderParagraph).text.toPlainText(includeSemanticsLabels: false)}');
     return lastParagraph;
   }
 
@@ -2124,12 +2128,16 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final TextPosition rootParagraphPlaceholderTextPosition = _getPositionInRootText();
     final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
     if (isSelectionInverted) {
+      debugPrint('inverted');
       if (paragraphBoundary.boundaryStart.offset == rootParagraphPlaceholderRange.start) {
+        debugPrint('end');
         return SelectionResult.end;
       }
       if (paragraphBoundary.boundaryStart.offset < rootParagraphPlaceholderRange.start) {
+        debugPrint('prev');
         return SelectionResult.previous;
       }
+      debugPrint('next');
       return SelectionResult.next;
     } else {
       if (paragraphBoundary.boundaryEnd.offset == rootParagraphPlaceholderRange.end) {
