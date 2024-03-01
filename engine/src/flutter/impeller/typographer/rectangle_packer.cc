@@ -166,8 +166,9 @@ void SkylineRectanglePacker::addSkylineLevel(int skylineIndex,
   }
 }
 
-RectanglePacker* RectanglePacker::Factory(int width, int height) {
-  return new SkylineRectanglePacker(width, height);
+std::unique_ptr<RectanglePacker> RectanglePacker::Factory(int width,
+                                                          int height) {
+  return std::make_unique<SkylineRectanglePacker>(width, height);
 }
 
 }  // namespace impeller
