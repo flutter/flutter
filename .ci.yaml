@@ -501,6 +501,7 @@ targets:
   - name: Linux firebase_abstract_method_smoke_test
     presubmit: false
     recipe: firebaselab/firebaselab
+    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -533,6 +534,7 @@ targets:
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
+    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -564,6 +566,7 @@ targets:
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
+    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -2635,14 +2638,15 @@ targets:
 
   # linux motog4 benchmark
   # Moto G4, Impeller (OpenGL)
-  - name: Linux_android new_gallery_impeller__transition_perf
+  - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
-      task_name: new_gallery_impeller__transition_perf
+      task_name: new_gallery_opengles_impeller__transition_perf
 
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
@@ -2665,7 +2669,7 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_impeller__transition_perf
 
-  # Samsung A02, Impeller (OpenGL)
+  # Samsung A02, Impeller (Vulkan)
   - name: Linux_samsung_a02 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4311,16 +4315,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios
 
-  - name: Mac_arm64_ios flavors_test_ios_xcode_debug
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flavors_test_ios_xcode_debug
-    bringup: true
-
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4338,16 +4332,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
-
-  - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios__start_up_xcode_debug
-    bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -4424,16 +4408,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
-
-  - name: Mac_ios integration_ui_ios_driver_xcode_debug
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: integration_ui_ios_driver_xcode_debug
-    bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
@@ -4549,17 +4523,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
-
-  # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
-  - name: Mac_ios microbenchmarks_ios_xcode_debug
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: microbenchmarks_ios_xcode_debug
-    bringup: true
 
   - name: Mac native_assets_ios_simulator
     recipe: devicelab/devicelab_drone

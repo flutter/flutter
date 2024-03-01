@@ -274,7 +274,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/main/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -390,7 +390,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///     ).createShader(bounds);
 ///   },
 ///   child: const Text(
-///     'I’m burning the memories',
+///     "I'm burning the memories",
 ///     style: TextStyle(color: Colors.white),
 ///   ),
 /// )
@@ -5034,8 +5034,8 @@ class Row extends Flex {
 ///     const Text('Through the night, we have one shot to live another day'),
 ///     const Text('We cannot let a stray gunshot give us away'),
 ///     const Text('We will fight up close, seize the moment and stay in it'),
-///     const Text('It’s either that or meet the business end of a bayonet'),
-///     const Text('The code word is ‘Rochambeau,’ dig me?'),
+///     const Text("It's either that or meet the business end of a bayonet"),
+///     const Text("The code word is 'Rochambeau,' dig me?"),
 ///     Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
 ///   ],
 /// )
