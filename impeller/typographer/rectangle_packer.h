@@ -27,7 +27,7 @@ class RectanglePacker {
   //----------------------------------------------------------------------------
   /// @brief     Return an empty packer with area specified by width and height.
   ///
-  static RectanglePacker* Factory(int width, int height);
+  static std::unique_ptr<RectanglePacker> Factory(int width, int height);
 
   virtual ~RectanglePacker() {}
 
