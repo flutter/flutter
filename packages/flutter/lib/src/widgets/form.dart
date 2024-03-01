@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/dropdown.dart';
 
 import 'basic.dart';
 import 'framework.dart';
