@@ -43,6 +43,17 @@ final class GitRepo {
   /// getter will return the same result.
   late final Future<List<io.File>> changedFiles = _changedFiles();
 
+  /// Returns the SHA of the current HEAD commit.
+  Future<String> headSha({bool short = false}) async {
+    final ProcessRunnerResult result = await ProcessRunner(
+      defaultWorkingDirectory: root,
+      processManager: _processManager,
+    ).runProcess(
+      <String>['git', 'rev-parse', if (short) '--short' ,'HEAD'],
+    );
+    return result.stdout.trim();
+  }
+
   Future<List<io.File>> _changedFiles() async {
     final ProcessRunner processRunner = ProcessRunner(
       defaultWorkingDirectory: root,

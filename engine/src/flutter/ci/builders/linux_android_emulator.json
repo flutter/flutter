@@ -60,6 +60,12 @@
                 },
                 {
                     "language": "dart",
+                    "name": "skia_gold_client/e2e_test",
+                    "script": "flutter/testing/skia_gold_client/tool/e2e_test.dart",
+                    "max_attempts": 1
+                },
+                {
+                    "language": "dart",
                     "name": "Android Scenario App Integration Tests (Impeller/Vulkan)",
                     "test_timeout_secs": 900,
                     "max_attempts": 2,
