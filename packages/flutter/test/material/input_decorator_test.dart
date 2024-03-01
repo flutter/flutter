@@ -15,6 +15,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const String hintText = 'hint';
+const String inputText = 'text';
+const String labelText = 'label';
+
+const Key customLabelKey = Key('label');
+const Widget customLabel = Text.rich(
+  key: customLabelKey,
+  TextSpan(
+    children: <InlineSpan>[
+      TextSpan(text: 'label'),
+      WidgetSpan(
+        child: Text('*', style: TextStyle(color: Colors.red)),
+      ),
+    ],
+  ),
+);
+
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
@@ -29,8 +46,8 @@ Widget buildInputDecorator({
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
   Widget child = const Text(
-    'text',
-    // Use a text style copliant with M3 specification (which is bodyLarge for text fields).
+    inputText,
+    // Use a text style compliant with M3 specification (which is bodyLarge for text fields).
     style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400, letterSpacing: 0.5, height: 1.50)
   ),
 }) {
@@ -95,6 +112,10 @@ Rect getLabelRect(WidgetTester tester) {
   return tester.getRect(findLabel());
 }
 
+Offset getLabelCenter(WidgetTester tester) {
+  return getLabelRect(tester).center;
+}
+
 TextStyle getLabelStyle(WidgetTester tester) {
   return tester.firstWidget<AnimatedDefaultTextStyle>(
     find.ancestor(
@@ -102,6 +123,58 @@ TextStyle getLabelStyle(WidgetTester tester) {
       matching: find.byType(AnimatedDefaultTextStyle),
     ),
   ).style;
+}
+
+Finder findCustomLabel() {
+  return find.byKey(customLabelKey);
+}
+
+Rect getCustomLabelRect(WidgetTester tester) {
+  return tester.getRect(findCustomLabel());
+}
+
+Offset getCustomLabelCenter(WidgetTester tester) {
+  return getCustomLabelRect(tester).center;
+}
+
+Finder findInputText() {
+  return find.text(inputText);
+}
+
+Rect getInputRect(WidgetTester tester) {
+  return tester.getRect(findInputText());
+}
+
+Offset getInputCenter(WidgetTester tester) {
+  return getInputRect(tester).center;
+}
+
+Finder findHint() {
+  return find.text(hintText);
+}
+
+Rect getHintRect(WidgetTester tester) {
+  return tester.getRect(findHint());
+}
+
+Offset getHintCenter(WidgetTester tester) {
+  return getHintRect(tester).center;
+}
+
+double getHintOpacity(WidgetTester tester) {
+  return getOpacity(tester, hintText);
+}
+
+Finder findDecorator() {
+  return find.byType(InputDecorator);
+}
+
+Rect getDecoratorRect(WidgetTester tester) {
+  return tester.getRect(findDecorator());
+}
+
+Offset getDecoratorCenter(WidgetTester tester) {
+  return getDecoratorRect(tester).center;
 }
 
 InputBorder? getBorder(WidgetTester tester) {
@@ -169,7 +242,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
           ),
         ),
       );
@@ -182,11 +255,11 @@ void main() {
       //    8 - bottom padding
       // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
       // this gap is not compliant with the M3 spec (M3 spec uses line height for this purpose).
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-      expect(tester.getTopLeft(findLabel()).dy, 8.0);
-      expect(tester.getBottomLeft(findLabel()).dy, 20.0);
-      expect(tester.getTopLeft(find.text('text')).dy, 24.0);
-      expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+      expect(getLabelRect(tester).top, 8.0);
+      expect(getLabelRect(tester).bottom, 20.0);
+      expect(getInputRect(tester).top, 24.0);
+      expect(getInputRect(tester).bottom, 48.0);
     });
 
     testWidgets('The label appears within the input when there is no text content', (WidgetTester tester) async {
@@ -194,16 +267,16 @@ void main() {
         buildInputDecorator(
           isEmpty: true,
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
           ),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       // Label line height is forced to 1.0 and font size is 16.0,
       // the label should be vertically centered (20 pixels above and below).
-      expect(tester.getTopLeft(findLabel()).dy, 20.0);
-      expect(tester.getBottomLeft(findLabel()).dy, 36.0);
+      expect(getLabelRect(tester).top, 20.0);
+      expect(getLabelRect(tester).bottom, 36.0);
       // From the M3 specification, centering the label is right, but setting the line height to 1.0 is not
       // compliant (the expected text style is bodyLarge which font size is 16.0 and its line height 1.5).
       // TODO(bleroux): fix input decorator to not rely on forcing the label text line height to 1.0.
@@ -216,15 +289,15 @@ void main() {
           buildInputDecorator(
             isEmpty: true,
             decoration: const InputDecoration(
-              labelText: 'label',
+              labelText: labelText,
               floatingLabelBehavior: FloatingLabelBehavior.always,
             ),
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('label')).dy, 8.0);
-        expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).top, 8.0);
+        expect(getLabelRect(tester).bottom, 20.0);
       },
     );
 
@@ -234,15 +307,15 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             decoration: const InputDecoration(
-              labelText: 'label',
+              labelText: labelText,
               floatingLabelBehavior: FloatingLabelBehavior.never,
             ),
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-        expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).top, 20.0);
+        expect(getLabelRect(tester).bottom, 36.0);
       },
     );
 
@@ -255,26 +328,26 @@ void main() {
             isEmpty: true,
             isFocused: isFocused,
             decoration: const InputDecoration(
-              labelText: 'label',
+              labelText: labelText,
               floatingLabelBehavior: FloatingLabelBehavior.auto,
             ),
           ),
         );
       }
       await pumpInputDecorator(isFocused: false);
-      expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+      expect(getLabelRect(tester).top, 20.0);
 
       // The label animates upwards and scales down.
       // The animation duration is 167ms and the curve is fastOutSlowIn.
       await pumpInputDecorator(isFocused: true);
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(17.09, 0.5));
+      expect(getLabelRect(tester).top, closeTo(17.09, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(10.66, 0.5));
+      expect(getLabelRect(tester).top, closeTo(10.66, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(8.47, 0.5));
+      expect(getLabelRect(tester).top, closeTo(8.47, 0.5));
       await tester.pump(const Duration(milliseconds: 41));
-      expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+      expect(getLabelRect(tester).top, 8.0);
 
       // If the animation changes direction without first reaching the
       // AnimationStatus.completed or AnimationStatus.dismissed status,
@@ -286,50 +359,17 @@ void main() {
       // The animation duration is 167ms and the curve is fastOutSlowIn.
       await pumpInputDecorator(isFocused: false);
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(10.90, 0.5));
+      expect(getLabelRect(tester).top, closeTo(10.90, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(17.34, 0.5));
+      expect(getLabelRect(tester).top, closeTo(17.34, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.text('label')).dy, closeTo(19.69, 0.5));
+      expect(getLabelRect(tester).top, closeTo(19.69, 0.5));
       await tester.pump(const Duration(milliseconds: 41));
-      expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+      expect(getLabelRect(tester).top, 20.0);
     });
-
-    testWidgets(
-      'alignLabelWithHint positions the label at the text baseline, aligned with the hint',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          buildInputDecorator(
-            isEmpty: true,
-            decoration: const InputDecoration(
-              labelText: 'label',
-              alignLabelWithHint: true,
-              hintText: 'hint',
-            ),
-          ),
-        );
-
-        // Label and hint should be vertically aligned.
-        expect(tester.getCenter(find.text('label')).dy, tester.getCenter(find.text('hint')).dy);
-      },
-    );
   });
 
   group('Material3 - InputDecoration.label layout', () {
-    const Key labelKey = Key('l');
-    const Widget customLabel = Text.rich(
-      key: labelKey,
-      TextSpan(
-        children: <InlineSpan>[
-          TextSpan(text: 'label'),
-          WidgetSpan(
-            child: Text('*', style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
     testWidgets('The label appears above input', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecorator(
@@ -345,11 +385,11 @@ void main() {
       //    4 - gap between label and input (this is not part of the M3 spec)
       //   24 - input text (font size = 16, line height = 1.5)
       //    8 - bottom padding
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, 8.0);
-      expect(tester.getBottomLeft(find.byKey(labelKey)).dy, 20.0);
-      expect(tester.getTopLeft(find.text('text')).dy, 24.0);
-      expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+      expect(getCustomLabelRect(tester).top, 8.0);
+      expect(getCustomLabelRect(tester).bottom, 20.0);
+      expect(getInputRect(tester).top, 24.0);
+      expect(getInputRect(tester).bottom, 48.0);
     });
 
     testWidgets('The label appears within the input when there is no text content', (WidgetTester tester) async {
@@ -362,11 +402,11 @@ void main() {
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       // Label line height is forced to 1.0 and font size is 16.0,
       // the label should be vertically centered (20 pixels above and below).
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, 20.0);
-      expect(tester.getBottomLeft(find.byKey(labelKey)).dy, 36.0);
+      expect(getCustomLabelRect(tester).top, 20.0);
+      expect(getCustomLabelRect(tester).bottom, 36.0);
     });
 
     testWidgets(
@@ -382,9 +422,11 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.byKey(labelKey)).dy, 8.0);
-        expect(tester.getBottomLeft(find.byKey(labelKey)).dy, 20.0);
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        //  8 - top padding
+        // 12 - floating label height (font size = 16 * 0.75, line height is forced to 1.0)
+        expect(getCustomLabelRect(tester).top, 8.0);
+        expect(getCustomLabelRect(tester).bottom, 20.0);
       },
     );
 
@@ -400,9 +442,11 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-        expect(tester.getTopLeft(find.byKey(labelKey)).dy, 20.0);
-        expect(tester.getBottomLeft(find.byKey(labelKey)).dy, 36.0);
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        // Label line height is forced to 1.0 and font size is 16.0,
+        // the label should be vertically centered (20 pixels above and below).
+        expect(getCustomLabelRect(tester).top, 20.0);
+        expect(getCustomLabelRect(tester).bottom, 36.0);
       },
     );
 
@@ -422,19 +466,21 @@ void main() {
         );
       }
       await pumpInputDecorator(isFocused: false);
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, 20.0);
+      // Label line height is forced to 1.0 and font size is 16.0,
+      // the label should be vertically centered (20 pixels above and below).
+      expect(getCustomLabelRect(tester).top, 20.0);
 
       // The label animates upwards and scales down.
       // The animation duration is 167ms and the curve is fastOutSlowIn.
       await pumpInputDecorator(isFocused: true);
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(17.09, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(17.09, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(10.66, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(10.66, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(8.47, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(8.47, 0.5));
       await tester.pump(const Duration(milliseconds: 41));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, 8.0);
+      expect(getCustomLabelRect(tester).top, 8.0);
 
       // If the animation changes direction without first reaching the
       // AnimationStatus.completed or AnimationStatus.dismissed status,
@@ -446,33 +492,14 @@ void main() {
       // The animation duration is 167ms and the curve is fastOutSlowIn.
       await pumpInputDecorator(isFocused: false);
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(10.90, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(10.90, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(17.34, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(17.34, 0.5));
       await tester.pump(const Duration(milliseconds: 42));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, closeTo(19.69, 0.5));
+      expect(getCustomLabelRect(tester).top, closeTo(19.69, 0.5));
       await tester.pump(const Duration(milliseconds: 41));
-      expect(tester.getTopLeft(find.byKey(labelKey)).dy, 20.0);
+      expect(getCustomLabelRect(tester).top, 20.0);
     });
-
-    testWidgets(
-      'alignLabelWithHint positions the label at the text baseline, aligned with the hint',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          buildInputDecorator(
-            isEmpty: true,
-            decoration: const InputDecoration(
-              label: customLabel,
-              alignLabelWithHint: true,
-              hintText: 'hint',
-            ),
-          ),
-        );
-
-        // Label and hint should be vertically aligned.
-        expect(tester.getCenter(find.byKey(labelKey)).dy, tester.getCenter(find.text('hint')).dy);
-      },
-    );
   });
 
   group('Material3 - InputDecoration border', () {
@@ -480,12 +507,12 @@ void main() {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
           ),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 1.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -497,12 +524,12 @@ void main() {
         buildInputDecorator(
           isFocused: true,
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
           ),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 2.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -513,12 +540,13 @@ void main() {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
             enabled: false,
           ),
         ),
       );
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 1.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -529,13 +557,13 @@ void main() {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
             filled: true,
           ),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 1.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -547,13 +575,13 @@ void main() {
         buildInputDecorator(
           isFocused: true,
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
             filled: true,
           ),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 2.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -564,13 +592,14 @@ void main() {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
-            labelText: 'label',
+            labelText: labelText,
             enabled: false,
             filled: true,
           ),
         ),
       );
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+
+      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
       expect(getBorderBottom(tester), 56.0);
       expect(getBorderWeight(tester), 1.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
@@ -578,22 +607,668 @@ void main() {
     });
   });
 
-  testWidgets('Material3 - Floating label is aligned with prefixIcon by default', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.ac_unit),
-          labelText: 'label',
-          border: OutlineInputBorder(),
-        ),
-        isFocused: true,
-      ),
-    );
+  group('Material3 - InputDecoration.hintText', () {
+    group('without label', () {
+      // Overall height for this InputDecorator is 48dp on mobile:
+      //   12 - Top padding
+      //   24 - Input and hint (font size = 16, line height = 1.5)
+      //   12 - Bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('label')).dx, 12.0);
-    expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
-    expect(getBorderWeight(tester), 2.0);
+      testWidgets('hint and input align vertically when decorator is empty and not focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            decoration: const InputDecoration(
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+        expect(getInputRect(tester).top, 12.0);
+        expect(getInputRect(tester).bottom, 36.0);
+        expect(getHintRect(tester).top, getInputRect(tester).top);
+        expect(getHintRect(tester).bottom, getInputRect(tester).bottom);
+      });
+
+      testWidgets('hint and input align vertically when decorator is empty and focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            isFocused: true,
+            decoration: const InputDecoration(
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+        expect(getInputRect(tester).top, 12.0);
+        expect(getInputRect(tester).bottom, 36.0);
+        expect(getHintRect(tester).top, getInputRect(tester).top);
+        expect(getHintRect(tester).bottom, getInputRect(tester).bottom);
+      });
+
+      testWidgets('hint and input align vertically when decorator is empty and not focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isFocused: true,
+            decoration: const InputDecoration(
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+        expect(getInputRect(tester).top, 12.0);
+        expect(getInputRect(tester).bottom, 36.0);
+        expect(getHintRect(tester).top, getInputRect(tester).top);
+        expect(getHintRect(tester).bottom, getInputRect(tester).bottom);
+      });
+
+      testWidgets('hint and input align vertically when decorator is not empty and not focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+        expect(getInputRect(tester).top, 12.0);
+        expect(getInputRect(tester).bottom, 36.0);
+        expect(getHintRect(tester).top, getInputRect(tester).top);
+        expect(getHintRect(tester).bottom, getInputRect(tester).bottom);
+      });
+    });
+
+    group('with label', () {
+      testWidgets('hint is not visible when decorator is empty and not focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            decoration: const InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getHintOpacity(tester), 0.0);
+      });
+
+      testWidgets('hint is not visible when decorator is not empty and focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isFocused: true,
+            decoration: const InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getHintOpacity(tester), 0.0);
+      });
+
+      testWidgets('hint is not visible when decorator is empty and not focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            decoration: const InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getHintOpacity(tester), 0.0);
+      });
+
+      testWidgets('hint is visible and aligned with input text when decorator is empty and focused', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            isFocused: true,
+            decoration: const InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+            ),
+          ),
+        );
+
+        expect(getHintOpacity(tester), 1.0);
+
+        // Overall height for this InputDecorator is 56dp on mobile:
+        //    8 - Top padding
+        //   12 - Floating label (font size = 16 * 0.75, line height is forced to 1.0)
+        //    4 - Gap between label and input (this is not part of the M3 spec)
+        //   24 - Input/Hint (font size = 16, line height = 1.5)
+        //    8 - Bottom padding
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getInputRect(tester).top, 24.0);
+        expect(getInputRect(tester).bottom, 48.0);
+        expect(getHintRect(tester).top, getInputRect(tester).top);
+        expect(getHintRect(tester).bottom, getInputRect(tester).bottom);
+        expect(getLabelRect(tester).top, 8.0);
+        expect(getLabelRect(tester).bottom, 20.0);
+      });
+
+      group('hint opacity animation', () {
+        testWidgets('default duration', (WidgetTester tester) async {
+          // Build once without focus.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+            ),
+          );
+
+          // Hint is not visible (opacity 0.0).
+          expect(getHintOpacity(tester), 0.0);
+
+          // Focus the decorator to trigger the animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              isFocused: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 0.0 to 1.0.
+          // The animation's default duration is 20ms.
+          await tester.pump(const Duration(milliseconds: 9));
+          double hintOpacity9ms = getHintOpacity(tester);
+          expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 9));
+          double hintOpacity18ms = getHintOpacity(tester);
+          expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
+
+          await tester.pumpAndSettle(); // Let the animation finish.
+          // Hint is fully visible (opacity 1.0).
+          expect(getHintOpacity(tester), 1.0);
+
+          // Unfocus the decorator to trigger the reversed animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 1.0 to 0.0.
+          // The animation's default duration is 20ms.
+          await tester.pump(const Duration(milliseconds: 9));
+          hintOpacity9ms = getHintOpacity(tester);
+          expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 9));
+          hintOpacity18ms = getHintOpacity(tester);
+          expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
+        });
+
+        testWidgets('custom duration', (WidgetTester tester) async {
+          // Build once without focus.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // Hint is not visible (opacity 0.0).
+          expect(getHintOpacity(tester), 0.0);
+
+          // Focus the decorator to trigger the animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              isFocused: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 0.0 to 1.0.
+          // The animation's duration is set to 120ms.
+          await tester.pump(const Duration(milliseconds: 50));
+          double hintOpacity50ms = getHintOpacity(tester);
+          expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          double hintOpacity100ms = getHintOpacity(tester);
+          expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          expect(getHintOpacity(tester), 1.0);
+
+          // Unfocus the decorator to trigger the reversed animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 1.0 to 0.0.
+          // The animation's default duration is 20ms.
+          await tester.pump(const Duration(milliseconds: 50));
+          hintOpacity50ms = getHintOpacity(tester);
+          expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          hintOpacity100ms = getHintOpacity(tester);
+          expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+          await tester.pump(const Duration(milliseconds: 50));
+          expect(getHintOpacity(tester), 0.0);
+        });
+
+        testWidgets('duration from theme', (WidgetTester tester) async {
+          // Build once without focus.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+              inputDecorationTheme: const InputDecorationTheme(
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // Hint is not visible (opacity 0.0).
+          expect(getHintOpacity(tester), 0.0);
+
+          // Focus the decorator to trigger the animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              isFocused: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+              inputDecorationTheme: const InputDecorationTheme(
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 0.0 to 1.0.
+          // The animation's duration is set to 120ms.
+          await tester.pump(const Duration(milliseconds: 50));
+          double hintOpacity50ms = getHintOpacity(tester);
+          expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          double hintOpacity100ms = getHintOpacity(tester);
+          expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          expect(getHintOpacity(tester), 1.0);
+
+          // Unfocus the decorator to trigger the reversed animation.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+              ),
+              inputDecorationTheme: const InputDecorationTheme(
+                hintFadeDuration: Duration(milliseconds: 120),
+              ),
+            ),
+          );
+
+          // The hint's opacity animates from 1.0 to 0.0.
+          // The animation's default duration is 20ms.
+          await tester.pump(const Duration(milliseconds: 50));
+          hintOpacity50ms = getHintOpacity(tester);
+          expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+          await tester.pump(const Duration(milliseconds: 50));
+          hintOpacity100ms = getHintOpacity(tester);
+          expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+          await tester.pump(const Duration(milliseconds: 50));
+          expect(getHintOpacity(tester), 0.0);
+        });
+      });
+
+      group('InputDecoration.alignLabelWithHint', () {
+        testWidgets('positions InputDecoration.labelText vertically aligned with the hint', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                labelText: labelText,
+                alignLabelWithHint: true,
+                hintText: hintText,
+              ),
+            ),
+          );
+
+          // Label and hint should be vertically aligned.
+          expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
+        });
+
+        testWidgets('positions InputDecoration.label vertically aligned with the hint', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isEmpty: true,
+              decoration: const InputDecoration(
+                label: customLabel,
+                alignLabelWithHint: true,
+                hintText: hintText,
+              ),
+            ),
+          );
+
+          // Label and hint should be vertically aligned.
+          expect(getCustomLabelCenter(tester).dy, getHintCenter(tester).dy);
+        });
+
+        group('in non-expanded multiline TextField', () {
+          testWidgets('positions the label correctly when strut is disabled', (WidgetTester tester) async {
+            final FocusNode focusNode = FocusNode();
+            final TextEditingController controller = TextEditingController();
+            addTearDown(() { focusNode.dispose(); controller.dispose();});
+
+            Widget buildFrame(bool alignLabelWithHint) {
+              return MaterialApp(
+                home: Material(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: 8,
+                        decoration: InputDecoration(
+                          labelText: labelText,
+                          alignLabelWithHint: alignLabelWithHint,
+                          hintText: hintText,
+                        ),
+                        strutStyle: StrutStyle.disabled,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // `alignLabelWithHint: false` centers the label vertically in the TextField.
+            await tester.pumpWidget(buildFrame(false));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(TextField), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+
+            // `alignLabelWithHint: true` aligns the label vertically with the hint.
+            await tester.pumpWidget(buildFrame(true));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(TextField), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+          });
+
+          testWidgets('positions the label correctly when strut style is set to default', (WidgetTester tester) async {
+            final FocusNode focusNode = FocusNode();
+            final TextEditingController controller = TextEditingController();
+            addTearDown(() { focusNode.dispose(); controller.dispose();});
+
+            Widget buildFrame(bool alignLabelWithHint) {
+              return MaterialApp(
+                home: Material(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: 8,
+                        decoration: InputDecoration(
+                          labelText: labelText,
+                          alignLabelWithHint: alignLabelWithHint,
+                          hintText: hintText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // `alignLabelWithHint: false` centers the label vertically in the TextField.
+            await tester.pumpWidget(buildFrame(false));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+
+            // `alignLabelWithHint: true` aligns the label vertically with the hint.
+            await tester.pumpWidget(buildFrame(true));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+          });
+        });
+
+        group('in expanded multiline TextField', () {
+          testWidgets('positions the label correctly', (WidgetTester tester) async {
+            final FocusNode focusNode = FocusNode();
+            final TextEditingController controller = TextEditingController();
+            addTearDown(() { focusNode.dispose(); controller.dispose();});
+
+            Widget buildFrame(bool alignLabelWithHint) {
+              return MaterialApp(
+                home: Material(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: null,
+                        expands: true,
+                        decoration: InputDecoration(
+                          labelText: labelText,
+                          alignLabelWithHint: alignLabelWithHint,
+                          hintText: hintText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // `alignLabelWithHint: false` centers the label vertically in the TextField.
+            await tester.pumpWidget(buildFrame(false));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+
+            // alignLabelWithHint: true aligns the label vertically with the hint at the top.
+            await tester.pumpWidget(buildFrame(true));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
+
+            // Entering text still happens at the top.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputRect(tester).top, 24.0);
+            controller.clear();
+            focusNode.unfocus();
+          });
+
+          testWidgets('positions the label correctly when border is outlined', (WidgetTester tester) async {
+            final FocusNode focusNode = FocusNode();
+            final TextEditingController controller = TextEditingController();
+            addTearDown(() { focusNode.dispose(); controller.dispose();});
+
+            Widget buildFrame(bool alignLabelWithHint) {
+              return MaterialApp(
+                home: Material(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        maxLines: null,
+                        expands: true,
+                        decoration: InputDecoration(
+                          labelText: labelText,
+                          alignLabelWithHint: alignLabelWithHint,
+                          hintText: hintText,
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // `alignLabelWithHint: false` centers the label vertically in the TextField.
+            await tester.pumpWidget(buildFrame(false));
+            await tester.pumpAndSettle();
+            expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
+
+            // Entering text happens in the center as well.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputCenter(tester).dy, getDecoratorCenter(tester).dy);
+            controller.clear();
+            focusNode.unfocus();
+
+            // `alignLabelWithHint: true` aligns keeps the label in the center because
+            // that's where the hint is.
+            await tester.pumpWidget(buildFrame(true));
+            await tester.pumpAndSettle();
+
+            // On M3, hint centering is slightly wrong.
+            // TODO(bleroux): remove closeTo usage when this is fixed.
+            expect(getHintCenter(tester).dy, closeTo(getDecoratorCenter(tester).dy, 2.0));
+            expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
+
+            // Entering text still happens in the center.
+            await tester.enterText(find.byType(InputDecorator), inputText);
+            expect(getInputCenter(tester).dy, getDecoratorCenter(tester).dy);
+            controller.clear();
+            focusNode.unfocus();
+          });
+        });
+
+        group('Horizontal alignment', () {
+          testWidgets('Label for outlined decoration aligns horizontally with prefixIcon by default', (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/113537.
+            await tester.pumpWidget(
+              buildInputDecorator(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.ac_unit),
+                  labelText: labelText,
+                  border: OutlineInputBorder(),
+                ),
+                isFocused: true,
+              ),
+            );
+
+            // 12.0 is the left padding from M3 spec for outlined text field with icon.
+            expect(getLabelRect(tester).left, 12.0);
+            // TODO(bleroux): consider changing the input text position because, based on M3 spec,
+            // the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
+            // See https://m3.material.io/components/text-fields/specs#1ad2798c-ab41-4f0c-9a97-295ab9b37f33
+            // (Note that the diagrams on the spec for outlined text field are wrong but the table for
+            // outlined text fields and the diagrams for filled text field point to these values).
+            expect(getInputRect(tester).left, 48.0);
+          });
+
+          testWidgets('Label for outlined decoration aligns horizontally with input when alignLabelWithHint is true', (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/113537.
+            await tester.pumpWidget(
+              buildInputDecorator(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.ac_unit),
+                  labelText: labelText,
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+                isFocused: true,
+              ),
+            );
+
+            expect(getLabelRect(tester).left, getInputRect(tester).left);
+          });
+
+          testWidgets('Label for filled decoration is horizontally aligned with text by default', (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/113537.
+            // See https://github.com/flutter/flutter/pull/115540.
+            await tester.pumpWidget(
+              buildInputDecorator(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.ac_unit),
+                  labelText: labelText,
+                  filled: true,
+                ),
+                isFocused: true,
+              ),
+            );
+
+            // Label and input are horizontally aligned despite `alignLabelWithHint` being false (default value).
+            // The reason is that `alignLabelWithHint` was initially intended for vertical alignement only.
+            // See https://github.com/flutter/flutter/pull/24993 which introduced `alignLabelWithHint` parameter.
+            // See https://github.com/flutter/flutter/pull/115409 which used `alignLabelWithHint` for
+            // horizontal alignment in outlined text field.
+            expect(getLabelRect(tester).left, getInputRect(tester).left);
+          });
+        });
+      });
+    });
   });
 
   testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
@@ -4988,7 +5663,26 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('Floating label for filled input decoration is aligned with text', (WidgetTester tester) async {
+        testWidgets('Label aligns horizontally with text', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecoratorM2(
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.ac_unit),
+                labelText: 'label',
+                border: OutlineInputBorder(),
+              ),
+              isFocused: true,
+            ),
+          );
+
+          expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+          expect(tester.getTopLeft(find.text('label')).dx, 48.0);
+          expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+          expect(getBorderWeight(tester), 2.0);
+        });
+
+        testWidgets('Floating label for filled input decoration is horizontally aligned with text', (WidgetTester tester) async {
+          // Regression test added in https://github.com/flutter/flutter/pull/115540.
           await tester.pumpWidget(
             buildInputDecoratorM2(
               decoration: const InputDecoration(
@@ -6367,13 +7061,13 @@ void main() {
         await tester.pumpWidget(buildFrame(TextDirection.ltr));
         await expectLater(
           find.byType(InputDecorator),
-          matchesGoldenFile('input_decorator.outline_label.ltr.png'),
+          matchesGoldenFile('m2_input_decorator.outline_label.ltr.png'),
         );
 
         await tester.pumpWidget(buildFrame(TextDirection.rtl));
         await expectLater(
           find.byType(InputDecorator),
-          matchesGoldenFile('input_decorator.outline_label.rtl.png'),
+          matchesGoldenFile('m2_input_decorator.outline_label.rtl.png'),
         );
       },
     );
@@ -6413,13 +7107,13 @@ void main() {
         await tester.pumpWidget(buildFrame(TextDirection.ltr));
         await expectLater(
           find.byType(InputDecorator),
-          matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+          matchesGoldenFile('m2_input_decorator.outline_icon_label.ltr.png'),
         );
 
         await tester.pumpWidget(buildFrame(TextDirection.rtl));
         await expectLater(
           find.byType(InputDecorator),
-          matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+          matchesGoldenFile('m2_input_decorator.outline_icon_label.rtl.png'),
         );
       },
     );
