@@ -9,6 +9,9 @@ import '../environment.dart';
 import 'build_command.dart';
 import 'format_command.dart';
 import 'query_command.dart';
+import 'run_command.dart';
+
+const int _usageLineLength = 80;
 
 /// The root command runner.
 final class ToolCommandRunner extends CommandRunner<int> {
@@ -17,13 +20,14 @@ final class ToolCommandRunner extends CommandRunner<int> {
   ToolCommandRunner({
     required this.environment,
     required this.configs,
-  }) : super(toolName, toolDescription) {
+  }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
     final List<Command<int>> commands = <Command<int>>[
       FormatCommand(
         environment: environment,
       ),
       QueryCommand(environment: environment, configs: configs),
       BuildCommand(environment: environment, configs: configs),
+      RunCommand(environment: environment, configs: configs),
     ];
     commands.forEach(addCommand);
   }
