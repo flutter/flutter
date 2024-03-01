@@ -152,7 +152,7 @@
 ///    on flutter.dev.
 ///  * [Animations tutorial](https://flutter.dev/docs/development/ui/animations/tutorial)
 ///    on flutter.dev.
-///  * [Sample app](https://github.com/flutter/samples/tree/master/animations),
+///  * [Sample app](https://github.com/flutter/samples/tree/main/animations),
 ///    which showcases Flutter's animation features.
 ///  * [ImplicitlyAnimatedWidget] and its subclasses, which are [Widget]s that
 ///    implicitly animate changes to their properties.

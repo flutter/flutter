@@ -45,7 +45,7 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// size of the area that should be interactive.
 ///
 /// See also:
-///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
+///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/main/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
 ///   * The [flutter-go demo](https://github.com/justinmc/flutter-go), which includes robust positioning of an InteractiveViewer child
 ///     that works for all screen sizes and child sizes.

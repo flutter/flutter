@@ -277,9 +277,13 @@ class Configurator {
 
   void _createPageFooter(Directory footerPath, Version version) {
     final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
-    final String gitBranch = FlutterInformation.instance.getBranchName();
+    String channel = FlutterInformation.instance.getBranchName();
+    // Backward compatibility: Still support running on "master", but pretend it is "main".
+    if (channel == 'master') {
+      channel = 'main';
+    }
     final String gitRevision = FlutterInformation.instance.getFlutterRevision();
-    final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+    final String channelOut = channel.isEmpty ? '' : '• $channel';
     footerPath.childFile('footer.html').writeAsStringSync('<script src="footer.js"></script>');
     publishRoot.childDirectory('flutter').childFile('footer.js')
       ..createSync(recursive: true)
@@ -287,11 +291,11 @@ class Configurator {
 (function() {
   var span = document.querySelector('footer>span');
   if (span) {
-    span.innerText = 'Flutter $version • $timestamp • $gitRevision $gitBranchOut';
+    span.innerText = 'Flutter $version • $timestamp • $gitRevision $channelOut';
   }
   var sourceLink = document.querySelector('a.source-link');
   if (sourceLink) {
-    sourceLink.href = sourceLink.href.replace('/master/', '/$gitRevision/');
+    sourceLink.href = sourceLink.href.replace('/main/', '/$gitRevision/');
   }
 })();
 ''');
@@ -568,7 +572,7 @@ class DartdocGenerator {
       '--link-to-source-root',
       flutterRoot.path,
       '--link-to-source-uri-template',
-      'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+      'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
       '--inject-html',
       '--use-base-href',
       '--header',
