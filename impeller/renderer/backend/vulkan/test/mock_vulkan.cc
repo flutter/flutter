@@ -36,9 +36,11 @@ struct MockDescriptorPool {};
 
 struct MockSurfaceKHR {};
 
-struct MockSwapchainKHR {};
-
 struct MockImage {};
+
+struct MockSwapchainKHR {
+  std::array<MockImage, 3> images;
+};
 
 struct MockSemaphore {};
 
@@ -539,6 +541,14 @@ VkResult vkCreateQueryPool(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkDestroyQueryPool(VkDevice device,
+                        VkQueryPool queryPool,
+                        const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDestroyQueryPool");
+  delete reinterpret_cast<MockQueryPool*>(queryPool);
+}
+
 VkResult vkGetQueryPoolResults(VkDevice device,
                                VkQueryPool queryPool,
                                uint32_t firstQuery,
@@ -572,6 +582,14 @@ VkResult vkCreateDescriptorPool(VkDevice device,
       reinterpret_cast<VkDescriptorPool>(new MockDescriptorPool());
   mock_device->AddCalledFunction("vkCreateDescriptorPool");
   return VK_SUCCESS;
+}
+
+void vkDestroyDescriptorPool(VkDevice device,
+                             VkDescriptorPool descriptorPool,
+                             const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDestroyDescriptorPool");
+  delete reinterpret_cast<MockDescriptorPool*>(descriptorPool);
 }
 
 VkResult vkResetDescriptorPool(VkDevice device,
@@ -655,15 +673,24 @@ VkResult vkCreateSwapchainKHR(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkDestroySwapchainKHR(VkDevice device,
+                           VkSwapchainKHR swapchain,
+                           const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<MockSwapchainKHR*>(swapchain);
+}
+
 VkResult vkGetSwapchainImagesKHR(VkDevice device,
                                  VkSwapchainKHR swapchain,
                                  uint32_t* pSwapchainImageCount,
                                  VkImage* pSwapchainImages) {
-  *pSwapchainImageCount = 3;
+  MockSwapchainKHR* mock_swapchain =
+      reinterpret_cast<MockSwapchainKHR*>(swapchain);
+  auto& images = mock_swapchain->images;
+  *pSwapchainImageCount = images.size();
   if (pSwapchainImages != nullptr) {
-    pSwapchainImages[0] = reinterpret_cast<VkImage>(new MockImage());
-    pSwapchainImages[1] = reinterpret_cast<VkImage>(new MockImage());
-    pSwapchainImages[2] = reinterpret_cast<VkImage>(new MockImage());
+    for (size_t i = 0; i < images.size(); i++) {
+      pSwapchainImages[i] = reinterpret_cast<VkImage>(&images[i]);
+    }
   }
   return VK_SUCCESS;
 }
@@ -674,6 +701,12 @@ VkResult vkCreateSemaphore(VkDevice device,
                            VkSemaphore* pSemaphore) {
   *pSemaphore = reinterpret_cast<VkSemaphore>(new MockSemaphore());
   return VK_SUCCESS;
+}
+
+void vkDestroySemaphore(VkDevice device,
+                        VkSemaphore semaphore,
+                        const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<MockSemaphore*>(semaphore);
 }
 
 VkResult vkAcquireNextImageKHR(VkDevice device,
@@ -790,10 +823,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkSetDebugUtilsObjectNameEXT;
   } else if (strcmp("vkCreateQueryPool", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateQueryPool;
+  } else if (strcmp("vkDestroyQueryPool", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyQueryPool;
   } else if (strcmp("vkGetQueryPoolResults", pName) == 0) {
     return (PFN_vkVoidFunction)vkGetQueryPoolResults;
   } else if (strcmp("vkCreateDescriptorPool", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateDescriptorPool;
+  } else if (strcmp("vkDestroyDescriptorPool", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyDescriptorPool;
   } else if (strcmp("vkResetDescriptorPool", pName) == 0) {
     return (PFN_vkVoidFunction)vkResetDescriptorPool;
   } else if (strcmp("vkAllocateDescriptorSets", pName) == 0) {
@@ -806,10 +843,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkGetPhysicalDeviceSurfaceSupportKHR;
   } else if (strcmp("vkCreateSwapchainKHR", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateSwapchainKHR;
+  } else if (strcmp("vkDestroySwapchainKHR", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroySwapchainKHR;
   } else if (strcmp("vkGetSwapchainImagesKHR", pName) == 0) {
     return (PFN_vkVoidFunction)vkGetSwapchainImagesKHR;
   } else if (strcmp("vkCreateSemaphore", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateSemaphore;
+  } else if (strcmp("vkDestroySemaphore", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroySemaphore;
   } else if (strcmp("vkDestroySurfaceKHR", pName) == 0) {
     return (PFN_vkVoidFunction)vkDestroySurfaceKHR;
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
