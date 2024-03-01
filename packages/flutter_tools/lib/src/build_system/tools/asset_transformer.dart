@@ -171,7 +171,7 @@ final class DevelopmentAssetTransformer {
   }) async {
     final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
     ErrorHandlingFileSystem.deleteIfExists(output);
-    late File inputFile;
+    File? inputFile;
     bool cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
@@ -199,7 +199,7 @@ final class DevelopmentAssetTransformer {
       resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
       if (cleanupInput) {
-        ErrorHandlingFileSystem.deleteIfExists(inputFile);
+        ErrorHandlingFileSystem.deleteIfExists(inputFile!);
       }
     }
     return DevFSByteContent(result);
