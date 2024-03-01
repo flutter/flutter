@@ -89,8 +89,12 @@ void main() {
         '\n',
         '"linux_test_config" builder:\n',
         '   "build_name" config\n',
+        '   "host_debug" config\n',
+        '   "android_debug_arm64" config\n',
         '"linux_test_config2" builder:\n',
         '   "build_name" config\n',
+        '   "host_debug" config\n',
+        '   "android_debug_arm64" config\n',
       ]),
     );
   });
@@ -117,6 +121,8 @@ void main() {
           '\n',
           '"linux_test_config" builder:\n',
           '   "build_name" config\n',
+          '   "host_debug" config\n',
+          '   "android_debug_arm64" config\n',
         ]));
   });
 
@@ -135,7 +141,7 @@ void main() {
     expect(result, equals(0));
     expect(
       logger.testLogs.length,
-      equals(10),
+      equals(26),
     );
   });
 }

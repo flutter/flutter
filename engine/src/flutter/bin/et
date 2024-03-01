@@ -58,11 +58,9 @@ PLATFORM="${OS}-${CPU}"
 DART_SDK_DIR="${ENGINE_DIR}/prebuilts/${PLATFORM}/dart-sdk"
 DART="${DART_SDK_DIR}/bin/dart"
 
-cd "${ENGINE_DIR}/tools/engine_tool"
-
-if [ ! -d ".dart_tool" ]; then
+if [ ! -d "${ENGINE_DIR}/tools/engine_tool/.dart_tool" ]; then
   echo "You must run 'gclient sync -D' before using this tool."
   exit 1
 fi
 
-"${DART}" --disable-dart-dev bin/et.dart "$@"
+"${DART}" --disable-dart-dev "${ENGINE_DIR}/tools/engine_tool/bin/et.dart" "$@"

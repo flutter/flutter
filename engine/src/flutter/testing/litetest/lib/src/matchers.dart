@@ -62,8 +62,8 @@ void isNotEmpty(dynamic d) {
 /// Gives a [Matcher] that asserts that the value being matched is within
 /// `tolerance` of `value`.
 Matcher closeTo(num value, num tolerance) => (dynamic actual) {
-  Expect.approxEquals(value, actual as num, tolerance);
-};
+      Expect.approxEquals(value, actual as num, tolerance);
+    };
 
 /// A [Matcher] that matches NaN.
 void isNaN(dynamic v) {
@@ -74,8 +74,8 @@ void isNaN(dynamic v) {
 /// Gives a [Matcher] that asserts that the value being matched is not equal to
 /// `unexpected`.
 Matcher notEquals(dynamic unexpected) => (dynamic actual) {
-  Expect.notEquals(unexpected, actual);
-};
+      Expect.notEquals(unexpected, actual);
+    };
 
 /// A [Matcher] that matches non-zero values.
 void isNonZero(dynamic d) {
@@ -90,44 +90,64 @@ void throwsRangeError(dynamic d) {
 /// Gives a [Matcher] that asserts that the value being matched is a [String]
 /// that contains `s` as a substring.
 Matcher contains(String s) => (dynamic d) {
-  expect(d, isInstanceOf<String>());
-  Expect.contains(s, d as String);
-};
+      expect(d, isInstanceOf<String>());
+      Expect.contains(s, d as String);
+    };
 
 /// Gives a [Matcher] that asserts that the value being matched is an [Iterable]
 /// of length `d`.
 Matcher hasLength(int l) => (dynamic d) {
-  expect(d, isInstanceOf<Iterable<dynamic>>());
-  expect((d as Iterable<dynamic>).length, equals(l));
-};
+      expect(d, isInstanceOf<Iterable<dynamic>>());
+      expect((d as Iterable<dynamic>).length, equals(l));
+    };
 
 /// Gives a matcher that asserts that the value being matched is a [String] that
 /// starts with `s`.
 Matcher startsWith(String s) => (dynamic d) {
-  expect(d, isInstanceOf<String>());
-  final String h = d as String;
-  if (!h.startsWith(s)) {
-    Expect.fail('Expected "$h" to start with "$s"');
-  }
-};
+      expect(d, isInstanceOf<String>());
+      final String h = d as String;
+      if (!h.startsWith(s)) {
+        Expect.fail('Expected "$h" to start with "$s"');
+      }
+    };
 
 /// Gives a matcher that asserts that the value being matched is a [String] that
 /// ends with `s`.
 Matcher endsWith(String s) => (dynamic d) {
-  expect(d, isInstanceOf<String>());
-  final String h = d as String;
-  if (!h.endsWith(s)) {
-    Expect.fail('Expected "$h" to end with "$s"');
-  }
-};
+      expect(d, isInstanceOf<String>());
+      final String h = d as String;
+      if (!h.endsWith(s)) {
+        Expect.fail('Expected "$h" to end with "$s"');
+      }
+    };
 
 /// Gives a matcher that asserts that the value being matched is a [String] that
 /// regexp matches with `pattern`.
 Matcher hasMatch(String pattern) => (dynamic d) {
-  expect(d, isInstanceOf<String>());
-  final String h = d as String;
-  final RegExp regExp = RegExp(pattern);
-  if (!regExp.hasMatch(h)) {
-    Expect.fail('Expected "$h" to match with "$pattern"');
-  }
-};
+      expect(d, isInstanceOf<String>());
+      final String h = d as String;
+      final RegExp regExp = RegExp(pattern);
+      if (!regExp.hasMatch(h)) {
+        Expect.fail('Expected "$h" to match with "$pattern"');
+      }
+    };
+
+/// Gives a matcher that asserts that the value being matched is a List<String>
+/// that contains the entries in `pattern` in order. There may be values
+/// that are not in the pattern interleaved.
+Matcher containsStringsInOrder(List<String> pattern) => (dynamic d) {
+      expect(d, isInstanceOf<List<String>>());
+      final List<String> input = d as List<String>;
+      int cursor = 0;
+      for (final String el in input) {
+        if (cursor == pattern.length) {
+          break;
+        }
+        if (el == pattern[cursor]) {
+          cursor++;
+        }
+      }
+      if (cursor < pattern.length) {
+        Expect.fail('Did not find ${pattern[cursor]} in $d}');
+      }
+    };

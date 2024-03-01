@@ -432,6 +432,7 @@ final class BuildRunner extends Runner {
           workingDirectory: engineSrcDir.path,
         );
         final List<int> stderrOutput = <int>[];
+        final List<int> stdoutOutput = <int>[];
         final Completer<void> stdoutComplete = Completer<void>();
         final Completer<void> stderrComplete = Completer<void>();
 
@@ -440,7 +441,11 @@ final class BuildRunner extends Runner {
             .transform(const LineSplitter())
             .listen(
           (String line) {
-            _ninjaProgress(eventHandler, command, line);
+            if (_ninjaProgress(eventHandler, command, line)) {
+              return;
+            }
+            final List<int> bytes = utf8.encode('$line\n');
+            stdoutOutput.addAll(bytes);
           },
           onDone: () async => stdoutComplete.complete(),
         );
@@ -458,9 +463,9 @@ final class BuildRunner extends Runner {
 
         processResult = ProcessRunnerResult(
           exitCode,
-          <int>[], // stdout.
+          stdoutOutput, // stdout.
           stderrOutput, // stderr.
-          stderrOutput, // combined,
+          <int>[], // combined,
           pid: process.pid, // pid,
         );
       }
@@ -481,7 +486,8 @@ final class BuildRunner extends Runner {
   }
 
   // Parse lines of the form '[6232/6269] LINK ./accessibility_unittests'.
-  void _ninjaProgress(
+  // Returns false if the line is not a ninja progress line.
+  bool _ninjaProgress(
     RunnerEventHandler eventHandler,
     List<String> command,
     String line,
@@ -491,19 +497,19 @@ final class BuildRunner extends Runner {
     if (maybeProgress.length < 3 ||
         maybeProgress[0] != '[' ||
         maybeProgress[maybeProgress.length - 1] != ']') {
-      return;
+      return false;
     }
     // Extract the two numbers by stripping the '[' and ']' and splitting on
     // the '/'.
     final List<String> progress =
         maybeProgress.substring(1, maybeProgress.length - 1).split('/');
     if (progress.length < 2) {
-      return;
+      return false;
     }
     final int? completed = int.tryParse(progress[0]);
     final int? total = int.tryParse(progress[1]);
     if (completed == null || total == null) {
-      return;
+      return false;
     }
     eventHandler(RunnerProgress(
       '${build.name}: ninja',
@@ -514,6 +520,7 @@ final class BuildRunner extends Runner {
       total,
       completed == total, // True when done.
     ));
+    return true;
   }
 
   late final bool _isGoma = _mergedGnArgs.contains('--goma');

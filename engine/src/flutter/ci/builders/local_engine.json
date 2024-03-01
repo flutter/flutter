@@ -1,0 +1,118 @@
+{
+  "builds": [
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--android",
+        "--android-cpu=arm64",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "android_debug_arm64",
+      "ninja": {
+        "config": "android_debug_arm64",
+        "targets": []
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "profile",
+        "--android",
+        "--android-cpu=arm64",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "android_profile_arm64",
+      "ninja": {
+        "config": "android_profile_arm64",
+        "targets": []
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "release",
+        "--android",
+        "--android-cpu=arm64",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "android_release_arm64",
+      "ninja": {
+        "config": "android_release_arm64",
+        "targets": []
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "host_debug",
+      "ninja": {
+        "config": "host_debug",
+        "targets": []
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "profile",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "host_profile",
+      "ninja": {
+        "config": "host_profile",
+        "targets": []
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Mac-13",
+        "os=Linux"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "release",
+        "--no-stripped",
+        "--enable-impeller-vulkan",
+        "--no-lto"
+      ],
+      "name": "host_release",
+      "ninja": {
+        "config": "host_release",
+        "targets": []
+      }
+    }
+  ]
+}

@@ -46,6 +46,30 @@ String testConfig(String os) => '''
           }
         ]
       }
+    },
+    {},
+    {},
+    {
+      "drone_dimensions": [
+        "os=$os"
+      ],
+      "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
+      "name": "host_debug",
+      "ninja": {
+        "config": "host_debug",
+        "targets": ["ninja_target"]
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=$os"
+      ],
+      "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
+      "name": "android_debug_arm64",
+      "ninja": {
+        "config": "android_debug_arm64",
+        "targets": ["ninja_target"]
+      }
     }
   ],
   "generators": {

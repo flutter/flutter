@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' as ffi show Abi;
-import 'dart:io' as io show Directory, exitCode, stderr;
+import 'dart:io' as io show Directory, Platform, exitCode, stderr;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
@@ -19,7 +19,7 @@ void main(List<String> args) async {
   // Find the engine repo.
   final Engine engine;
   try {
-    engine = Engine.findWithin();
+    engine = Engine.findWithin(p.dirname(io.Platform.script.toFilePath()));
   } catch (e) {
     io.stderr.writeln(e);
     io.exitCode = 1;
@@ -51,15 +51,17 @@ void main(List<String> args) async {
     io.exitCode = 1;
   }
 
+  final Environment environment = Environment(
+    abi: ffi.Abi.current(),
+    engine: engine,
+    platform: const LocalPlatform(),
+    processRunner: ProcessRunner(),
+    logger: Logger(),
+  );
+
   // Use the Engine and BuildConfig collection to build the CommandRunner.
   final ToolCommandRunner runner = ToolCommandRunner(
-    environment: Environment(
-      abi: ffi.Abi.current(),
-      engine: engine,
-      platform: const LocalPlatform(),
-      processRunner: ProcessRunner(),
-      logger: Logger(),
-    ),
+    environment: environment,
     configs: configs,
   );
 
