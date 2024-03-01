@@ -8,7 +8,6 @@ import 'dart:io' as io;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
-import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
@@ -76,82 +75,18 @@ void main() {
     );
   }
 
-  test('can find host runnable build', () async {
-    final Logger logger = Logger.test();
-    final (Environment env, _) = linuxEnv(logger);
-    final List<Build> result = runnableBuilds(env, configs);
-    expect(result.length, equals(6));
-    expect(result[0].name, equals('build_name'));
-  });
-
-  test('build command invokes gn', () async {
+  test('run command invokes flutter run', () async {
     final Logger logger = Logger.test();
     final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
       configs: configs,
     );
-    final int result = await runner.run(<String>[
-      'build',
-      '--config',
-      'build_name',
-    ]);
+    final int result =
+        await runner.run(<String>['run', '--', '--weird_argument']);
     expect(result, equals(0));
-    expect(runHistory.length, greaterThanOrEqualTo(1));
-    expect(runHistory[0].length, greaterThanOrEqualTo(1));
-    expect(runHistory[0][0], contains('gn'));
-  });
-
-  test('build command invokes ninja', () async {
-    final Logger logger = Logger.test();
-    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
-    final ToolCommandRunner runner = ToolCommandRunner(
-      environment: env,
-      configs: configs,
-    );
-    final int result = await runner.run(<String>[
-      'build',
-      '--config',
-      'build_name',
-    ]);
-    expect(result, equals(0));
-    expect(runHistory.length, greaterThanOrEqualTo(2));
-    expect(runHistory[1].length, greaterThanOrEqualTo(1));
-    expect(runHistory[1][0], contains('ninja'));
-  });
-
-  test('build command invokes generator', () async {
-    final Logger logger = Logger.test();
-    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
-    final ToolCommandRunner runner = ToolCommandRunner(
-      environment: env,
-      configs: configs,
-    );
-    final int result = await runner.run(<String>[
-      'build',
-      '--config',
-      'build_name',
-    ]);
-    expect(result, equals(0));
-    expect(runHistory.length, greaterThanOrEqualTo(3));
-    expect(runHistory[2].length, greaterThanOrEqualTo(2));
-    expect(runHistory[2][0], contains('python3'));
-    expect(runHistory[2][1], contains('gen/script.py'));
-  });
-
-  test('build command does not invoke tests', () async {
-    final Logger logger = Logger.test();
-    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
-    final ToolCommandRunner runner = ToolCommandRunner(
-      environment: env,
-      configs: configs,
-    );
-    final int result = await runner.run(<String>[
-      'build',
-      '--config',
-      'build_name',
-    ]);
-    expect(result, equals(0));
-    expect(runHistory.length, lessThanOrEqualTo(3));
+    expect(runHistory.length, greaterThanOrEqualTo(5));
+    expect(runHistory[4],
+        containsStringsInOrder(<String>['flutter', 'run', '--weird_argument']));
   });
 }

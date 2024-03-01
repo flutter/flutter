@@ -5,6 +5,7 @@
 import 'package:engine_build_configs/engine_build_configs.dart';
 
 import 'environment.dart';
+import 'logger.dart';
 
 /// A function that returns true or false when given a [BuilderConfig] and its
 /// name.
@@ -47,4 +48,60 @@ List<Build> runnableBuilds(Environment env, Map<String, BuilderConfig> input) {
   return filterBuilds(input, (String configName, Build build) {
     return build.canRunOn(env.platform);
   });
+}
+
+/// Validates the list of builds.
+/// Calls assert.
+void debugCheckBuilds(List<Build> builds) {
+  final Set<String> names = <String>{};
+
+  for (final Build build in builds) {
+    assert(!names.contains(build.name),
+        'More than one build has the name ${build.name}');
+    names.add(build.name);
+  }
+}
+
+/// Build the build target in the environment.
+Future<int> runBuild(Environment environment, Build build) async {
+  final BuildRunner buildRunner = BuildRunner(
+    platform: environment.platform,
+    processRunner: environment.processRunner,
+    abi: environment.abi,
+    engineSrcDir: environment.engine.srcDir,
+    build: build,
+    runTests: false,
+  );
+
+  Spinner? spinner;
+  void handler(RunnerEvent event) {
+    switch (event) {
+      case RunnerStart():
+        environment.logger.status('$event     ', newline: false);
+        spinner = environment.logger.startSpinner();
+      case RunnerProgress(done: true):
+        spinner?.finish();
+        spinner = null;
+        environment.logger.clearLine();
+        environment.logger.status(event);
+      case RunnerProgress(done: false):
+        {
+          spinner?.finish();
+          spinner = null;
+          final String percent = '${event.percent.toStringAsFixed(1)}%';
+          final String fraction = '(${event.completed}/${event.total})';
+          final String prefix = '[${event.name}] $percent $fraction ';
+          final String what = event.what;
+          environment.logger.clearLine();
+          environment.logger.status('$prefix$what', newline: false, fit: true);
+        }
+      default:
+        spinner?.finish();
+        spinner = null;
+        environment.logger.status(event);
+    }
+  }
+
+  final bool buildResult = await buildRunner.run(handler);
+  return buildResult ? 0 : 1;
 }
