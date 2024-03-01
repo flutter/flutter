@@ -604,8 +604,8 @@ void main() {
         snackBarTheme: const SnackBarThemeData(
           actionLabelStyle: TextStyle(
             backgroundColor: Colors.orange,
-          )
-        )
+          ),
+        ),
       ),
       home: Scaffold(
         body: Builder(
