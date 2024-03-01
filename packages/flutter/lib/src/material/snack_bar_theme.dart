@@ -166,8 +166,6 @@ class SnackBarThemeData with Diagnosticable {
   final DismissDirection? dismissDirection;
 
   /// Overrides the default value for [SnackBarAction.labelStyle].
-  ///
-  /// If null, [SnackBar] will default to null.
   final TextStyle? actionLabelStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
