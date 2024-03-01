@@ -1020,7 +1020,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
