@@ -52,6 +52,7 @@ class DatePickerThemeData with Diagnosticable {
     this.dayForegroundColor,
     this.dayBackgroundColor,
     this.dayOverlayColor,
+    this.dayShape,
     this.todayForegroundColor,
     this.todayBackgroundColor,
     this.todayBorder,
@@ -163,12 +164,41 @@ class DatePickerThemeData with Diagnosticable {
   /// indicate that a day in the grid is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? dayOverlayColor;
 
+  /// Overrides the default shape used to paint the shape decoration of the
+  /// day labels in the grid of the date picker.
+  ///
+  /// If the selected day is the current day, the provided shape with the
+  /// value of [todayBackgroundColor] is used to paint the shape decoration of
+  /// the day label and the value of [todayBorder] and [todayForegroundColor] is
+  /// used to paint the border.
+  ///
+  /// If the selected day is not the current day, the provided shape with the
+  /// value of [dayBackgroundColor] is used to paint the shape decoration of
+  /// the day label.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
+  final MaterialStateProperty<OutlinedBorder?>? dayShape;
+
   /// Overrides the default color used to paint the
   /// [DatePickerDialog.currentDate] label in the grid of the dialog's
   /// [CalendarDatePicker] and the corresponding year in the dialog's
   /// [YearPicker].
   ///
   /// This will be used instead of the [TextStyle.color] provided in [dayStyle].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
   final MaterialStateProperty<Color?>? todayForegroundColor;
 
   /// Overrides the default color used to paint the background of the
@@ -181,6 +211,14 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The border side's [BorderSide.color] is not used,
   /// [todayForegroundColor] is used instead.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
   final BorderSide? todayBorder;
 
   /// Overrides the default text style used to paint each of the year
@@ -326,6 +364,7 @@ class DatePickerThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? dayForegroundColor,
     MaterialStateProperty<Color?>? dayBackgroundColor,
     MaterialStateProperty<Color?>? dayOverlayColor,
+    MaterialStateProperty<OutlinedBorder?>? dayShape,
     MaterialStateProperty<Color?>? todayForegroundColor,
     MaterialStateProperty<Color?>? todayBackgroundColor,
     BorderSide? todayBorder,
@@ -364,6 +403,7 @@ class DatePickerThemeData with Diagnosticable {
       dayForegroundColor: dayForegroundColor ?? this.dayForegroundColor,
       dayBackgroundColor: dayBackgroundColor ?? this.dayBackgroundColor,
       dayOverlayColor: dayOverlayColor ?? this.dayOverlayColor,
+      dayShape: dayShape ?? this.dayShape,
       todayForegroundColor: todayForegroundColor ?? this.todayForegroundColor,
       todayBackgroundColor: todayBackgroundColor ?? this.todayBackgroundColor,
       todayBorder: todayBorder ?? this.todayBorder,
@@ -409,6 +449,7 @@ class DatePickerThemeData with Diagnosticable {
       dayForegroundColor: MaterialStateProperty.lerp<Color?>(a?.dayForegroundColor, b?.dayForegroundColor, t, Color.lerp),
       dayBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.dayBackgroundColor, b?.dayBackgroundColor, t, Color.lerp),
       dayOverlayColor: MaterialStateProperty.lerp<Color?>(a?.dayOverlayColor, b?.dayOverlayColor, t, Color.lerp),
+      dayShape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.dayShape, b?.dayShape, t, OutlinedBorder.lerp),
       todayForegroundColor: MaterialStateProperty.lerp<Color?>(a?.todayForegroundColor, b?.todayForegroundColor, t, Color.lerp),
       todayBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.todayBackgroundColor, b?.todayBackgroundColor, t, Color.lerp),
       todayBorder: _lerpBorderSide(a?.todayBorder, b?.todayBorder, t),
@@ -460,6 +501,7 @@ class DatePickerThemeData with Diagnosticable {
     dayForegroundColor,
     dayBackgroundColor,
     dayOverlayColor,
+    dayShape,
     todayForegroundColor,
     todayBackgroundColor,
     todayBorder,
@@ -504,6 +546,7 @@ class DatePickerThemeData with Diagnosticable {
       && other.dayForegroundColor == dayForegroundColor
       && other.dayBackgroundColor == dayBackgroundColor
       && other.dayOverlayColor == dayOverlayColor
+      && other.dayShape == dayShape
       && other.todayForegroundColor == todayForegroundColor
       && other.todayBackgroundColor == todayBackgroundColor
       && other.todayBorder == todayBorder
@@ -545,6 +588,7 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayForegroundColor', dayForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayBackgroundColor', dayBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayOverlayColor', dayOverlayColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('dayShape', dayShape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('todayForegroundColor', todayForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('todayBackgroundColor', todayBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide?>('todayBorder', todayBorder, defaultValue: null));
@@ -672,6 +716,7 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
     : super(
         elevation: 24.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -843,6 +888,9 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
     : super(
         elevation: 6.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        // TODO(tahatesser): Update this to use token when gen_defaults
+        // supports `CircleBorder` for fully rounded corners.
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
