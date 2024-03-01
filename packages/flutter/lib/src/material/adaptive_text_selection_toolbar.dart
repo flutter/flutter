@@ -262,6 +262,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           buttons.add(TextSelectionToolbarTextButton(
             padding: TextSelectionToolbarTextButton.getPadding(i, buttonItems.length),
             onPressed: buttonItem.onPressed,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(getButtonLabel(context, buttonItem)),
           ));
         }
