@@ -215,7 +215,12 @@ Android Studio:
    ![Example](https://github.com/flutter/flutter/assets/168174/02fe0e6f-f0c4-47b2-8dae-9aa0b9520503)
 
 At this point you should be able to open Java files in Android Studio and get
-code completion in the `io/flutter` folder (additional, undocumented work is
-required for `test/io/flutter`). For example, `FlutterJNI.java`:
+code completion in the `io/flutter` and `test/io/flutter` folders. For example, `FlutterJNI.java`:
 
 ![Example](https://github.com/flutter/flutter/assets/168174/387550d4-eab7-4097-9da3-7713a6ec4da7)
+
+To get code coverage displayed in line: go to the test class you wish to run and
+1. Right click > Modify Run Configuration..., 
+2. In the window that pops up click Modify options > Specify classes
+and packages (under "code coverage"). 
+3. In the new box that appears at the bottom of the window, click the + > Add package, and then add `io.flutter.*`.
