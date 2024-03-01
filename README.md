@@ -7,6 +7,8 @@
   </h1>
 </a>
 
+Fluuter Project
+
 [![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=flutter)](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
 [![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
