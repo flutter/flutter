@@ -103,6 +103,10 @@ vars = {
   # Checkout Linux dependencies only when building on Linux.
   'download_linux_deps': 'host_os == "linux"',
 
+  # The minimum macOS SDK version. This must match the setting in
+  # //flutter/tools/gn.
+  'mac_sdk_min': '10.14',
+
   # Downloads the fuchsia SDK as listed in fuchsia_sdk_path var. This variable
   # is currently only used for the Fuchsia LSC process and is not intended for
   # local development.
@@ -279,7 +283,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7b537de78ac2239982ace130d1845374e5dcf113',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ebc2748229c8377d97ee1cafd11dff07c285f440',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -1205,6 +1209,32 @@ hooks = [
       'src/flutter/tools/fuchsia/with_envs.py',
       'src/flutter/tools/fuchsia/test_scripts/update_product_bundles.py',
       'terminal.x64,terminal.qemu-arm64',
+    ]
+  },
+  # The following two scripts check if they are running in the LUCI
+  # environment, and do nothing if so. This is because Xcode is not yet
+  # installed in CI when these hooks are run.
+  {
+    'name': 'Find the iOS device SDKs',
+    'pattern': '.',
+    'condition': 'host_os == "mac"',
+    'action': [
+      'python3',
+      'src/build/config/ios/ios_sdk.py',
+      # This cleans up entries under flutter/prebuilts for this script and the
+      # following script.
+      '--as-gclient-hook'
+    ]
+  },
+  {
+    'name': 'Find the macOS SDK',
+    'pattern': '.',
+    'condition': 'host_os == "mac"',
+    'action': [
+      'python3',
+      'src/build/mac/find_sdk.py',
+      '--as-gclient-hook',
+      Var('mac_sdk_min')
     ]
   }
 ]
