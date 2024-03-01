@@ -194,7 +194,6 @@ void main() {
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
     expect(theme.errorColor, theme.colorScheme.error);
@@ -263,7 +262,6 @@ void main() {
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
     expect(theme.errorColor, theme.colorScheme.error);
@@ -327,7 +325,6 @@ void main() {
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
     expect(theme.errorColor, theme.colorScheme.error);
@@ -392,7 +389,6 @@ void main() {
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
     expect(theme.errorColor, theme.colorScheme.error);
@@ -456,7 +452,6 @@ void main() {
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
     expect(theme.errorColor, theme.colorScheme.error);
@@ -470,7 +465,6 @@ void main() {
     expect(theme.brightness, equals(Brightness.light));
     expect(theme.primaryColor, equals(lightColors.primary));
     expect(theme.cardColor, equals(lightColors.surface));
-    expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
@@ -486,7 +480,6 @@ void main() {
     // in dark theme's the color used for main components is surface instead of primary
     expect(theme.primaryColor, equals(darkColors.surface));
     expect(theme.cardColor, equals(darkColors.surface));
-    expect(theme.backgroundColor, equals(darkColors.background));
     expect(theme.canvasColor, equals(darkColors.background));
     expect(theme.scaffoldBackgroundColor, equals(darkColors.background));
     expect(theme.dialogBackgroundColor, equals(darkColors.background));
@@ -902,9 +895,7 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.black,
       errorColor: Colors.black,
-      backgroundColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -1021,9 +1012,7 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.white,
       errorColor: Colors.white,
-      backgroundColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1121,9 +1110,7 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: otherTheme.toggleableActiveColor,
       errorColor: otherTheme.errorColor,
-      backgroundColor: otherTheme.backgroundColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1222,9 +1209,7 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
-    expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1256,7 +1241,6 @@ void main() {
     expect(theme.colorScheme.brightness, equals(Brightness.dark));
     expect(theme.primaryColor, equals(lightColors.primary));
     expect(theme.cardColor, equals(lightColors.surface));
-    expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
@@ -1354,9 +1338,7 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'toggleableActiveColor',
       'errorColor',
-      'backgroundColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
