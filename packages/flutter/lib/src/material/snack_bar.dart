@@ -136,6 +136,9 @@ class SnackBarAction extends StatefulWidget {
   /// The button label's textStyle.
   ///
   /// If not provided, defaults to [SnackBarThemeData.actionLabelStyle].
+  ///
+  /// [TextStyle.color] would be overriden by either [textColor] or
+  /// [disabledTextColor].
   final TextStyle? labelStyle;
 
   @override
