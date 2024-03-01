@@ -247,7 +247,7 @@ class FormState extends State<Form> {
   }
 
   void _updateField(FormFieldState<dynamic> field) {
-    if(!field._focusNode.hasFocus) {
+    if (!field._focusNode.hasFocus) {
       _validate();
     }
   }
