@@ -274,7 +274,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/main/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )

@@ -350,7 +350,7 @@ class TextButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.primary
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.primary(0.08)
-  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.1)
   ///   * others - null
   /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
@@ -458,13 +458,13 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return primary.withOpacity(0.12);
+      return primary.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return primary.withOpacity(0.04);
+      return primary.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return primary.withOpacity(0.12);
+      return primary.withOpacity(0.1);
     }
     return null;
   }
@@ -600,13 +600,13 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       return null;
     });
