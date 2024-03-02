@@ -479,19 +479,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) {
-            switch (orientation) {
-              case Orientation.portrait:
-                return Scaffold(
-                  drawer: const Text('drawer'),
-                  body: Container(),
-                );
-              case Orientation.landscape:
-                return Scaffold(
-                  appBar: AppBar(),
-                  body: Container(),
-                );
-            }
+          builder: (BuildContext context, Orientation orientation) => switch (orientation) {
+            Orientation.portrait  => Scaffold(body: Container(), drawer: const Text('drawer')),
+            Orientation.landscape => Scaffold(body: Container(), appBar: AppBar()),
           },
         ),
       ),
@@ -520,19 +510,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) {
-            switch (orientation) {
-              case Orientation.portrait:
-                return Scaffold(
-                  endDrawer: const Text('endDrawer'),
-                  body: Container(),
-                );
-              case Orientation.landscape:
-                return Scaffold(
-                  appBar: AppBar(),
-                  body: Container(),
-                );
-            }
+          builder: (BuildContext context, Orientation orientation) => switch (orientation) {
+            Orientation.portrait  => Scaffold(body: Container(), endDrawer: const Text('endDrawer')),
+            Orientation.landscape => Scaffold(body: Container(), appBar: AppBar()),
           },
         ),
       ),
