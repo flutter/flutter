@@ -129,7 +129,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="incrementLabel" destination="qaB-rs-mWp" id="bFY-of-WoI"/>
+                        <outlet property="countLabel" destination="qaB-rs-mWp" id="bFY-of-WoI"/>
                         <outlet property="incrementButton" destination="6yL-sX-bUL" id="aQR-ap-BrT"/>
                     </connections>
                 </viewController>

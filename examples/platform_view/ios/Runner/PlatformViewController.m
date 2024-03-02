@@ -7,19 +7,19 @@
 #import <Foundation/Foundation.h>
 
 @interface PlatformViewController ()
-@property(weak, nonatomic) IBOutlet UILabel* incrementLabel;
+@property(weak, nonatomic) IBOutlet UILabel* countLabel;
 @end
 
 @implementation PlatformViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [self setIncrementLabelText];
+  [self updateCountLabelText];
 }
 
 - (IBAction)handleIncrement:(id)sender {
   self.counter++;
-  [self setIncrementLabelText];
+  [self updateCountLabelText];
 }
 
 - (IBAction)switchToFlutterView:(id)sender {
@@ -27,10 +27,10 @@
   [self dismissViewControllerAnimated:NO completion:nil];
 }
 
-- (void)setIncrementLabelText {
+- (void)updateCountLabelText {
   NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.", self.counter,
                                               (self.counter == 1) ? @"time" : @"times"];
-  self.incrementLabel.text = text;
+  self.countLabel.text = text;
 }
 
 @end

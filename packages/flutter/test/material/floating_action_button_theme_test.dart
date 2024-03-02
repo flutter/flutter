@@ -38,7 +38,7 @@ void main() {
     expect(_getRawMaterialButton(tester).elevation, 6);
     expect(_getRawMaterialButton(tester).highlightElevation, 6);
     expect(_getRawMaterialButton(tester).shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))));
-    expect(_getRawMaterialButton(tester).splashColor, colorScheme.onPrimaryContainer.withOpacity(0.12));
+    expect(_getRawMaterialButton(tester).splashColor, colorScheme.onPrimaryContainer.withOpacity(0.1));
     expect(_getRawMaterialButton(tester).constraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
     expect(_getIconSize(tester).width, 24.0);
     expect(_getIconSize(tester).height, 24.0);
