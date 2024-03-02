@@ -212,9 +212,12 @@ abstract interface class ChipAttributes {
   /// Color of the chip's surface tint overlay when its elevation is
   /// greater than 0.
   ///
-  /// If this is null and [ThemeData.useMaterial3] is true, then
-  /// [ColorScheme.surfaceTint] color is used. Otherwise, it defaults
-  /// to null.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
+  ///
+  /// If this is null, defaults to [Colors.transparent].
   Color? get surfaceTintColor;
 
   /// Theme used for all icons in the chip.
@@ -2374,7 +2377,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get checkmarkColor => null;
