@@ -11,7 +11,7 @@ Explain this cherry pick in one line that is accessible to most Flutter develope
 
 < Replace with changelog description here >
 
-### impact_description:
+### Impact Description:
 What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)
 
 < Replace with impact description here >
