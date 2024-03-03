@@ -211,6 +211,342 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
   }
 }
 
+/// A scrolling container that animates items with separators when they are inserted or removed.
+///
+/// This widget's [AnimatedListSeparatedState] can be used to dynamically insert or
+/// remove items. To refer to the [AnimatedListSeparatedState] either provide a
+/// [GlobalKey] or use the static [of] method from an item's input callback.
+///
+/// This widget is similar to one created by [ListView.separated].
+///
+/// {@tool dartpad}
+/// This sample application uses an [AnimatedListSeparated] to create an effect when
+/// items are removed or added to the list.
+///
+/// ** See code in examples/api/lib/widgets/animated_list/animated_list_separated.0.dart **
+/// {@end-tool}
+///
+/// By default, [AnimatedListSeparated] will automatically pad the limits of the
+/// list's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top and
+/// bottom padding using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     removeBottom: true,
+///     child: AnimatedListSeparated(
+///       initialItemCount: 50,
+///       itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///       separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Divider();
+///       }
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SliverAnimatedList], a sliver that animates items when they are inserted
+///    or removed from a list.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted or removed from a grid.
+///  * [AnimatedGrid], a non-sliver scrolling container that animates items when
+///    they are inserted or removed in a grid.
+class AnimatedListSeparated extends _AnimatedScrollView {
+  /// Creates a scrolling container that animates items with separators when
+  /// they are inserted or removed.
+  AnimatedListSeparated({
+    super.key,
+    required AnimatedItemBuilder itemBuilder,
+    required AnimatedItemBuilder separatorBuilder,
+    int initialItemCount = 0,
+    super.scrollDirection = Axis.vertical,
+    super.reverse = false,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap = false,
+    super.padding,
+    super.clipBehavior = Clip.hardEdge,
+  }) : assert(initialItemCount >= 0),
+       super(
+         initialItemCount: _computeChildCountWithSeparators(initialItemCount),
+         itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+           final int itemIndex = index ~/ 2;
+           if (index.isEven) {
+             return itemBuilder(context, itemIndex, animation);
+           }
+           return separatorBuilder(context, itemIndex, animation);
+         },
+       );
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// This method is typically used by [AnimatedListSeparated] item widgets that insert
+  /// or remove items in response to user input.
+  ///
+  /// If no [AnimatedListSeparated] surrounds the context given, then this function will
+  /// assert in debug mode and throw an exception in release mode.
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], a similar function that will return null if no
+  ///    [AnimatedListSeparated] ancestor is found.
+  static AnimatedListSeparatedState of(BuildContext context) {
+    final AnimatedListSeparatedState? result = AnimatedListSeparated.maybeOf(context);
+    assert(() {
+      if (result == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('AnimatedListSeparated.of() called with a context that does not contain an AnimatedListSeparated.'),
+          ErrorDescription(
+            'No AnimatedListSeparated ancestor could be found starting from the context that was passed to AnimatedListSeparated.of().',
+          ),
+          ErrorHint(
+            'This can happen when the context provided is from the same StatefulWidget that '
+                'built the AnimatedListSeparated. Please see the AnimatedListSeparated documentation for examples '
+                'of how to refer to an AnimatedListSeparatedState object:\n'
+                '  https://api.flutter.dev/flutter/widgets/AnimatedListSeparatedState-class.html',
+          ),
+          context.describeElement('The context used was'),
+        ]);
+      }
+      return true;
+    }());
+    return result!;
+  }
+
+  /// The [AnimatedListSeparatedState] from the closest instance
+  /// of [AnimatedListSeparated] that encloses the given context.
+  ///
+  /// This method is typically used by [AnimatedListSeparated] item widgets
+  /// that insert or remove items in response to user input.
+  ///
+  /// If no [AnimatedListSeparated] surrounds the context given,
+  /// then this function will return null.
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// This method does not create a dependency, and so will not cause rebuilding
+  /// when the state changes.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function that will throw if no [AnimatedListSeparated] ancestor
+  ///    is found.
+  static AnimatedListSeparatedState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<AnimatedListSeparatedState>();
+  }
+
+  @override
+  AnimatedListSeparatedState createState() => AnimatedListSeparatedState();
+
+  // Helper method to compute the actual child count when taking separators into account.
+  static int _computeChildCountWithSeparators(int itemCount) {
+    if (itemCount == 0) {
+      return 0;
+    }
+    return itemCount * 2 - 1;
+  }
+}
+
+/// The [AnimatedListSeparatedState] for [AnimatedListSeparated],
+/// a scrolling list container that animates items with separators when they are
+/// inserted or removed.
+///
+/// When an item is inserted with [insertItem] an animation begins running.
+/// The animation is passed to [AnimatedListSeparated.itemBuilder]
+/// and [AnimatedListSeparated.separatorBuilder] whenever the item's
+/// and separator's widgets are needed.
+///
+/// When multiple items are inserted with [insertAllItems] an animation begins running.
+/// The animation is passed to [AnimatedListSeparated.itemBuilder]
+/// and [AnimatedListSeparated.separatorBuilder] whenever
+/// the item's and separator's widgets are needed.
+///
+/// When an item is removed with [removeSeparatedItem] its animation
+/// as well as that of its corresponding separator are reversed.
+/// The removed item's animation is passed to
+/// the [removeSeparatedItem] itemBuilder parameter.
+/// The corresponding separator's animation is passed
+/// to the [removeSeparatedItem] separatorBuilder parameter.
+///
+/// An app that needs to insert or remove items in response to an event
+/// can refer to the [AnimatedListSeparated]'s state with a global key:
+///
+/// ```dart
+/// // (e.g. in a stateful widget)
+/// GlobalKey<AnimatedListSeparatedState> listKey = GlobalKey<AnimatedListSeparatedState>();
+///
+/// // ...
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedListSeparated(
+///     key: listKey,
+///     itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///     separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
+///       return const Placeholder();
+///     },
+///   );
+/// }
+///
+/// // ...
+///
+/// void _updateList() {
+///   // adds "123" to the AnimatedListSeparated
+///   listKey.currentState!.insertItem(123);
+/// }
+/// ```
+///
+/// [AnimatedListSeparated] item input handlers can also refer to their [AnimatedListSeparatedState]
+/// with the static [AnimatedListSeparated.of] method.
+class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSeparated> {
+
+  @override
+  Widget build(BuildContext context) {
+    return _wrap(
+      SliverAnimatedList(
+        key: _sliverAnimatedMultiBoxKey,
+        itemBuilder: widget.itemBuilder,
+        initialItemCount: widget.initialItemCount,
+      ),
+      widget.scrollDirection,
+    );
+  }
+
+  /// Insert an item at [index] with a corresponding separator
+  /// and start an animation that will be passed to
+  /// [AnimatedListSeparated.itemBuilder] and [AnimatedListSeparated.separatorBuilder]
+  /// when the item is visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insert] method: it
+  /// increases the length of the list of items by one and shifts
+  /// all items at or after [index] towards the end of the list of items.
+  @override
+  void insertItem(int index, { Duration duration = _kDuration }) {
+      final int itemIndex = _computeItemIndex(index);
+      super.insertItem(itemIndex, duration: duration);
+      if (_itemsCount > 1) {
+        super.insertItem(itemIndex, duration: duration);
+      }
+  }
+
+  /// Insert multiple items at [index] with corresponding separators
+  /// and start an animation that will be passed to
+  /// [AnimatedListSeparated.itemBuilder] and [AnimatedListSeparated.separatorBuilder]
+  /// when the items are visible.
+  @override
+  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
+    final int itemIndex = _computeItemIndex(index);
+    final int lengthWithSeparators = _itemsCount == 0 ? length * 2 - 1 : length * 2;
+    super.insertAllItems(itemIndex, lengthWithSeparators, duration: duration, isAsync: isAsync);
+  }
+
+  /// This method is not supported by [AnimatedListSeparatedState]. Use [removeSeparatedItem] instead.
+  @override
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    throw Exception('Separated list items can not be removed with this method. Use removeSeparatedItem instead.');
+  }
+
+  /// This method is not supported by [AnimatedListSeparatedState]. Use [removeAllSeparatedItems] instead.
+  @override
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    throw Exception('Separated list items can not be removed with this method. Use removeAllSeparatedItems instead.');
+  }
+
+  /// Remove the item at [index] with its corresponding separator
+  /// and start an animation that will be passed to
+  /// [itemBuilder] and [separatorBuilder] when the item is visible.
+  ///
+  /// Items are removed immediately. After an item has been removed, its index
+  /// will no longer be passed to the [AnimatedListSeparated.itemBuilder].
+  /// However, the item will still appear for [duration] and during that time
+  /// [itemBuilder] must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.remove] method: it
+  /// decreases the length of items by one and shifts all items at or before
+  /// `index` towards the beginning of the list of items.
+  ///
+  /// See also:
+  ///
+  ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
+  ///     [itemBuilder] and [separatorBuilder] arguments.
+  void removeSeparatedItem(
+    int index,
+    AnimatedRemovedItemBuilder itemBuilder,
+    AnimatedRemovedItemBuilder separatorBuilder, {
+    Duration duration = _kDuration,
+  }) {
+    final int itemIndex = _computeItemIndex(index);
+    super.removeItem(itemIndex, itemBuilder, duration: duration);
+    if (_itemsCount > 1) {
+      if (itemIndex == _itemsCount - 1) {
+        super.removeItem(itemIndex - 1, separatorBuilder, duration: duration);
+      } else {
+        super.removeItem(itemIndex, separatorBuilder, duration: duration);
+      }
+    }
+  }
+
+  /// Remove all the items and corresponding separators and start an animation that will be passed to
+  /// [itemBuilder] and [separatorBuilder] when the items are visible.
+  ///
+  /// Items are removed immediately. However, the
+  /// items will still appear for [duration], and during that time
+  /// [itemBuilder] must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.clear] method: it
+  /// removes all the items in the list.
+  void removeAllSeparatedItems(
+    AnimatedRemovedItemBuilder itemBuilder,
+    AnimatedRemovedItemBuilder separatorBuilder, {
+    Duration duration = _kDuration,
+  }) {
+    for (int itemIndex = _itemsCount - 1; itemIndex >= 0 ; itemIndex--) {
+      if (itemIndex.isEven) {
+        super.removeItem(itemIndex, itemBuilder, duration: duration);
+      } else {
+        super.removeItem(itemIndex, separatorBuilder, duration: duration);
+      }
+    }
+  }
+
+  int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
+
+  // Helper method to compute the index for the separated item considering the added separators.
+  int _computeItemIndex(int index) {
+    if (index == 0) {
+      return index;
+    } else {
+      final int indexSeparated = index * 2 - 1;
+      final bool isNewLastIndex = indexSeparated == _itemsCount;
+      return isNewLastIndex ? indexSeparated : indexSeparated + 1;
+    }
+  }
+}
+
 /// A scrolling container that animates items when they are inserted into or removed from a grid.
 /// in a grid.
 ///
