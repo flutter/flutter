@@ -226,12 +226,12 @@ void main() {
 
   late Brightness currentBrightness;
   void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
-    expect(componentColor, isSameColorAs(
-      switch (currentBrightness) {
-        Brightness.light => expectedDynamicColor.color,
-        Brightness.dark  => expectedDynamicColor.darkColor,
-      },
-    ));
+    switch (currentBrightness) {
+      case Brightness.light:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.color));
+      case Brightness.dark:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
+    }
   }
 
   void dynamicColorsTestGroup() {
