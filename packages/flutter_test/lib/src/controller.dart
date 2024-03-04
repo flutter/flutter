@@ -183,8 +183,14 @@ class SemanticsController {
     FlutterView? view,
   }) {
     TestAsyncUtils.guardSync();
-    assert(start == null || startNode == null, 'Cannot provide both start and startNode. Prefer startNode as start is deprecated.');
-    assert(end == null || endNode == null, 'Cannot provide both end and endNode. Prefer endNode as end is deprecated.');
+    assert(
+      start == null || startNode == null,
+      'Cannot provide both start and startNode. Prefer startNode as start is deprecated.',
+    );
+    assert(
+      end == null || endNode == null,
+      'Cannot provide both end and endNode. Prefer endNode as end is deprecated.',
+    );
 
     FlutterView? startView;
     if (start != null) {
@@ -197,8 +203,7 @@ class SemanticsController {
           'Specified view: $view'
         );
       }
-    }
-    if (startNode != null) {
+    } else if (startNode != null) {
       final SemanticsOwner owner = startNode.evaluate().single.owner!;
       final RenderView renderView = _controller.binding.renderViews.firstWhere(
         (RenderView render) => render.owner!.semanticsOwner == owner,
@@ -206,9 +211,9 @@ class SemanticsController {
       startView = renderView.flutterView;
       if (view != null && startView != view) {
         throw StateError(
-          'The end node is not part of the provided view.\n'
+          'The start node is not part of the provided view.\n'
           'Finder: ${startNode.toString(describeSelf: true)}\n'
-          'View of end node: $startView\n'
+          'View of start node: $startView\n'
           'Specified view: $view'
         );
       }
@@ -225,8 +230,7 @@ class SemanticsController {
           'Specified view: $view'
         );
       }
-    }
-    if (endNode != null) {
+    } else if (endNode != null) {
       final SemanticsOwner owner = endNode.evaluate().single.owner!;
       final RenderView renderView = _controller.binding.renderViews.firstWhere(
         (RenderView render) => render.owner!.semanticsOwner == owner,
@@ -261,32 +265,48 @@ class SemanticsController {
       traversal,
     );
 
-    int startIndex = 0;
-    int endIndex = traversal.length - 1;
+    // Setting the range
+    SemanticsNode? node;
+    String? errorString;
 
+    int startIndex;
     if (start != null) {
-      final SemanticsNode startNode = find(start);
-      startIndex = traversal.indexOf(startNode);
-      if (startIndex == -1) {
-        throw StateError(
-          'The expected starting node was not found.\n'
-          'Finder: ${start.toString(describeSelf: true)}\n\n'
-          'Expected Start Node: $startNode\n\n'
-          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
-      }
+      node = find(start);
+      startIndex = traversal.indexOf(node);
+      errorString = start.toString(describeSelf: true);
+    } else if (startNode != null) {
+      node = startNode.evaluate().single;
+      startIndex = traversal.indexOf(node);
+      errorString = startNode.toString(describeSelf: true);
+    } else {
+      startIndex = 0;
+    }
+    if (startIndex == -1) {
+      throw StateError(
+        'The expected starting node was not found.\n'
+        'Finder: $errorString\n\n'
+        'Expected Start Node: $node\n\n'
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
     }
 
+    int? endIndex;
     if (end != null) {
-      final SemanticsNode endNode = find(end);
-      endIndex = traversal.indexOf(endNode);
-      if (endIndex == -1) {
-        throw StateError(
-          'The expected ending node was not found.\n'
-          'Finder: ${end.toString(describeSelf: true)}\n\n'
-          'Expected End Node: $endNode\n\n'
-          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
-      }
+      node = find(end);
+      endIndex = traversal.indexOf(node);
+      errorString = end.toString(describeSelf: true);
+    } else if (endNode != null) {
+      node = endNode.evaluate().single;
+      endIndex = traversal.indexOf(node);
+      errorString = endNode.toString(describeSelf: true);
     }
+    if (endIndex == -1) {
+      throw StateError(
+        'The expected ending node was not found.\n'
+        'Finder: $errorString\n\n'
+        'Expected End Node: $node\n\n'
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+    }
+    endIndex ??= traversal.length - 1;
 
     return traversal.getRange(startIndex, endIndex + 1);
   }

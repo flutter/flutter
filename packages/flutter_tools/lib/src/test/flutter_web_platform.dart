@@ -236,6 +236,15 @@ class FlutterWebPlatform extends PlatformPlugin {
         'require.js',
       ));
 
+  /// The ddc module loader js binary.
+  File get _ddcModuleLoaderJs => _fileSystem.file(_fileSystem.path.join(
+        _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+        'lib',
+        'dev_compiler',
+        'ddc',
+        'ddc_module_loader.js',
+      ));
+
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
     _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
@@ -245,11 +254,15 @@ class FlutterWebPlatform extends PlatformPlugin {
     'dart_stack_trace_mapper.js',
   ));
 
-  File get _dartSdk => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!));
+  File get _dartSdk {
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
-  File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!));
+  File get _dartSdkSourcemaps {
+      final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>  dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
   File _canvasKitFile(String relativePath) {
     final String canvasKitPath = _fileSystem.path.join(
@@ -301,6 +314,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.requestedUri.path.contains('require.js')) {
       return shelf.Response.ok(
         _requireJs.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('ddc_module_loader.js')) {
+      return shelf.Response.ok(
+        _ddcModuleLoaderJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else if (request.requestedUri.path.contains('ahem.ttf')) {

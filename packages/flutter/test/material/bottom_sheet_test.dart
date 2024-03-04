@@ -944,7 +944,8 @@ void main() {
     final Material material = tester.widget<Material>(finder);
 
     expect(material.color, surfaceColor);
-    expect(material.surfaceTintColor, surfaceTintColor);
+    // Surface tint is no longer used by default.
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
     expect(tester.getSize(finder).width, 640);

@@ -2759,6 +2759,56 @@ void main() {
       expect(tester.getRect(find.byKey(const ValueKey<int>(1))),
           const Rect.fromLTWH(200.0, 200.0, 200.0, 200.0));
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('state is preserved after reordering',
+        (WidgetTester tester) async {
+      final TwoDimensionalChildBuilderDelegate delegate1 =
+          TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 5,
+              maxYIndex: 5,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                ValueKey<int>? key;
+                if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
+                  key = const ValueKey<int>(1);
+                } else if (vicinity ==
+                    const ChildVicinity(xIndex: 1, yIndex: 2)) {
+                  key = const ValueKey<int>(2);
+                }
+                return Checkbox(key: key, value: false, onChanged: (_) {});
+              });
+      final TwoDimensionalChildBuilderDelegate delegate2 =
+          TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 5,
+              maxYIndex: 5,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                ValueKey<int>? key;
+                if (vicinity == const ChildVicinity(xIndex: 0, yIndex: 0)) {
+                  key = const ValueKey<int>(1);
+                } else if (vicinity ==
+                    const ChildVicinity(xIndex: 1, yIndex: 1)) {
+                  key = const ValueKey<int>(2);
+                }
+                return Checkbox(key: key, value: false, onChanged: (_) {});
+              });
+      addTearDown(delegate1.dispose);
+      addTearDown(delegate2.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
+      final State stateBeforeReordering =
+          tester.state(find.byKey(const ValueKey<int>(2)));
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate2));
+      expect(tester.state(find.byKey(const ValueKey<int>(2))),
+          stateBeforeReordering);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
+      expect(tester.state(find.byKey(const ValueKey<int>(2))),
+          stateBeforeReordering);
+    }, variant: TargetPlatformVariant.all());
   });
 }
 

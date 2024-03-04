@@ -39,7 +39,7 @@ class FakeVmServiceHost {
         expect(_requests, isEmpty);
         return;
       }
-      if (fakeRequest.errorCode == null) {
+      if (fakeRequest.error == null) {
         _input.add(json.encode(<String, Object?>{
           'jsonrpc': '2.0',
           'id': request['id'],
@@ -50,8 +50,8 @@ class FakeVmServiceHost {
           'jsonrpc': '2.0',
           'id': request['id'],
           'error': <String, Object?>{
-            'code': fakeRequest.errorCode,
-            'message': 'error',
+            'code': fakeRequest.error!.code,
+            'message': fakeRequest.error!.error,
           },
         }));
       }
@@ -90,12 +90,22 @@ abstract class VmServiceExpectation {
   bool get isRequest;
 }
 
+class FakeRPCError {
+  const FakeRPCError({
+    required this.code,
+    this.error = 'error',
+  });
+
+  final int code;
+  final String error;
+}
+
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     required this.method,
     this.args = const <String, Object?>{},
     this.jsonResponse,
-    this.errorCode,
+    this.error,
     this.close = false,
   });
 
@@ -106,7 +116,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
 
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.
-  final int? errorCode;
+  final FakeRPCError? error;
   final Map<String, Object?>? args;
   final Map<String, Object?>? jsonResponse;
 

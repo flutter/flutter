@@ -85,7 +85,7 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.dialogBackgroundColor] is used.
+  /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -135,8 +135,12 @@ class Dialog extends StatelessWidget {
   ///
   /// If [ThemeData.useMaterial3] is false property has no effect.
   ///
-  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
-  /// [ColorScheme.surfaceTint] will be used.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
+  ///
+  /// defaults to [Colors.transparent].
   ///
   /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
   ///
@@ -1648,13 +1652,13 @@ class _DialogDefaultsM3 extends DialogTheme {
   Color? get iconColor => _colors.secondary;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   TextStyle? get titleTextStyle => _textTheme.headlineSmall;

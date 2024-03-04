@@ -6944,7 +6944,7 @@ void main() {
       // the arrow should not point exactly to the caret because the caret is
       // too close to the right.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       await tester.pumpWidget(
         CupertinoApp(
           debugShowCheckedModeBanner: false,
@@ -7005,7 +7005,7 @@ void main() {
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -7832,9 +7832,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
@@ -7869,9 +7866,6 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {

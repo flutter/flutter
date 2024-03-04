@@ -195,6 +195,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
     platformDispatcher: PlatformDispatcher.instance,
   ) {
+    platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -246,6 +247,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void reset() {
     _restorationManager?.dispose();
     _restorationManager = null;
+    platformDispatcher.defaultRouteNameTestValue = '/';
     resetGestureBinding();
     testTextInput.reset();
     if (registerTestTextInput) {
@@ -364,10 +366,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return binding.ensureInitialized(environment);
+    return _instance ?? binding.ensureInitialized(environment);
   }
 
   @override
@@ -550,7 +549,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (_insideAddRenderView
         && renderView.hasConfiguration
         && renderView.configuration is TestViewConfiguration
-        && renderView == this.renderView) { // ignore: deprecated_member_use
+        && renderView == this.renderView) {
       // If a test has reached out to the now deprecated renderView property to set a custom TestViewConfiguration
       // we are not replacing it. This is to maintain backwards compatibility with how things worked prior to the
       // deprecation of that property.
@@ -1161,21 +1160,22 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
 
-  // ignore: deprecated_member_use
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
-    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
+    // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
+    // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
+
+    assert(ServicesBinding.instance == WidgetsBinding.instance);
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
   }
