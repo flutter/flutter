@@ -615,4 +615,8 @@ void Engine::SetDisplays(const std::vector<DisplayData>& displays) {
   ScheduleFrame();
 }
 
+void Engine::ShutdownPlatformIsolates() {
+  runtime_controller_->ShutdownPlatformIsolates();
+}
+
 }  // namespace flutter

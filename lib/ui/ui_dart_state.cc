@@ -262,4 +262,10 @@ int64_t UIDartState::GetRootIsolateToken() const {
   return IsRootIsolate() ? reinterpret_cast<int64_t>(this) : 0;
 }
 
+Dart_Isolate UIDartState::CreatePlatformIsolate(Dart_Handle entry_point,
+                                                char** error) {
+  FML_UNREACHABLE();
+  return nullptr;
+}
+
 }  // namespace flutter
