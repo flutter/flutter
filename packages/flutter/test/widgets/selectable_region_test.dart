@@ -932,11 +932,13 @@ void main() {
 
       // Start a new triple-click drag.
       await gesture.up();
-      await tester.pump();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
       await gesture.down(textOffsetToPosition(paragraph, 151));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await gesture.up();
-      expect(paragraph.selections.isEmpty, isTrue);
+      expect(paragraph.selections.isNotEmpty, isTrue);
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections.first, const TextSelection.collapsed(offset: 151));
       await tester.pump(kDoubleTapTimeout);
 
       // triple-click.
@@ -1072,7 +1074,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph2, 2));
       // Should clear the selection on paragraph 1 and return to the origin paragraph.
       expect(paragraph1.selections.isEmpty, true);
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 15, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 15));
 
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
       // Should select line 1 of text widget 3.
