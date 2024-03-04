@@ -2419,6 +2419,9 @@ void main() {
         home: Material(
           child: Center(
             child: MenuAnchor(
+              style: MenuStyle(
+                animationStyle: AnimationStyle.noAnimation,
+              ),
               controller: controller,
               menuChildren: <Widget>[
                 MenuItemButton(
