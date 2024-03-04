@@ -19,6 +19,7 @@ import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../html_utils.dart';
 import '../../project.dart';
+import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
@@ -324,18 +325,32 @@ class Dart2WasmTarget extends Dart2WebTarget {
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  WebReleaseBundle(List<WebCompilerConfig> configs) : this._withTargets(
-    configs.map((WebCompilerConfig config) =>
+  WebReleaseBundle(List<WebCompilerConfig> configs) : this._(
+    compileTargets: configs.map((WebCompilerConfig config) =>
       switch (config) {
         WasmCompilerConfig() => Dart2WasmTarget(config),
         JsCompilerConfig() => Dart2JSTarget(config),
       }
-    ).toList()
+    ).toList(),
   );
 
-  const WebReleaseBundle._withTargets(this.compileTargets);
+  WebReleaseBundle._({
+    required this.compileTargets,
+  }) : templatedFilesTarget = WebTemplatedFiles(generateBuildConfigString(compileTargets));
+
+  static String generateBuildConfigString(List<Dart2WebTarget> compileTargets) {
+    final List<Map<String, Object?>> buildDescriptions = compileTargets.map(
+      (Dart2WebTarget target) => target.buildConfig
+    ).toList();
+    final Map<String, Object?> buildConfig = <String, Object?>{
+      'engineRevision': globals.flutterVersion.engineRevision,
+      'builds': buildDescriptions,
+    };
+    return '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+  }
 
   final List<Dart2WebTarget> compileTargets;
+  final WebTemplatedFiles templatedFilesTarget;
 
   List<String> get buildFiles => compileTargets.fold(
     const Iterable<String>.empty(),
@@ -346,7 +361,10 @@ class WebReleaseBundle extends Target {
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => compileTargets;
+  List<Target> get dependencies => <Target>[
+    ...compileTargets,
+    templatedFilesTarget,
+  ];
 
   @override
   List<Source> get inputs => <Source>[
@@ -401,40 +419,18 @@ class WebReleaseBundle extends Target {
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
+      final String relativePath = fileSystem.path.relative(inputFile.path, from: webResources.path);
+      if (relativePath == 'index.html' || relativePath == 'flutter_bootstrap.js') {
+        // Skip these, these are handled by the templated file target.
+        continue;
+      }
       final File outputFile = fileSystem.file(fileSystem.path.join(
         environment.outputDir.path,
-        fileSystem.path.relative(inputFile.path, from: webResources.path)));
+        relativePath));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
       outputResourcesFiles.add(outputFile);
-      // insert a random hash into the requests for service_worker.js. This is not a content hash,
-      // because it would need to be the hash for the entire bundle and not just the resource
-      // in question.
-      if (fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final List<Map<String, Object?>> buildDescriptions = compileTargets.map(
-          (Dart2WebTarget target) => target.buildConfig
-        ).toList();
-        final Map<String, Object?> buildConfig = <String, Object?>{
-          'engineRevision': globals.flutterVersion.engineRevision,
-          'builds': buildDescriptions,
-        };
-        final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
-        final IndexHtml indexHtml = IndexHtml(inputFile.readAsStringSync());
-        final File flutterJsFile = fileSystem.file(fileSystem.path.join(
-          globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-          'flutter.js',
-        ));
-
-        indexHtml.applySubstitutions(
-          baseHref: environment.defines[kBaseHref] ?? '/',
-          serviceWorkerVersion: Random().nextInt(4294967296).toString(),
-          buildConfig: buildConfigString,
-          flutterJsFile: flutterJsFile,
-        );
-        outputFile.writeAsStringSync(indexHtml.content);
-        continue;
-      }
       inputFile.copySync(outputFile.path);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
@@ -462,6 +458,88 @@ class WebReleaseBundle extends Target {
         .childFile('version.json')
         .writeAsStringSync(jsonEncode(versionInfo));
   }
+}
+
+class WebTemplatedFiles extends Target {
+  WebTemplatedFiles(this.buildConfigString);
+
+  final String buildConfigString;
+
+  @override
+  String get buildKey => buildConfigString;
+
+  @override
+  Future<void> build(Environment environment) async {
+    final Directory webResources = environment.projectDir
+      .childDirectory('web');
+    final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
+    final String inputBootstrapContent;
+    if (await inputFlutterBootstrapJs.exists()) {
+      inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
+    } else {
+      inputBootstrapContent = generateDefaultFlutterBootstrapScript();
+    }
+    final IndexHtml outputBootstrapContent = IndexHtml(inputBootstrapContent);
+
+    final FileSystem fileSystem = environment.fileSystem;
+    final File flutterJsFile = fileSystem.file(fileSystem.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ));
+
+    // Insert a random hash into the requests for service_worker.js. This is not a content hash,
+    // because it would need to be the hash for the entire bundle and not just the resource
+    // in question.
+    final String serviceWorkerVersion = Random().nextInt(4294967296).toString();
+    outputBootstrapContent.applySubstitutions(
+      baseHref: '',
+      serviceWorkerVersion: serviceWorkerVersion,
+      flutterJsFile: flutterJsFile,
+      buildConfig: buildConfigString,
+    );
+
+    final File outputFlutterBootstrapJs = fileSystem.file(fileSystem.path.join(
+        environment.outputDir.path,
+        'flutter_bootstrap.js'
+    ));
+    await outputFlutterBootstrapJs.writeAsString(outputBootstrapContent.content);
+
+    final File inputIndexHtml = webResources.childFile('index.html');
+    if (await inputIndexHtml.exists()) {
+      final IndexHtml indexHtml = IndexHtml(inputIndexHtml.readAsStringSync());
+      indexHtml.applySubstitutions(
+        baseHref: environment.defines[kBaseHref] ?? '/',
+        serviceWorkerVersion: serviceWorkerVersion,
+        flutterJsFile: flutterJsFile,
+        buildConfig: buildConfigString,
+        flutterBootstrapJs: outputBootstrapContent.content,
+      );
+      final File outputIndexHtml = fileSystem.file(fileSystem.path.join(
+        environment.outputDir.path,
+        'index.html'
+      ));
+      await outputIndexHtml.writeAsString(indexHtml.content);
+    }
+  }
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/web/index.html'),
+    Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  ];
+
+  @override
+  String get name => 'web_templated_files';
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/index.html'),
+    Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+  ];
 }
 
 /// Static assets provided by the Flutter SDK that do not change, such as

@@ -66,6 +66,7 @@ class IndexHtml {
     required String? serviceWorkerVersion,
     required File flutterJsFile,
     String? buildConfig,
+    String? flutterBootstrapJs,
   }) {
     if (_content.contains(kBaseHrefPlaceholder)) {
       _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);
@@ -86,16 +87,23 @@ class IndexHtml {
           );
     }
     if (buildConfig != null) {
-      _content = _content.replaceFirst(
+      _content = _content.replaceAll(
         '{{flutter_build_config}}',
         buildConfig,
       );
     }
 
     if (_content.contains('{{flutter_js}}')) {
-      _content = _content.replaceFirst(
+      _content = _content.replaceAll(
         '{{flutter_js}}',
         flutterJsFile.readAsStringSync(),
+      );
+    }
+
+    if (flutterBootstrapJs != null) {
+      _content = _content.replaceAll(
+        '{{flutter_bootstrap_js}}',
+        flutterBootstrapJs,
       );
     }
   }

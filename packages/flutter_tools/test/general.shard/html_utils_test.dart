@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/html_utils.dart';
 
 import '../src/common.dart';
@@ -108,6 +111,10 @@ const String htmlSample3 = '''
 ''';
 
 void main() {
+  final MemoryFileSystem fs = MemoryFileSystem();
+  final File flutterJs = fs.file('flutter.js');
+  flutterJs.writeAsStringSync('flutter.js content');
+
   test('can parse baseHref', () {
     expect(IndexHtml('<base href="/foo/111/">').getBaseHref(), 'foo/111');
     expect(IndexHtml(htmlSample1).getBaseHref(), 'foo/222');
@@ -139,6 +146,7 @@ void main() {
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
+      flutterJsFile: flutterJs,
     );
     expect(
       indexHtml.content,
@@ -154,6 +162,7 @@ void main() {
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
+      flutterJsFile: flutterJs,
     );
     expect(
       indexHtml.content,
@@ -171,6 +180,7 @@ void main() {
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
+      flutterJsFile: flutterJs,
     );
     // The parsed base href should be updated after substitutions.
     expect(indexHtml.getBaseHref(), 'foo/333');
