@@ -111,6 +111,10 @@ class ComponentV2 final
 
   // |fuchsia::ui::app::ViewProvider|
   void CreateView2(fuchsia::ui::app::CreateView2Args view_args) override;
+  void CreateViewWithViewRef(
+      ::zx::eventpair token,
+      ::fuchsia::ui::views::ViewRefControl view_ref_control,
+      ::fuchsia::ui::views::ViewRef view_ref) override {}
 
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
