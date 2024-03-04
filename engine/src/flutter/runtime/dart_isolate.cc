@@ -14,12 +14,14 @@
 #include "flutter/lib/io/dart_io.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/lib/ui/dart_ui.h"
+#include "flutter/lib/ui/window/platform_isolate.h"
 #include "flutter/runtime/dart_isolate_group_data.h"
 #include "flutter/runtime/dart_plugin_registrant.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/isolate_configuration.h"
+#include "flutter/runtime/runtime_controller.h"
 #include "fml/message_loop_task_queues.h"
 #include "fml/task_source.h"
 #include "fml/time/time_point.h"
@@ -280,6 +282,150 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   return (*root_isolate_data)->GetWeakIsolatePtr();
 }
 
+Dart_Isolate DartIsolate::CreatePlatformIsolate(Dart_Handle entry_point,
+                                                char** error) {
+  *error = nullptr;
+  PlatformConfiguration* platform_config = platform_configuration();
+  FML_DCHECK(platform_config != nullptr);
+  std::shared_ptr<PlatformIsolateManager> platform_isolate_manager =
+      platform_config->client()->GetPlatformIsolateManager();
+  std::weak_ptr<PlatformIsolateManager> weak_platform_isolate_manager =
+      platform_isolate_manager;
+  if (platform_isolate_manager->HasShutdownMaybeFalseNegative()) {
+    // Don't set the error string. We want to silently ignore this error,
+    // because the engine is shutting down.
+    FML_LOG(INFO) << "CreatePlatformIsolate called after shutdown";
+    return nullptr;
+  }
+
+  Dart_Isolate parent_isolate = isolate();
+  Dart_ExitIsolate();  // Exit parent_isolate.
+
+  const TaskRunners& task_runners = GetTaskRunners();
+  fml::RefPtr<fml::TaskRunner> platform_task_runner =
+      task_runners.GetPlatformTaskRunner();
+  FML_DCHECK(platform_task_runner);
+
+  auto isolate_group_data = std::shared_ptr<DartIsolateGroupData>(
+      *static_cast<std::shared_ptr<DartIsolateGroupData>*>(
+          Dart_IsolateGroupData(parent_isolate)));
+
+  Settings settings(isolate_group_data->GetSettings());
+
+  // PlatformIsolate.spawn should behave like Isolate.spawn when unhandled
+  // exceptions happen (log the exception, but don't terminate the app). But the
+  // default unhandled_exception_callback may terminate the app, because it is
+  // only called for the root isolate (child isolates are managed by the VM and
+  // have a different error code path). So override it to simply log the error.
+  settings.unhandled_exception_callback = [](const std::string& error,
+                                             const std::string& stack_trace) {
+    FML_LOG(ERROR) << "Unhandled exception:\n" << error << "\n" << stack_trace;
+    return true;
+  };
+
+  // The platform isolate task observer must be added on the platform thread. So
+  // schedule the add function on the platform task runner.
+  TaskObserverAdd old_task_observer_add = settings.task_observer_add;
+  settings.task_observer_add = [old_task_observer_add, platform_task_runner,
+                                weak_platform_isolate_manager](
+                                   intptr_t key, const fml::closure& callback) {
+    platform_task_runner->PostTask([old_task_observer_add,
+                                    weak_platform_isolate_manager, key,
+                                    callback]() {
+      std::shared_ptr<PlatformIsolateManager> platform_isolate_manager =
+          weak_platform_isolate_manager.lock();
+      if (platform_isolate_manager == nullptr ||
+          platform_isolate_manager->HasShutdown()) {
+        // Shutdown happened in between this task being posted, and it running.
+        // platform_isolate has already been shut down. Do nothing.
+        FML_LOG(INFO) << "Shutdown before platform isolate task observer added";
+        return;
+      }
+      old_task_observer_add(key, callback);
+    });
+  };
+
+  UIDartState::Context context(task_runners);
+  context.advisory_script_uri = isolate_group_data->GetAdvisoryScriptURI();
+  context.advisory_script_entrypoint =
+      isolate_group_data->GetAdvisoryScriptEntrypoint();
+  auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
+      std::shared_ptr<DartIsolate>(
+          new DartIsolate(settings, context, platform_isolate_manager)));
+
+  IsolateMaker isolate_maker =
+      [parent_isolate](
+          std::shared_ptr<DartIsolateGroupData>* unused_isolate_group_data,
+          std::shared_ptr<DartIsolate>* isolate_data, Dart_IsolateFlags* flags,
+          char** error) {
+        return Dart_CreateIsolateInGroup(
+            /*group_member=*/parent_isolate,
+            /*name=*/"PlatformIsolate",
+            /*shutdown_callback=*/
+            reinterpret_cast<Dart_IsolateShutdownCallback>(
+                DartIsolate::SpawnIsolateShutdownCallback),
+            /*cleanup_callback=*/
+            reinterpret_cast<Dart_IsolateCleanupCallback>(
+                DartIsolateCleanupCallback),
+            /*child_isolate_data=*/isolate_data,
+            /*error=*/error);
+      };
+  Dart_Isolate platform_isolate = CreateDartIsolateGroup(
+      nullptr, std::move(isolate_data), nullptr, error, isolate_maker);
+
+  Dart_EnterIsolate(parent_isolate);
+
+  if (*error) {
+    return nullptr;
+  }
+
+  if (!platform_isolate_manager->RegisterPlatformIsolate(platform_isolate)) {
+    // The PlatformIsolateManager was shutdown while we were creating the
+    // isolate. This means that we're shutting down the engine. We need to
+    // shutdown the platform isolate.
+    FML_LOG(INFO) << "Shutdown during platform isolate creation";
+    tonic::DartIsolateScope isolate_scope(platform_isolate);
+    Dart_ShutdownIsolate();
+    return nullptr;
+  }
+
+  tonic::DartApiScope api_scope;
+  Dart_PersistentHandle entry_point_handle =
+      Dart_NewPersistentHandle(entry_point);
+
+  platform_task_runner->PostTask([entry_point_handle, platform_isolate,
+                                  weak_platform_isolate_manager]() {
+    std::shared_ptr<PlatformIsolateManager> platform_isolate_manager =
+        weak_platform_isolate_manager.lock();
+    if (platform_isolate_manager == nullptr ||
+        platform_isolate_manager->HasShutdown()) {
+      // Shutdown happened in between this task being posted, and it running.
+      // platform_isolate has already been shut down. Do nothing.
+      FML_LOG(INFO) << "Shutdown before platform isolate entry point";
+      return;
+    }
+
+    tonic::DartIsolateScope isolate_scope(platform_isolate);
+    tonic::DartApiScope api_scope;
+    Dart_Handle entry_point = Dart_HandleFromPersistent(entry_point_handle);
+    Dart_DeletePersistentHandle(entry_point_handle);
+
+    // Disable Isolate.exit().
+    Dart_Handle isolate_lib = Dart_LookupLibrary(tonic::ToDart("dart:isolate"));
+    FML_CHECK(!tonic::CheckAndHandleError(isolate_lib));
+    Dart_Handle isolate_type = Dart_GetNonNullableType(
+        isolate_lib, tonic::ToDart("Isolate"), 0, nullptr);
+    FML_CHECK(!tonic::CheckAndHandleError(isolate_type));
+    Dart_Handle result =
+        Dart_SetField(isolate_type, tonic::ToDart("_mayExit"), Dart_False());
+    FML_CHECK(!tonic::CheckAndHandleError(result));
+
+    tonic::DartInvokeVoid(entry_point);
+  });
+
+  return platform_isolate;
+}
+
 DartIsolate::DartIsolate(const Settings& settings,
                          bool is_root_isolate,
                          const UIDartState::Context& context,
@@ -294,8 +440,30 @@ DartIsolate::DartIsolate(const Settings& settings,
                   context),
       may_insecurely_connect_to_all_domains_(
           settings.may_insecurely_connect_to_all_domains),
+      is_platform_isolate_(false),
+      is_spawning_in_group_(is_spawning_in_group),
+      domain_network_policy_(settings.domain_network_policy) {
+  phase_ = Phase::Uninitialized;
+}
+
+DartIsolate::DartIsolate(
+    const Settings& settings,
+    const UIDartState::Context& context,
+    std::shared_ptr<PlatformIsolateManager> platform_isolate_manager)
+    : UIDartState(settings.task_observer_add,
+                  settings.task_observer_remove,
+                  settings.log_tag,
+                  settings.unhandled_exception_callback,
+                  settings.log_message_callback,
+                  DartVMRef::GetIsolateNameServer(),
+                  false,  // is_root_isolate
+                  context),
+      may_insecurely_connect_to_all_domains_(
+          settings.may_insecurely_connect_to_all_domains),
+      is_platform_isolate_(true),
+      is_spawning_in_group_(false),
       domain_network_policy_(settings.domain_network_policy),
-      is_spawning_in_group_(is_spawning_in_group) {
+      platform_isolate_manager_(std::move(platform_isolate_manager)) {
   phase_ = Phase::Uninitialized;
 }
 
@@ -336,7 +504,9 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
     Dart_SetCurrentUserTag(Dart_NewUserTag("AppStartUp"));
   }
 
-  SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner());
+  SetMessageHandlingTaskRunner(is_platform_isolate_
+                                   ? GetTaskRunners().GetPlatformTaskRunner()
+                                   : GetTaskRunners().GetUITaskRunner());
 
   if (tonic::CheckAndHandleError(
           Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag))) {
@@ -393,7 +563,7 @@ void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
 
 void DartIsolate::SetMessageHandlingTaskRunner(
     const fml::RefPtr<fml::TaskRunner>& runner) {
-  if (!IsRootIsolate() || !runner) {
+  if (!runner) {
     return;
   }
 
@@ -1108,6 +1278,11 @@ void DartIsolate::OnShutdownCallback() {
     }
   }
 
+  if (is_platform_isolate_) {
+    FML_DCHECK(platform_isolate_manager_ != nullptr);
+    platform_isolate_manager_->RemovePlatformIsolate(isolate());
+  }
+
   shutdown_callbacks_.clear();
 
   const fml::closure& isolate_shutdown_callback =
@@ -1124,7 +1299,7 @@ Dart_Handle DartIsolate::OnDartLoadLibrary(intptr_t loading_unit_id) {
     return Dart_Null();
   }
   const std::string error_message =
-      "Platform Configuration was null. Deferred library load request"
+      "Platform Configuration was null. Deferred library load request "
       "for loading unit id " +
       std::to_string(loading_unit_id) + " was not sent.";
   FML_LOG(ERROR) << error_message;

@@ -31,6 +31,7 @@ part 'painting.dart';
 part 'path.dart';
 part 'path_metrics.dart';
 part 'platform_dispatcher.dart';
+part 'platform_isolate.dart';
 part 'pointer.dart';
 part 'semantics.dart';
 part 'text.dart';

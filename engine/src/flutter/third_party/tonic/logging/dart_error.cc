@@ -39,6 +39,12 @@ bool CheckAndHandleError(Dart_Handle handle) {
 
     ReportUnhandledException(exception_handle, stack_trace_handle);
     return true;
+  } else if (Dart_IsFatalError(handle)) {
+    // An UnwindError designed to shutdown isolates. This is thrown by
+    // Isolate.exit. This is ordinary API usage, not actually an error, so
+    // silently shut down the isolate. The actual isolate shutdown happens in
+    // DartMessageHandler::UnhandledError.
+    return true;
   } else if (Dart_IsError(handle)) {
     tonic::Log("Dart Error: %s", Dart_GetError(handle));
     return true;

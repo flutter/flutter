@@ -10,4 +10,5 @@
   Spawn;
   LoadLibraryFromKernel;
   LookupEntryPoint;
+  ForceShutdownIsolate;
 };

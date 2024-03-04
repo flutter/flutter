@@ -522,7 +522,16 @@ Shell::~Shell() {
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
 
-  fml::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch;
+  fml::AutoResetWaitableEvent platiso_latch, ui_latch, gpu_latch,
+      platform_latch, io_latch;
+
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      fml::MakeCopyable([this, &platiso_latch]() mutable {
+        engine_->ShutdownPlatformIsolates();
+        platiso_latch.Signal();
+      }));
+  platiso_latch.Wait();
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),

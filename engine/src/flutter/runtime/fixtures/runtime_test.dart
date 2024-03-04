@@ -188,3 +188,34 @@ void mainForPluginRegistrantTest() {
     passMessage('_PluginRegistrant.register() was not called');
   }
 }
+
+@pragma('vm:entry-point')
+void mainForPlatformIsolates() {
+  passMessage('Platform isolate is ready');
+}
+
+@pragma('vm:entry-point')
+void emptyMain(args) {}
+
+@pragma('vm:entry-point')
+Function createEntryPointForPlatIsoSendAndRecvTest() {
+  final port = RawReceivePort();
+  port.handler = (message) {
+    port.close();
+    (message as SendPort).send('Hello from root isolate!');
+  };
+  final SendPort sendPort = port.sendPort;
+  return () {
+    final replyPort = RawReceivePort();
+    replyPort.handler = (message) {
+      replyPort.close();
+      passMessage('Platform isolate received: $message');
+    };
+    sendPort.send(replyPort.sendPort);
+  };
+}
+
+@pragma('vm:entry-point')
+void mainForPlatformIsolatesThrowError() {
+  throw 'Error from platform isolate';
+}

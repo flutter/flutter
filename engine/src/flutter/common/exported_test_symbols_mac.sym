@@ -9,3 +9,4 @@ _kInternalFlutterGpu*
 _Spawn
 _LoadLibraryFromKernel
 _LookupEntryPoint
+_ForceShutdownIsolate
