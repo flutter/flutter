@@ -152,9 +152,7 @@ class SettingsFile {
     }
   }
 
-  factory SettingsFile.parseFromFile(File file) {
-    return SettingsFile.parse(file.readAsStringSync());
-  }
+  SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
   final Map<String, String> values = <String, String>{};
 
