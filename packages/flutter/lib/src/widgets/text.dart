@@ -737,7 +737,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    debugPrint('start of handle select paragraph ${paragraph.text.toPlainText()}');
     final SelectionResult result = _handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
@@ -793,7 +792,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
           if (selectables.length - 1 == index) {
             currentSelectionEndIndex = index;
             _flushInactiveSelections();
-            return result;//maybe should return SelectionResult.end since a paragraph will not extend outside a text container.
+            return result;
           }
         }
         continue;
@@ -806,7 +805,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         } else {
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
-        return SelectionResult.next;//maybe should return end here since a paragraph wont extend out of text container.
+        return SelectionResult.next;
       }
       if (lastSelectionResult == SelectionResult.next) {
         if (selectables[index].value == existingGeometry && !foundStart) {
@@ -832,7 +831,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         continue;
       }
       if (index == 0 && lastSelectionResult == SelectionResult.previous) {
-        return SelectionResult.previous;// return end?
+        return SelectionResult.previous;
       }
       if (selectables[index].value != existingGeometry) {
         if (!foundStart && lastNextIndex == null) {
@@ -845,7 +844,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         currentSelectionEndIndex = index;
         // Geometry has changed as a result of select paragraph, need to clear the
         // selection of other selectables to keep selection in sync.
-        debugPrint('paragraph $currentSelectionStartIndex $currentSelectionEndIndex $foundStart $lastNextIndex');
         _flushInactiveSelections();
       }
       return SelectionResult.end;
@@ -876,7 +874,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       (false, true) => currentSelectionEndIndex,
       (false, false) => 0,
     };
-    debugPrint('init start start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex $isEnd ${paragraph.text.toPlainText()}');
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
@@ -892,7 +889,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      debugPrint('Iterating at index: $newIndex ${selectables[newIndex]} ${event.granularity}');
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
@@ -910,14 +906,12 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
             newIndex += 1;
           }
         case SelectionResult.previous:
-          debugPrint('prev $newIndex');
           if (forward ?? false) {
             newIndex -= 1;
             finalResult = SelectionResult.end;
           } else if (newIndex == 0) {
             finalResult = currentSelectableResult;
           } else {
-            debugPrint('not forward');
             forward = false;
             newIndex -= 1;
           }
@@ -927,10 +921,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
-      debugPrint('init start $newIndex');
     }
     _flushInactiveSelections();
-    debugPrint('initEnd $currentSelectionStartIndex $currentSelectionEndIndex ${finalResult!}');
     return finalResult!;
   }
 
@@ -1039,6 +1031,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
   int _compareScreenOrder(Selectable a, Selectable b) {
+    // Attempt to sort the selectables under a [_SelectableTextContainerDelegate]
+    // by the top left rect.
     final Rect rectA = MatrixUtils.transformRect(
       a.getTransformTo(null),
       a.boundingBoxes.first,
