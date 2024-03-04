@@ -2188,8 +2188,8 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //
 // This `RenderObject` must be a child of a `_RenderTheater`. It guarantees that:
 //
-// 1. It's a relayout boundary, and `markParentNeedsLayout` is overridden such
-//    that it never dirties its `_RenderTheater`.
+// 1. It's a relayout boundary, so calling `markNeedsLayout` on it never dirties
+//    its `_RenderTheater`.
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
 //    not do anything when its called from `layout`, preventing the parent
@@ -2229,19 +2229,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   void redepthChildren() {
     _layoutSurrogate.redepthChild(this);
     super.redepthChildren();
-  }
-
-  bool _callingMarkParentNeedsLayout = false;
-  @override
-  void markParentNeedsLayout() {
-    // No re-entrant calls.
-    if (_callingMarkParentNeedsLayout) {
-      return;
-    }
-    _callingMarkParentNeedsLayout = true;
-    markNeedsLayout();
-    _layoutSurrogate.markNeedsLayout();
-    _callingMarkParentNeedsLayout = false;
   }
 
   @override
