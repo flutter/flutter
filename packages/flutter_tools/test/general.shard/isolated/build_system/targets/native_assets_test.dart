@@ -187,7 +187,7 @@ void main() {
         await createPackageConfig(androidEnvironment);
         await fileSystem.file('libfoo.so').create();
 
-        final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('foo', androidEnvironment.buildDir.uri)
           ],
@@ -207,6 +207,7 @@ void main() {
           ]),
         );
         await NativeAssets(buildRunner: buildRunner).build(androidEnvironment);
+        expect(buildRunner.lastBuildMode, native_assets_cli.BuildMode.release);
       },
     );
   }
