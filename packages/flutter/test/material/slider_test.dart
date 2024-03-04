@@ -4252,6 +4252,7 @@ void main() {
     });
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/143524.
   testWidgets('Slider.onChanged is called only once', (WidgetTester tester) async {
     int onChangeCallbackCount = 0;
     late final double screenWidth;
