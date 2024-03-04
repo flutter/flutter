@@ -274,7 +274,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/main/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -6763,10 +6763,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   ///
   /// The key for the [RepaintBoundary] is derived either from the child's key
   /// (if the child has a non-null key) or from the given `childIndex`.
-  factory RepaintBoundary.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return RepaintBoundary(key: key, child: child);
-  }
+  RepaintBoundary.wrap(Widget child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex), child: child);
 
   /// Wraps each of the given children in [RepaintBoundary]s.
   ///
@@ -7557,16 +7555,11 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
   /// Creates a widget that builds its child.
-  const KeyedSubtree({
-    super.key,
-    required this.child,
-  });
+  const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
-  factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return KeyedSubtree(key: key, child: child);
-  }
+  KeyedSubtree.wrap(this.child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex));
 
   /// The widget below this widget in the tree.
   ///

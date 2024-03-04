@@ -431,7 +431,7 @@ void main() {
       testWithoutContext('transfers file to the daemon with delta turned on, file exists on remote', () async {
         bufferLogger = BufferLogger.test();
         final FakeFileTransfer fileTransfer = FakeFileTransfer();
-        final BlockHashes blockHashes = BlockHashes(
+        const BlockHashes blockHashes = BlockHashes(
           blockSize: 10,
           totalSize: 30,
           adler32: <int>[1, 2, 3],
@@ -615,6 +615,9 @@ void main() {
       final DaemonMessage shutdownMessage = await broadcastOutput.first;
       expect(shutdownMessage.data['id'], isNotNull);
       expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+      expect(shutdownMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+      });
     });
 
     testWithoutContext('starts a local dds if the VM service port is not a forwarded port', () async {
