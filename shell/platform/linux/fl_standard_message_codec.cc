@@ -639,9 +639,10 @@ G_MODULE_EXPORT FlStandardMessageCodec* fl_standard_message_codec_new() {
       g_object_new(fl_standard_message_codec_get_type(), nullptr));
 }
 
-void fl_standard_message_codec_write_size(FlStandardMessageCodec* codec,
-                                          GByteArray* buffer,
-                                          uint32_t size) {
+G_MODULE_EXPORT void fl_standard_message_codec_write_size(
+    FlStandardMessageCodec* codec,
+    GByteArray* buffer,
+    uint32_t size) {
   if (size < 254) {
     write_uint8(buffer, size);
   } else if (size <= 0xffff) {
@@ -653,11 +654,12 @@ void fl_standard_message_codec_write_size(FlStandardMessageCodec* codec,
   }
 }
 
-gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
-                                             GBytes* buffer,
-                                             size_t* offset,
-                                             uint32_t* value,
-                                             GError** error) {
+G_MODULE_EXPORT gboolean fl_standard_message_codec_read_size(
+    FlStandardMessageCodec* codec,
+    GBytes* buffer,
+    size_t* offset,
+    uint32_t* value,
+    GError** error) {
   uint8_t value8;
   if (!read_uint8(buffer, offset, &value8, error)) {
     return FALSE;
@@ -680,18 +682,20 @@ gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
   return TRUE;
 }
 
-gboolean fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
-                                               GByteArray* buffer,
-                                               FlValue* value,
-                                               GError** error) {
+G_MODULE_EXPORT gboolean fl_standard_message_codec_write_value(
+    FlStandardMessageCodec* self,
+    GByteArray* buffer,
+    FlValue* value,
+    GError** error) {
   return FL_STANDARD_MESSAGE_CODEC_GET_CLASS(self)->write_value(self, buffer,
                                                                 value, error);
 }
 
-FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
-                                              GBytes* buffer,
-                                              size_t* offset,
-                                              GError** error) {
+G_MODULE_EXPORT FlValue* fl_standard_message_codec_read_value(
+    FlStandardMessageCodec* self,
+    GBytes* buffer,
+    size_t* offset,
+    GError** error) {
   uint8_t type;
   if (!read_uint8(buffer, offset, &type, error)) {
     return nullptr;

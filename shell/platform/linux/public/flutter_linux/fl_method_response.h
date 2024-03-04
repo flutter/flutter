@@ -37,6 +37,7 @@ typedef enum {
   // NOLINTEND(readability-identifier-naming)
 } FlMethodResponseError;
 
+G_MODULE_EXPORT
 GQuark fl_method_response_error_quark(void) G_GNUC_CONST;
 
 G_MODULE_EXPORT

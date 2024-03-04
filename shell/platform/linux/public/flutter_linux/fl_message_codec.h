@@ -38,6 +38,7 @@ typedef enum {
   // NOLINTEND(readability-identifier-naming)
 } FlMessageCodecError;
 
+G_MODULE_EXPORT
 GQuark fl_message_codec_error_quark(void) G_GNUC_CONST;
 
 G_MODULE_EXPORT

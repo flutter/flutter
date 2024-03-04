@@ -371,9 +371,9 @@ G_MODULE_EXPORT FlValue* fl_value_new_map() {
   return reinterpret_cast<FlValue*>(self);
 }
 
-FlValue* fl_value_new_custom(int type,
-                             gconstpointer value,
-                             GDestroyNotify destroy_notify) {
+G_MODULE_EXPORT FlValue* fl_value_new_custom(int type,
+                                             gconstpointer value,
+                                             GDestroyNotify destroy_notify) {
   FlValueCustom* self = reinterpret_cast<FlValueCustom*>(
       fl_value_new(FL_VALUE_TYPE_CUSTOM, sizeof(FlValueCustom)));
   self->type = type;
@@ -382,11 +382,12 @@ FlValue* fl_value_new_custom(int type,
   return reinterpret_cast<FlValue*>(self);
 }
 
-FlValue* fl_value_new_custom_object(int type, GObject* object) {
+G_MODULE_EXPORT FlValue* fl_value_new_custom_object(int type, GObject* object) {
   return fl_value_new_custom(type, g_object_ref(object), g_object_unref);
 }
 
-FlValue* fl_value_new_custom_object_take(int type, GObject* object) {
+G_MODULE_EXPORT FlValue* fl_value_new_custom_object_take(int type,
+                                                         GObject* object) {
   return fl_value_new_custom(type, object, g_object_unref);
 }
 
