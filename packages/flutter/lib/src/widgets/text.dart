@@ -958,7 +958,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       (false, false, true) => currentSelectionEndIndex,
       (false, false, false) => 0,
     };
-    debugPrint('adjust start $newIndex $currentSelectionStartIndex $currentSelectionEndIndex $isEnd ${paragraph.text.toPlainText()}');
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
@@ -976,7 +975,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      debugPrint('Iterating at index: $newIndex ${selectables[newIndex]} ${event.granularity}');
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
@@ -994,14 +992,12 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
             newIndex += 1;
           }
         case SelectionResult.previous:
-          debugPrint('prev $newIndex');
           if (forward ?? false) {
             newIndex -= 1;
             finalResult = SelectionResult.end;
           } else if (newIndex == 0) {
             finalResult = currentSelectableResult;
           } else {
-            debugPrint('not forward');
             forward = false;
             newIndex -= 1;
           }
@@ -1010,16 +1006,13 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (isEnd) {
       final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
       if (forward != null && ((!forwardSelection && forward! && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward! && newIndex <= currentSelectionStartIndex))) {
-        debugPrint('swapping text-container');
         currentSelectionStartIndex = currentSelectionEndIndex;
       }
       currentSelectionEndIndex = newIndex;
     } else {
       currentSelectionStartIndex = newIndex;
-      debugPrint('adjusting start $newIndex');
     }
     _flushInactiveSelections();
-    debugPrint('adjustEnd $currentSelectionStartIndex $currentSelectionEndIndex ${finalResult!}');
     return finalResult!;
   }
 
