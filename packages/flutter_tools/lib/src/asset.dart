@@ -103,6 +103,9 @@ abstract class AssetBundle {
   /// indexed by asset key.
   Map<String, AssetBundleEntry> get entries;
 
+  /// The time at which this bundle was last built.
+  DateTime? get lastBuildTime;
+
   /// The files that were specified under the deferred components assets sections
   /// in a pubspec, indexed by component name and asset key.
   Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries;
@@ -178,6 +181,11 @@ class ManifestAssetBundle implements AssetBundle {
   final String _flutterRoot;
   final bool _splitDeferredAssets;
 
+  DateTime? _lastBuildTime;
+
+  @override
+  DateTime? get lastBuildTime => _lastBuildTime;
+
   @override
   final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 
@@ -247,6 +255,7 @@ class ManifestAssetBundle implements AssetBundle {
     TargetPlatform? targetPlatform,
     String? flavor,
   }) async {
+    _lastBuildTime = DateTime.now();
     if (flutterProject == null) {
       try {
         flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);

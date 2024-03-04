@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
+import 'base/time.dart';
 import 'build_info.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
@@ -38,10 +39,6 @@ DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  /// Return true if this is the first time this method is called
-  /// or if the entry has been modified since this method was last called.
-  bool get isModified;
-
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified after the given time
   /// or if the given time is null.
@@ -110,17 +107,6 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  bool get isModified {
-    final FileStat? oldFileStat = _fileStat;
-    _stat();
-    final FileStat? newFileStat = _fileStat;
-    if (oldFileStat == null && newFileStat == null) {
-      return false;
-    }
-    return oldFileStat == null || newFileStat == null || newFileStat.modified.isAfter(oldFileStat.modified);
-  }
-
-  @override
   bool isModifiedAfter(DateTime time) {
     final FileStat? oldFileStat = _fileStat;
     _stat();
@@ -151,32 +137,32 @@ class DevFSFileContent extends DevFSContent {
 
 /// Byte content to be copied to the device.
 class DevFSByteContent extends DevFSContent {
-  DevFSByteContent(this._bytes);
+  factory DevFSByteContent(
+    List<int> bytes, {
+      SystemClock? clock,
+    }
+  ) {
+    return DevFSByteContent._(
+      bytes: bytes,
+      timeOfCreation: (clock ?? const SystemClock()).now(),
+    );
+  }
 
-  List<int> _bytes;
+  DevFSByteContent._({
+    required List<int> bytes,
+    required DateTime timeOfCreation,
+  }) : _bytes = bytes, _creationTime = timeOfCreation;
 
-  bool _isModified = true;
-  DateTime _modificationTime = DateTime.now();
+
+  final List<int> _bytes;
+
+  final DateTime _creationTime;
 
   List<int> get bytes => _bytes;
 
-  set bytes(List<int> value) {
-    _bytes = value;
-    _isModified = true;
-    _modificationTime = DateTime.now();
-  }
-
-  /// Return true only once so that the content is written to the device only once.
-  @override
-  bool get isModified {
-    final bool modified = _isModified;
-    _isModified = false;
-    return modified;
-  }
-
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -192,23 +178,24 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string)
-    : _string = string,
-      super(utf8.encode(string));
+  factory DevFSStringContent(
+    String string, {
+      SystemClock? clock,
+    }
+  ) {
+    return DevFSStringContent._(
+      string: string,
+      timeOfCreation: (clock ?? const SystemClock()).now(),
+    );
+  }
+    DevFSStringContent._({
+    required String string,
+    required super.timeOfCreation,
+  }) : _string = string, super._(bytes: utf8.encode(string));
 
-  String _string;
+  final String _string;
 
   String get string => _string;
-
-  set string(String value) {
-    _string = value;
-    super.bytes = utf8.encode(_string);
-  }
-
-  @override
-  set bytes(List<int> value) {
-    string = utf8.decode(value);
-  }
 }
 
 /// A string compressing DevFSContent.
@@ -235,17 +222,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
   final ZLibEncoder _compressor;
   final DateTime _modificationTime = DateTime.now();
 
-  bool _isModified = true;
-
   late final List<int> bytes = _compressor.convert(utf8.encode(_string));
-
-  /// Return true only once so that the content is written to the device only once.
-  @override
-  bool get isModified {
-    final bool modified = _isModified;
-    _isModified = false;
-    return modified;
-  }
 
   @override
   bool isModifiedAfter(DateTime time) {
@@ -638,7 +615,7 @@ class DevFS {
       bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!entry.content.isModified || bundleFirstUpload) {
+        if (!entry.content.isModifiedAfter(bundle.lastBuildTime!) || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.
