@@ -1989,12 +1989,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     debugPrint('after setting $_textSelectionStart $_textSelectionEnd');
     if (!positionWithinParagraphRect) {
       if (position.offset == range.end) {
-        debugPrint('neixt');
         return SelectionResult.next;
       }
 
       if (position.offset == range.start) {
-        debugPrint('preivious');
         return SelectionResult.previous;
       }
     }
