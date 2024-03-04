@@ -299,7 +299,7 @@ enum SelectionEventType {
   /// Used by [SelectWordSelectionEvent].
   selectWord,
 
-  /// An event to select a word at the location
+  /// An event to select a paragraph at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   ///
   /// Used by [SelectParagraphSelectionEvent].
