@@ -19,6 +19,7 @@ void main() {
           // TODO(justinmc): Maybe just put the Rects in here directly?
           lastCall = methodCall.arguments as Map<String, double>;
         }
+        return;
       });
     addTearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
