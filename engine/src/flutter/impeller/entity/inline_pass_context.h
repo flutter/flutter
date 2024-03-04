@@ -17,6 +17,7 @@ namespace impeller {
 class InlinePassContext {
  public:
   struct RenderPassResult {
+    bool just_created = false;
     std::shared_ptr<RenderPass> pass;
     std::shared_ptr<Texture> backdrop_texture;
   };
