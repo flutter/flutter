@@ -36,6 +36,7 @@ class CompilerTest : public ::testing::TestWithParam<TargetPlatform> {
       const char* entry_point_name = "main") const;
 
  private:
+  std::string intermediates_path_;
   fml::UniqueFD intermediates_directory_;
 
   CompilerTest(const CompilerTest&) = delete;

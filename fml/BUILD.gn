@@ -64,6 +64,7 @@ source_set("fml") {
     "paths.cc",
     "paths.h",
     "posix_wrappers.h",
+    "process.h",
     "raster_thread_merger.cc",
     "raster_thread_merger.h",
     "shared_thread_merger.cc",
@@ -251,6 +252,7 @@ source_set("fml") {
       "platform/win/native_library_win.cc",
       "platform/win/paths_win.cc",
       "platform/win/posix_wrappers_win.cc",
+      "platform/win/process_win.cc",
     ]
   } else {
     sources += [
@@ -260,6 +262,7 @@ source_set("fml") {
       "platform/posix/native_library_posix.cc",
       "platform/posix/paths_posix.cc",
       "platform/posix/posix_wrappers_posix.cc",
+      "platform/posix/process_posix.cc",
     ]
   }
 }
