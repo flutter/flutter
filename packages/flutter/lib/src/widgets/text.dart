@@ -1010,7 +1010,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       }
       currentSelectionEndIndex = newIndex;
     } else {
-      //TODO(Renzo-Olivares) swap for moving start.
       currentSelectionStartIndex = newIndex;
     }
     _flushInactiveSelections();
