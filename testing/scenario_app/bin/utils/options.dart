@@ -159,6 +159,11 @@ extension type const Options._(ArgResults _args) {
             'https://github.com/flutter/flutter/issues/143539 for details.',
         negatable: false
       )
+      ..addFlag(
+        'prefix-logs-per-run',
+        help: 'Whether to prefix logs with a per-run unique identifier.',
+        defaultsTo: environment.isCi,
+      )
       ..addOption(
         'impeller-backend',
         help: 'The graphics backend to use when --enable-impeller is true. '
@@ -314,4 +319,7 @@ extension type const Options._(ArgResults _args) {
     }
     return _args['force-surface-producer-surface-texture'] as bool;
   }
+
+  /// Whether to prefix logs with a per-run unique identifier.
+  bool get prefixLogsPerRun => _args['prefix-logs-per-run'] as bool;
 }
