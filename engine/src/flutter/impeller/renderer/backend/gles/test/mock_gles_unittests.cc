@@ -16,8 +16,9 @@ namespace testing {
 TEST(MockGLES, CanInitialize) {
   auto mock_gles = MockGLES::Init();
 
-  EXPECT_EQ(mock_gles->GetProcTable().GetString(GL_VENDOR),
-            (unsigned char*)"MockGLES");
+  std::string_view vendor(reinterpret_cast<const char*>(
+      mock_gles->GetProcTable().GetString(GL_VENDOR)));
+  EXPECT_EQ(vendor, "MockGLES");
 }
 
 // Tests we can call two functions and capture the calls.
