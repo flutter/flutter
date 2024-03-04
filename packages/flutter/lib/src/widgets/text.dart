@@ -13,8 +13,8 @@ import 'default_selection_style.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
-import 'selection_container.dart';
 import 'selectable_region.dart';
+import 'selection_container.dart';
 
 // Examples can assume:
 // late String _name;
@@ -650,8 +650,8 @@ class Text extends StatelessWidget {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
-    final GlobalKey? _textKey = registrar == null ? null : GlobalKey();
-    final _SelectableTextContainerDelegate? _selectionDelegate = registrar == null ? null : _SelectableTextContainerDelegate(_textKey!);
+    final GlobalKey? textKey = registrar == null ? null : GlobalKey();
+    final _SelectableTextContainerDelegate? selectionDelegate = registrar == null ? null : _SelectableTextContainerDelegate(textKey!);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _)     => textScaler,
       // For unmigrated apps, fall back to textScaleFactor.
@@ -659,7 +659,7 @@ class Text extends StatelessWidget {
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
     Widget result = RichText(
-      key: _textKey,
+      key: textKey,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -670,7 +670,7 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionRegistrar: _selectionDelegate,
+      selectionRegistrar: selectionDelegate,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
@@ -682,7 +682,7 @@ class Text extends StatelessWidget {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: SelectionContainer(
-          delegate: _selectionDelegate!,
+          delegate: selectionDelegate!,
           child: result,
         ),
       );
@@ -1005,7 +1005,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     if (isEnd) {
       final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-      if (forward != null && ((!forwardSelection && forward! && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward! && newIndex <= currentSelectionStartIndex))) {
+      if (forward != null && ((!forwardSelection && forward && newIndex >= currentSelectionStartIndex) || (forwardSelection && !forward && newIndex <= currentSelectionStartIndex))) {
         currentSelectionStartIndex = currentSelectionEndIndex;
       }
       currentSelectionEndIndex = newIndex;
