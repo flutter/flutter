@@ -4255,26 +4255,23 @@ void main() {
   // This is a regression test for https://github.com/flutter/flutter/issues/143524.
   testWidgets('Discrete Slider.onChanged is called only once', (WidgetTester tester) async {
     int onChangeCallbackCount = 0;
-    late final double screenWidth;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            screenWidth = constraints.maxWidth;
-            return Center(
-              child: Slider(
-                max: 5,
-                divisions: 5,
-                value: 0,
-                onChanged: (double newValue) {
-                  onChangeCallbackCount++;
-                },
-              ),
-            );
-          }),
+          body: Center(
+            child: Slider(
+              max: 5,
+              divisions: 5,
+              value: 0,
+              onChanged: (double newValue) {
+                onChangeCallbackCount++;
+              },
+            ),
+          ),
         ),
       ),
     );
+
     final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
     await tester.pump(kLongPressTimeout);
     await gesture.moveBy(Offset(screenWidth / 5, 0));
