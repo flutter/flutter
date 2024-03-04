@@ -85,6 +85,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -106,6 +107,7 @@ void main() {
         cpuArchitecture: DarwinArch.armv7,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -128,6 +130,7 @@ void main() {
         sdkVersion: '1.0.0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 1);
@@ -146,6 +149,7 @@ void main() {
         sdkVersion: '13.1.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 13);
@@ -164,6 +168,7 @@ void main() {
         sdkVersion: '10',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 10);
@@ -182,6 +187,7 @@ void main() {
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 0);
@@ -200,6 +206,7 @@ void main() {
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).majorSdkVersion, 0);
@@ -221,6 +228,7 @@ void main() {
         sdkVersion: '13.3.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -244,6 +252,7 @@ void main() {
         sdkVersion: '13.3.1 (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -267,6 +276,7 @@ void main() {
         sdkVersion: '16.4.1(a) (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -290,6 +300,7 @@ void main() {
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -312,6 +323,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -332,6 +344,7 @@ void main() {
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
@@ -354,6 +367,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -377,6 +391,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -406,6 +421,7 @@ void main() {
               cpuArchitecture: DarwinArch.arm64,
               connectionInterface: DeviceConnectionInterface.attached,
               isConnected: true,
+              isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
             );
@@ -501,6 +517,7 @@ void main() {
           cpuArchitecture: DarwinArch.arm64,
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
+          isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
         );
@@ -571,6 +588,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -590,6 +608,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
@@ -889,6 +908,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
+        isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
       );
