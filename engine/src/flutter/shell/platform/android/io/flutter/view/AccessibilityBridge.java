@@ -763,7 +763,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setParent(rootAccessibilityView);
     }
 
-    if (semanticsNode.previousNodeId != -1) {
+    if (semanticsNode.previousNodeId != -1 && Build.VERSION.SDK_INT >= 22) {
       result.setTraversalAfter(rootAccessibilityView, semanticsNode.previousNodeId);
     }
 
