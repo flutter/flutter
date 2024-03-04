@@ -1712,9 +1712,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         }
       }
     } else {
-      // The position is not contained within the current rect. The targetPosition
-      // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
-      // for a more in depth explanation on this adjustment.
+      // The position is not contained within the current [RenderParagraph]. The
+      // targetPosition will either be at the end or beginning of the current rect
+      // See [SelectionUtils.adjustDragOffset] for a more in depth explanation
+      // on this adjustment.
       if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
         // When the selection is inverted by the new position it is necessary to
         // swap the end edge (moving edge) with the start edge (static edge) to
