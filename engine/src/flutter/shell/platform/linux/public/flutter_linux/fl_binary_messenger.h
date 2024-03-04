@@ -32,6 +32,7 @@ typedef enum {
   FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED,
 } FlBinaryMessengerError;
 
+G_MODULE_EXPORT
 GQuark fl_binary_messenger_codec_error_quark(void) G_GNUC_CONST;
 
 G_MODULE_EXPORT
