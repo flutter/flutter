@@ -79,7 +79,7 @@ class SkiaGoldClient {
 
   /// The ABI of the current host platform.
   ///
-  /// If not overriden for testing, defaults to [Abi.current];
+  /// If not overridden for testing, defaults to [Abi.current];
   final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
