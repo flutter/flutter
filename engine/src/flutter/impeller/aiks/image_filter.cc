@@ -81,8 +81,8 @@ BlurImageFilter::~BlurImageFilter() = default;
 
 std::shared_ptr<FilterContents> BlurImageFilter::WrapInput(
     const FilterInput::Ref& input) const {
-  return FilterContents::MakeGaussianBlur(input, sigma_x_, sigma_y_,
-                                          blur_style_, tile_mode_);
+  return FilterContents::MakeGaussianBlur(input, sigma_x_, sigma_y_, tile_mode_,
+                                          blur_style_);
 }
 
 std::shared_ptr<ImageFilter> BlurImageFilter::Clone() const {

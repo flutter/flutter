@@ -588,5 +588,61 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, GaussianBlurStyleInner) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+
+  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+
+  Paint paint;
+  paint.color = Color::Green();
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kInner,
+      .sigma = Sigma(30),
+  };
+  canvas.DrawPath(PathBuilder()
+                      .MoveTo({200, 200})
+                      .LineTo({300, 400})
+                      .LineTo({100, 400})
+                      .Close()
+                      .TakePath(),
+                  paint);
+
+  // Draw another thing to make sure the clip area is reset.
+  Paint red;
+  red.color = Color::Red();
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 200, 200), red);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, GaussianBlurStyleOuter) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+
+  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+
+  Paint paint;
+  paint.color = Color::Green();
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kOuter,
+      .sigma = Sigma(30),
+  };
+  canvas.DrawPath(PathBuilder()
+                      .MoveTo({200, 200})
+                      .LineTo({300, 400})
+                      .LineTo({100, 400})
+                      .Close()
+                      .TakePath(),
+                  paint);
+
+  // Draw another thing to make sure the clip area is reset.
+  Paint red;
+  red.color = Color::Red();
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 200, 200), red);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

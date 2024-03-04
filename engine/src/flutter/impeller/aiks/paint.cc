@@ -128,8 +128,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   // away with doing one Gaussian blur.
   if (color_source_contents->IsSolidColor() && !color_filter) {
     return FilterContents::MakeGaussianBlur(
-        FilterInput::Make(color_source_contents), sigma, sigma, style,
-        Entity::TileMode::kDecal);
+        FilterInput::Make(color_source_contents), sigma, sigma,
+        Entity::TileMode::kDecal, style, color_source_contents->GetGeometry());
   }
 
   /// 1. Create an opaque white mask of the original geometry.
@@ -141,7 +141,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   /// 2. Blur the mask.
 
   auto blurred_mask = FilterContents::MakeGaussianBlur(
-      FilterInput::Make(mask), sigma, sigma, style, Entity::TileMode::kDecal);
+      FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal, style);
 
   /// 3. Replace the geometry of the original color source with a rectangle that
   ///    covers the full region of the blurred mask. Note that geometry is in
@@ -175,8 +175,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const FilterInput::Ref& input,
     bool is_solid_color) const {
   if (is_solid_color) {
-    return FilterContents::MakeGaussianBlur(input, sigma, sigma, style,
-                                            Entity::TileMode::kDecal);
+    return FilterContents::MakeGaussianBlur(input, sigma, sigma,
+                                            Entity::TileMode::kDecal, style);
   }
   return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
 }
