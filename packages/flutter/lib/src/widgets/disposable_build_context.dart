@@ -51,10 +51,7 @@ class DisposableBuildContext<T extends State> {
   /// Otherwise, asserts the [_state] is still mounted and returns its context.
   BuildContext? get context {
     assert(_debugValidate());
-    if (_state == null) {
-      return null;
-    }
-    return _state!.context;
+    return _state?.context;
   }
 
   /// Called from asserts or tests to determine whether this object is in a

@@ -144,6 +144,7 @@ Widget chipWithOptionalDeleteButton({
   TextDirection textDirection = TextDirection.ltr,
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
+  double? size,
   VoidCallback? onPressed = doNothing,
   ThemeData? themeData,
 }) {
@@ -156,7 +157,11 @@ Widget chipWithOptionalDeleteButton({
           tooltip: chipTooltip,
           onPressed: onPressed,
           onDeleted: deletable ? doNothing : null,
-          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          deleteIcon: Icon(
+            key: deleteButtonKey,
+            size: size,
+            Icons.close,
+          ),
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
@@ -1852,6 +1857,7 @@ void main() {
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -1957,6 +1963,7 @@ void main() {
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -5383,6 +5390,62 @@ void main() {
     // Calculate the distance between delete icon and label.
     labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('Default delete button InkWell shape', (WidgetTester tester) async {
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+    ));
+
+    final InkWell deleteButtonInkWell = tester.widget<InkWell>(find.ancestor(
+      of: find.byIcon(Icons.cancel),
+      matching: find.byType(InkWell).last,
+    ));
+    expect(deleteButtonInkWell.customBorder, const CircleBorder());
+  });
+
+  testWidgets('Default delete button overlay', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+      theme: theme,
+    ));
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, isNot(paints..rect(color: theme.hoverColor)));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    // Hover over the delete icon.
+    final Offset centerOfDeleteButton = tester.getCenter(find.byType(Icon));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+
+    const Rect expectedClipRect = Rect.fromLTRB(124.7, 10.0, 142.7, 28.0);
+    final Path expectedClipPath = Path()..addRect(expectedClipRect);
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(48.0),
+        sampleSize: 100,
+      )),
+    );
   });
 
   group('Material 2', () {

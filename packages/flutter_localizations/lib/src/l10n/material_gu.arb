@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "શોધો",
   "searchWebButtonLabel": "વેબ પર શોધો",
   "shareButtonLabel": "શેર કરો…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -1290,11 +1290,7 @@ class PerfTest {
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
-      if (device != null) {
-        selectedDevice = device!;
-      } else {
-        selectedDevice = await devices.workingDevice;
-      }
+      selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;

@@ -98,6 +98,9 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   ));
 
   /// The children extent builder.
+  ///
+  /// Should return null if asked to build an item extent with a greater index than
+  /// exists.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override

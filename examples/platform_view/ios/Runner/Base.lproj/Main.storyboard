@@ -49,7 +49,7 @@
                                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K7X-Ru-0N7" customClass="MDButton">
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K7X-Ru-0N7">
                                                 <rect key="frame" x="94" y="325.5" width="188" height="38"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -86,7 +86,7 @@
                                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6yL-sX-bUL" customClass="MDButton">
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6yL-sX-bUL">
                                                 <rect key="frame" x="300" y="-5" width="55" height="55"/>
                                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -94,6 +94,7 @@
                                                     <constraint firstAttribute="height" constant="55" id="q45-t3-9DA"/>
                                                 </constraints>
                                                 <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                <state key="normal" image="ic_add.png"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="type">
                                                         <integer key="value" value="2"/>
@@ -128,7 +129,8 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="incrementLabel" destination="qaB-rs-mWp" id="bFY-of-WoI"/>
+                        <outlet property="countLabel" destination="qaB-rs-mWp" id="bFY-of-WoI"/>
+                        <outlet property="incrementButton" destination="6yL-sX-bUL" id="aQR-ap-BrT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7qW-nP-WZA" userLabel="First Responder" sceneMemberID="firstResponder"/>

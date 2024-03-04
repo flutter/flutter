@@ -149,5 +149,6 @@
   "lookUpButtonLabel": "Privire în sus",
   "searchWebButtonLabel": "Căutați pe web",
   "shareButtonLabel": "Trimiteți…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

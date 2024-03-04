@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../build_info.dart' show BuildMode;
 import '../convert.dart';
 import 'compile.dart';
 
@@ -106,7 +107,8 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
   /// Includes the contents of [toSharedCommandOptions].
-  List<String> toCommandOptions() => <String>[
+  List<String> toCommandOptions(BuildMode buildMode) => <String>[
+        if (buildMode == BuildMode.profile) '--no-minify',
         ...toSharedCommandOptions(),
         '-O$optimizationLevel',
         if (dumpInfo) '--dump-info',
@@ -145,10 +147,11 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
 
-  List<String> toCommandOptions() {
+  List<String> toCommandOptions(BuildMode buildMode) {
+    final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O$optimizationLevel',
-      '--${stripWasm? 'no-' : ''}name-section',
+      '--${stripSymbols ? 'no-' : ''}name-section',
     ];
   }
 

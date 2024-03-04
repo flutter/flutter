@@ -461,10 +461,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   }
 
   GestureArenaEntry _addPointerToArena(int pointer) {
-    if (_team != null) {
-      return _team!.add(pointer, this);
-    }
-    return GestureBinding.instance.gestureArena.add(pointer, this);
+    return _team?.add(pointer, this) ?? GestureBinding.instance.gestureArena.add(pointer, this);
   }
 
   /// Causes events related to the given pointer ID to be routed to this recognizer.

@@ -313,12 +313,12 @@ class _GlowController extends ChangeNotifier {
     }
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _glowController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _glowOpacity = decelerator.drive(_glowOpacityTween);
-    _glowSize = decelerator.drive(_glowSizeTween);
+    _glowOpacity = _decelerator.drive(_glowOpacityTween);
+    _glowSize = _decelerator.drive(_glowSizeTween);
     _displacementTicker = vsync.createTicker(_tickDisplacement);
   }
 
@@ -330,6 +330,7 @@ class _GlowController extends ChangeNotifier {
   double _paintOffsetScrollPixels = 0.0;
 
   // animation values
+  late final CurvedAnimation _decelerator;
   final Tween<double> _glowOpacityTween = Tween<double>(begin: 0.0, end: 0.0);
   late final Animation<double> _glowOpacity;
   final Tween<double> _glowSizeTween = Tween<double>(begin: 0.0, end: 0.0);
@@ -383,6 +384,7 @@ class _GlowController extends ChangeNotifier {
   @override
   void dispose() {
     _glowController.dispose();
+    _decelerator.dispose();
     _displacementTicker.dispose();
     _pullRecedeTimer?.cancel();
     super.dispose();
@@ -812,15 +814,16 @@ class _StretchController extends ChangeNotifier {
     }
     _stretchController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    final Animation<double> decelerator = CurvedAnimation(
+    _decelerator = CurvedAnimation(
       parent: _stretchController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
-    _stretchSize = decelerator.drive(_stretchSizeTween);
+    _stretchSize = _decelerator.drive(_stretchSizeTween);
   }
 
   late final AnimationController _stretchController;
   late final Animation<double> _stretchSize;
+  late final CurvedAnimation _decelerator;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
 
@@ -923,6 +926,7 @@ class _StretchController extends ChangeNotifier {
   @override
   void dispose() {
     _stretchController.dispose();
+    _decelerator.dispose();
     super.dispose();
   }
 
