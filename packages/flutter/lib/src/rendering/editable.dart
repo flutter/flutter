@@ -532,7 +532,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.textHeightBehavior = value;
     _textIntrinsicsCache?.textHeightBehavior = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -543,7 +543,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.textWidthBasis = value;
     _textIntrinsicsCache?.textWidthBasis = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The pixel ratio of the current device.
@@ -556,7 +556,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _devicePixelRatio = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// Character used for obscuring text if [obscureText] is true.
@@ -756,7 +756,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// Implies [markNeedsLayout].
   @protected
-  void markNeedsTextLayout() {
+  void _markNeedsTextLayout() {
     markNeedsLayout();
   }
 
@@ -791,7 +791,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
     _canComputeIntrinsicsCached = null;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
 
@@ -819,7 +819,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.textAlign = value;
     _textIntrinsicsCache?.textAlign = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The directionality of the text.
@@ -843,7 +843,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.textDirection = value;
     _textIntrinsicsCache?.textDirection = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
 
@@ -864,7 +864,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.locale = value;
     _textIntrinsicsCache?.locale = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The [StrutStyle] used by the renderer's internal [TextPainter] to
@@ -876,7 +876,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.strutStyle = value;
     _textIntrinsicsCache?.strutStyle = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The color to use when painting the cursor.
@@ -986,7 +986,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // See the `_preferredHeight` method.
     _textPainter.maxLines = value == 1 ? 1 : null;
     _textIntrinsicsCache?.maxLines = _textPainter.maxLines;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// {@macro flutter.widgets.editableText.minLines}
@@ -999,7 +999,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _minLines = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -1010,7 +1010,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _expands = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The color to use when painting the selection.
@@ -1049,7 +1049,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _textPainter.textScaler = value;
     _textIntrinsicsCache?.textScaler = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
   }
 
   /// The region of text that is selected, if any.
@@ -1225,7 +1225,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _enableInteractiveSelection = value;
-    markNeedsTextLayout();
+    _markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
 
@@ -1314,6 +1314,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
   List<TextBox> getBoxesForSelection(TextSelection selection) {
+    _computeTextMetricsIfNeeded();
     return _textPainter.getBoxesForSelection(selection)
                        .map((TextBox textBox) => TextBox.fromLTRBD(
                           textBox.left + _paintOffset.dx,
@@ -1731,6 +1732,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [getLocalRectForCaret], which is the equivalent but for
   ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
+    _computeTextMetricsIfNeeded();
+
     final Offset paintOffset = _paintOffset;
 
     final List<ui.TextBox> boxes = selection.isCollapsed ?
@@ -1762,6 +1765,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (!range.isValid || range.isCollapsed) {
       return null;
     }
+    _computeTextMetricsIfNeeded();
+
     final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
@@ -1783,6 +1788,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [TextPainter.getPositionForOffset], which is the equivalent method
   ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
+    _computeTextMetricsIfNeeded();
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
@@ -1799,6 +1805,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
   ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
+    _computeTextMetricsIfNeeded();
     final Rect caretPrototype = _caretPrototype;
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, caretPrototype);
     Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
@@ -1867,7 +1874,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return (_textIntrinsics
       ..setPlaceholderDimensions(placeholderDimensions)
       ..layout(minWidth: minWidth, maxWidth: maxWidth))
-      .minIntrinsicWidth;
+      .maxIntrinsicWidth + _caretMargin;
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
@@ -1948,6 +1955,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
+    _computeTextMetricsIfNeeded();
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
@@ -2082,6 +2090,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// [from] corresponds to the [TextSelection.baseOffset], and [to] corresponds
   /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+    _computeTextMetricsIfNeeded();
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextPosition? toPosition = to == null
       ? null
@@ -2118,6 +2127,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+    _computeTextMetricsIfNeeded();
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextSelection fromWord = getWordAtOffset(fromPosition);
     final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
@@ -2138,6 +2148,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordEdge({ required SelectionChangedCause cause }) {
+    _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
     final TextRange word = _textPainter.getWordBoundary(position);
@@ -2261,8 +2272,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // the constraints used to layout the `_textPainter` is different. See
   // `TextPainter.layout`.
   void _computeTextMetricsIfNeeded() {
-
-    //_layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _textPainter.layout(minWidth: minWidth, maxWidth: maxWidth);
   }
 
   late Rect _caretPrototype;
@@ -2330,8 +2341,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textIntrinsics
       ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild))
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
-    final double width = forceLine ? constraints.maxWidth : constraints
-        .constrainWidth(_textIntrinsics.size.width + _caretMargin);
+    final double width = forceLine
+      ? constraints.maxWidth
+      : constraints.constrainWidth(_textIntrinsics.size.width + _caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
@@ -2598,6 +2610,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         needsCompositing,

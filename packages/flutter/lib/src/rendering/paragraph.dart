@@ -717,6 +717,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     assert(constraints.debugAssertIsValid());
+    _layoutTextWithConstraints(constraints);
     // TODO(garyq): Since our metric for ideographic baseline is currently
     // inaccurate and the non-alphabetic baselines are based off of the
     // alphabetic baseline, we use the alphabetic for now to produce correct
@@ -906,6 +907,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Text alignment only triggers repaint so it's possible the text layout has
+    // been invalidated but performLayout wasn't called at this point. Make sure
+    // the TextPainter has a valid layout.
+    _layoutTextWithConstraints(constraints);
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
@@ -954,6 +959,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// Valid only after [layout].
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
   }
 
@@ -962,6 +968,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// Valid only after [layout].
   double? getFullHeightForCaret(TextPosition position) {
     assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.getFullHeightForCaret(position, Rect.zero);
   }
 
@@ -987,6 +994,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(
       selection,
       boxHeightStyle: boxHeightStyle,
@@ -999,6 +1007,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// Valid only after [layout].
   TextPosition getPositionForOffset(Offset offset) {
     assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.getPositionForOffset(offset);
   }
 
@@ -1013,6 +1022,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// Valid only after [layout].
   TextRange getWordBoundary(TextPosition position) {
     assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.getWordBoundary(position);
   }
 
