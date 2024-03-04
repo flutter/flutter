@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/runtime/dart_isolate.h"
-
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/lib/ui/window/platform_message.h"
+#include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/isolate_configuration.h"
+#include "flutter/runtime/platform_isolate_manager.h"
 #include "flutter/testing/dart_isolate_runner.h"
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
@@ -693,6 +694,498 @@ TEST_F(DartIsolateTest, SpawningAnIsolateDoesNotReloadKernel) {
   }
 
   ASSERT_TRUE(root_isolate->Shutdown());
+}
+
+class FakePlatformConfigurationClient : public PlatformConfigurationClient {
+ public:
+  std::shared_ptr<PlatformIsolateManager> mgr =
+      std::shared_ptr<PlatformIsolateManager>(new PlatformIsolateManager());
+  std::shared_ptr<PlatformIsolateManager> GetPlatformIsolateManager() override {
+    return mgr;
+  }
+
+  std::string DefaultRouteName() override { return ""; }
+  void ScheduleFrame() override {}
+  void EndWarmUpFrame() override {}
+  void Render(Scene* scene, double width, double height) override {}
+  void UpdateSemantics(SemanticsUpdate* update) override {}
+  void HandlePlatformMessage(
+      std::unique_ptr<PlatformMessage> message) override {}
+  FontCollection& GetFontCollection() override {
+    FML_UNREACHABLE();
+    return *(FontCollection*)(this);
+  }
+  std::shared_ptr<AssetManager> GetAssetManager() override { return nullptr; }
+  void UpdateIsolateDescription(const std::string isolate_name,
+                                int64_t isolate_port) override {}
+  void SetNeedsReportTimings(bool value) override {}
+  std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override {
+    return nullptr;
+  }
+  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locale_data) override {
+    return nullptr;
+  }
+  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override {}
+  void SendChannelUpdate(std::string name, bool listening) override {}
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) const override {
+    return 0;
+  }
+};
+
+TEST_F(DartIsolateTest, PlatformIsolateCreationAndShutdown) {
+  fml::AutoResetWaitableEvent message_latch;
+  AddNativeCallback(
+      "PassMessage",
+      CREATE_NATIVE_ENTRY(([&message_latch](Dart_NativeArguments args) {
+        auto message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        ASSERT_EQ("Platform isolate is ready", message);
+        message_latch.Signal();
+      })));
+
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+  Dart_Isolate platform_isolate = nullptr;
+
+  {
+    ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+    auto settings = CreateSettingsForFixture();
+    auto vm_ref = DartVMRef::Create(settings);
+    ASSERT_TRUE(vm_ref);
+    auto vm_data = vm_ref.GetVMData();
+    ASSERT_TRUE(vm_data);
+
+    auto platform_thread = CreateNewThread();
+    auto ui_thread = CreateNewThread();
+    TaskRunners task_runners(GetCurrentTestName(),  // label
+                             platform_thread,       // platform
+                             ui_thread,             // raster
+                             ui_thread,             // ui
+                             ui_thread              // io
+    );
+    auto isolate =
+        RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                             GetDefaultKernelFilePath(), {}, nullptr,
+                             std::move(platform_configuration));
+    ASSERT_TRUE(isolate);
+    auto root_isolate = isolate->get();
+    ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+    EXPECT_FALSE(
+        client.mgr->IsRegisteredForTestingOnly(root_isolate->isolate()));
+
+    // Post a task to the platform_thread that just waits, to delay execution of
+    // the platform isolate until we're ready.
+    fml::AutoResetWaitableEvent platform_thread_latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        platform_thread, fml::MakeCopyable([&platform_thread_latch]() mutable {
+          platform_thread_latch.Wait();
+        }));
+
+    fml::AutoResetWaitableEvent ui_thread_latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        ui_thread, fml::MakeCopyable([&]() mutable {
+          ASSERT_TRUE(
+              isolate->RunInIsolateScope([root_isolate, &platform_isolate]() {
+                Dart_Handle lib = Dart_RootLibrary();
+                Dart_Handle entry_point = Dart_GetField(
+                    lib, tonic::ToDart("mainForPlatformIsolates"));
+                char* error = nullptr;
+                platform_isolate =
+                    root_isolate->CreatePlatformIsolate(entry_point, &error);
+
+                EXPECT_FALSE(error);
+                EXPECT_TRUE(platform_isolate);
+                EXPECT_EQ(Dart_CurrentIsolate(), root_isolate->isolate());
+                return true;
+              }));
+          ui_thread_latch.Signal();
+        }));
+
+    ui_thread_latch.Wait();
+    ASSERT_TRUE(platform_isolate);
+    EXPECT_TRUE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+
+    // Allow the platform isolate to run.
+    platform_thread_latch.Signal();
+
+    // Wait for a message from the platform isolate.
+    message_latch.Wait();
+
+    // root isolate will be auto-shutdown
+  }
+  EXPECT_FALSE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+}
+
+TEST_F(DartIsolateTest, PlatformIsolateEarlyShutdown) {
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  ASSERT_TRUE(vm_ref);
+  auto vm_data = vm_ref.GetVMData();
+  ASSERT_TRUE(vm_data);
+
+  auto platform_thread = CreateNewThread();
+  auto ui_thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  // label
+                           platform_thread,       // platform
+                           ui_thread,             // raster
+                           ui_thread,             // ui
+                           ui_thread              // io
+  );
+  auto isolate =
+      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                           GetDefaultKernelFilePath(), {}, nullptr,
+                           std::move(platform_configuration));
+  ASSERT_TRUE(isolate);
+  auto root_isolate = isolate->get();
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+  EXPECT_FALSE(client.mgr->IsRegisteredForTestingOnly(root_isolate->isolate()));
+
+  fml::AutoResetWaitableEvent ui_thread_latch;
+  Dart_Isolate platform_isolate = nullptr;
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_thread, fml::MakeCopyable([&]() mutable {
+        ASSERT_TRUE(
+            isolate->RunInIsolateScope([root_isolate, &platform_isolate]() {
+              Dart_Handle lib = Dart_RootLibrary();
+              Dart_Handle entry_point =
+                  Dart_GetField(lib, tonic::ToDart("emptyMain"));
+              char* error = nullptr;
+              platform_isolate =
+                  root_isolate->CreatePlatformIsolate(entry_point, &error);
+
+              EXPECT_FALSE(error);
+              EXPECT_TRUE(platform_isolate);
+              EXPECT_EQ(Dart_CurrentIsolate(), root_isolate->isolate());
+
+              return true;
+            }));
+        ui_thread_latch.Signal();
+      }));
+
+  ui_thread_latch.Wait();
+  ASSERT_TRUE(platform_isolate);
+  EXPECT_TRUE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+
+  // Post a task to the platform thread to shut down the platform isolate.
+  fml::AutoResetWaitableEvent platform_thread_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread,
+      fml::MakeCopyable([&platform_thread_latch, platform_isolate]() mutable {
+        Dart_EnterIsolate(platform_isolate);
+        Dart_ShutdownIsolate();
+        platform_thread_latch.Signal();
+      }));
+  platform_thread_latch.Wait();
+
+  // The platform isolate should be shut down.
+  EXPECT_FALSE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+
+  // root isolate will be auto-shutdown
+}
+
+TEST_F(DartIsolateTest, PlatformIsolateSendAndReceive) {
+  fml::AutoResetWaitableEvent message_latch;
+  AddNativeCallback(
+      "PassMessage",
+      CREATE_NATIVE_ENTRY(([&message_latch](Dart_NativeArguments args) {
+        auto message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        ASSERT_EQ("Platform isolate received: Hello from root isolate!",
+                  message);
+        message_latch.Signal();
+      })));
+
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  ASSERT_TRUE(vm_ref);
+  auto vm_data = vm_ref.GetVMData();
+  ASSERT_TRUE(vm_data);
+
+  auto platform_thread = CreateNewThread();
+  auto ui_thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  // label
+                           platform_thread,       // platform
+                           ui_thread,             // raster
+                           ui_thread,             // ui
+                           ui_thread              // io
+  );
+  auto isolate =
+      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                           GetDefaultKernelFilePath(), {}, nullptr,
+                           std::move(platform_configuration));
+  ASSERT_TRUE(isolate);
+  auto root_isolate = isolate->get();
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+
+  fml::AutoResetWaitableEvent ui_thread_latch;
+  Dart_Isolate platform_isolate = nullptr;
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_thread, fml::MakeCopyable([&]() mutable {
+        ASSERT_TRUE(isolate->RunInIsolateScope([root_isolate,
+                                                &platform_isolate]() {
+          Dart_Handle lib = Dart_RootLibrary();
+          Dart_Handle entry_point = Dart_Invoke(
+              lib, tonic::ToDart("createEntryPointForPlatIsoSendAndRecvTest"),
+              0, nullptr);
+          char* error = nullptr;
+          platform_isolate =
+              root_isolate->CreatePlatformIsolate(entry_point, &error);
+          EXPECT_FALSE(error);
+          return true;
+        }));
+        ui_thread_latch.Signal();
+      }));
+  ui_thread_latch.Wait();
+
+  // Wait for a message from the platform isolate.
+  message_latch.Wait();
+
+  // Post a task to the platform_thread that runs after the platform isolate's
+  // entry point and all messages, and wait for it to run.
+  fml::AutoResetWaitableEvent epilogue_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread, fml::MakeCopyable([&epilogue_latch]() mutable {
+        epilogue_latch.Signal();
+      }));
+  epilogue_latch.Wait();
+
+  // root isolate will be auto-shutdown
+}
+
+TEST_F(DartIsolateTest, PlatformIsolateCreationAfterManagerShutdown) {
+  AddNativeCallback("PassMessage",
+                    CREATE_NATIVE_ENTRY((
+                        [](Dart_NativeArguments args) { FML_UNREACHABLE(); })));
+
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  ASSERT_TRUE(vm_ref);
+  auto vm_data = vm_ref.GetVMData();
+  ASSERT_TRUE(vm_data);
+
+  auto platform_thread = CreateNewThread();
+  auto ui_thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  // label
+                           platform_thread,       // platform
+                           ui_thread,             // raster
+                           ui_thread,             // ui
+                           ui_thread              // io
+  );
+  auto isolate =
+      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                           GetDefaultKernelFilePath(), {}, nullptr,
+                           std::move(platform_configuration));
+  ASSERT_TRUE(isolate);
+  auto root_isolate = isolate->get();
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+
+  // Shut down the manager on the platform thread.
+  fml::AutoResetWaitableEvent manager_shutdown_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread,
+      fml::MakeCopyable([&manager_shutdown_latch, &client]() mutable {
+        client.mgr->ShutdownPlatformIsolates();
+        manager_shutdown_latch.Signal();
+      }));
+  manager_shutdown_latch.Wait();
+
+  fml::AutoResetWaitableEvent ui_thread_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_thread, fml::MakeCopyable([&]() mutable {
+        ASSERT_TRUE(isolate->RunInIsolateScope([root_isolate]() {
+          Dart_Handle lib = Dart_RootLibrary();
+          Dart_Handle entry_point =
+              Dart_GetField(lib, tonic::ToDart("mainForPlatformIsolates"));
+          char* error = nullptr;
+          Dart_Isolate platform_isolate =
+              root_isolate->CreatePlatformIsolate(entry_point, &error);
+
+          // Failed to create a platform isolate, but we've still re-entered the
+          // root isolate.
+          EXPECT_FALSE(error);
+          EXPECT_FALSE(platform_isolate);
+          EXPECT_EQ(Dart_CurrentIsolate(), root_isolate->isolate());
+
+          return true;
+        }));
+        ui_thread_latch.Signal();
+      }));
+  ui_thread_latch.Wait();
+
+  // root isolate will be auto-shutdown
+}
+
+TEST_F(DartIsolateTest, PlatformIsolateManagerShutdownBeforeMainRuns) {
+  AddNativeCallback("PassMessage",
+                    CREATE_NATIVE_ENTRY((
+                        [](Dart_NativeArguments args) { FML_UNREACHABLE(); })));
+
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  ASSERT_TRUE(vm_ref);
+  auto vm_data = vm_ref.GetVMData();
+  ASSERT_TRUE(vm_data);
+
+  auto platform_thread = CreateNewThread();
+  auto ui_thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  // label
+                           platform_thread,       // platform
+                           ui_thread,             // raster
+                           ui_thread,             // ui
+                           ui_thread              // io
+  );
+  auto isolate =
+      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                           GetDefaultKernelFilePath(), {}, nullptr,
+                           std::move(platform_configuration));
+  ASSERT_TRUE(isolate);
+  auto root_isolate = isolate->get();
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+
+  Dart_Isolate platform_isolate = nullptr;
+
+  // Post a task to the platform_thread that just waits, to delay execution of
+  // the platform isolate until we're ready, and shutdown the manager just
+  // before it runs.
+  fml::AutoResetWaitableEvent platform_thread_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread, fml::MakeCopyable([&platform_thread_latch, &client,
+                                          &platform_isolate]() mutable {
+        platform_thread_latch.Wait();
+        client.mgr->ShutdownPlatformIsolates();
+        EXPECT_TRUE(platform_isolate);
+        EXPECT_FALSE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+      }));
+
+  fml::AutoResetWaitableEvent ui_thread_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_thread, fml::MakeCopyable([&]() mutable {
+        ASSERT_TRUE(
+            isolate->RunInIsolateScope([root_isolate, &platform_isolate]() {
+              Dart_Handle lib = Dart_RootLibrary();
+              Dart_Handle entry_point =
+                  Dart_GetField(lib, tonic::ToDart("mainForPlatformIsolates"));
+              char* error = nullptr;
+              platform_isolate =
+                  root_isolate->CreatePlatformIsolate(entry_point, &error);
+
+              EXPECT_FALSE(error);
+              EXPECT_TRUE(platform_isolate);
+              EXPECT_EQ(Dart_CurrentIsolate(), root_isolate->isolate());
+
+              return true;
+            }));
+        ui_thread_latch.Signal();
+      }));
+  ui_thread_latch.Wait();
+  ASSERT_TRUE(platform_isolate);
+  EXPECT_TRUE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+
+  // Allow the platform isolate to run, but its main is never run.
+  platform_thread_latch.Signal();
+
+  // Post a task to the platform_thread that runs after the platform isolate's
+  // entry point, and wait for it to run.
+  fml::AutoResetWaitableEvent epilogue_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread, fml::MakeCopyable([&epilogue_latch]() mutable {
+        epilogue_latch.Signal();
+      }));
+  epilogue_latch.Wait();
+
+  // root isolate will be auto-shutdown
+}
+
+TEST_F(DartIsolateTest, PlatformIsolateMainThrowsError) {
+  AddNativeCallback("PassMessage",
+                    CREATE_NATIVE_ENTRY((
+                        [](Dart_NativeArguments args) { FML_UNREACHABLE(); })));
+
+  FakePlatformConfigurationClient client;
+  auto platform_configuration =
+      std::make_unique<PlatformConfiguration>(&client);
+
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  ASSERT_TRUE(vm_ref);
+  auto vm_data = vm_ref.GetVMData();
+  ASSERT_TRUE(vm_data);
+
+  auto platform_thread = CreateNewThread();
+  auto ui_thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  // label
+                           platform_thread,       // platform
+                           ui_thread,             // raster
+                           ui_thread,             // ui
+                           ui_thread              // io
+  );
+  auto isolate =
+      RunDartCodeInIsolate(vm_ref, settings, task_runners, "emptyMain", {},
+                           GetDefaultKernelFilePath(), {}, nullptr,
+                           std::move(platform_configuration));
+  ASSERT_TRUE(isolate);
+  auto root_isolate = isolate->get();
+  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+
+  Dart_Isolate platform_isolate = nullptr;
+  fml::AutoResetWaitableEvent ui_thread_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      ui_thread, fml::MakeCopyable([&]() mutable {
+        ASSERT_TRUE(
+            isolate->RunInIsolateScope([root_isolate, &platform_isolate]() {
+              Dart_Handle lib = Dart_RootLibrary();
+              Dart_Handle entry_point = Dart_GetField(
+                  lib, tonic::ToDart("mainForPlatformIsolatesThrowError"));
+              char* error = nullptr;
+              platform_isolate =
+                  root_isolate->CreatePlatformIsolate(entry_point, &error);
+
+              EXPECT_FALSE(error);
+              EXPECT_TRUE(platform_isolate);
+              EXPECT_EQ(Dart_CurrentIsolate(), root_isolate->isolate());
+
+              return true;
+            }));
+        ui_thread_latch.Signal();
+      }));
+  ui_thread_latch.Wait();
+  ASSERT_TRUE(platform_isolate);
+  EXPECT_TRUE(client.mgr->IsRegisteredForTestingOnly(platform_isolate));
+
+  // Post a task to the platform_thread that runs after the platform isolate's
+  // entry point, and wait for it to run.
+  fml::AutoResetWaitableEvent epilogue_latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      platform_thread, fml::MakeCopyable([&epilogue_latch]() mutable {
+        epilogue_latch.Signal();
+      }));
+  epilogue_latch.Wait();
+
+  // root isolate will be auto-shutdown
 }
 
 }  // namespace testing

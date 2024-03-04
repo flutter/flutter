@@ -72,7 +72,8 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
     const std::vector<std::string>& args,
     const std::string& kernel_file_path,
     fml::WeakPtr<IOManager> io_manager,
-    const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker) {
+    const std::shared_ptr<VolatilePathTracker>& volatile_path_tracker,
+    std::unique_ptr<PlatformConfiguration> platform_configuration) {
   FML_CHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (!vm_ref) {
@@ -129,7 +130,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
       DartIsolate::CreateRunningRootIsolate(
           settings,                            // settings
           vm_data->GetIsolateSnapshot(),       // isolate snapshot
-          nullptr,                             // platform configuration
+          std::move(platform_configuration),   // platform configuration
           DartIsolate::Flags{},                // flags
           nullptr,                             // root isolate create callback
           settings.isolate_create_callback,    // isolate create callback
@@ -159,14 +160,16 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     const std::vector<std::string>& args,
     const std::string& kernel_file_path,
     fml::WeakPtr<IOManager> io_manager,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+    std::unique_ptr<PlatformConfiguration> platform_configuration) {
   std::unique_ptr<AutoIsolateShutdown> result;
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetUITaskRunner(), fml::MakeCopyable([&]() mutable {
         result = RunDartCodeInIsolateOnUITaskRunner(
             vm_ref, settings, task_runners, entrypoint, args, kernel_file_path,
-            io_manager, volatile_path_tracker);
+            io_manager, volatile_path_tracker,
+            std::move(platform_configuration));
         latch.Signal();
       }));
   latch.Wait();

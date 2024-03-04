@@ -171,6 +171,9 @@ class UIDartState : public tonic::DartState {
   /// The expected type for runtime stage shaders.
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;
 
+  virtual Dart_Isolate CreatePlatformIsolate(Dart_Handle entry_point,
+                                             char** error);
+
  protected:
   UIDartState(TaskObserverAdd add_callback,
               TaskObserverRemove remove_callback,
