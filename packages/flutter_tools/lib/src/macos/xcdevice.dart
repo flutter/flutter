@@ -545,11 +545,15 @@ class XCDevice {
         bool devModeEnabled = true;
         bool isConnected = true;
         bool isPaired = true;
-        String? errorMessage;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
-          errorMessage = _parseErrorMessage(errorProperties);
+          final String? errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage != null) {
+            if (errorMessage.contains('not paired')) {
+              UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+              _analytics.send(Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'));
+
+            }
             _logger.printTrace(errorMessage);
           }
 
@@ -562,12 +566,8 @@ class XCDevice {
             isConnected = false;
           }
           // Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)
-          if (errorMessage != null && errorMessage.contains('not paired')) {
-            UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
-            _analytics.send(Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'));
-            if (code == -9) {
-              isPaired = false;
-            }
+          if (code == -9) {
+            isPaired = false;
           }
 
           if (code == 6) {
