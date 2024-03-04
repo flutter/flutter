@@ -4274,9 +4274,9 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
     await tester.pump(kLongPressTimeout);
-    await gesture.moveBy(Offset(screenWidth / 5, 0));
-    await gesture.moveBy(const Offset(1, 0));
-    await gesture.moveBy(const Offset(1, 0));
+    await gesture.moveBy(const Offset(160.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
     expect(onChangeCallbackCount, 1);
   });
 }
