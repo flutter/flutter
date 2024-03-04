@@ -2384,7 +2384,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex == -1) {
       currentSelectionStartIndex = currentSelectionEndIndex = switch (event.direction) {
-        SelectionExtendDirection.previousLine || SelectionExtendDirection.backward => selectables.length,
+        SelectionExtendDirection.previousLine || SelectionExtendDirection.backward => selectables.length - 1,
         SelectionExtendDirection.nextLine || SelectionExtendDirection.forward => 0,
       };
     }
