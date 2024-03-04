@@ -5647,14 +5647,12 @@ class _NamedRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : super(_RouteRestorationType.named);
 
-  factory _NamedRestorationInformation.fromSerializableData(List<Object?> data) {
-    assert(data.length >= 2);
-    return _NamedRestorationInformation(
-      restorationScopeId: data[0]! as int,
-      name: data[1]! as String,
-      arguments: data.length > 2 ? data[2] : null,
-    );
-  }
+  _NamedRestorationInformation.fromSerializableData(List<Object?> data)
+      : assert(data.length > 1),
+        restorationScopeId = data[0]! as int,
+        name = data[1]! as String,
+        arguments = data.elementAtOrNull(2),
+        super(_RouteRestorationType.named);
 
   @override
   List<Object> computeSerializableData() {
@@ -5685,15 +5683,12 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : super(_RouteRestorationType.anonymous);
 
-  factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
-    assert(data.length > 1);
-    final RestorableRouteBuilder<Object?> routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
-    return _AnonymousRestorationInformation(
-      restorationScopeId: data[0]! as int,
-      routeBuilder: routeBuilder,
-      arguments: data.length > 2 ? data[2] : null,
-    );
-  }
+  _AnonymousRestorationInformation.fromSerializableData(List<Object?> data)
+      : assert(data.length > 1),
+        restorationScopeId = data[0]! as int,
+        routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder,
+        arguments = data.elementAtOrNull(2),
+        super(_RouteRestorationType.anonymous);
 
   @override
   // TODO(goderbauer): remove the kIsWeb check when https://github.com/flutter/flutter/issues/33615 is resolved.
