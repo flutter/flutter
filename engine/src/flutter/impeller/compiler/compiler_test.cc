@@ -3,29 +3,39 @@
 // found in the LICENSE file.
 
 #include "impeller/compiler/compiler_test.h"
+#include "flutter/fml/paths.h"
+#include "flutter/fml/process.h"
 
 #include <algorithm>
+#include <filesystem>
 
 namespace impeller {
 namespace compiler {
 namespace testing {
 
-static fml::UniqueFD CreateIntermediatesDirectory() {
+static std::string GetIntermediatesPath() {
   auto test_name = flutter::testing::GetCurrentTestName();
   std::replace(test_name.begin(), test_name.end(), '/', '_');
   std::replace(test_name.begin(), test_name.end(), '.', '_');
-  return fml::OpenDirectory(flutter::testing::OpenFixturesDirectory(),
-                            test_name.c_str(),
-                            true,  // create if necessary
-                            fml::FilePermission::kReadWrite);
+  std::stringstream dir_name;
+  dir_name << test_name << "_" << std::to_string(fml::GetCurrentProcId());
+  return fml::paths::JoinPaths(
+      {flutter::testing::GetFixturesPath(), dir_name.str()});
 }
 
-CompilerTest::CompilerTest()
-    : intermediates_directory_(CreateIntermediatesDirectory()) {
+CompilerTest::CompilerTest() : intermediates_path_(GetIntermediatesPath()) {
+  intermediates_directory_ =
+      fml::OpenDirectory(intermediates_path_.c_str(),
+                         true,  // create if necessary
+                         fml::FilePermission::kReadWrite);
   FML_CHECK(intermediates_directory_.is_valid());
 }
 
-CompilerTest::~CompilerTest() = default;
+CompilerTest::~CompilerTest() {
+  intermediates_directory_.reset();
+
+  std::filesystem::remove_all(std::filesystem::path(intermediates_path_));
+}
 
 static std::string ReflectionHeaderName(const char* fixture_name) {
   std::stringstream stream;
