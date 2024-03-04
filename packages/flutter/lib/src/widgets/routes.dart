@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../material/dialog.dart';
+
 import 'actions.dart';
 import 'basic.dart';
 import 'display_feature_sub_screen.dart';
@@ -1717,14 +1719,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
-    changedInternalState(false);
+    changedInternalState(nextRoute is! ModalRoute || nextRoute is! DialogRoute);
   }
 
   @override
   void changedInternalState([bool markNeedsBuild = true]) {
     super.changedInternalState();
 
-    // // No need to mark dirty if this method is called during build phase.
+    // No need to mark dirty if this method is called during build phase.
     if (markNeedsBuild && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       setState(() {/* internal state already changed */});
       _modalBarrier.markNeedsBuild();
