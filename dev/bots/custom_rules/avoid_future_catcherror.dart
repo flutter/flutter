@@ -77,7 +77,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name != 'onError') {
+    if (node.methodName.name != 'onError' && node.methodName.name != 'catchError') {
       return;
     }
     final DartType? targetType = node.realTarget?.staticType;
