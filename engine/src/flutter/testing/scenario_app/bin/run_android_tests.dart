@@ -79,6 +79,7 @@ void main(List<String> args) async {
         contentsGolden: options.outputContentsGolden,
         ndkStack: options.ndkStack,
         forceSurfaceProducerSurfaceTexture: options.forceSurfaceProducerSurfaceTexture,
+        prefixLogsPerRun: options.prefixLogsPerRun,
       );
       onSigint.cancel();
       exit(0);
@@ -122,15 +123,22 @@ Future<void> _run({
   required String? contentsGolden,
   required String ndkStack,
   required bool forceSurfaceProducerSurfaceTexture,
+  required bool prefixLogsPerRun,
 }) async {
   const ProcessManager pm = LocalProcessManager();
   final String scenarioAppPath = join(outDir.path, 'scenario_app');
+
+  // Due to the CI environment, the logs directory persists between runs and
+  // even different builds. Because we're checking the output directory after
+  // each run, we need a clean logs directory to avoid false positives.
+  //
+  // Only after the runner is done, we can move the logs to the final location.
+  //
+  // See [_copyFiles] below and https://github.com/flutter/flutter/issues/144402.
+  final Directory finalLogsDir = logsDir..createSync(recursive: true);
+  logsDir = Directory.systemTemp.createTempSync('scenario_app_test_logs.');
   final String logcatPath = join(logsDir.path, 'logcat.txt');
 
-  // TODO(matanlurey): Use screenshots/ sub-directory (https://github.com/flutter/flutter/issues/143604).
-  if (!logsDir.existsSync()) {
-    logsDir.createSync(recursive: true);
-  }
   final String screenshotPath = logsDir.path;
   final String apkOutPath = join(scenarioAppPath, 'app', 'outputs', 'apk');
   final File testApk = File(join(apkOutPath, 'androidTest', 'debug', 'app-debug-androidTest.apk'));
@@ -388,6 +396,32 @@ Future<void> _run({
       await logcat.flush();
       await logcat.close();
       log('wrote logcat to $logcatPath');
+
+      // Copy the logs to the final location.
+      // Optionally prefix the logs with a run number and backend name.
+      // See https://github.com/flutter/flutter/issues/144402.
+      final StringBuffer prefix = StringBuffer();
+      if (prefixLogsPerRun) {
+        final int rerunNumber = _getAndIncrementRerunNumber(finalLogsDir.path);
+        prefix.write('run_$rerunNumber.');
+        if (enableImpeller) {
+          prefix.write('impeller');
+        } else {
+          prefix.write('skia');
+        }
+        if (enableImpeller) {
+          prefix.write('_${impellerBackend!.name}');
+        }
+        if (forceSurfaceProducerSurfaceTexture) {
+          prefix.write('_force-st');
+        }
+        prefix.write('.');
+      }
+      _copyFiles(
+        source: logsDir,
+        destination: finalLogsDir,
+        prefix: prefix.toString(),
+      );
     });
 
     if (enableImpeller) {
@@ -448,7 +482,9 @@ Future<void> _run({
       await Future.wait(pendingComparisons);
     });
 
-    if (contentsGolden != null) {
+    final bool allTestsRun = smokeTestFullPath == null;
+    final bool checkGoldens = contentsGolden != null;
+    if (allTestsRun && checkGoldens) {
       // Check the output here.
       await step('Check output files...', () async {
         // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
@@ -474,5 +510,34 @@ void _withTemporaryCwd(String path, void Function() callback) {
     callback();
   } finally {
     Directory.current = originalCwd;
+  }
+}
+
+/// Reads the file named `reruns.txt` in the logs directory and returns the number of reruns.
+///
+/// If the file does not exist, it is created with the number 1 and that number is returned.
+int _getAndIncrementRerunNumber(String logsDir) {
+  final File rerunFile = File(join(logsDir, 'reruns.txt'));
+  if (!rerunFile.existsSync()) {
+    rerunFile.writeAsStringSync('1');
+    return 1;
+  }
+  final int rerunNumber = int.parse(rerunFile.readAsStringSync()) + 1;
+  rerunFile.writeAsStringSync(rerunNumber.toString());
+  return rerunNumber;
+}
+
+/// Copies the contents of [source] to [destination], optionally adding a [prefix] to the destination path.
+///
+/// This function is used to copy the screenshots from the device to the logs directory.
+void _copyFiles({
+  required Directory source,
+  required Directory destination,
+  String prefix = '',
+}) {
+  for (final FileSystemEntity entity in source.listSync()) {
+    if (entity is File) {
+      entity.copySync(join(destination.path, prefix + basename(entity.path)));
+    }
   }
 }
