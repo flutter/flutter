@@ -13,6 +13,20 @@ import 'text_selection_toolbar_anchors.dart';
 /// Displays the system context menu on top of the Flutter view.
 ///
 /// Currently, only supports iOS and displays nothing on other platforms.
+///
+/// The context menu is the menu that appears, for example, when doing text
+/// selection. Flutter typically draws this menu itself, but this class deals
+/// with the platform-rendered context menu.
+///
+/// There can only be one system context menu visible at a time. Building this
+/// widget when the system context menu is already visible will hide the old one
+/// and display this one. A system context menu that is hidden is informed via
+/// [onSystemHide].
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which directly controls the hiding and
+///    showing of the system context menu.
 class SystemContextMenu extends StatefulWidget {
   /// Creates an instance of [SystemContextMenu] that points to the given
   /// [anchor].
@@ -70,11 +84,6 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     _systemContextMenuController = SystemContextMenuController(
       onSystemHide: widget.onSystemHide,
     );
-    // TODO(justinmc): This whole pattern of being tied to a widget is a little
-    // confusing, because the user may dismiss the menu by tapping, but this
-    // widget has no idea, and there's no good way to reshow the menu after
-    // that. Also, building two of this widget will result in confusing
-    // behavior.
     _systemContextMenuController.show(widget.anchor);
   }
 

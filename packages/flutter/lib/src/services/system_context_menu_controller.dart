@@ -8,17 +8,18 @@ import 'system_channels.dart';
 
 /// Allows access to the system context menu.
 ///
-/// The context menu is the menu that appears for example when doing text
+/// The context menu is the menu that appears, for example, when doing text
 /// selection. Flutter typically draws this menu itself, but this class deals
 /// with the platform-rendered context menu.
 ///
 /// Only one instance can be visible at a time. Calling [show] while the system
 /// context menu is already visible will hide it and show it again at the new
-/// [Rect].
+/// [Rect]. An instance that is hidden is informed via [onSystemHide].
 ///
 /// See also:
 ///
 ///  * [ContextMenuController], which controls Flutter-drawn context menus.
+///  * [SystemContextMenu], which wraps this functionality in a widget.
 class SystemContextMenuController {
   /// Creates an instance of [SystemContextMenuController].
   ///
