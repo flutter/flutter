@@ -120,7 +120,7 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
-  }) : basePath = _getIndexHtml().getBaseHref();
+  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -386,7 +386,11 @@ class WebAssetServer implements AssetReader {
 
     // If the response is `/`, then we are requesting the index file.
     if (requestPath == '/' || requestPath.isEmpty) {
-      return _serveIndex();
+      return _serveWebTemplate('index.html', 'text/html', _kDefaultIndex);
+    }
+
+    if (requestPath == 'flutter_bootstrap.js') {
+      return _serveWebTemplate('flutter_bootstrap.js', 'text/javascript', generateDefaultFlutterBootstrapScript());
     }
 
     final Map<String, String> headers = <String, String>{};
@@ -478,7 +482,7 @@ class WebAssetServer implements AssetReader {
           requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
-      return _serveIndex();
+      return _serveWebTemplate('index.html', 'text/html', _kDefaultIndex);
     }
 
     // For real files, use a serialized file stat plus path as a revision.
@@ -524,8 +528,12 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
-  shelf.Response _serveIndex() {
-    final WebTemplate indexHtml = _getIndexHtml();
+  shelf.Response _serveWebTemplate(
+    String filename,
+    String contentType,
+    String fallbackContent,
+  ) {
+    final WebTemplate indexHtml = _getWebTemplate(filename, fallbackContent);
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
@@ -552,7 +560,7 @@ class WebAssetServer implements AssetReader {
     );
 
     final Map<String, String> headers = <String, String>{
-      HttpHeaders.contentTypeHeader: 'text/html',
+      HttpHeaders.contentTypeHeader: contentType,
     };
     return shelf.Response.ok(indexHtml.content, headers: headers);
   }
@@ -1178,10 +1186,10 @@ String? _stripBasePath(String path, String basePath) {
   return stripLeadingSlash(path);
 }
 
-WebTemplate _getIndexHtml() {
-  final File indexHtml =
-      globals.fs.currentDirectory.childDirectory('web').childFile('index.html');
+WebTemplate _getWebTemplate(String filename, String fallbackContent) {
+  final File template =
+      globals.fs.currentDirectory.childDirectory('web').childFile(filename);
   final String htmlContent =
-      indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
+      template.existsSync() ? template.readAsStringSync() : fallbackContent;
   return WebTemplate(htmlContent);
 }
