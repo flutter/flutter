@@ -77,6 +77,7 @@ final class AssetTransformer {
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
         if (i == transformerEntries.length - 1) {
+          await _fileSystem.file(outputPath).create(recursive: true);
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
