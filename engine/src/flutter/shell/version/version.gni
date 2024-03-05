@@ -14,35 +14,6 @@ declare_args() {
 
 _flutter_root = "//flutter"
 
-if (engine_version == "") {
-  engine_version_lines =
-      exec_script("//flutter/build/git_revision.py",
-                  [
-                    "--repository",
-                    rebase_path(_flutter_root, "", _flutter_root),
-                  ],
-                  "list lines")
-  engine_version = engine_version_lines[0]
-}
-
-if (skia_version == "") {
-  skia_version_lines = exec_script(
-          "//flutter/build/git_revision.py",
-          [
-            "--repository",
-            rebase_path("//flutter/third_party/skia", "", _flutter_root),
-          ],
-          "list lines")
-  skia_version = skia_version_lines[0]
-}
-
-if (dart_version == "") {
-  dart_version_lines =
-      exec_script("//flutter/build/git_revision.py",
-                  [
-                    "--repository",
-                    rebase_path("$dart_src", "", _flutter_root),
-                  ],
-                  "list lines")
-  dart_version = dart_version_lines[0]
-}
+assert(engine_version != "", "The engine_version argument must be supplied")
+assert(skia_version != "", "The skia_version argument must be supplied")
+assert(dart_version != "", "The dart_version argument must be supplied")

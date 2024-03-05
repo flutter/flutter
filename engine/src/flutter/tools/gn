@@ -344,6 +344,40 @@ def setup_apple_sdks():
   return sdks_gn_args
 
 
+def get_repository_version(repository):
+  'Returns the Git HEAD for the supplied repository path as a string.'
+  if not os.path.exists(repository):
+    raise IOError('path does not exist')
+
+  git = 'git'
+  if sys.platform.startswith(('cygwin', 'win')):
+    git = 'git.bat'
+  version = subprocess.check_output([
+      git,
+      '-C',
+      repository,
+      'rev-parse',
+      'HEAD',
+  ])
+
+  return str(version.strip(), 'utf-8')
+
+
+def setup_git_versions():
+  revision_args = {}
+
+  engine_path = os.path.join(SRC_ROOT, 'flutter')
+  revision_args['engine_version'] = get_repository_version(engine_path)
+
+  skia_path = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'skia')
+  revision_args['skia_version'] = get_repository_version(skia_path)
+
+  dart_path = os.path.join(SRC_ROOT, 'third_party', 'dart')
+  revision_args['dart_version'] = get_repository_version(dart_path)
+
+  return revision_args
+
+
 def to_gn_args(args):
   if args.simulator:
     if args.target_os != 'ios':
@@ -354,6 +388,8 @@ def to_gn_args(args):
   gn_args = {}
 
   gn_args['is_debug'] = args.unoptimized
+
+  gn_args.update(setup_git_versions())
 
   gn_args.update(setup_goma(args))
 
@@ -697,6 +733,8 @@ def to_gn_args(args):
   # for a host Windows build and make GN think we will be building ANGLE.
   # Angle is not used on Mac hosts as there are no tests for the OpenGL backend.
   if is_host_build(args) or (args.target_os == 'android' and get_host_os() == 'win'):
+    # Don't include git commit information.
+    gn_args['angle_enable_commit_id'] = False
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
     gn_args['angle_has_astc_encoder'] = False
