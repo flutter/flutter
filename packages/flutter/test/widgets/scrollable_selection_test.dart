@@ -221,12 +221,14 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
+    expect(paragraph2.selections.isEmpty, isTrue);
     await gesture.moveTo(textOffsetToPosition(paragraph2, 4));
     // Should select paragraph 2.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
     expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)));
+    expect(paragraph3.selections.isEmpty, isTrue);
     await gesture.moveTo(textOffsetToPosition(paragraph3, 3));
     // Should select paragraph 3.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
@@ -234,6 +236,7 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     final RenderParagraph paragraph4 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 4'), matching: find.byType(RichText)));
+    expect(paragraph4.selections.isEmpty, isTrue);
     await gesture.moveTo(textOffsetToPosition(paragraph4, 3));
     // Should select paragraph 4.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
@@ -276,9 +279,16 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
-    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)));
+    expect(paragraph2.selections.isEmpty, isTrue);
     await gesture.moveTo(textOffsetToPosition(paragraph2, 5) + const Offset(0, 50));
-    // Should select paragraph 2 and 3.
+    // Should select paragraph 2.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)));
+    expect(paragraph3.selections.isEmpty, isTrue);
+    await gesture.moveTo(textOffsetToPosition(paragraph3, 5) + const Offset(0, 50));
+    // Should select paragraph 3.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
     expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));

@@ -2275,17 +2275,17 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
-      bool globalRectsContainsPosition = false;
+      bool globalRectsContainPosition = false;
       if (selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
           if (globalRect.contains(effectiveGlobalPosition)) {
-            globalRectsContainsPosition = true;
+            globalRectsContainPosition = true;
             break;
           }
         }
       }
-      if (globalRectsContainsPosition) {
+      if (globalRectsContainPosition) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
