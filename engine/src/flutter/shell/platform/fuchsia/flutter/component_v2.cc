@@ -274,7 +274,7 @@ ComponentV2::ComponentV2(
 
   // Collect our standard set of directories along with directories that are
   // included in the cml file to expose.
-  std::vector<std::string> other_dirs = {"debug", "ctrl", "diagnostics"};
+  std::vector<std::string> other_dirs = {"debug", "ctrl"};
   for (auto dir : metadata.expose_dirs) {
     other_dirs.push_back(dir);
   }
