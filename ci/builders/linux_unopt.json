@@ -94,6 +94,11 @@
                 {
                     "name": "Check build configs",
                     "script": "flutter/ci/check_build_configs.sh"
+                },
+                {
+                    "name": "Tests of tools/gn",
+                    "language": "python3",
+                    "script": "flutter/tools/gn_test.py"
                 }
             ]
         },
