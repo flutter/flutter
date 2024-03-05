@@ -408,7 +408,7 @@ class ContentContext {
   ///
   // TODO(bdero): Remove this setting once StC is fully de-risked
   //              https://github.com/flutter/flutter/issues/123671
-  static constexpr bool kEnableStencilThenCover = true;
+  static constexpr bool kEnableStencilThenCover = false;
 
 #if IMPELLER_ENABLE_3D
   std::shared_ptr<scene::SceneContext> GetSceneContext() const;
