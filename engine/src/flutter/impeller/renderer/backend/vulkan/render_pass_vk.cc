@@ -298,26 +298,18 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 // |RenderPass|
 void RenderPassVK::SetPipeline(
     const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
-  PipelineVK& pipeline_vk = PipelineVK::Cast(*pipeline);
+  pipeline_ = pipeline;
 
-  auto descriptor_result =
-      command_buffer_->GetEncoder()->AllocateDescriptorSets(
-          pipeline_vk.GetDescriptorSetLayout(), ContextVK::Cast(*context_));
-  if (!descriptor_result.ok()) {
+  if (!pipeline_) {
     return;
   }
-  pipeline_valid_ = true;
-  descriptor_set_ = descriptor_result.value();
-  pipeline_layout_ = pipeline_vk.GetPipelineLayout();
-  command_buffer_vk_.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                  pipeline_vk.GetPipeline());
 
   pipeline_uses_input_attachments_ =
-      pipeline->GetDescriptor().GetVertexDescriptor()->UsesInputAttacments();
+      pipeline_->GetDescriptor().GetVertexDescriptor()->UsesInputAttacments();
 
   if (pipeline_uses_input_attachments_) {
     if (bound_image_offset_ >= kMaxBindings) {
-      pipeline_valid_ = false;
+      pipeline_ = nullptr;
       return;
     }
     vk::DescriptorImageInfo image_info;
@@ -433,14 +425,57 @@ bool RenderPassVK::SetVertexBuffer(VertexBuffer buffer) {
 
 // |RenderPass|
 fml::Status RenderPassVK::Draw() {
-  if (!pipeline_valid_) {
+  if (!pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled,
                        "No valid pipeline is bound to the RenderPass.");
   }
 
-  const ContextVK& context_vk = ContextVK::Cast(*context_);
+  //----------------------------------------------------------------------------
+  /// If there are immutable samplers referenced in the render pass, the base
+  /// pipeline variant is no longer valid and needs to be re-constructed to
+  /// reference the samplers.
+  ///
+  /// This is an instance of JIT creation of PSOs that can cause jank. It is
+  /// unavoidable because it isn't possible to know all possible combinations of
+  /// target YUV conversions. Fortunately, this will only ever happen when
+  /// rendering to external textures. Like Android Hardware Buffers on Android.
+  ///
+  /// Even when JIT creation is unavoidable, pipelines will cache their variants
+  /// when able and all pipeline creation will happen via a base pipeline cache
+  /// anyway. So the jank can be mostly entirely ameliorated and it should only
+  /// ever happen when the first unknown YUV conversion is encountered.
+  ///
+  /// Jank can be completely eliminated by pre-populating known YUV conversion
+  /// pipelines.
+  if (immutable_sampler_) {
+    std::shared_ptr<PipelineVK> pipeline_variant =
+        PipelineVK::Cast(*pipeline_)
+            .CreateVariantForImmutableSamplers(immutable_sampler_);
+    if (!pipeline_variant) {
+      return fml::Status(
+          fml::StatusCode::kAborted,
+          "Could not create pipeline variant with immutable sampler.");
+    }
+    pipeline_ = std::move(pipeline_variant);
+  }
+
+  const auto& context_vk = ContextVK::Cast(*context_);
+  const auto& pipeline_vk = PipelineVK::Cast(*pipeline_);
+
+  auto descriptor_result =
+      command_buffer_->GetEncoder()->AllocateDescriptorSets(
+          pipeline_vk.GetDescriptorSetLayout(), context_vk);
+  if (!descriptor_result.ok()) {
+    return fml::Status(fml::StatusCode::kAborted,
+                       "Could not allocate descriptor sets.");
+  }
+  const auto descriptor_set = descriptor_result.value();
+  const auto pipeline_layout = pipeline_vk.GetPipelineLayout();
+  command_buffer_vk_.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                  pipeline_vk.GetPipeline());
+
   for (auto i = 0u; i < descriptor_write_offset_; i++) {
-    write_workspace_[i].dstSet = descriptor_set_;
+    write_workspace_[i].dstSet = descriptor_set;
   }
 
   context_vk.GetDevice().updateDescriptorSets(descriptor_write_offset_,
@@ -448,10 +483,10 @@ fml::Status RenderPassVK::Draw() {
 
   command_buffer_vk_.bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics,  // bind point
-      pipeline_layout_,                  // layout
+      pipeline_layout,                   // layout
       0,                                 // first set
       1,                                 // set count
-      &descriptor_set_,                  // sets
+      &descriptor_set,                   // sets
       0,                                 // offset count
       nullptr                            // offsets
   );
@@ -489,8 +524,9 @@ fml::Status RenderPassVK::Draw() {
   instance_count_ = 1u;
   base_vertex_ = 0u;
   vertex_count_ = 0u;
-  pipeline_valid_ = false;
+  pipeline_ = nullptr;
   pipeline_uses_input_attachments_ = false;
+  immutable_sampler_ = nullptr;
   return fml::Status();
 }
 
@@ -565,6 +601,10 @@ bool RenderPassVK::BindResource(ShaderStage stage,
 
   if (!command_buffer_->GetEncoder()->Track(texture)) {
     return false;
+  }
+
+  if (!immutable_sampler_) {
+    immutable_sampler_ = texture_vk.GetImmutableSamplerVariant(sampler_vk);
   }
 
   vk::DescriptorImageInfo image_info;

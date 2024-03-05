@@ -11,6 +11,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
+#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 #include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
 
@@ -166,7 +167,8 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 std::unique_ptr<PipelineVK> PipelineVK::Create(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolder>& device_holder,
-    const std::weak_ptr<PipelineLibrary>& weak_library) {
+    const std::weak_ptr<PipelineLibrary>& weak_library,
+    std::shared_ptr<SamplerVK> immutable_sampler) {
   TRACE_EVENT0("flutter", "PipelineVK::Create");
 
   auto library = weak_library.lock();
@@ -183,9 +185,8 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
 
   const auto* caps = pso_cache->GetCapabilities();
 
-  const auto supports_pipeline_creation_feedback =
-      caps->HasOptionalDeviceExtension(
-          OptionalDeviceExtensionVK::kEXTPipelineCreationFeedback);
+  const auto supports_pipeline_creation_feedback = caps->HasExtension(
+      OptionalDeviceExtensionVK::kEXTPipelineCreationFeedback);
   if (!supports_pipeline_creation_feedback) {
     chain.unlink<vk::PipelineCreationFeedbackCreateInfoEXT>();
   }
@@ -353,19 +354,36 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
   //----------------------------------------------------------------------------
   /// Pipeline Layout a.k.a the descriptor sets and uniforms.
   ///
-  std::vector<vk::DescriptorSetLayoutBinding> desc_bindings;
+  std::vector<vk::DescriptorSetLayoutBinding> set_bindings;
+
+  vk::Sampler vk_immutable_sampler =
+      immutable_sampler ? immutable_sampler->GetSampler() : VK_NULL_HANDLE;
 
   for (auto layout : desc.GetVertexDescriptor()->GetDescriptorSetLayouts()) {
-    auto vk_desc_layout = ToVKDescriptorSetLayoutBinding(layout);
-    desc_bindings.push_back(vk_desc_layout);
+    vk::DescriptorSetLayoutBinding set_binding;
+    set_binding.binding = layout.binding;
+    set_binding.descriptorCount = 1u;
+    set_binding.descriptorType = ToVKDescriptorType(layout.descriptor_type);
+    set_binding.stageFlags = ToVkShaderStage(layout.shader_stage);
+    // TODO(143719): This specifies the immutable sampler for all sampled
+    // images. This is incorrect. In cases where the shader samples from the
+    // multiple images, there is currently no way to tell which sampler needs to
+    // be immutable and which one needs a binding set in the render pass. Expect
+    // errors if the shader has more than on sampled image. The sampling from
+    // the one that is expected to be non-immutable will be incorrect.
+    if (vk_immutable_sampler &&
+        layout.descriptor_type == DescriptorType::kSampledImage) {
+      set_binding.setImmutableSamplers(vk_immutable_sampler);
+    }
+    set_bindings.push_back(set_binding);
   }
 
-  vk::DescriptorSetLayoutCreateInfo descs_layout_info;
-  descs_layout_info.setBindings(desc_bindings);
+  vk::DescriptorSetLayoutCreateInfo desc_set_layout_info;
+  desc_set_layout_info.setBindings(set_bindings);
 
   auto [descs_result, descs_layout] =
       device_holder->GetDevice().createDescriptorSetLayoutUnique(
-          descs_layout_info);
+          desc_set_layout_info);
   if (descs_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "unable to create uniform descriptors";
     return nullptr;
@@ -434,7 +452,8 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
       std::move(pipeline),               //
       std::move(render_pass),            //
       std::move(pipeline_layout.value),  //
-      std::move(descs_layout)            //
+      std::move(descs_layout),           //
+      std::move(immutable_sampler)       //
       ));
   if (!pipeline_vk->IsValid()) {
     VALIDATION_LOG << "Could not create a valid pipeline.";
@@ -449,13 +468,15 @@ PipelineVK::PipelineVK(std::weak_ptr<DeviceHolder> device_holder,
                        vk::UniquePipeline pipeline,
                        vk::UniqueRenderPass render_pass,
                        vk::UniquePipelineLayout layout,
-                       vk::UniqueDescriptorSetLayout descriptor_set_layout)
+                       vk::UniqueDescriptorSetLayout descriptor_set_layout,
+                       std::shared_ptr<SamplerVK> immutable_sampler)
     : Pipeline(std::move(library), desc),
       device_holder_(std::move(device_holder)),
       pipeline_(std::move(pipeline)),
       render_pass_(std::move(render_pass)),
       layout_(std::move(layout)),
-      descriptor_set_layout_(std::move(descriptor_set_layout)) {
+      descriptor_set_layout_(std::move(descriptor_set_layout)),
+      immutable_sampler_(std::move(immutable_sampler)) {
   is_valid_ = pipeline_ && render_pass_ && layout_ && descriptor_set_layout_;
 }
 
@@ -482,6 +503,25 @@ const vk::PipelineLayout& PipelineVK::GetPipelineLayout() const {
 
 const vk::DescriptorSetLayout& PipelineVK::GetDescriptorSetLayout() const {
   return *descriptor_set_layout_;
+}
+
+std::shared_ptr<PipelineVK> PipelineVK::CreateVariantForImmutableSamplers(
+    const std::shared_ptr<SamplerVK>& immutable_sampler) const {
+  if (!immutable_sampler) {
+    return nullptr;
+  }
+  auto cache_key = ImmutableSamplerKeyVK{*immutable_sampler};
+  Lock lock(immutable_sampler_variants_mutex_);
+  auto found = immutable_sampler_variants_.find(cache_key);
+  if (found != immutable_sampler_variants_.end()) {
+    return found->second;
+  }
+  auto device_holder = device_holder_.lock();
+  if (!device_holder) {
+    return nullptr;
+  }
+  return (immutable_sampler_variants_[cache_key] =
+              Create(desc_, device_holder, library_, immutable_sampler));
 }
 
 }  // namespace impeller

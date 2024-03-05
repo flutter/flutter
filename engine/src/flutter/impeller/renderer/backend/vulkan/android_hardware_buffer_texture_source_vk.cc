@@ -6,45 +6,94 @@
 
 #include <cstdint>
 
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
+#include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
 
 #ifdef FML_OS_ANDROID
 
 namespace impeller {
 
-namespace {
+using AHBProperties = vk::StructureChain<
+    // For VK_ANDROID_external_memory_android_hardware_buffer
+    vk::AndroidHardwareBufferPropertiesANDROID,
+    // For VK_ANDROID_external_memory_android_hardware_buffer
+    vk::AndroidHardwareBufferFormatPropertiesANDROID>;
 
-bool GetHardwareBufferProperties(
+static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
     const vk::Device& device,
-    struct AHardwareBuffer* hardware_buffer,
-    ::impeller::vk::AndroidHardwareBufferPropertiesANDROID* ahb_props,
-    ::impeller::vk::AndroidHardwareBufferFormatPropertiesANDROID*
-        ahb_format_props) {
-  FML_CHECK(ahb_format_props != nullptr);
-  FML_CHECK(ahb_props != nullptr);
-  ahb_props->pNext = ahb_format_props;
-  ::impeller::vk::Result result =
-      device.getAndroidHardwareBufferPropertiesANDROID(hardware_buffer,
-                                                       ahb_props);
-  if (result != impeller::vk::Result::eSuccess) {
-    return false;
-  }
-  return true;
-}
+    const AHBProperties& ahb_props,
+    const AHardwareBuffer_Desc& ahb_desc) {
+  const auto& ahb_format =
+      ahb_props.get<vk::AndroidHardwareBufferFormatPropertiesANDROID>();
 
-vk::ExternalFormatANDROID MakeExternalFormat(
-    const vk::AndroidHardwareBufferFormatPropertiesANDROID& format_props) {
-  vk::ExternalFormatANDROID external_format;
-  external_format.pNext = nullptr;
-  external_format.externalFormat = 0;
-  if (format_props.format == vk::Format::eUndefined) {
-    external_format.externalFormat = format_props.externalFormat;
+  vk::StructureChain<vk::ImageCreateInfo,
+                     // For VK_KHR_external_memory
+                     vk::ExternalMemoryImageCreateInfo,
+                     // For VK_ANDROID_external_memory_android_hardware_buffer
+                     vk::ExternalFormatANDROID>
+      image_chain;
+
+  auto& image_info = image_chain.get<vk::ImageCreateInfo>();
+
+  vk::ImageUsageFlags image_usage_flags;
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
+    image_usage_flags |= vk::ImageUsageFlagBits::eSampled;
   }
-  return external_format;
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
+    image_usage_flags |= vk::ImageUsageFlagBits::eColorAttachment;
+  }
+
+  vk::ImageCreateFlags image_create_flags;
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
+    image_create_flags |= vk::ImageCreateFlagBits::eProtected;
+  }
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_CUBE_MAP) {
+    image_create_flags |= vk::ImageCreateFlagBits::eCubeCompatible;
+  }
+
+  image_info.imageType = vk::ImageType::e2D;
+  image_info.format = ahb_format.format;
+  image_info.extent.width = ahb_desc.width;
+  image_info.extent.height = ahb_desc.height;
+  image_info.extent.depth = 1;
+  image_info.mipLevels =
+      (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
+          ? ISize{ahb_desc.width, ahb_desc.height}.MipCount()
+          : 1u;
+  image_info.arrayLayers = ahb_desc.layers;
+  image_info.samples = vk::SampleCountFlagBits::e1;
+  image_info.tiling = vk::ImageTiling::eOptimal;
+  image_info.usage = image_usage_flags;
+  image_info.flags = image_create_flags;
+  image_info.sharingMode = vk::SharingMode::eExclusive;
+  image_info.initialLayout = vk::ImageLayout::eUndefined;
+
+  image_chain.get<vk::ExternalMemoryImageCreateInfo>().handleTypes =
+      vk::ExternalMemoryHandleTypeFlagBits::eAndroidHardwareBufferANDROID;
+
+  // If the format isn't natively supported by Vulkan (i.e, be a part of the
+  // base vkFormat enum), an untyped "external format" must be specified when
+  // creating the image and the image views. Usually includes YUV formats.
+  if (ahb_format.format == vk::Format::eUndefined) {
+    image_chain.get<vk::ExternalFormatANDROID>().externalFormat =
+        ahb_format.externalFormat;
+  } else {
+    image_chain.unlink<vk::ExternalFormatANDROID>();
+  }
+
+  auto image = device.createImageUnique(image_chain.get());
+  if (image.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create image for external buffer: "
+                   << vk::to_string(image.result);
+    return {};
+  }
+
+  return std::move(image.value);
 }
 
 // Returns -1 if not found.
-int FindMemoryTypeIndex(
+static int FindMemoryTypeIndex(
     const vk::AndroidHardwareBufferPropertiesANDROID& props) {
   uint32_t memory_type_bits = props.memoryTypeBits;
   int32_t type_index = -1;
@@ -58,132 +107,274 @@ int FindMemoryTypeIndex(
   return type_index;
 }
 
-}  // namespace
-
-AndroidHardwareBufferTextureSourceVK::AndroidHardwareBufferTextureSourceVK(
-    TextureDescriptor desc,
+static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
     const vk::Device& device,
+    const vk::Image& image,
     struct AHardwareBuffer* hardware_buffer,
-    const AHardwareBuffer_Desc& hardware_buffer_desc)
-    : TextureSourceVK(desc), device_(device) {
-  vk::AndroidHardwareBufferFormatPropertiesANDROID ahb_format_props;
-  vk::AndroidHardwareBufferPropertiesANDROID ahb_props;
-  if (!GetHardwareBufferProperties(device, hardware_buffer, &ahb_props,
-                                   &ahb_format_props)) {
-    return;
-  }
-  vk::ExternalFormatANDROID external_format =
-      MakeExternalFormat(ahb_format_props);
-  vk::ExternalMemoryImageCreateInfo external_memory_image_info;
-  external_memory_image_info.pNext = &external_format;
-  external_memory_image_info.handleTypes =
-      vk::ExternalMemoryHandleTypeFlagBits::eAndroidHardwareBufferANDROID;
-  const int memory_type_index = FindMemoryTypeIndex(ahb_props);
+    const AHBProperties& ahb_props) {
+  const int memory_type_index = FindMemoryTypeIndex(ahb_props.get());
   if (memory_type_index < 0) {
-    FML_LOG(ERROR) << "Could not find memory type.";
-    return;
+    VALIDATION_LOG << "Could not find memory type of external image.";
+    return {};
   }
 
-  vk::ImageCreateFlags image_create_flags;
-  vk::ImageUsageFlags image_usage_flags;
-  if (hardware_buffer_desc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-    image_usage_flags |= impeller::vk::ImageUsageFlagBits::eSampled |
-                         impeller::vk::ImageUsageFlagBits::eInputAttachment;
-  }
-  if (hardware_buffer_desc.usage & AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT) {
-    image_usage_flags |= impeller::vk::ImageUsageFlagBits::eColorAttachment;
-  }
-  if (hardware_buffer_desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
-    image_create_flags |= impeller::vk::ImageCreateFlagBits::eProtected;
-  }
+  vk::StructureChain<vk::MemoryAllocateInfo,
+                     // Core in 1.1
+                     vk::MemoryDedicatedAllocateInfo,
+                     // For VK_ANDROID_external_memory_android_hardware_buffer
+                     vk::ImportAndroidHardwareBufferInfoANDROID>
+      memory_chain;
 
-  vk::ImageCreateInfo image_create_info;
-  image_create_info.pNext = &external_memory_image_info;
-  image_create_info.imageType = vk::ImageType::e2D;
-  image_create_info.format = ahb_format_props.format;
-  image_create_info.extent.width = hardware_buffer_desc.width;
-  image_create_info.extent.height = hardware_buffer_desc.height;
-  image_create_info.extent.depth = 1;
-  image_create_info.mipLevels = 1;
-  image_create_info.arrayLayers = 1;
-  image_create_info.samples = vk::SampleCountFlagBits::e1;
-  image_create_info.tiling = vk::ImageTiling::eOptimal;
-  image_create_info.usage = image_usage_flags;
-  image_create_info.flags = image_create_flags;
-  image_create_info.sharingMode = vk::SharingMode::eExclusive;
-  image_create_info.initialLayout = vk::ImageLayout::eUndefined;
-
-  vk::ResultValue<impeller::vk::Image> maybe_image =
-      device.createImage(image_create_info);
-  if (maybe_image.result != vk::Result::eSuccess) {
-    FML_LOG(ERROR) << "device.createImage failed: "
-                   << static_cast<int>(maybe_image.result);
-    return;
-  }
-  vk::Image image = maybe_image.value;
-
-  vk::ImportAndroidHardwareBufferInfoANDROID ahb_import_info;
-  ahb_import_info.pNext = nullptr;
-  ahb_import_info.buffer = hardware_buffer;
-
-  vk::MemoryDedicatedAllocateInfo dedicated_alloc_info;
-  dedicated_alloc_info.pNext = &ahb_import_info;
-  dedicated_alloc_info.image = image;
-  dedicated_alloc_info.buffer = VK_NULL_HANDLE;
-
-  vk::MemoryAllocateInfo mem_alloc_info;
-  mem_alloc_info.pNext = &dedicated_alloc_info;
-  mem_alloc_info.allocationSize = ahb_props.allocationSize;
+  auto& mem_alloc_info = memory_chain.get<vk::MemoryAllocateInfo>();
+  mem_alloc_info.allocationSize = ahb_props.get().allocationSize;
   mem_alloc_info.memoryTypeIndex = memory_type_index;
 
-  vk::ResultValue<vk::DeviceMemory> allocate_result =
-      device.allocateMemory(mem_alloc_info);
-  if (allocate_result.result != vk::Result::eSuccess) {
-    FML_LOG(ERROR) << "vkAllocateMemory failed : "
-                   << static_cast<int>(allocate_result.result);
-    device.destroyImage(image);
-    return;
-  }
-  vk::DeviceMemory device_memory = allocate_result.value;
+  auto& dedicated_alloc_info =
+      memory_chain.get<vk::MemoryDedicatedAllocateInfo>();
+  dedicated_alloc_info.image = image;
 
-  // Bind memory to the image object.
-  vk::Result bind_image_result =
-      device.bindImageMemory(image, device_memory, 0);
-  if (bind_image_result != vk::Result::eSuccess) {
-    FML_LOG(ERROR) << "vkBindImageMemory failed : "
-                   << static_cast<int>(bind_image_result);
-    device.destroyImage(image);
-    device.freeMemory(device_memory);
-    return;
-  }
-  image_ = image;
-  device_memory_ = device_memory;
+  auto& ahb_import_info =
+      memory_chain.get<vk::ImportAndroidHardwareBufferInfoANDROID>();
+  ahb_import_info.buffer = hardware_buffer;
 
-  // Create image view.
-  vk::ImageViewCreateInfo view_info;
-  view_info.image = image_;
+  auto device_memory = device.allocateMemoryUnique(memory_chain.get());
+  if (device_memory.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not allocate device memory for external image : "
+                   << vk::to_string(device_memory.result);
+    return {};
+  }
+
+  return std::move(device_memory.value);
+}
+
+static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
+    const ContextVK& context,
+    const AHBProperties& ahb_props) {
+  YUVConversionDescriptorVK conversion_chain;
+
+  const auto& ahb_format =
+      ahb_props.get<vk::AndroidHardwareBufferFormatPropertiesANDROID>();
+
+  auto& conversion_info = conversion_chain.get();
+
+  conversion_info.format = ahb_format.format;
+  conversion_info.ycbcrModel = ahb_format.suggestedYcbcrModel;
+  conversion_info.ycbcrRange = ahb_format.suggestedYcbcrRange;
+  conversion_info.components = ahb_format.samplerYcbcrConversionComponents;
+  conversion_info.xChromaOffset = ahb_format.suggestedXChromaOffset;
+  conversion_info.yChromaOffset = ahb_format.suggestedYChromaOffset;
+  // If the potential format features of the sampler Y′CBCR conversion do not
+  // support VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT,
+  // chromaFilter must not be VK_FILTER_LINEAR.
+  //
+  // Since we are not checking, let's just default to a safe value.
+  conversion_info.chromaFilter = vk::Filter::eNearest;
+  conversion_info.forceExplicitReconstruction = false;
+
+  if (conversion_info.format == vk::Format::eUndefined) {
+    auto& external_format = conversion_chain.get<vk::ExternalFormatANDROID>();
+    external_format.externalFormat = ahb_format.externalFormat;
+  } else {
+    conversion_chain.unlink<vk::ExternalFormatANDROID>();
+  }
+
+  return context.GetYUVConversionLibrary()->GetConversion(conversion_chain);
+}
+
+static vk::UniqueImageView CreateVKImageView(
+    const vk::Device& device,
+    const vk::Image& image,
+    const vk::SamplerYcbcrConversion& yuv_conversion,
+    const AHBProperties& ahb_props,
+    const AHardwareBuffer_Desc& ahb_desc) {
+  const auto& ahb_format =
+      ahb_props.get<vk::AndroidHardwareBufferFormatPropertiesANDROID>();
+
+  vk::StructureChain<vk::ImageViewCreateInfo,
+                     // Core in 1.1
+                     vk::SamplerYcbcrConversionInfo>
+      view_chain;
+
+  auto& view_info = view_chain.get();
+
+  view_info.image = image;
   view_info.viewType = vk::ImageViewType::e2D;
-  view_info.format = ToVKImageFormat(desc.format);
+  view_info.format = ahb_format.format;
   view_info.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
   view_info.subresourceRange.baseMipLevel = 0u;
   view_info.subresourceRange.baseArrayLayer = 0u;
-  view_info.subresourceRange.levelCount = desc.mip_count;
-  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
-  auto [view_result, view] = device.createImageViewUnique(view_info);
-  if (view_result != vk::Result::eSuccess) {
-    FML_LOG(ERROR) << "createImageViewUnique failed : "
-                   << static_cast<int>(view_result);
+  view_info.subresourceRange.levelCount =
+      (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
+          ? ISize{ahb_desc.width, ahb_desc.height}.MipCount()
+          : 1u;
+  view_info.subresourceRange.layerCount = ahb_desc.layers;
+
+  // We need a custom YUV conversion only if we don't recognize the format.
+  if (view_info.format == vk::Format::eUndefined) {
+    view_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
+        yuv_conversion;
+  } else {
+    view_chain.unlink<vk::SamplerYcbcrConversionInfo>();
+  }
+
+  auto image_view = device.createImageViewUnique(view_info);
+  if (image_view.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create external image view: "
+                   << vk::to_string(image_view.result);
+    return {};
+  }
+
+  return std::move(image_view.value);
+}
+
+static PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
+  switch (format) {
+    case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+      return PixelFormat::kR8G8B8A8UNormInt;
+    case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+      return PixelFormat::kR16G16B16A16Float;
+    case AHARDWAREBUFFER_FORMAT_D24_UNORM_S8_UINT:
+      return PixelFormat::kD24UnormS8Uint;
+    case AHARDWAREBUFFER_FORMAT_D32_FLOAT_S8_UINT:
+      return PixelFormat::kD32FloatS8UInt;
+    case AHARDWAREBUFFER_FORMAT_S8_UINT:
+      return PixelFormat::kS8UInt;
+    case AHARDWAREBUFFER_FORMAT_R8_UNORM:
+      return PixelFormat::kR8UNormInt;
+    case AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM:
+    case AHARDWAREBUFFER_FORMAT_R16G16_UINT:
+    case AHARDWAREBUFFER_FORMAT_D32_FLOAT:
+    case AHARDWAREBUFFER_FORMAT_R16_UINT:
+    case AHARDWAREBUFFER_FORMAT_D24_UNORM:
+    case AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420:
+    case AHARDWAREBUFFER_FORMAT_YCbCr_P010:
+    case AHARDWAREBUFFER_FORMAT_BLOB:
+    case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+    case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
+    case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
+    case AHARDWAREBUFFER_FORMAT_D16_UNORM:
+    case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
+      // Not understood by the rest of Impeller. Use a placeholder but create
+      // the native image and image views using the right external format.
+      break;
+  }
+  return PixelFormat::kR8G8B8A8UNormInt;
+}
+
+static TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
+  if (ahb_desc.layers == 1u) {
+    return TextureType::kTexture2D;
+  }
+  if (ahb_desc.layers % 6u == 0 &&
+      (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_CUBE_MAP)) {
+    return TextureType::kTextureCube;
+  }
+  // Our texture types seem to understand external OES textures. Should these be
+  // wired up instead?
+  return TextureType::kTexture2D;
+}
+
+static TextureDescriptor ToTextureDescriptor(
+    const AHardwareBuffer_Desc& ahb_desc) {
+  const auto ahb_size = ISize{ahb_desc.width, ahb_desc.height};
+  TextureDescriptor desc;
+  // We are not going to touch hardware buffers on the CPU or use them as
+  // transient attachments. Just treat them as device private.
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format =
+      ToPixelFormat(static_cast<AHardwareBuffer_Format>(ahb_desc.format));
+  desc.size = ahb_size;
+  desc.type = ToTextureType(ahb_desc);
+  desc.sample_count = SampleCount::kCount1;
+  desc.compression_type = CompressionType::kLossless;
+  desc.mip_count = (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
+                       ? ahb_size.MipCount()
+                       : 1u;
+  return desc;
+}
+
+AndroidHardwareBufferTextureSourceVK::AndroidHardwareBufferTextureSourceVK(
+    const std::shared_ptr<ContextVK>& context,
+    struct AHardwareBuffer* ahb,
+    const AHardwareBuffer_Desc& ahb_desc)
+    : TextureSourceVK(ToTextureDescriptor(ahb_desc)) {
+  if (!context) {
+    VALIDATION_LOG << "Invalid context.";
     return;
   }
-  image_view_ = std::move(view);
+
+  const auto& device = context->GetDevice();
+
+  AHBProperties ahb_props;
+
+  if (device.getAndroidHardwareBufferPropertiesANDROID(ahb, &ahb_props.get()) !=
+      vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not determine properties of the Android hardware "
+                      "buffer.";
+    return;
+  }
+
+  const auto& ahb_format =
+      ahb_props.get<vk::AndroidHardwareBufferFormatPropertiesANDROID>();
+
+  // Create an image to refer to our external image.
+  auto image =
+      CreateVKImageWrapperForAndroidHarwareBuffer(device, ahb_props, ahb_desc);
+  if (!image) {
+    return;
+  }
+
+  // Create a device memory allocation to refer to our external image.
+  auto device_memory = ImportVKDeviceMemoryFromAndroidHarwareBuffer(
+      device, image.get(), ahb, ahb_props);
+  if (!device_memory) {
+    return;
+  }
+
+  // Bind the image to the image memory.
+  if (auto result = device.bindImageMemory(image.get(), device_memory.get(), 0);
+      result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not bind external device memory to image : "
+                   << vk::to_string(result);
+    return;
+  }
+
+  // Figure out how to perform YUV conversions.
+  auto yuv_conversion = CreateYUVConversion(*context, ahb_props);
+  if (!yuv_conversion || !yuv_conversion->IsValid()) {
+    return;
+  }
+
+  // Create image view for the newly created image.
+  auto image_view = CreateVKImageView(device,                           //
+                                      image.get(),                      //
+                                      yuv_conversion->GetConversion(),  //
+                                      ahb_props,                        //
+                                      ahb_desc                          //
+  );
+  if (!image_view) {
+    return;
+  }
+
+  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined;
+  device_memory_ = std::move(device_memory);
+  image_ = std::move(image);
+  yuv_conversion_ = std::move(yuv_conversion);
+  image_view_ = std::move(image_view);
+
+#ifdef IMPELLER_DEBUG
+  context->SetDebugName(device_memory_.get(), "AHB Device Memory");
+  context->SetDebugName(image_.get(), "AHB Image");
+  context->SetDebugName(yuv_conversion_->GetConversion(), "AHB YUV Conversion");
+  context->SetDebugName(image_view_.get(), "AHB ImageView");
+#endif  // IMPELLER_DEBUG
+
   is_valid_ = true;
 }
 
 // |TextureSourceVK|
-AndroidHardwareBufferTextureSourceVK::~AndroidHardwareBufferTextureSourceVK() {
-  device_.destroyImage(image_);
-  device_.freeMemory(device_memory_);
-}
+AndroidHardwareBufferTextureSourceVK::~AndroidHardwareBufferTextureSourceVK() =
+    default;
 
 bool AndroidHardwareBufferTextureSourceVK::IsValid() const {
   return is_valid_;
@@ -191,21 +382,29 @@ bool AndroidHardwareBufferTextureSourceVK::IsValid() const {
 
 // |TextureSourceVK|
 vk::Image AndroidHardwareBufferTextureSourceVK::GetImage() const {
-  FML_CHECK(IsValid());
-  return image_;
+  return image_.get();
 }
 
 // |TextureSourceVK|
 vk::ImageView AndroidHardwareBufferTextureSourceVK::GetImageView() const {
-  FML_CHECK(IsValid());
   return image_view_.get();
 }
 
 // |TextureSourceVK|
 vk::ImageView AndroidHardwareBufferTextureSourceVK::GetRenderTargetView()
     const {
-  FML_CHECK(IsValid());
   return image_view_.get();
+}
+
+// |TextureSourceVK|
+bool AndroidHardwareBufferTextureSourceVK::IsSwapchainImage() const {
+  return false;
+}
+
+// |TextureSourceVK|
+std::shared_ptr<YUVConversionVK>
+AndroidHardwareBufferTextureSourceVK::GetYUVConversion() const {
+  return needs_yuv_conversion_ ? yuv_conversion_ : nullptr;
 }
 
 }  // namespace impeller

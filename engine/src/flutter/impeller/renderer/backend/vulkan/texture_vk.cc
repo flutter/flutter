@@ -7,6 +7,7 @@
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 
 namespace impeller {
 
@@ -189,6 +190,28 @@ SharedHandleVK<vk::Framebuffer> TextureVK::GetFramebuffer() const {
 
 SharedHandleVK<vk::RenderPass> TextureVK::GetRenderPass() const {
   return render_pass_;
+}
+
+void TextureVK::SetMipMapGenerated() {
+  mipmap_generated_ = true;
+}
+
+bool TextureVK::IsSwapchainImage() const {
+  return source_->IsSwapchainImage();
+}
+
+std::shared_ptr<SamplerVK> TextureVK::GetImmutableSamplerVariant(
+    const SamplerVK& sampler) const {
+  if (!source_) {
+    return nullptr;
+  }
+  auto conversion = source_->GetYUVConversion();
+  if (!conversion) {
+    // Most textures don't need a sampler conversion and will go down this path.
+    // Only needed for YUV sampling from external textures.
+    return nullptr;
+  }
+  return sampler.CreateVariantForConversion(std::move(conversion));
 }
 
 }  // namespace impeller
