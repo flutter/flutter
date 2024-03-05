@@ -231,7 +231,7 @@ bool DartComponentController::CreateAndBindNamespace() {
       dart_outgoing_dir_ptr_to_check_on_open_.NewRequest());
 
   // Collect our standard set of directories.
-  std::vector<std::string> other_dirs = {"debug", "ctrl", "diagnostics"};
+  std::vector<std::string> other_dirs = {"debug", "ctrl"};
 
   dart_outgoing_dir_ptr_to_check_on_open_.events().OnOpen =
       [this, other_dirs](zx_status_t status, auto unused) {
