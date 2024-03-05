@@ -746,10 +746,8 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle> implem
       skStringFree(localeHandle);
     }
     paragraphStyleSetTextStyle(handle, textStyleHandle);
+    paragraphStyleSetApplyRoundingHack(handle, false);
 
-    if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      paragraphStyleSetApplyRoundingHack(handle, false);
-    }
     return SkwasmParagraphStyle._(
       handle,
       textStyle,
