@@ -373,20 +373,6 @@ class TimelineSummary {
     }
   }
 
-  /// Writes [summaryJson] to a file.
-  @Deprecated(
-    'Use TimelineSummary.writeTimelineToFile. '
-    'This feature was deprecated after v2.1.0-13.0.pre.'
-  )
-  Future<void> writeSummaryToFile(
-    String traceName, {
-    String? destinationDirectory,
-    bool pretty = false,
-  }) async {
-    destinationDirectory ??= testOutputsDirectory;
-    await _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
-  }
-
   Future<void> _writeSummaryToFile(
     String traceName, {
     required String destinationDirectory,

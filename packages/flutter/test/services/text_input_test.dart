@@ -879,7 +879,24 @@ void main() {
 
       const TextInputConfiguration textConfig = TextInputConfiguration();
       const TextInputConfiguration numberConfig = TextInputConfiguration(inputType: TextInputType.number);
+      const TextInputConfiguration multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
       const TextInputConfiguration noneConfig = TextInputConfiguration(inputType: TextInputType.none);
+
+      // Test for https://github.com/flutter/flutter/issues/125875.
+      // When there's a custom text input control installed on Web, the platform text
+      // input control receives TextInputType.none and isMultiline flag.
+      // isMultiline flag is set to true when the input type is multiline.
+      // isMultiline flag is set to false when the input type is not multiline.
+      final Map<String, dynamic> noneIsMultilineFalseJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType = noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
+      if (kIsWeb) {
+        noneInputType['isMultiline'] = false;
+      }
+      final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType1 = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      if (kIsWeb) {
+        noneInputType1['isMultiline'] = true;
+      }
 
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(client, textConfig);
@@ -889,8 +906,8 @@ void main() {
       expect(control.inputType, TextInputType.text);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none
-        MethodCall('TextInput.setClient', <dynamic>[1, noneConfig.toJson()]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
       ]);
 
       connection.show();
@@ -906,34 +923,49 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none
-        MethodCall('TextInput.setClient', <dynamic>[1, noneConfig.toJson()]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
         const MethodCall('TextInput.show'),
-        MethodCall('TextInput.updateConfig', noneConfig.toJson()),
+        MethodCall('TextInput.updateConfig', noneIsMultilineFalseJson),
+      ]);
+
+      connection.updateConfig(multilineConfig);
+      expectedMethodCalls.add('updateConfig');
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(control.inputType, TextInputType.multiline);
+      expect(fakeTextChannel.outgoingCalls.length, 4);
+
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // When there's a custom text input control installed, the platform text
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
+        const MethodCall('TextInput.show'),
+        MethodCall('TextInput.updateConfig', noneIsMultilineFalseJson),
+        MethodCall('TextInput.updateConfig', noneIsMultilineTrueJson),
       ]);
 
       connection.setComposingRect(Rect.zero);
       expectedMethodCalls.add('setComposingRect');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 4);
+      expect(fakeTextChannel.outgoingCalls.length, 5);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setMarkedTextRect');
 
       connection.setCaretRect(Rect.zero);
       expectedMethodCalls.add('setCaretRect');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 5);
+      expect(fakeTextChannel.outgoingCalls.length, 6);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setCaretRect');
 
       connection.setEditableSizeAndTransform(Size.zero, Matrix4.identity());
       expectedMethodCalls.add('setEditableSizeAndTransform');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 6);
+      expect(fakeTextChannel.outgoingCalls.length, 7);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setEditableSizeAndTransform');
 
       connection.setSelectionRects(const <SelectionRect>[SelectionRect(position: 1, bounds: Rect.fromLTWH(2, 3, 4, 5), direction: TextDirection.rtl)]);
       expectedMethodCalls.add('setSelectionRects');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 7);
+      expect(fakeTextChannel.outgoingCalls.length, 8);
       expect(fakeTextChannel.outgoingCalls.last.arguments, const TypeMatcher<List<List<num>>>());
       final List<List<num>> sentList = fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
       expect(sentList.length, 1);
@@ -955,22 +987,51 @@ void main() {
       );
       expectedMethodCalls.add('setStyle');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 8);
+      expect(fakeTextChannel.outgoingCalls.length, 9);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setStyle');
 
       connection.close();
       expectedMethodCalls.add('detach');
       expect(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 9);
+      expect(fakeTextChannel.outgoingCalls.length, 10);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.clearClient');
 
       expectedMethodCalls.add('hide');
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAsync(() async {});
       await expectLater(control.methodCalls, expectedMethodCalls);
-      expect(fakeTextChannel.outgoingCalls.length, 10);
+      expect(fakeTextChannel.outgoingCalls.length, 11);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.hide');
     });
+
+    test('the platform input control receives isMultiline true on attach', () async {
+      final FakeTextInputControl control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      const TextInputConfiguration multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
+      const TextInputConfiguration noneConfig = TextInputConfiguration(inputType: TextInputType.none);
+
+      // Test for https://github.com/flutter/flutter/issues/125875.
+      // When there's a custom text input control installed, the platform text
+      // input control receives TextInputType.none and isMultiline flag.
+      // isMultiline flag is set to true when the input type is multiline.
+      // isMultiline flag is set to false when the input type is not multiline.
+      final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      noneInputType['isMultiline'] = true;
+
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      TextInput.attach(client, multilineConfig);
+
+      final List<String> expectedMethodCalls = <String>['attach'];
+      expect(control.methodCalls, expectedMethodCalls);
+      expect(control.inputType, TextInputType.multiline);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // When there's a custom text input control installed, the platform text
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
+      ]);
+    }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/125875
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();

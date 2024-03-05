@@ -1518,8 +1518,9 @@ void main() {
     expect(shiftingBox.size.height, equals(kBottomNavigationBarHeight));
     await tester.pumpWidget(
       MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 2.0),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: 2.0,
+          maxScaleFactor: 2.0,
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -1591,8 +1592,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 2.0),
+        home: MediaQuery.withClampedTextScaling(
+          minScaleFactor: 2.0,
+          maxScaleFactor: 2.0,
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -1770,8 +1772,9 @@ void main() {
     const String label = 'Foo';
 
     Widget buildApp({ required double textScaleFactor }) {
-      return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+      return MediaQuery.withClampedTextScaling(
+        minScaleFactor: textScaleFactor,
+        maxScaleFactor: textScaleFactor,
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1827,9 +1830,9 @@ void main() {
   testWidgets('Material3 - BottomNavigationBar shows tool tips with text scaling on long press when labels are provided', (WidgetTester tester) async {
     const String label = 'Foo';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1868,14 +1871,14 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
     expect(tester.getSize(find.text(label).last).height, equals(20.0));
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last).height, equals(80.0));
@@ -3173,6 +3176,34 @@ void main() {
     );
 
     addTearDown(tester.view.resetPhysicalSize);
+  });
+
+  testWidgets('BottomNavigationBar keys passed through', (WidgetTester tester) async {
+    const Key key1 = Key('key1');
+    const Key key2 = Key('key2');
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              key: key1,
+              icon: Icon(Icons.favorite_border),
+              label: 'Favorite',
+            ),
+            BottomNavigationBarItem(
+              key: key2,
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(key1), findsOneWidget);
+    expect(find.byKey(key2), findsOneWidget);
   });
 }
 

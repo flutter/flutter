@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -76,12 +75,18 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
+    super.iconAlignment,
   }) : _variant = _FilledButtonVariant.filled;
 
   /// Create a filled button from [icon] and [label].
   ///
   /// The icon and label are arranged in a row with padding at the start and end
   /// and a gap between them.
+  ///
+  /// If [icon] is null, will create a [FilledButton] instead.
+  ///
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  ///
   factory FilledButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -93,9 +98,41 @@ class FilledButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
-  }) = _FilledButtonWithIcon;
+    IconAlignment iconAlignment = IconAlignment.start,
+  }) {
+     if (icon == null) {
+      return FilledButton(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
+    return _FilledButtonWithIcon(
+      key: key,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      style: style,
+      focusNode: focusNode,
+      autofocus: autofocus ?? false,
+      clipBehavior: clipBehavior ?? Clip.none,
+      statesController: statesController,
+      icon: icon,
+      label: label,
+      iconAlignment: iconAlignment,
+    );
+  }
 
   /// Create a tonal variant of FilledButton.
   ///
@@ -119,8 +156,10 @@ class FilledButton extends ButtonStyleButton {
 
   /// Create a filled tonal button from [icon] and [label].
   ///
-  /// The icon and label are arranged in a row with padding at the start and end
-  /// and a gap between them.
+  /// The [icon] and [label] are arranged in a row with padding at the start and
+  /// end and a gap between them.
+  ///
+  /// If [icon] is null, will create a [FilledButton.tonal] instead.
   factory FilledButton.tonalIcon({
     Key? key,
     required VoidCallback? onPressed,
@@ -132,9 +171,25 @@ class FilledButton extends ButtonStyleButton {
     bool? autofocus,
     Clip? clipBehavior,
     MaterialStatesController? statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
+    IconAlignment iconAlignment = IconAlignment.start,
   }) {
+    if (icon == null) {
+      return FilledButton.tonal(
+        key: key,
+        onPressed: onPressed,
+        onLongPress: onLongPress,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        style: style,
+        focusNode: focusNode,
+        autofocus: autofocus ?? false,
+        clipBehavior: clipBehavior ?? Clip.none,
+        statesController: statesController,
+        child: label,
+      );
+    }
     return _FilledButtonWithIcon.tonal(
       key: key,
       onPressed: onPressed,
@@ -148,24 +203,29 @@ class FilledButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
+      iconAlignment: iconAlignment,
     );
   }
 
   /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor], and [disabledForegroundColor] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value. The
-  /// [backgroundColor] and [disabledBackgroundColor] are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.backgroundColor] value.
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
+  ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
   /// or focused, and elevation + 6 is used when the button is pressed.
-  ///
-  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
-  /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
   /// All of the other parameters are either used directly or used to
   /// create a [MaterialStateProperty] with a single value for all
@@ -202,6 +262,9 @@ class FilledButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
+    Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -218,29 +281,36 @@ class FilledButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColorProp =
-      (backgroundColor == null && disabledBackgroundColor == null)
-        ? null
-        : _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor);
-    final Color? foreground = foregroundColor;
-    final Color? disabledForeground = disabledForegroundColor;
-    final MaterialStateProperty<Color?>? foregroundColorProp =
-      (foreground == null && disabledForeground == null)
-        ? null
-        : _FilledButtonDefaultColor(foreground, disabledForeground);
-    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
-      ? null
-      : _FilledButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<Color?>? foregroundColorProp = switch ((foregroundColor, disabledForegroundColor)) {
+      (null, null) => null,
+      (_, _) => _FilledButtonDefaultColor(foregroundColor, disabledForegroundColor),
+    };
+    final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
+      (null, null) => null,
+      (_, _) => _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor),
+    };
+    final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
+      (null, null) => null,
+      (_, _) => _FilledButtonDefaultColor(iconColor, disabledIconColor),
+    };
+    final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
+      (null, null) => null,
+      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+      (_, _) => _FilledButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
+    };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _FilledButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
       backgroundColor: backgroundColorProp,
       foregroundColor: foregroundColorProp,
-      overlayColor: overlayColor,
+      overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -255,6 +325,8 @@ class FilledButton extends ButtonStyleButton {
       enableFeedback: enableFeedback,
       alignment: alignment,
       splashFactory: splashFactory,
+      backgroundBuilder: backgroundBuilder,
+      foregroundBuilder: foregroundBuilder,
     );
   }
 
@@ -345,7 +417,7 @@ class FilledButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.onSecondaryContainer
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.onSecondaryContainer(0.08)
-  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.12)
+  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.1)
   /// * `shadowColor` - Theme.colorScheme.shadow
   /// * `surfaceTintColor` - Colors.transparent
   /// * `elevation`
@@ -377,12 +449,10 @@ class FilledButton extends ButtonStyleButton {
   /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    switch (_variant) {
-      case _FilledButtonVariant.filled:
-        return _FilledButtonDefaultsM3(context);
-      case _FilledButtonVariant.tonal:
-        return _FilledTonalButtonDefaultsM3(context);
-    }
+    return switch (_variant) {
+      _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
+      _FilledButtonVariant.tonal  => _FilledTonalButtonDefaultsM3(context),
+    };
   }
 
   /// Returns the [FilledButtonThemeData.style] of the closest
@@ -431,13 +501,13 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.12);
+      return overlay.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.12);
+      return overlay.withOpacity(0.1);
     }
     return null;
   }
@@ -469,14 +539,19 @@ class _FilledButtonWithIcon extends FilledButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    Clip? clipBehavior,
+    super.clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
+    super.iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _FilledButtonWithIconChild(icon: icon, label: label)
+         child: _FilledButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
       );
 
   _FilledButtonWithIcon.tonal({
@@ -488,14 +563,19 @@ class _FilledButtonWithIcon extends FilledButton {
     super.style,
     super.focusNode,
     bool? autofocus,
-    Clip? clipBehavior,
+    super.clipBehavior,
     super.statesController,
     required Widget icon,
     required Widget label,
+    required IconAlignment iconAlignment,
   }) : super.tonal(
          autofocus: autofocus ?? false,
-         clipBehavior: clipBehavior ?? Clip.none,
-         child: _FilledButtonWithIconChild(icon: icon, label: label)
+         child: _FilledButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
        );
 
   @override
@@ -524,20 +604,30 @@ class _FilledButtonWithIcon extends FilledButton {
 }
 
 class _FilledButtonWithIconChild extends StatelessWidget {
-  const _FilledButtonWithIconChild({ required this.label, required this.icon });
+  const _FilledButtonWithIconChild({
+    required this.label,
+    required this.icon,
+    required this.buttonStyle,
+    required this.iconAlignment,
+  });
 
   final Widget label;
   final Widget icon;
+  final ButtonStyle? buttonStyle;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
+    final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
-    final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+    final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
+      children: iconAlignment == IconAlignment.start
+        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -586,13 +676,13 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       return null;
     });
@@ -708,13 +798,13 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       return null;
     });

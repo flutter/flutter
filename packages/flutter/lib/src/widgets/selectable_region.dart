@@ -192,8 +192,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// ```
 ///
 /// See also:
+///
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
+///  * [SelectableText], which enables selection on a single run of text.
 ///  * [SelectionHandler], which contains APIs to handle selection events from the
 ///    [SelectableRegion].
 ///  * [Selectable], which provides API to participate in the selection system.
@@ -216,13 +218,13 @@ class SelectableRegion extends StatefulWidget {
     this.onSelectionChanged,
   });
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
+  /// The configuration for the magnifier used with selections in this region.
   ///
   /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
+  /// For a version of [SelectableRegion] that adapts automatically to the
+  /// current platform, consider [SelectionArea].
   ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -267,9 +269,29 @@ class SelectableRegion extends StatefulWidget {
     required final SelectionGeometry selectionGeometry,
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
+    required final VoidCallback? onShare,
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
+    final bool platformCanShare = switch (defaultTargetPlatform) {
+      TargetPlatform.android
+        => selectionGeometry.status == SelectionStatus.uncollapsed,
+      TargetPlatform.macOS
+      || TargetPlatform.fuchsia
+      || TargetPlatform.linux
+      || TargetPlatform.windows
+        => false,
+      // TODO(bleroux): the share button should be shown on iOS but the share
+      // functionality requires some changes on the engine side because, on iPad,
+      // it needs an anchor for the popup.
+      // See: https://github.com/flutter/flutter/issues/141775.
+      TargetPlatform.iOS
+        => false,
+    };
+    final bool canShare = onShare != null && platformCanShare;
+
+    // On Android, the share button is before the select all button.
+    final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
@@ -280,10 +302,20 @@ class SelectableRegion extends StatefulWidget {
           onPressed: onCopy,
           type: ContextMenuButtonType.copy,
         ),
+      if (canShare && showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
+        ),
       if (canSelectAll)
         ContextMenuButtonItem(
           onPressed: onSelectAll,
           type: ContextMenuButtonType.selectAll,
+        ),
+      if (canShare && !showShareBeforeSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onShare,
+          type: ContextMenuButtonType.share,
         ),
     ];
   }
@@ -331,6 +363,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @visibleForTesting
   SelectionOverlay? get selectionOverlay => _selectionOverlay;
 
+  /// The text processing service used to retrieve the native text processing actions.
+  final ProcessTextService _processTextService = DefaultProcessTextService();
+
+  /// The list of native text processing actions provided by the engine.
+  final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
+
   @override
   void initState() {
     super.initState();
@@ -359,6 +397,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+    _initProcessTextActions();
+  }
+
+  /// Query the engine to initialize the list of text processing actions to show
+  /// in the text selection toolbar.
+  Future<void> _initProcessTextActions() async {
+    _processTextActions.clear();
+    _processTextActions.addAll(await _processTextService.queryTextActions());
   }
 
   @override
@@ -416,15 +462,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectionStatus() {
-    final TextSelection selection;
     final SelectionGeometry geometry = _selectionDelegate.value;
-    switch (geometry.status) {
-      case SelectionStatus.uncollapsed:
-      case SelectionStatus.collapsed:
-        selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-      case SelectionStatus.none:
-        selection = const TextSelection.collapsed(offset: 1);
-    }
+    final TextSelection selection = switch (geometry.status) {
+      SelectionStatus.uncollapsed || SelectionStatus.collapsed => const TextSelection(baseOffset: 0, extentOffset: 1),
+      SelectionStatus.none => const TextSelection.collapsed(offset: 1),
+    };
     textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
@@ -1075,6 +1117,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  Future<void> _share() async {
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return;
+    }
+    await SystemChannels.platform.invokeMethod('Share.invoke', data.plainText);
+  }
+
   /// {@macro flutter.widgets.EditableText.getAnchors}
   ///
   /// See also:
@@ -1177,7 +1227,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       onCopy: () {
         _copy();
 
-        // In Android copy should clear the selection.
+        // On Android copy should clear the selection.
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -1203,7 +1253,45 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             hideToolbar();
         }
       },
-    );
+      onShare: () {
+        _share();
+
+        // On Android, share should clear the selection.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            _clearSelection();
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            hideToolbar();
+        }
+      },
+    )..addAll(_textProcessingActionButtonItems);
+  }
+
+  List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
+    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final SelectedContent? data = _selectable?.getSelectedContent();
+    if (data == null) {
+      return buttonItems;
+    }
+
+    for (final ProcessTextAction action in _processTextActions) {
+      buttonItems.add(ContextMenuButtonItem(
+        label: action.label,
+        onPressed: () async {
+          final String selectedText = data.plainText;
+          if (selectedText.isNotEmpty) {
+            await _processTextService.processTextAction(action.id, selectedText, true);
+            hideToolbar();
+          }
+        },
+      ));
+    }
+    return buttonItems;
   }
 
   /// The line height at the start of the current selection.
@@ -1972,10 +2060,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects.map((Rect selectionRect) {
         final Matrix4 transform = getTransformFrom(selectables[index]);
         final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
-        if (drawableArea != null) {
-          return drawableArea.intersect(localRect);
-        }
-        return localRect;
+        return drawableArea?.intersect(localRect) ?? localRect;
       }).where((Rect selectionRect) {
         return selectionRect.isFinite && !selectionRect.isEmpty;
       }).toList();
@@ -2234,14 +2319,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex == -1) {
-      switch (event.direction) {
-        case SelectionExtendDirection.previousLine:
-        case SelectionExtendDirection.backward:
-          currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
-        case SelectionExtendDirection.nextLine:
-        case SelectionExtendDirection.forward:
-        currentSelectionStartIndex = currentSelectionEndIndex = 0;
-      }
+      currentSelectionStartIndex = currentSelectionEndIndex = switch (event.direction) {
+        SelectionExtendDirection.previousLine || SelectionExtendDirection.backward => selectables.length,
+        SelectionExtendDirection.nextLine || SelectionExtendDirection.forward => 0,
+      };
     }
     int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
     SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
@@ -2293,12 +2374,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    final bool selectionWillbeInProgress = event is! ClearSelectionEvent;
-    if (!_selectionInProgress && selectionWillbeInProgress) {
+    final bool selectionWillBeInProgress = event is! ClearSelectionEvent;
+    if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
       selectables.sort(compareOrder);
     }
-    _selectionInProgress = selectionWillbeInProgress;
+    _selectionInProgress = selectionWillBeInProgress;
     _isHandlingSelectionEvent = true;
     late SelectionResult result;
     switch (event.type) {

@@ -1368,7 +1368,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.surface;
   /// ```
   ///
   /// {@end-tool}
@@ -1451,7 +1451,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// visible.
   ///
   /// Setting [maintainState] to false does not guarantee that the route will be
-  /// discarded. For instance, it will not be descarded if it is still visible
+  /// discarded. For instance, it will not be discarded if it is still visible
   /// because the next above it is not opaque (e.g. it is a popup dialog).
   /// {@endtemplate}
   ///
@@ -1910,60 +1910,16 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [ModalRoute]
 /// variants, the `RouteObserver<ModalRoute<dynamic>>` type may be used.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example demonstrates how to implement a [RouteObserver] that notifies
+/// [RouteAware] widget of changes to the state of their [Route].
 ///
-/// To make a [StatefulWidget] aware of its current [Route] state, implement
-/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
-///
-/// ```dart
-/// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
-///
-/// void main() {
-///   runApp(MaterialApp(
-///     home: Container(),
-///     navigatorObservers: <RouteObserver<ModalRoute<void>>>[ routeObserver ],
-///   ));
-/// }
-///
-/// class RouteAwareWidget extends StatefulWidget {
-///   const RouteAwareWidget({super.key});
-///
-///   @override
-///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
-/// }
-///
-/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
-/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
-///
-///   @override
-///   void didChangeDependencies() {
-///     super.didChangeDependencies();
-///     routeObserver.subscribe(this, ModalRoute.of(context)!);
-///   }
-///
-///   @override
-///   void dispose() {
-///     routeObserver.unsubscribe(this);
-///     super.dispose();
-///   }
-///
-///   @override
-///   void didPush() {
-///     // Route was pushed onto navigator and is now topmost route.
-///   }
-///
-///   @override
-///   void didPopNext() {
-///     // Covering route was popped off the navigator.
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) => Container();
-///
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/routes/route_observer.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///  * [RouteAware], this is used with [RouteObserver] to make a widget aware
+///   of changes to the [Navigator]'s session history.
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 

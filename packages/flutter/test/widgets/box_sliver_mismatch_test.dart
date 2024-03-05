@@ -33,10 +33,12 @@ void main() {
   });
 
   testWidgets('Box in a sliver', (WidgetTester tester) async {
+    late ViewportOffset offset1;
+    addTearDown(() => offset1.dispose());
     await tester.pumpWidget(
       Viewport(
         crossAxisDirection: AxisDirection.right,
-        offset: ViewportOffset.zero(),
+        offset: offset1 = ViewportOffset.zero(),
         slivers: const <Widget>[
           SizedBox(),
         ],
@@ -45,10 +47,12 @@ void main() {
 
     expect(tester.takeException(), isFlutterError);
 
+    late ViewportOffset offset2;
+    addTearDown(() => offset2.dispose());
     await tester.pumpWidget(
       Viewport(
         crossAxisDirection: AxisDirection.right,
-        offset: ViewportOffset.zero(),
+        offset: offset2 = ViewportOffset.zero(),
         slivers: const <Widget>[
           SliverPadding(
             padding: EdgeInsets.zero,

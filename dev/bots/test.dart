@@ -160,11 +160,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 
     // These tests are broken and need to be fixed.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
-    'test/painting/decoration_test.dart',
-    'test/rendering/layers_test.dart',
-    'test/painting/text_style_test.dart',
     'test/material/text_field_test.dart',
-    'test/widgets/app_overrides_test.dart',
     'test/widgets/performance_overlay_test.dart',
     'test/widgets/html_element_view_test.dart',
     'test/cupertino/scaffold_test.dart',
@@ -818,6 +814,15 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
+  Future<void> runImpeller() async {
+    printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--enable-impeller'],
+    );
+  }
+
+
   Future<void> runLibraries() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
@@ -836,19 +841,16 @@ Future<void> _runFrameworkTests() async {
   }
 
   Future<void> runExampleTests() async {
-    // TODO(gspencergoog): Currently Linux LUCI bots can't run desktop Flutter applications, https://github.com/flutter/flutter/issues/90676
-    if (!Platform.isLinux || ciProvider != CiProviders.luci) {
-      await runCommand(
-        flutter,
-        <String>['config', '--enable-${Platform.operatingSystem}-desktop'],
-        workingDirectory: flutterRoot,
-      );
-      await runCommand(
-        dart,
-        <String>[path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart')],
-        workingDirectory: path.join(flutterRoot, 'examples', 'api'),
-      );
-    }
+    await runCommand(
+      flutter,
+      <String>['config', '--enable-${Platform.operatingSystem}-desktop'],
+      workingDirectory: flutterRoot,
+    );
+    await runCommand(
+      dart,
+      <String>[path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart')],
+      workingDirectory: path.join(flutterRoot, 'examples', 'api'),
+    );
     for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
@@ -987,6 +989,7 @@ Future<void> _runFrameworkTests() async {
     await runFixTests('flutter');
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
+    await runFixTests('flutter_driver');
     await runPrivateTests();
   }
 
@@ -1066,6 +1069,7 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'slow': runSlow,
     'misc': runMisc,
+    'impeller': runImpeller,
   });
 }
 
@@ -1569,8 +1573,10 @@ Future<void> _runCustomerTesting() async {
   await runCommand(
     'git',
     <String>[
-      'checkout',
+      'branch',
+      '-f',
       'master',
+      'origin/master',
     ],
     workingDirectory: flutterRoot,
   );
@@ -1679,7 +1685,7 @@ const List<String> expectedEntitlements = <String>[
 ///
 /// This list should be kept in sync with the actual contents of Flutter's
 /// cache.
-Future<List<String>> binariesWithEntitlements(String flutterRoot) async {
+List<String> binariesWithEntitlements(String flutterRoot) {
   return <String> [
     'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
     'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
@@ -1720,11 +1726,11 @@ Future<List<String>> binariesWithEntitlements(String flutterRoot) async {
 ///
 /// This list should be kept in sync with the actual contents of Flutter's
 /// cache.
-Future<List<String>> binariesWithoutEntitlements(String flutterRoot) async {
+List<String> binariesWithoutEntitlements(String flutterRoot) {
   return <String>[
-    'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',
     'artifacts/engine/darwin-x64/impellerc',
     'artifacts/engine/darwin-x64/libpath_ops.dylib',
@@ -1746,6 +1752,25 @@ Future<List<String>> binariesWithoutEntitlements(String flutterRoot) async {
   .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }
 
+/// xcframeworks that are expected to be codesigned.
+///
+/// This list should be kept in sync with the actual contents of Flutter's
+/// cache.
+List<String> signedXcframeworks(String flutterRoot) {
+  return <String>[
+    'artifacts/engine/ios-profile/Flutter.xcframework',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework',
+    'artifacts/engine/ios-release/Flutter.xcframework',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework',
+    'artifacts/engine/ios/Flutter.xcframework',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
+  ]
+  .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
+}
+
 /// Verify the existence of all expected binaries in cache.
 ///
 /// This function ignores code signatures and entitlements, and is intended to
@@ -1760,13 +1785,11 @@ Future<void> verifyExist(
   final Set<String> foundFiles = <String>{};
   final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
 
-
-
   for (final String binaryPath
       in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
-    if ((await binariesWithEntitlements(flutterRoot)).contains(binaryPath)) {
+    if (binariesWithEntitlements(flutterRoot).contains(binaryPath)) {
       foundFiles.add(binaryPath);
-    } else if ((await binariesWithoutEntitlements(flutterRoot)).contains(binaryPath)) {
+    } else if (binariesWithoutEntitlements(flutterRoot).contains(binaryPath)) {
       foundFiles.add(binaryPath);
     } else {
       throw Exception(
@@ -1774,7 +1797,7 @@ Future<void> verifyExist(
     }
   }
 
-  final List<String> allExpectedFiles = await binariesWithEntitlements(flutterRoot) + await binariesWithoutEntitlements(flutterRoot);
+  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
   if (foundFiles.length < allExpectedFiles.length) {
     final List<String> unfoundFiles = allExpectedFiles
         .where(
@@ -1798,71 +1821,76 @@ Future<void> verifySignatures(
   String flutterRoot,
   {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
 ) async {
-  final List<String> unsignedBinaries = <String>[];
+  final List<String> unsignedFiles = <String>[];
   final List<String> wrongEntitlementBinaries = <String>[];
-  final List<String> unexpectedBinaries = <String>[];
+  final List<String> unexpectedFiles = <String>[];
   final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
 
-  for (final String binaryPath
-      in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
+  final List<String> binariesAndXcframeworks =
+      (await findBinaryPaths(cacheDirectory, processManager: processManager)) + (await findXcframeworksPaths(cacheDirectory, processManager: processManager));
+
+  for (final String pathToCheck in binariesAndXcframeworks) {
     bool verifySignature = false;
     bool verifyEntitlements = false;
-    if ((await binariesWithEntitlements(flutterRoot)).contains(binaryPath)) {
+    if (binariesWithEntitlements(flutterRoot).contains(pathToCheck)) {
       verifySignature = true;
       verifyEntitlements = true;
     }
-    if ((await binariesWithoutEntitlements(flutterRoot)).contains(binaryPath)) {
+    if (binariesWithoutEntitlements(flutterRoot).contains(pathToCheck)) {
+      verifySignature = true;
+    }
+    if (signedXcframeworks(flutterRoot).contains(pathToCheck)) {
       verifySignature = true;
     }
     if (!verifySignature && !verifyEntitlements) {
-      unexpectedBinaries.add(binaryPath);
-      print('Unexpected binary $binaryPath found in cache!');
+      unexpectedFiles.add(pathToCheck);
+      print('Unexpected binary or xcframework $pathToCheck found in cache!');
       continue;
     }
-    print('Verifying the code signature of $binaryPath');
+    print('Verifying the code signature of $pathToCheck');
     final io.ProcessResult codeSignResult = await processManager.run(
       <String>[
         'codesign',
         '-vvv',
-        binaryPath,
+        pathToCheck,
       ],
     );
     if (codeSignResult.exitCode != 0) {
-      unsignedBinaries.add(binaryPath);
+      unsignedFiles.add(pathToCheck);
       print(
-        'File "$binaryPath" does not appear to be codesigned.\n'
+        'File "$pathToCheck" does not appear to be codesigned.\n'
         'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
         '${codeSignResult.stderr}\n',
       );
       continue;
     }
     if (verifyEntitlements) {
-      print('Verifying entitlements of $binaryPath');
-      if (!(await hasExpectedEntitlements(binaryPath, flutterRoot, processManager: processManager))) {
-        wrongEntitlementBinaries.add(binaryPath);
+      print('Verifying entitlements of $pathToCheck');
+      if (!(await hasExpectedEntitlements(pathToCheck, flutterRoot, processManager: processManager))) {
+        wrongEntitlementBinaries.add(pathToCheck);
       }
     }
   }
 
   // First print all deviations from expectations
-  if (unsignedBinaries.isNotEmpty) {
-    print('Found ${unsignedBinaries.length} unsigned binaries:');
-    unsignedBinaries.forEach(print);
+  if (unsignedFiles.isNotEmpty) {
+    print('Found ${unsignedFiles.length} unsigned files:');
+    unsignedFiles.forEach(print);
   }
 
   if (wrongEntitlementBinaries.isNotEmpty) {
-    print('Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
+    print('Found ${wrongEntitlementBinaries.length} files with unexpected entitlements:');
     wrongEntitlementBinaries.forEach(print);
   }
 
-  if (unexpectedBinaries.isNotEmpty) {
-    print('Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
-    unexpectedBinaries.forEach(print);
+  if (unexpectedFiles.isNotEmpty) {
+    print('Found ${unexpectedFiles.length} unexpected files in the cache:');
+    unexpectedFiles.forEach(print);
   }
 
   // Finally, exit on any invalid state
-  if (unsignedBinaries.isNotEmpty) {
-    throw Exception('Test failed because unsigned binaries detected.');
+  if (unsignedFiles.isNotEmpty) {
+    throw Exception('Test failed because unsigned files detected.');
   }
 
   if (wrongEntitlementBinaries.isNotEmpty) {
@@ -1872,10 +1900,10 @@ Future<void> verifySignatures(
     );
   }
 
-  if (unexpectedBinaries.isNotEmpty) {
-    throw Exception('Test failed because unexpected binaries found in the cache.');
+  if (unexpectedFiles.isNotEmpty) {
+    throw Exception('Test failed because unexpected files found in the cache.');
   }
-  print('Verified that binaries are codesigned and have expected entitlements.');
+  print('Verified that files are codesigned and have expected entitlements.');
 }
 
 /// Find every binary file in the given [rootDirectory].
@@ -1904,6 +1932,30 @@ Future<List<String>> findBinaryPaths(
     }
   });
   return allBinaryPaths;
+}
+
+/// Find every xcframework in the given [rootDirectory].
+Future<List<String>> findXcframeworksPaths(
+    String rootDirectory,
+    {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+    }) async {
+  final io.ProcessResult result = await processManager.run(
+    <String>[
+      'find',
+      rootDirectory,
+      '-type',
+      'd',
+      '-name',
+      '*xcframework',
+    ],
+  );
+  final List<String> allXcframeworkPaths = LineSplitter.split(result.stdout as String)
+      .where((String s) => s.isNotEmpty)
+      .toList();
+  for (final String path in allXcframeworkPaths) {
+    print('Found: $path\n');
+  }
+  return allXcframeworkPaths;
 }
 
 /// Check mime-type of file at [filePath] to determine if it is binary.
@@ -1950,7 +2002,7 @@ Future<bool> hasExpectedEntitlements(
   final String output = entitlementResult.stdout as String;
   for (final String entitlement in expectedEntitlements) {
     final bool entitlementExpected =
-        (await binariesWithEntitlements(flutterRoot)).contains(binaryPath);
+        binariesWithEntitlements(flutterRoot).contains(binaryPath);
     if (output.contains(entitlement) != entitlementExpected) {
       print(
         'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
@@ -2236,8 +2288,6 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
     flutter,
     <String>[
       'test',
-      if (ciProvider == CiProviders.cirrus)
-        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
       '--web-renderer=$webRenderer',
@@ -2431,21 +2481,6 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
     toolsArgs += ' --enable-asserts';
   }
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-}
-
-enum CiProviders {
-  cirrus,
-  luci,
-}
-
-CiProviders? get ciProvider {
-  if (Platform.environment['CIRRUS_CI'] == 'true') {
-    return CiProviders.cirrus;
-  }
-  if (Platform.environment['LUCI_CONTEXT'] != null) {
-    return CiProviders.luci;
-  }
-  return null;
 }
 
 /// Checks the given file's contents to determine if they match the allowed

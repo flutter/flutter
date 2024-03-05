@@ -42,7 +42,6 @@ void main() {
           minSdkVersionHandler,
           transformInputIssueHandler,
           lockFileDepMissingHandler,
-          multidexErrorHandler,
           incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
           jvm11RequiredHandler,
@@ -76,7 +75,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -124,7 +122,6 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
       expect(formatTestErrorMessage(errorMessage, remoteTerminatedHandshakeHandler), isTrue);
       expect(await remoteTerminatedHandshakeHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -156,7 +153,38 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('retries if gradle fails downloading with bad gateway error', () async {
+      const String errorMessage = r'''
+Exception in thread "main" java.io.IOException: Server returned HTTP response code: 502 for URL: https://objects.githubusercontent.com/github-production-release-asset-2e65be/696192900/1e77bbfb-4cde-4376-92ea-fc4ff57b8362?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=FFFF%2F20231220%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231220T160553Z&X-Amz-Expires=300&X-Amz-Signature=ffff&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=696192900&response-content-disposition=attachment%3B%20filename%3Dgradle-8.2.1-all.zip&response-content-type=application%2Foctet-stream
+at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1997)
+at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1589)
+at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(await networkErrorHandler.handler(
+        line: '',
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -182,7 +210,6 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -224,7 +251,6 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -258,7 +284,6 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -303,7 +328,6 @@ Exception in thread "main" java.net.SocketException: Connection reset
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -335,7 +359,6 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -371,7 +394,6 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
         usesAndroidX: true,
       ), equals(GradleBuildStatus.retry));
@@ -385,212 +407,34 @@ A problem occurred configuring root project 'android'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
-  });
 
-  group('multidex errors', () {
-    testUsingContext('exits if multidex AndroidManifest not detected', () async {
+    testUsingContext('retries if connection times out', () async {
       const String errorMessage = r'''
-Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
-  at com.android.tools.r8.utils.T0.error(SourceFile:1)
-  at com.android.tools.r8.utils.T0.a(SourceFile:2)
-  at com.android.tools.r8.dex.P.a(SourceFile:740)
-  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
-  at com.android.tools.r8.dex.b.a(SourceFile:14)
-  at com.android.tools.r8.dex.b.b(SourceFile:25)
-  at com.android.tools.r8.D8.d(D8.java:133)
-  at com.android.tools.r8.D8.b(D8.java:1)
-  at com.android.tools.r8.utils.Y.a(SourceFile:36)
-  ... 38 more
+Exception in thread "main" java.net.ConnectException: Connection timed out
+java.base/sun.nio.ch.Net.connect0(Native Method)
+  at java.base/sun.nio.ch.Net.connect(Net.java:579)
+  at java.base/sun.nio.ch.Net.connect(Net.java:568)
+  at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:588)
+  at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+  at java.base/java.net.Socket.connect(Socket.java:633)
+  at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:299)
+  at java.base/sun.security.ssl.BaseSSLSocketImpl.connect(BaseSSLSocketImpl.java:174)
+  at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:183)
+  at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:498)
+  at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:603)
+  at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:266)
+  at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:380)''';
 
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(await networkErrorHandler.handler(
+        line: '',
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
 
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:mergeDexDebug'.
-> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
-   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
-     The number of method references in a .dex file cannot exceed 64K.
-     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
-
-      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, usesAndroidX: true, line: ''), equals(GradleBuildStatus.exit));
-
-      expect(testLogger.statusText,
+      expect(testLogger.errorText,
         contains(
-          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
-        )
-      );
-      expect(testLogger.statusText,
-        contains(
-          'See https://docs.flutter.dev/deployment/android#enabling-multidex-support for more information.'
-        )
-      );
-      expect(testLogger.statusText,
-        contains(
-          'Your `android/app/src/main/AndroidManifest.xml` does not contain'
-        )
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    });
-    testUsingContext('retries if multidex support enabled', () async {
-      const String errorMessage = r'''
-Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
-  at com.android.tools.r8.utils.T0.error(SourceFile:1)
-  at com.android.tools.r8.utils.T0.a(SourceFile:2)
-  at com.android.tools.r8.dex.P.a(SourceFile:740)
-  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
-  at com.android.tools.r8.dex.b.a(SourceFile:14)
-  at com.android.tools.r8.dex.b.b(SourceFile:25)
-  at com.android.tools.r8.D8.d(D8.java:133)
-  at com.android.tools.r8.D8.b(D8.java:1)
-  at com.android.tools.r8.utils.Y.a(SourceFile:36)
-  ... 38 more
-
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:mergeDexDebug'.
-> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
-   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
-     The number of method references in a .dex file cannot exceed 64K.
-     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
-
-      final File manifest = fileSystem.currentDirectory
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml');
-      manifest.createSync(recursive: true);
-      manifest.writeAsStringSync(r'''
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.multidexapp">
-   <application
-        android:label="multidextest2"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-    </application>
-</manifest>
-''', flush: true);
-
-      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, line: '', usesAndroidX: true), equals(GradleBuildStatus.retry));
-
-      expect(testLogger.statusText,
-        contains(
-          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
-        )
-      );
-      expect(testLogger.statusText,
-        contains(
-          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
-        )
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      AnsiTerminal: () => _TestPromptTerminal('y'),
-    });
-
-    testUsingContext('exits if multidex support skipped', () async {
-      const String errorMessage = r'''
-Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
-  at com.android.tools.r8.utils.T0.error(SourceFile:1)
-  at com.android.tools.r8.utils.T0.a(SourceFile:2)
-  at com.android.tools.r8.dex.P.a(SourceFile:740)
-  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
-  at com.android.tools.r8.dex.b.a(SourceFile:14)
-  at com.android.tools.r8.dex.b.b(SourceFile:25)
-  at com.android.tools.r8.D8.d(D8.java:133)
-  at com.android.tools.r8.D8.b(D8.java:1)
-  at com.android.tools.r8.utils.Y.a(SourceFile:36)
-  ... 38 more
-
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:mergeDexDebug'.
-> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
-   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
-     The number of method references in a .dex file cannot exceed 64K.
-     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
-
-      final File manifest = fileSystem.currentDirectory
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childFile('AndroidManifest.xml');
-      manifest.createSync(recursive: true);
-      manifest.writeAsStringSync(r'''
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.multidexapp">
-   <application
-        android:label="multidextest2"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-    </application>
-</manifest>
-''', flush: true);
-
-      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: true, line: '', usesAndroidX: true), equals(GradleBuildStatus.exit));
-
-      expect(testLogger.statusText,
-        contains(
-          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
-        )
-      );
-      expect(testLogger.statusText,
-        contains(
-          'Flutter tool can add multidex support. The following file will be added by flutter:'
-        )
-      );
-      expect(testLogger.statusText,
-        contains(
-          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
-        )
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      AnsiTerminal: () => _TestPromptTerminal('n'),
-    });
-
-    testUsingContext('exits if multidex support disabled', () async {
-      const String errorMessage = r'''
-Caused by: com.android.tools.r8.utils.b: Cannot fit requested classes in a single dex file (# methods: 85091 > 65536)
-  at com.android.tools.r8.utils.T0.error(SourceFile:1)
-  at com.android.tools.r8.utils.T0.a(SourceFile:2)
-  at com.android.tools.r8.dex.P.a(SourceFile:740)
-  at com.android.tools.r8.dex.P$h.a(SourceFile:7)
-  at com.android.tools.r8.dex.b.a(SourceFile:14)
-  at com.android.tools.r8.dex.b.b(SourceFile:25)
-  at com.android.tools.r8.D8.d(D8.java:133)
-  at com.android.tools.r8.D8.b(D8.java:1)
-  at com.android.tools.r8.utils.Y.a(SourceFile:36)
-  ... 38 more
-
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:mergeDexDebug'.
-> A failure occurred while executing com.android.build.gradle.internal.tasks.Workers$ActionFacade
-   > com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:
-     The number of method references in a .dex file cannot exceed 64K.
-     Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
-
-      expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(fileSystem.currentDirectory), multidexEnabled: false, line: '', usesAndroidX: true), equals(GradleBuildStatus.exit));
-
-      expect(testLogger.statusText,
-        contains(
-          'Flutter multidex handling is disabled.'
+          'Gradle threw an error while downloading artifacts from the network.'
         )
       );
     }, overrides: <Type, Generator>{
@@ -609,7 +453,6 @@ Command: /home/android/gradlew assembleRelease
       expect(await permissionDeniedErrorHandler.handler(
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
       ), equals(GradleBuildStatus.exit));
 
@@ -642,7 +485,6 @@ Command: /home/android/gradlew assembleRelease
       expect(await permissionDeniedErrorHandler.handler(
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
         project: FakeFlutterProject(),
       ), equals(GradleBuildStatus.exit));
 
@@ -679,7 +521,6 @@ Command: /home/android/gradlew assembleRelease
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        multidexEnabled: true,
       );
 
       expect(
@@ -751,7 +592,6 @@ assembleFooTest
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -801,7 +641,6 @@ assembleProfile
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -827,7 +666,7 @@ assembleProfile
   });
 
   group('higher minSdkVersion', () {
-    const String stdoutLine = 'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16';
+    const String stdoutLine = 'uses-sdk:minSdkVersion 16 cannot be smaller than version 21 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 21';
 
     testWithoutContext('pattern', () {
       expect(
@@ -841,7 +680,6 @@ assembleProfile
         line: stdoutLine,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        multidexEnabled: true,
       );
 
       expect(
@@ -853,11 +691,11 @@ assembleProfile
           '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
           '│ android {                                                                                     │\n'
           '│   defaultConfig {                                                                             │\n'
-          '│     minSdkVersion 19                                                                          │\n'
+          '│     minSdkVersion 21                                                                          │\n'
           '│   }                                                                                           │\n'
           '│ }                                                                                             │\n'
           '│                                                                                               │\n'
-          '│ Following this change, your app will not be available to users running Android SDKs below 19. │\n'
+          '│ Following this change, your app will not be available to users running Android SDKs below 21. │\n'
           '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
           '│ Android SDK instead.                                                                          │\n'
           '│ For more information, see:                                                                    │\n'
@@ -889,7 +727,6 @@ assembleProfile
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -934,7 +771,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -973,7 +809,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -1015,7 +850,6 @@ A problem occurred evaluating project ':app'.
         line: errorMessage,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        multidexEnabled: true,
       );
 
       expect(
@@ -1074,7 +908,6 @@ Execution failed for task ':app:checkDebugAarMetadata'.
         line: errorMessage,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        multidexEnabled: true,
       );
 
       expect(
@@ -1120,7 +953,6 @@ A problem occurred evaluating project ':flutter'.
         project: FakeFlutterProject(),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(
@@ -1200,7 +1032,6 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''
         project: FakeFlutterProject(),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(status, GradleBuildStatus.retry);
@@ -1246,7 +1077,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
         project: FakeFlutterProject(),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1272,7 +1102,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
         project: FakeFlutterProject(),
         usesAndroidX: true,
         line: '',
-        multidexEnabled: true,
       );
 
       expect(result, equals(GradleBuildStatus.retry));
@@ -1301,7 +1130,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       final GradleBuildStatus result = await zipExceptionHandler.handler(
         line: '',
         usesAndroidX: true,
-        multidexEnabled: true,
         project: FakeFlutterProject(),
       );
 
@@ -1331,7 +1159,6 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       final GradleBuildStatus result = await zipExceptionHandler.handler(
         line: '',
         usesAndroidX: true,
-        multidexEnabled: true,
         project: FakeFlutterProject(),
       );
 
@@ -1373,7 +1200,6 @@ Could not compile build file '…/example/android/build.gradle'.
         line: errorMessage,
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
-        multidexEnabled: true,
       );
 
       // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
@@ -1405,7 +1231,6 @@ A problem occurred evaluating script.
       > Failed to create Jar file /Volumes/Work/s/w/ir/cache/gradle/caches/6.7/generated-gradle-jars/gradle-api-6.7.jar.''',
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       usesAndroidX: true,
-      multidexEnabled: true,
     );
     expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
     expect(status, GradleBuildStatus.retry);

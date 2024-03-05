@@ -156,7 +156,7 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   ///
-  /// Noteably the scrollable widget itself will have slightly different behavior
+  /// Notably the scrollable widget itself will have slightly different behavior
   /// from [CupertinoSliverRefreshControl], due to a difference in structure.
   const RefreshIndicator.adaptive({
     super.key,
@@ -357,32 +357,22 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       });
       return false;
     }
-    bool? indicatorAtTopNow;
-    switch (notification.metrics.axisDirection) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        indicatorAtTopNow = true;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        indicatorAtTopNow = null;
-    }
+    final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
+      AxisDirection.down || AxisDirection.up    => true,
+      AxisDirection.left || AxisDirection.right => null,
+    };
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
         _dismiss(_RefreshIndicatorMode.canceled);
       }
     } else if (notification is ScrollUpdateNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
-            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
-          _dismiss(_RefreshIndicatorMode.canceled);
-        } else {
-          if (notification.metrics.axisDirection == AxisDirection.down) {
-            _dragOffset = _dragOffset! - notification.scrollDelta!;
-          } else if (notification.metrics.axisDirection == AxisDirection.up) {
-            _dragOffset = _dragOffset! + notification.scrollDelta!;
-          }
-          _checkDragOffset(notification.metrics.viewportDimension);
+        if (notification.metrics.axisDirection == AxisDirection.down) {
+          _dragOffset = _dragOffset! - notification.scrollDelta!;
+        } else if (notification.metrics.axisDirection == AxisDirection.up) {
+          _dragOffset = _dragOffset! + notification.scrollDelta!;
         }
+        _checkDragOffset(notification.metrics.viewportDimension);
       }
       if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
         // On iOS start the refresh when the Scrollable bounces back from the
@@ -402,7 +392,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case _RefreshIndicatorMode.armed:
-          _show();
+          if (_positionController.value < 1.0) {
+            _dismiss(_RefreshIndicatorMode.canceled);
+          } else {
+            _show();
+          }
         case _RefreshIndicatorMode.drag:
           _dismiss(_RefreshIndicatorMode.canceled);
         case _RefreshIndicatorMode.canceled:

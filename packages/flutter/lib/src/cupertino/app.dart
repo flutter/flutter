@@ -547,6 +547,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routerDelegate: widget.routerDelegate,
         routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
+        onNavigationNotification: widget.onNavigationNotification,
         builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,

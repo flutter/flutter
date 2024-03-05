@@ -311,7 +311,17 @@ abstract interface class DecorationImagePainter {
 }
 
 class _DecorationImagePainter implements DecorationImagePainter {
-  _DecorationImagePainter._(this._details, this._onChanged);
+  _DecorationImagePainter._(this._details, this._onChanged) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$_DecorationImagePainter',
+        object: this,
+      );
+    }
+  }
 
   final DecorationImage _details;
   final VoidCallback _onChanged;
@@ -404,6 +414,9 @@ class _DecorationImagePainter implements DecorationImagePainter {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _imageStream?.removeListener(ImageStreamListener(
       _handleImage,
       onError: _details.onError,
@@ -801,7 +814,17 @@ class _BlendedDecorationImage implements DecorationImage {
 }
 
 class _BlendedDecorationImagePainter implements DecorationImagePainter {
-  _BlendedDecorationImagePainter._(this.a, this.b, this.t);
+  _BlendedDecorationImagePainter._(this.a, this.b, this.t) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/painting.dart',
+        className: '$_BlendedDecorationImagePainter',
+        object: this,
+      );
+    }
+  }
 
   final DecorationImagePainter? a;
   final DecorationImagePainter? b;
@@ -817,6 +840,9 @@ class _BlendedDecorationImagePainter implements DecorationImagePainter {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     a?.dispose();
     b?.dispose();
   }

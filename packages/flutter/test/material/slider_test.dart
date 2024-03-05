@@ -834,7 +834,7 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
-                  data: MediaQueryData(textScaleFactor: textScaleFactor),
+                  data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
                   child: Material(
                     child: Theme(
                       data: Theme.of(context).copyWith(
@@ -1707,11 +1707,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -1743,7 +1743,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     // Check that the overlay does not show when unfocused and disabled.
@@ -1752,7 +1752,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
   });
 
@@ -1941,10 +1941,10 @@ void main() {
     );
   });
 
-  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final Key sliderKey = UniqueKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -1978,7 +1978,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Start dragging.
@@ -1992,7 +1992,7 @@ void main() {
     // Slider has overlay when enabled and dragged.
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     await drag.up();
@@ -2002,7 +2002,7 @@ void main() {
     expect(focusNode.hasFocus, false);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Slider has overlay when enabled, dragged and focused.
@@ -2012,7 +2012,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
   });
 
@@ -3859,14 +3859,15 @@ void main() {
       );
     });
 
-    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
       addTearDown(focusNode.dispose);
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -3907,16 +3908,17 @@ void main() {
       );
     });
 
-    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       double value = 0.5;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       final Key sliderKey = UniqueKey();
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {

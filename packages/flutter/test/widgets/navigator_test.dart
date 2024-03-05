@@ -652,14 +652,14 @@ void main() {
         events.add(event);
       }
     }
-    MemoryAllocations.instance.addListener(listener);
+    FlutterMemoryAllocations.instance.addListener(listener);
 
     await createAndDisposeRoute();
     expect(events, hasLength(2));
     expect(events.first, isA<ObjectCreated>());
     expect(events.last, isA<ObjectDisposed>());
 
-    MemoryAllocations.instance.removeListener(listener);
+    FlutterMemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
@@ -5099,6 +5099,140 @@ void main() {
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
+
+      testWidgets('popping a page with canPop true still calls onPopInvoked', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/141189.
+        final List<_PageWithYesPop> pages = <_PageWithYesPop>[_PageWithYesPop.home];
+        bool canPop() => pages.length <= 1;
+        int onPopInvokedCallCount = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return PopScope(
+                  canPop: canPop(),
+                  onPopInvoked: (bool success) {
+                    if (success || pages.last == _PageWithYesPop.noPop) {
+                      return;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                  },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_PageWithYesPop page) {
+                      switch (page) {
+                        case _PageWithYesPop.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.noPop'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.yesPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.yesPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _PageWithYesPop.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _PageWithYesPop.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              canPop: false,
+                            ),
+                          );
+                        case _PageWithYesPop.yesPop:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Can pop page',
+                              canPop: true,
+                              onPopInvoked: (bool didPop) {
+                                onPopInvokedCallCount += 1;
+                              },
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(0));
+
+        await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Can pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+        expect(onPopInvokedCallCount, equals(0));
+
+        // A system back calls onPopInvoked.
+        await simulateSystemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(1));
+
+        await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Can pop page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isTrue);
+        expect(onPopInvokedCallCount, equals(1));
+
+        // Tapping a back button also calls onPopInvoked.
+        await tester.tap(find.text('Go back'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(lastFrameworkHandlesBack, isFalse);
+        expect(onPopInvokedCallCount, equals(2));
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
     });
   });
 }
@@ -5395,18 +5529,27 @@ enum _Page {
   noPop,
 }
 
+enum _PageWithYesPop {
+  home,
+  one,
+  noPop,
+  yesPop,
+}
+
 class _LinksPage extends StatelessWidget {
   const _LinksPage ({
     this.buttons = const <Widget>[],
     this.canPop,
     required this.title,
     this.onBack,
+    this.onPopInvoked,
   });
 
   final List<Widget> buttons;
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
+  final PopInvokedCallback? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5427,6 +5570,7 @@ class _LinksPage extends StatelessWidget {
             if (canPop != null)
               PopScope(
                 canPop: canPop!,
+                onPopInvoked: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],

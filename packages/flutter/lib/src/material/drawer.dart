@@ -175,12 +175,14 @@ class Drawer extends StatelessWidget {
   /// The color used as a surface tint overlay on the drawer's background color,
   /// which reflects the drawer's [elevation].
   ///
-  /// If [ThemeData.useMaterial3] is false property has no effect.
-  ///
-  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
-  /// [ColorScheme.surfaceTint] will be used.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
   /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
+  ///
+  /// Defaults to [Colors.transparent].
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which describes how the surface tint will
@@ -560,10 +562,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   double get _width {
     final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null) {
-      return box.size.width;
-    }
-    return _kWidth; // drawer not being shown currently
+    // return _kWidth if drawer not being shown currently
+    return box?.size.width ?? _kWidth;
   }
 
   bool _previouslyOpened = false;
@@ -644,50 +644,32 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        return AlignmentDirectional.centerStart;
-      case DrawerAlignment.end:
-        return AlignmentDirectional.centerEnd;
-    }
+    return switch (widget.alignment) {
+      DrawerAlignment.start => AlignmentDirectional.centerStart,
+      DrawerAlignment.end   => AlignmentDirectional.centerEnd,
+    };
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    switch (widget.alignment) {
-      case DrawerAlignment.start:
-        return AlignmentDirectional.centerEnd;
-      case DrawerAlignment.end:
-        return AlignmentDirectional.centerStart;
-    }
+    return switch (widget.alignment) {
+      DrawerAlignment.start => AlignmentDirectional.centerEnd,
+      DrawerAlignment.end => AlignmentDirectional.centerStart,
+    };
   }
 
   Widget _buildDrawer(BuildContext context) {
-    final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final TextDirection textDirection = Directionality.of(context);
-    final bool isDesktop;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        isDesktop = false;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isDesktop = true;
-    }
+    final bool isDesktop = switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+    };
 
-    double? dragAreaWidth = widget.edgeDragWidth;
-    if (widget.edgeDragWidth == null) {
-      final EdgeInsets padding = MediaQuery.paddingOf(context);
-      switch (textDirection) {
-        case TextDirection.ltr:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.left : padding.right);
-        case TextDirection.rtl:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.right : padding.left);
-      }
-    }
+    final double dragAreaWidth = widget.edgeDragWidth
+      ?? _kEdgeDragWidth + switch ((widget.alignment, Directionality.of(context))) {
+        (DrawerAlignment.start, TextDirection.ltr) => MediaQuery.paddingOf(context).left,
+        (DrawerAlignment.start, TextDirection.rtl) => MediaQuery.paddingOf(context).right,
+        (DrawerAlignment.end,   TextDirection.rtl) => MediaQuery.paddingOf(context).left,
+        (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
+      };
 
     if (_controller.status == AnimationStatus.dismissed) {
       if (widget.enableOpenDragGesture && !isDesktop) {
@@ -811,10 +793,10 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   late final TextDirection direction = Directionality.of(context);
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => Theme.of(context).colorScheme.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get shadowColor => Colors.transparent;

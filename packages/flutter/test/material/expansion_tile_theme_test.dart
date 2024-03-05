@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,6 +47,13 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
+  Material getMaterial(WidgetTester tester) {
+    return tester.widget<Material>(find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    ));
+  }
+
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
     expect(const ExpansionTileThemeData(), const ExpansionTileThemeData().copyWith());
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
@@ -173,21 +185,16 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material material = getMaterial(tester);
 
-    final Clip tileClipBehavior = tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).clipBehavior;
-
-    // expansionTile should have Clip.antiAlias as clipBehavior
-    expect(tileClipBehavior, clipBehavior);
+    // ExpansionTile should have Clip.antiAlias as clipBehavior.
+    expect(material.clipBehavior, clipBehavior);
 
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
-    expect(shapeDecoration.color, collapsedBackgroundColor);
+    expect(material.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -211,7 +218,7 @@ void main() {
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
     // Check the collapsed ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect(material.shape, collapsedShape);
   });
 
   testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
@@ -232,6 +239,7 @@ void main() {
       top: BorderSide(color: Colors.green),
       bottom: BorderSide(color: Colors.green),
     );
+    const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -248,6 +256,7 @@ void main() {
             collapsedTextColor: collapsedTextColor,
             shape: shape,
             collapsedShape: collapsedShape,
+            clipBehavior: clipBehavior,
           ),
         ),
         home: Material(
@@ -264,12 +273,12 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material material = getMaterial(tester);
     // Check the tile's background color when backgroundColor is applied.
-    expect(shapeDecoration.color, backgroundColor);
+    expect(material.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -293,7 +302,9 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, shape);
+    expect(material.shape, shape);
+    // Check the clipBehavior when shape is applied.
+    expect(material.clipBehavior, clipBehavior);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

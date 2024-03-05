@@ -28,8 +28,6 @@ POSTINSTALL
     raise 'Missing `flutter_post_install(installer)` in Podfile `post_install` block'
   end
 
-  require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
-
   flutter_application_path ||= File.join('..', '..')
   install_flutter_engine_pod(flutter_application_path)
   install_flutter_plugin_pods(flutter_application_path)
@@ -111,6 +109,8 @@ def flutter_root
   # This should never happen...
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 # Run the post-install script to set build settings on Flutter plugins.
 #

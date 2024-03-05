@@ -1255,7 +1255,7 @@ class FakeProcess extends Fake implements Process {
 const String validSchemeXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1510"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -1298,7 +1298,7 @@ const String validSchemeXml = '''
 const String disabledDebugExecutableSchemeXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1510"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"

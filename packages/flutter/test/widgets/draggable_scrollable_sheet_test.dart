@@ -1248,7 +1248,7 @@ void main() {
           ),
         ],
       ),
-    ), null, EnginePhase.build);
+    ), phase: EnginePhase.build);
     expect(tester.takeException(), isAssertionError);
   });
 

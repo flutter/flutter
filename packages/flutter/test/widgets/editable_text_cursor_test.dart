@@ -444,7 +444,6 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   },
-  // ignore: deprecated_member_use
   variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -959,13 +958,6 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
-          const Radius.circular(2.0),
-        ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
           const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
           const Radius.circular(1.0),
         ),
@@ -984,14 +976,32 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
+          const Rect.fromLTWH(193.83334350585938, -0.916666666666668, 3.0, 20.0),
+          const Radius.circular(1.0),
+        ),
+        color: const Color(0xbf2196f3),
+      ),
+    );
+
+    // Move the cursor away from characters, this will show the regular cursor.
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: const Offset(800, 0),
+      ),
+    );
+
+    expect(find.byType(EditableText), paints
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTWH(719.3333333333333, -0.9166666666666679, 2.0, 18.0),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff999999),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
+          const Rect.fromLTRB(800.5, -5.0, 803.5, 15.0),
           const Radius.circular(1.0),
         ),
         color: const Color(0xbf2196f3),
@@ -1302,4 +1312,88 @@ void main() {
   },
   variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('Floating cursor showing with local position', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final GlobalKey key = GlobalKey();
+    controller.text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890';
+    controller.selection = const TextSelection.collapsed(offset: 0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          autofocus: true,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+          maxLines: 2,
+        ),
+      ),
+    );
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    state.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start,
+        offset: Offset.zero,
+        startLocation: (Offset.zero, TextPosition(offset: controller.selection.baseOffset, affinity: controller.selection.affinity))
+      )
+    );
+    await tester.pump();
+
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(-0.5, -3.0, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(51, 0)));
+    await tester.pump();
+
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(50.5, -3.0, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+
+    state.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start,
+        offset: Offset.zero,
+        startLocation: (const Offset(800, 10), TextPosition(offset: controller.selection.baseOffset, affinity: controller.selection.affinity))
+      )
+    );
+    await tester.pump();
+
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(799.5, 4.0, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(100, 10)));
+    await tester.pump();
+
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(800.5, 14.0, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+
+    EditableText.debugDeterministicCursor = false;
+  });
 }

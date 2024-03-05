@@ -292,14 +292,11 @@ class Typography with Diagnosticable {
 
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
-    switch (category) {
-      case ScriptCategory.englishLike:
-        return englishLike;
-      case ScriptCategory.dense:
-        return dense;
-      case ScriptCategory.tall:
-        return tall;
-    }
+    return switch (category) {
+      ScriptCategory.englishLike => englishLike,
+      ScriptCategory.dense       => dense,
+      ScriptCategory.tall        => tall,
+    };
   }
 
   /// Creates a copy of this [Typography] with the given fields
@@ -748,9 +745,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _M3Typography {
-  _M3Typography._();
-
+abstract final class _M3Typography {
   static const TextTheme englishLike = TextTheme(
     displayLarge: TextStyle(debugLabel: 'englishLike displayLarge 2021', inherit: false, fontSize: 57.0, fontWeight: FontWeight.w400, letterSpacing: -0.25, height: 1.12, textBaseline: TextBaseline.alphabetic, leadingDistribution: TextLeadingDistribution.even),
     displayMedium: TextStyle(debugLabel: 'englishLike displayMedium 2021', inherit: false, fontSize: 45.0, fontWeight: FontWeight.w400, letterSpacing: 0.0, height: 1.16, textBaseline: TextBaseline.alphabetic, leadingDistribution: TextLeadingDistribution.even),

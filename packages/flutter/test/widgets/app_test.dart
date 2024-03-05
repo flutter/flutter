@@ -146,7 +146,11 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
-  // ignore: deprecated_member_use
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
   group('error control test', () {
@@ -619,13 +623,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaleFactor: 10), child: widget),
+      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(10)), child: widget),
     );
 
     expect(routeBuildCount, equals(1));
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(textScaleFactor: 20), child: widget),
+      MediaQuery(data: const MediaQueryData(textScaler: TextScaler.linear(20)), child: widget),
     );
 
     expect(routeBuildCount, equals(1));

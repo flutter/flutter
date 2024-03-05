@@ -151,7 +151,7 @@ void main() {
           ),
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
-            onRun: () {
+            onRun: (_) {
               final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
                   ..createSync(recursive: true);
               _initializeCiYamlFile(file);
@@ -402,7 +402,7 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
-            onRun: () {
+            onRun: (_) {
               final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
                   ..createSync();
               _initializeCiYamlFile(file);
@@ -504,7 +504,7 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
-            onRun: () {
+            onRun: (_) {
               final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
                   ..createSync();
               _initializeCiYamlFile(file);
@@ -600,7 +600,7 @@ void main() {
           // we want merged upstream commit, not local working commit
           FakeCommand(
             command: const <String>['git', 'checkout', 'upstream/$candidateBranch'],
-            onRun: () {
+            onRun: (_) {
               final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
                   ..createSync();
               _initializeCiYamlFile(file);
@@ -686,7 +686,7 @@ void main() {
           const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
-            onRun: () {
+            onRun: (_) {
               final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
                   ..createSync();
               _initializeCiYamlFile(file);

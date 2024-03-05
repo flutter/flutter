@@ -50,10 +50,7 @@ void main() {
     final SimpleAsyncRouteInformationParser parser = SimpleAsyncRouteInformationParser();
     final SimpleAsyncRouterDelegate delegate = SimpleAsyncRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
-        if (information == null) {
-          return const Text('waiting');
-        }
-        return Text(information.uri.toString());
+        return Text(information?.uri.toString() ?? 'waiting');
       },
     );
     addTearDown(delegate.dispose);
@@ -97,10 +94,7 @@ void main() {
     final CompleterRouteInformationParser parser = CompleterRouteInformationParser();
     final SimpleAsyncRouterDelegate delegate = SimpleAsyncRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
-        if (information == null) {
-          return const Text('waiting');
-        }
-        return Text(information.uri.toString());
+        return Text(information?.uri.toString() ?? 'waiting');
       },
     );
     addTearDown(delegate.dispose);

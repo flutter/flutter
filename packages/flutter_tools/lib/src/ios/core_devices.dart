@@ -78,8 +78,16 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      final RunResult result = await _processUtils.run(command, throwOnError: true);
 
+      if (!output.existsSync()) {
+        _logger.printError('After running the command ${command.join(' ')} the file');
+        _logger.printError('${output.path} was expected to exist, but it did not.');
+        _logger.printError('The process exited with code ${result.exitCode} and');
+        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
+        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not');
+      }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
 
@@ -370,7 +378,7 @@ class IOSCoreDevice {
     required this.connectionProperties,
     required this.deviceProperties,
     required this.hardwareProperties,
-    required this.coreDeviceIdentifer,
+    required this.coreDeviceIdentifier,
     required this.visibilityClass,
   });
 
@@ -432,7 +440,7 @@ class IOSCoreDevice {
       connectionProperties: connectionProperties,
       deviceProperties: deviceProperties,
       hardwareProperties: hardwareProperties,
-      coreDeviceIdentifer: data['identifier']?.toString(),
+      coreDeviceIdentifier: data['identifier']?.toString(),
       visibilityClass: data['visibilityClass']?.toString(),
     );
   }
@@ -462,7 +470,7 @@ class IOSCoreDevice {
   @visibleForTesting
   final _IOSCoreDeviceHardwareProperties? hardwareProperties;
 
-  final String? coreDeviceIdentifer;
+  final String? coreDeviceIdentifier;
   final String? visibilityClass;
 }
 
