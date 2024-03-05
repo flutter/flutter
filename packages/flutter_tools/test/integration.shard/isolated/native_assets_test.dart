@@ -305,7 +305,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   //       Resources/
   //         Info.plist
   //     Current  -> A
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final Directory frameworkDir =
       frameworksFolder.childDirectory('$frameworkName.framework');
   final Directory versionsDir = frameworkDir.childDirectory('Versions');
@@ -330,7 +330,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final File dylib = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
@@ -409,7 +409,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final File dylib = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
