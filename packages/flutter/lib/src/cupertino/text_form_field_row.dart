@@ -291,7 +291,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     if (_controller != null) {
       _registerController();
     }
-    // Make sure to update the internal [FormFieldState] value to sync up with
+    // This makes sure to update the internal [FormFieldState] value to sync up with
     // text editing controller value.
     setValue(_effectiveController.text);
   }

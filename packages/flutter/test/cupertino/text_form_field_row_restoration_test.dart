@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
-        home: TestWidget(),
+        home: RestorableTestWidget(),
       ),
     );
 
@@ -25,8 +25,8 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'root',
-        home: TestWidget(
-          useExternal: true,
+        home: RestorableTestWidget(
+          useExternalController: true,
         ),
       ),
     );
@@ -202,16 +202,16 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
   expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
 }
 
-class TestWidget extends StatefulWidget {
-  const TestWidget({super.key, this.useExternal = false});
+class RestorableTestWidget extends StatefulWidget {
+  const RestorableTestWidget({super.key, this.useExternalController = false});
 
-  final bool useExternal;
+  final bool useExternalController;
 
   @override
-  TestWidgetState createState() => TestWidgetState();
+  RestorableTestWidgetState createState() => RestorableTestWidgetState();
 }
 
-class TestWidgetState extends State<TestWidget> with RestorationMixin {
+class RestorableTestWidgetState extends State<RestorableTestWidget> with RestorationMixin {
   final RestorableTextEditingController controller = RestorableTextEditingController();
 
   @override
@@ -237,7 +237,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
           child: CupertinoTextFormFieldRow(
             restorationId: 'text',
             maxLines: 3,
-            controller: widget.useExternal ? controller.value : null,
+            controller: widget.useExternalController ? controller.value : null,
           ),
         ),
       ),
