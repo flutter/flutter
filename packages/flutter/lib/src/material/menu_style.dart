@@ -199,13 +199,13 @@ class MenuStyle with Diagnosticable {
   /// as much of itself as possible, possibly overlapping the parent button.
   final AlignmentGeometry? alignment;
 
-  /// Used to override the menu animation curve and duration.
+  /// Used to override the menu size's animation curve and duration.
   ///
   /// If [AnimationStyle.duration] is provided, it will be used to override
-  /// the menu animation duration. Otherwise, defaults to 200ms.
+  /// the menu size's animation duration. Otherwise, defaults to 500ms.
   ///
   /// If [AnimationStyle.curve] is provided, it will be used to override
-  /// the menu animation curve. Otherwise, defaults to [Curves.easeIn].
+  /// the menu size's animation curve. Otherwise, defaults to [Curves.easeInOutCubicEmphasized].
   ///
   /// To disable the animation when menu is open/close, use [AnimationStyle.noAnimation].
   final AnimationStyle? sizeAnimationStyle;
