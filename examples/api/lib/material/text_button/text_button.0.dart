@@ -55,9 +55,26 @@ class _TextButtonExampleState extends State<TextButtonExample> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeMode themeMode = ThemeMode.light;
   late final ScrollController scrollController;
+  bool isRunning = false;
 
   static const Widget verticalSpacer = SizedBox(height: 16);
   static const Widget horizontalSpacer = SizedBox(width: 32);
+
+  static const ImageProvider grassImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_grass.jpeg',
+  );
+  static const ImageProvider defaultImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_default.png',
+  );
+  static const ImageProvider hoveredImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_hovered.png',
+  );
+  static const ImageProvider pressedImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_pressed.png',
+  );
+  static const ImageProvider runningImage = NetworkImage(
+    'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_nhu_end.png',
+  );
 
   @override
   void initState() {
@@ -302,7 +319,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             return Ink(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(grassUrl),
+                  image: grassImage,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -315,7 +332,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       verticalSpacer,
 
       // Override the foregroundBuilder to specify images for the button's pressed
-      // hovered and inactive states.
+      // hovered and default states. We switch to an additional image while the
+      // button's callback is "running".
       //
       // This is an example of completely changing the default appearance of a button
       // by specifying images for each state and by turning off the overlays by
@@ -326,13 +344,25 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // TextButton's child parameter is required, so we still have
       // to provide one.
       TextButton(
-        onPressed: () {},
+        onPressed: () async {
+          setState(() { isRunning = true; });
+          Future<void>.delayed(const Duration(seconds: 1), () {
+            // Simulate a time consuming action.
+            setState(() { isRunning = false; });
+          });
+        },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
           foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
-            String url = states.contains(MaterialState.hovered) ? smiley3Url : smiley1Url;
-            if (states.contains(MaterialState.pressed)) {
-              url = smiley2Url;
+            late final ImageProvider image;
+            if (isRunning) {
+              image = runningImage;
+            } else if (states.contains(MaterialState.pressed)) {
+              image = pressedImage;
+            } else if (states.contains(MaterialState.hovered)) {
+              image = hoveredImage;
+            } else {
+              image = defaultImage;
             }
             return AnimatedContainer(
               width: 64,
@@ -341,7 +371,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               curve: Curves.fastOutSlowIn,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(url),
+                  image: image,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -459,8 +489,3 @@ class TextButtonExampleSwitches extends StatelessWidget {
     );
   }
 }
-
-const String grassUrl = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_grass.jpeg';
-const String smiley1Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley1.png';
-const String smiley2Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley2.png';
-const String smiley3Url = 'https://flutter.github.io/assets-for-api-docs/assets/material/text_button_smiley3.png';
