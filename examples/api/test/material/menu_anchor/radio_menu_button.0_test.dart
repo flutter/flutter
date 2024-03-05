@@ -15,7 +15,7 @@ void main() {
 
     await tester.tap(find.byType(TextButton));
     await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Red Background'), findsOneWidget);
     expect(find.text('Green Background'), findsOneWidget);
