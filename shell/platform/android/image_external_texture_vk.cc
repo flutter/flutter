@@ -54,18 +54,9 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     return;
   }
 
-  impeller::TextureDescriptor desc;
-  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-  desc.size = {static_cast<int>(bounds.width()),
-               static_cast<int>(bounds.height())};
-  // TODO(johnmccutchan): Use hb_desc to compute the correct format at runtime.
-  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-  desc.mip_count = 1;
-
   auto texture_source =
       std::make_shared<impeller::AndroidHardwareBufferTextureSourceVK>(
-          desc, impeller_context_->GetDevice(), latest_hardware_buffer,
-          hb_desc);
+          impeller_context_, latest_hardware_buffer, hb_desc);
 
   auto texture =
       std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);

@@ -10,6 +10,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -40,9 +41,12 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   // |Texture|
   ISize GetSize() const override;
 
-  void SetMipMapGenerated() { mipmap_generated_ = true; }
+  void SetMipMapGenerated();
 
-  bool IsSwapchainImage() const { return source_->IsSwapchainImage(); }
+  bool IsSwapchainImage() const;
+
+  std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(
+      const SamplerVK& sampler) const;
 
   // These methods should only be used by render_pass_vk.h
 

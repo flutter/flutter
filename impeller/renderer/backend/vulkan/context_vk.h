@@ -93,6 +93,9 @@ class ContextVK final : public Context,
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
+  const std::shared_ptr<YUVConversionLibraryVK>& GetYUVConversionLibrary()
+      const;
+
   // |Context|
   void Shutdown() override;
 
@@ -180,6 +183,7 @@ class ContextVK final : public Context,
   std::shared_ptr<ShaderLibraryVK> shader_library_;
   std::shared_ptr<SamplerLibraryVK> sampler_library_;
   std::shared_ptr<PipelineLibraryVK> pipeline_library_;
+  std::shared_ptr<YUVConversionLibraryVK> yuv_conversion_library_;
   QueuesVK queues_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
