@@ -427,6 +427,50 @@ void main() {
     });
   });
 
+  group('Windows', () {
+    late FakeWindowsPlatformViewController viewsController;
+    setUp(() {
+      viewsController = FakeWindowsPlatformViewController();
+    });
+
+    test('create Windows view of unregistered type', () async {
+      expect(
+        () {
+          return PlatformViewsService.initWindowsView(
+            id: 0,
+            viewType: 'web',
+          );
+        },
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('create Windows views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initWindowsView(id: 0, viewType: 'webview');
+      await PlatformViewsService.initWindowsView(id: 1, viewType: 'webview');
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeWindowsView>[
+          const FakeWindowsView(0, 'webview'),
+          const FakeWindowsView(1, 'webview'),
+        ]),
+      );
+    });
+
+    test('reuse Windows view id', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initWindowsView(
+        id: 0,
+        viewType: 'webview',
+      );
+      expect(
+        () => PlatformViewsService.initWindowsView(id: 0, viewType: 'web'),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+  });
+
   test('toString works as intended', () async {
     const AndroidPointerProperties androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');

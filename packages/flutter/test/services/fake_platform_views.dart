@@ -574,6 +574,52 @@ class FakeMacosPlatformViewsController {
   }
 }
 
+class FakeWindowsPlatformViewController {
+  FakeWindowsPlatformViewController() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+  }
+
+  final Set<String> _registeredViewTypes = {};
+  final Map<int, FakeWindowsView> _views = {};
+  Iterable<FakeWindowsView> get views => _views.values;
+
+  void registerViewType(String viewType) {
+    _registeredViewTypes.add(viewType);
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) {
+    switch (call.method) {
+      case 'create':
+        return _create(call);
+    }
+    return Future<dynamic>.value();
+  }
+
+  Future<dynamic> _create(MethodCall call) {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final String viewType = args['viewType'] as String;
+
+    if (_views.containsKey(id)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create an already created platform view, view id: $id',
+      );
+    }
+
+    if (!_registeredViewTypes.contains(viewType)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create a platform view of unregistered type: $viewType',
+      );
+    }
+
+    final FakeWindowsView view = FakeWindowsView(id, viewType);
+    _views[id] = view;
+    return Future<int?>.value();
+  }
+}
+
 @immutable
 class FakeAndroidPlatformView {
   const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
@@ -714,5 +760,29 @@ class FakeAppKitView {
   @override
   String toString() {
     return 'FakeAppKitView(id: $id, type: $type, creationParams: $creationParams)';
+  }
+}
+
+@immutable
+class FakeWindowsView {
+  const FakeWindowsView(this.id, this.type);
+
+  final int id;
+  final String type;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is FakeWindowsView && other.id == id && other.type == type;
+  }
+
+  @override
+  int get hashCode => Object.hash(id, type);
+
+  @override
+  String toString() {
+    return 'FakeWindowsView(id: $id, type: $type)';
   }
 }

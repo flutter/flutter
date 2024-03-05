@@ -3209,6 +3209,31 @@ void main() {
     });
   });
 
+  group('WindowsView', () {
+    testWidgets('Create WindowsView', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeWindowsPlatformViewController viewsController = FakeWindowsPlatformViewController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: Win32View(viewType: 'webview'),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeWindowsView>[
+          FakeWindowsView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+  });
+
   group('Common PlatformView', () {
     late FakePlatformViewController controller;
 
