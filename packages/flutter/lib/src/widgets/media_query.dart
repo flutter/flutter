@@ -190,7 +190,7 @@ class MediaQueryData {
     'This constructor was deprecated in preparation for the upcoming multi-window support. '
     'This feature was deprecated after v3.7.0-32.0.pre.'
   )
-  factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
+  factory MediaQueryData.fromWindow(ui.FlutterView window) = MediaQueryData.fromView;
 
   /// Creates data for a [MediaQuery] based on the given `view`.
   ///
@@ -924,29 +924,23 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///    adds a [Padding] widget.
   ///  * [MediaQueryData.padding], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
-  ///  * [removeViewPadding], the same thing but for
+  ///  * [MediaQuery.removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  ///  * [MediaQuery.removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  factory MediaQuery.removePadding({
-    Key? key,
+  MediaQuery.removePadding({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removePadding(
+    required super.child,
+  }) : data = MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view insets.
@@ -966,29 +960,23 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   ///  * [MediaQueryData.viewInsets], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
-  ///  * [removeViewPadding], the same thing but for
+  ///  * [MediaQuery.removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [MediaQuery.removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
-  factory MediaQuery.removeViewInsets({
-    Key? key,
+  MediaQuery.removeViewInsets({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removeViewInsets(
+    required super.child,
+  }) : data = MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified view padding.
@@ -1008,28 +996,22 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
   ///    [MediaQueryData].
-  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
-  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
-  factory MediaQuery.removeViewPadding({
-    Key? key,
+  ///  * [MediaQuery.removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [MediaQuery.removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  MediaQuery.removeViewPadding({
+    super.key,
     required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    required Widget child,
-  }) {
-    return MediaQuery(
-      key: key,
-      data: MediaQuery.of(context).removeViewPadding(
+    required super.child,
+  }) : data = MediaQuery.of(context).removeViewPadding(
         removeLeft: removeLeft,
         removeTop: removeTop,
         removeRight: removeRight,
         removeBottom: removeBottom,
-      ),
-      child: child,
-    );
-  }
+      );
 
   /// Deprecated. Use [MediaQuery.fromView] instead.
   ///

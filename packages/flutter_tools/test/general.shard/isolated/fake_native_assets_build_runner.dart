@@ -36,6 +36,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   int dryRunInvocations = 0;
   int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
+  BuildMode? lastBuildMode;
 
   @override
   Future<native_assets_builder.BuildResult> build({
@@ -49,6 +50,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     IOSSdk? targetIOSSdk,
   }) async {
     buildInvocations++;
+    lastBuildMode = buildMode;
     return buildResult;
   }
 
