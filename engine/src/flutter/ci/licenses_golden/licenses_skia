@@ -1,4 +1,4 @@
-Signature: b0608dc61d9b8f27549998b98bdf375c
+Signature: 0a5b1a3f81f83e74b5ccf5023e831623
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9462,9 +9462,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkFontScanner.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h
 FILE: ../../../flutter/third_party/skia/src/core/SkFontScanner.h
+FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp
+FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 Google Inc.
 
