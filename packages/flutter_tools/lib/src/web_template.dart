@@ -85,6 +85,10 @@ class WebTemplate {
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
           );
     }
+    _content = _content.replaceAll(
+      '{{flutter_service_worker_version}}',
+      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+    );
     if (buildConfig != null) {
       _content = _content.replaceAll(
         '{{flutter_build_config}}',

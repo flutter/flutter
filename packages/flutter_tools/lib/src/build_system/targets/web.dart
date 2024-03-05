@@ -680,6 +680,7 @@ class WebServiceWorker extends Target {
           'main.dart.mjs',
         ],
         'index.html',
+        'flutter_bootstrap.js',
         if (urlToHash.containsKey('assets/AssetManifest.bin.json'))
           'assets/AssetManifest.bin.json',
         if (urlToHash.containsKey('assets/FontManifest.json'))
