@@ -468,6 +468,16 @@ class WebTemplatedFiles extends Target {
   @override
   String get buildKey => buildConfigString;
 
+  void _emitWebTemplateWarning(
+    Environment environment,
+    String filePath,
+    WebTemplateWarning warning
+  ) {
+    environment.logger.printWarning(
+      'Warning: In $filePath:${warning.lineNumber}: ${warning.warningText}'
+    );
+  }
+
   @override
   Future<void> build(Environment environment) async {
     final Directory webResources = environment.projectDir
@@ -479,7 +489,10 @@ class WebTemplatedFiles extends Target {
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript();
     }
-    final WebTemplate outputBootstrapContent = WebTemplate(inputBootstrapContent);
+    final WebTemplate bootstrapTemplate = WebTemplate(inputBootstrapContent);
+    for (final WebTemplateWarning warning in bootstrapTemplate.getWarnings()) {
+      _emitWebTemplateWarning(environment, 'flutter_bootstrap.js', warning);
+    }
 
     final FileSystem fileSystem = environment.fileSystem;
     final File flutterJsFile = fileSystem.file(fileSystem.path.join(
@@ -491,7 +504,7 @@ class WebTemplatedFiles extends Target {
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
     final String serviceWorkerVersion = Random().nextInt(4294967296).toString();
-    outputBootstrapContent.applySubstitutions(
+    bootstrapTemplate.applySubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
@@ -502,24 +515,30 @@ class WebTemplatedFiles extends Target {
         environment.outputDir.path,
         'flutter_bootstrap.js'
     ));
-    await outputFlutterBootstrapJs.writeAsString(outputBootstrapContent.content);
+    await outputFlutterBootstrapJs.writeAsString(bootstrapTemplate.content);
 
     await for (final FileSystemEntity file in webResources.list(recursive: true)) {
       if (file is File && file.basename == 'index.html') {
-        final WebTemplate indexHtml = WebTemplate(file.readAsStringSync());
-        indexHtml.applySubstitutions(
+        final WebTemplate indexHtmlTemplate = WebTemplate(file.readAsStringSync());
+        final String relativePath = fileSystem.path.relative(file.path, from: webResources.path);
+
+        for (final WebTemplateWarning warning in indexHtmlTemplate.getWarnings()) {
+          _emitWebTemplateWarning(environment, relativePath, warning);
+        }
+
+        indexHtmlTemplate.applySubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfigString,
-          flutterBootstrapJs: outputBootstrapContent.content,
+          flutterBootstrapJs: bootstrapTemplate.content,
         );
-        final String relativePath = fileSystem.path.relative(file.path, from: webResources.path);
         final File outputIndexHtml = fileSystem.file(fileSystem.path.join(
           environment.outputDir.path,
           relativePath,
         ));
-        await outputIndexHtml.writeAsString(indexHtml.content);
+        await outputIndexHtml.create(recursive: true);
+        await outputIndexHtml.writeAsString(indexHtmlTemplate.content);
       }
     }
   }

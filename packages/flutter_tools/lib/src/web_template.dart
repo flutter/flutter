@@ -11,6 +11,15 @@ import 'base/file_system.dart';
 /// Placeholder for base href
 const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
+class WebTemplateWarning {
+  WebTemplateWarning(
+    this.warningText,
+    this.lineNumber,
+  );
+  final String warningText;
+  final int lineNumber;
+}
+
 /// Utility class for parsing and performing operations on the contents of the
 /// index.html file.
 ///
@@ -57,6 +66,35 @@ class WebTemplate {
     }
 
     return stripLeadingSlash(stripTrailingSlash(baseHref));
+  }
+
+  List<WebTemplateWarning> getWarnings() {
+    return <WebTemplateWarning>[
+      ..._getWarningsForPattern(
+        RegExp('(const|var) serviceWorkerVersion = null'),
+        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead.',
+      ),
+      ..._getWarningsForPattern(
+        "navigator.serviceWorker.register('flutter_service_worker.js')",
+        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead.',
+      ),
+      ..._getWarningsForPattern(
+        '_flutter.loader.loadEntrypoint(',
+        '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead.',
+      ),
+    ];
+  }
+
+  List<WebTemplateWarning> _getWarningsForPattern(Pattern pattern, String warningText) {
+    return <WebTemplateWarning>[
+      for (final Match match in pattern.allMatches(_content))
+        _getWarningForMatch(match, warningText)
+    ];
+  }
+
+  WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
+    final int lineCount = RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    return WebTemplateWarning(warningText, lineCount + 1);
   }
 
   /// Applies substitutions to the content of the index.html file.
