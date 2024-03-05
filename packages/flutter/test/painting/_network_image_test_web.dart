@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
+import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
@@ -16,7 +16,7 @@ void runTests() {
     debugRestoreHttpRequestFactory();
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with headers',
+  testWidgets('loads an image from the network with headers',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
@@ -24,7 +24,7 @@ void runTests() {
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -42,7 +42,7 @@ void runTests() {
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with unsuccessful HTTP code',
+  testWidgets('loads an image from the network with unsuccessful HTTP code',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
@@ -50,7 +50,7 @@ void runTests() {
 
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{
@@ -67,7 +67,7 @@ void runTests() {
     expect((tester.takeException() as web.ProgressEvent).type, 'test error');
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with empty response',
+  testWidgets('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
@@ -75,7 +75,7 @@ void runTests() {
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
-      return testHttpRequest.getMock();
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
     };
 
     const Map<String, String> headers = <String, String>{

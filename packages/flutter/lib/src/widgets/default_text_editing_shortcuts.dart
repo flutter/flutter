@@ -25,6 +25,8 @@ import 'text_editing_intents.dart';
 /// cause CJK input methods to discard more text than they should when the
 /// backspace key is pressed during text composition on iOS.
 ///
+/// {@macro flutter.widgets.editableText.shortcutsAndTextInput}
+///
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
@@ -472,20 +474,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return _androidShortcuts;
-      case TargetPlatform.fuchsia:
-        return _fuchsiaShortcuts;
-      case TargetPlatform.iOS:
-        return _iOSShortcuts;
-      case TargetPlatform.linux:
-        return _linuxShortcuts;
-      case TargetPlatform.macOS:
-        return _macShortcuts;
-      case TargetPlatform.windows:
-        return _windowsShortcuts;
-    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => _androidShortcuts,
+      TargetPlatform.fuchsia => _fuchsiaShortcuts,
+      TargetPlatform.iOS     => _iOSShortcuts,
+      TargetPlatform.linux   => _linuxShortcuts,
+      TargetPlatform.macOS   => _macShortcuts,
+      TargetPlatform.windows => _windowsShortcuts,
+    };
   }
 
   Map<ShortcutActivator, Intent>? _getDisablingShortcut() {

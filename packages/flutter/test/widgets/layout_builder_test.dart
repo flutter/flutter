@@ -5,10 +5,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('LayoutBuilder parent size', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
@@ -39,7 +38,7 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
-  testWidgetsWithLeakTracking('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey1 = UniqueKey();
@@ -89,7 +88,7 @@ void main() {
     expect(childSliver2.geometry, parentSliver2.geometry);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder stateful child', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -135,7 +134,7 @@ void main() {
     expect(childBox.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
     late StateSetter setState;
     double childWidth = 10.0;
     double childHeight = 20.0;
@@ -204,7 +203,7 @@ void main() {
     expect(parentSliver.geometry!.paintExtent, 600);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder stateful parent', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -248,7 +247,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -271,7 +270,7 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -295,7 +294,7 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgetsWithLeakTracking('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
@@ -326,7 +325,7 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
     (WidgetTester tester) async {
       int built = 0;
@@ -361,7 +360,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('nested SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey = UniqueKey();
@@ -406,7 +405,7 @@ void main() {
     expect(parentSliver1.geometry, parentSliver2.geometry);
   });
 
-  testWidgetsWithLeakTracking('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
     final Key childKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
     final ScrollController scrollController = ScrollController();
@@ -463,7 +462,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     List<int> hitCounts = <int> [0, 0, 0];
@@ -592,7 +591,7 @@ void main() {
     expect(hitCounts, const <int> [0, 0, 0]);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
     int builderInvocationCount = 0;
 
     Future<void> pumpTestWidget(Size size) async {
@@ -668,7 +667,7 @@ void main() {
     expect(spy.performResizeCount, 2);
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
     Size? childSize;
     int buildCount = 0;
 
@@ -700,7 +699,7 @@ void main() {
     expect(childSize, const Size(10.0, 10.0));
   });
 
-  testWidgetsWithLeakTracking('LayoutBuilder will only invoke builder if updateShouldRebuild returns true', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder will only invoke builder if updateShouldRebuild returns true', (WidgetTester tester) async {
     int buildCount = 0;
     int paintCount = 0;
     Offset? mostRecentOffset;

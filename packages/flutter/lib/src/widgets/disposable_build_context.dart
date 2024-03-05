@@ -34,7 +34,7 @@ class DisposableBuildContext<T extends State> {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$DisposableBuildContext',
         object: this,
@@ -51,10 +51,7 @@ class DisposableBuildContext<T extends State> {
   /// Otherwise, asserts the [_state] is still mounted and returns its context.
   BuildContext? get context {
     assert(_debugValidate());
-    if (_state == null) {
-      return null;
-    }
-    return _state!.context;
+    return _state?.context;
   }
 
   /// Called from asserts or tests to determine whether this object is in a
@@ -81,7 +78,7 @@ class DisposableBuildContext<T extends State> {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _state = null;
   }

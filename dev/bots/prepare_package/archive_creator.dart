@@ -528,6 +528,8 @@ class ArchiveCreator {
       'tar',
       'cJf',
       output.absolute.path,
+      // Print out input files as they get added, to debug hangs
+      '--verbose',
       path.basename(source.absolute.path),
     ], workingDirectory: fs.directory(path.dirname(source.absolute.path)));
   }

@@ -200,7 +200,7 @@ class Configurator {
 
   /// The [Platform] to use for this run.
   ///
-  /// Can be replaced by tests to test behavior on different plaforms.
+  /// Can be replaced by tests to test behavior on different platforms.
   final Platform platform;
 
   void generateConfiguration() {
@@ -277,9 +277,13 @@ class Configurator {
 
   void _createPageFooter(Directory footerPath, Version version) {
     final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
-    final String gitBranch = FlutterInformation.instance.getBranchName();
+    String channel = FlutterInformation.instance.getBranchName();
+    // Backward compatibility: Still support running on "master", but pretend it is "main".
+    if (channel == 'master') {
+      channel = 'main';
+    }
     final String gitRevision = FlutterInformation.instance.getFlutterRevision();
-    final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+    final String channelOut = channel.isEmpty ? '' : '• $channel';
     footerPath.childFile('footer.html').writeAsStringSync('<script src="footer.js"></script>');
     publishRoot.childDirectory('flutter').childFile('footer.js')
       ..createSync(recursive: true)
@@ -287,11 +291,11 @@ class Configurator {
 (function() {
   var span = document.querySelector('footer>span');
   if (span) {
-    span.innerText = 'Flutter $version • $timestamp • $gitRevision $gitBranchOut';
+    span.innerText = 'Flutter $version • $timestamp • $gitRevision $channelOut';
   }
   var sourceLink = document.querySelector('a.source-link');
   if (sourceLink) {
-    sourceLink.href = sourceLink.href.replace('/master/', '/$gitRevision/');
+    sourceLink.href = sourceLink.href.replace('/main/', '/$gitRevision/');
   }
 })();
 ''');
@@ -568,7 +572,7 @@ class DartdocGenerator {
       '--link-to-source-root',
       flutterRoot.path,
       '--link-to-source-uri-template',
-      'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+      'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
       '--inject-html',
       '--use-base-href',
       '--header',
@@ -742,15 +746,15 @@ class DartdocGenerator {
 
     // Check a "dartpad" example, any one will do, and check for the correct URL
     // arguments.
-    // Just use "master" for any branch other than the LUCI_BRANCH.
+    // Just use "main" for any branch other than "stable", just like it is done
+    // in the snippet generator at https://github.com/flutter/assets-for-api-docs/blob/cc56972b8f03552fc5f9f9f1ef309efc6c93d7bc/packages/snippets/lib/src/snippet_generator.dart#L104.
     final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
-    final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+    final String expectedChannel = luciBranch == 'stable' ? 'stable' : 'main';
     final List<String> argumentRegExps = <String>[
       r'split=\d+',
       r'run=true',
       r'sample_id=widgets\.Listener\.\d+',
-      'sample_channel=$expectedBranch',
-      'channel=$expectedBranch',
+      'channel=$expectedChannel',
     ];
     for (final String argumentRegExp in argumentRegExps) {
       _sanityCheckExample(

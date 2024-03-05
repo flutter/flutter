@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
@@ -20,7 +19,7 @@ Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Overscroll indicator color', (WidgetTester tester) async {
+  testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -56,7 +55,7 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgetsWithLeakTracking('Nested scrollable', (WidgetTester tester) async {
+  testWidgets('Nested scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -87,7 +86,7 @@ void main() {
     expect(innerPainter, paints..circle());
   });
 
-  testWidgetsWithLeakTracking('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
+  testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -129,7 +128,7 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgetsWithLeakTracking('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
+  testWidgets('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -167,7 +166,7 @@ void main() {
   });
 
   group("Flipping direction of scrollable doesn't change overscroll behavior", () {
-    testWidgetsWithLeakTracking('down', (WidgetTester tester) async {
+    testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -187,7 +186,7 @@ void main() {
       expect(painter, doesNotOverscroll);
     });
 
-    testWidgetsWithLeakTracking('up', (WidgetTester tester) async {
+    testWidgets('up', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -209,7 +208,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Overscroll in both directions', (WidgetTester tester) async {
+  testWidgets('Overscroll in both directions', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -232,7 +231,7 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgetsWithLeakTracking('Overscroll ignored from alternate axis', (WidgetTester tester) async {
+  testWidgets('Overscroll ignored from alternate axis', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -261,7 +260,7 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgetsWithLeakTracking('Overscroll horizontally', (WidgetTester tester) async {
+  testWidgets('Overscroll horizontally', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -292,7 +291,8 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgetsWithLeakTracking('Nested overscrolls do not throw exceptions', (WidgetTester tester) async {
+  testWidgets('Nested overscrolls do not throw exceptions',
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
@@ -314,7 +314,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Changing settings', (WidgetTester tester) async {
+  testWidgets('Changing settings', (WidgetTester tester) async {
     RenderObject painter;
 
     await tester.pumpWidget(
@@ -360,7 +360,7 @@ void main() {
     expect(painter, isNot(paints..circle()..circle()));
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView overscroll indicator works if there is sliver before center', (WidgetTester tester) async {
+  testWidgets('CustomScrollView overscroll indicator works if there is sliver before center', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -399,7 +399,7 @@ void main() {
     expect(painter, paints..save()..translate(y: 0.0)..scale()..circle());
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView overscroll indicator works well with [CustomScrollView.center] and [OverscrollIndicatorNotification.paintOffset]', (WidgetTester tester) async {
+  testWidgets('CustomScrollView overscroll indicator works well with [CustomScrollView.center] and [OverscrollIndicatorNotification.paintOffset]', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -446,7 +446,7 @@ void main() {
     expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
   });
 
-  testWidgetsWithLeakTracking('The OverscrollIndicator should not overflow the scrollable view edge', (WidgetTester tester) async {
+  testWidgets('The OverscrollIndicator should not overflow the scrollable view edge', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/64149
     await tester.pumpWidget(
       Directionality(
@@ -509,7 +509,7 @@ void main() {
   });
 
   group('[OverscrollIndicatorNotification.paintOffset] test', () {
-    testWidgetsWithLeakTracking('Leading', (WidgetTester tester) async {
+    testWidgets('Leading', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -539,7 +539,7 @@ void main() {
       expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
     });
 
-    testWidgetsWithLeakTracking('Trailing', (WidgetTester tester) async {
+    testWidgets('Trailing', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

@@ -26,5 +26,6 @@
   "menuDismissLabel": "Pechar menú",
   "lookUpButtonLabel": "Mirar cara arriba",
   "searchWebButtonLabel": "Buscar na Web",
-  "shareButtonLabel": "Compartir…"
+  "shareButtonLabel": "Compartir…",
+  "clearButtonLabel": "Clear"
 }

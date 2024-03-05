@@ -58,7 +58,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
         final Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
 
         // If another search happened after this one, throw away these options.
-        // Use the previous options intead and wait for the newer request to
+        // Use the previous options instead and wait for the newer request to
         // finish.
         if (_searchingWithQuery != textEditingValue.text) {
           return _lastOptions;

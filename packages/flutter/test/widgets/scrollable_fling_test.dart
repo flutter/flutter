@@ -5,7 +5,6 @@
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const TextStyle testFont = TextStyle(
   color: Color(0xFF00FF00),
@@ -32,7 +31,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
 const double dragOffset = 213.82;
 
 void main() {
-  testWidgetsWithLeakTracking('Flings on different platforms', (WidgetTester tester) async {
+  testWidgets('Flings on different platforms', (WidgetTester tester) async {
     double getCurrentOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
@@ -97,7 +96,7 @@ void main() {
     expect(linuxResult, equals(androidResult));
   });
 
-  testWidgetsWithLeakTracking('fling and tap to stop', (WidgetTester tester) async {
+  testWidgets('fling and tap to stop', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
@@ -127,7 +126,7 @@ void main() {
     expect(log, equals(<String>['tap 21', 'tap 35']));
   });
 
-  testWidgetsWithLeakTracking('fling and wait and tap', (WidgetTester tester) async {
+  testWidgets('fling and wait and tap', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(

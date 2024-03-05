@@ -5,10 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SliverFillViewport control test', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
       return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
     });
@@ -159,7 +158,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SliverFillViewport padding test', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(
       <Widget>[
         const Text('0'),

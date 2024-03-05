@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
@@ -40,7 +42,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser.addMultiOption('target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -68,6 +69,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   final String name = 'appbundle';
+
+  @override
+  List<String> get aliases => const <String>['aab'];
 
   @override
   DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
@@ -106,6 +110,29 @@ class BuildAppBundleCommand extends BuildSubCommand {
   }
 
   @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String buildMode;
+
+    if (boolArg('release')) {
+      buildMode = 'release';
+    } else if (boolArg('debug')) {
+      buildMode = 'debug';
+    } else if (boolArg('profile')) {
+      buildMode = 'profile';
+    } else {
+      // The build defaults to release.
+      buildMode = 'release';
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
+      buildAppBundleBuildMode: buildMode,
+    );
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
@@ -113,7 +140,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArg('multidex'),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.

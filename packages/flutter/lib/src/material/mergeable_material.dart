@@ -4,6 +4,7 @@
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -147,7 +148,17 @@ class _AnimationTuple {
     required this.startAnimation,
     required this.endAnimation,
     required this.gapAnimation,
-  });
+  }) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_AnimationTuple',
+        object: this,
+      );
+    }
+  }
 
   final AnimationController controller;
   final CurvedAnimation startAnimation;
@@ -157,6 +168,9 @@ class _AnimationTuple {
 
   @mustCallSuper
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     controller.dispose();
     startAnimation.dispose();
     endAnimation.dispose();

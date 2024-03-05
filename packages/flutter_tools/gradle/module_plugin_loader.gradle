@@ -5,41 +5,26 @@
 // This file is included from `<module>/.android/include_flutter.groovy`,
 // so it can be versioned with the Flutter SDK.
 
-import groovy.json.JsonSlurper
+import java.nio.file.Paths
+
+File pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "native_plugin_loader.groovy")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
-def object = null;
-String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
-// If this logic is changed, also change the logic in app_plugin_loader.gradle.
-def pluginsFile = new File(moduleProjectRoot, '.flutter-plugins-dependencies')
-if (pluginsFile.exists()) {
-    object = new JsonSlurper().parseText(pluginsFile.text)
-    assert object instanceof Map
-    assert object.plugins instanceof Map
-    assert object.plugins.android instanceof List
-    // Includes the Flutter plugins that support the Android platform.
-    object.plugins.android.each { androidPlugin ->
-        assert androidPlugin.name instanceof String
-        assert androidPlugin.path instanceof String
-        // Skip plugins that have no native build (such as a Dart-only
-        // implementation of a federated plugin).
-        def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
-        if (!needsBuild) {
-            return
-        }
-        def pluginDirectory = new File(androidPlugin.path, 'android')
-        assert pluginDirectory.exists()
-        include ":${androidPlugin.name}"
-        project(":${androidPlugin.name}").projectDir = pluginDirectory
-    }
+List<Map<String, Object>> nativePlugins = nativePluginLoader.getPlugins(moduleProjectRoot)
+nativePlugins.each { androidPlugin ->
+    def pluginDirectory = new File(androidPlugin.path as String, 'android')
+    assert pluginDirectory.exists()
+    include ":${androidPlugin.name}"
+    project(":${androidPlugin.name}").projectDir = pluginDirectory
 }
 
+String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { subproject ->
-            if (object != null && object.plugins != null && object.plugins.android != null
-                    && object.plugins.android.name.contains(subproject.name)) {
+            if (nativePlugins.name.contains(subproject.name)) {
                 File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
                         + "plugins_build_output" + File.separator + subproject.name);
                 if (!androidPluginBuildOutputDir.exists()) {

@@ -52,6 +52,7 @@ class ExpansionTileThemeData with Diagnosticable {
     this.shape,
     this.collapsedShape,
     this.clipBehavior,
+    this.expansionAnimationStyle,
   });
 
   /// Overrides the default value of [ExpansionTile.backgroundColor].
@@ -90,6 +91,9 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Overrides the default value of [ExpansionTile.clipBehavior].
   final Clip? clipBehavior;
 
+  /// Overrides the default value of [ExpansionTile.expansionAnimationStyle].
+  final AnimationStyle? expansionAnimationStyle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
@@ -105,6 +109,7 @@ class ExpansionTileThemeData with Diagnosticable {
     ShapeBorder? shape,
     ShapeBorder? collapsedShape,
     Clip? clipBehavior,
+    AnimationStyle? expansionAnimationStyle,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -119,6 +124,7 @@ class ExpansionTileThemeData with Diagnosticable {
       shape: shape ?? this.shape,
       collapsedShape: collapsedShape ?? this.collapsedShape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      expansionAnimationStyle: expansionAnimationStyle ?? this.expansionAnimationStyle,
     );
   }
 
@@ -139,6 +145,8 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedTextColor: Color.lerp(a?.collapsedTextColor, b?.collapsedTextColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       collapsedShape: ShapeBorder.lerp(a?.collapsedShape, b?.collapsedShape, t),
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
+      expansionAnimationStyle: t < 0.5 ? a?.expansionAnimationStyle : b?.expansionAnimationStyle,
     );
   }
 
@@ -157,6 +165,7 @@ class ExpansionTileThemeData with Diagnosticable {
       shape,
       collapsedShape,
       clipBehavior,
+      expansionAnimationStyle,
     );
   }
 
@@ -180,7 +189,8 @@ class ExpansionTileThemeData with Diagnosticable {
       && other.collapsedTextColor == collapsedTextColor
       && other.shape == shape
       && other.collapsedShape == collapsedShape
-      && other.clipBehavior == clipBehavior;
+      && other.clipBehavior == clipBehavior
+      && other.expansionAnimationStyle == expansionAnimationStyle;
   }
 
   @override
@@ -198,6 +208,7 @@ class ExpansionTileThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('collapsedShape', collapsedShape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<AnimationStyle>('expansionAnimationStyle', expansionAnimationStyle, defaultValue: null));
   }
 }
 

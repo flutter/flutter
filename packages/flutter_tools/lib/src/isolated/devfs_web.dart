@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -25,14 +24,15 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/targets/scene_importer.dart';
-import '../build_system/targets/shader_compiler.dart';
+import '../build_system/tools/scene_importer.dart';
+import '../build_system/tools/shader_compiler.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
@@ -100,7 +100,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   }
 
   @override
-  Future<void> initialize({String? moduleFormat, bool? soundNullSafety}) async {}
+  Future<void> initialize(CompilerOptions options) async {}
 
   @override
   Future<bool> updateDependencies(Map<String, ModuleInfo> modules) async => true;
@@ -118,7 +118,9 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._nullSafetyMode,
-  ) : basePath = _getIndexHtml().getBaseHref();
+    this._ddcModuleSystem, {
+    required this.webRenderer,
+  }) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -177,8 +179,11 @@ class WebAssetServer implements AssetReader {
     ExpressionCompiler? expressionCompiler,
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
+    required WebRendererMode webRenderer,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
+    // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
+    bool ddcModuleSystem = false,
   }) async {
     InternetAddress address;
     if (hostname == 'any') {
@@ -225,6 +230,8 @@ class WebAssetServer implements AssetReader {
       modules,
       digests,
       nullSafetyMode,
+      ddcModuleSystem,
+      webRenderer: webRenderer,
     );
     if (testMode) {
       return server;
@@ -282,14 +289,26 @@ class WebAssetServer implements AssetReader {
         return chromium.chromeConnection;
       },
       toolConfiguration: ToolConfiguration(
-        loadStrategy: FrontendServerRequireStrategyProvider(
+        loadStrategy: ddcModuleSystem
+            ? FrontendServerLegacyStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
         digestProvider,
-        packageConfig.toPackageUri(
+          BuildSettings(
+            appEntrypoint: packageConfig.toPackageUri(
           globals.fs.file(entrypoint).absolute.uri,
-        ),
+            )),
+          ).strategy
+            : FrontendServerRequireStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                    appEntrypoint: packageConfig.toPackageUri(
+                  globals.fs.file(entrypoint).absolute.uri,
+                )),
       ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
@@ -323,6 +342,7 @@ class WebAssetServer implements AssetReader {
   }
 
   final NullSafetyMode _nullSafetyMode;
+  final bool _ddcModuleSystem;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -502,16 +522,27 @@ class WebAssetServer implements AssetReader {
   }
 
   /// Determines what rendering backed to use.
-  WebRendererMode webRenderer = WebRendererMode.html;
+  final WebRendererMode webRenderer;
 
   shelf.Response _serveIndex() {
-
     final IndexHtml indexHtml = _getIndexHtml();
+    final Map<String, dynamic> buildConfig = <String, dynamic>{
+      'engineRevision': globals.flutterVersion.engineRevision,
+      'builds': <dynamic>[
+        <String, dynamic>{
+          'compileTarget': 'dartdevc',
+          'renderer': webRenderer.name,
+          'mainJsPath': 'main.dart.js',
+        },
+      ],
+    };
+    final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
 
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
+      buildConfig: buildConfigString,
     );
 
     final Map<String, String> headers = <String, String>{
@@ -579,15 +610,22 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
-  File get _resolveDartSdkJsFile =>
-      globals.fs.file(globals.artifacts!.getHostArtifact(
-          kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!
-      ));
+  File get _resolveDartSdkJsFile {
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
+        dartSdkArtifactMap =
+        _ddcModuleSystem ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    return globals.fs.file(globals.artifacts!
+        .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
-  File get _resolveDartSdkJsMapFile =>
-    globals.fs.file(globals.artifacts!.getHostArtifact(
-        kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!
-    ));
+  File get _resolveDartSdkJsMapFile {
+    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
+        dartSdkArtifactMap = _ddcModuleSystem
+            ? kDdcDartSdkJsMapArtifactMap
+            : kAmdDartSdkJsMapArtifactMap;
+    return globals.fs.file(globals.artifacts!
+        .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+  }
 
   @override
   Future<String?> dartSourceContents(String serverPath) async {
@@ -661,6 +699,8 @@ class WebDevFS implements DevFS {
     required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
+    required this.ddcModuleSystem,
+    required this.webRenderer,
     this.testMode = false,
   }) : _port = port;
 
@@ -676,6 +716,7 @@ class WebDevFS implements DevFS {
   final bool enableDds;
   final Map<String, String> extraHeaders;
   final bool testMode;
+  final bool ddcModuleSystem;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
@@ -684,6 +725,7 @@ class WebDevFS implements DevFS {
   final NullSafetyMode nullSafetyMode;
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
+  final WebRendererMode webRenderer;
 
   late WebAssetServer webAssetServer;
 
@@ -783,21 +825,18 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       extraHeaders,
       nullSafetyMode,
+      webRenderer: webRenderer,
       testMode: testMode,
+      ddcModuleSystem: ddcModuleSystem,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
-    if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.auto;
-    } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
-      webAssetServer.webRenderer = WebRendererMode.canvaskit;
-    }
     String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      url ='localhost:$selectedPort';
+      url = 'localhost:$selectedPort';
     }
     _baseUri = Uri.http(url, webAssetServer.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath!= null) {
+    if (tlsCertPath != null && tlsCertKeyPath != null) {
       _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
@@ -850,7 +889,12 @@ class WebDevFS implements DevFS {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
-      webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      if (ddcModuleSystem) {
+        webAssetServer.writeBytes(
+            'ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
+      } else {
+        webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      }
       webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
@@ -862,7 +906,14 @@ class WebDevFS implements DevFS {
           'version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
-        generateBootstrapScript(
+        ddcModuleSystem
+            ? generateDDCBootstrapScript(
+                entrypoint: entrypoint,
+                ddcModuleLoaderUrl: 'ddc_module_loader.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: enableDwds,
+              )
+            : generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
           generateLoadingIndicator: enableDwds,
@@ -870,7 +921,14 @@ class WebDevFS implements DevFS {
       );
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
-        generateMainModule(
+        ddcModuleSystem
+            ? generateDDCMainModule(
+                entrypoint: entrypoint,
+                nullAssertions: nullAssertions,
+                nativeNullAssertions: nativeNullAssertions,
+                exportedMain: pathToJSIdentifier(entrypoint.split('.')[0]),
+              )
+            : generateMainModule(
           entrypoint: entrypoint,
           nullAssertions: nullAssertions,
           nativeNullAssertions: nativeNullAssertions,
@@ -882,8 +940,12 @@ class WebDevFS implements DevFS {
         await writeBundle(
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
-          bundle.entryKinds,
           targetPlatform: TargetPlatform.web_javascript,
+          impellerStatus: ImpellerStatus.disabled,
+          processManager: globals.processManager,
+          fileSystem: globals.fs,
+          artifacts: globals.artifacts!,
+          logger: globals.logger,
         );
       }
     }
@@ -946,6 +1008,16 @@ class WebDevFS implements DevFS {
     'dev_compiler',
     'amd',
     'require.js',
+  ));
+
+  @visibleForTesting
+  final File ddcModuleLoaderJS = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath,
+        platform: TargetPlatform.web_javascript),
+    'lib',
+    'dev_compiler',
+    'ddc',
+    'ddc_module_loader.js',
   ));
 
   @visibleForTesting

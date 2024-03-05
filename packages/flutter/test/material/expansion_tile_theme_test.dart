@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -43,6 +47,13 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
+  Material getMaterial(WidgetTester tester) {
+    return tester.widget<Material>(find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    ));
+  }
+
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
     expect(const ExpansionTileThemeData(), const ExpansionTileThemeData().copyWith());
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
@@ -68,9 +79,10 @@ void main() {
     expect(theme.shape, null);
     expect(theme.collapsedShape, null);
     expect(theme.clipBehavior, null);
+    expect(theme.expansionAnimationStyle, null);
   });
 
-  testWidgetsWithLeakTracking('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -82,21 +94,22 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const ExpansionTileThemeData(
-      backgroundColor: Color(0xff000000),
-      collapsedBackgroundColor: Color(0xff6f83fc),
-      tilePadding: EdgeInsets.all(20.0),
+    ExpansionTileThemeData(
+      backgroundColor: const Color(0xff000000),
+      collapsedBackgroundColor: const Color(0xff6f83fc),
+      tilePadding: const EdgeInsets.all(20.0),
       expandedAlignment: Alignment.bottomCenter,
-      childrenPadding: EdgeInsets.all(10.0),
-      iconColor: Color(0xffa7c61c),
-      collapsedIconColor: Color(0xffdd0b1f),
-      textColor: Color(0xffffffff),
-      collapsedTextColor: Color(0xff522bab),
-      shape: Border(),
-      collapsedShape: Border(),
+      childrenPadding: const EdgeInsets.all(10.0),
+      iconColor: const Color(0xffa7c61c),
+      collapsedIconColor: const Color(0xffdd0b1f),
+      textColor: const Color(0xffffffff),
+      collapsedTextColor: const Color(0xff522bab),
+      shape: const Border(),
+      collapsedShape: const Border(),
       clipBehavior: Clip.antiAlias,
+      expansionAnimationStyle: AnimationStyle(curve: Curves.easeInOut),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -104,7 +117,7 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
+    expect(description, equalsIgnoringHashCodes(<String>[
       'backgroundColor: Color(0xff000000)',
       'collapsedBackgroundColor: Color(0xff6f83fc)',
       'tilePadding: EdgeInsets.all(20.0)',
@@ -117,10 +130,11 @@ void main() {
       'shape: Border.all(BorderSide(width: 0.0, style: none))',
       'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
       'clipBehavior: Clip.antiAlias',
-    ]);
+      'expansionAnimationStyle: AnimationStyle#983ac(curve: Cubic(0.42, 0.00, 0.58, 1.00))',
+    ]));
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -171,21 +185,16 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material material = getMaterial(tester);
 
-    final Clip tileClipBehavior = tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).clipBehavior;
-
-    // expansionTile should have Clip.antiAlias as clipBehavior
-    expect(tileClipBehavior, clipBehavior);
+    // ExpansionTile should have Clip.antiAlias as clipBehavior.
+    expect(material.clipBehavior, clipBehavior);
 
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
-    expect(shapeDecoration.color, collapsedBackgroundColor);
+    expect(material.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -209,10 +218,10 @@ void main() {
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
     // Check the collapsed ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect(material.shape, collapsedShape);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -230,6 +239,7 @@ void main() {
       top: BorderSide(color: Colors.green),
       bottom: BorderSide(color: Colors.green),
     );
+    const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -246,6 +256,7 @@ void main() {
             collapsedTextColor: collapsedTextColor,
             shape: shape,
             collapsedShape: collapsedShape,
+            clipBehavior: clipBehavior,
           ),
         ),
         home: Material(
@@ -262,12 +273,12 @@ void main() {
       ),
     );
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
-      of: find.byKey(tileKey),
-      matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    // When a custom shape is provided, ExpansionTile will use the
+    // Material widget to draw the shape and background color
+    // instead of a Container.
+    final Material material = getMaterial(tester);
     // Check the tile's background color when backgroundColor is applied.
-    expect(shapeDecoration.color, backgroundColor);
+    expect(material.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -291,7 +302,9 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, shape);
+    expect(material.shape, shape);
+    // Check the clipBehavior when shape is applied.
+    expect(material.clipBehavior, clipBehavior);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));
@@ -304,5 +317,110 @@ void main() {
     expect(childRect.left, paddingRect.left + 20);
     expect(childRect.right, paddingRect.right - 20);
     expect(childRect.bottom, paddingRect.bottom - 20);
+  });
+
+  testWidgets('Override ExpansionTile animation using ExpansionTileThemeData.AnimationStyle', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+
+    Widget buildExpansionTile({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        theme: ThemeData(
+          expansionTileTheme: ExpansionTileThemeData(
+            expansionAnimationStyle: animationStyle,
+          ),
+        ),
+        home: const Material(
+          child: Center(
+            child: ExpansionTile(
+              key: expansionTileKey,
+              title: TestText('title'),
+              children: <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExpansionTile());
+
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+
+    // Test initial ExpansionTile height.
+    expect(getHeight(expansionTileKey), 58.0);
+
+    // Test the default expansion animation.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation duration.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation duration.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation curve.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation curve.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(153, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+
+    // Test no animation.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
+
+    // Tap to expand the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+
+    expect(getHeight(expansionTileKey), 158.0);
   });
 }

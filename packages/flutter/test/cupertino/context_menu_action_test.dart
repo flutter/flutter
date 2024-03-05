@@ -7,17 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
-  const CupertinoDynamicColor kBackgroundColor =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF1F1F1),
     darkColor: Color(0xFF212122),
   );
-  const CupertinoDynamicColor kBackgroundColorPressed =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -72,7 +69,7 @@ void main() {
     return icon;
   }
 
-  testWidgetsWithLeakTracking('responds to taps', (WidgetTester tester) async {
+  testWidgets('responds to taps', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(getApp(onPressed: () {
       wasPressed = true;
@@ -83,7 +80,7 @@ void main() {
     expect(wasPressed, true);
   });
 
-  testWidgetsWithLeakTracking('turns grey when pressed and held', (WidgetTester tester) async {
+  testWidgets('turns grey when pressed and held', (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(find.byType(CupertinoContextMenuAction),
         paints..rect(color: kBackgroundColor.color));
@@ -118,27 +115,36 @@ void main() {
         paints..rect(color: kBackgroundColor.darkColor));
   });
 
-  testWidgetsWithLeakTracking('icon and textStyle colors are correct out of the box',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(getTextStyle(tester).color, CupertinoColors.label);
     expect(getIcon(tester).color, CupertinoColors.label);
   });
 
-  testWidgetsWithLeakTracking('icon and textStyle colors are correct for destructive actions',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
     await tester.pumpWidget(getApp(isDestructiveAction: true));
     expect(getTextStyle(tester).color, kDestructiveActionColor);
     expect(getIcon(tester).color, kDestructiveActionColor);
   });
 
-  testWidgetsWithLeakTracking('textStyle is correct for defaultAction',
-      (WidgetTester tester) async {
+  testWidgets('textStyle is correct for defaultAction for Brightness.light', (WidgetTester tester) async {
     await tester.pumpWidget(getApp(isDefaultAction: true));
     expect(getTextStyle(tester).fontWeight, kDefaultActionWeight);
+    final Element context = tester.element(find.byType(CupertinoContextMenuAction));
+    // The dynamic color should have been resolved.
+    expect(getTextStyle(tester).color, CupertinoColors.label.resolveFrom(context));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets('textStyle is correct for defaultAction for Brightness.dark', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144492.
+    await tester.pumpWidget(getApp(isDefaultAction: true, brightness: Brightness.dark));
+    expect(getTextStyle(tester).fontWeight, kDefaultActionWeight);
+    final Element context = tester.element(find.byType(CupertinoContextMenuAction));
+    // The dynamic color should have been resolved.
+    expect(getTextStyle(tester).color, CupertinoColors.label.resolveFrom(context));
+  });
+
+  testWidgets(
       'Hovering over Cupertino context menu action updates cursor to clickable on Web',
       (WidgetTester tester) async {
     /// Cupertino context menu action without "onPressed" callback.

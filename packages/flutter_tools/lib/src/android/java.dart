@@ -135,6 +135,10 @@ class Java {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
   late final Version? version = (() {
+    if (!canRun()) {
+      return null;
+    }
+
     final RunResult result = _processUtils.runSync(
       <String>[binaryPath, '--version'],
       environment: environment,
@@ -142,6 +146,7 @@ class Java {
     if (result.exitCode != 0) {
       _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
         ' stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
     }
     final String rawVersionOutput = result.stdout;
     final List<String> versionLines = rawVersionOutput.split('\n');
@@ -158,11 +163,7 @@ class Java {
           RegExp(r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d');
       final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
       if (match != null) {
-        final Version? parsedVersion = Version.parse(match.namedGroup('version'));
-        if (parsedVersion == null) {
-          return null;
-        }
-        return parsedVersion;
+        return Version.parse(match.namedGroup('version'));
       }
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;

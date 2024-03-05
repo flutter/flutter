@@ -8,6 +8,7 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'asset.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -15,8 +16,8 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -456,6 +457,7 @@ class DevFS {
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    Config? config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -468,13 +470,15 @@ class DevFS {
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
           : context.get<HttpClientFactory>()!())),
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _config = config;
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
+  final Config? _config;
 
   final String fsName;
   final Directory? rootDirectory;
@@ -570,7 +574,6 @@ class DevFS {
     DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
     final DateTime candidateCompileTime = DateTime.now();
@@ -598,7 +601,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: projectRootPath,
+      projectRootPath: rootDirectory?.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -616,12 +619,12 @@ class DevFS {
 
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
+      final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
+      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
+      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!content.isModified || bundleFirstUpload) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.
@@ -635,9 +638,9 @@ class DevFS {
           didUpdateFontManifest = true;
         }
 
-        switch (bundle.entryKinds[archivePath]) {
+        switch (bundle.entries[archivePath]?.kind) {
           case AssetKind.shader:
-            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
+            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -654,7 +657,7 @@ class DevFS {
             if (sceneImporter == null) {
               break;
             }
-            final Future<DevFSContent?> pending = sceneImporter.reimportScene(content);
+            final Future<DevFSContent?> pending = sceneImporter.reimportScene(entry.content);
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
@@ -670,8 +673,8 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
+            dirtyEntries[deviceUri] = entry.content;
+            syncedBytes += entry.content.size;
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }

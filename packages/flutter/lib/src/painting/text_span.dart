@@ -343,18 +343,20 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Returns the text span that contains the given position in the text.
   @override
   InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
-    if (text == null) {
+    final String? text = this.text;
+    if (text == null || text.isEmpty) {
       return null;
     }
     final TextAffinity affinity = position.affinity;
     final int targetOffset = position.offset;
-    final int endOffset = offset.value + text!.length;
+    final int endOffset = offset.value + text.length;
+
     if (offset.value == targetOffset && affinity == TextAffinity.downstream ||
         offset.value < targetOffset && targetOffset < endOffset ||
         endOffset == targetOffset && affinity == TextAffinity.upstream) {
       return this;
     }
-    offset.increment(text!.length);
+    offset.increment(text.length);
     return null;
   }
 

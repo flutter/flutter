@@ -33,7 +33,7 @@ const double _kFinalLabelScale = 0.75;
 // The default duration for hint fade in/out transitions.
 //
 // Animating hint is not mentioned in the Material specification.
-// The animation is kept for backard compatibility and a short duration
+// The animation is kept for backward compatibility and a short duration
 // is used to mitigate the UX impact.
 const Duration _kHintFadeTransitionDuration = Duration(milliseconds: 20);
 
@@ -181,9 +181,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 
   late AnimationController _controller;
   late AnimationController _hoverColorController;
-  late Animation<double> _borderAnimation;
+  late CurvedAnimation _borderAnimation;
   late _InputBorderTween _border;
-  late Animation<double> _hoverAnimation;
+  late CurvedAnimation _hoverAnimation;
   late ColorTween _hoverColorTween;
 
   @override
@@ -218,6 +218,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   void dispose() {
     _controller.dispose();
     _hoverColorController.dispose();
+    _borderAnimation.dispose();
+    _hoverAnimation.dispose();
     super.dispose();
   }
 
@@ -1148,7 +1150,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // below center alignments are interpolated independently.
     final double outlineCenterBaseline = inputInternalBaseline
       + baselineAdjustment / 2.0
-      + (containerHeight - (2.0 + inputHeight)) / 2.0;
+      + (containerHeight - inputHeight) / 2.0;
     final double outlineTopBaseline = topInputBaseline;
     final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
     final double outlineBaseline = _interpolateThree(
@@ -1373,13 +1375,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         width: overallWidth - _boxSize(icon).width,
       );
       container.layout(containerConstraints, parentUsesSize: true);
-      final double x;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          x = 0.0;
-        case TextDirection.ltr:
-          x = _boxSize(icon).width;
-       }
+      final double x = switch (textDirection) {
+        TextDirection.rtl => 0.0,
+        TextDirection.ltr => _boxSize(icon).width,
+      };
       _boxParentData(container).offset = Offset(x, 0.0);
     }
 
@@ -1402,13 +1401,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
 
     if (icon != null) {
-      final double x;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          x = overallWidth - icon!.size.width;
-        case TextDirection.ltr:
-          x = 0.0;
-       }
+      final double x = switch (textDirection) {
+        TextDirection.rtl => overallWidth - icon!.size.width,
+        TextDirection.ltr => 0.0,
+      };
       centerLayout(icon!, x);
     }
 
@@ -1673,30 +1669,19 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
 
   @override
   Widget? childForSlot(_DecorationSlot slot) {
-    switch (slot) {
-      case _DecorationSlot.icon:
-        return decoration.icon;
-      case _DecorationSlot.input:
-        return decoration.input;
-      case _DecorationSlot.label:
-        return decoration.label;
-      case _DecorationSlot.hint:
-        return decoration.hint;
-      case _DecorationSlot.prefix:
-        return decoration.prefix;
-      case _DecorationSlot.suffix:
-        return decoration.suffix;
-      case _DecorationSlot.prefixIcon:
-        return decoration.prefixIcon;
-      case _DecorationSlot.suffixIcon:
-        return decoration.suffixIcon;
-      case _DecorationSlot.helperError:
-        return decoration.helperError;
-      case _DecorationSlot.counter:
-        return decoration.counter;
-      case _DecorationSlot.container:
-        return decoration.container;
-    }
+    return switch (slot) {
+      _DecorationSlot.icon        => decoration.icon,
+      _DecorationSlot.input       => decoration.input,
+      _DecorationSlot.label       => decoration.label,
+      _DecorationSlot.hint        => decoration.hint,
+      _DecorationSlot.prefix      => decoration.prefix,
+      _DecorationSlot.suffix      => decoration.suffix,
+      _DecorationSlot.prefixIcon  => decoration.prefixIcon,
+      _DecorationSlot.suffixIcon  => decoration.suffixIcon,
+      _DecorationSlot.helperError => decoration.helperError,
+      _DecorationSlot.counter     => decoration.counter,
+      _DecorationSlot.container   => decoration.container,
+    };
   }
 
   @override
@@ -1745,14 +1730,17 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: labelIsFloating ? 1.0 : 0.0,
-        child: Semantics(
-          sortKey: semanticsSortKey,
-          tagForChildren: semanticsTag,
-          child: child ?? (text == null ? null : Text(text!, style: style)),
+      child: IgnorePointer(
+        ignoring: !labelIsFloating,
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          opacity: labelIsFloating ? 1.0 : 0.0,
+          child: Semantics(
+            sortKey: semanticsSortKey,
+            tagForChildren: semanticsTag,
+            child: child ?? (text == null ? null : Text(text!, style: style)),
+          ),
         ),
       ),
     );
@@ -1916,7 +1904,7 @@ class InputDecorator extends StatefulWidget {
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   late final AnimationController _floatingLabelController;
-  late final Animation<double> _floatingLabelAnimation;
+  late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
   static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
@@ -1960,6 +1948,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void dispose() {
     _floatingLabelController.dispose();
+    _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
     super.dispose();
@@ -2123,9 +2112,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
-      .copyWith(height: 1)
       .merge(defaultTextStyle)
-      .merge(style);
+      .merge(style)
+      .copyWith(height: 1);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationTheme defaults) {
@@ -2410,30 +2399,42 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final EdgeInsets contentPadding;
     final double floatingLabelHeight;
-    if (decoration.isCollapsed
-        ?? themeData.inputDecorationTheme.isCollapsed) {
+
+    if (decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
+      floatingLabelHeight = MediaQuery.textScalerOf(context).scale(4.0 + 0.75 * labelStyle.fontSize!);
       if (decoration.filled ?? false) {
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+        contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+          ? decorationIsDense
+            ? const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0)
+            : const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : decorationIsDense
+            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
-        // Not left or right padding for underline borders that aren't filled
+        // No left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+        contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+          ? decorationIsDense
+            ? const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0)
+            : const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+          : decorationIsDense
+            ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+      contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
+        ? decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+          : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
     final _Decorator decorator = _Decorator(
@@ -2973,9 +2974,26 @@ class InputDecoration {
   ///
   /// If [isCollapsed] is true then [contentPadding] is [EdgeInsets.zero].
   ///
+  /// ### Material 3 default content padding
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is true then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(12, 4, 12, 4)` when [isDense]
+  /// is true and `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is false then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(0, 4, 0, 4)` when [isDense] is
+  /// true and `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is true then [contentPadding] is
+  /// `EdgeInsets.fromLTRB(12, 16, 12, 8)` when [isDense] is true
+  /// and `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is false.
+  ///
+  /// ### Material 2 default content padding
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// [contentPadding] is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// [contentPadding] is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
@@ -4309,7 +4327,7 @@ class InputDecorationTheme with Diagnosticable {
       floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
-      iconColor: iconColor,
+      iconColor: iconColor ?? this.iconColor,
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconColor: prefixIconColor ?? this.prefixIconColor,
@@ -4558,22 +4576,12 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      // dark theme: 5% white
-      // light theme: 2% black
-      switch (Theme.of(context).brightness) {
-        case Brightness.dark:
-          return const Color(0x0DFFFFFF);
-        case Brightness.light:
-          return const Color(0x05000000) ;
-      }
-    }
-    // dark theme: 10% white
-    // light theme: 4% black
-    switch (Theme.of(context).brightness) {
-      case Brightness.dark: return const Color(0x1AFFFFFF);
-      case Brightness.light:return const Color(0x0A000000) ;
-    }
+    return switch ((Theme.of(context).brightness, states.contains(MaterialState.disabled))) {
+      (Brightness.dark, true)   => const Color(0x0DFFFFFF), //  5% white
+      (Brightness.dark, false)  => const Color(0x1AFFFFFF), // 10% white
+      (Brightness.light, true)  => const Color(0x05000000), //  2% black
+      (Brightness.light, false) => const Color(0x0A000000), //  4% black
+    };
   });
 
   @override
@@ -4584,12 +4592,10 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
-      case Brightness.dark:
-        return Colors.white70;
-      case Brightness.light:
-        return Colors.black45;
-    }
+    return switch (Theme.of(context).brightness) {
+      Brightness.dark  => Colors.white70,
+      Brightness.light => Colors.black45,
+    };
   });
 
   @override
@@ -4600,12 +4606,10 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
-      case Brightness.dark:
-        return Colors.white70;
-      case Brightness.light:
-        return Colors.black45;
-    }
+    return switch (Theme.of(context).brightness) {
+      Brightness.dark  => Colors.white70,
+      Brightness.light => Colors.black45,
+    };
   });
 
   @override
@@ -4616,12 +4620,10 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
-      case Brightness.dark:
-        return Colors.white70;
-      case Brightness.light:
-        return Colors.black45;
-    }
+    return switch (Theme.of(context).brightness) {
+      Brightness.dark  => Colors.white70,
+      Brightness.light => Colors.black45,
+    };
   });
 }
 
@@ -4654,7 +4656,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   });
 
   @override

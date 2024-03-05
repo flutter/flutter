@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
@@ -26,7 +25,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgetsWithLeakTracking('Changing query moves cursor to the end of query', (WidgetTester tester) async {
+  testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -48,7 +47,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Can open and close search', (WidgetTester tester) async {
+  testWidgets('Can open and close search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
     final List<String> selectedResults = <String>[];
@@ -85,7 +84,7 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgetsWithLeakTracking('Can close search with system back button to return null', (WidgetTester tester) async {
+  testWidgets('Can close search with system back button to return null', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
@@ -132,7 +131,7 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Hint text color overridden', (WidgetTester tester) async {
+  testWidgets('Hint text color overridden', (WidgetTester tester) async {
     const String searchHintText = 'Enter search terms';
     final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText);
     addTearDown(() => delegate.dispose());
@@ -147,7 +146,7 @@ void main() {
     expect(hintText.style!.color, _TestSearchDelegate.hintTextColor);
   });
 
-  testWidgetsWithLeakTracking('Requests suggestions', (WidgetTester tester) async {
+  testWidgets('Requests suggestions', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -177,7 +176,7 @@ void main() {
     expect(delegate.queriesForResults, hasLength(0));
   });
 
-  testWidgetsWithLeakTracking('Shows Results and closes search', (WidgetTester tester) async {
+  testWidgets('Shows Results and closes search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
     final List<String> selectedResults = <String>[];
@@ -214,7 +213,7 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgetsWithLeakTracking('Can switch between results and suggestions', (WidgetTester tester) async {
+  testWidgets('Can switch between results and suggestions', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -285,7 +284,7 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Fresh search always starts with empty query', (WidgetTester tester) async {
+  testWidgets('Fresh search always starts with empty query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -306,7 +305,7 @@ void main() {
     expect(delegate.query, '');
   });
 
-  testWidgetsWithLeakTracking('Initial queries are honored', (WidgetTester tester) async {
+  testWidgets('Initial queries are honored', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -323,7 +322,7 @@ void main() {
     expect(delegate.query, 'Foo');
   });
 
-  testWidgetsWithLeakTracking('Initial query null re-used previous query', (WidgetTester tester) async {
+  testWidgets('Initial query null re-used previous query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -339,7 +338,7 @@ void main() {
     expect(delegate.query, 'Foo');
   });
 
-  testWidgetsWithLeakTracking('Changing query shows up in search field', (WidgetTester tester) async {
+  testWidgets('Changing query shows up in search field', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -361,7 +360,7 @@ void main() {
     expect(find.text('Bar'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('transitionAnimation runs while search fades in/out', (WidgetTester tester) async {
+  testWidgets('transitionAnimation runs while search fades in/out', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -390,7 +389,7 @@ void main() {
     expect(delegate.transitionAnimation.status, AnimationStatus.dismissed);
   });
 
-  testWidgetsWithLeakTracking('Closing nested search returns to search', (WidgetTester tester) async {
+  testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
     final List<String?> nestedSearchResults = <String?>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
@@ -456,7 +455,7 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgetsWithLeakTracking('Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
+  testWidgets('Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
     late _TestSearchDelegate delegate;
     addTearDown(() => delegate.dispose());
     final List<String?> nestedSearchResults = <String?>[];
@@ -530,7 +529,7 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
-  testWidgetsWithLeakTracking('Custom searchFieldLabel value', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
     const String searchHint = 'custom search hint';
     final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
@@ -547,7 +546,7 @@ void main() {
     expect(find.text(defaultSearchHint), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
+  testWidgets('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
     final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
@@ -562,7 +561,7 @@ void main() {
     expect(find.text(searchHint), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Custom searchFieldStyle value', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
     const String searchHintText = 'Enter search terms';
     const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
@@ -583,7 +582,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('keyboard show search button by default', (WidgetTester tester) async {
+  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -598,7 +597,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], TextInputAction.search.toString());
   });
 
-  testWidgetsWithLeakTracking('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
+  testWidgets('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
     addTearDown(() => delegate.dispose());
 
@@ -611,7 +610,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], TextInputAction.done.toString());
   });
 
-  testWidgetsWithLeakTracking('Custom flexibleSpace value', (WidgetTester tester) async {
+  testWidgets('Custom flexibleSpace value', (WidgetTester tester) async {
     const Widget flexibleSpace = Text('custom flexibleSpace');
     final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
     addTearDown(() => delegate.dispose());
@@ -671,6 +670,8 @@ void main() {
                                 id: 9,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isTextField,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocused,
                                   SemanticsFlag.isHeader,
                                   if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
@@ -731,7 +732,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('includes routeName on Android', (WidgetTester tester) async {
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
       addTearDown(() => delegate.dispose());
@@ -753,7 +754,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('does not include routeName', (WidgetTester tester) async {
+    testWidgets('does not include routeName', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
       addTearDown(() => delegate.dispose());
@@ -819,6 +820,8 @@ void main() {
                             id: 11,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
                               if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
@@ -867,7 +870,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('includes routeName on Android', (WidgetTester tester) async {
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate();
       addTearDown(() => delegate.dispose());
@@ -889,7 +892,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('does not include routeName', (WidgetTester tester) async {
+    testWidgets('does not include routeName', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate();
       addTearDown(() => delegate.dispose());
@@ -912,7 +915,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
-  testWidgetsWithLeakTracking('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
     const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
@@ -930,7 +933,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
-  testWidgetsWithLeakTracking('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
+  testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(defaultAppBarTheme: true);
     addTearDown(() => delegate.dispose());
@@ -958,7 +961,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
-  testWidgetsWithLeakTracking('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
+  testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData.dark(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(defaultAppBarTheme: true);
     addTearDown(() => delegate.dispose());
@@ -986,7 +989,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgetsWithLeakTracking('`Leading`, `Actions` and `FlexibleSpace` nullable test', (WidgetTester tester) async {
+  testWidgets('`Leading`, `Actions` and `FlexibleSpace` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading], [buildActions] and [flexibleSpace].
     final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
@@ -1049,7 +1052,7 @@ void main() {
     expect(find.text('HomeBody'), findsOneWidget);
   });
 
- testWidgetsWithLeakTracking('showSearch with useRootNavigator', (WidgetTester tester) async {
+ testWidgets('showSearch with useRootNavigator', (WidgetTester tester) async {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
@@ -1120,7 +1123,7 @@ void main() {
     expect(localObserver.pushCount, 1);
   });
 
-  testWidgetsWithLeakTracking('Query text field shows toolbar initially', (WidgetTester tester) async {
+  testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/95588
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();

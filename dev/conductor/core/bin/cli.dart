@@ -46,10 +46,6 @@ Future<void> main(List<String> args) async {
   )).trim();
 
   <Command<void>>[
-    CodesignCommand(
-      checkouts: checkouts,
-      flutterRoot: _localFlutterRoot,
-    ),
     StatusCommand(
       checkouts: checkouts,
     ),

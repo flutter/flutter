@@ -9,7 +9,7 @@ updates:
       interval: "weekly"
     reviewers:
       - "christopherfujino"
-      - "vashworth"
+      - "jmagman"
       - "keyonghan"
       - "yusuf-goog"
     labels:

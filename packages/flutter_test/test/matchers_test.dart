@@ -663,6 +663,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -790,6 +791,7 @@ void main() {
         link: true,
         onTap: () { },
         onLongPress: () { },
+        identifier: 'ident',
         label: 'foo',
         hint: 'bar',
         value: 'baz',
@@ -947,6 +949,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1039,6 +1042,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1137,6 +1141,7 @@ void main() {
       final SemanticsData emptyData = SemanticsData(
         flags: 0,
         actions: 0,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1163,6 +1168,7 @@ void main() {
       final SemanticsData fullData = SemanticsData(
         flags: allFlags,
         actions: allActions,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1252,6 +1258,7 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: SemanticsAction.customAction.index,
+        identifier: 'i',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),

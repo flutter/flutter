@@ -15,7 +15,7 @@ List<Widget> children(int n) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
@@ -30,7 +30,7 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
-  testWidgetsWithLeakTracking('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
@@ -45,7 +45,7 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
-  testWidgetsWithLeakTracking('Ability to keep a PageView at the end manually (issue 62209)', (WidgetTester tester) async {
+  testWidgets('Ability to keep a PageView at the end manually (issue 62209)', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: PageView62209()));
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 100'), findsNothing);
@@ -132,7 +132,7 @@ void main() {
     expect(find.text('Page 9'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
+  testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     int? lastTapped;
@@ -218,6 +218,19 @@ void main() {
       await memoryEvents(
         () => _ScrollActivity(_ScrollActivityDelegate()).dispose(),
         _ScrollActivity,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  test('$ScrollDragController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => ScrollDragController(
+          delegate: _ScrollActivityDelegate(),
+          details: DragStartDetails(),
+        ).dispose(),
+        ScrollDragController,
       ),
       areCreateAndDispose,
     );

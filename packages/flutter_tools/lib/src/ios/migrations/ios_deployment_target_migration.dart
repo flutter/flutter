@@ -50,14 +50,19 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   <key>MinimumOSVersion</key>
   <string>9.0</string>
 ''';
-    const String minimumOSVersionReplacement = '''
+    const String minimumOSVersionOriginal11 = '''
   <key>MinimumOSVersion</key>
   <string>11.0</string>
+''';
+    const String minimumOSVersionReplacement = '''
+  <key>MinimumOSVersion</key>
+  <string>12.0</string>
 ''';
 
     return fileContents
         .replaceAll(minimumOSVersionOriginal8, minimumOSVersionReplacement)
-        .replaceAll(minimumOSVersionOriginal9, minimumOSVersionReplacement);
+        .replaceAll(minimumOSVersionOriginal9, minimumOSVersionReplacement)
+        .replaceAll(minimumOSVersionOriginal11, minimumOSVersionReplacement);
   }
 
   @override
@@ -65,24 +70,30 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
     // Xcode project file changes.
     const String deploymentTargetOriginal8 = 'IPHONEOS_DEPLOYMENT_TARGET = 8.0;';
     const String deploymentTargetOriginal9 = 'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';
+    const String deploymentTargetOriginal11 = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
 
     // Podfile changes.
-    const String podfilePlatformVersionOriginal = "platform :ios, '9.0'";
+    const String podfilePlatformVersionOriginal9 = "platform :ios, '9.0'";
+    const String podfilePlatformVersionOriginal11 = "platform :ios, '11.0'";
 
     if (line.contains(deploymentTargetOriginal8)
         || line.contains(deploymentTargetOriginal9)
-        || line.contains(podfilePlatformVersionOriginal)) {
+        || line.contains(deploymentTargetOriginal11)
+        || line.contains(podfilePlatformVersionOriginal9)
+        || line.contains(podfilePlatformVersionOriginal11)) {
       if (!migrationRequired) {
         // Only print for the first discovered change found.
-        logger.printStatus('Updating minimum iOS deployment target to 11.0.');
+        logger.printStatus('Updating minimum iOS deployment target to 12.0.');
       }
 
-      const String deploymentTargetReplacement = 'IPHONEOS_DEPLOYMENT_TARGET = 11.0;';
-      const String podfilePlatformVersionReplacement = "platform :ios, '11.0'";
+      const String deploymentTargetReplacement = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
+      const String podfilePlatformVersionReplacement = "platform :ios, '12.0'";
       return line
           .replaceAll(deploymentTargetOriginal8, deploymentTargetReplacement)
           .replaceAll(deploymentTargetOriginal9, deploymentTargetReplacement)
-          .replaceAll(podfilePlatformVersionOriginal, podfilePlatformVersionReplacement);
+          .replaceAll(deploymentTargetOriginal11, deploymentTargetReplacement)
+          .replaceAll(podfilePlatformVersionOriginal9, podfilePlatformVersionReplacement)
+          .replaceAll(podfilePlatformVersionOriginal11, podfilePlatformVersionReplacement);
     }
 
     return line;

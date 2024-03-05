@@ -4,8 +4,7 @@
 
 import 'dart:ui_web' as ui_web;
 
-import 'package:web/web.dart' as web;
-
+import '../web.dart' as web;
 import 'platform.dart' as platform;
 
 export 'platform.dart' show TargetPlatform;
