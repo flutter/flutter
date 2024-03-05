@@ -19,6 +19,7 @@ class SystemContextMenu extends StatefulWidget {
   const SystemContextMenu._({
     super.key,
     required this.anchor,
+    this.onSystemHide,
   });
 
   /// Creates an instance of [SystemContextMenu] for the field indicated by the
@@ -41,22 +42,34 @@ class SystemContextMenu extends StatefulWidget {
           editableTextState.textEditingValue.selection,
         ),
       ),
+      onSystemHide: () {
+        editableTextState.hideToolbar();
+      },
     );
   }
 
   /// The [Rect] that the context menu should point to.
   final Rect anchor;
 
+  /// Called when the system hides this context menu.
+  ///
+  /// For example, tapping outside of the context menu typically causes the
+  /// system to hide the menu.
+  final VoidCallback? onSystemHide;
+
   @override
   State<SystemContextMenu> createState() => _SystemContextMenuState();
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
-  final SystemContextMenuController _systemContextMenuController = SystemContextMenuController();
+  late final SystemContextMenuController _systemContextMenuController;
 
   @override
   void initState() {
     super.initState();
+    _systemContextMenuController = SystemContextMenuController(
+      onSystemHide: widget.onSystemHide,
+    );
     // TODO(justinmc): This whole pattern of being tied to a widget is a little
     // confusing, because the user may dismiss the menu by tapping, but this
     // widget has no idea, and there's no good way to reshow the menu after

@@ -23,11 +23,38 @@ class SystemContextMenuController {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.
-  SystemContextMenuController();
+  SystemContextMenuController({
+    this.onSystemHide,
+  });
+
+  /// Called when the system has hidden the context menu.
+  ///
+  /// For example, tapping outside of the context menu typically causes the
+  /// system to hide it directly. Flutter is made aware that the context menu is
+  /// no longer visible through this callback.
+  final VoidCallback? onSystemHide;
 
   static const MethodChannel _channel = SystemChannels.platform;
 
   static SystemContextMenuController? _lastShown;
+
+  // TODO(justinmc): Distinguish being the last shown and being currently visible.
+  bool get _isActive => this == _lastShown;
+
+  // TODO(justinmc): Connect with engine when implemented.
+  /// Handles the system hiding a context menu.
+  ///
+  /// This is called for all instances of [SystemContextMenuController], so it's
+  /// not guaranteed that this instance was the one that was hidden.
+  void _handleSystemHide() {
+    // If this instance wasn't being shown, then it wasn't the instance that was
+    // hidden.
+    if (this != _lastShown) {
+      return;
+    }
+    // TODO(justinmc): Set a flag for no longer visible? Be sure how the engine works. Does it call when a subsequent "show" is called, or only when the menu is explicitly hidden?
+    onSystemHide?.call();
+  }
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
