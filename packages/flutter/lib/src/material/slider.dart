@@ -612,9 +612,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   bool _dragging = false;
 
-  // For discrete sliders, [_handleChanged] might receive the same value
-  // multiple times. To avoid calling [widget.onChanged] repeatedly, the
-  // value from [_handleChanged] is temporarily saved here.
+  // For discrete sliders, _handleChanged might receive the same value
+  // multiple times. To avoid calling widget.onChanged repeatedly, the
+  // value from _handleChanged is temporarily saved here.
   double? _currentChangedValue;
 
   FocusNode? _focusNode;
