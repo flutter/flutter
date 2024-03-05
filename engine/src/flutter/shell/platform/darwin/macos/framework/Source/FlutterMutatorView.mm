@@ -12,24 +12,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/NSView+ClipsToBounds.h"
 
-namespace flutter {
-PlatformViewLayer::PlatformViewLayer(const FlutterLayer* layer) {
-  FML_CHECK(layer->type == kFlutterLayerContentTypePlatformView);
-  const auto* platform_view = layer->platform_view;
-  identifier_ = platform_view->identifier;
-  for (size_t i = 0; i < platform_view->mutations_count; i++) {
-    mutations_.push_back(*platform_view->mutations[i]);
-  }
-  offset_ = layer->offset;
-  size_ = layer->size;
-}
-PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
-                                     const std::vector<FlutterPlatformViewMutation>& mutations,
-                                     FlutterPoint offset,
-                                     FlutterSize size)
-    : identifier_(identifier), mutations_(mutations), offset_(offset), size_(size) {}
-}  // namespace flutter
-
 @interface FlutterMutatorView () {
   // Each of these views clips to a CGPathRef. These views, if present,
   // are nested (first is child of FlutterMutatorView and last is parent of
@@ -248,16 +230,19 @@ using MutationVector = std::vector<FlutterPlatformViewMutation>;
 /// The transforms sent from the engine include a transform from logical to physical coordinates.
 /// Since Cocoa deals only in logical points, this function prepends a scale transform that scales
 /// back from physical to logical coordinates to compensate.
-MutationVector MutationsForPlatformView(const MutationVector& mutationsIn, float scale) {
-  MutationVector mutations(mutationsIn);
-
-  mutations.insert(mutations.begin(), {
-                                          .type = kFlutterPlatformViewMutationTypeTransformation,
-                                          .transformation{
-                                              .scaleX = 1.0 / scale,
-                                              .scaleY = 1.0 / scale,
-                                          },
-                                      });
+MutationVector MutationsForPlatformView(const FlutterPlatformView* view, float scale) {
+  MutationVector mutations;
+  mutations.reserve(view->mutations_count + 1);
+  mutations.push_back({
+      .type = kFlutterPlatformViewMutationTypeTransformation,
+      .transformation{
+          .scaleX = 1.0 / scale,
+          .scaleY = 1.0 / scale,
+      },
+  });
+  for (size_t i = 0; i < view->mutations_count; ++i) {
+    mutations.push_back(*view->mutations[i]);
+  }
   return mutations;
 }
 
@@ -499,18 +484,18 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
 /// Whenever possible view will be clipped using layer bounds.
 /// If clipping to path is needed, CAShapeLayer(s) will be used as mask.
 /// Clipping to round rect only clips to path if round corners are intersected.
-- (void)applyFlutterLayer:(const flutter::PlatformViewLayer*)layer {
+- (void)applyFlutterLayer:(const FlutterLayer*)layer {
   // Compute the untransformed bounding rect for the platform view in logical pixels.
   // FlutterLayer.size is in physical pixels but Cocoa uses logical points.
   CGFloat scale = [self contentsScale];
-  MutationVector mutations = MutationsForPlatformView(layer->mutations(), scale);
+  MutationVector mutations = MutationsForPlatformView(layer->platform_view, scale);
 
   CATransform3D finalTransform = CATransformFromMutations(mutations);
 
   // Compute the untransformed bounding rect for the platform view in logical pixels.
   // FlutterLayer.size is in physical pixels but Cocoa uses logical points.
   CGRect untransformedBoundingRect =
-      CGRectMake(0, 0, layer->size().width / scale, layer->size().height / scale);
+      CGRectMake(0, 0, layer->size.width / scale, layer->size.height / scale);
   CGRect finalBoundingRect = CGRectApplyAffineTransform(
       untransformedBoundingRect, CATransform3DGetAffineTransform(finalTransform));
   self.frame = finalBoundingRect;
