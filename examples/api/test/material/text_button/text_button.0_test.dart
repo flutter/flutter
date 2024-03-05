@@ -55,8 +55,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder smileyButton = find.byType(TextButton).last;
-    await tester.tap(smileyButton); // Smiley image button
-    await tester.pumpAndSettle();
+    await tester.tap(smileyButton);
+    await tester.pump();
 
     String smileyButtonImageUrl() {
       final AnimatedContainer container = tester.widget<AnimatedContainer>(
@@ -66,11 +66,24 @@ void main() {
       final NetworkImage image = decoration.image!.image as NetworkImage;
       return image.url;
     }
+
     // The smiley button's onPressed method changes the button image
     // for one second to simulate a long action running. The button's
     // image changes while the action is running.
     expect(smileyButtonImageUrl().endsWith('text_button_nhu_end.png'), isTrue);
     await tester.pump(const Duration(seconds: 1));
+    expect(smileyButtonImageUrl().endsWith('text_button_nhu_default.png'), isTrue);
+
+    // Pressing the smiley button while the one second action is
+    // underway starts a new one section action. The button's image
+    // doesn't change until the second action has finished.
+    await tester.tap(smileyButton);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(smileyButtonImageUrl().endsWith('text_button_nhu_end.png'), isTrue);
+    await tester.tap(smileyButton); // Second button press.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(smileyButtonImageUrl().endsWith('text_button_nhu_end.png'), isTrue);
+    await tester.pump(const Duration(milliseconds: 500));
     expect(smileyButtonImageUrl().endsWith('text_button_nhu_default.png'), isTrue);
 
     await tester.tap(find.byType(Switch).at(0)); // Dark Mode Switch

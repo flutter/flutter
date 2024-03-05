@@ -55,7 +55,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeMode themeMode = ThemeMode.light;
   late final ScrollController scrollController;
-  bool isRunning = false;
+  Future<void>? currentAction;
 
   static const Widget verticalSpacer = SizedBox(height: 16);
   static const Widget horizontalSpacer = SizedBox(width: 32);
@@ -345,17 +345,22 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // to provide one.
       TextButton(
         onPressed: () async {
-          setState(() { isRunning = true; });
-          Future<void>.delayed(const Duration(seconds: 1), () {
-            // Simulate a time consuming action.
-            setState(() { isRunning = false; });
+          // This is slightly complicated so that if the user presses the button
+          // while the current Future.delayed action is running, the currentAction
+          // flag is only reset to null after the _new_ action completes.
+          late final Future<void> thisAction;
+          thisAction = Future<void>.delayed(const Duration(seconds: 1), () {
+            if (currentAction == thisAction) {
+              setState(() { currentAction = null; });
+            }
           });
+          setState(() { currentAction = thisAction; });
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
           foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
             late final ImageProvider image;
-            if (isRunning) {
+            if (currentAction != null) {
               image = runningImage;
             } else if (states.contains(MaterialState.pressed)) {
               image = pressedImage;
@@ -400,8 +405,6 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           },
         ),
         horizontalSpacer,
-
-        // All of the button examples appear below. They're arranged in two columns.
 
         Expanded(
           child:  Scrollbar(
