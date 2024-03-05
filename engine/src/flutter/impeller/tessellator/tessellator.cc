@@ -205,6 +205,7 @@ std::vector<Point> Tessellator::TessellateConvex(const Path& path,
       output.emplace_back(output.back());
       output.emplace_back(first_point);
       output.emplace_back(first_point);
+      output.emplace_back(first_point);
     } else {
       output.emplace_back(first_point);
     }
