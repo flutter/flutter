@@ -34,13 +34,13 @@ import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../html_utils.dart';
 import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web_template.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
@@ -525,7 +525,7 @@ class WebAssetServer implements AssetReader {
   final WebRendererMode webRenderer;
 
   shelf.Response _serveIndex() {
-    final IndexHtml indexHtml = _getIndexHtml();
+    final WebTemplate indexHtml = _getIndexHtml();
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
@@ -1178,10 +1178,10 @@ String? _stripBasePath(String path, String basePath) {
   return stripLeadingSlash(path);
 }
 
-IndexHtml _getIndexHtml() {
+WebTemplate _getIndexHtml() {
   final File indexHtml =
       globals.fs.currentDirectory.childDirectory('web').childFile('index.html');
   final String htmlContent =
       indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
-  return IndexHtml(htmlContent);
+  return WebTemplate(htmlContent);
 }

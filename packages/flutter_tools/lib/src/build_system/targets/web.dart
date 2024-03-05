@@ -17,12 +17,12 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
-import '../../html_utils.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
+import '../../web_template.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -479,7 +479,7 @@ class WebTemplatedFiles extends Target {
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript();
     }
-    final IndexHtml outputBootstrapContent = IndexHtml(inputBootstrapContent);
+    final WebTemplate outputBootstrapContent = WebTemplate(inputBootstrapContent);
 
     final FileSystem fileSystem = environment.fileSystem;
     final File flutterJsFile = fileSystem.file(fileSystem.path.join(
@@ -506,7 +506,7 @@ class WebTemplatedFiles extends Target {
 
     await for (final FileSystemEntity file in webResources.list(recursive: true)) {
       if (file is File && file.basename == 'index.html') {
-        final IndexHtml indexHtml = IndexHtml(file.readAsStringSync());
+        final WebTemplate indexHtml = WebTemplate(file.readAsStringSync());
         indexHtml.applySubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,

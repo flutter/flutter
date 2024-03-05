@@ -4,7 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/html_utils.dart';
+import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
 
@@ -115,33 +115,33 @@ void main() {
   flutterJs.writeAsStringSync('flutter.js content');
 
   test('can parse baseHref', () {
-    expect(IndexHtml('<base href="/foo/111/">').getBaseHref(), 'foo/111');
-    expect(IndexHtml(htmlSample1).getBaseHref(), 'foo/222');
-    expect(IndexHtml(htmlSample2).getBaseHref(), ''); // Placeholder base href.
+    expect(WebTemplate('<base href="/foo/111/">').getBaseHref(), 'foo/111');
+    expect(WebTemplate(htmlSample1).getBaseHref(), 'foo/222');
+    expect(WebTemplate(htmlSample2).getBaseHref(), ''); // Placeholder base href.
   });
 
   test('handles missing baseHref', () {
-    expect(IndexHtml('').getBaseHref(), '');
-    expect(IndexHtml('<base>').getBaseHref(), '');
-    expect(IndexHtml(htmlSample3).getBaseHref(), '');
+    expect(WebTemplate('').getBaseHref(), '');
+    expect(WebTemplate('<base>').getBaseHref(), '');
+    expect(WebTemplate(htmlSample3).getBaseHref(), '');
   });
 
   test('throws on invalid baseHref', () {
-    expect(() => IndexHtml('<base href>').getBaseHref(), throwsToolExit());
-    expect(() => IndexHtml('<base href="">').getBaseHref(), throwsToolExit());
-    expect(() => IndexHtml('<base href="foo/111">').getBaseHref(), throwsToolExit());
+    expect(() => WebTemplate('<base href>').getBaseHref(), throwsToolExit());
+    expect(() => WebTemplate('<base href="">').getBaseHref(), throwsToolExit());
+    expect(() => WebTemplate('<base href="foo/111">').getBaseHref(), throwsToolExit());
     expect(
-      () => IndexHtml('<base href="foo/111/">').getBaseHref(),
+      () => WebTemplate('<base href="foo/111/">').getBaseHref(),
       throwsToolExit(),
     );
     expect(
-      () => IndexHtml('<base href="/foo/111">').getBaseHref(),
+      () => WebTemplate('<base href="/foo/111">').getBaseHref(),
       throwsToolExit(),
     );
   });
 
   test('applies substitutions', () {
-    final IndexHtml indexHtml = IndexHtml(htmlSample2);
+    final WebTemplate indexHtml = WebTemplate(htmlSample2);
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
@@ -157,7 +157,7 @@ void main() {
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    final IndexHtml indexHtml = IndexHtml(htmlSampleLegacyVar);
+    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
@@ -173,7 +173,7 @@ void main() {
   });
 
   test('re-parses after substitutions', () {
-    final IndexHtml indexHtml = IndexHtml(htmlSample2);
+    final WebTemplate indexHtml = WebTemplate(htmlSample2);
     expect(indexHtml.getBaseHref(), ''); // Placeholder base href.
 
     indexHtml.applySubstitutions(

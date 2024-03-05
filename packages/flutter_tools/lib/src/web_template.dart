@@ -22,8 +22,8 @@ const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 ///   return indexHtml.getBaseHref();
 /// }
 /// ```
-class IndexHtml {
-  IndexHtml(this._content);
+class WebTemplate {
+  WebTemplate(this._content);
 
   String get content => _content;
   String _content;
