@@ -252,13 +252,14 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      visualDensity: VisualDensity(horizontal: 1.5, vertical: -1.5),
+                      visualDensity:  VisualDensity(horizontal: 1.5, vertical: -1.5),
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        visualDensity: VisualDensity(horizontal: 0.5, vertical: -0.5),
+                        sizeAnimationStyle: AnimationStyle.noAnimation,
+                        visualDensity: const VisualDensity(horizontal: 0.5, vertical: -0.5),
                       ),
                     ),
                     child: MenuBar(
