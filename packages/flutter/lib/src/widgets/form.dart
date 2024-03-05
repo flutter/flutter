@@ -61,8 +61,8 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
+  })  : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
+        assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -211,8 +211,7 @@ class FormState extends State<Form> {
   void _fieldDidChange() {
     widget.onChanged?.call();
 
-    _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
+    _hasInteractedByUser = _fields.any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -301,7 +300,6 @@ class FormState extends State<Form> {
     return _validate();
   }
 
-
   /// Validates every [FormField] that is a descendant of this [Form], and
   /// returns a [Set] of [FormFieldState] of the invalid field(s) only, if any.
   ///
@@ -352,8 +350,8 @@ class _FormScope extends InheritedWidget {
     required super.child,
     required FormState formState,
     required int generation,
-  }) : _formState = formState,
-       _generation = generation;
+  })  : _formState = formState,
+        _generation = generation;
 
   final FormState _formState;
 
@@ -441,7 +439,6 @@ class FormField<T> extends StatefulWidget {
   /// handle error conditions or show specific error messages manually.
   final String? forceErrorText;
 
-
   /// An optional method that validates an input. Returns an error string to
   /// display if the input is invalid, or null otherwise.
   ///
@@ -519,7 +516,9 @@ class FormField<T> extends StatefulWidget {
 /// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
-  final RestorableStringN _errorText = RestorableStringN(null);
+  // Marking it as late, so we can get to register it
+  // with the value provided by [forceErrorText].
+  late final RestorableStringN _errorText;
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
 
   /// The current value of the form field.
@@ -592,13 +591,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _validate() {
-      if (widget.forceErrorText != null) {
+    if (widget.forceErrorText != null) {
       _errorText.value = widget.forceErrorText;
-      // skip validating if error is forced.
+      // Skip validating if error is forced.
       return;
     }
-
-
     if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
     } else {
@@ -651,14 +648,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void initState() {
     super.initState();
-    if (widget.forceErrorText != null) {
-      // ignore: always_specify_types
-      Future.microtask(() {
-        setState(() {
-          _errorText.value = widget.forceErrorText;
-        });
-      });
-    }
+    _errorText = RestorableStringN(widget.forceErrorText);
   }
 
   @override
@@ -667,6 +657,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     if (widget.forceErrorText != oldWidget.forceErrorText) {
       _errorText.value = widget.forceErrorText;
     }
+  }
 
   @override
   void dispose() {
@@ -675,7 +666,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.dispose();
   }
 
-    
   @override
   Widget build(BuildContext context) {
     if (widget.enabled) {
