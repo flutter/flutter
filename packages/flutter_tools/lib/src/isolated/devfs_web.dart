@@ -873,7 +873,6 @@ class WebDevFS implements DevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
