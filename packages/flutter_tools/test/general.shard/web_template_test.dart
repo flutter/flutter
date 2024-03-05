@@ -46,6 +46,90 @@ const String htmlSample2 = '''
 </html>
 ''';
 
+const String htmlSampleInlineFlutterJsBootstrap = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/foo/222/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      serviceWorker: {
+        serviceWorkerVersion: {{flutter_service_worker_version}},
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+const String htmlSampleInlineFlutterJsBootstrapOutput = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/foo/222/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter.js content)
+    (build config)
+    _flutter.loader.load({
+      serviceWorker: {
+        serviceWorkerVersion: "(service worker version)",
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+const String htmlSampleFullFlutterBootstrapReplacement = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/foo/222/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_bootstrap_js}}
+  </script>
+</body>
+</html>
+''';
+
+const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/foo/222/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter bootstrap script)
+  </script>
+</body>
+</html>
+''';
+
 const String htmlSampleLegacyVar = '''
 <!DOCTYPE html>
 <html>
@@ -63,6 +147,32 @@ const String htmlSampleLegacyVar = '''
   </script>
   <script>
     navigator.serviceWorker.register('flutter_service_worker.js');
+  </script>
+</body>
+</html>
+''';
+
+const String htmlSampleLegacyLoadEntrypoint = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="$kBaseHrefPlaceholder">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <div></div>
+  <script>
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+      });
+    });
   </script>
 </body>
 </html>
@@ -112,7 +222,7 @@ const String htmlSample3 = '''
 void main() {
   final MemoryFileSystem fs = MemoryFileSystem();
   final File flutterJs = fs.file('flutter.js');
-  flutterJs.writeAsStringSync('flutter.js content');
+  flutterJs.writeAsStringSync('(flutter.js content)');
 
   test('can parse baseHref', () {
     expect(WebTemplate('<base href="/foo/111/">').getBaseHref(), 'foo/111');
@@ -172,6 +282,33 @@ void main() {
     );
   });
 
+  test('applies substitutions to inline flutter.js bootstrap script', () {
+    final WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    expect(indexHtml.getWarnings(), isEmpty);
+
+    indexHtml.applySubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: '(service worker version)',
+      flutterJsFile: flutterJs,
+      buildConfig: '(build config)',
+    );
+    expect(indexHtml.content, htmlSampleInlineFlutterJsBootstrapOutput);
+  });
+
+  test('applies substitutions to full flutter_bootstrap.js replacement', () {
+    final WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    expect(indexHtml.getWarnings(), isEmpty);
+
+    indexHtml.applySubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: '(service worker version)',
+      flutterJsFile: flutterJs,
+      buildConfig: '(build config)',
+      flutterBootstrapJs: '(flutter bootstrap script)',
+    );
+    expect(indexHtml.content, htmlSampleFullFlutterBootstrapReplacementOutput);
+  });
+
   test('re-parses after substitutions', () {
     final WebTemplate indexHtml = WebTemplate(htmlSample2);
     expect(indexHtml.getBaseHref(), ''); // Placeholder base href.
@@ -183,5 +320,22 @@ void main() {
     );
     // The parsed base href should be updated after substitutions.
     expect(indexHtml.getBaseHref(), 'foo/333');
+  });
+
+  test('warns on legacy service worker patterns', () {
+    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
+    expect(warnings.length, 2);
+
+    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
+    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+  });
+
+  test('warns on legacy FlutterLoader.loadEntrypoint', () {
+    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
+
+    expect(warnings.length, 1);
+    expect(warnings.single.lineNumber, 14);
   });
 }
