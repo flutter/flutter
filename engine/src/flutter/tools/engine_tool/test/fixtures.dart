@@ -110,3 +110,76 @@ String testConfig(String os) => '''
   ]
 }
 ''';
+
+String attachedDevices() => '''
+[
+  {
+    "name": "sdk gphone64 arm64",
+    "id": "emulator-5554",
+    "isSupported": true,
+    "targetPlatform": "android-arm64",
+    "emulator": true,
+    "sdk": "Android 14 (API 34)",
+    "capabilities": {
+      "hotReload": true,
+      "hotRestart": true,
+      "screenshot": true,
+      "fastStart": true,
+      "flutterExit": true,
+      "hardwareRendering": true,
+      "startPaused": true
+    }
+  },
+  {
+    "name": "macOS",
+    "id": "macos",
+    "isSupported": true,
+    "targetPlatform": "darwin",
+    "emulator": false,
+    "sdk": "macOS 14.3.1 23D60 darwin-arm64",
+    "capabilities": {
+      "hotReload": true,
+      "hotRestart": true,
+      "screenshot": false,
+      "fastStart": false,
+      "flutterExit": true,
+      "hardwareRendering": false,
+      "startPaused": true
+    }
+  },
+  {
+    "name": "Mac Designed for iPad",
+    "id": "mac-designed-for-ipad",
+    "isSupported": true,
+    "targetPlatform": "darwin",
+    "emulator": false,
+    "sdk": "macOS 14.3.1 23D60 darwin-arm64",
+    "capabilities": {
+      "hotReload": true,
+      "hotRestart": true,
+      "screenshot": false,
+      "fastStart": false,
+      "flutterExit": true,
+      "hardwareRendering": false,
+      "startPaused": true
+    }
+  },
+  {
+    "name": "Chrome",
+    "id": "chrome",
+    "isSupported": true,
+    "targetPlatform": "web-javascript",
+    "emulator": false,
+    "sdk": "Google Chrome 122.0.6261.94",
+    "capabilities": {
+      "hotReload": true,
+      "hotRestart": true,
+      "screenshot": false,
+      "fastStart": false,
+      "flutterExit": false,
+      "hardwareRendering": false,
+      "startPaused": true
+    }
+  }
+]
+''';

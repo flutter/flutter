@@ -16,6 +16,7 @@ The tool has the following commands.
 * `help` - Prints helpful information about commands and usage.
 * `format` - Formats files in the engine tree using various off-the-shelf
 formatters.
+* `run` - Runs a flutter application with a local build of the engine.
 * `query builds` - Lists the CI builds described under `ci/builders` that the
 host platform is capable of executing.
 

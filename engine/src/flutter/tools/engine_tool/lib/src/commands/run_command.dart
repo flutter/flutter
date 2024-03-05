@@ -8,6 +8,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:process_runner/process_runner.dart';
 
 import '../build_utils.dart';
+import '../run_utils.dart';
 import 'command.dart';
 import 'flags.dart';
 
@@ -48,7 +49,7 @@ final class RunCommand extends CommandBase {
   String get description => 'Run a flutter app with a local engine build'
       'All arguments after -- are forwarded to flutter run, e.g.: '
       'et run -- --profile'
-      'et run -- -d chrome'
+      'et run -- -d macos'
       'See `flutter run --help` for a listing';
 
   Build? _lookup(String configName) {
@@ -76,17 +77,23 @@ final class RunCommand extends CommandBase {
     return null;
   }
 
-  String _selectTargetConfig() {
-    final String configName = argResults![configFlag] as String;
-    if (configName.isNotEmpty) {
-      return configName;
+  String _getDeviceId() {
+    if (argResults!.rest.contains('-d')) {
+      final int index = argResults!.rest.indexOf('-d') + 1;
+      if (index < argResults!.rest.length) {
+        return argResults!.rest[index];
+      }
     }
-    // TODO(johnmccutchan): We need a way to invoke flutter tool and be told
-    // which OS and CPU architecture the selected device requires, for now
-    // use some hard coded values:
-    const String targetOS = 'android';
-    const String cpuArch = 'arm64';
+    if (argResults!.rest.contains('--device-id')) {
+      final int index = argResults!.rest.indexOf('--device-id') + 1;
+      if (index < argResults!.rest.length) {
+        return argResults!.rest[index];
+      }
+    }
+    return '';
+  }
 
+  String _getMode() {
     // Sniff the build mode from the args that will be passed to flutter run.
     String mode = 'debug';
     if (argResults!.rest.contains('--profile')) {
@@ -94,8 +101,23 @@ final class RunCommand extends CommandBase {
     } else if (argResults!.rest.contains('--release')) {
       mode = 'release';
     }
+    return mode;
+  }
 
-    return '${targetOS}_${mode}_$cpuArch';
+  Future<String?> _selectTargetConfig() async {
+    final String configName = argResults![configFlag] as String;
+    if (configName.isNotEmpty) {
+      return configName;
+    }
+    final String deviceId = _getDeviceId();
+    final RunTarget? target =
+        await detectAndSelectRunTarget(environment, deviceId);
+    if (target == null) {
+      return 'host_debug';
+    }
+    environment.logger.status(
+        'Building to run on "${target.name}" running ${target.targetPlatform}');
+    return target.buildConfigFor(_getMode());
   }
 
   @override
@@ -104,7 +126,11 @@ final class RunCommand extends CommandBase {
       environment.logger.error('Cannot find flutter command in your path');
       return 1;
     }
-    final String configName = _selectTargetConfig();
+    final String? configName = await _selectTargetConfig();
+    if (configName == null) {
+      environment.logger.error('Could not find target config');
+      return 1;
+    }
     final Build? build = _lookup(configName);
     final Build? hostBuild = _findHostBuild(build);
     if (build == null) {
