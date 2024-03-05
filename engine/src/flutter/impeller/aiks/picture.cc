@@ -66,17 +66,15 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
         /*mip_count=*/1,
         "Picture Snapshot MSAA",  // label
         RenderTarget::
-            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
-        std::nullopt                            // stencil_attachment_config
+            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
         *impeller_context,  // context
         size,               // size
         /*mip_count=*/1,
-        "Picture Snapshot",                           // label
-        RenderTarget::kDefaultColorAttachmentConfig,  // color_attachment_config
-        std::nullopt  // stencil_attachment_config
+        "Picture Snapshot",                          // label
+        RenderTarget::kDefaultColorAttachmentConfig  // color_attachment_config
     );
   }
   if (!target.IsValid()) {
