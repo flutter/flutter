@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
   runApp(
@@ -22,6 +23,34 @@ class PlatformViewApp extends StatefulWidget {
 }
 
 class PlatformViewAppState extends State<PlatformViewApp> {
+
+  final String _adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-3940256099942544/2934735716';
+
+  BannerAd getBanner() {
+    var bannerAd = BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size: AdSize.mediumRectangle,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {},
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {},
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) {},
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {},
+        // Called when an impression occurs on the ad.
+        onAdImpression: (Ad ad) {},
+      ),
+    );
+
+    bannerAd.load();
+    return bannerAd;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,30 +60,19 @@ class PlatformViewAppState extends State<PlatformViewApp> {
         appBar: AppBar(title: const Text('Platform View Ad Banners')),
         body: ListView.builder(
           key: const Key('platform-views-scroll'), // This key is used by the driver test.
-          itemCount: 200,
+          itemCount: 250,
           itemBuilder: (BuildContext context, int index) {
             return index.isEven
                 // Adjust the height so that there are multiple ad banners on screen at the same time.
-                ? Container(height: 50.0, color: Colors.yellow)
-                : const DummyAdBanner();
+                ? Container(height: 250.0, color: Colors.yellow)
+                : SizedBox(
+                  width: 320,
+                  height: 50,
+                  child: AdWidget(ad: getBanner()),
+                );
           },
         ),
       ),
-    );
-  }
-}
-
-class DummyAdBanner extends StatelessWidget {
-  const DummyAdBanner({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // mimic admob standard banner size (320x50)
-      // TODO: use real admob banner? or use webview?
-      width: 320.0,
-      height: 50.0,
-      child: const UiKitView(viewType: 'benchmarks/platform_views_layout/DummyPlatformView'),
     );
   }
 }
