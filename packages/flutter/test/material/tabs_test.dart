@@ -6993,4 +6993,44 @@ void main() {
       expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
     });
   });
+
+  testWidgets('does not crash if switching to a newly added tab', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144087.
+    Widget buildTabs(int tabCount) {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabCount,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Flutter Demo Click Counter'),
+              bottom: TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: List<Widget>.generate(tabCount, (int i) => Tab(text: 'Tab $i')),
+              ),
+            ),
+            body: TabBarView(
+              children: List<Widget>.generate(tabCount, (int i) => Text('View $i')),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(1));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(1));
+
+    await tester.pumpWidget(buildTabs(2));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(2));
+
+    await tester.pumpWidget(buildTabs(3));
+    expect(tester.widgetList(find.byType(Tab)), hasLength(3));
+
+    expect(find.text('View 0'), findsOneWidget);
+    expect(find.text('View 2'), findsNothing);
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('View 0'), findsNothing);
+    expect(find.text('View 2'), findsOneWidget);
+  });
 }
