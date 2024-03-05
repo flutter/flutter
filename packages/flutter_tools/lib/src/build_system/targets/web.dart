@@ -470,6 +470,7 @@ class WebTemplatedFiles extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    print('building templated');
     final Directory webResources = environment.projectDir
       .childDirectory('web');
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
@@ -504,30 +505,33 @@ class WebTemplatedFiles extends Target {
     ));
     await outputFlutterBootstrapJs.writeAsString(outputBootstrapContent.content);
 
-    final File inputIndexHtml = webResources.childFile('index.html');
-    if (await inputIndexHtml.exists()) {
-      final IndexHtml indexHtml = IndexHtml(inputIndexHtml.readAsStringSync());
-      indexHtml.applySubstitutions(
-        baseHref: environment.defines[kBaseHref] ?? '/',
-        serviceWorkerVersion: serviceWorkerVersion,
-        flutterJsFile: flutterJsFile,
-        buildConfig: buildConfigString,
-        flutterBootstrapJs: outputBootstrapContent.content,
-      );
-      final File outputIndexHtml = fileSystem.file(fileSystem.path.join(
-        environment.outputDir.path,
-        'index.html'
-      ));
-      await outputIndexHtml.writeAsString(indexHtml.content);
+    await for (final FileSystemEntity file in webResources.list(recursive: true)) {
+      if (file is File && file.basename == 'index.html') {
+        final IndexHtml indexHtml = IndexHtml(file.readAsStringSync());
+        indexHtml.applySubstitutions(
+          baseHref: environment.defines[kBaseHref] ?? '/',
+          serviceWorkerVersion: serviceWorkerVersion,
+          flutterJsFile: flutterJsFile,
+          buildConfig: buildConfigString,
+          flutterBootstrapJs: outputBootstrapContent.content,
+        );
+        final String relativePath = fileSystem.path.relative(file.path, from: webResources.path);
+        final File outputIndexHtml = fileSystem.file(fileSystem.path.join(
+          environment.outputDir.path,
+          relativePath,
+        ));
+        await outputIndexHtml.writeAsString(indexHtml.content);
+      }
     }
   }
+
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/web/index.html'),
+    Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     Source.hostArtifact(HostArtifact.flutterWebSdk),
   ];
@@ -537,7 +541,7 @@ class WebTemplatedFiles extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/index.html'),
+    Source.pattern('{OUTPUT_DIR}/*/index.html'),
     Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
   ];
 }

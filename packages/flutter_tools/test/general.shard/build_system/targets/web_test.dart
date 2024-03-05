@@ -142,9 +142,7 @@ void main() {
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await WebTemplatedFiles('buildConfig').build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -157,9 +155,7 @@ void main() {
 <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await WebTemplatedFiles('build config').build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -167,18 +163,9 @@ void main() {
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
-    webResources.childFile('index.html')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('''
-<html>
-  <script src="main.dart.js" type="application/javascript"></script>
-  <script>
-    navigator.serviceWorker.register('flutter_service_worker.js');
-  </script>
-</html>
-''');
     webResources.childFile('foo.txt')
-      .writeAsStringSync('A');
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
@@ -201,11 +188,6 @@ void main() {
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
-    // Appends number to requests for service worker only
-    expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
-      contains('<script src="main.dart.js" type="application/javascript">'),
-      contains('flutter_service_worker.js?v='),
-    ));
   }));
 
   test('WebReleaseBundle copies over output files when they change', () => testbed.run(() async {
