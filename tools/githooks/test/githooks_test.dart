@@ -66,4 +66,52 @@ void main() {
     }
     expect(result, equals(1));
   });
+
+  test('post-merge runs successfully', () async {
+    int? result;
+    try {
+      final io.Directory flutterPath = io.File(io.Platform.script.path)
+        .parent.parent.parent;
+      result = await run(<String>[
+        'post-merge',
+        '--flutter',
+        flutterPath.path,
+      ]);
+    } catch (e, st) {
+      fail('Unexpected exception: $e\n$st');
+    }
+    expect(result, equals(0));
+  });
+
+  test('pre-rebase runs successfully', () async {
+    int? result;
+    try {
+      final io.Directory flutterPath = io.File(io.Platform.script.path)
+        .parent.parent.parent;
+      result = await run(<String>[
+        'pre-rebase',
+        '--flutter',
+        flutterPath.path,
+      ]);
+    } catch (e, st) {
+      fail('Unexpected exception: $e\n$st');
+    }
+    expect(result, equals(0));
+  });
+
+  test('post-checkout runs successfully', () async {
+    int? result;
+    try {
+      final io.Directory flutterPath = io.File(io.Platform.script.path)
+        .parent.parent.parent;
+      result = await run(<String>[
+        'post-checkout',
+        '--flutter',
+        flutterPath.path,
+      ]);
+    } catch (e, st) {
+      fail('Unexpected exception: $e\n$st');
+    }
+    expect(result, equals(0));
+  });
 }
