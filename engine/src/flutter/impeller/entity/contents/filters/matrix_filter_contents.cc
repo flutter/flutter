@@ -64,7 +64,10 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
                         snapshot->transform;
 
   snapshot->sampler_descriptor = sampler_descriptor_;
-  return Entity::FromSnapshot(snapshot, entity.GetBlendMode(),
+  if (!snapshot.has_value()) {
+    return std::nullopt;
+  }
+  return Entity::FromSnapshot(snapshot.value(), entity.GetBlendMode(),
                               entity.GetClipDepth());
 }
 
