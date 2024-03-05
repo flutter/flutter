@@ -114,7 +114,7 @@ class MenuStyle with Diagnosticable {
     this.mouseCursor,
     this.visualDensity,
     this.alignment,
-    this.animationStyle,
+    this.sizeAnimationStyle,
   });
 
   /// The menu's background fill color.
@@ -208,7 +208,7 @@ class MenuStyle with Diagnosticable {
   /// the menu animation curve. Otherwise, defaults to [Curves.easeIn].
   ///
   /// To disable the animation when menu is open/close, use [AnimationStyle.noAnimation].
-  final AnimationStyle? animationStyle;
+  final AnimationStyle? sizeAnimationStyle;
 
   @override
   int get hashCode {
@@ -226,7 +226,7 @@ class MenuStyle with Diagnosticable {
       mouseCursor,
       visualDensity,
       alignment,
-      animationStyle,
+      sizeAnimationStyle,
     ];
     return Object.hashAll(values);
   }
@@ -253,7 +253,7 @@ class MenuStyle with Diagnosticable {
         && other.mouseCursor == mouseCursor
         && other.visualDensity == visualDensity
         && other.alignment == alignment
-        && other.animationStyle == animationStyle;
+        && other.sizeAnimationStyle == sizeAnimationStyle;
   }
 
   /// Returns a copy of this MenuStyle with the given fields replaced with
@@ -272,7 +272,7 @@ class MenuStyle with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     AlignmentGeometry? alignment,
-    AnimationStyle? animationStyle,
+    AnimationStyle? sizeAnimationStyle,
   }) {
     return MenuStyle(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -288,7 +288,7 @@ class MenuStyle with Diagnosticable {
       mouseCursor: mouseCursor ?? this.mouseCursor,
       visualDensity: visualDensity ?? this.visualDensity,
       alignment: alignment ?? this.alignment,
-      animationStyle: animationStyle ?? this.animationStyle,
+      sizeAnimationStyle: sizeAnimationStyle ?? this.sizeAnimationStyle,
     );
   }
 
@@ -315,7 +315,7 @@ class MenuStyle with Diagnosticable {
       mouseCursor: mouseCursor ?? style.mouseCursor,
       visualDensity: visualDensity ?? style.visualDensity,
       alignment: alignment ?? style.alignment,
-      animationStyle: animationStyle ?? style.animationStyle,
+      sizeAnimationStyle: sizeAnimationStyle ?? style.sizeAnimationStyle,
     );
   }
 
@@ -338,7 +338,7 @@ class MenuStyle with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
-      animationStyle: AnimationStyle.lerp(a?.animationStyle, b?.animationStyle, t),
+      sizeAnimationStyle: AnimationStyle.lerp(a?.sizeAnimationStyle, b?.sizeAnimationStyle, t),
     );
   }
 
@@ -358,6 +358,6 @@ class MenuStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(DiagnosticsProperty<AnimationStyle>('animationStyle', animationStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<AnimationStyle>('sizeAnimationStyle', sizeAnimationStyle, defaultValue: null));
   }
 }

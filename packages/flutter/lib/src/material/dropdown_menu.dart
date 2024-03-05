@@ -1144,7 +1144,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
       minimumSize: const MaterialStatePropertyAll<Size>(Size(_kMinimumWidth, 0.0)),
       maximumSize: const MaterialStatePropertyAll<Size>(Size.infinite),
       visualDensity: _theme.visualDensity,
-      animationStyle: switch (Theme.of(context).platform) {
+      sizeAnimationStyle: switch (Theme.of(context).platform) {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia
           => AnimationStyle(
             curve: Curves.easeInOutCubicEmphasized,
