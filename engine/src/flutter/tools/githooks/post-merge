@@ -4,18 +4,16 @@
 # found in the LICENSE file.
 
 '''
-Runs the pre-push githooks.
+Runs the post-merge githooks.
 '''
 
 import os
 import subprocess
 import sys
 
-
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 DART_BIN = os.path.join(SRC_ROOT, 'third_party', 'dart', 'tools', 'sdks', 'dart-sdk', 'bin')
-ENABLE_CLANG_TIDY = os.environ.get('PRE_PUSH_CLANG_TIDY')
 
 def Main(argv):
   githook_args = [
@@ -23,17 +21,12 @@ def Main(argv):
     FLUTTER_DIR,
   ]
 
-  if ENABLE_CLANG_TIDY is not None:
-    githook_args += [
-      '--enable-clang-tidy',
-    ]
-
   result = subprocess.run([
     os.path.join(DART_BIN, 'dart'),
     '--disable-dart-dev',
     os.path.join(FLUTTER_DIR, 'tools', 'githooks', 'bin', 'main.dart'),
   ] + githook_args + [
-    'pre-push',
+    'post-merge',
   ] + argv[1:], cwd=SRC_ROOT)
   return result.returncode
 
