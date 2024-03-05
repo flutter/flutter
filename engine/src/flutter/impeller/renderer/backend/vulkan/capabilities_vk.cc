@@ -9,7 +9,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 
@@ -153,25 +152,58 @@ CapabilitiesVK::GetEnabledInstanceExtensions() const {
   return required;
 }
 
-static const char* GetDeviceExtensionName(OptionalDeviceExtensionVK ext) {
+static const char* GetExtensionName(RequiredCommonDeviceExtensionVK ext) {
+  switch (ext) {
+    case RequiredCommonDeviceExtensionVK::kKHRSwapchain:
+      return VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    case RequiredCommonDeviceExtensionVK::kLast:
+      return "Unknown";
+  }
+  FML_UNREACHABLE();
+}
+
+static const char* GetExtensionName(RequiredAndroidDeviceExtensionVK ext) {
+  switch (ext) {
+    case RequiredAndroidDeviceExtensionVK::
+        kANDROIDExternalMemoryAndroidHardwareBuffer:
+      return "VK_ANDROID_external_memory_android_hardware_buffer";
+    case RequiredAndroidDeviceExtensionVK::kKHRSamplerYcbcrConversion:
+      return VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kKHRExternalMemory:
+      return VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kEXTQueueFamilyForeign:
+      return VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kKHRDedicatedAllocation:
+      return VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kLast:
+      return "Unknown";
+  }
+  FML_UNREACHABLE();
+}
+
+static const char* GetExtensionName(OptionalDeviceExtensionVK ext) {
   switch (ext) {
     case OptionalDeviceExtensionVK::kEXTPipelineCreationFeedback:
       return VK_EXT_PIPELINE_CREATION_FEEDBACK_EXTENSION_NAME;
+    case OptionalDeviceExtensionVK::kVKKHRPortabilitySubset:
+      return "VK_KHR_portability_subset";
     case OptionalDeviceExtensionVK::kLast:
       return "Unknown";
   }
-  return "Unknown";
+  FML_UNREACHABLE();
 }
 
-static void IterateOptionalDeviceExtensions(
-    const std::function<void(OptionalDeviceExtensionVK)>& it) {
+template <class T>
+static bool IterateExtensions(const std::function<bool(T)>& it) {
   if (!it) {
-    return;
+    return false;
   }
-  for (size_t i = 0;
-       i < static_cast<uint32_t>(OptionalDeviceExtensionVK::kLast); i++) {
-    it(static_cast<OptionalDeviceExtensionVK>(i));
+  for (size_t i = 0; i < static_cast<uint32_t>(T::kLast); i++) {
+    if (!it(static_cast<T>(i))) {
+      return false;
+    }
   }
+  return true;
 }
 
 static std::optional<std::set<std::string>> GetSupportedDeviceExtensions(
@@ -200,36 +232,49 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
 
   std::vector<std::string> enabled;
 
-  if (exts->find("VK_KHR_swapchain") == exts->end()) {
-    VALIDATION_LOG << "Device does not support the swapchain extension.";
-    return std::nullopt;
-  }
-  enabled.push_back("VK_KHR_swapchain");
-
-  // Required for non-conformant implementations like MoltenVK.
-  if (exts->find("VK_KHR_portability_subset") != exts->end()) {
-    enabled.push_back("VK_KHR_portability_subset");
-  }
-
-#ifdef FML_OS_ANDROID
-  if (exts->find("VK_ANDROID_external_memory_android_hardware_buffer") ==
-      exts->end()) {
-    VALIDATION_LOG
-        << "Device does not support "
-           "VK_ANDROID_external_memory_android_hardware_buffer extension.";
-    return std::nullopt;
-  }
-  enabled.push_back("VK_ANDROID_external_memory_android_hardware_buffer");
-  enabled.push_back("VK_EXT_queue_family_foreign");
-#endif
-
-  // Enable all optional extensions if the device supports it.
-  IterateOptionalDeviceExtensions([&](auto ext) {
-    auto ext_name = GetDeviceExtensionName(ext);
-    if (exts->find(ext_name) != exts->end()) {
-      enabled.push_back(ext_name);
+  auto for_each_common_extension = [&](RequiredCommonDeviceExtensionVK ext) {
+    auto name = GetExtensionName(ext);
+    if (exts->find(name) == exts->end()) {
+      VALIDATION_LOG << "Device does not support required extension: " << name;
+      return false;
     }
-  });
+    enabled.push_back(name);
+    return true;
+  };
+
+  auto for_each_android_extension = [&](RequiredAndroidDeviceExtensionVK ext) {
+#ifdef FML_OS_ANDROID
+    auto name = GetExtensionName(ext);
+    if (exts->find(name) == exts->end()) {
+      VALIDATION_LOG << "Device does not support required Android extension: "
+                     << name;
+      return false;
+    }
+    enabled.push_back(name);
+#endif  //  FML_OS_ANDROID
+    return true;
+  };
+
+  auto for_each_optional_extension = [&](OptionalDeviceExtensionVK ext) {
+    auto name = GetExtensionName(ext);
+    if (exts->find(name) != exts->end()) {
+      enabled.push_back(name);
+    }
+    return true;
+  };
+
+  const auto iterate_extensions =
+      IterateExtensions<RequiredCommonDeviceExtensionVK>(
+          for_each_common_extension) &&
+      IterateExtensions<RequiredAndroidDeviceExtensionVK>(
+          for_each_android_extension) &&
+      IterateExtensions<OptionalDeviceExtensionVK>(for_each_optional_extension);
+
+  if (!iterate_extensions) {
+    VALIDATION_LOG << "Device not suitable since required extensions are not "
+                      "supported.";
+    return std::nullopt;
+  }
 
   return enabled;
 }
@@ -282,7 +327,14 @@ static bool HasRequiredQueues(const vk::PhysicalDevice& physical_device) {
                                     vk::QueueFlagBits::eTransfer));
 }
 
-std::optional<vk::PhysicalDeviceFeatures>
+template <class ExtensionEnum>
+static bool IsExtensionInList(const std::vector<std::string>& list,
+                              ExtensionEnum ext) {
+  const std::string name = GetExtensionName(ext);
+  return std::find(list.begin(), list.end(), name) != list.end();
+}
+
+std::optional<CapabilitiesVK::PhysicalDeviceFeatures>
 CapabilitiesVK::GetEnabledDeviceFeatures(
     const vk::PhysicalDevice& device) const {
   if (!PhysicalDeviceSupportsRequiredFormats(device)) {
@@ -300,20 +352,41 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     return std::nullopt;
   }
 
-  if (!GetEnabledDeviceExtensions(device).has_value()) {
+  const auto enabled_extensions = GetEnabledDeviceExtensions(device);
+  if (!enabled_extensions.has_value()) {
     VALIDATION_LOG << "Device doesn't support the required queues.";
     return std::nullopt;
   }
 
-  const auto device_features = device.getFeatures();
+  PhysicalDeviceFeatures supported_chain;
+  device.getFeatures2(&supported_chain.get());
 
-  vk::PhysicalDeviceFeatures required;
+  PhysicalDeviceFeatures required_chain;
 
-  // We require this for enabling wireframes in the playground. But its not
-  // necessarily a big deal if we don't have this feature.
-  required.fillModeNonSolid = device_features.fillModeNonSolid;
+  // Base features.
+  {
+    auto& required = required_chain.get().features;
+    const auto& supported = supported_chain.get().features;
 
-  return required;
+    // We require this for enabling wireframes in the playground. But its not
+    // necessarily a big deal if we don't have this feature.
+    required.fillModeNonSolid = supported.fillModeNonSolid;
+  }
+  // VK_KHR_sampler_ycbcr_conversion features.
+  if (IsExtensionInList(
+          enabled_extensions.value(),
+          RequiredAndroidDeviceExtensionVK::kKHRSamplerYcbcrConversion)) {
+    auto& required =
+        required_chain
+            .get<vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR>();
+    const auto& supported =
+        supported_chain
+            .get<vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR>();
+
+    required.samplerYcbcrConversion = supported.samplerYcbcrConversion;
+  }
+
+  return required_chain;
 }
 
 bool CapabilitiesVK::HasLayer(const std::string& layer) const {
@@ -386,16 +459,33 @@ bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
 
   // Determine the optional device extensions this physical device supports.
   {
+    required_common_device_extensions_.clear();
+    required_android_device_extensions_.clear();
     optional_device_extensions_.clear();
     auto exts = GetSupportedDeviceExtensions(device);
     if (!exts.has_value()) {
       return false;
     }
-    IterateOptionalDeviceExtensions([&](auto ext) {
-      auto ext_name = GetDeviceExtensionName(ext);
+    IterateExtensions<RequiredCommonDeviceExtensionVK>([&](auto ext) -> bool {
+      auto ext_name = GetExtensionName(ext);
+      if (exts->find(ext_name) != exts->end()) {
+        required_common_device_extensions_.insert(ext);
+      }
+      return true;
+    });
+    IterateExtensions<RequiredAndroidDeviceExtensionVK>([&](auto ext) -> bool {
+      auto ext_name = GetExtensionName(ext);
+      if (exts->find(ext_name) != exts->end()) {
+        required_android_device_extensions_.insert(ext);
+      }
+      return true;
+    });
+    IterateExtensions<OptionalDeviceExtensionVK>([&](auto ext) -> bool {
+      auto ext_name = GetExtensionName(ext);
       if (exts->find(ext_name) != exts->end()) {
         optional_device_extensions_.insert(ext);
       }
+      return true;
     });
   }
 
@@ -478,14 +568,23 @@ CapabilitiesVK::GetPhysicalDeviceProperties() const {
   return device_properties_;
 }
 
-bool CapabilitiesVK::HasOptionalDeviceExtension(
-    OptionalDeviceExtensionVK extension) const {
-  return optional_device_extensions_.find(extension) !=
-         optional_device_extensions_.end();
-}
-
 PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
   return PixelFormat::kR8UNormInt;
+}
+
+bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
+  return required_common_device_extensions_.find(ext) !=
+         required_common_device_extensions_.end();
+}
+
+bool CapabilitiesVK::HasExtension(RequiredAndroidDeviceExtensionVK ext) const {
+  return required_android_device_extensions_.find(ext) !=
+         required_android_device_extensions_.end();
+}
+
+bool CapabilitiesVK::HasExtension(OptionalDeviceExtensionVK ext) const {
+  return optional_device_extensions_.find(ext) !=
+         optional_device_extensions_.end();
 }
 
 }  // namespace impeller

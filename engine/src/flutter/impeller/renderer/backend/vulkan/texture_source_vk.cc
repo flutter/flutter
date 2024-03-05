@@ -14,6 +14,10 @@ const TextureDescriptor& TextureSourceVK::GetTextureDescriptor() const {
   return desc_;
 }
 
+std::shared_ptr<YUVConversionVK> TextureSourceVK::GetYUVConversion() const {
+  return nullptr;
+}
+
 vk::ImageLayout TextureSourceVK::GetLayout() const {
   ReaderLock lock(layout_mutex_);
   return layout_;

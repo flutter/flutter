@@ -28,41 +28,8 @@ const std::unique_ptr<const Sampler>& SamplerLibraryVK::GetSampler(
   if (!device_holder || !device_holder->GetDevice()) {
     return kNullSampler;
   }
-
-  const auto mip_map = ToVKSamplerMipmapMode(desc.mip_filter);
-
-  const auto min_filter = ToVKSamplerMinMagFilter(desc.min_filter);
-  const auto mag_filter = ToVKSamplerMinMagFilter(desc.mag_filter);
-
-  const auto address_mode_u = ToVKSamplerAddressMode(desc.width_address_mode);
-  const auto address_mode_v = ToVKSamplerAddressMode(desc.height_address_mode);
-  const auto address_mode_w = ToVKSamplerAddressMode(desc.depth_address_mode);
-
-  const auto sampler_create_info =
-      vk::SamplerCreateInfo()
-          .setMagFilter(mag_filter)
-          .setMinFilter(min_filter)
-          .setAddressModeU(address_mode_u)
-          .setAddressModeV(address_mode_v)
-          .setAddressModeW(address_mode_w)
-          .setBorderColor(vk::BorderColor::eFloatTransparentBlack)
-          .setMipmapMode(mip_map);
-
-  auto res =
-      device_holder->GetDevice().createSamplerUnique(sampler_create_info);
-  if (res.result != vk::Result::eSuccess) {
-    FML_LOG(ERROR) << "Failed to create sampler: " << vk::to_string(res.result);
-    return kNullSampler;
-  }
-
-  auto sampler = std::make_unique<SamplerVK>(desc, std::move(res.value));
-
-  if (!desc.label.empty()) {
-    ContextVK::SetDebugName(device_holder->GetDevice(), sampler->GetSampler(),
-                            desc.label.c_str());
-  }
-
-  return (samplers_[desc] = std::move(sampler));
+  return (samplers_[desc] =
+              std::make_unique<SamplerVK>(device_holder->GetDevice(), desc));
 }
 
 }  // namespace impeller
