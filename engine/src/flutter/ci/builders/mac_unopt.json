@@ -44,6 +44,11 @@
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump"
                     ]
+                },
+                {
+                    "name": "Tests of tools/gn",
+                    "language": "python3",
+                    "script": "flutter/tools/gn_test.py"
                 }
             ]
         },
