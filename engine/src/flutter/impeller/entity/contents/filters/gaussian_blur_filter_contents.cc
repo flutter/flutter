@@ -204,31 +204,12 @@ int ScaleBlurRadius(Scalar radius, Scalar scalar) {
   return static_cast<int>(std::round(radius * scalar));
 }
 
-Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
-                      const Entity& entity,
-                      const std::shared_ptr<FilterInput>& input,
-                      const Snapshot& input_snapshot,
-                      Entity blur_entity,
-                      const std::shared_ptr<Geometry>& geometry) {
-  if (blur_style == FilterContents::BlurStyle::kNormal) {
-    return blur_entity;
-  }
-  Entity::ClipOperation clip_operation;
-  switch (blur_style) {
-    case FilterContents::BlurStyle::kNormal:
-      FML_UNREACHABLE();
-      break;
-    case FilterContents::BlurStyle::kInner:
-      clip_operation = Entity::ClipOperation::kIntersect;
-      break;
-    case FilterContents::BlurStyle::kOuter:
-      clip_operation = Entity::ClipOperation::kDifference;
-      break;
-    case FilterContents::BlurStyle::kSolid:
-      FML_DLOG(ERROR) << "Unimplemented blur style";
-      return blur_entity;
-  }
-
+Entity ApplyClippedBlurStyle(Entity::ClipOperation clip_operation,
+                             const Entity& entity,
+                             const std::shared_ptr<FilterInput>& input,
+                             const Snapshot& input_snapshot,
+                             Entity blur_entity,
+                             const std::shared_ptr<Geometry>& geometry) {
   auto shared_blur_entity = std::make_shared<Entity>(std::move(blur_entity));
   shared_blur_entity->SetNewClipDepth(entity.GetNewClipDepth());
   auto clipper = std::make_unique<ClipContents>();
@@ -254,6 +235,48 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
         return shared_blur_entity->GetCoverage();
       }));
   return result;
+}
+
+Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
+                      const Entity& entity,
+                      const std::shared_ptr<FilterInput>& input,
+                      const Snapshot& input_snapshot,
+                      Entity blur_entity,
+                      const std::shared_ptr<Geometry>& geometry) {
+  switch (blur_style) {
+    case FilterContents::BlurStyle::kNormal:
+      return blur_entity;
+    case FilterContents::BlurStyle::kInner:
+      return ApplyClippedBlurStyle(Entity::ClipOperation::kIntersect, entity,
+                                   input, input_snapshot,
+                                   std::move(blur_entity), geometry);
+      break;
+    case FilterContents::BlurStyle::kOuter:
+      return ApplyClippedBlurStyle(Entity::ClipOperation::kDifference, entity,
+                                   input, input_snapshot,
+                                   std::move(blur_entity), geometry);
+    case FilterContents::BlurStyle::kSolid: {
+      Entity blurred = ApplyClippedBlurStyle(Entity::ClipOperation::kIntersect,
+                                             entity, input, input_snapshot,
+                                             std::move(blur_entity), geometry);
+      Entity snapshot_entity = Entity::FromSnapshot(
+          input_snapshot, entity.GetBlendMode(), entity.GetClipDepth());
+      Entity result;
+      std::optional<Rect> coverage = blurred.GetCoverage();
+      result.SetContents(Contents::MakeAnonymous(
+          fml::MakeCopyable([blurred = std::move(blurred),
+                             snapshot_entity = std::move(snapshot_entity)](
+                                const ContentContext& renderer,
+                                const Entity& entity,
+                                RenderPass& pass) mutable {
+            return blurred.Render(renderer, pass) &&
+                   snapshot_entity.Render(renderer, pass);
+          }),
+          fml::MakeCopyable(
+              [coverage](const Entity& entity) { return coverage; })));
+      return result;
+    }
+  }
 }
 }  // namespace
 
@@ -499,7 +522,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   SamplerDescriptor sampler_desc = MakeSamplerDescriptor(
       MinMagFilter::kLinear, SamplerAddressMode::kClampToEdge);
 
-  auto blur_output_entity = Entity::FromSnapshot(
+  Entity blur_output_entity = Entity::FromSnapshot(
       Snapshot{.texture = pass3_out.value().GetRenderTargetTexture(),
                .transform = input_snapshot->transform *
                             padding_snapshot_adjustment *
@@ -508,13 +531,9 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                .opacity = input_snapshot->opacity},
       entity.GetBlendMode(), entity.GetClipDepth());
 
-  if (!blur_output_entity.has_value()) {
-    return std::nullopt;
-  }
-
   return ApplyBlurStyle(mask_blur_style_, entity, inputs[0],
-                        input_snapshot.value(),
-                        std::move(blur_output_entity.value()), mask_geometry_);
+                        input_snapshot.value(), std::move(blur_output_entity),
+                        mask_geometry_);
 }
 
 Scalar GaussianBlurFilterContents::CalculateBlurRadius(Scalar sigma) {

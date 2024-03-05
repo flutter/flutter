@@ -37,9 +37,13 @@ std::optional<Entity> LocalMatrixFilterContents::RenderFilter(
     const Matrix& effect_transform,
     const Rect& coverage,
     const std::optional<Rect>& coverage_hint) const {
-  return Entity::FromSnapshot(
-      inputs[0]->GetSnapshot("LocalMatrix", renderer, entity),
-      entity.GetBlendMode(), entity.GetClipDepth());
+  std::optional<Snapshot> snapshot =
+      inputs[0]->GetSnapshot("LocalMatrix", renderer, entity);
+  if (!snapshot.has_value()) {
+    return std::nullopt;
+  }
+  return Entity::FromSnapshot(snapshot.value(), entity.GetBlendMode(),
+                              entity.GetClipDepth());
 }
 
 }  // namespace impeller

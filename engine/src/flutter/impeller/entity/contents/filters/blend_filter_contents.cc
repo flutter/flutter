@@ -111,7 +111,7 @@ static std::optional<Entity> AdvancedBlend(
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
       }
-      return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+      return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode(),
                                   entity.GetClipDepth());
     }
     auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
@@ -119,7 +119,7 @@ static std::optional<Entity> AdvancedBlend(
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
       }
-      return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+      return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode(),
                                   entity.GetClipDepth());
     }
     src_uvs = maybe_src_uvs.value();
@@ -426,7 +426,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
   }
 
   if (blend_mode == BlendMode::kDestination) {
-    return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+    return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode(),
                                 entity.GetClipDepth());
   }
 
