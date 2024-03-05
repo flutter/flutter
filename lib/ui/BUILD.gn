@@ -123,7 +123,6 @@ source_set("ui") {
     "text/asset_manager_font_provider.h",
     "text/font_collection.cc",
     "text/font_collection.h",
-    "text/line_metrics.h",
     "text/paragraph.cc",
     "text/paragraph.h",
     "text/paragraph_builder.cc",
