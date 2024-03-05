@@ -198,8 +198,8 @@ final class DevelopmentAssetTransformer {
     } finally {
       resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
-      if (cleanupInput) {
-        ErrorHandlingFileSystem.deleteIfExists(inputFile!);
+      if (cleanupInput && inputFile != null) {
+        ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
