@@ -508,7 +508,6 @@ TEST_F(FlutterEngineTest, Compositor) {
                                                                                 nibName:nil
                                                                                  bundle:nil];
   [viewController loadView];
-  [viewController viewDidLoad];
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
 
   EXPECT_TRUE([engine runWithEntrypoint:@"canCompositePlatformViews"]);
