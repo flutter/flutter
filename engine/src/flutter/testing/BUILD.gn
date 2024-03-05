@@ -51,7 +51,7 @@ source_set("testing") {
 
   sources = [ "run_all_unittests.cc" ]
 
-  if (is_linux) {
+  if (enable_unittests && is_linux) {
     # So that we can call gtk_init in main().
     configs += [ "//flutter/shell/platform/linux/config:gtk" ]
   }
