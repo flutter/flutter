@@ -470,7 +470,6 @@ class WebTemplatedFiles extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    print('building templated');
     final Directory webResources = environment.projectDir
       .childDirectory('web');
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
