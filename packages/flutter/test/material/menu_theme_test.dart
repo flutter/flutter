@@ -68,7 +68,7 @@ void main() {
               child: MenuTheme(
                 data: MenuThemeData(
                   style: MenuStyle(
-                    animationStyle: AnimationStyle.noAnimation,
+                    sizeAnimationStyle: AnimationStyle.noAnimation,
                     backgroundColor: const MaterialStatePropertyAll<Color?>(Colors.red),
                     elevation: const MaterialStatePropertyAll<double?>(15.0),
                     shape: const MaterialStatePropertyAll<OutlinedBorder?>(StadiumBorder()),
@@ -222,7 +222,7 @@ List<Widget> createTestMenus({
     backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
-    animationStyle: AnimationStyle.noAnimation,
+    sizeAnimationStyle: AnimationStyle.noAnimation,
   );
   final ButtonStyle itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,

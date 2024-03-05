@@ -102,7 +102,7 @@ void main() {
                 controller: controller,
                 alignmentOffset: alignmentOffset,
                 consumeOutsideTap: consumesOutsideTap,
-                style: MenuStyle(alignment: alignment, animationStyle: AnimationStyle.noAnimation),
+                style: MenuStyle(alignment: alignment, sizeAnimationStyle: AnimationStyle.noAnimation),
                 onOpen: () {
                   onOpen?.call(TestMenu.anchorButton);
                 },
@@ -1644,7 +1644,7 @@ void main() {
                 alignment: Alignment.topLeft,
                 child: MenuAnchor(
                   style: MenuStyle(
-                    animationStyle: AnimationStyle.noAnimation,
+                    sizeAnimationStyle: AnimationStyle.noAnimation,
                   ),
                   controller: controller,
                   alignmentOffset: const Offset(0, 10),
@@ -2383,7 +2383,7 @@ void main() {
             child: MenuAnchor(
               controller: controller,
               style: MenuStyle(
-                animationStyle: AnimationStyle.noAnimation,
+                sizeAnimationStyle: AnimationStyle.noAnimation,
               ),
               menuChildren: <Widget>[
                 MenuItemButton(
@@ -2420,7 +2420,7 @@ void main() {
           child: Center(
             child: MenuAnchor(
               style: MenuStyle(
-                animationStyle: AnimationStyle.noAnimation,
+                sizeAnimationStyle: AnimationStyle.noAnimation,
               ),
               controller: controller,
               menuChildren: <Widget>[
@@ -2731,7 +2731,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return MenuAnchor(
                 style: MenuStyle(
-                  animationStyle: AnimationStyle.noAnimation,
+                  sizeAnimationStyle: AnimationStyle.noAnimation,
                 ),
                 menuChildren: <Widget>[
                   MenuItemButton(
@@ -2821,7 +2821,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place with offset in LTR', (WidgetTester tester) async {
-      final MenuStyle menuStyle = MenuStyle(animationStyle: AnimationStyle.noAnimation);
+      final MenuStyle menuStyle = MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation);
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -2904,7 +2904,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place with offset in RTL', (WidgetTester tester) async {
-      final MenuStyle menuStyle = MenuStyle(animationStyle: AnimationStyle.noAnimation);
+      final MenuStyle menuStyle = MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation);
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -2999,7 +2999,7 @@ void main() {
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
                     style: MenuStyle(
-                      animationStyle: AnimationStyle.noAnimation,
+                      sizeAnimationStyle: AnimationStyle.noAnimation,
                     ),
                     menuChildren: const <Widget>[
                       MenuItemButton(
@@ -3053,7 +3053,7 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
-                    style: MenuStyle(animationStyle: AnimationStyle.noAnimation),
+                    style: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     alignmentOffset: const Offset(0, 50),
                     menuChildren: const <Widget>[
                       MenuItemButton(
@@ -3311,7 +3311,7 @@ void main() {
               return MenuBar(
                 children: <Widget>[
                   SubmenuButton(
-                    menuStyle: MenuStyle(animationStyle: AnimationStyle.noAnimation),
+                    menuStyle: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     menuChildren: <Widget>[
                       CheckboxMenuButton(
                         value: checkBoxValue,
@@ -3366,7 +3366,7 @@ void main() {
               return MenuBar(
                 children: <Widget>[
                   SubmenuButton(
-                    menuStyle: MenuStyle(animationStyle: AnimationStyle.noAnimation),
+                    menuStyle: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     menuChildren: <Widget>[
                       RadioMenuButton<int>(
                         value: 0,
@@ -3848,7 +3848,7 @@ List<Widget> createTestMenus({
   }) {
     return SubmenuButton(
       menuStyle: MenuStyle(
-        animationStyle: AnimationStyle.noAnimation,
+        sizeAnimationStyle: AnimationStyle.noAnimation,
       ),
       onOpen: onOpen != null ? () => onOpen(menu) : null,
       onClose: onClose != null ? () => onClose(menu) : null,

@@ -62,7 +62,7 @@ void main() {
                 style: MenuStyle(
                   backgroundColor: const MaterialStatePropertyAll<Color?>(Colors.green),
                   elevation: const MaterialStatePropertyAll<double?>(20.0),
-                  animationStyle: AnimationStyle.noAnimation,
+                  sizeAnimationStyle: AnimationStyle.noAnimation,
                 ),
               ),
               child: MenuBarTheme(
@@ -220,7 +220,7 @@ List<Widget> createTestMenus({
     backgroundColor: menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
-    animationStyle: AnimationStyle.noAnimation,
+    sizeAnimationStyle: AnimationStyle.noAnimation,
   );
   final ButtonStyle itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,

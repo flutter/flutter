@@ -118,7 +118,7 @@ void main() {
           shape: const MaterialStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           ),
-          animationStyle: AnimationStyle(
+          sizeAnimationStyle: AnimationStyle(
             duration: const Duration(milliseconds: 700),
           )
         ),
@@ -203,7 +203,7 @@ void main() {
         shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
-        animationStyle: AnimationStyle(
+        sizeAnimationStyle: AnimationStyle(
           duration: const Duration(milliseconds: 200),
         ),
       ),
@@ -227,7 +227,7 @@ void main() {
         shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
-        animationStyle: AnimationStyle.noAnimation,
+        sizeAnimationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
@@ -313,7 +313,7 @@ void main() {
         shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
-        animationStyle: AnimationStyle.noAnimation,
+        sizeAnimationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
@@ -335,7 +335,7 @@ void main() {
         shape: const MaterialStatePropertyAll<OutlinedBorder>(
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         ),
-        animationStyle: AnimationStyle.noAnimation,
+        sizeAnimationStyle: AnimationStyle.noAnimation,
       ),
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
@@ -365,7 +365,7 @@ void main() {
                   shape: const MaterialStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
-                  animationStyle: AnimationStyle(
+                  sizeAnimationStyle: AnimationStyle(
                     duration: const Duration(milliseconds: 300),
                   )
                 ),
