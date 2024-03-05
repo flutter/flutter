@@ -3216,7 +3216,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
