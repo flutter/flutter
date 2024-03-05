@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -16,6 +18,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
@@ -454,6 +457,8 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -471,7 +476,16 @@ class DevFS {
           ? HttpClient()
           : context.get<HttpClientFactory>()!())),
        _stopwatchFactory = stopwatchFactory,
-       _config = config;
+       _config = config,
+       _assetTransformer = DevelopmentAssetTransformer(
+          transformer: AssetTransformer(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+          ),
+          fileSystem: fileSystem,
+          logger: logger,
+        );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
@@ -479,9 +493,10 @@ class DevFS {
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
   final Config? _config;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
   final Set<String> scenePathsToEvict = <String>{};
@@ -505,7 +520,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -600,7 +615,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: rootDirectory?.path,
+      projectRootPath: rootDirectory.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -636,8 +651,8 @@ class DevFS {
         if (archivePath == _kFontManifest) {
           didUpdateFontManifest = true;
         }
-
-        switch (bundle.entries[archivePath]?.kind) {
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
           case AssetKind.shader:
             final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
@@ -672,11 +687,30 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = entry.content;
-            syncedBytes += entry.content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
-            }
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
+
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            });
         }
       });
 

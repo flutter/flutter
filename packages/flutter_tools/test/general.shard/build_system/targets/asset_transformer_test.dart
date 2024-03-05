@@ -74,6 +74,7 @@ void main() {
     expect(transformationFailure, isNull, reason: logger.errorText);
     expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file(outputPath).readAsStringSync(), 'hello world');
+    expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 
   testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
@@ -138,6 +139,7 @@ stdout:
 Beginning transformation
 stderr:
 Something went wrong''');
+    expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 
   testWithoutContext('prints error message when the transformer does not produce an output file', () async {
@@ -197,6 +199,7 @@ stdout:
 stderr:
 Transformation failed, but I forgot to exit with a non-zero code.'''
     );
+    expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 
   testWithoutContext('correctly chains transformations when there are multiple of them', () async {
@@ -283,6 +286,7 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
     expect(processManager, hasNoRemainingExpectations);
     expect(failure, isNull);
     expect(fileSystem.file(outputPath).readAsStringSync(), '012');
+    expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 
   testWithoutContext('prints an error when a transformer in a chain (thats not the first) does not produce an output', () async {
@@ -368,6 +372,6 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
     );
     expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file(outputPath), isNot(exists));
-    expect(fileSystem.systemTempDirectory.listSync(), isEmpty);
+    expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 }

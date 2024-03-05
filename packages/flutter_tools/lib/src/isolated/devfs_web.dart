@@ -701,6 +701,7 @@ class WebDevFS implements DevFS {
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
     required this.webRenderer,
+    required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
 
@@ -857,7 +858,7 @@ class WebDevFS implements DevFS {
   String get fsName => 'web_asset';
 
   @override
-  Directory? get rootDirectory => null;
+  final Directory rootDirectory;
 
   @override
   Future<UpdateFSReport> update({

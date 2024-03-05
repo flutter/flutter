@@ -3,11 +3,16 @@
 // found in the LICENSE file.
 
 
+import 'dart:typed_data';
+
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart';
+import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
 
@@ -52,6 +57,7 @@ final class AssetTransformer {
     File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
     await asset.copy(tempInputFile.path);
     File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
+    ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
@@ -71,10 +77,12 @@ final class AssetTransformer {
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
         if (i == transformerEntries.length - 1) {
+          await _fileSystem.file(outputPath).create(recursive: true);
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
           tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
+          ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
     } finally {
@@ -133,6 +141,69 @@ final class AssetTransformer {
     }
 
     return null;
+  }
+}
+
+
+// A wrapper around [AssetTransformer] to support hot reload of transformed assets.
+final class DevelopmentAssetTransformer {
+  DevelopmentAssetTransformer({
+    required FileSystem fileSystem,
+    required AssetTransformer transformer,
+    required Logger logger,
+  })  : _fileSystem = fileSystem,
+        _transformer = transformer,
+        _logger = logger;
+
+  final AssetTransformer _transformer;
+  final FileSystem _fileSystem;
+  final Pool _transformationPool = Pool(4);
+  final Logger _logger;
+
+  /// Re-transforms an asset and returns a [DevFSContent] that should be synced
+  /// to the attached device in its place.
+  ///
+  /// Returns `null` if any of the transformation subprocesses failed.
+  Future<DevFSContent?> retransformAsset({
+    required String inputAssetKey,
+    required DevFSContent inputAssetContent,
+    required List<AssetTransformerEntry> transformerEntries,
+    required String workingDirectory,
+  }) async {
+    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+    ErrorHandlingFileSystem.deleteIfExists(output);
+    File? inputFile;
+    bool cleanupInput = false;
+    Uint8List result;
+    PoolResource? resource;
+    try {
+      resource = await _transformationPool.request();
+      if (inputAssetContent is DevFSFileContent) {
+        inputFile = inputAssetContent.file as File;
+      } else {
+        inputFile = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+        inputFile.writeAsBytesSync(await inputAssetContent.contentsAsBytes());
+        cleanupInput = true;
+      }
+      final AssetTransformationFailure? failure = await _transformer.transformAsset(
+        asset: inputFile,
+        outputPath: output.path,
+        transformerEntries: transformerEntries,
+        workingDirectory: workingDirectory,
+      );
+      if (failure != null) {
+        _logger.printError(failure.message);
+        return null;
+      }
+      result = output.readAsBytesSync();
+    } finally {
+      resource?.release();
+      ErrorHandlingFileSystem.deleteIfExists(output);
+      if (cleanupInput && inputFile != null) {
+        ErrorHandlingFileSystem.deleteIfExists(inputFile);
+      }
+    }
+    return DevFSByteContent(result);
   }
 }
 
