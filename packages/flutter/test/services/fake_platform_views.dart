@@ -579,8 +579,8 @@ class FakeWindowsPlatformViewController {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
-  final Set<String> _registeredViewTypes = {};
-  final Map<int, FakeWindowsView> _views = {};
+  final Set<String> _registeredViewTypes = <String>{};
+  final Map<int, FakeWindowsView> _views = <int, FakeWindowsView>{};
   Iterable<FakeWindowsView> get views => _views.values;
 
   void registerViewType(String viewType) {

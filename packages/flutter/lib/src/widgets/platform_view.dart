@@ -361,10 +361,14 @@ class AppKitView extends _DarwinView {
 
 /// A windows platform view implemented using a win32 HWND.
 class Win32View extends StatefulWidget {
-  Win32View({
+
+  /// The identifier viewType must be registered on the native side.
+  const Win32View({
     required this.viewType,
+    super.key,
   });
 
+  /// An identifier for a type of platform view. Must be registered with the platform view plugin.
   final String viewType;
 
   @override
@@ -788,7 +792,7 @@ class _WindowsViewState extends State<Win32View> {
       _createNewWin32View();
     }
   }
-  
+
   Future<void> _createNewWin32View() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
     final Win32ViewController controller = await PlatformViewsService.initWindowsView(
