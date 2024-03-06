@@ -1142,6 +1142,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     super.settings,
     this.filter,
     this.traversalEdgeBehavior,
+    this.delegatedTransition,
   });
 
   /// The filter to add to the barrier.
@@ -1472,6 +1473,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   /// {@endtemplate}
   bool get barrierDismissible;
+
+  /// The delegated transition provided to the previous route.
+  final DelegatedTransitionBuilder? delegatedTransition;
 
   /// Whether the semantics of the modal barrier are included in the
   /// semantics tree.
@@ -2095,6 +2099,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     super.settings,
     super.filter,
     super.traversalEdgeBehavior,
+    super.delegatedTransition,
   });
 
   @override
@@ -2296,6 +2301,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.settings,
     this.anchorPoint,
     super.traversalEdgeBehavior,
+    super.delegatedTransition,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
