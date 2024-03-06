@@ -132,9 +132,9 @@ Matcher hasMatch(String pattern) => (dynamic d) {
       }
     };
 
-/// Gives a matcher that asserts that the value being matched is a List<String>
-/// that contains the entries in `pattern` in order. There may be values
-/// that are not in the pattern interleaved.
+/// Gives a matcher that asserts that the value being matched is a
+/// `List<String>` that contains the entries in `pattern` in order.
+/// There may be values that are not in the pattern interleaved.
 Matcher containsStringsInOrder(List<String> pattern) => (dynamic d) {
       expect(d, isInstanceOf<List<String>>());
       final List<String> input = d as List<String>;
@@ -148,6 +148,18 @@ Matcher containsStringsInOrder(List<String> pattern) => (dynamic d) {
         }
       }
       if (cursor < pattern.length) {
-        Expect.fail('Did not find ${pattern[cursor]} in $d}');
+        Expect.fail('Did not find ${pattern[cursor]} in $d');
+      }
+    };
+
+/// Gives a matcher that asserts that the value being matched is a
+/// `List<String>` that does not contain any of the values in `unexpected`.
+Matcher doesNotContainAny(List<String> unexpected) => (dynamic d) {
+      expect(d, isInstanceOf<List<String>>());
+      final List<String> input = d as List<String>;
+      for (final String string in input) {
+        if (unexpected.contains(string)) {
+          Expect.fail("String '$d' is unexpected");
+        }
       }
     };

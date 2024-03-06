@@ -134,9 +134,10 @@ void main() {
     ]);
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(3));
-    expect(runHistory[2].length, greaterThanOrEqualTo(2));
-    expect(runHistory[2][0], contains('python3'));
-    expect(runHistory[2][1], contains('gen/script.py'));
+    expect(
+      runHistory[2],
+      containsStringsInOrder(<String>['python3', 'gen/script.py']),
+    );
   });
 
   test('build command does not invoke tests', () async {

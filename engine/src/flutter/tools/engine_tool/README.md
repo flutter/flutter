@@ -14,6 +14,8 @@ before it will work.
 The tool has the following commands.
 
 * `help` - Prints helpful information about commands and usage.
+* `build` - Builds the Flutter engine.
+* `fetch` - Downloads Flutter engine dependencies.
 * `format` - Formats files in the engine tree using various off-the-shelf
 formatters.
 * `run` - Runs a flutter application with a local build of the engine.
@@ -27,7 +29,7 @@ GitHub issue [here](https://github.com/flutter/flutter/issues/132807). Some
 desirable new features would do the following:
 
 * Add a `doctor` command.
-* Update the engine checkout so that engine developers no longer have to remeber
+* Update the engine checkout so that engine developers no longer have to remember
 to run `gclient sync -D`.
 * Build and test the engine using CI configurations locally, with the
 possibility to override or add new build options and targets.
@@ -61,3 +63,9 @@ implementation, then write a fake implementation.
 * *Begin with the end in mind* - Start working from what the interface provided
 by this tool *should* be, then modify underlying scripts and tools to provide
 APIs to support that.
+
+Run tests using `//flutter/testing/run_tests.py`:
+
+```shell
+testing/run_tests.py --type dart-host --dart-host-filter flutter/tools/engine_tool
+```

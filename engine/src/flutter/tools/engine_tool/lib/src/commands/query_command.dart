@@ -36,12 +36,6 @@ final class QueryCommand extends CommandBase {
             if (entry.value.canRunOn(environment.platform))
               entry.key: entry.value.path,
         },
-      )
-      ..addFlag(
-        verboseFlag,
-        abbr: 'v',
-        help: 'Respond to queries with extra information',
-        negatable: false,
       );
 
     addSubcommand(QueryBuildersCommand(
@@ -85,7 +79,7 @@ final class QueryBuildersCommand extends CommandBase {
     // current platform.
     final bool all = parent!.argResults![allFlag]! as bool;
     final String? builderName = parent!.argResults![builderFlag] as String?;
-    final bool verbose = parent!.argResults![verboseFlag] as bool;
+    final bool verbose = globalResults![verboseFlag]! as bool;
     if (!verbose) {
       environment.logger.status(
         'Add --verbose to see detailed information about each builder',

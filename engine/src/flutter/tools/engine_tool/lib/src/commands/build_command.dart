@@ -17,7 +17,6 @@ final class BuildCommand extends CommandBase {
   }) {
     builds = runnableBuilds(environment, configs);
     debugCheckBuilds(builds);
-    // Add options here that are common to all queries.
     argParser.addOption(
       configFlag,
       abbr: 'c',
@@ -53,6 +52,7 @@ final class BuildCommand extends CommandBase {
       return 1;
     }
 
+    // TODO(loic-sharma): Fetch dependencies if needed.
     return runBuild(environment, build);
   }
 }
