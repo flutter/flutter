@@ -196,7 +196,6 @@ void main() {
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -264,7 +263,6 @@ void main() {
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
-    expect(theme.errorColor, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, true);
   });
 
@@ -327,7 +325,6 @@ void main() {
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -391,7 +388,6 @@ void main() {
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -454,7 +450,6 @@ void main() {
     expect(theme.dividerColor, theme.colorScheme.outline);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
-    expect(theme.errorColor, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, true);
   });
 
@@ -468,7 +463,6 @@ void main() {
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
-    expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 
@@ -483,7 +477,6 @@ void main() {
     expect(theme.canvasColor, equals(darkColors.background));
     expect(theme.scaffoldBackgroundColor, equals(darkColors.background));
     expect(theme.dialogBackgroundColor, equals(darkColors.background));
-    expect(theme.errorColor, equals(darkColors.error));
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
@@ -894,8 +887,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
-      // DEPRECATED (newest deprecations at the bottom)
-      errorColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -1010,9 +1001,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
-
-      // DEPRECATED (newest deprecations at the bottom)
-      errorColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1108,9 +1096,6 @@ void main() {
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       tooltipTheme: otherTheme.tooltipTheme,
-
-      // DEPRECATED (newest deprecations at the bottom)
-      errorColor: otherTheme.errorColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1207,9 +1192,6 @@ void main() {
     expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
     expect(themeDataCopy.toggleButtonsTheme, equals(otherTheme.toggleButtonsTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
-
-    // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1244,7 +1226,6 @@ void main() {
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
-    expect(theme.errorColor, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 
@@ -1337,8 +1318,6 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
-      // DEPRECATED (newest deprecations at the bottom)
-      'errorColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
