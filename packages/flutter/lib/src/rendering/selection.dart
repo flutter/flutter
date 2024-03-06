@@ -111,14 +111,13 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 class SelectedContent {
   /// Creates a selected content object.
 
-  const SelectedContent({required this.plainText, this.textSelection});
+  const SelectedContent({required this.plainText, required this.textSelection});
 
   /// The selected content in plain text format.
   final String plainText;
 
   /// The selected content in [TextSelection] format.
-  /// not all selected content supports TextSelection
-  final TextSelection? textSelection;
+  final TextSelection textSelection;
 
   /// Copy with constructor
   ///
