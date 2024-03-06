@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show Process, ProcessSignal;
+import 'dart:typed_data';
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -29,6 +31,7 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_http_client.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/logging_logger.dart';
@@ -144,6 +147,8 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
     expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
@@ -167,6 +172,8 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     expect(await devFS.create(), isNotNull);
@@ -215,6 +222,8 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (final List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
     await devFS.create();
 
@@ -248,6 +257,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -288,6 +299,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -330,6 +343,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: HttpClient(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -379,6 +394,8 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -456,6 +473,8 @@ void main() {
         'compile': FakeStopwatch()..elapsed = const Duration(seconds: 3),
         'transfer': FakeStopwatch()..elapsed = const Duration(seconds: 5),
       }),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -500,6 +519,8 @@ void main() {
       logger: logger,
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
     );
 
     await devFS.create();
@@ -604,6 +625,8 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(),
       );
 
       await devFS.create();
@@ -660,6 +683,8 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(),
       );
 
       await devFS.create();
@@ -698,6 +723,191 @@ void main() {
       expect(devFS.didUpdateFontManifest, true);
     });
   });
+
+  group('Asset transformation', () {
+    testWithoutContext('DevFS re-transforms assets with transformers during update', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Artifacts artifacts = Artifacts.test();
+      final FakeDevFSWriter devFSWriter = FakeDevFSWriter();
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[
+          FakeCommand(
+            command: <Pattern>[
+              artifacts.getArtifactPath(Artifact.engineDartBinary),
+              'run',
+              'increment',
+              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+            ],
+            onRun: (List<String> command) {
+              final ArgResults argParseResults = (ArgParser()
+                  ..addOption('input', mandatory: true)
+                  ..addOption('output', mandatory: true))
+                .parse(command);
+
+              final File inputFile = fileSystem.file(argParseResults['input']);
+              final File outputFile = fileSystem.file(argParseResults['output']);
+
+              expect(inputFile, exists);
+              outputFile
+                ..createSync()
+                ..writeAsBytesSync(
+                  Uint8List.fromList(
+                    inputFile.readAsBytesSync().map((int b) => b + 1).toList(),
+                  ),
+                );
+            },
+          ),
+        ],
+      );
+
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+        config: Config.test(),
+        processManager: processManager,
+        artifacts: artifacts,
+      );
+
+      await devFS.create();
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+
+      final FakeBundle bundle = FakeBundle()
+        ..entries['asset.txt'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        devFSWriter: devFSWriter,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(report.success, true);
+      expect(devFSWriter.entries, isNotNull);
+      final Uri assetUri = Uri(path: 'build/flutter_assets/asset.txt');
+      expect(devFSWriter.entries, contains(assetUri));
+      expect(
+        await devFSWriter.entries![assetUri]!.contentsAsBytes(),
+        containsAllInOrder(<int>[2, 3, 4, 5]),
+      );
+    });
+
+    testWithoutContext('DevFS reports failure when asset transformation fails', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Artifacts artifacts = Artifacts.test();
+      final FakeDevFSWriter devFSWriter = FakeDevFSWriter();
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[
+          FakeCommand(
+            command: <Pattern>[
+              artifacts.getArtifactPath(Artifact.engineDartBinary),
+              'run',
+              'increment',
+              '--input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt',
+              '--output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt',
+            ],
+            exitCode: 1,
+          ),
+        ],
+      );
+
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+        config: Config.test(),
+        processManager: processManager,
+        artifacts: artifacts,
+      );
+
+      await devFS.create();
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+
+      final FakeBundle bundle = FakeBundle()
+        ..entries['asset.txt'] = AssetBundleEntry(
+          DevFSByteContent(<int>[1, 2, 3, 4]),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'increment', args: <String>[]),
+          ],
+        );
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        devFSWriter: devFSWriter,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(report.success, false, reason: 'DevFS update should fail since asset transformation failed.');
+      expect(devFSWriter.entries, isNull, reason: 'DevFS should not have written anything since the update failed.');
+      expect(
+        logger.errorText,
+        'User-defined transformation of asset "/.tmp_rand0/retransformerInput-asset.txt" failed.\n'
+        'Transformer process terminated with non-zero exit code: 1\n'
+        'Transformer package: increment\n'
+        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
+        'stdout:\n'
+        '\n'
+        'stderr:\n'
+        '\n',
+      );
+    });
+
+  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -723,10 +933,12 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
 class FakeDevFSWriter implements DevFSWriter {
   bool written = false;
+  Map<Uri, DevFSContent>? entries;
 
   @override
   Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent) async {
     written = true;
+    this.entries = entries;
   }
 }
 
