@@ -267,6 +267,7 @@ class IOSDevice extends Device {
     required this.cpuArchitecture,
     required this.connectionInterface,
     required this.isConnected,
+    required this.isPaired,
     required this.devModeEnabled,
     required this.isCoreDevice,
     String? sdkVersion,
@@ -336,6 +337,11 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
+  bool devModeEnabled = false;
+
+  /// Device has trusted this computer and paired.
+  bool isPaired = false;
+
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
   final bool isCoreDevice;
@@ -343,8 +349,6 @@ class IOSDevice extends Device {
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
-
-  bool devModeEnabled = false;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;

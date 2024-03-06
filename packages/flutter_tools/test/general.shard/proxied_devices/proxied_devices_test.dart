@@ -431,7 +431,7 @@ void main() {
       testWithoutContext('transfers file to the daemon with delta turned on, file exists on remote', () async {
         bufferLogger = BufferLogger.test();
         final FakeFileTransfer fileTransfer = FakeFileTransfer();
-        final BlockHashes blockHashes = BlockHashes(
+        const BlockHashes blockHashes = BlockHashes(
           blockSize: 10,
           totalSize: 30,
           adler32: <int>[1, 2, 3],

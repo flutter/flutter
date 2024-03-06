@@ -10,11 +10,7 @@ class Timeline {
   /// and loaded in Chrome for visual inspection.
   ///
   /// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-  factory Timeline.fromJson(Map<String, dynamic> json) {
-    return Timeline._(json, _parseEvents(json));
-  }
-
-  Timeline._(this.json, this.events);
+  Timeline.fromJson(this.json) : events = _parseEvents(json);
 
   /// The original timeline JSON.
   final Map<String, dynamic> json;
