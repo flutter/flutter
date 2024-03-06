@@ -188,6 +188,9 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
   Future<void> _updateImage(ImageProvider provider) async {
     final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
         provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
+    if (!mounted) {
+      return;
+    }
     setState(() {
       selectedImage = widget.images.indexOf(provider);
       currentColorScheme = newColorScheme;
