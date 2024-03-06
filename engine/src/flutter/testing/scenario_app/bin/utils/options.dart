@@ -163,6 +163,7 @@ extension type const Options._(ArgResults _args) {
         'prefix-logs-per-run',
         help: 'Whether to prefix logs with a per-run unique identifier.',
         defaultsTo: environment.isCi,
+        hide: hideUnusualOptions,
       )
       ..addOption(
         'impeller-backend',
