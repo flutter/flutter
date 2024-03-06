@@ -6,18 +6,18 @@
 
 #include <memory>
 
-#include "flutter/fml/memory/ref_ptr.h"
-#include "flutter/fml/trace_event.h"
+#include "flutter_vma/flutter_vma.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "vulkan/vulkan_enums.hpp"
+#include "vulkan/vulkan_to_string.hpp"
 
 namespace impeller {
 
-static constexpr vk::Flags<vk::MemoryPropertyFlagBits>
-ToVKBufferMemoryPropertyFlags(StorageMode mode) {
+vk::Flags<vk::MemoryPropertyFlagBits>
+AllocatorVK::ToVKBufferMemoryPropertyFlags(StorageMode mode) {
   switch (mode) {
     case StorageMode::kHostVisible:
       return vk::MemoryPropertyFlagBits::eHostVisible;
@@ -29,7 +29,7 @@ ToVKBufferMemoryPropertyFlags(StorageMode mode) {
   FML_UNREACHABLE();
 }
 
-static VmaAllocationCreateFlags ToVmaAllocationBufferCreateFlags(
+VmaAllocationCreateFlags AllocatorVK::ToVmaAllocationBufferCreateFlags(
     StorageMode mode,
     bool readback) {
   VmaAllocationCreateFlags flags = 0;
@@ -52,6 +52,84 @@ static VmaAllocationCreateFlags ToVmaAllocationBufferCreateFlags(
   FML_UNREACHABLE();
 }
 
+vk::ImageUsageFlags AllocatorVK::ToVKImageUsageFlags(
+    PixelFormat format,
+    TextureUsageMask usage,
+    StorageMode mode,
+    bool supports_memoryless_textures) {
+  vk::ImageUsageFlags vk_usage;
+
+  switch (mode) {
+    case StorageMode::kHostVisible:
+    case StorageMode::kDevicePrivate:
+      break;
+    case StorageMode::kDeviceTransient:
+      if (supports_memoryless_textures) {
+        vk_usage |= vk::ImageUsageFlagBits::eTransientAttachment;
+      }
+      break;
+  }
+
+  if (usage & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+    if (PixelFormatIsDepthStencil(format)) {
+      vk_usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+    } else {
+      vk_usage |= vk::ImageUsageFlagBits::eColorAttachment;
+      vk_usage |= vk::ImageUsageFlagBits::eInputAttachment;
+    }
+  }
+
+  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+    vk_usage |= vk::ImageUsageFlagBits::eSampled;
+    // Device transient images can only be used as attachments. The caller
+    // specified incorrect usage flags and is attempting to read a device
+    // transient image in a shader. Unset the transient attachment flag. See:
+    // https://github.com/flutter/flutter/issues/121633
+    if (mode == StorageMode::kDeviceTransient) {
+      vk_usage &= ~vk::ImageUsageFlagBits::eTransientAttachment;
+    }
+  }
+
+  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+    vk_usage |= vk::ImageUsageFlagBits::eStorage;
+    // Device transient images can only be used as attachments. The caller
+    // specified incorrect usage flags and is attempting to read a device
+    // transient image in a shader. Unset the transient attachment flag. See:
+    // https://github.com/flutter/flutter/issues/121633
+    if (mode == StorageMode::kDeviceTransient) {
+      vk_usage &= ~vk::ImageUsageFlagBits::eTransientAttachment;
+    }
+  }
+
+  if (mode != StorageMode::kDeviceTransient) {
+    // Add transfer usage flags to support blit passes only if image isn't
+    // device transient.
+    vk_usage |= vk::ImageUsageFlagBits::eTransferSrc |
+                vk::ImageUsageFlagBits::eTransferDst;
+  }
+
+  return vk_usage;
+}
+
+vk::Flags<vk::MemoryPropertyFlagBits>
+AllocatorVK::ToVKTextureMemoryPropertyFlags(StorageMode mode,
+                                            bool supports_memoryless_textures) {
+  switch (mode) {
+    case StorageMode::kHostVisible:
+      return vk::MemoryPropertyFlagBits::eHostVisible |
+             vk::MemoryPropertyFlagBits::eDeviceLocal;
+    case StorageMode::kDevicePrivate:
+      return vk::MemoryPropertyFlagBits::eDeviceLocal;
+    case StorageMode::kDeviceTransient:
+      if (supports_memoryless_textures) {
+        return vk::MemoryPropertyFlagBits::eLazilyAllocated |
+               vk::MemoryPropertyFlagBits::eDeviceLocal;
+      }
+      return vk::MemoryPropertyFlagBits::eDeviceLocal;
+  }
+  FML_UNREACHABLE();
+}
+
 static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   vk::BufferCreateInfo buffer_info;
   buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer |
@@ -68,8 +146,8 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   VmaAllocationCreateInfo allocation_info = {};
   allocation_info.usage = VMA_MEMORY_USAGE_AUTO;
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
-      ToVKBufferMemoryPropertyFlags(StorageMode::kHostVisible));
-  allocation_info.flags = ToVmaAllocationBufferCreateFlags(
+      AllocatorVK::ToVKBufferMemoryPropertyFlags(StorageMode::kHostVisible));
+  allocation_info.flags = AllocatorVK::ToVmaAllocationBufferCreateFlags(
       StorageMode::kHostVisible, /*readback=*/false);
 
   uint32_t memTypeIndex;
@@ -101,6 +179,7 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   auto limits = physical_device.getProperties().limits;
   max_texture_size_.width = max_texture_size_.height =
       limits.maxImageDimension2D;
+  physical_device.getMemoryProperties(&memory_properties_);
 
   VmaVulkanFunctions proc_table = {};
 
@@ -149,11 +228,24 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
     VALIDATION_LOG << "Could not create memory allocator";
     return;
   }
+
+  {
+    // Query texture support.
+    // TODO(jonahwilliams):
+    // https://github.com/flutter/flutter/issues/129784
+    for (auto i = 0u; i < memory_properties_.memoryTypeCount; i++) {
+      if (memory_properties_.memoryTypes[i].propertyFlags &
+          vk::MemoryPropertyFlagBits::eLazilyAllocated) {
+        supports_memoryless_textures_ = true;
+        break;
+      }
+    }
+  }
+
   staging_buffer_pool_.reset(CreateBufferPool(allocator));
   created_buffer_pool_ &= staging_buffer_pool_.is_valid();
   allocator_.reset(allocator);
-  supports_memoryless_textures_ =
-      capabilities.SupportsDeviceTransientTextures();
+  supports_memoryless_textures_ = false;
   is_valid_ = true;
 }
 
@@ -167,101 +259,6 @@ bool AllocatorVK::IsValid() const {
 // |Allocator|
 ISize AllocatorVK::GetMaxTextureSizeSupported() const {
   return max_texture_size_;
-}
-
-static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
-    PixelFormat format,
-    TextureUsageMask usage,
-    StorageMode mode,
-    bool supports_memoryless_textures) {
-  vk::ImageUsageFlags vk_usage;
-
-  switch (mode) {
-    case StorageMode::kHostVisible:
-    case StorageMode::kDevicePrivate:
-      break;
-    case StorageMode::kDeviceTransient:
-      if (supports_memoryless_textures) {
-        vk_usage |= vk::ImageUsageFlagBits::eTransientAttachment;
-      }
-      break;
-  }
-
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
-    if (PixelFormatIsDepthStencil(format)) {
-      vk_usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-    } else {
-      vk_usage |= vk::ImageUsageFlagBits::eColorAttachment;
-    }
-    vk_usage |= vk::ImageUsageFlagBits::eInputAttachment;
-  }
-
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
-    vk_usage |= vk::ImageUsageFlagBits::eSampled;
-    // Device transient images can only be used as attachments. The caller
-    // specified incorrect usage flags and is attempting to read a device
-    // transient image in a shader. Unset the transient attachment flag. See:
-    // https://github.com/flutter/flutter/issues/121633
-    if (mode == StorageMode::kDeviceTransient) {
-      vk_usage &= ~vk::ImageUsageFlagBits::eTransientAttachment;
-    }
-  }
-
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
-    vk_usage |= vk::ImageUsageFlagBits::eStorage;
-    // Device transient images can only be used as attachments. The caller
-    // specified incorrect usage flags and is attempting to read a device
-    // transient image in a shader. Unset the transient attachment flag. See:
-    // https://github.com/flutter/flutter/issues/121633
-    if (mode == StorageMode::kDeviceTransient) {
-      vk_usage &= ~vk::ImageUsageFlagBits::eTransientAttachment;
-    }
-  }
-
-  if (mode != StorageMode::kDeviceTransient) {
-    // Add transfer usage flags to support blit passes only if image isn't
-    // device transient.
-    vk_usage |= vk::ImageUsageFlagBits::eTransferSrc |
-                vk::ImageUsageFlagBits::eTransferDst;
-  }
-
-  return vk_usage;
-}
-
-static constexpr VmaMemoryUsage ToVMAMemoryUsage() {
-  return VMA_MEMORY_USAGE_AUTO;
-}
-
-static constexpr vk::Flags<vk::MemoryPropertyFlagBits>
-ToVKTextureMemoryPropertyFlags(StorageMode mode,
-                               bool supports_memoryless_textures) {
-  switch (mode) {
-    case StorageMode::kHostVisible:
-      return vk::MemoryPropertyFlagBits::eHostVisible |
-             vk::MemoryPropertyFlagBits::eDeviceLocal;
-    case StorageMode::kDevicePrivate:
-      return vk::MemoryPropertyFlagBits::eDeviceLocal;
-    case StorageMode::kDeviceTransient:
-      if (supports_memoryless_textures) {
-        return vk::MemoryPropertyFlagBits::eLazilyAllocated |
-               vk::MemoryPropertyFlagBits::eDeviceLocal;
-      }
-      return vk::MemoryPropertyFlagBits::eDeviceLocal;
-  }
-  FML_UNREACHABLE();
-}
-
-static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode) {
-  VmaAllocationCreateFlags flags = 0;
-  switch (mode) {
-    case StorageMode::kHostVisible:
-      return flags;
-    case StorageMode::kDevicePrivate:
-      return flags;
-    case StorageMode::kDeviceTransient:
-      return flags;
-  }
-  FML_UNREACHABLE();
 }
 
 class AllocatedTextureSourceVK final : public TextureSourceVK {
@@ -287,18 +284,17 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     image_info.arrayLayers = ToArrayLayerCount(desc.type);
     image_info.tiling = vk::ImageTiling::eOptimal;
     image_info.initialLayout = vk::ImageLayout::eUndefined;
-    image_info.usage =
-        ToVKImageUsageFlags(desc.format, desc.usage, desc.storage_mode,
-                            supports_memoryless_textures);
+    image_info.usage = AllocatorVK::ToVKImageUsageFlags(
+        desc.format, desc.usage, desc.storage_mode,
+        supports_memoryless_textures);
     image_info.sharingMode = vk::SharingMode::eExclusive;
 
     VmaAllocationCreateInfo alloc_nfo = {};
 
-    alloc_nfo.usage = ToVMAMemoryUsage();
-    alloc_nfo.preferredFlags =
-        static_cast<VkMemoryPropertyFlags>(ToVKTextureMemoryPropertyFlags(
+    alloc_nfo.usage = VMA_MEMORY_USAGE_AUTO;
+    alloc_nfo.preferredFlags = static_cast<VkMemoryPropertyFlags>(
+        AllocatorVK::ToVKTextureMemoryPropertyFlags(
             desc.storage_mode, supports_memoryless_textures));
-    alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode);
 
     auto create_info_native =
         static_cast<vk::ImageCreateInfo::NativeType>(image_info);
@@ -459,7 +455,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
       static_cast<vk::BufferCreateInfo::NativeType>(buffer_info);
 
   VmaAllocationCreateInfo allocation_info = {};
-  allocation_info.usage = ToVMAMemoryUsage();
+  allocation_info.usage = VMA_MEMORY_USAGE_AUTO;
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags =
@@ -480,6 +476,11 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                                              &buffer_allocation_info  //
                                              )};
 
+  bool is_host_coherent_buffer =
+      !!(memory_properties_.memoryTypes[buffer_allocation_info.memoryType]
+             .propertyFlags &
+         vk::MemoryPropertyFlagBits::eHostCoherent);
+
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Unable to allocate a device buffer: "
                    << vk::to_string(result);
@@ -492,8 +493,27 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
       UniqueBufferVMA{BufferVMA{allocator_.get(),      //
                                 buffer_allocation,     //
                                 vk::Buffer{buffer}}},  //
-      buffer_allocation_info                           //
+      buffer_allocation_info,                          //
+      is_host_coherent_buffer                          //
   );
+}
+
+void AllocatorVK::DebugTraceMemoryStatistics() const {
+#ifdef IMPELLER_DEBUG
+  auto count = memory_properties_.memoryHeapCount;
+  std::vector<VmaBudget> budgets(count);
+  vmaGetHeapBudgets(allocator_.get(), budgets.data());
+  size_t total_usage = 0;
+  for (auto i = 0u; i < count; i++) {
+    const VmaBudget& budget = budgets[i];
+    total_usage += budget.usage;
+  }
+  // Convert bytes to MB.
+  total_usage *= 1e-6;
+  FML_TRACE_COUNTER("flutter", "AllocatorVK",
+                    reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                    "MemoryBudgetUsageMB", total_usage);
+#endif  // IMPELLER_DEBUG
 }
 
 }  // namespace impeller

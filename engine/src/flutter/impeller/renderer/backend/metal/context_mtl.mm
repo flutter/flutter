@@ -66,7 +66,6 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsCompute(true)
       .SetSupportsComputeSubgroups(DeviceSupportsComputeSubgroups(device))
       .SetSupportsReadFromResolve(true)
-      .SetSupportsDeviceTransientTextures(true)
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .Build();
 }

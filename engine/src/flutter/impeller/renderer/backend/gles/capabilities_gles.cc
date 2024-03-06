@@ -181,10 +181,6 @@ bool CapabilitiesGLES::SupportsDecalSamplerAddressMode() const {
   return supports_decal_sampler_address_mode_;
 }
 
-bool CapabilitiesGLES::SupportsDeviceTransientTextures() const {
-  return false;
-}
-
 PixelFormat CapabilitiesGLES::GetDefaultColorFormat() const {
   return PixelFormat::kR8G8B8A8UNormInt;
 }

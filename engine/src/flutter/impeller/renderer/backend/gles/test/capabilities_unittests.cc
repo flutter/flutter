@@ -24,7 +24,6 @@ TEST(CapabilitiesGLES, CanInitializeWithDefaults) {
   EXPECT_FALSE(capabilities->SupportsComputeSubgroups());
   EXPECT_FALSE(capabilities->SupportsReadFromResolve());
   EXPECT_FALSE(capabilities->SupportsDecalSamplerAddressMode());
-  EXPECT_FALSE(capabilities->SupportsDeviceTransientTextures());
 
   EXPECT_EQ(capabilities->GetDefaultColorFormat(),
             PixelFormat::kR8G8B8A8UNormInt);

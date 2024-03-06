@@ -44,6 +44,8 @@ struct MockSwapchainKHR {
 
 struct MockSemaphore {};
 
+struct MockBuffer {};
+
 static ISize currentImageSize = ISize{1, 1};
 
 class MockDevice final {
@@ -221,14 +223,20 @@ VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
 void vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
-  pMemoryProperties->memoryTypeCount = 1;
+  pMemoryProperties->memoryTypeCount = 2;
+  pMemoryProperties->memoryHeapCount = 2;
   pMemoryProperties->memoryTypes[0].heapIndex = 0;
-  // pMemoryProperties->memoryTypes[0].propertyFlags =
-  //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
-  //     VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD;
-  pMemoryProperties->memoryHeapCount = 1;
+  pMemoryProperties->memoryTypes[0].propertyFlags =
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+  pMemoryProperties->memoryTypes[1].heapIndex = 1;
+  pMemoryProperties->memoryTypes[1].propertyFlags =
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
   pMemoryProperties->memoryHeaps[0].size = 1024 * 1024 * 1024;
-  pMemoryProperties->memoryHeaps[0].flags = 0;
+  pMemoryProperties->memoryHeaps[0].flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
+  pMemoryProperties->memoryHeaps[1].size = 1024 * 1024 * 1024;
+  pMemoryProperties->memoryHeaps[1].flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
 }
 
 VkResult vkCreatePipelineCache(VkDevice device,
@@ -317,8 +325,16 @@ VkResult vkCreateBuffer(VkDevice device,
                         const VkBufferCreateInfo* pCreateInfo,
                         const VkAllocationCallbacks* pAllocator,
                         VkBuffer* pBuffer) {
-  *pBuffer = reinterpret_cast<VkBuffer>(0xDEADDEAD);
+  *pBuffer = reinterpret_cast<VkBuffer>(new MockBuffer());
   return VK_SUCCESS;
+}
+
+void vkDestroyBuffer(VkDevice device,
+                     VkBuffer buffer,
+                     const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDestroyBuffer");
+  delete reinterpret_cast<MockBuffer*>(buffer);
 }
 
 void vkGetBufferMemoryRequirements2KHR(
@@ -719,6 +735,25 @@ VkResult vkAcquireNextImageKHR(VkDevice device,
   return VK_SUCCESS;
 }
 
+VkResult vkFlushMappedMemoryRanges(VkDevice device,
+                                   uint32_t memoryRangeCount,
+                                   const VkMappedMemoryRange* pMemoryRanges) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkFlushMappedMemoryRanges");
+  return VK_SUCCESS;
+}
+
+VkResult vkMapMemory(VkDevice device,
+                     VkDeviceMemory memory,
+                     VkDeviceSize offset,
+                     VkDeviceSize size,
+                     VkMemoryMapFlags flags,
+                     void** ppData) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkMapMemory");
+  return VK_SUCCESS;
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -855,6 +890,12 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkDestroySurfaceKHR;
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
     return (PFN_vkVoidFunction)vkAcquireNextImageKHR;
+  } else if (strcmp("vkFlushMappedMemoryRanges", pName) == 0) {
+    return (PFN_vkVoidFunction)vkFlushMappedMemoryRanges;
+  } else if (strcmp("vkDestroyBuffer", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyBuffer;
+  } else if (strcmp("vkMapMemory", pName) == 0) {
+    return (PFN_vkVoidFunction)vkMapMemory;
   }
   return noop;
 }

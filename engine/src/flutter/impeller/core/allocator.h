@@ -44,6 +44,12 @@ class Allocator {
 
   virtual ISize GetMaxTextureSizeSupported() const = 0;
 
+  /// @brief Write debug memory usage information to the dart timeline in debug
+  ///        and profile modes.
+  ///
+  ///        This is only supported on the Vulkan backend.
+  virtual void DebugTraceMemoryStatistics() const {};
+
  protected:
   Allocator();
 

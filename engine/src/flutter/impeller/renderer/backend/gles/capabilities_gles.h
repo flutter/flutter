@@ -108,9 +108,6 @@ class CapabilitiesGLES final
   bool SupportsDecalSamplerAddressMode() const override;
 
   // |Capabilities|
-  bool SupportsDeviceTransientTextures() const override;
-
-  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|

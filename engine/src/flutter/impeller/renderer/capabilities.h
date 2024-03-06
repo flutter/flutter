@@ -81,14 +81,6 @@ class Capabilities {
   /// @brief  Whether the context backend supports `SamplerAddressMode::Decal`.
   virtual bool SupportsDecalSamplerAddressMode() const = 0;
 
-  /// @brief  Whether the context backend supports allocating
-  ///         `StorageMode::kDeviceTransient` (aka "memoryless") textures, which
-  ///         are temporary textures kept in tile memory for the duration of the
-  ///         `RenderPass` it's attached to.
-  ///
-  ///         This feature is especially useful for MSAA and stencils.
-  virtual bool SupportsDeviceTransientTextures() const = 0;
-
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -149,8 +141,6 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsDecalSamplerAddressMode(bool value);
 
-  CapabilitiesBuilder& SetSupportsDeviceTransientTextures(bool value);
-
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
   std::unique_ptr<Capabilities> Build();
@@ -165,7 +155,6 @@ class CapabilitiesBuilder {
   bool supports_compute_subgroups_ = false;
   bool supports_read_from_resolve_ = false;
   bool supports_decal_sampler_address_mode_ = false;
-  bool supports_device_transient_textures_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;
