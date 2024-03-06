@@ -164,6 +164,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.expandedInsets,
     this.searchCallback,
     required this.dropdownMenuEntries,
+    this.inputFormatters,
   });
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -389,6 +390,20 @@ class DropdownMenu<T> extends StatefulWidget {
   /// which contains the contents of the text input field.
   final SearchCallback<T>? searchCallback;
 
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the user changes the text
+  /// this widget contains. When this parameter changes, the new formatters will
+  /// not be applied until the next time the user inserts or deletes text.
+  /// Formatters don't run when the text is changed
+  /// programmatically via [controller].
+  ///
+  /// See also:
+  ///
+  ///  * [TextEditingController], which implements the [Listenable] interface
+  ///    and notifies its listeners on [TextEditingValue] changes.
+  final List<TextInputFormatter>? inputFormatters;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -469,22 +484,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
-    if (widget.focusNode != null) {
-      return widget.focusNode!.canRequestFocus;
-    }
-    if (widget.requestFocusOnTap != null) {
-      return widget.requestFocusOnTap!;
-    }
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return false;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return true;
-    }
+    return widget.focusNode?.canRequestFocus ?? widget.requestFocusOnTap
+      ?? switch (Theme.of(context).platform) {
+        TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
+        TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+      };
   }
 
   void refreshLeadingPadding() {
@@ -755,6 +759,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 _enableFilter = widget.enableFilter;
               });
             },
+            inputFormatters: widget.inputFormatters,
             decoration: InputDecoration(
               enabled: widget.enabled,
               label: widget.label,

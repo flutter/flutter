@@ -1025,28 +1025,29 @@ mixin SchedulerBinding on BindingBase {
       debugTimelineTask = TimelineTask()..start('Warm-up frame');
     }
     final bool hadScheduledFrame = _hasScheduledFrame;
-    // We use timers here to ensure that microtasks flush in between.
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleBeginFrame(null);
-    });
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleDrawFrame();
-      // We call resetEpoch after this frame so that, in the hot reload case,
-      // the very next frame pretends to have occurred immediately after this
-      // warm-up frame. The warm-up frame's timestamp will typically be far in
-      // the past (the time of the last real frame), so if we didn't reset the
-      // epoch we would see a sudden jump from the old time in the warm-up frame
-      // to the new time in the "real" frame. The biggest problem with this is
-      // that implicit animations end up being triggered at the old time and
-      // then skipping every frame and finishing in the new time.
-      resetEpoch();
-      _warmUpFrame = false;
-      if (hadScheduledFrame) {
-        scheduleFrame();
-      }
-    });
+    PlatformDispatcher.instance.scheduleWarmUpFrame(
+      beginFrame: () {
+        assert(_warmUpFrame);
+        handleBeginFrame(null);
+      },
+      drawFrame: () {
+        assert(_warmUpFrame);
+        handleDrawFrame();
+        // We call resetEpoch after this frame so that, in the hot reload case,
+        // the very next frame pretends to have occurred immediately after this
+        // warm-up frame. The warm-up frame's timestamp will typically be far in
+        // the past (the time of the last real frame), so if we didn't reset the
+        // epoch we would see a sudden jump from the old time in the warm-up frame
+        // to the new time in the "real" frame. The biggest problem with this is
+        // that implicit animations end up being triggered at the old time and
+        // then skipping every frame and finishing in the new time.
+        resetEpoch();
+        _warmUpFrame = false;
+        if (hadScheduledFrame) {
+          scheduleFrame();
+        }
+      },
+    );
 
     // Lock events so touch events etc don't insert themselves until the
     // scheduled frame has finished.

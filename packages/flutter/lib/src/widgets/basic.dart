@@ -274,7 +274,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/main/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -390,7 +390,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///     ).createShader(bounds);
 ///   },
 ///   child: const Text(
-///     'I’m burning the memories',
+///     "I'm burning the memories",
 ///     style: TextStyle(color: Colors.white),
 ///   ),
 /// )
@@ -2813,16 +2813,11 @@ class UnconstrainedBox extends StatelessWidget {
   final Widget? child;
 
   BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
-    if (constrainedAxis != null) {
-      switch (constrainedAxis) {
-        case Axis.horizontal:
-          return ConstraintsTransformBox.heightUnconstrained;
-        case Axis.vertical:
-          return ConstraintsTransformBox.widthUnconstrained;
-      }
-    } else {
-      return ConstraintsTransformBox.unconstrained;
-    }
+    return switch (constrainedAxis) {
+      Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
+      Axis.vertical   => ConstraintsTransformBox.widthUnconstrained,
+      null            => ConstraintsTransformBox.unconstrained,
+    };
   }
 
   @override
@@ -4263,16 +4258,10 @@ class Positioned extends ParentDataWidget<StackParentData> {
     double? height,
     required Widget child,
   }) {
-    double? left;
-    double? right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (double? left, double? right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return Positioned(
       key: key,
       left: left,
@@ -4640,6 +4629,13 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// For example, [CrossAxisAlignment.center], the default, centers the
   /// children in the cross axis (e.g., horizontally for a [Column]).
+  ///
+  /// When the cross axis is vertical (as for a [Row]) and the children
+  /// contain text, consider using [CrossAxisAlignment.baseline] instead.
+  /// This typically produces better visual results if the different children
+  /// have text with different font metrics, for example because they differ in
+  /// [TextStyle.fontSize] or other [TextStyle] properties, or because
+  /// they use different fonts due to being written in different scripts.
   final CrossAxisAlignment crossAxisAlignment;
 
   /// Determines the order to lay children out horizontally and how to interpret
@@ -4788,6 +4784,14 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
+///
+/// By default, [crossAxisAlignment] is [CrossAxisAlignment.center], which
+/// centers the children in the vertical axis.  If several of the children
+/// contain text, this is likely to make them visually misaligned if
+/// they have different font metrics (for example because they differ in
+/// [TextStyle.fontSize] or other [TextStyle] properties, or because
+/// they use different fonts due to being written in different scripts).
+/// Consider using [CrossAxisAlignment.baseline] instead.
 ///
 /// {@tool snippet}
 ///
@@ -5030,8 +5034,8 @@ class Row extends Flex {
 ///     const Text('Through the night, we have one shot to live another day'),
 ///     const Text('We cannot let a stray gunshot give us away'),
 ///     const Text('We will fight up close, seize the moment and stay in it'),
-///     const Text('It’s either that or meet the business end of a bayonet'),
-///     const Text('The code word is ‘Rochambeau,’ dig me?'),
+///     const Text("It's either that or meet the business end of a bayonet"),
+///     const Text("The code word is 'Rochambeau,' dig me?"),
 ///     Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
 ///   ],
 /// )
@@ -5199,7 +5203,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child's can occupy in the main axis is
+  /// non-zero, the amount of space the child can occupy in the main axis is
   /// determined by dividing the free space (after placing the inflexible
   /// children) according to the flex factors of the flexible children.
   final int flex;
@@ -6759,10 +6763,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   ///
   /// The key for the [RepaintBoundary] is derived either from the child's key
   /// (if the child has a non-null key) or from the given `childIndex`.
-  factory RepaintBoundary.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return RepaintBoundary(key: key, child: child);
-  }
+  RepaintBoundary.wrap(Widget child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex), child: child);
 
   /// Wraps each of the given children in [RepaintBoundary]s.
   ///
@@ -7553,16 +7555,11 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
   /// Creates a widget that builds its child.
-  const KeyedSubtree({
-    super.key,
-    required this.child,
-  });
+  const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
-  factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return KeyedSubtree(key: key, child: child);
-  }
+  KeyedSubtree.wrap(this.child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex));
 
   /// The widget below this widget in the tree.
   ///

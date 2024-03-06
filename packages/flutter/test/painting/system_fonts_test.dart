@@ -37,10 +37,10 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester t
 }
 
 void main() {
-  testWidgets('RenderParagraph relayout upon system fonts changes',
   // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  LeakTesting.settings = LeakTesting.settings.withIgnored(classes: <String>['CurvedAnimation']);
+
+  testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),

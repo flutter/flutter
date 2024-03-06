@@ -54,7 +54,7 @@ class Dialog extends StatelessWidget {
     this.surfaceTintColor,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -85,7 +85,7 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.dialogBackgroundColor] is used.
+  /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -135,8 +135,12 @@ class Dialog extends StatelessWidget {
   ///
   /// If [ThemeData.useMaterial3] is false property has no effect.
   ///
-  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
-  /// [ColorScheme.surfaceTint] will be used.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
+  ///
+  /// defaults to [Colors.transparent].
   ///
   /// To disable this feature, set [surfaceTintColor] to [Colors.transparent].
   ///
@@ -215,7 +219,8 @@ class Dialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context) + (insetPadding ?? EdgeInsets.zero);
+    final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context)
+      + (insetPadding ?? dialogTheme.insetPadding ?? _defaultInsetPadding);
     final DialogTheme defaults = theme.useMaterial3
       ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
       : _DialogDefaultsM2(context);
@@ -387,7 +392,7 @@ class AlertDialog extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.semanticLabel,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -676,7 +681,7 @@ class AlertDialog extends StatelessWidget {
   final String? semanticLabel;
 
   /// {@macro flutter.material.dialog.insetPadding}
-  final EdgeInsets insetPadding;
+  final EdgeInsets? insetPadding;
 
   /// {@macro flutter.material.dialog.clipBehavior}
   final Clip clipBehavior;
@@ -912,7 +917,7 @@ class _AdaptiveAlertDialog extends AlertDialog {
     super.shadowColor,
     super.surfaceTintColor,
     super.semanticLabel,
-    super.insetPadding = _defaultInsetPadding,
+    super.insetPadding,
     super.clipBehavior = Clip.none,
     super.shape,
     super.alignment,
@@ -1110,7 +1115,7 @@ class SimpleDialog extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.semanticLabel,
-    this.insetPadding = _defaultInsetPadding,
+    this.insetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
@@ -1185,7 +1190,7 @@ class SimpleDialog extends StatelessWidget {
   final String? semanticLabel;
 
   /// {@macro flutter.material.dialog.insetPadding}
-  final EdgeInsets insetPadding;
+  final EdgeInsets? insetPadding;
 
   /// {@macro flutter.material.dialog.clipBehavior}
   final Clip clipBehavior;
@@ -1647,13 +1652,13 @@ class _DialogDefaultsM3 extends DialogTheme {
   Color? get iconColor => _colors.secondary;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   TextStyle? get titleTextStyle => _textTheme.headlineSmall;

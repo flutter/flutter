@@ -7,7 +7,6 @@ plugins {
     `groovy`
 }
 
-
 group = "dev.flutter.plugin"
 version = "1.0.0"
 

@@ -5,9 +5,12 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -15,6 +18,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
@@ -453,9 +457,12 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    Config? config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -468,16 +475,28 @@ class DevFS {
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
           : context.get<HttpClientFactory>()!())),
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _config = config,
+       _assetTransformer = DevelopmentAssetTransformer(
+          transformer: AssetTransformer(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+          ),
+          fileSystem: fileSystem,
+          logger: logger,
+        );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
+  final Config? _config;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
   final Set<String> scenePathsToEvict = <String>{};
@@ -501,7 +520,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -567,7 +586,6 @@ class DevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     File? dartPluginRegistrant,
@@ -597,7 +615,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: rootDirectory?.path,
+      projectRootPath: rootDirectory.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -615,8 +633,8 @@ class DevFS {
 
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      final String assetDirectory = getAssetBuildDirectory();
+      final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
+      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
       bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
@@ -633,8 +651,8 @@ class DevFS {
         if (archivePath == _kFontManifest) {
           didUpdateFontManifest = true;
         }
-
-        switch (bundle.entries[archivePath]?.kind) {
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
           case AssetKind.shader:
             final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
@@ -669,11 +687,30 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = entry.content;
-            syncedBytes += entry.content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
-            }
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
+
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            });
         }
       });
 

@@ -75,6 +75,7 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
+    super.iconAlignment,
   }) : _variant = _FilledButtonVariant.filled;
 
   /// Create a filled button from [icon] and [label].
@@ -83,6 +84,9 @@ class FilledButton extends ButtonStyleButton {
   /// and a gap between them.
   ///
   /// If [icon] is null, will create a [FilledButton] instead.
+  ///
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  ///
   factory FilledButton.icon({
     Key? key,
     required VoidCallback? onPressed,
@@ -96,6 +100,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
+    IconAlignment iconAlignment = IconAlignment.start,
   }) {
      if (icon == null) {
       return FilledButton(
@@ -125,6 +130,7 @@ class FilledButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
+      iconAlignment: iconAlignment,
     );
   }
 
@@ -167,6 +173,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
+    IconAlignment iconAlignment = IconAlignment.start,
   }) {
     if (icon == null) {
       return FilledButton.tonal(
@@ -196,6 +203,7 @@ class FilledButton extends ButtonStyleButton {
       statesController: statesController,
       icon: icon,
       label: label,
+      iconAlignment: iconAlignment,
     );
   }
 
@@ -409,7 +417,7 @@ class FilledButton extends ButtonStyleButton {
   ///   * others - Theme.colorScheme.onSecondaryContainer
   /// * `overlayColor`
   ///   * hovered - Theme.colorScheme.onSecondaryContainer(0.08)
-  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.12)
+  ///   * focused or pressed - Theme.colorScheme.onSecondaryContainer(0.1)
   /// * `shadowColor` - Theme.colorScheme.shadow
   /// * `surfaceTintColor` - Colors.transparent
   /// * `elevation`
@@ -493,13 +501,13 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.12);
+      return overlay.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.12);
+      return overlay.withOpacity(0.1);
     }
     return null;
   }
@@ -535,9 +543,15 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
+    super.iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style)
+         child: _FilledButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
       );
 
   _FilledButtonWithIcon.tonal({
@@ -553,9 +567,15 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
+    required IconAlignment iconAlignment,
   }) : super.tonal(
          autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(icon: icon, label: label, buttonStyle: style)
+         child: _FilledButtonWithIconChild(
+           icon: icon,
+           label: label,
+           buttonStyle: style,
+           iconAlignment: iconAlignment,
+         ),
        );
 
   @override
@@ -584,11 +604,17 @@ class _FilledButtonWithIcon extends FilledButton {
 }
 
 class _FilledButtonWithIconChild extends StatelessWidget {
-  const _FilledButtonWithIconChild({ required this.label, required this.icon, required this.buttonStyle });
+  const _FilledButtonWithIconChild({
+    required this.label,
+    required this.icon,
+    required this.buttonStyle,
+    required this.iconAlignment,
+  });
 
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -599,7 +625,9 @@ class _FilledButtonWithIconChild extends StatelessWidget {
     final double gap = lerpDouble(8, 4, scale)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
+      children: iconAlignment == IconAlignment.start
+        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -648,13 +676,13 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       return null;
     });
@@ -770,13 +798,13 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       return null;
     });

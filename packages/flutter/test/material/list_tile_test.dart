@@ -1380,7 +1380,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -1394,7 +1394,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );

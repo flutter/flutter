@@ -62,9 +62,9 @@ void main() {
       matching: find.byType(Material),
     ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -1971,6 +1971,54 @@ void main() {
 
     // Test input border when focused.
     expect(box, paints..rrect(color: theme.colorScheme.primary));
+  });
+
+  testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
+    int called = 0;
+    final TextInputFormatter formatter = TextInputFormatter.withFunction(
+      (TextEditingValue oldValue, TextEditingValue newValue) {
+        called += 1;
+        return newValue;
+      },
+    );
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            controller: controller,
+            dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Blue',
+                label: 'Blue',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Green',
+                label: 'Green',
+              ),
+            ],
+            inputFormatters: <TextInputFormatter>[
+              formatter,
+              FilteringTextInputFormatter.deny(RegExp('[0-9]'))
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+    state.updateEditingValue(const TextEditingValue(text: 'Blue'));
+    expect(called, 1);
+    expect(controller.text, 'Blue');
+
+    state.updateEditingValue(const TextEditingValue(text: 'Green'));
+    expect(called, 2);
+    expect(controller.text, 'Green');
+
+    state.updateEditingValue(const TextEditingValue(text: 'Green2'));
+    expect(called, 3);
+    expect(controller.text, 'Green');
   });
 }
 
