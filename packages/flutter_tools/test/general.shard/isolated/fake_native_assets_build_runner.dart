@@ -123,3 +123,26 @@ class FakeHotRunnerNativeAssetsBuilder implements HotRunnerNativeAssetsBuilder {
     );
   }
 }
+
+class FatNativeAssetsBuildRunner extends FakeNativeAssetsBuildRunner {
+  FatNativeAssetsBuildRunner({
+    super.packagesWithNativeAssetsResult,
+    required this.onBuild,
+  });
+
+  @override
+  Future<FakeNativeAssetsBuilderResult> build({
+    required bool includeParentEnvironment,
+    required BuildMode buildMode,
+    required LinkModePreference linkModePreference,
+    required Target target,
+    required Uri workingDirectory,
+    CCompilerConfig? cCompilerConfig,
+    int? targetAndroidNdkApi,
+    IOSSdk? targetIOSSdk,
+  }) async {
+    return onBuild(target);
+  }
+
+  final FakeNativeAssetsBuilderResult Function(Target target) onBuild;
+}
