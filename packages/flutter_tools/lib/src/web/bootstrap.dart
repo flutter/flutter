@@ -479,7 +479,7 @@ String generateDefaultFlutterBootstrapScript() {
 {{flutter_build_config}}
 
 _flutter.loader.load({
-  serviceWorker: {
+  serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
 });
