@@ -58,7 +58,7 @@ void main() {
       await dryRunNativeAssetsMacOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           hasPackageConfigResult: false,
         ),
       ),
@@ -78,7 +78,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -98,7 +98,7 @@ void main() {
         TargetPlatform.darwin,
         TargetPlatform.ios,
       ],
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -118,7 +118,7 @@ void main() {
       () => dryRunNativeAssetsMacOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -141,7 +141,7 @@ void main() {
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsMacOS(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -192,7 +192,7 @@ void main() {
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -217,7 +217,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -301,7 +301,7 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildResult: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
+          onBuild: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
             assets: <Asset>[
               if (target == native_assets_cli.Target.macOSArm64)
                 Asset(
@@ -358,7 +358,7 @@ void main() {
       () => dryRunNativeAssetsMacOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -402,7 +402,7 @@ void main() {
       () => dryRunNativeAssetsMacOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -433,7 +433,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],

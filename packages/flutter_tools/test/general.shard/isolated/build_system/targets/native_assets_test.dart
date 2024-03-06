@@ -76,7 +76,7 @@ void main() {
 
     iosEnvironment.defines.remove(kIosArchs);
 
-    final NativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner();
+    final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
     await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
     final File nativeAssetsYaml =
@@ -109,7 +109,7 @@ void main() {
       () async {
         await createPackageConfig(iosEnvironment);
 
-        final NativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner();
+        final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
         expect(iosEnvironment.buildDir.childFile('native_assets.d'), exists);
@@ -128,7 +128,7 @@ void main() {
     () async {
       await createPackageConfig(iosEnvironment);
 
-      final NativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner(
+      final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
           native_assets_cli.Asset(
@@ -187,7 +187,7 @@ void main() {
         await createPackageConfig(androidEnvironment);
         await fileSystem.file('libfoo.so').create();
 
-        final ConstFakeNativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner(
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('foo', androidEnvironment.buildDir.uri)
           ],

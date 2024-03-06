@@ -59,7 +59,7 @@ void main() {
       await dryRunNativeAssetsWindows(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           hasPackageConfigResult: false,
         ),
       ),
@@ -78,7 +78,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -97,7 +97,7 @@ void main() {
       targetPlatforms: <TargetPlatform>[
         TargetPlatform.windows_x64,
       ],
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -117,7 +117,7 @@ void main() {
       () => dryRunNativeAssetsWindows(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -140,7 +140,7 @@ void main() {
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsWindows(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -184,7 +184,7 @@ void main() {
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -209,7 +209,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -250,7 +250,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         flutterTester: flutterTester,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -303,7 +303,7 @@ void main() {
       () => dryRunNativeAssetsWindows(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -341,7 +341,7 @@ void main() {
       () => dryRunNativeAssetsWindows(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -372,7 +372,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],

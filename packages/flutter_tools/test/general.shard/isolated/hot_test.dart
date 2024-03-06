@@ -60,7 +60,7 @@ void main() {
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final ConstFakeNativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner(
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
@@ -119,7 +119,7 @@ void main() {
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final ConstFakeNativeAssetsBuildRunner buildRunner = ConstFakeNativeAssetsBuildRunner(
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],

@@ -58,7 +58,7 @@ void main() {
       await dryRunNativeAssetsAndroid(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           hasPackageConfigResult: false,
         ),
       ),
@@ -80,7 +80,7 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -100,7 +100,7 @@ void main() {
       () => dryRunNativeAssetsAndroid(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -123,7 +123,7 @@ void main() {
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsAndroid(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -174,7 +174,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -201,7 +201,7 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -232,7 +232,7 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: ConstFakeNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -327,7 +327,7 @@ void main() {
       () => dryRunNativeAssetsAndroid(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -359,7 +359,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: ConstFakeNativeAssetsBuildRunner(
+        buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -376,7 +376,7 @@ void main() {
   });
 }
 
-class _BuildRunnerWithoutNdk extends ConstFakeNativeAssetsBuildRunner {
+class _BuildRunnerWithoutNdk extends FakeNativeAssetsBuildRunner {
   _BuildRunnerWithoutNdk({
     super.packagesWithNativeAssetsResult = const <Package>[],
   });
