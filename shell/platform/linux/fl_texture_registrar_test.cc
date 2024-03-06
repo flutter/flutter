@@ -119,7 +119,10 @@ TEST(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
 
 // Test the textures can be accessed via multiple threads without
 // synchronization issues.
-TEST(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
+// TODO(robert-ancell): Re-enable when no longer flaky
+// https://github.com/flutter/flutter/issues/138197
+TEST(FlTextureRegistrarTest,
+     DISABLED_RegistrarRegisterTextureInMultipleThreads) {
   g_autoptr(FlEngine) engine = make_mock_engine();
   g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
   pthread_t threads[kThreadCount];
