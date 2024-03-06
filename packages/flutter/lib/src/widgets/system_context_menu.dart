@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'text_selection_toolbar_anchors.dart';
 
 /// Displays the system context menu on top of the Flutter view.
@@ -78,6 +80,12 @@ class SystemContextMenu extends StatefulWidget {
 class _SystemContextMenuState extends State<SystemContextMenu> {
   late final SystemContextMenuController _systemContextMenuController;
 
+  /// Whether showing the system context menu is supported by the platform.
+  bool get _isSupported {
+    return defaultTargetPlatform == TargetPlatform.iOS
+        && (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -97,12 +105,13 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
   @override
   void dispose() {
-    _systemContextMenuController.hide();
+    _systemContextMenuController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    assert(_isSupported);
     return const SizedBox.shrink();
   }
 }
