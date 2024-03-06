@@ -47,12 +47,6 @@ final class FormatCommand extends CommandBase {
         abbr: 'q',
         help: 'Silences all log messages except for errors and warnings',
         negatable: false,
-      )
-      ..addFlag(
-        verboseFlag,
-        abbr: 'v',
-        help: 'Prints verbose output',
-        negatable: false,
       );
   }
 
@@ -67,7 +61,7 @@ final class FormatCommand extends CommandBase {
     final bool all = argResults![allFlag]! as bool;
     final bool dryRun = argResults![dryRunFlag]! as bool;
     final bool quiet = argResults![quietFlag]! as bool;
-    final bool verbose = argResults![verboseFlag]! as bool;
+    final bool verbose = globalResults![verboseFlag] as bool;
     final String formatPath = p.join(
       environment.engine.flutterDir.path, 'ci', 'bin', 'format.dart',
     );
