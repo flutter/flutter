@@ -189,6 +189,7 @@ std::vector<Point> Tessellator::TessellateConvex(const Path& path,
 
   output.reserve(polyline.points->size() +
                  (4 * (polyline.contours.size() - 1)));
+  bool previous_contour_odd_points = false;
   for (auto j = 0u; j < polyline.contours.size(); j++) {
     auto [start, end] = polyline.GetContourPointBounds(j);
     auto first_point = polyline.GetPoint(start);
@@ -205,21 +206,30 @@ std::vector<Point> Tessellator::TessellateConvex(const Path& path,
       output.emplace_back(output.back());
       output.emplace_back(first_point);
       output.emplace_back(first_point);
-      output.emplace_back(first_point);
+
+      // If the contour has an odd number of points, insert an extra point when
+      // bridging to the next contour to preserve the correct triangle winding
+      // order.
+      if (previous_contour_odd_points) {
+        output.emplace_back(first_point);
+      }
     } else {
       output.emplace_back(first_point);
     }
 
     size_t a = start + 1;
     size_t b = end - 1;
-    while (a <= b) {
-      // If the contour has an odd number of points, two identical points will
-      // be appended when a == b. This ensures the triangle winding order will
-      // remain the same after bridging to the next contour.
+    while (a < b) {
       output.emplace_back(polyline.GetPoint(a));
       output.emplace_back(polyline.GetPoint(b));
       a++;
       b--;
+    }
+    if (a == b) {
+      previous_contour_odd_points = false;
+      output.emplace_back(polyline.GetPoint(a));
+    } else {
+      previous_contour_odd_points = true;
     }
   }
   return output;

@@ -111,9 +111,7 @@ TEST(TessellatorTest, TessellateConvex) {
     auto pts = t.TessellateConvex(
         PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 10, 10)).TakePath(), 1.0);
 
-    std::vector<Point> expected = {
-        {0, 0}, {10, 0}, {0, 10}, {10, 10}, {10, 10},  //
-    };
+    std::vector<Point> expected = {{0, 0}, {10, 0}, {0, 10}, {10, 10}};
     EXPECT_EQ(pts, expected);
   }
 
@@ -125,9 +123,9 @@ TEST(TessellatorTest, TessellateConvex) {
                                       .TakePath(),
                                   1.0);
 
-    std::vector<Point> expected = {
-        {0, 0},   {10, 0},  {0, 10},  {10, 10}, {10, 10}, {10, 10}, {20, 20},
-        {20, 20}, {20, 20}, {30, 20}, {20, 30}, {30, 30}, {30, 30}};
+    std::vector<Point> expected = {{0, 0},   {10, 0},  {0, 10},  {10, 10},
+                                   {10, 10}, {20, 20}, {20, 20}, {30, 20},
+                                   {20, 30}, {30, 30}};
     EXPECT_EQ(pts, expected);
   }
 }
