@@ -1683,7 +1683,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     };
     if (isDesktop || kIsWeb) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
-      WidgetsBinding.instance.addObserver(_appLifecycleListener);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
     rootScope._manager = this;
   }
@@ -1701,7 +1701,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(_appLifecycleListener);
+    if (_appLifecycleListener != null) {
+      WidgetsBinding.instance.removeObserver(_appLifecycleListener!);
+    }
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1862,7 +1864,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Allows FocusManager to respond to app lifecycle state changes,
   // temporarily suspending the primaryFocus when the app is inactive.
-  late final _AppLifecycleListener _appLifecycleListener;
+  _AppLifecycleListener? _appLifecycleListener;
 
   // Stores the node that was focused before the app lifecycle changed.
   // Will be restored as the primary focus once app is resumed.
