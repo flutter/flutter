@@ -46,10 +46,10 @@ final class RunCommand extends CommandBase {
   String get name => 'run';
 
   @override
-  String get description => 'Run a flutter app with a local engine build'
+  String get description => 'Run a Flutter app with a local engine build. '
       'All arguments after -- are forwarded to flutter run, e.g.: '
-      'et run -- --profile'
-      'et run -- -d macos'
+      'et run -- --profile '
+      'et run -- -d macos '
       'See `flutter run --help` for a listing';
 
   Build? _lookup(String configName) {
@@ -123,7 +123,7 @@ final class RunCommand extends CommandBase {
   @override
   Future<int> run() async {
     if (!environment.processRunner.processManager.canRun('flutter')) {
-      environment.logger.error('Cannot find flutter command in your path');
+      environment.logger.error('Cannot find the flutter command in your path');
       return 1;
     }
     final String? configName = await _selectTargetConfig();

@@ -7,6 +7,8 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 
 import '../environment.dart';
 import 'build_command.dart';
+import 'fetch_command.dart';
+import 'flags.dart';
 import 'format_command.dart';
 import 'query_command.dart';
 import 'run_command.dart';
@@ -22,14 +24,20 @@ final class ToolCommandRunner extends CommandRunner<int> {
     required this.configs,
   }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
     final List<Command<int>> commands = <Command<int>>[
-      FormatCommand(
-        environment: environment,
-      ),
+      FetchCommand(environment: environment),
+      FormatCommand(environment: environment),
       QueryCommand(environment: environment, configs: configs),
       BuildCommand(environment: environment, configs: configs),
       RunCommand(environment: environment, configs: configs),
     ];
     commands.forEach(addCommand);
+
+    argParser.addFlag(
+      verboseFlag,
+      abbr: 'v',
+      help: 'Prints verbose output',
+      negatable: false,
+    );
   }
 
   /// The name of the tool as reported in the tool's usage and help
