@@ -79,7 +79,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      await completer.future.timeout(const Duration(seconds: 3000));
+      await completer.future.timeout(const Duration(seconds: 15));
     } finally {
       await subscription.cancel();
     }
