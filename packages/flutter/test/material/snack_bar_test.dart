@@ -640,7 +640,6 @@ void main() {
       dialogBackgroundColor: Colors.black,
       indicatorColor: Colors.black,
       hintColor: Colors.black,
-      errorColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
