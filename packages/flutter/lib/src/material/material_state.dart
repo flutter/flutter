@@ -530,8 +530,8 @@ class _MaterialStateFromStyles extends MaterialStateTextStyle {
   /// The style to use when [MaterialState.error] is active
   /// and the enclosing widget is disabled.
   ///
-  /// If [disabledError] is not supplied, defaults to [error],
-  /// and defaults to [disabled] if both are null.
+  /// If [disabledError] is not supplied, defaults to [disabled],
+  /// and defaults to [error] if both are null.
   final TextStyle? disabledError;
 
   /// The style to use when the user drags their mouse cursor
