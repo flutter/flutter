@@ -99,11 +99,6 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 
-  /// Gets the TextSelection from the selected content
-  ///
-  /// Return `null` if nothing is selected, or is not supported by the selectable
-  TextSelection? get textSelection;
-
   /// Gets the content length of the selectable
   ///
   /// Return `null` if the content length is not supported by the selectable
@@ -115,13 +110,14 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 // https://github.com/flutter/flutter/issues/104206.
 class SelectedContent {
   /// Creates a selected content object.
-  /// not all selected content supports TextSelection
+
   const SelectedContent({required this.plainText, this.textSelection});
 
   /// The selected content in plain text format.
   final String plainText;
 
   /// The selected content in [TextSelection] format.
+  /// not all selected content supports TextSelection
   final TextSelection? textSelection;
 
   /// Copy with constructor
@@ -170,10 +166,6 @@ mixin Selectable implements SelectionHandler {
   /// A list of [Rect]s that represent the bounding box of this [Selectable]
   /// in local coordinates.
   List<Rect> get boundingBoxes;
-
-  /// The [TextSelection] of this [Selectable].
-  @override
-  TextSelection? get textSelection;
 
   /// An int that represents the content length of this [Selectable].
   @override
@@ -240,10 +232,6 @@ mixin SelectionRegistrant on Selectable {
       _subscribedToSelectionRegistrar = false;
     }
   }
-
-  // not applicable since we don't know the type here
-  @override
-  TextSelection? get textSelection => null;
 }
 
 /// A utility class that provides useful methods for handling selection events.

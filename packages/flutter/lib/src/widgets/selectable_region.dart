@@ -605,8 +605,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _updateSelectedContentIfNeeded() {
     if (_lastSelectedContent?.plainText !=_selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
-      final TextSelection? textSelection = _selectable?.textSelection;
-      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
+      widget.onSelectionChanged?.call(_lastSelectedContent);
     }
   }
 
@@ -1893,44 +1892,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return length;
   }
 
-  @override
-  TextSelection? get textSelection {
-    // initialize data structures
-    int start = 0;
-    int? end;
-    int numSelected = 0;
-    bool enteredSelectedRegion = false;
-
-    for (final Selectable selectable in selectables) {
-      // Retrieve the selected content, if any, of the current 'selectable'.
-      final SelectedContent? data = selectable.getSelectedContent();
-      if (data != null) {
-        final TextSelection? selection = selectable.textSelection ;
-        if (!enteredSelectedRegion) {
-          // ...start the selection index at the start of the current selection.
-          start += selection?.start ?? 0;
-        }
-        enteredSelectedRegion = true;
-        numSelected += (selection?.extentOffset ?? 0) - (selection?.baseOffset ?? 0);
-      } else {
-        if (!enteredSelectedRegion) {
-          // add its length to the 'start' index if we haven't started selection.
-          start += selectable.contentLength ?? 0;
-        }
-      }
-    }
-
-    if (numSelected == 0) {
-      return null;
-    }
-    end = numSelected + start;
-    // Return a TextSelection that represents the selected range of text.
-    return TextSelection(
-      baseOffset: start,
-      extentOffset: end,
-    );
-  }
-
   /// Called when this delegate finishes updating the selectables.
   @protected
   @mustCallSuper
@@ -2211,28 +2172,56 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _endHandleLayerOwner!.pushHandleLayers(null, effectiveEndHandle);
   }
 
-  /// Copies the selected contents of all selectables.
   @override
   SelectedContent? getSelectedContent() {
     final List<SelectedContent> selections = <SelectedContent>[];
+    final StringBuffer buffer = StringBuffer();
+    int start = 0;
+    int? end;
+    int numSelected = 0;
+    // Indicates if the loop has processed a selectable item that contains selected content.
+    bool enteredSelectedRegion = false;
+
     for (final Selectable selectable in selectables) {
       final SelectedContent? data = selectable.getSelectedContent();
       if (data != null) {
         selections.add(data);
+        buffer.write(data.plainText);
+        final TextSelection? selection = data.textSelection;
+
+        // Adjusts the start index only upon entering the first selected region.
+        // This ensures start is positioned at the beginning of the first selection,
+        // ignoring any content before that doesn't belong to the selected content.
+        if (!enteredSelectedRegion) {
+          start += selection?.start ?? 0;
+          enteredSelectedRegion = true;
+        }
+        // Accumulates the total length of selected content.
+        // This is crucial for calculating the 'end' index later.
+        numSelected += (selection?.extentOffset ?? 0) - (selection?.baseOffset ?? 0);
+      } else {
+        // If the current selectable has no selection and we haven't entered a selected region yet,
+        // adjust 'start' to account for its length. This skips over unselected content at the beginning.
+        if (!enteredSelectedRegion) {
+          start += selectable.contentLength ?? 0;
+        }
       }
     }
-    if (selections.isEmpty) {
+
+    if (selections.isEmpty || numSelected == 0) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
-      buffer.write(selection.plainText);
-    }
+
+    end = numSelected + start; // Calculates the ending index of the entire selection.
+
     return SelectedContent(
       plainText: buffer.toString(),
+      textSelection: TextSelection(
+        baseOffset: start,
+        extentOffset: end,
+      ),
     );
   }
-
   // Clears the selection on all selectables not in the range of
   // currentSelectionStartIndex..currentSelectionEndIndex.
   //
