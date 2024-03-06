@@ -27,6 +27,7 @@ CAPABILITY_TEST(SupportsCompute, false);
 CAPABILITY_TEST(SupportsComputeSubgroups, false);
 CAPABILITY_TEST(SupportsReadFromResolve, false);
 CAPABILITY_TEST(SupportsDecalSamplerAddressMode, false);
+CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 
 TEST(CapabilitiesTest, DefaultColorFormat) {
   auto defaults = CapabilitiesBuilder().Build();

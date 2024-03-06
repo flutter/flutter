@@ -442,6 +442,21 @@ bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
              .supportedOperations &
          vk::SubgroupFeatureFlagBits::eArithmetic);
 
+  {
+    // Query texture support.
+    // TODO(jonahwilliams):
+    // https://github.com/flutter/flutter/issues/129784
+    vk::PhysicalDeviceMemoryProperties memory_properties;
+    device.getMemoryProperties(&memory_properties);
+
+    for (auto i = 0u; i < memory_properties.memoryTypeCount; i++) {
+      if (memory_properties.memoryTypes[i].propertyFlags &
+          vk::MemoryPropertyFlagBits::eLazilyAllocated) {
+        supports_device_transient_textures_ = true;
+      }
+    }
+  }
+
   // Determine the optional device extensions this physical device supports.
   {
     required_common_device_extensions_.clear();
@@ -526,6 +541,11 @@ bool CapabilitiesVK::SupportsReadFromResolve() const {
 
 bool CapabilitiesVK::SupportsDecalSamplerAddressMode() const {
   return true;
+}
+
+// |Capabilities|
+bool CapabilitiesVK::SupportsDeviceTransientTextures() const {
+  return supports_device_transient_textures_;
 }
 
 // |Capabilities|

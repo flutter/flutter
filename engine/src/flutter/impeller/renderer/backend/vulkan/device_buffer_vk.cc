@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 
 #include "flutter/flutter_vma/flutter_vma.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "vulkan/vulkan_core.h"
 
@@ -13,16 +14,14 @@ namespace impeller {
 DeviceBufferVK::DeviceBufferVK(DeviceBufferDescriptor desc,
                                std::weak_ptr<Context> context,
                                UniqueBufferVMA buffer,
-                               VmaAllocationInfo info,
-                               bool is_host_coherent_buffer)
+                               VmaAllocationInfo info)
     : DeviceBuffer(desc),
       context_(std::move(context)),
       resource_(ContextVK::Cast(*context_.lock().get()).GetResourceManager(),
                 BufferResource{
                     std::move(buffer),  //
                     info                //
-                }),
-      is_host_coherent_buffer_(is_host_coherent_buffer) {}
+                }) {}
 
 DeviceBufferVK::~DeviceBufferVK() = default;
 
@@ -42,11 +41,9 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
   if (source) {
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
-  if (!is_host_coherent_buffer_) {
-    ::vmaFlushAllocation(resource_->buffer.get().allocator,
-                         resource_->buffer.get().allocation, offset,
-                         source_range.length);
-  }
+  ::vmaFlushAllocation(resource_->buffer.get().allocator,
+                       resource_->buffer.get().allocation, offset,
+                       source_range.length);
 
   return true;
 }
@@ -68,9 +65,6 @@ bool DeviceBufferVK::SetLabel(const std::string& label) {
 }
 
 void DeviceBufferVK::Flush(std::optional<Range> range) const {
-  if (is_host_coherent_buffer_) {
-    return;
-  }
   auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
   ::vmaFlushAllocation(resource_->buffer.get().allocator,
                        resource_->buffer.get().allocation, flush_range.offset,
@@ -78,9 +72,6 @@ void DeviceBufferVK::Flush(std::optional<Range> range) const {
 }
 
 void DeviceBufferVK::Invalidate(std::optional<Range> range) const {
-  if (is_host_coherent_buffer_) {
-    return;
-  }
   auto flush_range = range.value_or(Range{0, GetDeviceBufferDescriptor().size});
   ::vmaInvalidateAllocation(resource_->buffer.get().allocator,
                             resource_->buffer.get().allocation,

@@ -179,6 +179,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsDecalSamplerAddressMode() const override;
 
   // |Capabilities|
+  bool SupportsDeviceTransientTextures() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
