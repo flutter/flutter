@@ -3078,7 +3078,6 @@
 ../../../third_party/dart/sdk/lib/_internal/vm/OWNERS
 ../../../third_party/dart/sdk/lib/_internal/wasm/OWNERS
 ../../../third_party/dart/sdk/lib/_wasm/OWNERS
-../../../third_party/dart/sdk/lib/analysis_options.yaml
 ../../../third_party/dart/sdk/lib/html/doc
 ../../../third_party/dart/sdk/lib/libraries.json
 ../../../third_party/dart/sdk/lib/libraries.yaml
