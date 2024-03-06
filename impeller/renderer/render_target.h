@@ -84,7 +84,8 @@ class RenderTarget final {
       bool msaa,
       const std::string& label = "Offscreen",
       RenderTarget::AttachmentConfig stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig);
+          RenderTarget::kDefaultStencilAttachmentConfig,
+      const std::shared_ptr<Texture>& depth_stencil_texture = nullptr);
 
   SampleCount GetSampleCount() const;
 
@@ -152,7 +153,9 @@ class RenderTargetAllocator {
       RenderTarget::AttachmentConfig color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfig,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig);
+          RenderTarget::kDefaultStencilAttachmentConfig,
+      const std::shared_ptr<Texture>& existing_color_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_depth_stencil_texture = nullptr);
 
   virtual RenderTarget CreateOffscreenMSAA(
       const Context& context,
@@ -162,7 +165,10 @@ class RenderTargetAllocator {
       RenderTarget::AttachmentConfigMSAA color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfigMSAA,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig);
+          RenderTarget::kDefaultStencilAttachmentConfig,
+      const std::shared_ptr<Texture>& existing_color_msaa_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_color_resolve_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_depth_stencil_texture = nullptr);
 
   /// @brief Mark the beginning of a frame workload.
   ///
@@ -176,15 +182,6 @@ class RenderTargetAllocator {
   virtual void End();
 
  private:
-  void SetupDepthStencilAttachments(
-      Allocator& allocator,
-      const Context& context,
-      ISize size,
-      bool msaa,
-      const std::string& label = "Offscreen",
-      RenderTarget::AttachmentConfig stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig);
-
   std::shared_ptr<Allocator> allocator_;
 };
 
