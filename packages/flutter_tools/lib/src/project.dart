@@ -806,47 +806,26 @@ $javaGradleCompatUrl
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-    globals.printStatus(
-'''
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. To migrate
-your project, follow the steps at:
-
-https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The detected reason was:
-
-  ${result.reason}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-''');
-    if (deprecationBehavior == DeprecationBehavior.ignore) {
-      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-ignored',
-        buildType: 'gradle',
-      ));
-
-    } else { // DeprecationBehavior.exit
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-failed',
-        buildType: 'gradle',
-      ));
-
-      throwToolExit(
-        'Build failed due to use of deprecated Android v1 embedding.',
-        exitCode: 1,
-      );
-    }
+    // The v1 android embedding has been deleted. TODO(gmackall): I think we
+    // will never get here (the imports will fail to resolve), so figure out a
+    // better way. This is just to simulate it so I can hunt down tests to
+    // modify or delete.
+    throwToolExit(
+      'Build failed due to use of deleted Android v1 embedding.',
+      exitCode: 1,
+    );
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
-    return computeEmbeddingVersion().version;
+    final AndroidEmbeddingVersion androidEmbeddingVersion = computeEmbeddingVersion().version;
+    if (androidEmbeddingVersion == AndroidEmbeddingVersion.v1) {
+      throwToolExit(
+        'Build failed due to use of deleted Android v1 embedding.',
+        exitCode: 1,
+      );
+    }
+
+    return androidEmbeddingVersion;
   }
 
   AndroidEmbeddingVersionResult computeEmbeddingVersion() {
