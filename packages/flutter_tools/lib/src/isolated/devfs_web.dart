@@ -386,11 +386,11 @@ class WebAssetServer implements AssetReader {
 
     // If the response is `/`, then we are requesting the index file.
     if (requestPath == '/' || requestPath.isEmpty) {
-      return _serveWebTemplate('index.html', 'text/html', _kDefaultIndex);
+      return _serveIndexHtml();
     }
 
     if (requestPath == 'flutter_bootstrap.js') {
-      return _serveWebTemplate('flutter_bootstrap.js', 'text/javascript', generateDefaultFlutterBootstrapScript());
+      return _serveFlutterBootstrapJs();
     }
 
     final Map<String, String> headers = <String, String>{};
@@ -482,7 +482,7 @@ class WebAssetServer implements AssetReader {
           requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
-      return _serveWebTemplate('index.html', 'text/html', _kDefaultIndex);
+      return _serveIndexHtml();
     }
 
     // For real files, use a serialized file stat plus path as a revision.
@@ -528,12 +528,7 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
-  shelf.Response _serveWebTemplate(
-    String filename,
-    String contentType,
-    String fallbackContent,
-  ) {
-    final WebTemplate indexHtml = _getWebTemplate(filename, fallbackContent);
+  String get _buildConfigString {
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
@@ -544,25 +539,47 @@ class WebAssetServer implements AssetReader {
         },
       ],
     };
-    final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+    return '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+  }
 
-    final File flutterJsFile = globals.fs.file(globals.fs.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      'flutter.js',
-    ));
+  File get _flutterJsFile => globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
+  ));
 
+  String get _flutterBootstrapJsContent {
+    final WebTemplate bootstrapTemplate = _getWebTemplate(
+      'flutter_bootstrap.js',
+      generateDefaultFlutterBootstrapScript()
+    );
+    bootstrapTemplate.applySubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      buildConfig: _buildConfigString,
+      flutterJsFile: _flutterJsFile,
+    );
+    return bootstrapTemplate.content;
+  }
+
+  shelf.Response _serveFlutterBootstrapJs() {
+    return shelf.Response.ok(_flutterBootstrapJsContent, headers: <String, String>{
+      HttpHeaders.contentTypeHeader: 'text/javascript',
+    });
+  }
+
+  shelf.Response _serveIndexHtml() {
+    final WebTemplate indexHtml = _getWebTemplate('indexHtml', _kDefaultIndex);
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
-      buildConfig: buildConfigString,
-      flutterJsFile: flutterJsFile
+      buildConfig: _buildConfigString,
+      flutterJsFile: _flutterJsFile,
+      flutterBootstrapJs: _flutterBootstrapJsContent,
     );
-
-    final Map<String, String> headers = <String, String>{
-      HttpHeaders.contentTypeHeader: contentType,
-    };
-    return shelf.Response.ok(indexHtml.content, headers: headers);
+    return shelf.Response.ok(indexHtml.content, headers: <String, String>{
+      HttpHeaders.contentTypeHeader: 'text/html',
+    });
   }
 
   // Attempt to resolve `path` to a dart file.
