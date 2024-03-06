@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1678,7 +1677,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    if (Platform.operatingSystem case 'windows' || 'macos' || 'linux') {
+    final bool isDesktop = switch (defaultTargetPlatform) {
+      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => false,
+    };
+    if (isDesktop || kIsWeb) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener);
     }
