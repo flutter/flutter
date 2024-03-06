@@ -212,14 +212,14 @@ std::vector<Point> Tessellator::TessellateConvex(const Path& path,
 
     size_t a = start + 1;
     size_t b = end - 1;
-    while (a < b) {
+    while (a <= b) {
+      // If the contour has an odd number of points, two identical points will
+      // be appended when a == b. This ensures the triangle winding order will
+      // remain the same after bridging to the next contour.
       output.emplace_back(polyline.GetPoint(a));
       output.emplace_back(polyline.GetPoint(b));
       a++;
       b--;
-    }
-    if (a == b) {
-      output.emplace_back(polyline.GetPoint(a));
     }
   }
   return output;
