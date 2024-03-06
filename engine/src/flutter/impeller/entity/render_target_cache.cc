@@ -33,7 +33,11 @@ RenderTarget RenderTargetCache::CreateOffscreen(
     int mip_count,
     const std::string& label,
     RenderTarget::AttachmentConfig color_attachment_config,
-    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config) {
+    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
+    const std::shared_ptr<Texture>& existing_color_texture,
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+  FML_DCHECK(existing_color_texture == nullptr &&
+             existing_depth_stencil_texture == nullptr);
   auto config = RenderTargetConfig{
       .size = size,
       .mip_count = static_cast<size_t>(mip_count),
@@ -44,7 +48,14 @@ RenderTarget RenderTargetCache::CreateOffscreen(
     const auto other_config = render_target_data.config;
     if (!render_target_data.used_this_frame && other_config == config) {
       render_target_data.used_this_frame = true;
-      return render_target_data.render_target;
+      auto color0 = render_target_data.render_target.GetColorAttachments()
+                        .find(0u)
+                        ->second;
+      auto depth = render_target_data.render_target.GetDepthAttachment();
+      std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+      return RenderTargetAllocator::CreateOffscreen(
+          context, size, mip_count, label, color_attachment_config,
+          stencil_attachment_config, color0.texture, depth_tex);
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreen(
@@ -66,7 +77,13 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
     int mip_count,
     const std::string& label,
     RenderTarget::AttachmentConfigMSAA color_attachment_config,
-    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config) {
+    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
+    const std::shared_ptr<Texture>& existing_color_msaa_texture,
+    const std::shared_ptr<Texture>& existing_color_resolve_texture,
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+  FML_DCHECK(existing_color_msaa_texture == nullptr &&
+             existing_color_resolve_texture == nullptr &&
+             existing_depth_stencil_texture == nullptr);
   auto config = RenderTargetConfig{
       .size = size,
       .mip_count = static_cast<size_t>(mip_count),
@@ -77,7 +94,15 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
     const auto other_config = render_target_data.config;
     if (!render_target_data.used_this_frame && other_config == config) {
       render_target_data.used_this_frame = true;
-      return render_target_data.render_target;
+      auto color0 = render_target_data.render_target.GetColorAttachments()
+                        .find(0u)
+                        ->second;
+      auto depth = render_target_data.render_target.GetDepthAttachment();
+      std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+      return RenderTargetAllocator::CreateOffscreenMSAA(
+          context, size, mip_count, label, color_attachment_config,
+          stencil_attachment_config, color0.texture, color0.resolve_texture,
+          depth_tex);
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreenMSAA(

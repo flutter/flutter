@@ -261,37 +261,46 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
     int mip_count,
     const std::string& label,
     RenderTarget::AttachmentConfig color_attachment_config,
-    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config) {
+    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
+    const std::shared_ptr<Texture>& existing_color_texture,
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
   if (size.IsEmpty()) {
     return {};
   }
 
   RenderTarget target;
-  PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
-  TextureDescriptor color_tex0;
-  color_tex0.storage_mode = color_attachment_config.storage_mode;
-  color_tex0.format = pixel_format;
-  color_tex0.size = size;
-  color_tex0.mip_count = mip_count;
-  color_tex0.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-                     static_cast<uint64_t>(TextureUsage::kShaderRead);
+
+  std::shared_ptr<Texture> color0_tex;
+  if (existing_color_texture) {
+    color0_tex = existing_color_texture;
+  } else {
+    PixelFormat pixel_format =
+        context.GetCapabilities()->GetDefaultColorFormat();
+    TextureDescriptor color0_tex_desc;
+    color0_tex_desc.storage_mode = color_attachment_config.storage_mode;
+    color0_tex_desc.format = pixel_format;
+    color0_tex_desc.size = size;
+    color0_tex_desc.mip_count = mip_count;
+    color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
+                            static_cast<uint64_t>(TextureUsage::kShaderRead);
+    color0_tex = allocator_->CreateTexture(color0_tex_desc);
+    if (!color0_tex) {
+      return {};
+    }
+  }
+  color0_tex->SetLabel(SPrintF("%s Color Texture", label.c_str()));
 
   ColorAttachment color0;
   color0.clear_color = color_attachment_config.clear_color;
   color0.load_action = color_attachment_config.load_action;
   color0.store_action = color_attachment_config.store_action;
-  color0.texture = allocator_->CreateTexture(color_tex0);
-
-  if (!color0.texture) {
-    return {};
-  }
-  color0.texture->SetLabel(SPrintF("%s Color Texture", label.c_str()));
+  color0.texture = color0_tex;
   target.SetColorAttachment(color0, 0u);
 
   if (stencil_attachment_config.has_value()) {
-    target.SetupDepthStencilAttachments(context, *allocator_, size, false,
-                                        label,
-                                        stencil_attachment_config.value());
+    target.SetupDepthStencilAttachments(
+        context, *allocator_, size, false, label,
+        stencil_attachment_config.value(), existing_depth_stencil_texture);
   } else {
     target.SetStencilAttachment(std::nullopt);
     target.SetDepthAttachment(std::nullopt);
@@ -306,7 +315,10 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     int mip_count,
     const std::string& label,
     RenderTarget::AttachmentConfigMSAA color_attachment_config,
-    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config) {
+    std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
+    const std::shared_ptr<Texture>& existing_color_msaa_texture,
+    const std::shared_ptr<Texture>& existing_color_resolve_texture,
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -315,45 +327,50 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
   PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
 
   // Create MSAA color texture.
-
-  TextureDescriptor color0_tex_desc;
-  color0_tex_desc.storage_mode = color_attachment_config.storage_mode;
-  color0_tex_desc.type = TextureType::kTexture2DMultisample;
-  color0_tex_desc.sample_count = SampleCount::kCount4;
-  color0_tex_desc.format = pixel_format;
-  color0_tex_desc.size = size;
-  color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
-
-  if (context.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
-    // See below ("SupportsImplicitResolvingMSAA") for more details.
-    color0_tex_desc.storage_mode = StorageMode::kDevicePrivate;
-  }
-
-  auto color0_msaa_tex = allocator_->CreateTexture(color0_tex_desc);
-  if (!color0_msaa_tex) {
-    VALIDATION_LOG << "Could not create multisample color texture.";
-    return {};
+  std::shared_ptr<Texture> color0_msaa_tex;
+  if (existing_color_msaa_texture) {
+    color0_msaa_tex = existing_color_msaa_texture;
+  } else {
+    TextureDescriptor color0_tex_desc;
+    color0_tex_desc.storage_mode = color_attachment_config.storage_mode;
+    color0_tex_desc.type = TextureType::kTexture2DMultisample;
+    color0_tex_desc.sample_count = SampleCount::kCount4;
+    color0_tex_desc.format = pixel_format;
+    color0_tex_desc.size = size;
+    color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+    if (context.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
+      // See below ("SupportsImplicitResolvingMSAA") for more details.
+      color0_tex_desc.storage_mode = StorageMode::kDevicePrivate;
+    }
+    color0_msaa_tex = allocator_->CreateTexture(color0_tex_desc);
+    if (!color0_msaa_tex) {
+      VALIDATION_LOG << "Could not create multisample color texture.";
+      return {};
+    }
   }
   color0_msaa_tex->SetLabel(
       SPrintF("%s Color Texture (Multisample)", label.c_str()));
 
   // Create color resolve texture.
-
-  TextureDescriptor color0_resolve_tex_desc;
-  color0_resolve_tex_desc.storage_mode =
-      color_attachment_config.resolve_storage_mode;
-  color0_resolve_tex_desc.format = pixel_format;
-  color0_resolve_tex_desc.size = size;
-  color0_resolve_tex_desc.compression_type = CompressionType::kLossy;
-  color0_resolve_tex_desc.usage =
-      static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-      static_cast<uint64_t>(TextureUsage::kShaderRead);
-  color0_resolve_tex_desc.mip_count = mip_count;
-
-  auto color0_resolve_tex = allocator_->CreateTexture(color0_resolve_tex_desc);
-  if (!color0_resolve_tex) {
-    VALIDATION_LOG << "Could not create color texture.";
-    return {};
+  std::shared_ptr<Texture> color0_resolve_tex;
+  if (existing_color_resolve_texture) {
+    color0_resolve_tex = existing_color_resolve_texture;
+  } else {
+    TextureDescriptor color0_resolve_tex_desc;
+    color0_resolve_tex_desc.storage_mode =
+        color_attachment_config.resolve_storage_mode;
+    color0_resolve_tex_desc.format = pixel_format;
+    color0_resolve_tex_desc.size = size;
+    color0_resolve_tex_desc.compression_type = CompressionType::kLossy;
+    color0_resolve_tex_desc.usage =
+        static_cast<uint64_t>(TextureUsage::kRenderTarget) |
+        static_cast<uint64_t>(TextureUsage::kShaderRead);
+    color0_resolve_tex_desc.mip_count = mip_count;
+    color0_resolve_tex = allocator_->CreateTexture(color0_resolve_tex_desc);
+    if (!color0_resolve_tex) {
+      VALIDATION_LOG << "Could not create color texture.";
+      return {};
+    }
   }
   color0_resolve_tex->SetLabel(SPrintF("%s Color Texture", label.c_str()));
 
@@ -383,7 +400,8 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
 
   if (stencil_attachment_config.has_value()) {
     target.SetupDepthStencilAttachments(context, *allocator_, size, true, label,
-                                        stencil_attachment_config.value());
+                                        stencil_attachment_config.value(),
+                                        existing_depth_stencil_texture);
   } else {
     target.SetDepthAttachment(std::nullopt);
     target.SetStencilAttachment(std::nullopt);
@@ -398,24 +416,28 @@ void RenderTarget::SetupDepthStencilAttachments(
     ISize size,
     bool msaa,
     const std::string& label,
-    RenderTarget::AttachmentConfig stencil_attachment_config) {
-  TextureDescriptor depth_stencil_texture_desc;
-  depth_stencil_texture_desc.storage_mode =
-      stencil_attachment_config.storage_mode;
-  if (msaa) {
-    depth_stencil_texture_desc.type = TextureType::kTexture2DMultisample;
-    depth_stencil_texture_desc.sample_count = SampleCount::kCount4;
-  }
-  depth_stencil_texture_desc.format =
-      context.GetCapabilities()->GetDefaultDepthStencilFormat();
-  depth_stencil_texture_desc.size = size;
-  depth_stencil_texture_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-
-  auto depth_stencil_texture =
-      allocator.CreateTexture(depth_stencil_texture_desc);
-  if (!depth_stencil_texture) {
-    return;  // Error messages are handled by `Allocator::CreateTexture`.
+    RenderTarget::AttachmentConfig stencil_attachment_config,
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+  std::shared_ptr<Texture> depth_stencil_texture;
+  if (existing_depth_stencil_texture) {
+    depth_stencil_texture = existing_depth_stencil_texture;
+  } else {
+    TextureDescriptor depth_stencil_texture_desc;
+    depth_stencil_texture_desc.storage_mode =
+        stencil_attachment_config.storage_mode;
+    if (msaa) {
+      depth_stencil_texture_desc.type = TextureType::kTexture2DMultisample;
+      depth_stencil_texture_desc.sample_count = SampleCount::kCount4;
+    }
+    depth_stencil_texture_desc.format =
+        context.GetCapabilities()->GetDefaultDepthStencilFormat();
+    depth_stencil_texture_desc.size = size;
+    depth_stencil_texture_desc.usage =
+        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    depth_stencil_texture = allocator.CreateTexture(depth_stencil_texture_desc);
+    if (!depth_stencil_texture) {
+      return;  // Error messages are handled by `Allocator::CreateTexture`.
+    }
   }
 
   DepthAttachment depth0;
