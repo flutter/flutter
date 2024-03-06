@@ -67,6 +67,7 @@ targets:
       - lib/ui/**
       - shell/platform/android/**
       - testing/scenario_app/**
+      - testing/skia_gold_client/**
 
   - name: Linux linux_android_emulator_skia_tests
     enabled_branches:
@@ -86,6 +87,7 @@ targets:
       - lib/ui/**
       - shell/platform/android/**
       - testing/scenario_app/**
+      - testing/skia_gold_client/**
 
   # TODO(matanlurey): OpenGLES is very flaky, https://github.com/flutter/flutter/issues/143626.
   - name: Linux linux_android_emulator_opengles_tests
@@ -107,6 +109,7 @@ targets:
       - lib/ui/**
       - shell/platform/android/**
       - testing/scenario_app/**
+      - testing/skia_gold_client/**
 
 # Task to run Linux linux_android_emulator_tests on AVDs running Android 33
 # instead of 34 for investigating https://github.com/flutter/flutter/issues/137947.
@@ -129,6 +132,7 @@ targets:
       - lib/ui/**
       - shell/platform/android/**
       - testing/scenario_app/**
+      - testing/skia_gold_client/**
 
   - name: Linux builder_cache
     enabled_branches:
