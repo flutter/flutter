@@ -20,15 +20,15 @@ class GPUMemorySumarizer {
     }
   }
 
-  /// Whether or not this event is a GPU event.
+  /// Whether or not this event is a GPU allocation event.
   static const Set<String> kMemoryEvents = <String>{'AllocatorVK'};
 
   final List<double> _memoryMB = <double>[];
 
-  /// Computes the average GPU time recorded.
+  /// Computes the average GPU memory allocated.
   double computeAverageMemoryUsage() => _computeAverage(_memoryMB);
 
-  /// The [percentile]-th percentile GPU time recorded.
+  /// The [percentile]-th percentile GPU memory allocated.
   double computePercentileMemoryUsage(double percentile) {
     if (_memoryMB.isEmpty) {
       return 0;
