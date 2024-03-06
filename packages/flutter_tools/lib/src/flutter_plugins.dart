@@ -340,7 +340,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'plugins',
     'GeneratedPluginRegistrant.java',
   );
-  String templateContent = _androidPluginRegistryTemplateNewEmbedding;
+  const String templateContent = _androidPluginRegistryTemplateNewEmbedding;
   globals.printTrace('Generating $registryPath');
   await _renderTemplateToFile(
     templateContent,
