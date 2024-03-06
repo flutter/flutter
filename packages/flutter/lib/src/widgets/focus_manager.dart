@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1677,8 +1678,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
-    WidgetsBinding.instance.addObserver(_appLifecycleListener);
+    if (Platform.operatingSystem case 'windows' || 'macos' || 'linux') {
+      _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener);
+    }
     rootScope._manager = this;
   }
 
