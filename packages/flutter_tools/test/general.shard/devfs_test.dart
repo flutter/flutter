@@ -67,10 +67,6 @@ void main() {
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
     expect(content.isModified, isTrue);
     expect(content.isModified, isFalse);
-    content.bytes = <int>[7, 8, 9, 2];
-    expect(content.bytes, orderedEquals(<int>[7, 8, 9, 2]));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
   });
 
   testWithoutContext('DevFSStringContent', () {
@@ -78,16 +74,6 @@ void main() {
 
     expect(content.string, 'some string');
     expect(content.bytes, orderedEquals(utf8.encode('some string')));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    content.string = 'another string';
-    expect(content.string, 'another string');
-    expect(content.bytes, orderedEquals(utf8.encode('another string')));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    content.bytes = utf8.encode('foo bar');
-    expect(content.string, 'foo bar');
-    expect(content.bytes, orderedEquals(utf8.encode('foo bar')));
     expect(content.isModified, isTrue);
     expect(content.isModified, isFalse);
   });

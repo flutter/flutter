@@ -153,18 +153,11 @@ class DevFSFileContent extends DevFSContent {
 class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this._bytes);
 
-  List<int> _bytes;
-
+  final List<int> _bytes;
+  final DateTime _creationTime = DateTime.now();
   bool _isModified = true;
-  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
-
-  set bytes(List<int> value) {
-    _bytes = value;
-    _isModified = true;
-    _modificationTime = DateTime.now();
-  }
 
   /// Return true only once so that the content is written to the device only once.
   @override
@@ -176,7 +169,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -196,19 +189,9 @@ class DevFSStringContent extends DevFSByteContent {
     : _string = string,
       super(utf8.encode(string));
 
-  String _string;
+  final String _string;
 
   String get string => _string;
-
-  set string(String value) {
-    _string = value;
-    super.bytes = utf8.encode(_string);
-  }
-
-  @override
-  set bytes(List<int> value) {
-    string = utf8.decode(value);
-  }
 }
 
 /// A string compressing DevFSContent.
@@ -233,7 +216,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   final String _string;
   final ZLibEncoder _compressor;
-  final DateTime _modificationTime = DateTime.now();
+  final DateTime _creationTime = DateTime.now();
 
   bool _isModified = true;
 
@@ -249,7 +232,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
