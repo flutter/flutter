@@ -146,5 +146,15 @@ TEST_P(HostBufferTest, UnusedBuffersAreDiscardedWhenResetting) {
   EXPECT_EQ(buffer->GetStateForTest().current_frame, 0u);
 }
 
+TEST_P(HostBufferTest, EmplaceWithProcIsAligned) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
+
+  BufferView view = buffer->Emplace(std::array<char, 21>());
+  EXPECT_EQ(view.range, Range(0, 21));
+
+  view = buffer->Emplace(64, 16, [](uint8_t*) {});
+  EXPECT_EQ(view.range, Range(32, 64));
+}
+
 }  // namespace  testing
 }  // namespace impeller
