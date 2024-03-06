@@ -1681,7 +1681,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
       TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => false,
     };
-    if (isDesktop || kIsWeb) {
+    if (isDesktop) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
