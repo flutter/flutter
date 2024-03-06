@@ -2213,8 +2213,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @protected
   void debugAssertDoesMeetConstraints();
 
-  /// When true, debugAssertDoesMeetConstraints() is currently
-  /// executing asserts for verifying the consistent behavior of
+  /// When true, a debug method (debugAssertDoesMeetConstraints(), for instance)
+  /// is currently executing asserts for verifying the consistent behavior of
   /// intrinsic dimensions methods.
   ///
   /// This should only be set by debugAssertDoesMeetConstraints()
