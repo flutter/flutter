@@ -54,7 +54,7 @@ class PluginRegistrar {
   void AddPlugin(std::unique_ptr<Plugin> plugin);
 
  protected:
-  FlutterDesktopPluginRegistrarRef registrar() { return registrar_; }
+  FlutterDesktopPluginRegistrarRef registrar() const { return registrar_; }
 
   // Destroys all owned plugins. Subclasses should call this at the beginning of
   // their destructors to prevent the possibility of an owned plugin trying to
