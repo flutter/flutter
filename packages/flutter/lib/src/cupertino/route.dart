@@ -170,7 +170,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(PageRoute.isPopGestureEnabled(route));
+    assert(route.popGestureEnabled);
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
@@ -220,7 +220,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
         child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => PageRoute.isPopGestureEnabled<T>(route),
+          enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
           child: child,
         ),

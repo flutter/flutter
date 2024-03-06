@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -181,6 +183,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @protected
   AnimationController? get controller => _controller;
   AnimationController? _controller;
+
+  static GestureTransitionController createDefaultGestureTransitionController(
+      TransitionRoute<dynamic> route) {
+    return _AndroidBackGestureTransitionController(
+      navigator: route.navigator!,
+      controller: route.controller!, // protected access
+    );
+  }
 
   /// The animation for the route being pushed on top of this route. This
   /// animation lets this route coordinate with the entrance and exit transition
@@ -494,6 +504,80 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';
+}
+
+abstract class GestureTransitionController {
+  void dragStart({double progress = 0});
+
+  void dragUpdate({required double progress});
+
+  void dragEnd({required bool animateForward});
+}
+
+class _AndroidBackGestureTransitionController
+    extends GestureTransitionController {
+  _AndroidBackGestureTransitionController({
+    required this.controller,
+    required this.navigator,
+  });
+
+  final NavigatorState navigator;
+  final AnimationController controller;
+
+  @override
+  void dragStart({double progress = 0}) {
+    controller.value = progress;
+    navigator.didStartUserGesture();
+  }
+
+  @override
+  void dragUpdate({required double progress}) {
+    controller.value = progress;
+  }
+
+  @override
+  void dragEnd({required bool animateForward}) {
+    if (animateForward) {
+      // The closer the panel is to dismissing, the shorter the animation is.
+      // We want to cap the animation time, but we want to use a linear curve
+      // to determine it.
+      final int droppedPageForwardAnimationTime = min(
+        lerpDouble(800, 0, controller.value)!.floor(),
+        300,
+      );
+      controller.animateTo(
+        1.0,
+        duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+        curve: Curves.fastLinearToSlowEaseIn,
+      );
+    } else {
+      // This route is destined to pop at this point. Reuse navigator's pop.
+      navigator.pop();
+
+      // The popping may have finished inline if already at the target destination.
+      if (controller.isAnimating) {
+        // Otherwise, use a custom popping animation duration and curve.
+        final int droppedPageBackAnimationTime =
+            lerpDouble(0, 800, controller.value)!.floor();
+        controller.animateBack(0.0,
+            duration: Duration(milliseconds: droppedPageBackAnimationTime),
+            curve: Curves.fastLinearToSlowEaseIn);
+      }
+    }
+
+    if (controller.isAnimating) {
+      // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
+      // depends on userGestureInProgress
+      late AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      };
+      controller.addStatusListener(animationStatusCallback);
+    } else {
+      navigator.didStopUserGesture();
+    }
+  }
 }
 
 /// An entry in the history of a [LocalHistoryRoute].

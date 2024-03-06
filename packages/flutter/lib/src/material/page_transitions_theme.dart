@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
@@ -788,13 +787,14 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 typedef AndroidBackGestureTransitionBuilder<T> = Widget Function(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-    AndroidBackEvent? startBackEvent,
-    AndroidBackEvent? currentBackEvent);
+  PageRoute<T> route,
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+  AndroidBackEvent? startBackEvent,
+  AndroidBackEvent? currentBackEvent,
+);
 
 class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
   const AndroidBackGesturePageTransitionsBuilder({
@@ -815,9 +815,9 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     return AndroidBackGestureDetector(
-      controller: route.controller!, // protected access
-      navigator: route.navigator!,
-      enabledCallback: () => PageRoute.isPopGestureEnabled(route),
+      backGestureController:
+          TransitionRoute.createDefaultGestureTransitionController(route),
+      enabledCallback: () => route.popGestureEnabled,
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
         final bool linearTransition = PageRoute.isPopGestureInProgress(route);
@@ -864,23 +864,22 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 typedef AndroidBackGestureDetectorWidgetBuilder = Widget Function(
-    BuildContext context,
-    AndroidBackEvent? startBackEvent,
-    AndroidBackEvent? currentBackEvent);
+  BuildContext context,
+  AndroidBackEvent? startBackEvent,
+  AndroidBackEvent? currentBackEvent,
+);
 
 class AndroidBackGestureDetector extends StatefulWidget {
   const AndroidBackGestureDetector({
     super.key,
-    required this.builder,
-    required this.controller,
-    required this.navigator,
     required this.enabledCallback,
+    required this.backGestureController,
+    required this.builder,
   });
 
-  final AndroidBackGestureDetectorWidgetBuilder builder;
-  final AnimationController controller;
-  final NavigatorState navigator;
   final ValueGetter<bool> enabledCallback;
+  final GestureTransitionController backGestureController;
+  final AndroidBackGestureDetectorWidgetBuilder builder;
 
   @override
   State<AndroidBackGestureDetector> createState() =>
@@ -929,44 +928,29 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   Future<bool> startBackGesture(AndroidBackEvent backEvent) {
     gestureInProgress = !backEvent.isBackPressed && widget.enabledCallback();
     if (gestureInProgress) {
-      widget.navigator.didStartUserGesture();
+      widget.backGestureController.dragStart(progress: 1 - backEvent.progress);
       startBackEvent = currentBackEvent = backEvent;
-      widget.controller.value = 1 - backEvent.progress;
-
-      return Future<bool>.value(true);
     }
 
-    return Future<bool>.value(false);
+    return SynchronousFuture<bool>(gestureInProgress);
   }
 
   @override
   Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
     if (gestureInProgress) {
+      widget.backGestureController.dragUpdate(progress: 1 - backEvent.progress);
       currentBackEvent = backEvent;
-      widget.controller.value = 1 - backEvent.progress;
-
-      return Future<bool>.value(true);
     }
 
-    return Future<bool>.value(false);
+    return SynchronousFuture<bool>(gestureInProgress);
   }
 
   @override
   Future<bool> cancelBackGesture() {
     if (gestureInProgress) {
-      // The closer the panel is to dismissing, the shorter the animation is.
-      // We want to cap the animation time, but we want to use a linear curve
-      // to determine it.
-      final int droppedPageForwardAnimationTime = min(
-        lerpDouble(800, 0, widget.controller.value)!.floor(),
-        300,
-      );
-      widget.controller.animateTo(
-        1.0,
-        duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-        curve: Curves.fastLinearToSlowEaseIn,
-      );
-      _finalizeGesture();
+      widget.backGestureController.dragEnd(animateForward: true);
+      gestureInProgress = false;
+      startBackEvent = currentBackEvent = null;
 
       return Future<bool>.value(true);
     }
@@ -977,43 +961,14 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
   @override
   Future<bool> commitBackGesture() {
     if (gestureInProgress) {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      widget.navigator.pop();
-
-      // The popping may have finished inline if already at the target destination.
-      if (widget.controller.isAnimating) {
-        // Otherwise, use a custom popping animation duration and curve.
-        final int droppedPageBackAnimationTime =
-            lerpDouble(0, 800, widget.controller.value)!.floor();
-        widget.controller.animateBack(0.0,
-            duration: Duration(milliseconds: droppedPageBackAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn);
-      }
-      _finalizeGesture();
+      widget.backGestureController.dragEnd(animateForward: false);
+      gestureInProgress = false;
+      startBackEvent = currentBackEvent = null;
 
       return Future<bool>.value(true);
     }
 
     return Future<bool>.value(false);
-  }
-
-  void _finalizeGesture() {
-    gestureInProgress = false;
-    startBackEvent = currentBackEvent = null;
-
-    if (widget.controller.isAnimating) {
-      // Keep the userGestureInProgress in true state so we don't change the
-      // curve of the page transition mid-flight since CupertinoPageTransition
-      // depends on userGestureInProgress.
-      late AnimationStatusListener animationStatusCallback;
-      animationStatusCallback = (AnimationStatus status) {
-        widget.navigator.didStopUserGesture();
-        widget.controller.removeStatusListener(animationStatusCallback);
-      };
-      widget.controller.addStatusListener(animationStatusCallback);
-    } else {
-      widget.navigator.didStopUserGesture();
-    }
   }
 
   @override

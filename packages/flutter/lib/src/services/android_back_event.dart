@@ -45,7 +45,8 @@ class AndroidBackEvent {
   /// button press.
   final double? touchY;
 
-  /// Returns a value between 0 and 1 on how far along the back gesture is.
+  /// Returns a value between 0 and 1 representing how far along the back
+  /// gesture is.
   ///
   /// This value is driven by the horizontal location of the touch point, and
   /// should be used as the fraction to seek the predictive back animation with.
@@ -65,7 +66,7 @@ class AndroidBackEvent {
   /// exceeds a system-wide threshold.
   final double progress;
 
-  /// The screen edge from which the swipe starts.
+  /// The screen edge from which the swipe gesture starts.
   final SwipeEdge swipeEdge;
 
   /// Determines if the event was triggered by a button press.
