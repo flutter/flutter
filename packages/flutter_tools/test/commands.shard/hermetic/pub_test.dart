@@ -57,7 +57,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
@@ -82,7 +82,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
@@ -146,7 +146,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
