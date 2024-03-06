@@ -507,6 +507,13 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         'SocketException occurred, could not reach Gold. '
           'Switching to FlutterSkippingGoldenFileComparator.',
       );
+    } on FormatException catch (_) {
+      return FlutterSkippingFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'FormatException occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
+      );
     }
 
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);

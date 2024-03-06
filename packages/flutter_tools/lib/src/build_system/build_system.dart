@@ -435,7 +435,7 @@ class Environment {
       processManager: processManager,
       platform: platform ?? FakePlatform(),
       usage: usage ?? TestUsage(),
-      analytics: analytics ?? NoOpAnalytics(),
+      analytics: analytics ?? const NoOpAnalytics(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );

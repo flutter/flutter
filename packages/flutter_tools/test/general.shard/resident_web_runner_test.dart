@@ -973,7 +973,7 @@ void main() {
       const FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
-        errorCode: RPCErrorCodes.kInternalError,
+        error: FakeRPCError(code: RPCErrorCodes.kInternalError),
       ),
     ]);
     setupMocks();
@@ -1562,7 +1562,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
@@ -1731,7 +1730,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Uri? mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,

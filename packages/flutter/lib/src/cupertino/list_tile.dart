@@ -287,15 +287,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       child: widget.title,
     );
 
-    EdgeInsetsGeometry? padding = widget.padding;
-    if (padding == null) {
-      switch (widget._type) {
-        case _CupertinoListTileType.base:
-          padding = widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle;
-        case _CupertinoListTileType.notched:
-          padding = widget.leading == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding;
-      }
-    }
+    final EdgeInsetsGeometry padding = widget.padding ?? switch (widget._type) {
+      _CupertinoListTileType.base when widget.subtitle != null => _kPaddingWithSubtitle,
+      _CupertinoListTileType.notched when widget.leading != null => _kNotchedPadding,
+      _CupertinoListTileType.base => _kPadding,
+      _CupertinoListTileType.notched => _kNotchedPaddingWithoutLeading,
+    };
 
     Widget? subtitle;
     if (widget.subtitle != null) {
@@ -325,13 +322,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       backgroundColor = widget.backgroundColorActivated ?? CupertinoColors.systemGrey4.resolveFrom(context);
     }
 
-    double minHeight;
-    switch (widget._type) {
-      case _CupertinoListTileType.base:
-        minHeight = subtitle == null ? _kMinHeight : _kMinHeightWithSubtitle;
-      case _CupertinoListTileType.notched:
-        minHeight = widget.leading == null ? _kNotchedMinHeightWithoutLeading : _kNotchedMinHeight;
-    }
+    final double minHeight = switch (widget._type) {
+      _CupertinoListTileType.base when subtitle != null => _kMinHeightWithSubtitle,
+      _CupertinoListTileType.notched when widget.leading != null => _kNotchedMinHeight,
+      _CupertinoListTileType.base => _kMinHeight,
+      _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
+    };
 
     final Widget child = Container(
       constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),

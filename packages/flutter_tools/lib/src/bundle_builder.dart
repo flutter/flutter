@@ -4,7 +4,9 @@
 
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -137,16 +139,18 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, AssetBundleEntry> assetEntries, {
-  Logger? loggerOverride,
   required TargetPlatform targetPlatform,
   required ImpellerStatus impellerStatus,
+  required ProcessManager processManager,
+  required FileSystem fileSystem,
+  required Artifacts artifacts,
+  required Logger logger,
 }) async {
-  loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);
     } on FileSystemException catch (err) {
-      loggerOverride.printWarning(
+      logger.printWarning(
         'Failed to clean up asset directory ${bundleDir.path}: $err\n'
         'To clean build artifacts, use the command "flutter clean".'
       );
@@ -155,17 +159,17 @@ Future<void> writeBundle(
   bundleDir.createSync(recursive: true);
 
   final ShaderCompiler shaderCompiler = ShaderCompiler(
-    processManager: globals.processManager,
-    logger: globals.logger,
-    fileSystem: globals.fs,
-    artifacts: globals.artifacts!,
+    processManager: processManager,
+    logger: logger,
+    fileSystem: fileSystem,
+    artifacts: artifacts,
   );
 
   final SceneImporter sceneImporter = SceneImporter(
-    processManager: globals.processManager,
-    logger: globals.logger,
-    fileSystem: globals.fs,
-    artifacts: globals.artifacts!,
+    processManager: processManager,
+    logger: logger,
+    fileSystem: fileSystem,
+    artifacts: artifacts,
   );
 
   // Limit number of open files to avoid running out of file descriptors.
@@ -179,7 +183,7 @@ Future<void> writeBundle(
         // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
-        final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
+        final File file = fileSystem.file(fileSystem.path.join(bundleDir.path, entry.key));
         file.parent.createSync(recursive: true);
         final DevFSContent devFSContent = entry.value.content;
         if (devFSContent is DevFSFileContent) {

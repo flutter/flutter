@@ -157,7 +157,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -221,7 +221,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -291,7 +291,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -361,7 +361,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -432,7 +432,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -507,7 +507,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -582,7 +582,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -1203,6 +1203,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     FlutterProject? flutterProject,
     Analytics? analytics,
     String? nativeAssetsYamlFile,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {

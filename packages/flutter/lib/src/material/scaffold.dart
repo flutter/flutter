@@ -1321,11 +1321,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   // Controls the previous widget.child as it exits.
   late AnimationController _previousController;
   late Animation<double> _previousScaleAnimation;
-  late Animation<double> _previousRotationAnimation;
+  late TrainHoppingAnimation _previousRotationAnimation;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
   late Animation<double> _currentScaleAnimation;
   late Animation<double> _extendedCurrentScaleAnimation;
-  late Animation<double> _currentRotationAnimation;
+  late TrainHoppingAnimation _currentRotationAnimation;
   Widget? _previousChild;
 
   @override
@@ -1352,6 +1352,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void dispose() {
     _previousController.dispose();
+    _disposeAnimations();
     super.dispose();
   }
 
@@ -1359,6 +1360,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
+      _disposeAnimations();
       // Get the right scale and rotation animations to use for this widget.
       _updateAnimations();
     }
@@ -1393,6 +1395,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     begin: 1.0 - kFloatingActionButtonTurnInterval,
     end: 1.0,
   ).chain(CurveTween(curve: Curves.easeIn));
+
+  void _disposeAnimations() {
+    _previousRotationAnimation.dispose();
+    _currentRotationAnimation.dispose();
+  }
 
   void _updateAnimations() {
     // Get the animations for exit and entrance.

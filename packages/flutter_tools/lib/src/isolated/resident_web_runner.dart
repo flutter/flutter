@@ -129,7 +129,6 @@ class ResidentWebRunner extends ResidentRunner {
 
   FlutterDevice? get device => flutterDevices.first;
   final FlutterProject flutterProject;
-  DateTime? firstBuildTime;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
@@ -166,11 +165,12 @@ class ResidentWebRunner extends ResidentRunner {
     if (_instance != null) {
       return _instance!;
     }
-    final vmservice.VmService? service =_connectionResult?.vmService;
+    final vmservice.VmService? service = _connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
     return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri);
   }
+
   FlutterVmService? _instance;
 
   @override
@@ -240,7 +240,6 @@ class ResidentWebRunner extends ResidentRunner {
     bool enableDevTools = false, // ignored, we don't yet support devtools for web
     String? route,
   }) async {
-    firstBuildTime = DateTime.now();
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
       TargetPlatform.web_javascript,
       buildInfo: debuggingOptions.buildInfo,
@@ -289,6 +288,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
               : null;
+
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
@@ -309,7 +309,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+          ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           webRenderer: debuggingOptions.webRenderer,
+          rootDirectory: fileSystem.directory(projectRootPath),
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
@@ -564,7 +566,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       ),
       target: target,
       bundle: assetBundle,
-      firstBuildTime: firstBuildTime,
       bundleFirstUpload: isFirstUpload,
       generator: device!.generator!,
       fullRestart: fullRestart,
@@ -576,7 +577,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       shaderCompiler: device!.developmentShaderCompiler,
     );
     devFSStatus.stop();
-    _logger.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
+    _logger.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -605,7 +606,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
-      void onLogEvent(vmservice.Event event)  {
+      void onLogEvent(vmservice.Event event) {
         final String message = processVmServiceMessage(event);
         _logger.printStatus(message);
       }
@@ -640,7 +641,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         vmService: _vmService.service,
       );
 
-
       websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
       device!.vmService = _vmService;
 
@@ -651,8 +651,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         _connectionResult!.appConnection!.runMain();
       } else {
         late StreamSubscription<void> resumeSub;
-        resumeSub = _vmService.service.onDebugEvent
-            .listen((vmservice.Event event) {
+        resumeSub = _vmService.service.onDebugEvent.listen((vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
             _connectionResult!.appConnection!.runMain();
             resumeSub.cancel();
@@ -674,7 +673,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
-      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+      if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
         _logger.printStatus('');
         _logger.printStatus(
           'Running without sound null safety ⚠️',

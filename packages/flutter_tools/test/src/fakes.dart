@@ -194,6 +194,15 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   bool _hasTerminal = true;
 
   @override
+  // ignore: override_on_non_overriding_member
+  String get lineTerminator => '\n';
+  @override
+  // ignore: override_on_non_overriding_member
+  set lineTerminator(String value) {
+    throw UnimplementedError('Setting the line terminator is not supported');
+  }
+
+  @override
   io.IOSink get nonBlocking => this;
 
   @override
@@ -540,9 +549,6 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   List<File> whichAll(String execName) => <File>[];
-
-  @override
-  int? getDirectorySize(Directory directory) => 10000000; // 10 MB / 9.5 MiB
 
   @override
   void unzip(File file, Directory targetDirectory) { }

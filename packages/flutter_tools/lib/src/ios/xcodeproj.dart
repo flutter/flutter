@@ -92,7 +92,7 @@ class XcodeProjectInterpreter {
       logger: BufferLogger.test(),
       version: version,
       build: build,
-      analytics: analytics ?? NoOpAnalytics(),
+      analytics: analytics ?? const NoOpAnalytics(),
     );
   }
 
