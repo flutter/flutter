@@ -110,19 +110,24 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
     return std::make_tuple(Range{0, length}, device_buffer);
   }
 
-  auto old_length = GetLength();
-  if (old_length + length > kAllocatorBlockSize) {
-    MaybeCreateNewBuffer();
+  size_t padding = 0;
+  if (align > 0 && offset_ % align) {
+    padding = align - (offset_ % align);
   }
-  old_length = GetLength();
+  if (offset_ + padding + length > kAllocatorBlockSize) {
+    MaybeCreateNewBuffer();
+  } else {
+    offset_ += padding;
+  }
 
   auto current_buffer = GetCurrentBuffer();
   auto contents = current_buffer->OnGetContents();
-  cb(contents + old_length);
-  current_buffer->Flush(Range{old_length, length});
+  cb(contents + offset_);
+  Range output_range(offset_, length);
+  current_buffer->Flush(output_range);
 
   offset_ += length;
-  return std::make_tuple(Range{old_length, length}, std::move(current_buffer));
+  return std::make_tuple(output_range, std::move(current_buffer));
 }
 
 std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
