@@ -200,7 +200,6 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsComputeSubgroups, (), (const, override));
   MOCK_METHOD(bool, SupportsReadFromResolve, (), (const, override));
   MOCK_METHOD(bool, SupportsDecalSamplerAddressMode, (), (const, override));
-  MOCK_METHOD(bool, SupportsDeviceTransientTextures, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultColorFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultStencilFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultDepthStencilFormat, (), (const, override));
