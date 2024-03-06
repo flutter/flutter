@@ -190,7 +190,8 @@
                         "host_release",
                         "--type",
                         "dart,dart-host,engine,impeller-golden"
-                    ]
+                    ],
+                    "run_if": "main"
                 }
             ]
         },
