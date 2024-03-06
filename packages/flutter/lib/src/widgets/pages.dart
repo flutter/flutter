@@ -25,7 +25,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     bool barrierDismissible = false,
-    this.delegatedTransition,
+    super.delegatedTransition,
   }) : _barrierDismissible = barrierDismissible;
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
@@ -37,9 +37,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// with the back swipe gesture.
   /// {@endtemplate}
   final bool fullscreenDialog;
-
-  /// The delegated transition provided to the previous route.
-  final DelegatedTransitionBuilder? delegatedTransition;
 
   @override
   final bool allowSnapshotting;

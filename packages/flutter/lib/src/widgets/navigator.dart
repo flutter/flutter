@@ -4776,7 +4776,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
-    if (route is PageRoute<T>) {
+    if (route is ModalRoute<T>) {
       delegateTransitionBuilder = route.delegatedTransition;
     }
     return route.popped;
@@ -5284,6 +5284,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.pageBased) {
+      // if (entry.route is ModalRoute<T>) {
+      //     delegateTransitionBuilder = (entry.route as ModalRoute<T>).delegatedTransition;
+      //   }
       if (widget.onPopPage!(entry.route, result) && entry.currentState == _RouteLifecycle.idle) {
         // The entry may have been disposed if the pop finishes synchronously.
         assert(entry.route._popCompleter.isCompleted);
