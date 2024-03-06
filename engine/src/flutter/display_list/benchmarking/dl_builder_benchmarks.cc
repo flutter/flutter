@@ -108,6 +108,28 @@ static void BM_DisplayListBuilderWithClipRect(
   }
 }
 
+static void BM_DisplayListBuilderWithGlobalSaveLayer(
+    benchmark::State& state,
+    DisplayListBuilderBenchmarkType type) {
+  bool prepare_rtree = NeedPrepareRTree(type);
+  while (state.KeepRunning()) {
+    DisplayListBuilder builder(prepare_rtree);
+    builder.Scale(3.5, 3.5);
+    builder.Translate(10.3, 6.9);
+    builder.SaveLayer(nullptr, nullptr);
+    builder.Translate(45.3, 27.9);
+    DlOpReceiver& receiver = DisplayListBuilderBenchmarkAccessor(builder);
+    for (auto& group : allRenderingOps) {
+      for (size_t i = 0; i < group.variants.size(); i++) {
+        auto& invocation = group.variants[i];
+        invocation.Invoke(receiver);
+      }
+    }
+    builder.Restore();
+    Complete(builder, type);
+  }
+}
+
 static void BM_DisplayListBuilderWithSaveLayer(
     benchmark::State& state,
     DisplayListBuilderBenchmarkType type) {
@@ -213,6 +235,23 @@ BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
                   DisplayListBuilderBenchmarkType::kRtree)
     ->Unit(benchmark::kMicrosecond);
 BENCHMARK_CAPTURE(BM_DisplayListBuilderWithClipRect,
+                  kBoundsAndRtree,
+                  DisplayListBuilderBenchmarkType::kBoundsAndRtree)
+    ->Unit(benchmark::kMicrosecond);
+
+BENCHMARK_CAPTURE(BM_DisplayListBuilderWithGlobalSaveLayer,
+                  kDefault,
+                  DisplayListBuilderBenchmarkType::kDefault)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DisplayListBuilderWithGlobalSaveLayer,
+                  kBounds,
+                  DisplayListBuilderBenchmarkType::kBounds)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DisplayListBuilderWithGlobalSaveLayer,
+                  kRtree,
+                  DisplayListBuilderBenchmarkType::kRtree)
+    ->Unit(benchmark::kMicrosecond);
+BENCHMARK_CAPTURE(BM_DisplayListBuilderWithGlobalSaveLayer,
                   kBoundsAndRtree,
                   DisplayListBuilderBenchmarkType::kBoundsAndRtree)
     ->Unit(benchmark::kMicrosecond);
