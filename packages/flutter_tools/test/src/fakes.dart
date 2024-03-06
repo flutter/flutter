@@ -622,6 +622,24 @@ class FakeStopwatchFactory implements StopwatchFactory {
   }
 }
 
+base class FakeSystemClock extends Fake implements SystemClock {
+  late DateTime currentTime;
+
+  @override
+  DateTime now() {
+    return currentTime;
+  }
+
+  @override
+  DateTime ago(Duration duration) {
+    return currentTime.subtract(duration);
+  }
+
+  DateTime later(Duration duration) {
+    return currentTime.add(duration);
+  }
+}
+
 class FakeFlutterProjectFactory implements FlutterProjectFactory {
   @override
   FlutterProject fromDirectory(Directory directory) {

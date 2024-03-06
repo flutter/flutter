@@ -60,65 +60,59 @@ const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
   error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
 );
 
+const Duration oneDay = Duration(days: 1);
+
 void main() {
   testWithoutContext('DevFSByteContent', () {
-    final DevFSByteContent content = DevFSByteContent(<int>[4, 5, 6]);
-
+    final FakeSystemClock testClock = FakeSystemClock();
+    testClock.currentTime = DateTime(1971);
+    final DevFSByteContent content = DevFSByteContent(
+      <int>[4, 5, 6],
+      clock: testClock,
+    );
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    content.bytes = <int>[7, 8, 9, 2];
-    expect(content.bytes, orderedEquals(<int>[7, 8, 9, 2]));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
+    expect(content.isModifiedAfter(testClock.ago(oneDay)), isTrue);
+    expect(content.isModifiedAfter(testClock.later(oneDay)), isFalse);
   });
 
   testWithoutContext('DevFSStringContent', () {
-    final DevFSStringContent content = DevFSStringContent('some string');
-
-    expect(content.string, 'some string');
+    final FakeSystemClock testClock = FakeSystemClock();
+    testClock.currentTime = DateTime(1971);
+    final DevFSStringContent content = DevFSStringContent(
+      'some string',
+      clock: testClock,
+    );
     expect(content.bytes, orderedEquals(utf8.encode('some string')));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    content.string = 'another string';
-    expect(content.string, 'another string');
-    expect(content.bytes, orderedEquals(utf8.encode('another string')));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    content.bytes = utf8.encode('foo bar');
-    expect(content.string, 'foo bar');
-    expect(content.bytes, orderedEquals(utf8.encode('foo bar')));
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
+    expect(content.isModifiedAfter(testClock.ago(oneDay)), isTrue);
+    expect(content.isModifiedAfter(testClock.later(oneDay)), isFalse);
   });
 
-  testWithoutContext('DevFSFileContent', () async {
+  testWithoutContext('DevFSFileContent::isModifiedAfter always returns true when the underlying file does not exist', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo.txt');
     final DevFSFileContent content = DevFSFileContent(file);
-    expect(content.isModified, isFalse);
-    expect(content.isModified, isFalse);
+    expect(
+      content.isModifiedAfter(
+        DateTime(99999),
+      ),
+      isTrue,
+    );
+  });
 
+  testWithoutContext('DevFSFileContent::isModifiedAfter bases its result on the last modified time of the underlying file', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('foo.txt')..createSync();
+    final DevFSFileContent content = DevFSFileContent(file);
+    final DateTime creationTime = file.lastModifiedSync();
     file.parent.createSync(recursive: true);
     file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
-
-    final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds: 5));
-    expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
-    expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
-
-    file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
-
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
-
-    expect(content.isModified, isFalse);
-    expect(content.isModified, isFalse);
-
-    file.deleteSync();
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
-    expect(content.isModified, isFalse);
+    expect(file.lastModifiedSync().isAfter(creationTime), true);
+    expect(
+      content.isModifiedAfter(
+        creationTime,
+      ),
+      isTrue,
+    );
   });
 
   testWithoutContext('DevFSStringCompressingBytesContent', () {
@@ -127,8 +121,8 @@ void main() {
 
     expect(content.equals('uncompressed string'), isTrue);
     expect(content.bytes, isNotNull);
-    expect(content.isModified, isTrue);
-    expect(content.isModified, isFalse);
+    expect(content.isModifiedAfter(DateTime.now().add(const Duration(days: 1))), isFalse);
+    expect(content.isModifiedAfter(DateTime.now().subtract(const Duration(days: 1))), isTrue);
   });
 
   testWithoutContext('DevFS create throws a DevFSException when vmservice disconnects unexpectedly', () async {
@@ -947,6 +941,9 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
+  DateTime? lastBuildTime = DateTime.fromMillisecondsSinceEpoch(0);
+
+  @override
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
@@ -955,6 +952,7 @@ class FakeBundle extends AssetBundle {
     TargetPlatform? targetPlatform,
     String? flavor,
   }) async {
+    lastBuildTime = DateTime.now();
     return 0;
   }
 

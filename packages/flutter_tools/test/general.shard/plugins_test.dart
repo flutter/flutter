@@ -1943,12 +1943,3 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   final String name;
 }
-
-class FakeSystemClock extends Fake implements SystemClock {
-  late DateTime currentTime;
-
-  @override
-  DateTime now() {
-    return currentTime;
-  }
-}
