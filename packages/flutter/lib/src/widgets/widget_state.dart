@@ -309,12 +309,6 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// const constructors so that they can be used in const expressions.
   const WidgetStateBorderSide();
 
-  /// Returns a [BorderSide] that's to be used when a component is in the
-  /// specified state. Return null to defer to the default value of the widget
-  /// or theme.
-  @override
-  BorderSide? resolve(Set<WidgetState> states);
-
   /// Creates a [WidgetStateBorderSide] from a
   /// [WidgetPropertyResolver<BorderSide?>] callback function.
   ///
@@ -352,9 +346,13 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   ///   }),
   /// ),
   /// ```
-  static WidgetStateBorderSide resolveWith(WidgetPropertyResolver<BorderSide?> callback) {
-    return _WidgetStateBorderSide(callback);
-  }
+  const factory WidgetStateBorderSide.resolveWith(WidgetPropertyResolver<BorderSide?> callback) = _WidgetStateBorderSide;
+
+  /// Returns a [BorderSide] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  BorderSide? resolve(Set<WidgetState> states);
 }
 
 class _WidgetStateBorderSide extends WidgetStateBorderSide {
@@ -363,9 +361,7 @@ class _WidgetStateBorderSide extends WidgetStateBorderSide {
   final WidgetPropertyResolver<BorderSide?> _resolve;
 
   @override
-  BorderSide? resolve(Set<WidgetState> states) {
-    return _resolve(states);
-  }
+  BorderSide? resolve(Set<WidgetState> states) => _resolve(states);
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [WidgetState]s
@@ -445,8 +441,7 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static WidgetStateTextStyle resolveWith(WidgetPropertyResolver<TextStyle> callback) =>
-      _WidgetStateTextStyle(callback);
+  const factory WidgetStateTextStyle.resolveWith(WidgetPropertyResolver<TextStyle> callback) = _WidgetStateTextStyle;
 
   /// Returns a [TextStyle] that's to be used when a component is in the
   /// specified state.
@@ -610,6 +605,14 @@ class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 /// [WidgetState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
+///
+/// When calling `setState` in a [MaterialStatesController] listener, use the
+/// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
+/// the frame has been rendered. It's generally prudent to use the
+/// [SchedulerBinding.addPostFrameCallback] because some of the widgets that
+/// depend on [MaterialStatesController] may call [update] in their build method.
+/// In such cases, listener's that call `setState` - during the build phase - will cause
+/// an error.
 ///
 /// See also:
 ///
