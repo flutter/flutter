@@ -60,7 +60,7 @@ void main() {
       await dryRunNativeAssetsLinux(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           hasPackageConfigResult: false,
         ),
       ),
@@ -79,7 +79,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -117,7 +117,7 @@ void main() {
         TargetPlatform.darwin,
         TargetPlatform.ios,
       ],
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -137,7 +137,7 @@ void main() {
       () => dryRunNativeAssetsLinux(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -160,7 +160,7 @@ void main() {
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsLinux(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -210,7 +210,7 @@ void main() {
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -235,7 +235,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -279,7 +279,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         flutterTester: flutterTester,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -332,7 +332,7 @@ void main() {
       () => dryRunNativeAssetsLinux(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -374,7 +374,7 @@ void main() {
       () => dryRunNativeAssetsLinux(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -405,7 +405,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -465,7 +465,7 @@ void main() {
   });
 }
 
-class _BuildRunnerWithoutClang extends FakeNativeAssetsBuildRunner {
+class _BuildRunnerWithoutClang extends ConstFakeNativeAssetsBuildRunner {
   @override
   Future<CCompilerConfig> get cCompilerConfig async => throwToolExit('Failed to find clang++ on the PATH.');
 }

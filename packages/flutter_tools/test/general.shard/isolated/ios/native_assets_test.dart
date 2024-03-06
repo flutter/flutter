@@ -57,7 +57,7 @@ void main() {
       await dryRunNativeAssetsIOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           hasPackageConfigResult: false,
         ),
       ),
@@ -79,7 +79,7 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
     );
@@ -99,7 +99,7 @@ void main() {
       () => dryRunNativeAssetsIOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -122,7 +122,7 @@ void main() {
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsIOS(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -173,7 +173,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -200,7 +200,7 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: FakeNativeAssetsBuildRunner(
+      buildRunner: ConstFakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
@@ -260,11 +260,11 @@ void main() {
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: FatNativeAssetsBuildRunner(
+      buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        onBuild: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
+        buildResult: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
           assets: <Asset>[
             if (target == native_assets_cli.Target.iOSArm64)
               Asset(
@@ -309,7 +309,7 @@ void main() {
       () => dryRunNativeAssetsIOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -341,7 +341,7 @@ void main() {
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: FakeNativeAssetsBuildRunner(
+        buildRunner: ConstFakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
