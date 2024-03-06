@@ -568,7 +568,7 @@ class WebAssetServer implements AssetReader {
   }
 
   shelf.Response _serveIndexHtml() {
-    final WebTemplate indexHtml = _getWebTemplate('indexHtml', _kDefaultIndex);
+    final WebTemplate indexHtml = _getWebTemplate('index.html', _kDefaultIndex);
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',

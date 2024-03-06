@@ -244,6 +244,10 @@ void main() {
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/base/path/')));
@@ -257,6 +261,11 @@ void main() {
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
@@ -404,6 +413,10 @@ void main() {
       .childDirectory('web')
       ..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/bar/baz')));
@@ -454,6 +467,11 @@ void main() {
   }));
 
   test('serves default index.html', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
@@ -828,6 +846,10 @@ void main() {
       .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdk).path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
       .getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps).path;
+    final String flutterJs = globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    );
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -840,6 +862,9 @@ void main() {
     globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
       ..createSync(recursive: true)
       ..writeAsStringSync('CHUM');
+    globals.fs.file(flutterJs)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('(flutter.js content)');
 
     await webDevFS.update(
       mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
