@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -24,7 +23,6 @@ import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
-import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
