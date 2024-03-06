@@ -7,11 +7,14 @@
 
 #include "flutter/shell/platform/windows/client_wrapper/include/flutter/plugin_registrar_windows.h"
 #include "flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 
 namespace {
+
+using ::testing::Return;
 
 // Stub implementation to validate calls to the API.
 class TestWindowsApi : public testing::StubFlutterWindowsApi {
@@ -23,6 +26,12 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
     last_registered_delegate_ = delegate;
     last_registered_user_data_ = user_data;
   }
+
+  MOCK_METHOD(FlutterDesktopViewRef, PluginRegistrarGetView, (), (override));
+  MOCK_METHOD(FlutterDesktopViewRef,
+              PluginRegistrarGetViewById,
+              (FlutterDesktopViewId),
+              (override));
 
   void PluginRegistrarUnregisterTopLevelWindowProcDelegate(
       FlutterDesktopWindowProcCallback delegate) override {
@@ -65,16 +74,47 @@ class TestPlugin : public Plugin {
 }  // namespace
 
 TEST(PluginRegistrarWindowsTest, GetView) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillOnce(Return(reinterpret_cast<FlutterDesktopViewRef>(1)));
+
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
   EXPECT_NE(registrar.GetView(), nullptr);
+}
+
+TEST(PluginRegistrarWindowsTest, GetViewById) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(*windows_api, PluginRegistrarGetViewById(123))
+      .WillOnce(Return(reinterpret_cast<FlutterDesktopViewRef>(1)));
+  EXPECT_CALL(*windows_api, PluginRegistrarGetViewById(456))
+      .WillOnce(Return(nullptr));
+
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
+  EXPECT_EQ(registrar.GetView(), nullptr);
+  EXPECT_NE(registrar.GetViewById(123).get(), nullptr);
+  EXPECT_EQ(registrar.GetViewById(456).get(), nullptr);
 }
 
 // Tests that the registrar runs plugin destructors before its own teardown.
 TEST(PluginRegistrarWindowsTest, PluginDestroyedBeforeRegistrar) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(reinterpret_cast<FlutterDesktopViewRef>(1)));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+
   auto dummy_registrar_handle =
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
   bool registrar_valid_at_destruction = false;
@@ -89,8 +129,9 @@ TEST(PluginRegistrarWindowsTest, PluginDestroyedBeforeRegistrar) {
 }
 
 TEST(PluginRegistrarWindowsTest, RegisterUnregister) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView).WillOnce(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
@@ -118,8 +159,9 @@ TEST(PluginRegistrarWindowsTest, RegisterUnregister) {
 }
 
 TEST(PluginRegistrarWindowsTest, CallsRegisteredDelegates) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView).WillOnce(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
@@ -154,8 +196,9 @@ TEST(PluginRegistrarWindowsTest, CallsRegisteredDelegates) {
 }
 
 TEST(PluginRegistrarWindowsTest, StopsOnceHandled) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView).WillOnce(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));

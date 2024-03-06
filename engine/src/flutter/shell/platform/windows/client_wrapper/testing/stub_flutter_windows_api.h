@@ -86,6 +86,15 @@ class StubFlutterWindowsApi {
     return reinterpret_cast<IDXGIAdapter*>(2);
   }
 
+  // Called for FlutterDesktopPluginRegistrarGetView.
+  virtual FlutterDesktopViewRef PluginRegistrarGetView() { return nullptr; }
+
+  // Called for FlutterDesktopPluginRegistrarGetViewById.
+  virtual FlutterDesktopViewRef PluginRegistrarGetViewById(
+      FlutterDesktopViewId view_id) {
+    return nullptr;
+  }
+
   // Called for FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate.
   virtual void PluginRegistrarRegisterTopLevelWindowProcDelegate(
       FlutterDesktopWindowProcCallback delegate,

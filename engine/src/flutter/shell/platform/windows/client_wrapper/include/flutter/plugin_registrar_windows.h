@@ -32,22 +32,45 @@ class PluginRegistrarWindows : public PluginRegistrar {
   explicit PluginRegistrarWindows(
       FlutterDesktopPluginRegistrarRef core_registrar)
       : PluginRegistrar(core_registrar) {
-    view_ = std::make_unique<FlutterView>(
-        FlutterDesktopPluginRegistrarGetView(core_registrar));
+    FlutterDesktopViewRef implicit_view =
+        FlutterDesktopPluginRegistrarGetView(core_registrar);
+    if (implicit_view) {
+      implicit_view_ = std::make_unique<FlutterView>(implicit_view);
+    }
   }
 
   virtual ~PluginRegistrarWindows() {
     // Must be the first call.
     ClearPlugins();
     // Explicitly cleared to facilitate destruction order testing.
-    view_.reset();
+    implicit_view_.reset();
   }
 
   // Prevent copying.
   PluginRegistrarWindows(PluginRegistrarWindows const&) = delete;
   PluginRegistrarWindows& operator=(PluginRegistrarWindows const&) = delete;
 
-  FlutterView* GetView() { return view_.get(); }
+  // Returns the implicit view, or nullptr if there is no implicit view.
+  //
+  // See:
+  // https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/implicitView.html
+  //
+  // DEPRECATED: Use |GetViewById| instead.
+  FlutterView* GetView() { return implicit_view_.get(); }
+
+  // Returns the view with the given ID, or nullptr if the view does not exist.
+  //
+  // Destroying the shared pointer destroys the reference to the view; it does
+  // not destroy the underlying view.
+  std::shared_ptr<FlutterView> GetViewById(FlutterViewId view_id) const {
+    FlutterDesktopViewRef view =
+        FlutterDesktopPluginRegistrarGetViewById(registrar(), view_id);
+    if (!view) {
+      return nullptr;
+    }
+
+    return std::make_shared<FlutterView>(view);
+  }
 
   // Registers |delegate| to receive WindowProc callbacks for the top-level
   // window containing this Flutter instance. Returns an ID that can be used to
@@ -115,7 +138,7 @@ class PluginRegistrarWindows : public PluginRegistrar {
   }
 
   // The associated FlutterView, if any.
-  std::unique_ptr<FlutterView> view_;
+  std::unique_ptr<FlutterView> implicit_view_;
 
   // The next ID to return from RegisterWindowProcDelegate.
   int next_window_proc_delegate_id_ = 1;

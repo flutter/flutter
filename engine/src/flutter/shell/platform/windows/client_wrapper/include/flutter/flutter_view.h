@@ -17,6 +17,7 @@ class FlutterView {
  public:
   explicit FlutterView(FlutterDesktopViewRef view) : view_(view) {}
 
+  // Destroys this reference to the view. The underlying view is not destroyed.
   virtual ~FlutterView() = default;
 
   // Prevent copying.
