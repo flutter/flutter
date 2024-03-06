@@ -33,7 +33,10 @@ class RenderTargetCache : public RenderTargetAllocator {
       RenderTarget::AttachmentConfig color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfig,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig) override;
+          RenderTarget::kDefaultStencilAttachmentConfig,
+      const std::shared_ptr<Texture>& existing_color_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_depth_stencil_texture =
+          nullptr) override;
 
   RenderTarget CreateOffscreenMSAA(
       const Context& context,
@@ -43,7 +46,11 @@ class RenderTargetCache : public RenderTargetAllocator {
       RenderTarget::AttachmentConfigMSAA color_attachment_config =
           RenderTarget::kDefaultColorAttachmentConfigMSAA,
       std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config =
-          RenderTarget::kDefaultStencilAttachmentConfig) override;
+          RenderTarget::kDefaultStencilAttachmentConfig,
+      const std::shared_ptr<Texture>& existing_color_msaa_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_color_resolve_texture = nullptr,
+      const std::shared_ptr<Texture>& existing_depth_stencil_texture =
+          nullptr) override;
 
   // visible for testing.
   size_t CachedTextureCount() const;
