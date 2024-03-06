@@ -4124,6 +4124,51 @@ void main() {
     ));
     expect(iconText.text.style?.color, Colors.red);
   });
+
+  testWidgets(
+      'PopupMenu positioning inside nested Navigator when useRootNavigator',
+      (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: 50,
+                top: 50,
+                right: 0,
+                bottom: 0,
+                child: Navigator(
+                  onGenerateRoute: (settings) => MaterialPageRoute<void>(
+                    builder: (context) => Center(
+                      child: PopupMenuButton(
+                        key: buttonKey,
+                        useRootNavigator: true,
+                        itemBuilder: (BuildContext context) => [
+                          const PopupMenuItem(child: Text('Item')),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final popupTopLeft = tester.getTopLeft(popupFinder);
+    final buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(popupTopLeft, buttonTopLeft);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
