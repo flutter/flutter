@@ -286,63 +286,6 @@ flutter:
       return pluginUsingJavaAndNewEmbeddingDir;
     }
 
-    void createNewKotlinPlugin2() {
-      final Directory pluginUsingKotlinAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
-      pluginUsingKotlinAndNewEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
-flutter:
-  plugin:
-    androidPackage: plugin2
-    pluginClass: UseNewEmbedding
-          ''');
-      pluginUsingKotlinAndNewEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('kotlin')
-        .childDirectory('plugin2')
-        .childFile('UseNewEmbedding.kt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
-
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri}\n',
-          mode: FileMode.append,
-        );
-    }
-
-    void createOldJavaPlugin(String pluginName) {
-      final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
-      pluginUsingOldEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
-flutter:
-  plugin:
-    androidPackage: $pluginName
-    pluginClass: UseOldEmbedding
-        ''');
-      pluginUsingOldEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory(pluginName)
-        .childFile('UseOldEmbedding.java')
-        .createSync(recursive: true);
-
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri}\n',
-          mode: FileMode.append,
-        );
-    }
-
     void createDualSupportJavaPlugin4() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
         fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
