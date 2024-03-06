@@ -200,17 +200,17 @@ Future<void> writeBundle(
           switch (entry.value.kind) {
             case AssetKind.regular:
             if (entry.value.transformers.isNotEmpty) {
-                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
-                  asset: input,
-                  outputPath: file.path,
-                  workingDirectory: projectDir.path,
-                  transformerEntries: entry.value.transformers,
-                );
-                doCopy = false;
-                if (failure != null) {
-                  throwToolExit(failure.message);
-                }
+              final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                asset: input,
+                outputPath: file.path,
+                workingDirectory: projectDir.path,
+                transformerEntries: entry.value.transformers,
+              );
+              doCopy = false;
+              if (failure != null) {
+                throwToolExit(failure.message);
               }
+            }
             case AssetKind.font:
               break;
             case AssetKind.shader:
