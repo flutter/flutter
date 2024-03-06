@@ -344,6 +344,11 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
 
             final Response response = await webAssetServer.handleRequest(
                 Request('GET', Uri.parse('http://foobar/base/path/')));
@@ -360,6 +365,10 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
             final Response response = await webAssetServer
                 .handleRequest(Request('GET', Uri.parse('http://foobar/')));
@@ -530,6 +539,10 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
             final Response response = await webAssetServer.handleRequest(
                 Request('GET', Uri.parse('http://foobar/bar/baz')));
@@ -586,6 +599,11 @@ void main() {
   test(
       'serves default index.html',
       () => testbed.run(() async {
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
             final Response response = await webAssetServer
                 .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
