@@ -816,8 +816,8 @@ class EngineRepository extends Repository {
 
   final Checkouts checkouts;
 
-  static const String defaultUpstream = 'git@github.com:flutter/engine.git';
-  static const String defaultBranch = 'main';
+  static const String defaultUpstream = 'git@github.com:gmackall/engine.git';
+  static const String defaultBranch = 'remove_ghosts';
 
   /// Update the `dart_revision` entry in the DEPS file.
   Future<void> updateDartRevision(
