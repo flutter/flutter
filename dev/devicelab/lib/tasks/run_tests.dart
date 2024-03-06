@@ -38,9 +38,7 @@ TaskFunction createLinuxRunReleaseTest() {
 
 TaskFunction createMacOSRunDebugTest() {
   return DesktopRunOutputTest(
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
-    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    '${flutterDirectory.path}/examples/hello_world',
+    '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/main.dart',
     release: false,
     allowStderr: true,
@@ -49,9 +47,7 @@ TaskFunction createMacOSRunDebugTest() {
 
 TaskFunction createMacOSRunReleaseTest() {
   return DesktopRunOutputTest(
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
-    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    '${flutterDirectory.path}/examples/hello_world',
+    '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/main.dart',
     release: true,
     allowStderr: true,
