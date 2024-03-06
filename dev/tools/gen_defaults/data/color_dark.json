@@ -1,7 +1,7 @@
 {
-  "version": "v0_162",
+  "version": "v0_206",
 
-  "md.sys.color.background": "md.ref.palette.neutral10",
+  "md.sys.color.background": "md.ref.palette.neutral6",
   "md.sys.color.error": "md.ref.palette.error80",
   "md.sys.color.error-container": "md.ref.palette.error30",
   "md.sys.color.inverse-on-surface": "md.ref.palette.neutral20",
@@ -36,7 +36,7 @@
   "md.sys.color.secondary-fixed": "md.ref.palette.secondary90",
   "md.sys.color.secondary-fixed-dim": "md.ref.palette.secondary80",
   "md.sys.color.shadow": "md.ref.palette.neutral0",
-  "md.sys.color.surface": "md.ref.palette.neutral10",
+  "md.sys.color.surface": "md.ref.palette.neutral6",
   "md.sys.color.surface-bright": "md.ref.palette.neutral24",
   "md.sys.color.surface-container": "md.ref.palette.neutral12",
   "md.sys.color.surface-container-high": "md.ref.palette.neutral17",

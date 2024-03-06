@@ -26,9 +26,11 @@ class RelativeRect {
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
   /// rectangle described by the Size, with 0,0 being at the top left.
-  factory RelativeRect.fromSize(Rect rect, Size container) {
-    return RelativeRect.fromLTRB(rect.left, rect.top, container.width - rect.right, container.height - rect.bottom);
-  }
+  RelativeRect.fromSize(Rect rect, Size container)
+      : left = rect.left,
+        top = rect.top,
+        right = container.width - rect.right,
+        bottom = container.height - rect.bottom;
 
   /// Creates a RelativeRect from two Rects. The second Rect provides the
   /// container, the first provides the rectangle, in the same coordinate space,
@@ -42,14 +44,11 @@ class RelativeRect {
   /// If the first rect is actually in the container's coordinate space, then
   /// use [RelativeRect.fromSize] and pass the container's size as the second
   /// argument instead.
-  factory RelativeRect.fromRect(Rect rect, Rect container) {
-    return RelativeRect.fromLTRB(
-      rect.left - container.left,
-      rect.top - container.top,
-      container.right - rect.right,
-      container.bottom - rect.bottom,
-    );
-  }
+  RelativeRect.fromRect(Rect rect, Rect container)
+      : left = rect.left - container.left,
+        top = rect.top - container.top,
+        right = container.right - rect.right,
+        bottom = container.bottom - rect.bottom;
 
   /// Creates a RelativeRect from horizontal position using `start` and `end`
   /// rather than `left` and `right`.
@@ -66,17 +65,10 @@ class RelativeRect {
     required double end,
     required double bottom,
   }) {
-    double left;
-    double right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
-
+    final (double left, double right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return RelativeRect.fromLTRB(left, top, right, bottom);
   }
 
