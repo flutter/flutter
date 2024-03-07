@@ -221,14 +221,20 @@ VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
 void vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
-  pMemoryProperties->memoryTypeCount = 1;
+  pMemoryProperties->memoryTypeCount = 2;
+  pMemoryProperties->memoryHeapCount = 2;
   pMemoryProperties->memoryTypes[0].heapIndex = 0;
-  // pMemoryProperties->memoryTypes[0].propertyFlags =
-  //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
-  //     VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD;
-  pMemoryProperties->memoryHeapCount = 1;
+  pMemoryProperties->memoryTypes[0].propertyFlags =
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+  pMemoryProperties->memoryTypes[1].heapIndex = 1;
+  pMemoryProperties->memoryTypes[1].propertyFlags =
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
   pMemoryProperties->memoryHeaps[0].size = 1024 * 1024 * 1024;
-  pMemoryProperties->memoryHeaps[0].flags = 0;
+  pMemoryProperties->memoryHeaps[0].flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
+  pMemoryProperties->memoryHeaps[1].size = 1024 * 1024 * 1024;
+  pMemoryProperties->memoryHeaps[1].flags = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
 }
 
 VkResult vkCreatePipelineCache(VkDevice device,

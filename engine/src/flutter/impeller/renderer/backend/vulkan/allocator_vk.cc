@@ -101,6 +101,7 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   auto limits = physical_device.getProperties().limits;
   max_texture_size_.width = max_texture_size_.height =
       limits.maxImageDimension2D;
+  physical_device.getMemoryProperties(&memory_properties_);
 
   VmaVulkanFunctions proc_table = {};
 
@@ -494,6 +495,28 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                                 vk::Buffer{buffer}}},  //
       buffer_allocation_info                           //
   );
+}
+
+size_t AllocatorVK::DebugGetHeapUsage() const {
+  auto count = memory_properties_.memoryHeapCount;
+  std::vector<VmaBudget> budgets(count);
+  vmaGetHeapBudgets(allocator_.get(), budgets.data());
+  size_t total_usage = 0;
+  for (auto i = 0u; i < count; i++) {
+    const VmaBudget& budget = budgets[i];
+    total_usage += budget.usage;
+  }
+  // Convert bytes to MB.
+  total_usage *= 1e-6;
+  return total_usage;
+}
+
+void AllocatorVK::DebugTraceMemoryStatistics() const {
+#ifdef IMPELLER_DEBUG
+  FML_TRACE_COUNTER("flutter", "AllocatorVK",
+                    reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                    "MemoryBudgetUsageMB", DebugGetHeapUsage());
+#endif  // IMPELLER_DEBUG
 }
 
 }  // namespace impeller
