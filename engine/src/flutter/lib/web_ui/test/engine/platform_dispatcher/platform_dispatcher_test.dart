@@ -409,8 +409,9 @@ void testMain() {
       });
     });
 
-    test('appends an accesibility placeholder', () {
+    test('adds the accesibility placeholder', () {
       expect(dispatcher.accessibilityPlaceholder.isConnected, isTrue);
+      expect(domDocument.body!.children.first, dispatcher.accessibilityPlaceholder);
     });
 
     test('removes the accesibility placeholder', () {
