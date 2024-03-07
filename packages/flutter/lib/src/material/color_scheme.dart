@@ -78,8 +78,9 @@ import 'theme_data.dart';
 class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance from the given colors.
   ///
-  /// [ColorScheme.fromSeed] can be used as a simpler way to create a full
-  /// color scheme derived from a single seed color.
+  /// [ColorScheme.fromSeed] and [ColorScheme.fromFidelitySeed] can be used as a
+  /// simpler way to create a full color scheme derived from a single seed
+  /// color.
   ///
   /// For the color parameters that are nullable, it is still recommended
   /// that applications provide values for them. They are only nullable due
@@ -90,7 +91,8 @@ class ColorScheme with Diagnosticable {
   /// to [primary]). Material Design 3 makes use of these colors for many
   /// component defaults, so for the best results the application should
   /// supply colors for all the parameters. An easy way to ensure this is to
-  /// use [ColorScheme.fromSeed] to generate a full set of colors.
+  /// [ColorScheme.fromSeed] or [ColorScheme.fromFidelitySeed] to generate a
+  /// full set of colors.
   ///
   /// During the migration to Material Design 3, if an app's
   /// [ThemeData.useMaterial3] is false, then components will only
@@ -216,18 +218,22 @@ class ColorScheme with Diagnosticable {
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
   /// Using the seedColor as a starting point, a set of tonal palettes are
-  /// constructed. These tonal palettes are based on the Material 3 Color
-  /// system and provide all the needed colors for a [ColorScheme]. These
-  /// colors are designed to work well together and meet contrast
-  /// requirements for accessibility.
+  /// constructed using the [SchemeTonalSpot] algorithm. These tonal palettes
+  /// are based on the Material 3 Color system and provide all the needed colors
+  /// for a [ColorScheme]. These colors are designed to work well together and
+  /// meet contrast requirements for accessibility.
   ///
   /// If any of the optional color parameters are non-null they will be
   /// used in place of the generated colors for that field in the resulting
   /// color scheme. This allows apps to override specific colors for their
   /// needs.
   ///
-  /// Given the nature of the algorithm, the seedColor may not wind up as
+  /// Given the nature of the algorithm, the `seedColor` may not wind up as
   /// one of the ColorScheme colors.
+  ///
+  /// If the resulting color scheme is too dark, consider
+  /// [ColorScheme.fromFidelitySeed], which uses the [SchemeFidelity] algorithm
+  /// instead.
   ///
   /// See also:
   ///
@@ -307,7 +313,150 @@ class ColorScheme with Diagnosticable {
       case Brightness.dark:
         scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: true, contrastLevel: 0.0);
     }
+    return ColorScheme(
+      primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
+      onPrimary: onPrimary ?? Color(MaterialDynamicColors.onPrimary.getArgb(scheme)),
+      primaryContainer: primaryContainer ?? Color(MaterialDynamicColors.primaryContainer.getArgb(scheme)),
+      onPrimaryContainer: onPrimaryContainer ?? Color(MaterialDynamicColors.onPrimaryContainer.getArgb(scheme)),
+      primaryFixed: primaryFixed ?? Color(MaterialDynamicColors.primaryFixed.getArgb(scheme)),
+      primaryFixedDim: primaryFixedDim ?? Color(MaterialDynamicColors.primaryFixedDim.getArgb(scheme)),
+      onPrimaryFixed: onPrimaryFixed ?? Color(MaterialDynamicColors.onPrimaryFixed.getArgb(scheme)),
+      onPrimaryFixedVariant: onPrimaryFixedVariant ?? Color(MaterialDynamicColors.onPrimaryFixedVariant.getArgb(scheme)),
+      secondary: secondary ?? Color(MaterialDynamicColors.secondary.getArgb(scheme)),
+      onSecondary: onSecondary ?? Color(MaterialDynamicColors.onSecondary.getArgb(scheme)),
+      secondaryContainer: secondaryContainer ?? Color(MaterialDynamicColors.secondaryContainer.getArgb(scheme)),
+      onSecondaryContainer: onSecondaryContainer ?? Color(MaterialDynamicColors.onSecondaryContainer.getArgb(scheme)),
+      secondaryFixed: secondaryFixed ?? Color(MaterialDynamicColors.secondaryFixed.getArgb(scheme)),
+      secondaryFixedDim: secondaryFixedDim ?? Color(MaterialDynamicColors.secondaryFixedDim.getArgb(scheme)),
+      onSecondaryFixed: onSecondaryFixed ?? Color(MaterialDynamicColors.onSecondaryFixed.getArgb(scheme)),
+      onSecondaryFixedVariant: onSecondaryFixedVariant ?? Color(MaterialDynamicColors.onSecondaryFixedVariant.getArgb(scheme)),
+      tertiary: tertiary ?? Color(MaterialDynamicColors.tertiary.getArgb(scheme)),
+      onTertiary: onTertiary ?? Color(MaterialDynamicColors.onTertiary.getArgb(scheme)),
+      tertiaryContainer: tertiaryContainer ?? Color(MaterialDynamicColors.tertiaryContainer.getArgb(scheme)),
+      onTertiaryContainer: onTertiaryContainer ?? Color(MaterialDynamicColors.onTertiaryContainer.getArgb(scheme)),
+      tertiaryFixed: tertiaryFixed ?? Color(MaterialDynamicColors.tertiaryFixed.getArgb(scheme)),
+      tertiaryFixedDim: tertiaryFixedDim ?? Color(MaterialDynamicColors.tertiaryFixedDim.getArgb(scheme)),
+      onTertiaryFixed: onTertiaryFixed ?? Color(MaterialDynamicColors.onTertiaryFixed.getArgb(scheme)),
+      onTertiaryFixedVariant: onTertiaryFixedVariant ?? Color(MaterialDynamicColors.onTertiaryFixedVariant.getArgb(scheme)),
+      error: error ?? Color(MaterialDynamicColors.error.getArgb(scheme)),
+      onError: onError ?? Color(MaterialDynamicColors.onError.getArgb(scheme)),
+      errorContainer: errorContainer ?? Color(MaterialDynamicColors.errorContainer.getArgb(scheme)),
+      onErrorContainer: onErrorContainer ?? Color(MaterialDynamicColors.onErrorContainer.getArgb(scheme)),
+      outline: outline ?? Color(MaterialDynamicColors.outline.getArgb(scheme)),
+      outlineVariant: outlineVariant ?? Color(MaterialDynamicColors.outlineVariant.getArgb(scheme)),
+      surface: surface ?? Color(MaterialDynamicColors.surface.getArgb(scheme)),
+      surfaceDim: surfaceDim ?? Color(MaterialDynamicColors.surfaceDim.getArgb(scheme)),
+      surfaceBright: surfaceBright ?? Color(MaterialDynamicColors.surfaceBright.getArgb(scheme)),
+      surfaceContainerLowest: surfaceContainerLowest ?? Color(MaterialDynamicColors.surfaceContainerLowest.getArgb(scheme)),
+      surfaceContainerLow: surfaceContainerLow ?? Color(MaterialDynamicColors.surfaceContainerLow.getArgb(scheme)),
+      surfaceContainer: surfaceContainer ?? Color(MaterialDynamicColors.surfaceContainer.getArgb(scheme)),
+      surfaceContainerHigh: surfaceContainerHigh ?? Color(MaterialDynamicColors.surfaceContainerHigh.getArgb(scheme)),
+      surfaceContainerHighest: surfaceContainerHighest ?? Color(MaterialDynamicColors.surfaceContainerHighest.getArgb(scheme)),
+      onSurface: onSurface ?? Color(MaterialDynamicColors.onSurface.getArgb(scheme)),
+      onSurfaceVariant: onSurfaceVariant ?? Color(MaterialDynamicColors.onSurfaceVariant.getArgb(scheme)),
+      inverseSurface: inverseSurface ?? Color(MaterialDynamicColors.inverseSurface.getArgb(scheme)),
+      onInverseSurface: onInverseSurface ?? Color(MaterialDynamicColors.inverseOnSurface.getArgb(scheme)),
+      inversePrimary: inversePrimary ?? Color(MaterialDynamicColors.inversePrimary.getArgb(scheme)),
+      shadow: shadow ?? Color(MaterialDynamicColors.shadow.getArgb(scheme)),
+      scrim: scrim ?? Color(MaterialDynamicColors.scrim.getArgb(scheme)),
+      surfaceTint: surfaceTint ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
+      brightness: brightness,
+      // DEPRECATED (newest deprecations at the bottom)
+      background: background ?? Color(MaterialDynamicColors.background.getArgb(scheme)),
+      onBackground: onBackground ?? Color(MaterialDynamicColors.onBackground.getArgb(scheme)),
+      surfaceVariant: surfaceVariant ?? Color(MaterialDynamicColors.surfaceVariant.getArgb(scheme)),
+    );
+  }
 
+  /// Generate a [ColorScheme] derived from the given `seedColor` using the
+  /// Material [SchemeFidelity] mechanism.
+  ///
+  /// This is similar to [ColorScheme.fromSeed] but uses the [SchemeFidelity]
+  /// algorithm instead of the [SchemeTonalSpot] algorithm.
+  ///
+  /// If any of the optional color parameters are non-null they will be
+  /// used in place of the generated colors for that field in the resulting
+  /// color scheme. This allows apps to override specific colors for their
+  /// needs.
+  ///
+  /// Given the nature of the algorithm, the `seedColor` may not wind up as
+  /// one of the ColorScheme colors.
+  ///
+  /// If the resulting color scheme is too bright, consider
+  /// [ColorScheme.fromSeed], which uses the [SchemeTonalSpot] algorithm
+  /// instead.
+  factory ColorScheme.fromFidelitySeed({
+    required Color seedColor,
+    Brightness brightness = Brightness.light,
+    Color? primary,
+    Color? onPrimary,
+    Color? primaryContainer,
+    Color? onPrimaryContainer,
+    Color? primaryFixed,
+    Color? primaryFixedDim,
+    Color? onPrimaryFixed,
+    Color? onPrimaryFixedVariant,
+    Color? secondary,
+    Color? onSecondary,
+    Color? secondaryContainer,
+    Color? onSecondaryContainer,
+    Color? secondaryFixed,
+    Color? secondaryFixedDim,
+    Color? onSecondaryFixed,
+    Color? onSecondaryFixedVariant,
+    Color? tertiary,
+    Color? onTertiary,
+    Color? tertiaryContainer,
+    Color? onTertiaryContainer,
+    Color? tertiaryFixed,
+    Color? tertiaryFixedDim,
+    Color? onTertiaryFixed,
+    Color? onTertiaryFixedVariant,
+    Color? error,
+    Color? onError,
+    Color? errorContainer,
+    Color? onErrorContainer,
+    Color? outline,
+    Color? outlineVariant,
+    Color? surface,
+    Color? onSurface,
+    Color? surfaceDim,
+    Color? surfaceBright,
+    Color? surfaceContainerLowest,
+    Color? surfaceContainerLow,
+    Color? surfaceContainer,
+    Color? surfaceContainerHigh,
+    Color? surfaceContainerHighest,
+    Color? onSurfaceVariant,
+    Color? inverseSurface,
+    Color? onInverseSurface,
+    Color? inversePrimary,
+    Color? shadow,
+    Color? scrim,
+    Color? surfaceTint,
+    @Deprecated(
+      'Use surface instead. '
+      'This feature was deprecated after v3.18.0-0.1.pre.'
+    )
+    Color? background,
+    @Deprecated(
+      'Use onSurface instead. '
+      'This feature was deprecated after v3.18.0-0.1.pre.'
+    )
+    Color? onBackground,
+    @Deprecated(
+      'Use surfaceContainerHighest instead. '
+      'This feature was deprecated after v3.18.0-0.1.pre.'
+    )
+    Color? surfaceVariant,
+  }) {
+    final SchemeFidelity scheme;
+    switch (brightness) {
+      case Brightness.light:
+        scheme = SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: false, contrastLevel: 0.0);
+      case Brightness.dark:
+        scheme = SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: true, contrastLevel: 0.0);
+    }
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
       onPrimary: onPrimary ?? Color(MaterialDynamicColors.onPrimary.getArgb(scheme)),
