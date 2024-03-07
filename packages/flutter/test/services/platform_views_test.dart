@@ -427,6 +427,22 @@ void main() {
     });
   });
 
+  group('windows', () {
+    test('focus loss callback invoked', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, (MethodCall call) {
+        return Future<dynamic>.value();
+      });
+      bool lostFocus = false;
+      await PlatformViewsService.initWindowsView(id: 123, viewType: 'viewType', onLoseFocus: (int reason) {
+        lostFocus = true;
+      });
+      final ByteData message =
+          SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('navigatedOut', <dynamic, dynamic>{'id': 123, 'reason': 0}));
+      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      expect(lostFocus, isTrue);
+    });
+  });
+
   test('toString works as intended', () async {
     const AndroidPointerProperties androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');

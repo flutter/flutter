@@ -61,6 +61,8 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+typedef LoseFocusCallback = void Function(int reason);
+
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
@@ -78,6 +80,13 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
+      case 'navigatedOut':
+        final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+        final int id = args['id'] as int;
+        final int reason = args['reason'] as int;
+        if (_loseFocusCallbacks.containsKey(id)) {
+          _loseFocusCallbacks[id]!(reason);
+        }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -88,6 +97,8 @@ class PlatformViewsService {
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
+  final Map<int, LoseFocusCallback> _loseFocusCallbacks = <int, LoseFocusCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -291,6 +302,27 @@ class PlatformViewsService {
       _instance._focusCallbacks[id] = onFocus;
     }
     return AppKitViewController._(id, layoutDirection);
+  }
+
+  // TODO(schectman): return newly created view
+  // https://github.com/flutter/flutter/issues/143375
+  static Future<void> initWindowsView({
+    required int id,
+    required String viewType,
+    VoidCallback? onFocus,
+    LoseFocusCallback? onLoseFocus,
+  }) async {
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    if (onLoseFocus != null) {
+      _instance._loseFocusCallbacks[id] = onLoseFocus;
+    }
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
   }
 }
 
