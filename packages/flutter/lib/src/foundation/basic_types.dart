@@ -249,19 +249,33 @@ Duration lerpDuration(Duration a, Duration b, double t) {
   );
 }
 
-/// A wrapper for
+/// A wrapper that represents the baseline location of a `RenderBox`.
 extension type const BaselineOffset(double? value) {
-  static const noBaseline = BaselineOffset(null);
+  /// A value that indicates that the associated `RenderBox` does not have any
+  /// baselines.
+  ///
+  /// [BaselineOffset.noBaseline] is an identity element in most binary
+  /// operations involving two [BaselineOffset]s (such as [minOf]), for render
+  /// objects with no baselines typically do not contribute to the baseline
+  /// offset of their parents.
+  static const BaselineOffset noBaseline = BaselineOffset(null);
 
+  /// Returns a new baseline location that is `offset` pixels further away from
+  /// the origin than `this`, or unchanged if `this` is [noBaseline].
   BaselineOffset operator +(double offset) {
     final double? value = this.value;
     return BaselineOffset(value == null ? null : value + offset);
   }
 
-  /// Compare this [BaselineOffset] and `other`, and return whichever is smaller.
+  /// Compares this [BaselineOffset] and `other`, and returns whichever is closer
+  /// to the origin.
+  ///
+  /// When both `this` and `other` are [noBaseline], this method returns
+  /// [noBaseline]. When one of them is [noBaseline], this method returns the
+  /// other oprand that's not [noBaseline].
   BaselineOffset minOf(BaselineOffset other) {
     return switch ((this, other)) {
-      (final double lhs?, final double rhs?) => lhs >= rhs ? this : other,
+      (final double lhs?, final double rhs?) => lhs >= rhs ? other : this,
       (final double lhs?, null) => BaselineOffset(lhs),
       (null, final BaselineOffset rhs) => rhs,
     };
