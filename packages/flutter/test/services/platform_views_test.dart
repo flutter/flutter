@@ -429,6 +429,8 @@ void main() {
 
   group('windows', () {
     test('focus loss callback invoked', () async {
+      // TODO(schectman): Handle this in a fake views controller.
+      // https://github.com/flutter/flutter/issues/143375
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, (MethodCall call) {
         return Future<dynamic>.value();
       });

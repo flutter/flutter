@@ -61,6 +61,11 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+/// Callback signature for when the engine notifies the framework that keyboard
+/// focus has attempted to move out of a platform view back into the widget
+/// tree.
+///
+/// The 'reason' parameter indicates the direction of navigation.
 typedef LoseFocusCallback = void Function(int reason);
 
 /// Provides access to the platform views service.
@@ -306,6 +311,9 @@ class PlatformViewsService {
 
   // TODO(schectman): return newly created view
   // https://github.com/flutter/flutter/issues/143375
+  /// Factory method to create a new 'Win32View'.
+  ///
+  /// This should not be called directly by user code.
   static Future<void> initWindowsView({
     required int id,
     required String viewType,
