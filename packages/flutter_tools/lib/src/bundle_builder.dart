@@ -198,18 +198,19 @@ Future<void> writeBundle(
           final File input = devFSContent.file as File;
           bool doCopy = true;
           switch (entry.value.kind) {
-            case AssetKind.regular:
-            if (entry.value.transformers.isNotEmpty) {
-              final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
-                asset: input,
-                outputPath: file.path,
-                workingDirectory: projectDir.path,
-                transformerEntries: entry.value.transformers,
-              );
-              doCopy = false;
-              if (failure != null) {
-                throwToolExit(failure.message);
-              }
+          case AssetKind.regular:
+            if (entry.value.transformers.isEmpty) {
+              break;
+            }
+            final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+              asset: input,
+              outputPath: file.path,
+              workingDirectory: projectDir.path,
+              transformerEntries: entry.value.transformers,
+            );
+            doCopy = false;
+            if (failure != null) {
+              throwToolExit(failure.message);
             }
             case AssetKind.font:
               break;
