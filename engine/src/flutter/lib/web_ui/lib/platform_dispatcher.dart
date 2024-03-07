@@ -502,6 +502,7 @@ class Locale {
   @override
   int get hashCode => Object.hash(languageCode, scriptCode, countryCode);
 
+  @keepToString
   @override
   String toString() => _rawToString('_');
 

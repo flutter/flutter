@@ -4,20 +4,20 @@
 
 part of dart.ui;
 
-// TODO(dnfield): Update this if/when we default this to on in the tool,
-// see: https://github.com/flutter/flutter/issues/52759
-/// Annotation used by Flutter's Dart compiler to indicate that an
-/// [Object.toString] override should not be replaced with a supercall.
+/// Annotation to keep [Object.toString] overrides as-is instead of removing
+/// them for size optimization purposes.
 ///
-/// Since `dart:ui` and `package:flutter` override `toString` purely for
-/// debugging purposes, the frontend compiler is instructed to replace all
-/// `toString` bodies with `return super.toString()` during compilation. This
-/// significantly reduces release code size, and would make it impossible to
-/// implement a meaningful override of `toString` for release mode without
-/// disabling the feature and losing the size savings. If a package uses this
-/// feature and has some unavoidable need to keep the `toString` implementation
-/// for a specific class, applying this annotation will direct the compiler
-/// to leave the method body as-is.
+/// For certain uris (currently `dart:ui` and `package:flutter`) the Dart
+/// compiler will remove [Object.toString] overrides from classes in
+/// profile/release mode to reduce code size.
+///
+/// Individual classes can opt out of this behavior via the following
+/// annotations:
+///
+///    * `@pragma('flutter:keep-to-string')`
+///    * `@pragma('flutter:keep-to-string-in-subtypes')`
+///
+/// See https://github.com/dart-lang/sdk/blob/main/runtime/docs/pragmas.md
 ///
 /// For example, in the following class the `toString` method will remain as
 /// `return _buffer.toString();`, even if the  `--delete-tostring-package-uri`
