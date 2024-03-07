@@ -88,6 +88,7 @@ std::unique_ptr<Surface> SurfaceContextVK::AcquireNextSurface() {
         .DidAcquireSurfaceFrame();
   }
   parent_->GetCommandPoolRecycler()->Dispose();
+  parent_->GetResourceAllocator()->DebugTraceMemoryStatistics();
   return surface;
 }
 
