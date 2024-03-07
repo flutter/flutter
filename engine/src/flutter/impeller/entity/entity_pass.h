@@ -189,6 +189,9 @@ class EntityPass {
   std::optional<Rect> GetElementsCoverage(
       std::optional<Rect> coverage_limit) const;
 
+  /// Exposed for testing purposes only.
+  const EntityPassClipRecorder& GetEntityPassClipRecorder() const;
+
  private:
   struct EntityResult {
     enum Status {
