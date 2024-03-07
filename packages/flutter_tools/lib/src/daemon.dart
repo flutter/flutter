@@ -190,10 +190,10 @@ class DaemonStreams {
     final Future<Socket> socketFuture = Socket.connect(host, port);
     final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
     final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
-    socketFuture.then((Socket socket) {
+    socketFuture.then<void>((Socket socket) {
       inputStreamController.addStream(socket);
       socket.addStream(outputStreamController.stream);
-    }).onError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       logger.printError('Socket error: $error');
       logger.printTrace('$stackTrace');
       // Propagate the error to the streams.

@@ -1555,6 +1555,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
+/// The `value` parameter maps to [FormField.initialValue].
+///
 /// See also:
 ///
 ///  * [DropdownButton], which is the underlying text field without the [Form]

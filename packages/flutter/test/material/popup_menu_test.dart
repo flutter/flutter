@@ -4060,6 +4060,33 @@ void main() {
     expect(listViewportBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds, overlaps(buttonBounds));
   });
+
+  testWidgets('PopupMenuButton honors style', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PopupMenuButton<int>(
+            style: const ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('One'),
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(PopupMenuButton<int>),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style?.color, Colors.red);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
