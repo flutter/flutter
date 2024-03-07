@@ -43,8 +43,8 @@ executable("testing") {
     "//flutter/shell/common",
     "//flutter/shell/gpu:gpu_surface_software",
     "//flutter/skia",
+    "//flutter/third_party/abseil-cpp/absl/base:no_destructor",
     "//flutter/third_party/tonic",
-    "//third_party/abseil-cpp/absl/base:no_destructor",
   ]
 
   if (impeller_supports_rendering) {

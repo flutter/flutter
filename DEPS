@@ -283,7 +283,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ebc2748229c8377d97ee1cafd11dff07c285f440',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '31f887a3ba13087f1bc64bd2a1736329b5f84201',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -683,8 +683,8 @@ deps = {
    'src/third_party/vulkan_memory_allocator':
    Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
 
-   'src/third_party/abseil-cpp':
-   Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '1db3bdd4eb208bef55c77f22aa94991e52225230',
+   'src/flutter/third_party/abseil-cpp':
+   Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + 'ff6504dc527b25fef0f3c531e7dba0ed6b69c162',
 
    # Dart packages
   'src/flutter/third_party/pkg/archive':

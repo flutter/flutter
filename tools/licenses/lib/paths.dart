@@ -459,11 +459,11 @@ final List<Pattern> skippedFilePatterns = <Pattern>[
   RegExp(r'^flutter/(?:.+/)*[^/]+_unittests?\.[^/]+$'),
   RegExp(r'^flutter/lib/web_ui/lib/assets/ahem\.ttf$', expectNoMatch: true), // this gitignored file exists only for testing purposes
   RegExp(r'^flutter/sky/packages/sky_engine/LICENSE$'), // that is the output of this script
+  RegExp(r'^flutter/third_party/abseil-cpp/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^flutter/third_party/boringssl/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/bn/[^/]+.go$'),
   RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/ec/[^/]+.go$'),
   RegExp(r'^flutter/third_party/freetype2/docs/(?!FTL\.TXT$).+'), // ignore all documentation except the license
-  RegExp(r'^third_party/abseil-cpp/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^third_party/angle/(?:.+/)*[^/]+_unittest\.[^/]+$'),
   RegExp(r'^third_party/dart/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^third_party/zlib/(?:.+/)*[^/]+_unittest\.[^/]+$'),

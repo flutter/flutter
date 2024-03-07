@@ -122,7 +122,7 @@ source_set("fml") {
 
   if (enable_backtrace) {
     # This abseil dependency is only used by backtrace.cc.
-    deps += [ "//third_party/abseil-cpp/absl/debugging:symbolize" ]
+    deps += [ "//flutter/third_party/abseil-cpp/absl/debugging:symbolize" ]
   }
 
   configs += [ "//flutter/third_party/icu:icu_config" ]
