@@ -248,3 +248,22 @@ Duration lerpDuration(Duration a, Duration b, double t) {
     microseconds: (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t).round(),
   );
 }
+
+/// A wrapper for
+extension type const BaselineOffset(double? value) {
+  static const noBaseline = BaselineOffset(null);
+
+  BaselineOffset operator +(double offset) {
+    final double? value = this.value;
+    return BaselineOffset(value == null ? null : value + offset);
+  }
+
+  /// Compare this [BaselineOffset] and `other`, and return whichever is smaller.
+  BaselineOffset minOf(BaselineOffset other) {
+    return switch ((this, other)) {
+      (final double lhs?, final double rhs?) => lhs >= rhs ? this : other,
+      (final double lhs?, null) => BaselineOffset(lhs),
+      (null, final BaselineOffset rhs) => rhs,
+    };
+  }
+}

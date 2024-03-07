@@ -940,8 +940,8 @@ class BoxParentData extends ParentData {
 /// the relevant type arguments.
 abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
-/// A class that encodes the type information of a memoized layout computation
-/// run by a [RenderBox].
+/// An interface that represents a memoized layout computation run by a
+/// [RenderBox].
 ///
 /// Each subclass of this sealed class is inhabited by a single object. Each
 /// object represents the signature of a memoized layout computation run by
@@ -967,6 +967,8 @@ sealed class _CachedLayoutCalculation<Input extends Object, Output> {
   Output getOrCompute(_LayoutCacheStorage cacheStorage, Input input, Output Function(Input) computer);
 
   Map<String, String> debugFillTimelineArguments(Map<String, String> timelineArguments, Input input);
+
+  String eventLabel(RenderBox renderBox);
 }
 
 // Dry layout calculation that computes the RenderBox's size given the input
@@ -983,6 +985,9 @@ final class _DryLayout implements _CachedLayoutCalculation<BoxConstraints, Size>
   Map<String, String> debugFillTimelineArguments(Map<String, String> timelineArguments, BoxConstraints input) {
     return timelineArguments..['getDryLayout constraints'] = '$input';
   }
+
+  @override
+  String eventLabel(RenderBox renderBox) => '${renderBox.runtimeType}.getDryLayout';
 }
 
 // Dry baseline calculation that computes the RenderBox's baseline location given
@@ -1004,6 +1009,9 @@ final class _DryBaseline implements _CachedLayoutCalculation<(BoxConstraints, Te
       ..['baseline type'] = '${input.$2}'
       ..['getDryBaseline constraints'] = '${input.$1}';
   }
+
+  @override
+  String eventLabel(RenderBox renderBox) => '${renderBox.runtimeType}.getDryBaseline';
 }
 
 // Intrinsic dimension calculation that computes the intrinsic width given the
@@ -1023,6 +1031,9 @@ enum _IntrinsicDimension implements _CachedLayoutCalculation<double, double> {
       ..['intrinsics dimension'] = name
       ..['intrinsics argument'] = '$input';
   }
+
+  @override
+  String eventLabel(RenderBox renderBox) => '${renderBox.runtimeType} intrinsics';
 }
 
 final class _LayoutCacheStorage {
@@ -1080,12 +1091,7 @@ final class _LayoutCacheStorage {
     }());
     if (!kReleaseMode) {
       if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-        final String eventLabel = switch (type) {
-          _IntrinsicDimension() => '${debugRenderBox.runtimeType} intrinsics',
-          _DryLayout() => '${debugRenderBox.runtimeType}.getDryLayout',
-          _DryBaseline() => '${debugRenderBox.runtimeType}.getDryBaseline',
-        };
-        FlutterTimeline.startSync(eventLabel, arguments: debugTimelineArguments);
+        FlutterTimeline.startSync(type.eventLabel(debugRenderBox), arguments: debugTimelineArguments);
       }
       _debugIntrinsicsDepth += 1;
     }
@@ -3061,22 +3067,15 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   /// order in the child list.
   double? defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
-    double? result;
+    BaselineOffset minBaseline = BaselineOffset.noBaseline;
     ChildType? child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData! as ParentDataType;
-      double? candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null) {
-          result = math.min(result, candidate);
-        } else {
-          result = candidate;
-        }
-      }
+      final BaselineOffset candidate = BaselineOffset(child.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
+      minBaseline = minBaseline.minOf(candidate);
       child = childParentData.nextSibling;
     }
-    return result;
+    return minBaseline.value;
   }
 
   /// Performs a hit test on each child by walking the child list backwards.
