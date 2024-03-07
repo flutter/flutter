@@ -66,6 +66,7 @@ void main() {
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
+          kBuildMode: BuildMode.debug.cliName,
         },
         artifacts: Artifacts.test(),
         processManager: processManager,
