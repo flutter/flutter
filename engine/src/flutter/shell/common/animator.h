@@ -54,20 +54,27 @@ class Animator final {
   void RequestFrame(bool regenerate_layer_trees = true);
 
   //--------------------------------------------------------------------------
-  /// @brief    Tells the Animator that a warm up frame has ended.
+  /// @brief    Tells the Animator that all views that should render for this
+  ///           frame have been rendered.
   ///
-  ///           In a warm up frame, `Animator::Render` is called out of vsync
-  ///           tasks, and Animator requires an explicit end-of-frame call to
-  ///           know when to send the layer trees to the pipeline.
+  ///           In regular frames, since all `Render` calls must take place
+  ///           during a vsync task, the Animator knows that all views have
+  ///           been rendered at the end of the vsync task, therefore calling
+  ///           this method is not needed.
   ///
-  ///           This is different from regular frames, where Animator::Render is
-  ///           always called within a vsync task, and Animator can send
-  ///           the views at the end of the vsync task.
+  ///           However, the engine might decide to start it a bit earlier, for
+  ///           example, if the engine decides that no more views can be
+  ///           rendered, so that the rasterization can start a bit earlier.
+  ///
+  ///           This method is also useful in warm-up frames. In a warm up
+  ///           frame, `Animator::Render` is called out of vsync tasks, and
+  ///           Animator requires an explicit end-of-frame call to know when to
+  ///           send the layer trees to the pipeline.
   ///
   ///           For more about warm up frames, see
   ///           `PlatformDispatcher.scheduleWarmUpFrame`.
   ///
-  void EndWarmUpFrame();
+  void OnAllViewsRendered();
 
   //--------------------------------------------------------------------------
   /// @brief    Tells the Animator that this frame needs to render another view.
@@ -76,7 +83,8 @@ class Animator final {
   ///           technically, between Animator::BeginFrame and Animator::EndFrame
   ///           (both private methods). Otherwise, this call will be ignored.
   ///
-  void Render(std::unique_ptr<flutter::LayerTree> layer_tree,
+  void Render(int64_t view_id,
+              std::unique_ptr<flutter::LayerTree> layer_tree,
               float device_pixel_ratio);
 
   const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
@@ -105,7 +113,13 @@ class Animator final {
   void EnqueueTraceFlowId(uint64_t trace_flow_id);
 
  private:
+  // Animator's work during a vsync is split into two methods, BeginFrame and
+  // EndFrame. The two methods should be called synchronously back-to-back to
+  // avoid being interrupted by a regular vsync. The reason to split them is to
+  // allow ShellTest::PumpOneFrame to insert a Render in between.
+
   void BeginFrame(std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder);
+  void EndFrame();
 
   bool CanReuseLastLayerTrees();
 
@@ -122,6 +136,8 @@ class Animator final {
   std::shared_ptr<VsyncWaiter> waiter_;
 
   std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder_;
+  std::unordered_map<int64_t, std::unique_ptr<LayerTreeTask>>
+      layer_trees_tasks_;
   uint64_t frame_request_number_ = 1;
   fml::TimeDelta dart_frame_deadline_;
   std::shared_ptr<FramePipeline> layer_tree_pipeline_;
