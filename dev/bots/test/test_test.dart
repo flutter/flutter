@@ -134,7 +134,7 @@ void main() {
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-8 of 9)'));
+      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-9 of 9)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {
