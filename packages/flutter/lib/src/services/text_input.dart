@@ -21,7 +21,6 @@ import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
-import 'system_context_menu_controller.dart';
 import 'text_editing.dart';
 import 'text_editing_delta.dart';
 
@@ -1923,7 +1922,9 @@ class TextInput {
       // the user taps outside the menu. Not called when Flutter shows a new
       // system context menu while an old one is still visible.
       case 'TextInputClient.onDismissSystemContextMenu':
-        SystemContextMenuController.handleSystemHide();
+        for (final SystemContextMenuClient client in _systemContextMenuClients) {
+          client.handleSystemHide();
+        }
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
       case 'TextInputClient.showToolbar':
@@ -2130,6 +2131,19 @@ class TextInput {
   /// Unregisters a [ScribbleClient] with [elementIdentifier].
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
+  }
+
+  final Set<SystemContextMenuClient> _systemContextMenuClients = <SystemContextMenuClient>{};
+
+  /// Registers a [SystemContextMenuClient] that will receive system context
+  /// menu calls from the engine.
+  static void registerSystemContextMenuClient(SystemContextMenuClient client) {
+    TextInput._instance._systemContextMenuClients.add(client);
+  }
+
+  /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
+  static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
+    TextInput._instance._systemContextMenuClients.remove(client);
   }
 }
 
@@ -2400,4 +2414,22 @@ class _PlatformTextInputControl with TextInputControl {
       shouldSave,
     );
   }
+}
+
+/// An interface to receive calls related to the system context menu from the
+/// engine.
+///
+/// Currently this is only supported on iOS.
+///
+/// See also:
+///  * [SystemContextMenuController], which uses this to provide a fully
+///    featured way to control the system context menu.
+///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
+///    whether the system context menu is supported.
+mixin SystemContextMenuClient {
+  /// Handles the system hiding a context menu.
+  ///
+  /// This is called for all instances of [SystemContextMenuController], so it's
+  /// not guaranteed that this instance was the one that was hidden.
+  void handleSystemHide();
 }

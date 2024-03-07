@@ -71,6 +71,9 @@ class SystemContextMenu extends StatefulWidget {
   ///
   /// For example, tapping outside of the context menu typically causes the
   /// system to hide the menu.
+  ///
+  /// This is not called when showing a new system context menu causes another
+  /// to be hidden.
   final VoidCallback? onSystemHide;
 
   @override

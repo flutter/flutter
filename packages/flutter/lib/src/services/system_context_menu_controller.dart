@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
+import 'text_input.dart';
 
 /// Allows access to the system context menu.
 ///
@@ -24,14 +25,16 @@ import 'system_channels.dart';
 ///
 ///  * [ContextMenuController], which controls Flutter-drawn context menus.
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
-class SystemContextMenuController {
+///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
+///    whether the system context menu is supported.
+class SystemContextMenuController with SystemContextMenuClient {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.
   SystemContextMenuController({
     this.onSystemHide,
   }) {
-    _instances.add(this);
+    TextInput.registerSystemContextMenuClient(this);
   }
 
   /// Called when the system has hidden the context menu.
@@ -39,22 +42,14 @@ class SystemContextMenuController {
   /// For example, tapping outside of the context menu typically causes the
   /// system to hide it directly. Flutter is made aware that the context menu is
   /// no longer visible through this callback.
+  ///
+  /// This is not called when [show]ing a new system context menu causes another
+  /// to be hidden.
   final VoidCallback? onSystemHide;
-
-  static final Set<SystemContextMenuController> _instances = <SystemContextMenuController>{};
 
   static const MethodChannel _channel = SystemChannels.platform;
 
   static SystemContextMenuController? _lastShown;
-
-  // TODO(justinmc): Name.
-  /// Handles the engine informing Flutter that the system has hidden the
-  /// context menu.
-  static void handleSystemHide() {
-    for (final SystemContextMenuController instance in _instances) {
-      instance._handleSystemHide();
-    }
-  }
 
   /// True when the instance most recently [show]n has been hidden by the
   /// system.
@@ -62,22 +57,27 @@ class SystemContextMenuController {
 
   bool get _isVisible => this == _lastShown && !_hiddenBySystem;
 
-  bool get _isDisposed => !_instances.contains(this);
+  /// After calling [dispose], this instance can no longer be used.
+  bool _isDisposed = false;
 
-  /// Handles the system hiding a context menu.
-  ///
-  /// This is called for all instances of [SystemContextMenuController], so it's
-  /// not guaranteed that this instance was the one that was hidden.
-  void _handleSystemHide() {
+  // Begin SystemContextMenuClient
+
+  @override
+  void handleSystemHide() {
     assert(!_isDisposed);
     // If this instance wasn't being shown, then it wasn't the instance that was
     // hidden.
     if (!_isVisible) {
       return;
     }
+    if (_lastShown == this) {
+      _lastShown = null;
+    }
     _hiddenBySystem = true;
     onSystemHide?.call();
   }
+
+  // End SystemContextMenuClient
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
@@ -98,6 +98,11 @@ class SystemContextMenuController {
   Future<void> show(Rect rect) {
     assert(defaultTargetPlatform == TargetPlatform.iOS);
     assert(!_isDisposed);
+    assert(
+      _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
+      'Attempted to show while another instance was still visible.',
+    );
+
     _lastShown = this;
     _hiddenBySystem = false;
     return _channel.invokeMethod<void>(
@@ -145,6 +150,7 @@ class SystemContextMenuController {
   void dispose() {
     assert(!_isDisposed);
     hide();
-    _instances.remove(this);
+    TextInput.unregisterSystemContextMenuClient(this);
+    _isDisposed = true;
   }
 }
