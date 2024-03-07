@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'system_channels.dart';
 import 'text_input.dart';
 
+// TODO(justinmc): Enforce that this must be tied to a text input connection?
 /// Allows access to the system context menu.
 ///
 /// The context menu is the menu that appears, for example, when doing text

@@ -12,6 +12,7 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'text_selection_toolbar_anchors.dart';
 
+// TODO(justinmc): Enforce that this must be tied to a text input connection?
 /// Displays the system context menu on top of the Flutter view.
 ///
 /// Currently, only supports iOS and displays nothing on other platforms.
