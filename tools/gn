@@ -601,6 +601,21 @@ def to_gn_args(args):
 
   gn_args['concurrent_dart_jobs'] = get_concurrent_jobs('1GB', '1GB')
 
+  # Hardcoding this avoids invoking a relatively expensive python script from
+  # GN, but removes the ability to use git-worktrees in the Dart checkout from
+  # within the Engine repo, but it's unlikely anyone is using that.
+  gn_args['default_git_folder'] = os.path.join(SRC_ROOT, 'third_party', 'dart', '.git')
+
+  # By default, the Dart GN build will invoke a relatively expensive python
+  # script to calculate an SDK "hash" that ensures compatibility between the
+  # Dart VM and the Dart front-end. This default hash calculation allows some
+  # wiggle room in which a VM and kernel file will be compatible forwards and
+  # backwards across a small range of git commits. Since Flutter doesn't need
+  # the wiggle room, to avoid running the python script, we instead set the SDK
+  # hash to the exact git commit.
+  sdk_hash = gn_args['dart_version']
+  gn_args['dart_sdk_verification_hash'] = sdk_hash if len(sdk_hash) <= 10 else sdk_hash[:10]
+
   # Desktop embeddings can have more dependencies than the engine library,
   # which can be problematic in some build environments (e.g., building on
   # Linux will bring in pkg-config dependencies at generation time). These
