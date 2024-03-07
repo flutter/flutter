@@ -861,64 +861,76 @@ class _DatePickerHeader extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return SizedBox(
-          height: _datePickerHeaderPortraitHeight,
-          child: Material(
-            color: backgroundColor,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(
-                start: 24,
-                end: 12,
-                bottom: 12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 16),
-                  help,
-                  const Flexible(child: SizedBox(height: 38)),
-                  Row(
-                    children: <Widget>[
-                      Expanded(child: title),
-                      if (entryModeButton != null)
-                        entryModeButton!,
-                    ],
-                  ),
-                ],
+        return Semantics(
+          container: true,
+          child: SizedBox(
+            height: _datePickerHeaderPortraitHeight,
+            child: Material(
+              color: backgroundColor,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  start: 24,
+                  end: 12,
+                  bottom: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const SizedBox(height: 16),
+                    help,
+                    const Flexible(child: SizedBox(height: 38)),
+                    Row(
+                      children: <Widget>[
+                        Expanded(child: title),
+                        if (entryModeButton != null)
+                         Semantics(
+                          container: true,
+                          child: entryModeButton,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       case Orientation.landscape:
-        return SizedBox(
-          width: _datePickerHeaderLandscapeWidth,
-          child: Material(
-            color: backgroundColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _headerPaddingLandscape,
-                  ),
-                  child: help,
-                ),
-                SizedBox(height: isShort ? 16 : 56),
-                Expanded(
-                  child: Padding(
+        return Semantics(
+          container: true,
+          child:SizedBox(
+            width: _datePickerHeaderLandscapeWidth,
+            child: Material(
+              color: backgroundColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 16),
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: _headerPaddingLandscape,
                     ),
-                    child: title,
+                    child: help,
                   ),
-                ),
-                if (entryModeButton != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: entryModeButton,
+                  SizedBox(height: isShort ? 16 : 56),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _headerPaddingLandscape,
+                      ),
+                      child: title,
+                    ),
                   ),
-              ],
+                  if (entryModeButton != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Semantics(
+                        container: true,
+                        child: entryModeButton,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
@@ -1008,7 +1020,7 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material date range picker.
 /// This is accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
