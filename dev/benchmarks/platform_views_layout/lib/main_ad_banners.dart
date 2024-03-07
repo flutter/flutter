@@ -9,7 +9,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
   runApp(
-      const PlatformViewApp()
+    const PlatformViewApp()
   );
 }
 
@@ -24,31 +24,18 @@ class PlatformViewApp extends StatefulWidget {
 
 class PlatformViewAppState extends State<PlatformViewApp> {
 
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-3940256099942544/2934735716';
-
-  BannerAd getBanner() {
-    var bannerAd = BannerAd(
-      adUnitId: _adUnitId,
+  AdWidget _getBannerWidget() {
+    final String bannerId = Platform.isAndroid
+        ? 'ca-app-pub-3940256099942544/6300978111'
+        : 'ca-app-pub-3940256099942544/2934735716';
+    final BannerAd bannerAd = BannerAd(
+      adUnitId: bannerId,
       request: const AdRequest(),
-      size: AdSize.mediumRectangle,
-      listener: BannerAdListener(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {},
-        // Called when an ad request failed.
-        onAdFailedToLoad: (ad, err) {},
-        // Called when an ad opens an overlay that covers the screen.
-        onAdOpened: (Ad ad) {},
-        // Called when an ad removes an overlay that covers the screen.
-        onAdClosed: (Ad ad) {},
-        // Called when an impression occurs on the ad.
-        onAdImpression: (Ad ad) {},
-      ),
+      size: AdSize.banner,
+      listener: BannerAdListener(),
     );
-
     bannerAd.load();
-    return bannerAd;
+    return AdWidget(ad: bannerAd);
   }
 
   @override
@@ -63,13 +50,10 @@ class PlatformViewAppState extends State<PlatformViewApp> {
           itemCount: 250,
           itemBuilder: (BuildContext context, int index) {
             return index.isEven
-                // Adjust the height so that there are multiple ad banners on screen at the same time.
-                ? Container(height: 250.0, color: Colors.yellow)
-                : SizedBox(
-                  width: 320,
-                  height: 50,
-                  child: AdWidget(ad: getBanner()),
-                );
+              // Use 320x50 Admob standard banner size.
+              ? Container(width: 320, height: 50, child: _getBannerWidget())
+              // Adjust the height to control number of platform views on screen.
+              : Container(height: 50, color: Colors.yellow);
           },
         ),
       ),
