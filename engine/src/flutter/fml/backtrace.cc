@@ -10,7 +10,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
-#include "third_party/abseil-cpp/absl/debugging/symbolize.h"
+#include "flutter/third_party/abseil-cpp/absl/debugging/symbolize.h"
 
 #ifdef FML_OS_WIN
 #include <Windows.h>
