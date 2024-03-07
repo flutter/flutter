@@ -24,6 +24,9 @@ class AllocatorVK final : public Allocator {
   // |Allocator|
   ~AllocatorVK() override;
 
+  // Visible for testing
+  size_t DebugGetHeapUsage() const;
+
  private:
   friend class ContextVK;
 
@@ -36,6 +39,7 @@ class AllocatorVK final : public Allocator {
   bool supports_memoryless_textures_ = false;
   // TODO(jonahwilliams): figure out why CI can't create these buffer pools.
   bool created_buffer_pool_ = true;
+  vk::PhysicalDeviceMemoryProperties memory_properties_;
 
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
@@ -57,6 +61,9 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
+
+  // |Allocator|
+  void DebugTraceMemoryStatistics() const override;
 
   AllocatorVK(const AllocatorVK&) = delete;
 
