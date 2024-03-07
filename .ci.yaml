@@ -501,7 +501,6 @@ targets:
   - name: Linux firebase_abstract_method_smoke_test
     presubmit: false
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -534,7 +533,6 @@ targets:
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -566,7 +564,6 @@ targets:
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -2638,14 +2635,15 @@ targets:
 
   # linux motog4 benchmark
   # Moto G4, Impeller (OpenGL)
-  - name: Linux_android new_gallery_impeller__transition_perf
+  - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
-      task_name: new_gallery_impeller__transition_perf
+      task_name: new_gallery_opengles_impeller__transition_perf
 
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
@@ -2668,7 +2666,7 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_impeller__transition_perf
 
-  # Samsung A02, Impeller (OpenGL)
+  # Samsung A02, Impeller (Vulkan)
   - name: Linux_samsung_a02 new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3660,6 +3658,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/144680
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:

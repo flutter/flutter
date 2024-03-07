@@ -132,11 +132,8 @@ class TabController extends ChangeNotifier {
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
-       _animationDuration = animationDuration {
-    if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
-    }
-  }
+       _animationDuration = animationDuration;
+
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
   /// `animationDuration` if they are non-null.
@@ -145,10 +142,7 @@ class TabController extends ChangeNotifier {
   ///
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
-  ///
-  /// This instance of [TabController] will be disposed and must not be used
-  /// anymore.
-  TabController _copyWithAndDispose({
+  TabController _copyWith({
     required int? index,
     required int? length,
     required int? previousIndex,
@@ -157,20 +151,13 @@ class TabController extends ChangeNotifier {
     if (index != null) {
       _animationController!.value = index.toDouble();
     }
-    final TabController newController = TabController._(
+    return TabController._(
       index: index ?? _index,
       length: length ?? this.length,
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
     );
-
-    // Nulling _animationController to not dispose it. It will be disposed by
-    // the newly created instance of the TabController.
-    _animationController = null;
-    dispose();
-
-    return newController;
   }
 
   /// An animation whose value represents the current position of the [TabBar]'s
@@ -498,7 +485,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
         newIndex = math.max(0, widget.length - 1);
         previousIndex = _controller.index;
       }
-      _controller = _controller._copyWithAndDispose(
+      _controller = _controller._copyWith(
         length: widget.length,
         animationDuration: widget.animationDuration,
         index: newIndex,
@@ -507,7 +494,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     }
 
     if (oldWidget.animationDuration != widget.animationDuration) {
-      _controller = _controller._copyWithAndDispose(
+      _controller = _controller._copyWith(
         length: widget.length,
         animationDuration: widget.animationDuration,
         index: _controller.index,
