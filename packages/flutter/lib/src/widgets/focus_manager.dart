@@ -1677,11 +1677,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    final bool isDesktop = switch (defaultTargetPlatform) {
-      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
-      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => false,
-    };
-    if (isDesktop) {
+    if (defaultTargetPlatform != TargetPlatform.android) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
