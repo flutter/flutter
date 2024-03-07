@@ -946,6 +946,7 @@ class WebDevFS implements DevFS {
           fileSystem: globals.fs,
           artifacts: globals.artifacts!,
           logger: globals.logger,
+          projectDir: rootDirectory,
         );
       }
     }

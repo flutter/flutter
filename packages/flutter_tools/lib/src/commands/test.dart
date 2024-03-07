@@ -675,6 +675,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         logger: globals.logger,
+        projectDir: globals.fs.currentDirectory,
       );
     }
   }
