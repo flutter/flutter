@@ -1,4 +1,4 @@
-Signature: 9d22ccc57a684b1df2b36c706b588afc
+Signature: bb7ebf99816814eabfe13148dc3703e8
 
 ====================================================================================================
 LIBRARY: dart
@@ -4087,12 +4087,14 @@ ORIGIN: ../../../third_party/dart/runtime/bin/ifaddrs.h + ../../../third_party/d
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.cc
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs.h
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4745,7 +4747,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/9ea8813ab4d45fa242210d4252385e0217dc7fc6
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/3ad64881a2095991a7c2604abc9d97c089808e4a
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
