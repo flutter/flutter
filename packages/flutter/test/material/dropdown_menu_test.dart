@@ -694,7 +694,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     Finder button0Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 0').last,
@@ -705,7 +705,7 @@ void main() {
     expect(item0material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     // Press down key one more time, the highlight should move to the next item.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     final Finder button1Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Menu 1').last,
@@ -735,7 +735,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     Finder button5Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 5').last,
@@ -746,7 +746,7 @@ void main() {
     expect(item5material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
 
     // Press up key one more time, the highlight should move up to the item 4.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     final Finder button4Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 4').last,
@@ -779,17 +779,17 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
 
     // Press down key one more time to the next item.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Menu 1'), findsOneWidget);
 
     // Press down to the next item.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 2'), findsOneWidget);
   }, variant: TargetPlatformVariant.desktop());
@@ -810,17 +810,17 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 5'), findsOneWidget);
 
     // Press up key one more time to the upper item.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 4'), findsOneWidget);
 
     // Press up to the upper item.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 3'), findsOneWidget);
   }, variant: TargetPlatformVariant.desktop());
@@ -849,7 +849,7 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     final Finder button0Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 0').last,
@@ -859,7 +859,7 @@ void main() {
     expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // first item can be highlighted as it's enabled.
 
     // Continue to press down key. Item 3 should be highlighted as Menu 1 and Item 2 are both disabled.
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     final Finder button3Material = find.descendant(
       of: find.widgetWithText(MenuItemButton, 'Item 3').last,
@@ -941,6 +941,7 @@ void main() {
 
     // Press up to the upper item (Item 0).
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
     final Finder button0Material = find.descendant(
@@ -952,6 +953,7 @@ void main() {
 
     // Continue to move up to the last item (Item 5).
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 5'), findsOneWidget);
     final Finder button5Material = find.descendant(
