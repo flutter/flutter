@@ -80,7 +80,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     registerHotRestartListener(dispose);
     AppLifecycleState.instance.addListener(_setAppLifecycleState);
     ViewFocusBinding.instance.addListener(invokeOnViewFocusChange);
-    domDocument.body?.append(accessibilityPlaceholder);
+    domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
