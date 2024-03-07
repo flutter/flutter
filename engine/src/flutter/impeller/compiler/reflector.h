@@ -225,6 +225,9 @@ class Reflector {
   std::vector<size_t> ComputeOffsets(
       const spirv_cross::SmallVector<spirv_cross::Resource>& resources) const;
 
+  std::optional<size_t> GetOffset(spirv_cross::ID id,
+                                  const std::vector<size_t>& offsets) const;
+
   std::optional<nlohmann::json::object_t> ReflectType(
       const spirv_cross::TypeID& type_id) const;
 

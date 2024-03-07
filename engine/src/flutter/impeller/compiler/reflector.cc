@@ -421,9 +421,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     const auto inputs = compiler_->get_shader_resources().stage_inputs;
     auto input_offsets = ComputeOffsets(inputs);
     for (const auto& input : inputs) {
-      auto location = compiler_->get_decoration(
-          input.id, spv::Decoration::DecorationLocation);
-      std::optional<size_t> offset = input_offsets[location];
+      std::optional<size_t> offset = GetOffset(input.id, input_offsets);
 
       const auto type = compiler_->get_type(input.type_id);
 
@@ -518,9 +516,7 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
     const auto inputs = compiler_->get_shader_resources().stage_inputs;
     auto input_offsets = ComputeOffsets(inputs);
     for (const auto& input : inputs) {
-      auto location = compiler_->get_decoration(
-          input.id, spv::Decoration::DecorationLocation);
-      std::optional<size_t> offset = input_offsets[location];
+      std::optional<size_t> offset = GetOffset(input.id, input_offsets);
 
       const auto type = compiler_->get_type(input.type_id);
 
@@ -624,6 +620,17 @@ std::vector<size_t> Reflector::ComputeOffsets(
   return offsets;
 }
 
+std::optional<size_t> Reflector::GetOffset(
+    spirv_cross::ID id,
+    const std::vector<size_t>& offsets) const {
+  uint32_t location =
+      compiler_->get_decoration(id, spv::Decoration::DecorationLocation);
+  if (location >= offsets.size()) {
+    return std::nullopt;
+  }
+  return offsets[location];
+}
+
 std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
     const spirv_cross::Resource& resource,
     std::optional<size_t> offset) const {
@@ -698,9 +705,7 @@ std::optional<nlohmann::json::array_t> Reflector::ReflectResources(
   for (const auto& resource : resources) {
     std::optional<size_t> maybe_offset = std::nullopt;
     if (compute_offsets) {
-      auto location = compiler_->get_decoration(
-          resource.id, spv::Decoration::DecorationLocation);
-      maybe_offset = offsets[location];
+      maybe_offset = GetOffset(resource.id, offsets);
     }
     if (auto reflected = ReflectResource(resource, maybe_offset);
         reflected.has_value()) {
