@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -684,4 +685,47 @@ void main() {
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
+
+  testWidgets('ColorScheme.fromSeed and ColorScheme.fromFidelitySeed spot checks', (WidgetTester tester) async {
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF000000)), const Color(0xFF8C4A60));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00)), const Color(0xFF406836));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF6559F5)), const Color(0xFF5B5891));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)), const Color(0xFF006874));
+    await _testFilledButtonColor(tester, ColorScheme.fromFidelitySeed(seedColor: const Color(0xFF000000)), const Color(0xFF000000));
+    await _testFilledButtonColor(tester, ColorScheme.fromFidelitySeed(seedColor: const Color(0xFF00FF00)), const Color(0xFF026E00));
+    await _testFilledButtonColor(tester, ColorScheme.fromFidelitySeed(seedColor: const Color(0xFF6559F5)), const Color(0xFF3F2CD0));
+    await _testFilledButtonColor(tester, ColorScheme.fromFidelitySeed(seedColor: const Color(0xFFFFFFFF)), const Color(0xFF5D5F5F));
+  });
+}
+
+Color _getPixel(ByteData bytes, ui.Image image, double x, double y) {
+  final int offset = ((x * image.width).round() + (y * image.height).round() * image.width) * 4;
+  return Color.fromARGB(
+    bytes.getUint8(offset + 3),
+    bytes.getUint8(offset + 0),
+    bytes.getUint8(offset + 1),
+    bytes.getUint8(offset + 2),
+  );
+}
+
+Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Color expectation) async {
+  final TestWidgetsFlutterBinding binding = tester.binding;
+  final GlobalKey key = GlobalKey();
+  await tester.pumpWidget(
+    MaterialApp(
+      key: key,
+      theme: ThemeData.from(
+        colorScheme: scheme,
+      ),
+      home: FilledButton(
+        onPressed: () {},
+        child: const SizedBox.shrink(),
+      ),
+    ),
+  );
+
+  final ui.Image image = (await binding.runAsync<ui.Image>(() => captureImage(find.byKey(key).evaluate().single)))!;
+  addTearDown(image.dispose);
+  final ByteData bytes = (await binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!;
+  expect(_getPixel(bytes, image, 0.5, 0.5), expectation);
 }
