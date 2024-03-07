@@ -26,6 +26,7 @@
 ../../../flutter/README.md
 ../../../flutter/analysis_options.yaml
 ../../../flutter/build
+../../../flutter/build_overrides
 ../../../flutter/ci
 ../../../flutter/common/README.md
 ../../../flutter/display_list/benchmarking/dl_complexity_unittests.cc
