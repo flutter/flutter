@@ -18,6 +18,7 @@ import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
+import 'custom_rules/avoid_future_catcherror.dart';
 import 'custom_rules/no_double_clamp.dart';
 import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
@@ -186,6 +187,10 @@ Future<void> run(List<String> arguments) async {
     await analyzeWithRules(flutterRoot, testRules,
       includePaths: <String>['packages/flutter/test'],
     );
+    final List<AnalyzeRule> toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
+    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
+    await analyzeToolWithRules(flutterRoot, toolRules);
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
