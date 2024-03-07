@@ -23,12 +23,14 @@ class RelativePositionedTransitionExample extends StatefulWidget {
   const RelativePositionedTransitionExample({super.key});
 
   @override
-  State<RelativePositionedTransitionExample> createState() => _RelativePositionedTransitionExampleState();
+  State<RelativePositionedTransitionExample> createState() =>
+      _RelativePositionedTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _RelativePositionedTransitionExampleState extends State<RelativePositionedTransitionExample>
+class _RelativePositionedTransitionExampleState
+    extends State<RelativePositionedTransitionExample>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),

@@ -20,7 +20,8 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
 
-    final String projectPath = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final String projectPath =
+        '${flutterDirectory.path}/dev/integration_tests/flavors';
     final TaskResult installTestsResult = await inDirectory(
       projectPath,
       () async {
@@ -30,7 +31,7 @@ Future<void> main() async {
         ];
 
         final TaskResult? firstInstallFailure = testResults
-          .firstWhereOrNull((TaskResult element) => element.failed);
+            .firstWhereOrNull((TaskResult element) => element.failed);
 
         return firstInstallFailure ?? TaskResult.success(null);
       },
@@ -48,22 +49,26 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
   );
 
   final Uint8List assetManifestFileData = File(
-    path.join(projectDir, 'build', 'app', 'intermediates', 'assets', 'paidDebug', 'flutter_assets', 'AssetManifest.bin'),
+    path.join(projectDir, 'build', 'app', 'intermediates', 'assets',
+        'paidDebug', 'flutter_assets', 'AssetManifest.bin'),
   ).readAsBytesSync();
 
   final Map<Object?, Object?> assetManifest = const StandardMessageCodec()
-    .decodeMessage(ByteData.sublistView(assetManifestFileData)) as Map<Object?, Object?>;
+          .decodeMessage(ByteData.sublistView(assetManifestFileData))
+      as Map<Object?, Object?>;
 
   if (assetManifest.containsKey('assets/free/free.txt')) {
-    return TaskResult.failure('Expected the asset "assets/free/free.txt", which '
-      ' was declared with a flavor of "free" to not be included in the asset bundle '
-      ' because the --flavor was set to "paid".');
+    return TaskResult.failure(
+        'Expected the asset "assets/free/free.txt", which '
+        ' was declared with a flavor of "free" to not be included in the asset bundle '
+        ' because the --flavor was set to "paid".');
   }
 
   if (!assetManifest.containsKey('assets/paid/paid.txt')) {
-    return TaskResult.failure('Expected the asset "assets/paid/paid.txt", which '
-      ' was declared with a flavor of "paid" to be included in the asset bundle '
-      ' because the --flavor was set to "paid".');
+    return TaskResult.failure(
+        'Expected the asset "assets/paid/paid.txt", which '
+        ' was declared with a flavor of "paid" to be included in the asset bundle '
+        ' because the --flavor was set to "paid".');
   }
 
   await flutter(
@@ -84,7 +89,8 @@ Future<TaskResult> _testInstallBogusFlavor() async {
   );
 
   final String stderrString = stderr.toString();
-  final String expectedApkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-bogus-release.apk');
+  final String expectedApkPath = path.join(
+      'build', 'app', 'outputs', 'flutter-apk', 'app-bogus-release.apk');
   if (!stderrString.contains('"$expectedApkPath" does not exist.')) {
     print(stderrString);
     return TaskResult.failure('Should not succeed with bogus flavor');

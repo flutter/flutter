@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/color_scheme/color_scheme.0.dart' as example;
+import 'package:flutter_api_samples/material/color_scheme/color_scheme.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -23,13 +24,11 @@ void main() {
     );
 
     ColoredBox coloredBox() {
-      return tester.widget<ColoredBox>(
-        find.descendant(
+      return tester.widget<ColoredBox>(find.descendant(
           of: find.widgetWithText(example.ColorChip, 'primary').first,
-          matching: find.byType(ColoredBox)
-        )
-      );
+          matching: find.byType(ColoredBox)));
     }
+
     expect(coloredBox().color, const Color(0xFF6750A4));
     await tester.tap(find.byType(MenuAnchor));
     await tester.pumpAndSettle();

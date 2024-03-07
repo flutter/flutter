@@ -217,8 +217,10 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
     final Color iconColor = colorScheme.onSurface;
     final Color selectedIconColor = colorScheme.primary;
     final double appBarPadding = isDesktop ? 20.0 : 0.0;
-    final _DemoState currentDemoState = _DemoState.values[_demoStateIndex.value];
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final _DemoState currentDemoState =
+        _DemoState.values[_demoStateIndex.value];
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final GalleryOptions options = GalleryOptions.of(context);
 
     final AppBar appBar = AppBar(
@@ -295,8 +297,10 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
         mediaQuery.padding.top -
         mediaQuery.padding.bottom -
         appBar.preferredSize.height;
-    final double maxSectionHeight = isDesktop ? contentHeight : contentHeight - 64;
-    final double horizontalPadding = isDesktop ? mediaQuery.size.width * 0.12 : 0.0;
+    final double maxSectionHeight =
+        isDesktop ? contentHeight : contentHeight - 64;
+    final double horizontalPadding =
+        isDesktop ? mediaQuery.size.width * 0.12 : 0.0;
     const double maxSectionWidth = 420.0;
 
     Widget section;
@@ -563,7 +567,8 @@ class _DemoSectionOptions extends StatelessWidget {
               child: ListView(
                 shrinkWrap: true,
                 children: <Widget>[
-                  for (final GalleryDemoConfiguration configuration in configurations)
+                  for (final GalleryDemoConfiguration configuration
+                      in configurations)
                     _DemoSectionOptionsItem(
                       title: configuration.title,
                       isSelected: configuration == configurations[configIndex],

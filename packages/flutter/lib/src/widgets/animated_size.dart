@@ -89,8 +89,8 @@ class AnimatedSize extends StatefulWidget {
   State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
-class _AnimatedSizeState
-    extends State<AnimatedSize> with SingleTickerProviderStateMixin {
+class _AnimatedSizeState extends State<AnimatedSize>
+    with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
@@ -145,7 +145,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderAnimatedSize renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderAnimatedSize renderObject) {
     renderObject
       ..alignment = alignment
       ..duration = duration
@@ -160,8 +161,13 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
-    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', alignment,
+        defaultValue: Alignment.topCenter));
+    properties
+        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty(
+        'reverseDuration', reverseDuration?.inMilliseconds,
+        unit: 'ms', defaultValue: null));
   }
 }

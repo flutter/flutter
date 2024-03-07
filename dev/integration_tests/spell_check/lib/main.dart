@@ -40,18 +40,15 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: EditableText(
-          controller: TextEditingController(),
-          backgroundCursorColor: Colors.grey,
-          focusNode: FocusNode(),
-          style: const TextStyle(),
-          cursorColor: Colors.red,
-          spellCheckConfiguration:
-            const SpellCheckConfiguration(
-              misspelledTextStyle: TextField.materialMisspelledTextStyle,
-            )
-        )
-      ),
+          child: EditableText(
+              controller: TextEditingController(),
+              backgroundCursorColor: Colors.grey,
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.red,
+              spellCheckConfiguration: const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              ))),
     );
   }
 }

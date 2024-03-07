@@ -21,12 +21,10 @@ class BuildMacosCommand extends BuildSubCommand {
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
-    argParser
-      .addFlag('config-only',
+    argParser.addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
-          'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.'
-    );
+            'This can be used in CI/CD process that create an archive to avoid '
+            'performing duplicate work.');
   }
 
   @override
@@ -36,9 +34,10 @@ class BuildMacosCommand extends BuildSubCommand {
   bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.macOS,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.macOS,
+      };
 
   @override
   String get description => 'Build a macOS desktop application.';
@@ -53,7 +52,8 @@ class BuildMacosCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
-      throwToolExit('"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
+      throwToolExit(
+          '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".');
     }
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');

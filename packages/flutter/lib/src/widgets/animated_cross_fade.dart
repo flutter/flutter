@@ -61,7 +61,8 @@ enum CrossFadeState {
 /// }
 /// ```
 /// {@end-tool}
-typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
+typedef AnimatedCrossFadeBuilder = Widget Function(
+    Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey);
 
 /// A widget that cross-fades between two given children and animates itself
 /// between their sizes.
@@ -213,7 +214,8 @@ class AnimatedCrossFade extends StatefulWidget {
   ///
   /// This is the default value for [layoutBuilder]. It implements
   /// [AnimatedCrossFadeBuilder].
-  static Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
+  static Widget defaultLayoutBuilder(Widget topChild, Key topChildKey,
+      Widget bottomChild, Key bottomChildKey) {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
@@ -238,14 +240,21 @@ class AnimatedCrossFade extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
-    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
-    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
+    properties
+        .add(EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', alignment,
+        defaultValue: Alignment.topCenter));
+    properties
+        .add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty(
+        'reverseDuration', reverseDuration?.inMilliseconds,
+        unit: 'ms', defaultValue: null));
   }
 }
 
-class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
+class _AnimatedCrossFadeState extends State<AnimatedCrossFade>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _firstAnimation;
   late Animation<double> _secondAnimation;
@@ -311,14 +320,19 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   /// Whether we're in the middle of cross-fading this frame.
-  bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
+  bool get _isTransitioning =>
+      _controller.status == AnimationStatus.forward ||
+      _controller.status == AnimationStatus.reverse;
 
   @override
   Widget build(BuildContext context) {
-    const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
-    const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
-                                       _controller.status == AnimationStatus.forward;
+    const Key kFirstChildKey =
+        ValueKey<CrossFadeState>(CrossFadeState.showFirst);
+    const Key kSecondChildKey =
+        ValueKey<CrossFadeState>(CrossFadeState.showSecond);
+    final bool transitioningForwards =
+        _controller.status == AnimationStatus.completed ||
+            _controller.status == AnimationStatus.forward;
     final Key topKey;
     Widget topChild;
     final Animation<double> topAnimation;
@@ -345,7 +359,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       key: bottomKey,
       enabled: _isTransitioning,
       child: IgnorePointer(
-        child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
+        child: ExcludeSemantics(
+          // Always exclude the semantics of the widget that's fading out.
           child: ExcludeFocus(
             excluding: widget.excludeBottomFocus,
             child: FadeTransition(
@@ -362,7 +377,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       child: IgnorePointer(
         ignoring: false,
         child: ExcludeSemantics(
-          excluding: false, // Always publish semantics for the widget that's fading in.
+          excluding:
+              false, // Always publish semantics for the widget that's fading in.
           child: ExcludeFocus(
             excluding: false,
             child: FadeTransition(
@@ -387,8 +403,13 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
-    description.add(DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));
-    description.add(DiagnosticsProperty<AlignmentGeometry>('alignment', widget.alignment, defaultValue: Alignment.topCenter));
+    description.add(
+        EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
+    description.add(DiagnosticsProperty<AnimationController>(
+        'controller', _controller,
+        showName: false));
+    description.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', widget.alignment,
+        defaultValue: Alignment.topCenter));
   }
 }

@@ -31,7 +31,8 @@ void main() {
 
   test('Demo descriptions are unique and correct', () {
     final List<GalleryDemo> allDemos = Demos.all(GalleryLocalizationsEn());
-    final List<String> allDemoDescriptions = allDemos.map((GalleryDemo d) => d.describe).toList();
+    final List<String> allDemoDescriptions =
+        allDemos.map((GalleryDemo d) => d.describe).toList();
 
     expect(_isUnique(allDemoDescriptions), true);
     expect(

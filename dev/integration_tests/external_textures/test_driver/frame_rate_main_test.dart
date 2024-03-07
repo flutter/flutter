@@ -8,7 +8,8 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 final RegExp _calibrationRegExp = RegExp('Flutter frame rate is (.*)fps');
-final RegExp _statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
+final RegExp _statsRegExp =
+    RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
 const Duration _samplingTime = Duration(seconds: 8);
 
 Future<void> main() async {
@@ -26,7 +27,9 @@ Future<void> main() async {
   // rate at which they are produced and Flutter's frame rate. In addition,
   // it verifies that widget builds are not triggered by external texture
   // frames.
-  test('renders frames from the device at a rate similar to the frames produced', () async {
+  test(
+      'renders frames from the device at a rate similar to the frames produced',
+      () async {
     final SerializableFinder fab = find.byValueKey('fab');
     final SerializableFinder summary = find.byValueKey('summary');
 
@@ -34,9 +37,11 @@ Future<void> main() async {
     await driver.waitFor(fab);
 
     final String calibrationResult = await driver.getText(summary);
-    final Match? matchCalibration = _calibrationRegExp.matchAsPrefix(calibrationResult);
+    final Match? matchCalibration =
+        _calibrationRegExp.matchAsPrefix(calibrationResult);
     expect(matchCalibration, isNotNull);
-    final double flutterFrameRate = double.parse(matchCalibration?.group(1) ?? '0');
+    final double flutterFrameRate =
+        double.parse(matchCalibration?.group(1) ?? '0');
 
     // Texture frame stats at 0.5x Flutter frame rate
     await driver.tap(fab);

@@ -73,7 +73,10 @@ void main() {
       ),
     );
 
-    expect(tester.widget<CupertinoListTileChevron>(find.byType(CupertinoListTileChevron)), trailing);
+    expect(
+        tester.widget<CupertinoListTileChevron>(
+            find.byType(CupertinoListTileChevron)),
+        trailing);
   });
 
   testWidgets('shows leading', (WidgetTester tester) async {
@@ -114,11 +117,14 @@ void main() {
     );
 
     // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    final Container container =
+        tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('does not change backgroundColor when tapped if onTap is not provided', (WidgetTester tester) async {
+  testWidgets(
+      'does not change backgroundColor when tapped if onTap is not provided',
+      (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -144,11 +150,13 @@ void main() {
     await tester.pump();
 
     // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    final Container container =
+        tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('changes backgroundColor when tapped if onTap is provided', (WidgetTester tester) async {
+  testWidgets('changes backgroundColor when tapped if onTap is provided',
+      (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -163,7 +171,10 @@ void main() {
                 title: const Text('CupertinoListTile'),
                 backgroundColor: backgroundColor,
                 backgroundColorActivated: backgroundColorActivated,
-                onTap: () async { await Future<void>.delayed(const Duration(milliseconds: 1), () {}); },
+                onTap: () async {
+                  await Future<void>.delayed(
+                      const Duration(milliseconds: 1), () {});
+                },
               ),
             ],
           ),
@@ -172,7 +183,8 @@ void main() {
     );
 
     // Container inside CupertinoListTile is the second one in row.
-    Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    Container container =
+        tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColor);
 
     // Pump only one frame so the color change persists.
@@ -180,14 +192,16 @@ void main() {
     await tester.pump();
 
     // Container inside CupertinoListTile is the second one in row.
-    container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    container =
+        tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColorActivated);
 
     // Pump the rest of the frames to complete the test.
     await tester.pumpAndSettle();
   });
 
-  testWidgets('does not contain GestureDetector if onTap is not provided', (WidgetTester tester) async {
+  testWidgets('does not contain GestureDetector if onTap is not provided',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -208,7 +222,8 @@ void main() {
     expect(find.byType(GestureDetector), findsNothing);
   });
 
-  testWidgets('contains GestureDetector if onTap is provided', (WidgetTester tester) async {
+  testWidgets('contains GestureDetector if onTap is provided',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -230,7 +245,8 @@ void main() {
     expect(find.byType(GestureDetector), findsOneWidget);
   });
 
-  testWidgets('resets the background color when navigated back', (WidgetTester tester) async {
+  testWidgets('resets the background color when navigated back',
+      (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -238,7 +254,7 @@ void main() {
       CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
-             final Widget secondPage = Center(
+            final Widget secondPage = Center(
               child: CupertinoButton(
                 child: const Text('Go back'),
                 onPressed: () => Navigator.of(context).pop<void>(),
@@ -249,11 +265,12 @@ void main() {
                 textDirection: TextDirection.ltr,
                 child: MediaQuery(
                   data: const MediaQueryData(),
-                  child:CupertinoListTile(
+                  child: CupertinoListTile(
                     title: const Text('CupertinoListTile'),
                     backgroundColor: backgroundColor,
                     backgroundColorActivated: backgroundColorActivated,
-                    onTap: () => Navigator.of(context).push(CupertinoPageRoute<Widget>(
+                    onTap: () =>
+                        Navigator.of(context).push(CupertinoPageRoute<Widget>(
                       builder: (BuildContext context) => secondPage,
                     )),
                   ),
@@ -274,7 +291,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Container inside CupertinoListTile is the second one in row.
-    final Container container = tester.widget<Container>(find.byType(Container));
+    final Container container =
+        tester.widget<Container>(find.byType(Container));
     expect(container.color, backgroundColor);
   });
 
@@ -303,7 +321,8 @@ void main() {
       expect(foundTitle.dx > foundLeading.dx, true);
     });
 
-    testWidgets('subtitle is placed below title and aligned on left', (WidgetTester tester) async {
+    testWidgets('subtitle is placed below title and aligned on left',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile title');
       const Widget subtitle = Text('CupertinoListTile subtitle');
 
@@ -321,14 +340,17 @@ void main() {
         ),
       );
 
-      final Offset foundTitle = tester.getBottomLeft(find.text('CupertinoListTile title'));
-      final Offset foundSubtitle = tester.getTopLeft(find.text('CupertinoListTile subtitle'));
+      final Offset foundTitle =
+          tester.getBottomLeft(find.text('CupertinoListTile title'));
+      final Offset foundSubtitle =
+          tester.getTopLeft(find.text('CupertinoListTile subtitle'));
 
       expect(foundTitle.dx, equals(foundSubtitle.dx));
       expect(foundTitle.dy < foundSubtitle.dy, isTrue);
     });
 
-    testWidgets('additionalInfo is on the right of title', (WidgetTester tester) async {
+    testWidgets('additionalInfo is on the right of title',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
 
@@ -346,13 +368,15 @@ void main() {
         ),
       );
 
-      final Offset foundTitle = tester.getTopRight(find.text('CupertinoListTile'));
+      final Offset foundTitle =
+          tester.getTopRight(find.text('CupertinoListTile'));
       final Offset foundInfo = tester.getTopLeft(find.text('Not Connected'));
 
       expect(foundTitle.dx < foundInfo.dx, isTrue);
     });
 
-    testWidgets('trailing is on the right of additionalInfo', (WidgetTester tester) async {
+    testWidgets('trailing is on the right of additionalInfo',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
       const Widget trailing = CupertinoListTileChevron();
@@ -373,14 +397,16 @@ void main() {
       );
 
       final Offset foundInfo = tester.getTopRight(find.text('Not Connected'));
-      final Offset foundTrailing = tester.getTopLeft(find.byType(CupertinoListTileChevron));
+      final Offset foundTrailing =
+          tester.getTopLeft(find.byType(CupertinoListTileChevron));
 
       expect(foundInfo.dx < foundTrailing.dx, isTrue);
     });
   });
 
   group('alignment of widgets for right-to-left', () {
-    testWidgets('leading is on the right of title', (WidgetTester tester) async {
+    testWidgets('leading is on the right of title',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget leading = Icon(CupertinoIcons.add);
 
@@ -404,7 +430,8 @@ void main() {
       expect(foundTitle.dx < foundLeading.dx, true);
     });
 
-    testWidgets('subtitle is placed below title and aligned on right', (WidgetTester tester) async {
+    testWidgets('subtitle is placed below title and aligned on right',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile title');
       const Widget subtitle = Text('CupertinoListTile subtitle');
 
@@ -422,14 +449,17 @@ void main() {
         ),
       );
 
-      final Offset foundTitle = tester.getBottomRight(find.text('CupertinoListTile title'));
-      final Offset foundSubtitle = tester.getTopRight(find.text('CupertinoListTile subtitle'));
+      final Offset foundTitle =
+          tester.getBottomRight(find.text('CupertinoListTile title'));
+      final Offset foundSubtitle =
+          tester.getTopRight(find.text('CupertinoListTile subtitle'));
 
       expect(foundTitle.dx, equals(foundSubtitle.dx));
       expect(foundTitle.dy < foundSubtitle.dy, isTrue);
     });
 
-    testWidgets('additionalInfo is on the left of title', (WidgetTester tester) async {
+    testWidgets('additionalInfo is on the left of title',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
 
@@ -447,13 +477,15 @@ void main() {
         ),
       );
 
-      final Offset foundTitle = tester.getTopLeft(find.text('CupertinoListTile'));
+      final Offset foundTitle =
+          tester.getTopLeft(find.text('CupertinoListTile'));
       final Offset foundInfo = tester.getTopRight(find.text('Not Connected'));
 
       expect(foundTitle.dx > foundInfo.dx, isTrue);
     });
 
-    testWidgets('trailing is on the left of additionalInfo', (WidgetTester tester) async {
+    testWidgets('trailing is on the left of additionalInfo',
+        (WidgetTester tester) async {
       const Widget title = Text('CupertinoListTile');
       const Widget additionalInfo = Text('Not Connected');
       const Widget trailing = CupertinoListTileChevron();
@@ -474,13 +506,15 @@ void main() {
       );
 
       final Offset foundInfo = tester.getTopLeft(find.text('Not Connected'));
-      final Offset foundTrailing = tester.getTopRight(find.byType(CupertinoListTileChevron));
+      final Offset foundTrailing =
+          tester.getTopRight(find.byType(CupertinoListTileChevron));
 
       expect(foundInfo.dx > foundTrailing.dx, isTrue);
     });
   });
 
-  testWidgets('onTap with delay does not throw an exception', (WidgetTester tester) async {
+  testWidgets('onTap with delay does not throw an exception',
+      (WidgetTester tester) async {
     const Widget title = Text('CupertinoListTile');
     bool showTile = true;
 
@@ -504,7 +538,7 @@ void main() {
                     onTap: onTap,
                     title: title,
                   ),
-               ],
+              ],
             ),
           ),
         ),

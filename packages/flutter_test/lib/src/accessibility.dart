@@ -320,7 +320,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     Evaluation result = const Evaluation.pass();
     for (final RenderView renderView in tester.binding.renderViews) {
       final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      final SemanticsNode root =
+          renderView.owner!.semanticsOwner!.rootSemanticsNode!;
 
       late ui.Image image;
       final ByteData? byteData = await tester.binding.runAsync<ByteData?>(
@@ -328,7 +329,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           // Needs to be the same pixel ratio otherwise our dimensions won't match
           // the last transform layer.
           final double ratio = 1 / renderView.flutterView.devicePixelRatio;
-          image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
+          image =
+              await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
           final ByteData? data = await image.toByteData();
           image.dispose();
           return data;
@@ -376,7 +378,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
     for (final Element element in elements) {
-      result += await _evaluateElement(node, element, tester, image, byteData, renderView);
+      result += await _evaluateElement(
+          node, element, tester, image, byteData, renderView);
     }
     return result;
   }
@@ -402,7 +405,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
-    paintBoundsWithOffset = MatrixUtils.transformRect(globalTransform, renderBox.paintBounds.inflate(4.0));
+    paintBoundsWithOffset = MatrixUtils.transformRect(
+        globalTransform, renderBox.paintBounds.inflate(4.0));
 
     // The semantics node transform will include root view transform, which is
     // not included in renderBox.getTransformTo(null). Manually multiply the
@@ -410,7 +414,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final Matrix4 rootTransform = Matrix4.identity();
     renderView.applyPaintTransform(renderView.child!, rootTransform);
     rootTransform.multiply(globalTransform);
-    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+    screenBounds =
+        MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
     Rect nodeBounds = node.rect;
     SemanticsNode? current = node;
     while (current != null) {
@@ -447,7 +452,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return const Evaluation.pass();
     }
 
-    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBoundsWithOffset, image.width, image.height);
+    final Map<Color, int> colorHistogram = _colorsWithinRect(
+        byteData, paintBoundsWithOffset, image.width, image.height);
 
     // Node was too far off screen.
     if (colorHistogram.isEmpty) {
@@ -457,7 +463,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final _ContrastReport report = _ContrastReport(colorHistogram);
 
     final double contrastRatio = report.contrastRatio();
-    final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
+    final double targetContrastRatio =
+        this.targetContrastRatio(fontSize, bold: isBold);
 
     if (contrastRatio - targetContrastRatio >= _tolerance) {
       return const Evaluation.pass();
@@ -485,11 +492,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   ///
   /// Allows node to be of screen partially before culling the node.
   bool isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
+    final Size windowPhysicalSize =
+        window.physicalSize * window.devicePixelRatio;
     return paintBounds.top < -50.0 ||
-           paintBounds.left < -50.0 ||
-           paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
-           paintBounds.right > windowPhysicalSize.width + 50.0;
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
+        paintBounds.right > windowPhysicalSize.width + 50.0;
   }
 
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
@@ -561,8 +569,10 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // Collate all evaluations into a final evaluation, then return.
     Evaluation result = const Evaluation.pass();
     for (final Element element in elements) {
-      final FlutterView view = tester.viewOf(find.byElementPredicate((Element e) => e == element));
-      final RenderView renderView = tester.binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
+      final FlutterView view =
+          tester.viewOf(find.byElementPredicate((Element e) => e == element));
+      final RenderView renderView = tester.binding.renderViews
+          .firstWhere((RenderView r) => r.flutterView == view);
       final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
 
       late final ui.Image image;
@@ -586,7 +596,8 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   }
 
   // How to evaluate a single element.
-  Evaluation _evaluateElement(Element element, ByteData byteData, ui.Image image) {
+  Evaluation _evaluateElement(
+      Element element, ByteData byteData, ui.Image image) {
     final RenderBox renderObject = element.renderObject! as RenderBox;
 
     final Rect originalPaintBounds = renderObject.paintBounds;
@@ -598,7 +609,8 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
       renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
     );
 
-    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
+    final Map<Color, int> colorHistogram =
+        _colorsWithinRect(byteData, paintBounds, image.width, image.height);
 
     if (colorHistogram.isEmpty) {
       return const Evaluation.pass();
@@ -679,7 +691,9 @@ class _ContrastReport {
   /// Computes the contrast ratio as defined by the WCAG.
   ///
   /// Source: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double contrastRatio() => (lightColor.computeLuminance() + 0.05) / (darkColor.computeLuminance() + 0.05);
+  double contrastRatio() =>
+      (lightColor.computeLuminance() + 0.05) /
+      (darkColor.computeLuminance() + 0.05);
 }
 
 /// Gives the color histogram of all pixels inside a given rectangle on the
@@ -690,12 +704,13 @@ class _ContrastReport {
 /// and [paintBounds], the rectangle, and [width] and [height],
 //  the dimensions of the [ByteData] returns color histogram.
 Map<Color, int> _colorsWithinRect(
-    ByteData data,
-    Rect paintBounds,
-    int width,
-    int height,
+  ByteData data,
+  Rect paintBounds,
+  int width,
+  int height,
 ) {
-  final Rect truePaintBounds = paintBounds.intersect(Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()));
+  final Rect truePaintBounds = paintBounds
+      .intersect(Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()));
 
   final int leftX = truePaintBounds.left.floor();
   final int rightX = truePaintBounds.right.ceil();
@@ -720,7 +735,7 @@ Map<Color, int> _colorsWithinRect(
   }
 
   return rgbaToCount.map<Color, int>((int rgba, int count) {
-    final int argb =  (rgba << 24) | (rgba >> 8) & 0xFFFFFFFF;
+    final int argb = (rgba << 24) | (rgba >> 8) & 0xFFFFFFFF;
     return MapEntry<Color, int>(Color(argb), count);
   });
 }
@@ -735,7 +750,8 @@ Map<Color, int> _colorsWithinRect(
 ///    accessibility guidelines and how to use them.
 ///  * [iOSTapTargetGuideline], which checks that tappable nodes have a minimum
 ///    size of 44 by 44 pixels.
-const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideline(
+const AccessibilityGuideline androidTapTargetGuideline =
+    MinimumTapTargetGuideline(
   size: Size(48.0, 48.0),
   link: 'https://support.google.com/accessibility/android/answer/7101858?hl=en',
 );
@@ -752,7 +768,8 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
 ///    minimum size of 48 by 48 pixels.
 const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
   size: Size(44.0, 44.0),
-  link: 'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
+  link:
+      'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
 );
 
 /// A guideline which requires text contrast to meet minimum values.
@@ -767,11 +784,13 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
 ///
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
-const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
+const AccessibilityGuideline textContrastGuideline =
+    MinimumTextContrastGuideline();
 
 /// A guideline which enforces that all nodes with a tap or long press action
 /// also have a label.
 ///
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
-const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
+const AccessibilityGuideline labeledTapTargetGuideline =
+    LabeledTapTargetGuideline._();

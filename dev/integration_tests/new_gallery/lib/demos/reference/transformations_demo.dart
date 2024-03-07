@@ -230,7 +230,8 @@ class _BoardPainter extends CustomPainter {
       final Color color = boardPoint!.color.withOpacity(
         board.selected == boardPoint ? 0.7 : 1,
       );
-      final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
+      final Vertices vertices =
+          board.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
     }
 

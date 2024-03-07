@@ -10,7 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   testWidgets('Slider value indicator', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
@@ -97,7 +96,8 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale',
+      (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -232,7 +232,8 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
+    testWidgets('Slider value indicator wide text',
+        (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -273,7 +274,8 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgets('Slider value indicator large text scale',
+        (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -369,7 +371,7 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
 
-  addTearDown(()async {
+  addTearDown(() async {
     // Finish gesture to release resources.
     await gesture.up();
     await tester.pumpAndSettle();
@@ -389,7 +391,7 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
   final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
 
-  addTearDown(()async {
+  addTearDown(() async {
     // Finish gesture to release resources.
     await gesture.up();
     await tester.pumpAndSettle();
@@ -405,7 +407,8 @@ Future<void> _buildValueIndicatorStaticSlider(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
-      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+      debugShowCheckedModeBanner:
+          false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
@@ -416,8 +419,8 @@ Future<void> _buildValueIndicatorStaticSlider(
                 maxScaleFactor: textScale,
                 child: SliderTheme(
                   data: Theme.of(context).sliderTheme.copyWith(
-                    showValueIndicator: ShowValueIndicator.always,
-                  ),
+                        showValueIndicator: ShowValueIndicator.always,
+                      ),
                   child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),

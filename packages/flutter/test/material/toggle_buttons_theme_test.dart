@@ -16,8 +16,10 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
   test('ToggleButtonsThemeData copyWith, ==, hashCode basics', () {
-    expect(const ToggleButtonsThemeData(), const ToggleButtonsThemeData().copyWith());
-    expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
+    expect(const ToggleButtonsThemeData(),
+        const ToggleButtonsThemeData().copyWith());
+    expect(const ToggleButtonsThemeData().hashCode,
+        const ToggleButtonsThemeData().copyWith().hashCode);
   });
 
   test('ToggleButtonsThemeData lerp special cases', () {
@@ -44,7 +46,8 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
+    const ToggleButtonsTheme theme =
+        ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);
@@ -62,19 +65,21 @@ void main() {
     expect(theme.data.borderWidth, null);
   });
 
-  testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ToggleButtonsThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ToggleButtonsThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
@@ -119,7 +124,8 @@ void main() {
     ]);
   });
 
-  testWidgets('Theme text style, except color, is applied', (WidgetTester tester) async {
+  testWidgets('Theme text style, except color, is applied',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: boilerplate(
@@ -145,18 +151,22 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-      of: find.widgetWithText(TextButton, 'First child'),
-      matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'First child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, 'Second child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'Second child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
@@ -240,17 +250,21 @@ void main() {
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(TextButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(TextButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
           of: find.widgetWithIcon(TextButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
+
       final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
@@ -369,7 +383,8 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Custom Theme button fillColor in different states', (WidgetTester tester) async {
+  testWidgets('Custom Theme button fillColor in different states',
+      (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
@@ -396,11 +411,12 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(
+                fillColor: MaterialStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               onPressed: (int index) {},
-              children: const <Widget> [
+              children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),
               ],
@@ -419,7 +435,8 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(
+                fillColor: MaterialStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               children: const <Widget>[
@@ -478,11 +495,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(
-      inkFeatures,
-      paints
-        ..circle(color: splashColor)
-    );
+    expect(inkFeatures, paints..circle(color: splashColor));
 
     await touchGesture.up();
     await tester.pumpAndSettle();
@@ -543,8 +556,10 @@ void main() {
       );
 
       RenderObject toggleButtonRenderObject;
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -578,8 +593,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -612,8 +629,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,

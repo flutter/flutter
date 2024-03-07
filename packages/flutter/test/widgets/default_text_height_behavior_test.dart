@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Text widget parameter takes precedence over DefaultTextHeightBehavior', (WidgetTester tester) async {
+  testWidgets(
+      'Text widget parameter takes precedence over DefaultTextHeightBehavior',
+      (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -31,7 +33,9 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgets('DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ', (WidgetTester tester) async {
+  testWidgets(
+      'DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ',
+      (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -77,7 +81,8 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgets('DefaultTextHeightBehavior changes propagate to Text', (WidgetTester tester) async {
+  testWidgets('DefaultTextHeightBehavior changes propagate to Text',
+      (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,

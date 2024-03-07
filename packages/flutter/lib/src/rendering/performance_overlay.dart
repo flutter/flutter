@@ -66,10 +66,10 @@ class RenderPerformanceOverlay extends RenderBox {
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
-  }) : _optionsMask = optionsMask,
-       _rasterizerThreshold = rasterizerThreshold,
-       _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
-       _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
+  })  : _optionsMask = optionsMask,
+        _rasterizerThreshold = rasterizerThreshold,
+        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
+        _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -137,12 +137,25 @@ class RenderPerformanceOverlay extends RenderBox {
   double get _intrinsicHeight {
     const double kDefaultGraphHeight = 80.0;
     double result = 0.0;
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
+    if ((optionsMask |
+                (1 <<
+                    PerformanceOverlayOption
+                        .displayRasterizerStatistics.index) >
+            0) ||
+        (optionsMask |
+                (1 <<
+                    PerformanceOverlayOption
+                        .visualizeRasterizerStatistics.index) >
+            0)) {
       result += kDefaultGraphHeight;
     }
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0)) {
+    if ((optionsMask |
+                (1 << PerformanceOverlayOption.displayEngineStatistics.index) >
+            0) ||
+        (optionsMask |
+                (1 <<
+                    PerformanceOverlayOption.visualizeEngineStatistics.index) >
+            0)) {
       result += kDefaultGraphHeight;
     }
     return result;

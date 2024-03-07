@@ -80,7 +80,9 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                   return Container(
                     height: _cellHeight,
                     width: _cellWidth,
-                    color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
+                    color: row % 2 + column % 2 == 1
+                        ? Colors.white
+                        : Colors.grey.withOpacity(0.1),
                     child: Align(
                       child: Text('$row x $column'),
                     ),
@@ -95,7 +97,8 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   }
 }
 
-typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
+typedef _CellBuilder = Widget Function(
+    BuildContext context, int row, int column);
 
 class _TableBuilder extends StatelessWidget {
   const _TableBuilder({

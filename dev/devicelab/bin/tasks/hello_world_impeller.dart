@@ -70,7 +70,7 @@ Future<TaskResult> run() async {
   if (!isUsingValidationLayers || impellerBackendCount != 1) {
     return TaskResult.failure('Not using Vulkan validation layers.');
   }
-  if (hasValidationErrors){
+  if (hasValidationErrors) {
     return TaskResult.failure('Impeller validation errors detected.');
   }
   return TaskResult.success(null);

@@ -85,10 +85,9 @@ class BundleBuilder {
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
-              ? measurement.stackTrace
-              : null,
+        globals.printError(
+          'Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal ? measurement.stackTrace : null,
         );
       }
       throwToolExit('Failed to build bundle.');
@@ -102,7 +101,8 @@ class BundleBuilder {
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill =
+          globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }
@@ -151,9 +151,8 @@ Future<void> writeBundle(
       bundleDir.deleteSync(recursive: true);
     } on FileSystemException catch (err) {
       logger.printWarning(
-        'Failed to clean up asset directory ${bundleDir.path}: $err\n'
-        'To clean build artifacts, use the command "flutter clean".'
-      );
+          'Failed to clean up asset directory ${bundleDir.path}: $err\n'
+          'To clean build artifacts, use the command "flutter clean".');
     }
   }
   bundleDir.createSync(recursive: true);
@@ -174,46 +173,47 @@ Future<void> writeBundle(
 
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
-  await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
-      final PoolResource resource = await pool.request();
-      try {
-        // This will result in strange looking files, for example files with `/`
-        // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`. However, we have to keep it this way since the
-        // platform channels in the framework will URI encode these values,
-        // and the native APIs will look for files this way.
-        final File file = fileSystem.file(fileSystem.path.join(bundleDir.path, entry.key));
-        file.parent.createSync(recursive: true);
-        final DevFSContent devFSContent = entry.value.content;
-        if (devFSContent is DevFSFileContent) {
-          final File input = devFSContent.file as File;
-          bool doCopy = true;
-          switch (entry.value.kind) {
-            case AssetKind.regular:
-              break;
-            case AssetKind.font:
-              break;
-            case AssetKind.shader:
-              doCopy = !await shaderCompiler.compileShader(
-                input: input,
-                outputPath: file.path,
-                targetPlatform: targetPlatform,
-              );
-            case AssetKind.model:
-              doCopy = !await sceneImporter.importScene(
-                input: input,
-                outputPath: file.path,
-              );
-          }
-          if (doCopy) {
-            input.copySync(file.path);
-          }
-        } else {
-          await file.writeAsBytes(await entry.value.contentsAsBytes());
+  await Future.wait<void>(assetEntries.entries
+      .map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
+    final PoolResource resource = await pool.request();
+    try {
+      // This will result in strange looking files, for example files with `/`
+      // on Windows or files that end up getting URI encoded such as `#.ext`
+      // to `%23.ext`. However, we have to keep it this way since the
+      // platform channels in the framework will URI encode these values,
+      // and the native APIs will look for files this way.
+      final File file =
+          fileSystem.file(fileSystem.path.join(bundleDir.path, entry.key));
+      file.parent.createSync(recursive: true);
+      final DevFSContent devFSContent = entry.value.content;
+      if (devFSContent is DevFSFileContent) {
+        final File input = devFSContent.file as File;
+        bool doCopy = true;
+        switch (entry.value.kind) {
+          case AssetKind.regular:
+            break;
+          case AssetKind.font:
+            break;
+          case AssetKind.shader:
+            doCopy = !await shaderCompiler.compileShader(
+              input: input,
+              outputPath: file.path,
+              targetPlatform: targetPlatform,
+            );
+          case AssetKind.model:
+            doCopy = !await sceneImporter.importScene(
+              input: input,
+              outputPath: file.path,
+            );
         }
-      } finally {
-        resource.release();
+        if (doCopy) {
+          input.copySync(file.path);
+        }
+      } else {
+        await file.writeAsBytes(await entry.value.contentsAsBytes());
       }
-    }));
+    } finally {
+      resource.release();
+    }
+  }));
 }

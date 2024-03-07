@@ -35,7 +35,7 @@ class IOSAnalyze {
     this.target,
     required this.logger,
   }) : assert(option == IOSAnalyzeOption.listBuildOptions ||
-              (configuration != null && target != null));
+            (configuration != null && target != null));
 
   final FlutterProject project;
   final IOSAnalyzeOption option;

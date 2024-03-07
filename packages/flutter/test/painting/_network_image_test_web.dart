@@ -11,6 +11,7 @@ import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
+
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
@@ -47,7 +48,6 @@ void runTests() {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
       ..mockEvent = MockEvent('error', web.Event('test error'));
-
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;

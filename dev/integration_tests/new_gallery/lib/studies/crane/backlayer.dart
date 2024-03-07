@@ -5,13 +5,11 @@
 import 'package:flutter/material.dart';
 
 abstract class BackLayerItem extends StatefulWidget {
-
   const BackLayerItem({super.key, required this.index});
   final int index;
 }
 
 class BackLayer extends StatefulWidget {
-
   const BackLayer({
     super.key,
     required this.backLayerItems,

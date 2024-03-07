@@ -13,7 +13,8 @@ void main() {
     await tester.pumpWidget(
       const example.NavigationBarApp(),
     );
-    final NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
+    final NavigationBar navigationBarWidget =
+        tester.firstWidget(find.byType(NavigationBar));
 
     /// NavigationDestinations must be rendered
     expect(find.text('Home'), findsOneWidget);

@@ -34,7 +34,8 @@ class LoginPage extends StatelessWidget {
     return ApplyTextOptions(
       child: isDesktop
           ? LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) => Scaffold(
+              builder: (BuildContext context, BoxConstraints constraints) =>
+                  Scaffold(
                 body: SafeArea(
                   child: Center(
                     child: SizedBox(

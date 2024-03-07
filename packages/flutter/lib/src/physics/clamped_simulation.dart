@@ -36,8 +36,8 @@ class ClampedSimulation extends Simulation {
     this.xMax = double.infinity,
     this.dxMin = double.negativeInfinity,
     this.dxMax = double.infinity,
-  }) : assert(xMax >= xMin),
-       assert(dxMax >= dxMin);
+  })  : assert(xMax >= xMin),
+        assert(dxMax >= dxMin);
 
   /// The simulation being clamped. Calls to [x], [dx], and [isDone] are
   /// forwarded to the simulation.
@@ -65,5 +65,6 @@ class ClampedSimulation extends Simulation {
   bool isDone(double time) => simulation.isDone(time);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ClampedSimulation')}(simulation: $simulation, x: ${xMin.toStringAsFixed(1)}..${xMax.toStringAsFixed(1)}, dx: ${dxMin.toStringAsFixed(1)}..${dxMax.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'ClampedSimulation')}(simulation: $simulation, x: ${xMin.toStringAsFixed(1)}..${xMax.toStringAsFixed(1)}, dx: ${dxMin.toStringAsFixed(1)}..${dxMax.toStringAsFixed(1)})';
 }

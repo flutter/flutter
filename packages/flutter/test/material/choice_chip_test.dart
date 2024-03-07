@@ -35,10 +35,12 @@ IconThemeData getIconData(WidgetTester tester) {
 
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
+    find
+        .ancestor(
+          of: find.text(labelText),
+          matching: find.byType(DefaultTextStyle),
+        )
+        .first,
   );
 }
 
@@ -63,7 +65,8 @@ Widget wrapForChip({
 }
 
 void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  final Iterable<Material> materials =
+      tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
   // last Material is from the "RawChip".
   expect(materials.length, 2);
@@ -84,7 +87,7 @@ void main() {
           child: Center(
             child: ChoiceChip(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -105,7 +108,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
     // Test disabled ChoiceChip defaults.
@@ -127,7 +131,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black38);
 
     // Test selected enabled ChoiceChip defaults.
@@ -137,7 +142,7 @@ void main() {
         home: Material(
           child: ChoiceChip(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -150,7 +155,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x3d));
 
     // Test selected disabled ChoiceChip defaults.
@@ -172,7 +178,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x3d));
   });
 
@@ -188,7 +195,7 @@ void main() {
           child: Center(
             child: ChoiceChip(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -219,7 +226,8 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test disabled ChoiceChip defaults.
@@ -248,7 +256,8 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test selected enabled ChoiceChip defaults.
@@ -258,7 +267,7 @@ void main() {
         home: Material(
           child: ChoiceChip(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -278,7 +287,8 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.secondaryContainer);
 
     // Test selected disabled ChoiceChip defaults.
@@ -307,11 +317,13 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('Material3 - ChoiceChip.elevated defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - ChoiceChip.elevated defaults',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     const String label = 'choice chip';
 
@@ -323,7 +335,7 @@ void main() {
           child: Center(
             child: ChoiceChip.elevated(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -354,7 +366,8 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ChoiceChip.elevated defaults.
@@ -383,7 +396,8 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
 
     // Test selected enabled ChoiceChip.elevated defaults.
@@ -393,7 +407,7 @@ void main() {
         home: Material(
           child: ChoiceChip.elevated(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -413,7 +427,8 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.secondaryContainer);
 
     // Test selected disabled ChoiceChip.elevated defaults.
@@ -442,17 +457,21 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ChoiceChip.color resolves material states', (WidgetTester tester) async {
+  testWidgets('ChoiceChip.color resolves material states',
+      (WidgetTester tester) async {
     const Color disabledSelectedColor = Color(0xffffff00);
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+    final MaterialStateProperty<Color?> color =
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled) &&
+          states.contains(MaterialState.selected)) {
         return disabledSelectedColor;
       }
       if (states.contains(MaterialState.disabled)) {
@@ -463,19 +482,19 @@ void main() {
       }
       return backgroundColor;
     });
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               color: color,
               label: const Text('ChoiceChip'),
             ),
             ChoiceChip.elevated(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               color: color,
               label: const Text('ChoiceChip.elevated'),
@@ -545,17 +564,18 @@ void main() {
     );
   });
 
-  testWidgets('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgets('ChoiceChip uses provided state color properties',
+      (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
@@ -563,7 +583,7 @@ void main() {
               label: const Text('ChoiceChip'),
             ),
             ChoiceChip.elevated(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
@@ -636,19 +656,24 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('ChoiceChip clipBehavior properly passes through to the Material',
+      (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
+    await tester.pumpWidget(
+        wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(wrapForChip(
+        child: const ChoiceChip(
+            label: label, selected: false, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+  testWidgets('ChoiceChip passes iconTheme property to RawChip',
+      (WidgetTester tester) async {
     const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(wrapForChip(
-      child: const ChoiceChip(
+        child: const ChoiceChip(
       label: Text('Test'),
       selected: true,
       iconTheme: iconTheme,
@@ -657,7 +682,8 @@ void main() {
     expect(rawChip.iconTheme, iconTheme);
   });
 
-  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
+  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip',
+      (WidgetTester tester) async {
     const bool showCheckmark = false;
     await tester.pumpWidget(wrapForChip(
       child: const ChipTheme(
@@ -674,7 +700,8 @@ void main() {
     expect(rawChip.showCheckmark, showCheckmark);
   });
 
-  testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
+  testWidgets('ChoiceChip passes checkmark properties to RawChip',
+      (WidgetTester tester) async {
     const bool showCheckmark = false;
     const Color checkmarkColor = Color(0xff0000ff);
     await tester.pumpWidget(wrapForChip(
@@ -690,10 +717,11 @@ void main() {
     expect(rawChip.checkmarkColor, checkmarkColor);
   });
 
-  testWidgets('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
+  testWidgets('ChoiceChip uses provided iconTheme',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
 
-    Widget buildChip({ IconThemeData? iconTheme }) {
+    Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -714,12 +742,14 @@ void main() {
     expect(getIconData(tester).color, theme.colorScheme.primary);
 
     // Test provided icon theme.
-    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
+    await tester.pumpWidget(
+        buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 
-  testWidgets('ChoiceChip avatar layout constraints can be customized', (WidgetTester tester) async {
+  testWidgets('ChoiceChip avatar layout constraints can be customized',
+      (WidgetTester tester) async {
     const double border = 1.0;
     const double iconSize = 18.0;
     const double labelPadding = 8.0;
@@ -752,15 +782,19 @@ void main() {
     // Calculate the distance between avatar and chip edges.
     Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
     final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
-    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
-    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dx,
+        avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy,
+        avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
     // Calculate the distance between avatar and label.
     Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
-    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+    expect(labelTopLeft.dx,
+        avatarCenter.dx + (labelSize.width / 2) + labelPadding);
 
     // Test custom avatar layout constraints.
-    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pumpWidget(
+        buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
     await tester.pump();
 
     expect(tester.getSize(find.byType(ChoiceChip)).width, equals(152.0));
@@ -769,7 +803,8 @@ void main() {
     // Calculate the distance between avatar and chip edges.
     chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
     expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
-    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy,
+        avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
     // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));

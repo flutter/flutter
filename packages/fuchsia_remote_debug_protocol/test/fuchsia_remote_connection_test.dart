@@ -67,7 +67,8 @@ void main() {
           final FakeVmService service = FakeVmService();
           fakeVmServices.add(service);
           uriConnections.add(uri);
-          service.flutterListViews = vms.Response.parse(flutterViewCannedResponses[uri.port]);
+          service.flutterListViews =
+              vms.Response.parse(flutterViewCannedResponses[uri.port]);
           return service;
         });
       }
@@ -341,8 +342,7 @@ void main() {
       }
 
       // Should fail as no env variable has been passed.
-      expect(failingFunction,
-          throwsA(isA<FuchsiaRemoteConnectionError>()));
+      expect(failingFunction, throwsA(isA<FuchsiaRemoteConnectionError>()));
     });
   });
 }
@@ -394,7 +394,8 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
+  Future<vms.Response> callMethod(String method,
+      {String? isolateId, Map<String, dynamic>? args}) async {
     if (method == '_flutter.listViews') {
       return flutterListViews!;
     }

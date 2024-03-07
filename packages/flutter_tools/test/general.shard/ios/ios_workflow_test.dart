@@ -50,17 +50,23 @@ void main() {
   });
 
   testWithoutContext('iOS workflow applies on macOS, no Xcode or simctl', () {
-    final FakeProcessManager xcodeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager xcodeProcessManager =
+        FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'xcrun', 'simctl', 'list', 'devices', 'booted',
+          'xcrun',
+          'simctl',
+          'list',
+          'devices',
+          'booted',
         ],
         exitCode: 1,
       ),
     ]);
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
-      xcode: Xcode.test(processManager: xcodeProcessManager,
+      xcode: Xcode.test(
+        processManager: xcodeProcessManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: FakeProcessManager.any(),
           version: null,
@@ -76,13 +82,12 @@ void main() {
     expect(xcodeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('iOS workflow can list devices even when Xcode version is too low', () {
+  testWithoutContext(
+      'iOS workflow can list devices even when Xcode version is too low', () {
     final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
-          version: Version(1, 0, 0)
-      ),
+          processManager: FakeProcessManager.any(), version: Version(1, 0, 0)),
     );
 
     final IOSWorkflow iosWorkflow = IOSWorkflow(
@@ -99,13 +104,13 @@ void main() {
     expect(iosWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('iOS workflow can launch devices when Xcode is set up', () {
+  testWithoutContext('iOS workflow can launch devices when Xcode is set up',
+      () {
     final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
-        version: Version(1000, 0, 0)
-      ),
+          processManager: FakeProcessManager.any(),
+          version: Version(1000, 0, 0)),
     );
 
     final IOSWorkflow iosWorkflow = IOSWorkflow(

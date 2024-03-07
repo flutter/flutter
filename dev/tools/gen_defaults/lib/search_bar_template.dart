@@ -5,13 +5,13 @@
 import 'template.dart';
 
 class SearchBarTemplate extends TokenTemplate {
-  const SearchBarTemplate(super.blockName, super.fileName, super.tokens, {
-    super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
-  });
+  const SearchBarTemplate(super.blockName, super.fileName, super.tokens,
+      {super.colorSchemePrefix = '_colors.',
+      super.textThemePrefix = '_textTheme.'});
 
   String _surfaceTint() {
-    final String? color = colorOrTransparent('md.comp.search-bar.container.surface-tint-layer.color');
+    final String? color = colorOrTransparent(
+        'md.comp.search-bar.container.surface-tint-layer.color');
     final String surfaceTintColor = 'MaterialStatePropertyAll<Color>($color);';
     if (color == 'Colors.transparent') {
       return 'const $surfaceTintColor';

@@ -87,12 +87,17 @@ class _OverviewGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<AccountData> accountDataList = DummyDataService.getAccountDataList(context);
-    final List<BillData> billDataList = DummyDataService.getBillDataList(context);
-    final List<BudgetData> budgetDataList = DummyDataService.getBudgetDataList(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final List<AccountData> accountDataList =
+        DummyDataService.getAccountDataList(context);
+    final List<BillData> billDataList =
+        DummyDataService.getBillDataList(context);
+    final List<BudgetData> budgetDataList =
+        DummyDataService.getBudgetDataList(context);
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       final double textScaleFactor =
           GalleryOptions.of(context).textScaleFactor(context);
 
@@ -153,7 +158,8 @@ class _AlertsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsetsDirectional.only(start: 16, top: 4, bottom: 4),

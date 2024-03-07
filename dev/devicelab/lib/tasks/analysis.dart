@@ -18,21 +18,27 @@ import '../framework/utils.dart';
 const int _kRunsPerBenchmark = 3;
 
 /// Path to the generated "mega gallery" app.
-Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
+Directory get _megaGalleryDirectory =>
+    dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
 Future<TaskResult> analyzerBenchmarkTask() async {
   await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
     await flutter('update-packages');
-    await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
+    await dart(<String>[
+      'dev/tools/mega_gallery.dart',
+      '--out=${_megaGalleryDirectory.path}'
+    ]);
   });
 
   final Map<String, dynamic> data = <String, dynamic>{
     ...(await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'),
-    ...(await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'),
+    ...(await _run(_FlutterRepoBenchmark(watch: true)))
+        .asMap('flutter_repo', 'watch'),
     ...(await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'),
-    ...(await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'),
+    ...(await _run(_MegaGalleryBenchmark(watch: true)))
+        .asMap('mega_gallery', 'watch'),
   };
 
   return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
@@ -71,7 +77,8 @@ abstract class _Benchmark {
       ];
 
   Future<double> execute(int iteration, int targetIterations) async {
-    section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
+    section(
+        'Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
     final Stopwatch stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {
       stopwatch.start();

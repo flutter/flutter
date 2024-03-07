@@ -26,7 +26,8 @@ class _SharedXAxisTransitionDemoState extends State<SharedXAxisTransitionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -94,7 +95,8 @@ class _CoursePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return ListView(
       children: <Widget>[
@@ -144,7 +146,8 @@ class _CourseSwitchState extends State<_CourseSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations =
+        GalleryLocalizations.of(context);
     final String subtitle = _isCourseBundled
         ? localizations!.demoSharedXAxisBundledCourseSubtitle
         : localizations!.demoSharedXAxisIndividualCourseSubtitle;
@@ -167,7 +170,8 @@ class _SignInPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations =
+        GalleryLocalizations.of(context);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

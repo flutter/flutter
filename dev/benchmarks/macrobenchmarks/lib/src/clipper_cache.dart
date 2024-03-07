@@ -25,13 +25,16 @@ class _ClipperCachePageState extends State<ClipperCachePage>
     super.initState();
     _controller.addListener(() {
       if (_controller.offset < 10) {
-        _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+        _controller.animateTo(_animateOffset,
+            duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       } else if (_controller.offset > _animateOffset - 10) {
-        _controller.animateTo(0, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+        _controller.animateTo(0,
+            duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
     });
     Timer(const Duration(milliseconds: 500), () {
-      _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      _controller.animateTo(_animateOffset,
+          duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
   }
 
@@ -41,7 +44,8 @@ class _ClipperCachePageState extends State<ClipperCachePage>
 
     const double itemHeight = 140;
     final FlutterView view = View.of(context);
-    _topMargin = (view.physicalSize.height / view.devicePixelRatio - itemHeight * 3) / 2;
+    _topMargin =
+        (view.physicalSize.height / view.devicePixelRatio - itemHeight * 3) / 2;
     if (_topMargin < 0) {
       _topMargin = 0;
     }
@@ -56,17 +60,14 @@ class _ClipperCachePageState extends State<ClipperCachePage>
         children: <Widget>[
           SizedBox(height: _topMargin),
           ClipPath(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(0, _isComplex)
-          ),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              child: _makeChild(0, _isComplex)),
           ClipRect(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(1, _isComplex)
-          ),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              child: _makeChild(1, _isComplex)),
           ClipRRect(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(2, _isComplex)
-          ),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              child: _makeChild(2, _isComplex)),
           const SizedBox(height: 1000),
         ],
       ),

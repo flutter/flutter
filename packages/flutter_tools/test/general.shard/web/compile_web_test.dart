@@ -30,19 +30,21 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     testUsage = TestUsage();
     logger = BufferLogger.test();
-    flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
+    flutterVersion =
+        FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
     );
 
-    flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    flutterProject =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     fileSystem.file('.packages').createSync();
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
-    final TestBuildSystem buildSystem =
-        TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    final TestBuildSystem buildSystem = TestBuildSystem.all(
+        BuildResult(success: true), (Target target, Environment environment) {
       expect(target, isA<WebServiceWorker>());
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
@@ -98,15 +100,14 @@ void main() {
       testUsage.events,
       unorderedEquals(
         <TestUsageEvent>[
-      const TestUsageEvent(
-        'build',
-        'web',
-        label: 'web-compile',
+          const TestUsageEvent(
+            'build',
+            'web',
+            label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
                   'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
-
-      ),
+            ),
           ),
         ],
       ),
@@ -118,7 +119,8 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings:
+              'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
@@ -159,18 +161,19 @@ void main() {
       analytics: fakeAnalytics,
     );
     await expectLater(
-        () async => webBuilder.buildWeb(
-              flutterProject,
-              'target',
-              BuildInfo.debug,
-              ServiceWorkerStrategy.offlineFirst,
-              compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
-              ]
-            ),
+        () async => webBuilder.buildWeb(flutterProject, 'target',
+                BuildInfo.debug, ServiceWorkerStrategy.offlineFirst,
+                compilerConfigs: <WebCompilerConfig>[
+                  const JsCompilerConfig.run(
+                      nativeNullAssertions: true,
+                      renderer: WebRendererMode.auto),
+                ]),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
-    expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
+    expect(
+        logger.errorText,
+        contains(
+            'Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
   });

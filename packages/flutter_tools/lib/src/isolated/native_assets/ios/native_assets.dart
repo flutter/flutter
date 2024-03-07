@@ -31,7 +31,8 @@ Future<Uri?> dryRunNativeAssetsIOS({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.iOS);
-  final Iterable<KernelAsset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
+  final Iterable<KernelAsset> assetTargetLocations =
+      await dryRunNativeAssetsIOSInternal(
     fileSystem,
     projectUri,
     buildRunner,
@@ -76,18 +77,21 @@ Future<List<Uri>> buildNativeAssetsIOS({
   required FileSystem fileSystem,
 }) async {
   if (!await nativeBuildRequired(buildRunner)) {
-    await writeNativeAssetsYaml(KernelAssets(), yamlParentDirectory, fileSystem);
+    await writeNativeAssetsYaml(
+        KernelAssets(), yamlParentDirectory, fileSystem);
     return <Uri>[];
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
-  final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
+  final native_assets_cli.BuildMode buildModeCli =
+      nativeAssetsBuildMode(buildMode);
 
   const OS targetOS = OS.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final IOSSdk iosSdk = _getIOSSdk(environmentType);
 
-  globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
+  globals.logger
+      .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
@@ -106,7 +110,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  final Map<KernelAssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
+  final Map<KernelAssetPath, List<Asset>> fatAssetTargetLocations =
+      _fatAssetTargetLocations(nativeAssets);
   await _copyNativeAssetsIOS(
     buildUri,
     fatAssetTargetLocations,
@@ -115,7 +120,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
     fileSystem,
   );
 
-  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocations(nativeAssets);
+  final Map<Asset, KernelAsset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
     KernelAssets(assetTargetLocations.values),
     yamlParentDirectory,
@@ -145,11 +151,14 @@ Target _getNativeTarget(DarwinArch darwinArch) {
   }
 }
 
-Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
+Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(
+    List<Asset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<Asset>> result = <KernelAssetPath, List<Asset>>{};
+  final Map<KernelAssetPath, List<Asset>> result =
+      <KernelAssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final KernelAssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
+    final KernelAssetPath path =
+        _targetLocationIOS(asset, alreadyTakenNames).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
@@ -166,7 +175,7 @@ Map<Asset, KernelAsset> _assetTargetLocations(List<Asset> nativeAssets) {
 
 KernelAsset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
   final AssetPath path = asset.path;
-final KernelAssetPath kernelAssetPath;
+  final KernelAssetPath kernelAssetPath;
   switch (path) {
     case AssetSystemPath _:
       kernelAssetPath = KernelAssetSystemPath(path.uri);

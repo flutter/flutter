@@ -15,7 +15,8 @@ void main() {
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 30),
     body: (WidgetController controller) async {
-      final Finder nestedScroll = find.byKey(const ValueKey<String>('vlp_single_child_scrollable'));
+      final Finder nestedScroll =
+          find.byKey(const ValueKey<String>('vlp_single_child_scrollable'));
       expect(nestedScroll, findsOneWidget);
       Future<void> scrollOnce(double offset) async {
         await controller.timedDrag(
@@ -25,6 +26,7 @@ void main() {
         );
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
+
       for (int i = 0; i < 2; i += 1) {
         await scrollOnce(-3000.0);
         await scrollOnce(-3000.0);

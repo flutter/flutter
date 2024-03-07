@@ -111,10 +111,13 @@ Widget _buildProductCard({
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (isDesktop) imageWidget else AspectRatio(
-                    aspectRatio: imageAspectRatio!,
-                    child: imageWidget,
-                  ),
+            if (isDesktop)
+              imageWidget
+            else
+              AspectRatio(
+                aspectRatio: imageAspectRatio!,
+                child: imageWidget,
+              ),
             SizedBox(
               child: Column(
                 children: <Widget>[

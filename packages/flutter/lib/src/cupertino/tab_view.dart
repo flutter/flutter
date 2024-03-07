@@ -150,8 +150,8 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void didUpdateWidget(CupertinoTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey
-        || widget.navigatorObservers != oldWidget.navigatorObservers) {
+    if (widget.navigatorKey != oldWidget.navigatorKey ||
+        widget.navigatorObservers != oldWidget.navigatorObservers) {
       _updateObservers();
     }
   }
@@ -163,9 +163,8 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   }
 
   void _updateObservers() {
-    _navigatorObservers =
-        List<NavigatorObserver>.of(widget.navigatorObservers)
-          ..add(_heroController);
+    _navigatorObservers = List<NavigatorObserver>.of(widget.navigatorObservers)
+      ..add(_heroController);
   }
 
   GlobalKey<NavigatorState>? _ownedNavigatorKey;

@@ -68,7 +68,8 @@ class _HardwareKeyboardDemoState extends State<HardwareKeyboardDemo> {
 
           final List<Widget> dataText = <Widget>[
             Text('${_event.runtimeType}'),
-            if (_event?.character?.isNotEmpty ?? false) Text('character produced: "${_event?.character}"'),
+            if (_event?.character?.isNotEmpty ?? false)
+              Text('character produced: "${_event?.character}"'),
           ];
           dataText.add(Text('logical: ${_event?.logicalKey}'));
           dataText.add(Text('physical: ${_event?.physicalKey}'));
@@ -76,7 +77,8 @@ class _HardwareKeyboardDemoState extends State<HardwareKeyboardDemo> {
             dataText.add(Text('character: ${_event?.character}'));
           }
           final List<String> pressed = <String>['Pressed:'];
-          for (final LogicalKeyboardKey key in HardwareKeyboard.instance.logicalKeysPressed) {
+          for (final LogicalKeyboardKey key
+              in HardwareKeyboard.instance.logicalKeysPressed) {
             pressed.add(key.debugName!);
           }
           dataText.add(Text(pressed.join(' ')));

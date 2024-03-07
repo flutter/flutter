@@ -12,11 +12,14 @@ void main() {
   testWidgets('Stateful widget smoke test', (WidgetTester tester) async {
     void checkTree(BoxDecoration expectedDecoration) {
       final SingleChildRenderObjectElement element = tester.element(
-        find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement && element.renderObject is! RenderView),
+        find.byElementPredicate((Element element) =>
+            element is SingleChildRenderObjectElement &&
+            element.renderObject is! RenderView),
       );
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
+      final RenderDecoratedBox renderObject =
+          element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 

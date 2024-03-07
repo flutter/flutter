@@ -17,7 +17,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+  final AutomatedTestWidgetsFlutterBinding binding =
+      AutomatedTestWidgetsFlutterBinding();
 
   group(TestViewConfiguration, () {
     test('is initialized with top-level window if one is not provided', () {
@@ -57,8 +58,10 @@ void main() {
     order += 1;
   });
 
-  testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
-    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  testWidgets('timeStamp should be accurate to microsecond precision',
+      (WidgetTester tester) async {
+    final WidgetsBinding widgetsBinding =
+        WidgetsFlutterBinding.ensureInitialized();
 
     await tester.pumpWidget(const CircularProgressIndicator());
 
@@ -66,7 +69,8 @@ void main() {
     await tester.pump(const Duration(microseconds: 12345));
     final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
 
-    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
+    expect(
+        timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
   });
 
   group('elapseBlocking', () {
@@ -103,7 +107,8 @@ void main() {
     });
   });
 
-  testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
+  testWidgets('Assets in the tester can be loaded without turning event loop',
+      (WidgetTester tester) async {
     bool responded = false;
     // The particular asset does not matter, as long as it exists.
     rootBundle.load('AssetManifest.json').then((ByteData data) {

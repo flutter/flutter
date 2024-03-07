@@ -59,7 +59,8 @@ enum PlatformType {
   @override
   String toString() => name;
 
-  static PlatformType? fromString(String platformType) => values.asNameMap()[platformType];
+  static PlatformType? fromString(String platformType) =>
+      values.asNameMap()[platformType];
 }
 
 /// A discovery mechanism for flutter-supported development devices.
@@ -125,9 +126,10 @@ abstract class DeviceManager {
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
     final Set<String> wellKnownIds = _platformDiscoverers
-      .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
-      .toSet();
-    final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
+        .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+        .toSet();
+    final bool hasWellKnownId =
+        hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
 
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
@@ -135,10 +137,9 @@ abstract class DeviceManager {
     final Completer<Device> exactMatchCompleter = Completer<Device>();
     final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
-          discoverer
-          .devices(filter: filter)
-          .then((List<Device> devices) {
+        if (!hasWellKnownId ||
+            discoverer.wellKnownIds.contains(specifiedDeviceId))
+          discoverer.devices(filter: filter).then((List<Device> devices) {
             for (final Device device in devices) {
               if (exactlyMatchesDeviceId(device)) {
                 exactMatchCompleter.complete(device);
@@ -184,7 +185,8 @@ abstract class DeviceManager {
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
-    return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+    return deviceDiscoverers
+        .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Returns a list of devices filtered by [filter].
@@ -195,12 +197,15 @@ abstract class DeviceManager {
     DeviceDiscoveryFilter? filter,
   }) async {
     filter ??= DeviceDiscoveryFilter();
-    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+    final List<List<Device>> devices =
+        await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer.devices(filter: filter),
     ]);
 
-    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+    return devices
+        .expand<Device>((List<Device> deviceList) => deviceList)
+        .toList();
   }
 
   /// Returns a list of devices filtered by [filter]. Discards existing cache of devices.
@@ -214,12 +219,15 @@ abstract class DeviceManager {
     DeviceDiscoveryFilter? filter,
   }) async {
     filter ??= DeviceDiscoveryFilter();
-    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+    final List<List<Device>> devices =
+        await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer.discoverDevices(filter: filter, timeout: timeout),
     ]);
 
-    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+    return devices
+        .expand<Device>((List<Device> deviceList) => deviceList)
+        .toList();
   }
 
   /// Discard existing cache of discoverers that are known to take longer to
@@ -240,7 +248,8 @@ abstract class DeviceManager {
 
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers
+        .any((DeviceDiscovery discoverer) => discoverer.canListAnything);
   }
 
   /// Get diagnostics about issues with any connected devices.
@@ -273,11 +282,13 @@ abstract class DeviceManager {
       flutterProject = FlutterProject.current();
     }
     if (hasSpecifiedAllDevices) {
-      return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll(
+      return DeviceDiscoverySupportFilter
+          .excludeDevicesUnsupportedByFlutterOrProjectOrAll(
         flutterProject: flutterProject,
       );
     } else if (!hasSpecifiedDeviceId) {
-      return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+      return DeviceDiscoverySupportFilter
+          .excludeDevicesUnsupportedByFlutterOrProject(
         flutterProject: flutterProject,
       );
     } else {
@@ -295,7 +306,7 @@ abstract class DeviceManager {
   ///
   /// Note: ephemeral is nullable for device types where this is not well
   /// defined.
-  Device? getSingleEphemeralDevice(List<Device> devices){
+  Device? getSingleEphemeralDevice(List<Device> devices) {
     if (!hasSpecifiedDeviceId) {
       try {
         return devices.singleWhere((Device device) => device.ephemeral);
@@ -343,8 +354,12 @@ class DeviceDiscoverySupportFilter {
 
   Future<bool> matchesRequirements(Device device) async {
     final bool meetsSupportByFlutterRequirement = device.isSupported();
-    final bool meetsSupportForProjectRequirement = !_excludeDevicesNotSupportedByProject || isDeviceSupportedForProject(device);
-    final bool meetsSupportForAllRequirement = !_excludeDevicesNotSupportedByAll || await isDeviceSupportedForAll(device);
+    final bool meetsSupportForProjectRequirement =
+        !_excludeDevicesNotSupportedByProject ||
+            isDeviceSupportedForProject(device);
+    final bool meetsSupportForAllRequirement =
+        !_excludeDevicesNotSupportedByAll ||
+            await isDeviceSupportedForAll(device);
 
     return meetsSupportByFlutterRequirement &&
         meetsSupportForProjectRequirement &&
@@ -405,9 +420,12 @@ class DeviceDiscoveryFilter {
   Future<bool> matchesRequirements(Device device) async {
     final DeviceDiscoverySupportFilter? localSupportFilter = supportFilter;
 
-    final bool meetsConnectionRequirement = !excludeDisconnected || device.isConnected;
-    final bool meetsSupportRequirements = localSupportFilter == null || (await localSupportFilter.matchesRequirements(device));
-    final bool meetsConnectionInterfaceRequirement = matchesDeviceConnectionInterface(device, deviceConnectionInterface);
+    final bool meetsConnectionRequirement =
+        !excludeDisconnected || device.isConnected;
+    final bool meetsSupportRequirements = localSupportFilter == null ||
+        (await localSupportFilter.matchesRequirements(device));
+    final bool meetsConnectionInterfaceRequirement =
+        matchesDeviceConnectionInterface(device, deviceConnectionInterface);
 
     return meetsConnectionRequirement &&
         meetsSupportRequirements &&
@@ -456,7 +474,8 @@ abstract class DeviceDiscovery {
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
-  Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
+  Future<List<String>> getDiagnostics() =>
+      Future<List<String>>.value(<String>[]);
 
   /// Hard-coded device IDs that the discoverer can produce.
   ///
@@ -498,7 +517,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     // Poll for devices immediately on the initial call for faster initial population.
     return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
-        final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
+        final List<Device> devices =
+            await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier!.updateWithNewList(devices);
       } on TimeoutException {
         // Do nothing on a timeout.
@@ -591,7 +611,8 @@ enum DeviceConnectionInterface {
 /// This may correspond to a connected iOS or Android device, or represent
 /// the host operating system in the case of Flutter Desktop.
 abstract class Device {
-  Device(this.id, {
+  Device(
+    this.id, {
     required this.category,
     required this.platformType,
     required this.ephemeral,
@@ -778,7 +799,8 @@ abstract class Device {
     return Future<MemoryInfo>.value(const MemoryInfo.empty());
   }
 
-  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) =>
+      Future<void>.error('unimplemented');
 
   @nonVirtual
   @override
@@ -792,8 +814,7 @@ abstract class Device {
     if (identical(this, other)) {
       return true;
     }
-    return other is Device
-        && other.id == id;
+    return other is Device && other.id == id;
   }
 
   @override
@@ -810,7 +831,8 @@ abstract class Device {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type =
+            targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -822,20 +844,26 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices =
+        List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
     for (final List<String> row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices
+          .map<int>((int i) => math.max(widths[i], row[i].length))
+          .toList();
     }
 
     // Join columns into lines of text
     return <String>[
       for (final List<String> row in table)
-        indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • '),
+        indices
+            .map<String>((int i) => row[i].padRight(widths[i]))
+            .followedBy(<String>[row.last]).join(' • '),
     ];
   }
 
-  static Future<void> printDevices(List<Device> devices, Logger logger, { String prefix = '' }) async {
+  static Future<void> printDevices(List<Device> devices, Logger logger,
+      {String prefix = ''}) async {
     for (final String line in await descriptions(devices)) {
       logger.printStatus('$prefix$line');
     }
@@ -845,7 +873,10 @@ abstract class Device {
     return devices
         .map(
           (Device d) => d.platformType.toString(),
-        ).toSet().toList()..sort();
+        )
+        .toSet()
+        .toList()
+      ..sort();
   }
 
   /// Convert the Device object to a JSON representation suitable for serialization.
@@ -966,61 +997,62 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-   }) : debuggingEnabled = true;
+  }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, {
-      this.dartEntrypointArgs = const <String>[],
-      this.port,
-      this.hostname,
-      this.tlsCertPath,
-      this.tlsCertKeyPath,
-      this.webEnableExposeUrl,
-      this.webUseSseForDebugProxy = true,
-      this.webUseSseForDebugBackend = true,
-      this.webUseSseForInjectedClient = true,
-      this.webRunHeadless = false,
-      this.webBrowserDebugPort,
-      this.webBrowserFlags = const <String>[],
-      this.webLaunchUrl,
-      this.webHeaders = const <String, String>{},
-      this.webRenderer = WebRendererMode.auto,
-      this.cacheSkSL = false,
-      this.traceAllowlist,
-      this.enableImpeller = ImpellerStatus.platformDefault,
-      this.enableVulkanValidation = false,
-      this.uninstallFirst = false,
-      this.enableDartProfiling = true,
-      this.enableEmbedderApi = false,
-      this.usingCISystem = false,
-      this.debugLogsDirectoryPath,
-    }) : debuggingEnabled = false,
-      useTestFonts = false,
-      startPaused = false,
-      dartFlags = '',
-      disableServiceAuthCodes = false,
-      enableDds = true,
-      cacheStartupProfile = false,
-      enableSoftwareRendering = false,
-      skiaDeterministicRendering = false,
-      traceSkia = false,
-      traceSkiaAllowlist = null,
-      traceSystrace = false,
-      traceToFile = null,
-      endlessTraceBuffer = false,
-      dumpSkpOnShaderCompilation = false,
-      purgePersistentCache = false,
-      verboseSystemLogs = false,
-      hostVmServicePort = null,
-      disablePortPublication = false,
-      deviceVmServicePort = null,
-      ddsPort = null,
-      devToolsServerAddress = null,
-      vmserviceOutFile = null,
-      fastStart = false,
-      webEnableExpressionEvaluation = false,
-      nullAssertions = false,
-      nativeNullAssertions = false,
-      serveObservatory = false;
+  DebuggingOptions.disabled(
+    this.buildInfo, {
+    this.dartEntrypointArgs = const <String>[],
+    this.port,
+    this.hostname,
+    this.tlsCertPath,
+    this.tlsCertKeyPath,
+    this.webEnableExposeUrl,
+    this.webUseSseForDebugProxy = true,
+    this.webUseSseForDebugBackend = true,
+    this.webUseSseForInjectedClient = true,
+    this.webRunHeadless = false,
+    this.webBrowserDebugPort,
+    this.webBrowserFlags = const <String>[],
+    this.webLaunchUrl,
+    this.webHeaders = const <String, String>{},
+    this.webRenderer = WebRendererMode.auto,
+    this.cacheSkSL = false,
+    this.traceAllowlist,
+    this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableVulkanValidation = false,
+    this.uninstallFirst = false,
+    this.enableDartProfiling = true,
+    this.enableEmbedderApi = false,
+    this.usingCISystem = false,
+    this.debugLogsDirectoryPath,
+  })  : debuggingEnabled = false,
+        useTestFonts = false,
+        startPaused = false,
+        dartFlags = '',
+        disableServiceAuthCodes = false,
+        enableDds = true,
+        cacheStartupProfile = false,
+        enableSoftwareRendering = false,
+        skiaDeterministicRendering = false,
+        traceSkia = false,
+        traceSkiaAllowlist = null,
+        traceSystrace = false,
+        traceToFile = null,
+        endlessTraceBuffer = false,
+        dumpSkpOnShaderCompilation = false,
+        purgePersistentCache = false,
+        verboseSystemLogs = false,
+        hostVmServicePort = null,
+        disablePortPublication = false,
+        deviceVmServicePort = null,
+        ddsPort = null,
+        devToolsServerAddress = null,
+        vmserviceOutFile = null,
+        fastStart = false,
+        webEnableExpressionEvaluation = false,
+        nullAssertions = false,
+        nativeNullAssertions = false,
+        serveObservatory = false;
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -1168,7 +1200,8 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
-    DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
+    DeviceConnectionInterface interfaceType =
+        DeviceConnectionInterface.attached,
     bool isCoreDevice = false,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
@@ -1180,7 +1213,8 @@ class DebuggingOptions {
       // Wrap dart flags in quotes for physical devices
       if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
         '--dart-flags="$dartVmFlags"',
-      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
+      if (environmentType == EnvironmentType.simulator &&
+          dartVmFlags.isNotEmpty)
         '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
       // Core Devices (iOS 17 devices) are debugged through Xcode so don't
@@ -1196,7 +1230,8 @@ class DebuggingOptions {
       if (skiaDeterministicRendering) '--skia-deterministic-rendering',
       if (traceSkia) '--trace-skia',
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
-      if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
+      if (traceSkiaAllowlist != null)
+        '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
       if (dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (verboseSystemLogs) '--verbose-logging',
@@ -1206,11 +1241,13 @@ class DebuggingOptions {
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
-      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
+      if (environmentType == EnvironmentType.physical &&
+          deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
       // Use the suggested host port.
-      if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
+      if (environmentType == EnvironmentType.simulator &&
+          hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
       if (interfaceType == DeviceConnectionInterface.wireless)
@@ -1220,125 +1257,135 @@ class DebuggingOptions {
   }
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'debuggingEnabled': debuggingEnabled,
-    'startPaused': startPaused,
-    'dartFlags': dartFlags,
-    'dartEntrypointArgs': dartEntrypointArgs,
-    'disableServiceAuthCodes': disableServiceAuthCodes,
-    'enableDds': enableDds,
-    'cacheStartupProfile': cacheStartupProfile,
-    'enableSoftwareRendering': enableSoftwareRendering,
-    'skiaDeterministicRendering': skiaDeterministicRendering,
-    'traceSkia': traceSkia,
-    'traceAllowlist': traceAllowlist,
-    'traceSkiaAllowlist': traceSkiaAllowlist,
-    'traceSystrace': traceSystrace,
-    'traceToFile': traceToFile,
-    'endlessTraceBuffer': endlessTraceBuffer,
-    'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
-    'cacheSkSL': cacheSkSL,
-    'purgePersistentCache': purgePersistentCache,
-    'useTestFonts': useTestFonts,
-    'verboseSystemLogs': verboseSystemLogs,
-    'hostVmServicePort': hostVmServicePort,
-    'deviceVmServicePort': deviceVmServicePort,
-    'disablePortPublication': disablePortPublication,
-    'ddsPort': ddsPort,
-    'devToolsServerAddress': devToolsServerAddress.toString(),
-    'port': port,
-    'hostname': hostname,
-    'tlsCertPath': tlsCertPath,
-    'tlsCertKeyPath': tlsCertKeyPath,
-    'webEnableExposeUrl': webEnableExposeUrl,
-    'webUseSseForDebugProxy': webUseSseForDebugProxy,
-    'webUseSseForDebugBackend': webUseSseForDebugBackend,
-    'webUseSseForInjectedClient': webUseSseForInjectedClient,
-    'webRunHeadless': webRunHeadless,
-    'webBrowserDebugPort': webBrowserDebugPort,
-    'webBrowserFlags': webBrowserFlags,
-    'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
-    'webLaunchUrl': webLaunchUrl,
-    'webHeaders': webHeaders,
-    'webRenderer': webRenderer.name,
-    'vmserviceOutFile': vmserviceOutFile,
-    'fastStart': fastStart,
-    'nullAssertions': nullAssertions,
-    'nativeNullAssertions': nativeNullAssertions,
-    'enableImpeller': enableImpeller.asBool,
-    'enableVulkanValidation': enableVulkanValidation,
-    'serveObservatory': serveObservatory,
-    'enableDartProfiling': enableDartProfiling,
-    'enableEmbedderApi': enableEmbedderApi,
-    'usingCISystem': usingCISystem,
-    'debugLogsDirectoryPath': debugLogsDirectoryPath,
-  };
+        'debuggingEnabled': debuggingEnabled,
+        'startPaused': startPaused,
+        'dartFlags': dartFlags,
+        'dartEntrypointArgs': dartEntrypointArgs,
+        'disableServiceAuthCodes': disableServiceAuthCodes,
+        'enableDds': enableDds,
+        'cacheStartupProfile': cacheStartupProfile,
+        'enableSoftwareRendering': enableSoftwareRendering,
+        'skiaDeterministicRendering': skiaDeterministicRendering,
+        'traceSkia': traceSkia,
+        'traceAllowlist': traceAllowlist,
+        'traceSkiaAllowlist': traceSkiaAllowlist,
+        'traceSystrace': traceSystrace,
+        'traceToFile': traceToFile,
+        'endlessTraceBuffer': endlessTraceBuffer,
+        'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
+        'cacheSkSL': cacheSkSL,
+        'purgePersistentCache': purgePersistentCache,
+        'useTestFonts': useTestFonts,
+        'verboseSystemLogs': verboseSystemLogs,
+        'hostVmServicePort': hostVmServicePort,
+        'deviceVmServicePort': deviceVmServicePort,
+        'disablePortPublication': disablePortPublication,
+        'ddsPort': ddsPort,
+        'devToolsServerAddress': devToolsServerAddress.toString(),
+        'port': port,
+        'hostname': hostname,
+        'tlsCertPath': tlsCertPath,
+        'tlsCertKeyPath': tlsCertKeyPath,
+        'webEnableExposeUrl': webEnableExposeUrl,
+        'webUseSseForDebugProxy': webUseSseForDebugProxy,
+        'webUseSseForDebugBackend': webUseSseForDebugBackend,
+        'webUseSseForInjectedClient': webUseSseForInjectedClient,
+        'webRunHeadless': webRunHeadless,
+        'webBrowserDebugPort': webBrowserDebugPort,
+        'webBrowserFlags': webBrowserFlags,
+        'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
+        'webLaunchUrl': webLaunchUrl,
+        'webHeaders': webHeaders,
+        'webRenderer': webRenderer.name,
+        'vmserviceOutFile': vmserviceOutFile,
+        'fastStart': fastStart,
+        'nullAssertions': nullAssertions,
+        'nativeNullAssertions': nativeNullAssertions,
+        'enableImpeller': enableImpeller.asBool,
+        'enableVulkanValidation': enableVulkanValidation,
+        'serveObservatory': serveObservatory,
+        'enableDartProfiling': enableDartProfiling,
+        'enableEmbedderApi': enableEmbedderApi,
+        'usingCISystem': usingCISystem,
+        'debugLogsDirectoryPath': debugLogsDirectoryPath,
+      };
 
-  static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
-    DebuggingOptions._(
-      buildInfo: buildInfo,
-      debuggingEnabled: json['debuggingEnabled']! as bool,
-      startPaused: json['startPaused']! as bool,
-      dartFlags: json['dartFlags']! as String,
-      dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
-      disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
-      enableDds: json['enableDds']! as bool,
-      cacheStartupProfile: json['cacheStartupProfile']! as bool,
-      enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
-      skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
-      traceSkia: json['traceSkia']! as bool,
-      traceAllowlist: json['traceAllowlist'] as String?,
-      traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
-      traceSystrace: json['traceSystrace']! as bool,
-      traceToFile: json['traceToFile'] as String?,
-      endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
-      dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
-      cacheSkSL: json['cacheSkSL']! as bool,
-      purgePersistentCache: json['purgePersistentCache']! as bool,
-      useTestFonts: json['useTestFonts']! as bool,
-      verboseSystemLogs: json['verboseSystemLogs']! as bool,
-      hostVmServicePort: json['hostVmServicePort'] as int? ,
-      deviceVmServicePort: json['deviceVmServicePort'] as int?,
-      disablePortPublication: json['disablePortPublication']! as bool,
-      ddsPort: json['ddsPort'] as int?,
-      devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
-      port: json['port'] as String?,
-      hostname: json['hostname'] as String?,
-      tlsCertPath: json['tlsCertPath'] as String?,
-      tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
-      webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
-      webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
-      webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
-      webUseSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
-      webRunHeadless: json['webRunHeadless']! as bool,
-      webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
-      webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
-      webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-      webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
-      webLaunchUrl: json['webLaunchUrl'] as String?,
-      webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
-      vmserviceOutFile: json['vmserviceOutFile'] as String?,
-      fastStart: json['fastStart']! as bool,
-      nullAssertions: json['nullAssertions']! as bool,
-      nativeNullAssertions: json['nativeNullAssertions']! as bool,
-      enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
-      enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
-      uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
-      serveObservatory: (json['serveObservatory'] as bool?) ?? false,
-      enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-      enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
-      usingCISystem: (json['usingCISystem'] as bool?) ?? false,
-      debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
-    );
+  static DebuggingOptions fromJson(
+          Map<String, Object?> json, BuildInfo buildInfo) =>
+      DebuggingOptions._(
+        buildInfo: buildInfo,
+        debuggingEnabled: json['debuggingEnabled']! as bool,
+        startPaused: json['startPaused']! as bool,
+        dartFlags: json['dartFlags']! as String,
+        dartEntrypointArgs:
+            (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
+        disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        enableDds: json['enableDds']! as bool,
+        cacheStartupProfile: json['cacheStartupProfile']! as bool,
+        enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
+        skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
+        traceSkia: json['traceSkia']! as bool,
+        traceAllowlist: json['traceAllowlist'] as String?,
+        traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
+        traceSystrace: json['traceSystrace']! as bool,
+        traceToFile: json['traceToFile'] as String?,
+        endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+        dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
+        cacheSkSL: json['cacheSkSL']! as bool,
+        purgePersistentCache: json['purgePersistentCache']! as bool,
+        useTestFonts: json['useTestFonts']! as bool,
+        verboseSystemLogs: json['verboseSystemLogs']! as bool,
+        hostVmServicePort: json['hostVmServicePort'] as int?,
+        deviceVmServicePort: json['deviceVmServicePort'] as int?,
+        disablePortPublication: json['disablePortPublication']! as bool,
+        ddsPort: json['ddsPort'] as int?,
+        devToolsServerAddress: json['devToolsServerAddress'] != null
+            ? Uri.parse(json['devToolsServerAddress']! as String)
+            : null,
+        port: json['port'] as String?,
+        hostname: json['hostname'] as String?,
+        tlsCertPath: json['tlsCertPath'] as String?,
+        tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
+        webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
+        webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
+        webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
+        webUseSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
+        webRunHeadless: json['webRunHeadless']! as bool,
+        webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
+        webBrowserFlags:
+            (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
+        webEnableExpressionEvaluation:
+            json['webEnableExpressionEvaluation']! as bool,
+        webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>)
+            .cast<String, String>(),
+        webLaunchUrl: json['webLaunchUrl'] as String?,
+        webRenderer:
+            WebRendererMode.values.byName(json['webRenderer']! as String),
+        vmserviceOutFile: json['vmserviceOutFile'] as String?,
+        fastStart: json['fastStart']! as bool,
+        nullAssertions: json['nullAssertions']! as bool,
+        nativeNullAssertions: json['nativeNullAssertions']! as bool,
+        enableImpeller:
+            ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+        enableVulkanValidation:
+            (json['enableVulkanValidation'] as bool?) ?? false,
+        uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+        serveObservatory: (json['serveObservatory'] as bool?) ?? false,
+        enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+        usingCISystem: (json['usingCISystem'] as bool?) ?? false,
+        debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
+      );
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ Uri? vmServiceUri, Uri? observatoryUri }) :
-    started = true,
-    vmServiceUri = vmServiceUri ?? observatoryUri;
+  LaunchResult.succeeded({Uri? vmServiceUri, Uri? observatoryUri})
+      : started = true,
+        vmServiceUri = vmServiceUri ?? observatoryUri;
 
   LaunchResult.failed()
-    : started = false,
-      vmServiceUri = null;
+      : started = false,
+        vmServiceUri = null;
 
   bool get hasVmService => vmServiceUri != null;
 
@@ -1400,16 +1447,14 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
-  void dispose() { }
+  void dispose() {}
 }
 
 /// Append --null_assertions to any existing Dart VM flags if
 /// [debuggingOptions.nullAssertions] is true.
 String computeDartVmFlags(DebuggingOptions debuggingOptions) {
   return <String>[
-    if (debuggingOptions.dartFlags.isNotEmpty)
-      debuggingOptions.dartFlags,
-    if (debuggingOptions.nullAssertions)
-      '--null_assertions',
+    if (debuggingOptions.dartFlags.isNotEmpty) debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions) '--null_assertions',
   ].join(',');
 }

@@ -79,11 +79,16 @@ void main() {
       if (device == 'flutter-tester' && buildMode != 'debug') {
         continue;
       }
-      final String hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
-      testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
+      final String hotReload =
+          buildMode == 'debug' ? ' hot reload and hot restart' : '';
+      testWithoutContext(
+          'flutter run$hotReload with native assets $device $buildMode',
+          () async {
         await inTempDir((Directory tempDirectory) async {
-          final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-          final Directory exampleDirectory = packageDirectory.childDirectory('example');
+          final Directory packageDirectory =
+              await createTestProject(packageName, tempDirectory);
+          final Directory exampleDirectory =
+              packageDirectory.childDirectory('example');
 
           final ProcessTestResult result = await runFlutter(
             <String>[
@@ -115,7 +120,8 @@ void main() {
                   // Do a hot restart, pushing a new complete dill file.
                   return 'R';
                 }),
-                Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
+                Barrier(
+                    'Performing hot restart...'.padRight(progressMessageWidth)),
                 Multiple(<Pattern>[
                   RegExp('Restarted application .*'),
                 ], handler: (String line) {
@@ -137,15 +143,20 @@ void main() {
             logging: false,
           );
           if (result.exitCode != 0) {
-            throw Exception('flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+            throw Exception(
+                'flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
           final String stdout = result.stdout.join('\n');
           // Check that we did not fail to resolve the native function in the
           // dynamic library.
-          expect(stdout, isNot(contains("Invalid argument(s): Couldn't resolve native function 'sum'")));
+          expect(
+              stdout,
+              isNot(contains(
+                  "Invalid argument(s): Couldn't resolve native function 'sum'")));
           // And also check that we did not have any other exceptions that might
           // shadow the exception we would have gotten.
-          expect(stdout, isNot(contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY')));
+          expect(
+              stdout, isNot(contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY')));
 
           if (device == 'macos') {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
@@ -164,7 +175,8 @@ void main() {
 
   testWithoutContext('flutter test with native assets', () async {
     await inTempDir((Directory tempDirectory) async {
-      final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+      final Directory packageDirectory =
+          await createTestProject(packageName, tempDirectory);
 
       final ProcessTestResult result = await runFlutter(
         <String>[
@@ -177,17 +189,22 @@ void main() {
         logging: false,
       );
       if (result.exitCode != 0) {
-        throw Exception('flutter test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+        throw Exception(
+            'flutter test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
       }
     });
   });
 
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
-      testWithoutContext('flutter build $buildSubcommand with native assets $buildMode', () async {
+      testWithoutContext(
+          'flutter build $buildSubcommand with native assets $buildMode',
+          () async {
         await inTempDir((Directory tempDirectory) async {
-          final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-          final Directory exampleDirectory = packageDirectory.childDirectory('example');
+          final Directory packageDirectory =
+              await createTestProject(packageName, tempDirectory);
+          final Directory exampleDirectory =
+              packageDirectory.childDirectory('example');
 
           final ProcessResult result = processManager.runSync(
             <String>[
@@ -200,7 +217,8 @@ void main() {
             workingDirectory: exampleDirectory.path,
           );
           if (result.exitCode != 0) {
-            throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+            throw Exception(
+                'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
 
           if (buildSubcommand == 'macos') {
@@ -222,13 +240,16 @@ void main() {
     // This could be an hermetic unit test if the native_assets_builder
     // could mock process runs and file system.
     // https://github.com/dart-lang/native/issues/90.
-    testWithoutContext('flutter build $buildSubcommand error on static libraries', () async {
+    testWithoutContext(
+        'flutter build $buildSubcommand error on static libraries', () async {
       await inTempDir((Directory tempDirectory) async {
-        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+        final Directory packageDirectory =
+            await createTestProject(packageName, tempDirectory);
         final File buildDotDart = packageDirectory.childFile('build.dart');
         final String buildDotDartContents = await buildDotDart.readAsString();
         // Overrides the build to output static libraries.
-        final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
+        final String buildDotDartContentsNew =
+            buildDotDartContents.replaceFirst(
           'final buildConfig = await BuildConfig.fromArgs(args);',
           '''
   final buildConfig = await BuildConfig.fromArgs([
@@ -239,7 +260,8 @@ void main() {
         );
         expect(buildDotDartContentsNew, isNot(buildDotDartContents));
         await buildDotDart.writeAsString(buildDotDartContentsNew);
-        final Directory exampleDirectory = packageDirectory.childDirectory('example');
+        final Directory exampleDirectory =
+            packageDirectory.childDirectory('example');
 
         final ProcessResult result = processManager.runSync(
           <String>[
@@ -247,7 +269,8 @@ void main() {
             'build',
             buildSubcommand,
             if (buildSubcommand == 'ios') '--no-codesign',
-            if (buildSubcommand == 'windows') '-v' // Requires verbose mode for error.
+            if (buildSubcommand == 'windows')
+              '-v' // Requires verbose mode for error.
           ],
           workingDirectory: exampleDirectory.path,
         );
@@ -261,10 +284,13 @@ void main() {
   }
 
   for (final String add2appBuildSubcommand in add2appBuildSubcommands) {
-    testWithoutContext('flutter build $add2appBuildSubcommand with native assets', () async {
+    testWithoutContext(
+        'flutter build $add2appBuildSubcommand with native assets', () async {
       await inTempDir((Directory tempDirectory) async {
-        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-        final Directory exampleDirectory = packageDirectory.childDirectory('example');
+        final Directory packageDirectory =
+            await createTestProject(packageName, tempDirectory);
+        final Directory exampleDirectory =
+            packageDirectory.childDirectory('example');
 
         final ProcessResult result = processManager.runSync(
           <String>[
@@ -275,11 +301,13 @@ void main() {
           workingDirectory: exampleDirectory.path,
         );
         if (result.exitCode != 0) {
-          throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+          throw Exception(
+              'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
         }
 
         for (final String buildMode in buildModes) {
-          expectDylibIsBundledWithFrameworks(exampleDirectory, buildMode, add2appBuildSubcommand.replaceAll('-framework', ''));
+          expectDylibIsBundledWithFrameworks(exampleDirectory, buildMode,
+              add2appBuildSubcommand.replaceAll('-framework', ''));
         }
         expectCCompilerIsConfigured(exampleDirectory);
       });
@@ -290,7 +318,8 @@ void main() {
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
 void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
-  final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
+  final Directory appBundle = appDirectory.childDirectory(
+      'build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
   expect(appBundle, exists);
   final Directory frameworksFolder =
       appBundle.childDirectory('Contents/Frameworks');
@@ -326,7 +355,8 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
-  final Directory appBundle = appDirectory.childDirectory('build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app');
+  final Directory appBundle = appDirectory.childDirectory(
+      'build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app');
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
@@ -352,7 +382,8 @@ void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('lib');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
+  final File dylib =
+      dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -406,8 +437,10 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
-void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
-  final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
+void expectDylibIsBundledWithFrameworks(
+    Directory appDirectory, String buildMode, String os) {
+  final Directory frameworksFolder = appDirectory
+      .childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
   const String frameworkName = packageName;
   final File dylib = frameworksFolder
@@ -420,8 +453,10 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 ///
 /// This inspects the build configuration to see if the C compiler was configured.
 void expectCCompilerIsConfigured(Directory appDirectory) {
-  final Directory nativeAssetsBuilderDir = appDirectory.childDirectory('.dart_tool/native_assets_builder/');
-  for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
+  final Directory nativeAssetsBuilderDir =
+      appDirectory.childDirectory('.dart_tool/native_assets_builder/');
+  for (final Directory subDir
+      in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     final File config = subDir.childFile('config.yaml');
     expect(config, exists);
     final String contents = config.readAsStringSync();
@@ -439,7 +474,8 @@ extension on String {
   }
 }
 
-Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+Future<Directory> createTestProject(
+    String packageName, Directory tempDirectory) async {
   final ProcessResult result = processManager.runSync(
     <String>[
       flutterBin,
@@ -490,8 +526,12 @@ Future<void> pinDependencies(File pubspecFile) async {
   await pubspecFile.writeAsString(newPubspec);
 }
 
-Future<void> inTempDir(Future<void> Function(Directory tempDirectory) fun) async {
-  final Directory tempDirectory = fileSystem.directory(fileSystem.systemTempDirectory.createTempSync().resolveSymbolicLinksSync());
+Future<void> inTempDir(
+    Future<void> Function(Directory tempDirectory) fun) async {
+  final Directory tempDirectory = fileSystem.directory(fileSystem
+      .systemTempDirectory
+      .createTempSync()
+      .resolveSymbolicLinksSync());
   try {
     await fun(tempDirectory);
   } finally {

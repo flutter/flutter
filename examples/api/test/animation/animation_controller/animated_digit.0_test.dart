@@ -31,7 +31,8 @@ void main() {
     expect(findVisibleDigit(2), findsOneWidget);
 
     await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump(const Duration(milliseconds: 100)); // Animation duration is 300ms
+    await tester
+        .pump(const Duration(milliseconds: 100)); // Animation duration is 300ms
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     expect(findVisibleDigit(4), findsOneWidget);

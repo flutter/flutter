@@ -8,7 +8,8 @@ import 'package:flutter_api_samples/gestures/tap_and_drag/tap_and_drag.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Single tap + drag should not change the scale of child', (WidgetTester tester) async {
+  testWidgets('Single tap + drag should not change the scale of child',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapAndDragToZoomApp(),
     );
@@ -36,7 +37,8 @@ void main() {
     expect(getScale(), 1.0);
   });
 
-  testWidgets('Double tap + drag should change the scale of the child', (WidgetTester tester) async {
+  testWidgets('Double tap + drag should change the scale of the child',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapAndDragToZoomApp(),
     );

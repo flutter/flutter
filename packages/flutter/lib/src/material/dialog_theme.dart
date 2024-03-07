@@ -133,8 +133,10 @@ class DialogTheme with Diagnosticable {
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
-      actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
+      contentTextStyle:
+          TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      actionsPadding:
+          EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
       barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
     );
@@ -142,19 +144,19 @@ class DialogTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
-    backgroundColor,
-    elevation,
-    shadowColor,
-    surfaceTintColor,
-    shape,
-    alignment,
-    iconColor,
-    titleTextStyle,
-    contentTextStyle,
-    actionsPadding,
-    barrierColor,
-    insetPadding,
-  ]);
+        backgroundColor,
+        elevation,
+        shadowColor,
+        surfaceTintColor,
+        shape,
+        alignment,
+        iconColor,
+        titleTextStyle,
+        contentTextStyle,
+        actionsPadding,
+        barrierColor,
+        insetPadding,
+      ]);
 
   @override
   bool operator ==(Object other) {
@@ -164,19 +166,19 @@ class DialogTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DialogTheme
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.shape == shape
-        && other.alignment == alignment
-        && other.iconColor == iconColor
-        && other.titleTextStyle == titleTextStyle
-        && other.contentTextStyle == contentTextStyle
-        && other.actionsPadding == actionsPadding
-        && other.barrierColor == barrierColor
-        && other.insetPadding == insetPadding;
+    return other is DialogTheme &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.shape == shape &&
+        other.alignment == alignment &&
+        other.iconColor == iconColor &&
+        other.titleTextStyle == titleTextStyle &&
+        other.contentTextStyle == contentTextStyle &&
+        other.actionsPadding == actionsPadding &&
+        other.barrierColor == barrierColor &&
+        other.insetPadding == insetPadding;
   }
 
   @override
@@ -186,13 +188,23 @@ class DialogTheme with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(ColorProperty('shadowColor', shadowColor));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', alignment,
+        defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor));
-    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>(
+        'titleTextStyle', titleTextStyle,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>(
+        'contentTextStyle', contentTextStyle,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
+        'actionsPadding', actionsPadding,
+        defaultValue: null));
     properties.add(ColorProperty('barrierColor', barrierColor));
-    properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding,
+        defaultValue: null));
   }
 }

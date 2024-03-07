@@ -52,15 +52,19 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
         _message = 'Pressed the key next to CAPS LOCK!';
       } else {
         if (kReleaseMode) {
-          _message = 'Not the key next to CAPS LOCK: Pressed 0x${event.physicalKey.usbHidUsage.toRadixString(16)}';
+          _message =
+              'Not the key next to CAPS LOCK: Pressed 0x${event.physicalKey.usbHidUsage.toRadixString(16)}';
         } else {
           // As the name implies, the debugName will only print useful
           // information in debug mode.
-          _message = 'Not the key next to CAPS LOCK: Pressed ${event.physicalKey.debugName}';
+          _message =
+              'Not the key next to CAPS LOCK: Pressed ${event.physicalKey.debugName}';
         }
       }
     });
-    return event.physicalKey == PhysicalKeyboardKey.keyA ? KeyEventResult.handled : KeyEventResult.ignored;
+    return event.physicalKey == PhysicalKeyboardKey.keyA
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 
   @override

@@ -19,7 +19,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     super.logger,
     Usage usage,
     Analytics analytics,
-  ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+  )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _usage = usage,
         _analytics = analytics;
 
@@ -30,7 +30,8 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   @override
   void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping framework link and embedding migration');
+      logger.printTrace(
+          'Xcode project not found, skipping framework link and embedding migration');
       return;
     }
 
@@ -49,8 +50,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
 
     // App.framework Embed Framework reference (build phase to embed framework).
     // 3B80C3951E831B6300D905FE /* App.framework in Embed Frameworks */,
-    if (line.contains('3B80C3951E831B6300D905FE')
-        || line.contains('741F496821356857001E2961')) { // Ephemeral add-to-app variant.
+    if (line.contains('3B80C3951E831B6300D905FE') ||
+        line.contains('741F496821356857001E2961')) {
+      // Ephemeral add-to-app variant.
       return null;
     }
 
@@ -58,8 +60,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     // isa = PBXGroup;
     // children = (
     //	 3B80C3931E831B6300D905FE /* App.framework */,
-    if (line.contains('3B80C3931E831B6300D905FE')
-        || line.contains('741F496521356807001E2961')) { // Ephemeral add-to-app variant.
+    if (line.contains('3B80C3931E831B6300D905FE') ||
+        line.contains('741F496521356807001E2961')) {
+      // Ephemeral add-to-app variant.
       return null;
     }
 
@@ -73,8 +76,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
 
     // Flutter.framework Embed Framework reference (build phase to embed framework).
     // 9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */,
-    if (line.contains('9705A1C71CF904A300538489')
-        || line.contains('741F496221355F47001E2961')) { // Ephemeral add-to-app variant.
+    if (line.contains('9705A1C71CF904A300538489') ||
+        line.contains('741F496221355F47001E2961')) {
+      // Ephemeral add-to-app variant.
       return null;
     }
 
@@ -82,26 +86,32 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     // isa = PBXGroup;
     // children = (
     //	 9740EEBA1CF902C7004384FC /* Flutter.framework */,
-    if (line.contains('9740EEBA1CF902C7004384FC')
-        || line.contains('741F495E21355F27001E2961')) { // Ephemeral add-to-app variant.
+    if (line.contains('9740EEBA1CF902C7004384FC') ||
+        line.contains('741F495E21355F27001E2961')) {
+      // Ephemeral add-to-app variant.
       return null;
     }
 
     // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
     const String thinBinaryScript = r'xcode_backend.sh\" thin';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
-      return line.replaceFirst(thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
+      return line.replaceFirst(
+          thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
     }
 
-    if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
+    if (line.contains('/* App.framework ') ||
+        line.contains('/* Flutter.framework ')) {
       // Print scary message.
-      UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
+      UsageEvent('ios-migration', 'remove-frameworks',
+              label: 'failure', flutterUsage: _usage)
+          .send();
       _analytics.send(Event.appleUsageEvent(
         workflow: 'ios-migration',
         parameter: 'remove-frameworks',
         result: 'failure',
       ));
-      throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+      throwToolExit(
+          'Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     }
 
     return line;

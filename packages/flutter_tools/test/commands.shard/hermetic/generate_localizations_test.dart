@@ -36,7 +36,8 @@ void main() {
   });
 
   testUsingContext('default l10n settings', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -55,10 +56,13 @@ void main() {
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -79,9 +83,7 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    fileSystem
-      .file('pubspec.yaml')
-      .writeAsStringSync('''
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
 flutter:
   generate: true''');
 
@@ -97,15 +99,18 @@ flutter:
     ]);
 
     expect(l10nDirectory.existsSync(), true);
-    expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('throws error when arguments are invalid', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -115,9 +120,7 @@ flutter:
   }
 }''');
     fileSystem.file('header.txt').writeAsStringSync('a header file');
-    fileSystem
-      .file('pubspec.yaml')
-      .writeAsStringSync('''
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
 flutter:
   generate: true''');
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
@@ -139,8 +142,10 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('l10n yaml file takes precedence over command line arguments', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testUsingContext(
+      'l10n yaml file takes precedence over command line arguments', () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -160,18 +165,25 @@ flutter:
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    expect(logger.statusText, contains('Because l10n.yaml exists, the options defined there will be used instead.'));
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(
+        logger.statusText,
+        contains(
+            'Because l10n.yaml exists, the options defined there will be used instead.'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('nullable-getter help message is expected string', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -197,7 +209,8 @@ flutter:
   });
 
   testUsingContext('dart format is run when --format is passed', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -208,16 +221,12 @@ flutter:
 }''');
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'Artifact.engineDartBinary',
-          'format',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-        ]
-      )
-    );
+    processManager.addCommand(const FakeCommand(command: <String>[
+      'Artifact.engineDartBinary',
+      'format',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+    ]));
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
@@ -226,20 +235,27 @@ flutter:
       processManager: processManager,
     );
 
-    await createTestCommandRunner(command).run(<String>['gen-l10n', '--format']);
+    await createTestCommandRunner(command)
+        .run(<String>['gen-l10n', '--format']);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('dart format is run when format: true is passed into l10n.yaml', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testUsingContext(
+      'dart format is run when format: true is passed into l10n.yaml',
+      () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -254,16 +270,12 @@ format: true
 ''');
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'Artifact.engineDartBinary',
-          'format',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-        ]
-      )
-    );
+    processManager.addCommand(const FakeCommand(command: <String>[
+      'Artifact.engineDartBinary',
+      'format',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+    ]));
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -272,10 +284,13 @@ format: true
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -283,8 +298,11 @@ format: true
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/119594
-  testUsingContext('dart format is working when the untranslated messages file is produced', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testUsingContext(
+      'dart format is working when the untranslated messages file is produced',
+      () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -304,17 +322,13 @@ untranslated-messages-file: lib/l10n/untranslated.json
 ''');
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'Artifact.engineDartBinary',
-          'format',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_es.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-        ]
-      )
-    );
+    processManager.addCommand(const FakeCommand(command: <String>[
+      'Artifact.engineDartBinary',
+      'format',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations_es.dart',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+    ]));
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -323,12 +337,17 @@ untranslated-messages-file: lib/l10n/untranslated.json
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_es.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-    final File untranslatedMessagesFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'untranslated.json'));
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(outputDirectory.childFile('app_localizations_es.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    final File untranslatedMessagesFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'untranslated.json'));
     expect(untranslatedMessagesFile.existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
@@ -337,8 +356,11 @@ untranslated-messages-file: lib/l10n/untranslated.json
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/120530.
-  testWithoutContext('dart format is run when generateLocalizations is called through build target', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testWithoutContext(
+      'dart format is run when generateLocalizations is called through build target',
+      () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -354,16 +376,12 @@ format: true
     const Target buildTarget = GenerateLocalizationsTarget();
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'Artifact.engineDartBinary',
-          'format',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-        ]
-      )
-    );
+    processManager.addCommand(const FakeCommand(command: <String>[
+      'Artifact.engineDartBinary',
+      'format',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
+      '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+    ]));
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
@@ -373,15 +391,19 @@ format: true
     );
     await buildTarget.build(environment);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('nullable-getter defaults to true', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -400,9 +422,11 @@ format: true
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(
+        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), isTrue);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(),
+        isTrue);
     expect(
       outputDirectory.childFile('app_localizations.dart').readAsStringSync(),
       contains('static AppLocalizations? of(BuildContext context)'),
@@ -412,8 +436,11 @@ format: true
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('throw when generate: false and uses synthetic package when run with l10n.yaml', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testUsingContext(
+      'throw when generate: false and uses synthetic package when run with l10n.yaml',
+      () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -443,17 +470,20 @@ format: true
       processManager: processManager,
     );
     expect(
-      () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
-      throwsToolExit(message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.')
-    );
-
+        () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
+        throwsToolExit(
+            message:
+                'Attempted to generate localizations code without having the flutter: generate flag turned on.'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('throw when generate: false and uses synthetic package when run via commandline options', () async {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+  testUsingContext(
+      'throw when generate: false and uses synthetic package when run via commandline options',
+      () async {
+    final File arbFile = fileSystem
+        .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -482,15 +512,18 @@ format: true
       processManager: processManager,
     );
     expect(
-      () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package']),
-      throwsToolExit(message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.')
-    );
+        () async => createTestCommandRunner(command)
+            .run(<String>['gen-l10n', '--synthetic-package']),
+        throwsToolExit(
+            message:
+                'Attempted to generate localizations code without having the flutter: generate flag turned on.'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('throws error when unexpected positional argument is provided', () {
+  testUsingContext(
+      'throws error when unexpected positional argument is provided', () {
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -498,20 +531,26 @@ format: true
       processManager: processManager,
     );
     expect(
-      () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package', 'false']),
-      throwsToolExit(message: 'Unexpected positional argument "false".')
-    );
+        () async => createTestCommandRunner(command)
+            .run(<String>['gen-l10n', '--synthetic-package', 'false']),
+        throwsToolExit(message: 'Unexpected positional argument "false".'));
   });
 
   group(AppResourceBundle, () {
-    testWithoutContext("can be parsed without FormatException when it's content is empty", () {
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+    testWithoutContext(
+        "can be parsed without FormatException when it's content is empty", () {
+      final File arbFile = fileSystem
+          .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       expect(AppResourceBundle(arbFile), isA<AppResourceBundle>());
     });
 
-    testUsingContext("would not fail the gen-l10n command when it's content is empty", () async {
-      fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb')).createSync(recursive: true);
+    testUsingContext(
+        "would not fail the gen-l10n command when it's content is empty",
+        () async {
+      fileSystem
+          .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+          .createSync(recursive: true);
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
       final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
@@ -522,10 +561,14 @@ format: true
       );
       await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
-      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+      final Directory outputDirectory = fileSystem.directory(
+          fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
       expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+      expect(
+          outputDirectory.childFile('app_localizations_en.dart').existsSync(),
+          true);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(),
+          true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),

@@ -10,18 +10,20 @@ import '../xcode_project.dart';
 // compiled dart frameworks.
 class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
   XcodeScriptBuildPhaseMigration(XcodeBasedProject project, super.logger)
-    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
+      : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
 
   @override
   void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping script build phase dependency analysis removal.');
+      logger.printTrace(
+          'Xcode project not found, skipping script build phase dependency analysis removal.');
       return;
     }
 
-    final String originalProjectContents = _xcodeProjectInfoFile.readAsStringSync();
+    final String originalProjectContents =
+        _xcodeProjectInfoFile.readAsStringSync();
 
     // Uncheck "Based on dependency analysis" which causes a warning in Xcode 14.
     // Unchecking sets "alwaysOutOfDate = 1" in the Xcode project file.
@@ -50,7 +52,8 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 ''';
-      newProjectContents = newProjectContents.replaceAll(scriptBuildPhaseOriginal, scriptBuildPhaseReplacement);
+      newProjectContents = newProjectContents.replaceAll(
+          scriptBuildPhaseOriginal, scriptBuildPhaseReplacement);
     }
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Removing script build phase dependency analysis.');

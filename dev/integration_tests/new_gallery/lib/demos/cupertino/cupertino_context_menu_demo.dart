@@ -13,7 +13,8 @@ class CupertinoContextMenuDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations galleryLocalizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations galleryLocalizations =
+        GalleryLocalizations.of(context)!;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,

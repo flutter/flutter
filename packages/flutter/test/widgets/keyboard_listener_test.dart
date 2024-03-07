@@ -10,8 +10,10 @@ void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
+    await tester
+        .pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
+    await tester
+        .pumpWidget(KeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(Container());
   });
 
@@ -71,7 +73,8 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events',
+      (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
 
     final FocusNode focusNode = FocusNode();

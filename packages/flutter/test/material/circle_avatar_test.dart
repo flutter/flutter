@@ -17,7 +17,8 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
 void main() {
-  testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with dark background color',
+      (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -29,17 +30,20 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
+    expect(paragraph.text.style!.color,
+        equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar with light background color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with light background color',
+      (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade100;
     await tester.pumpWidget(
       wrap(
@@ -51,17 +55,20 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorDark));
+    expect(paragraph.text.style!.color,
+        equals(ThemeData.fallback().primaryColorDark));
   });
 
-  testWidgets('CircleAvatar with image background', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with image background',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -71,14 +78,16 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar with image foreground', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with image foreground',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -88,34 +97,38 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets(
+      'CircleAvatar backgroundImage is used as a fallback for foregroundImage',
+      // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+      experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+      (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
     await tester.pumpWidget(
       wrap(
         child: RepaintBoundary(
           child: CircleAvatar(
-          foregroundImage: errorImage,
-          backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
-          radius: 50.0,
-          onForegroundImageError: (_,__) => caughtForegroundImageError = true,
+            foregroundImage: errorImage,
+            backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+            radius: 50.0,
+            onForegroundImageError: (_, __) =>
+                caughtForegroundImageError = true,
           ),
         ),
       ),
     );
 
     expect(caughtForegroundImageError, true);
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
@@ -126,7 +139,8 @@ void main() {
     );
   });
 
-  testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with foreground color',
+      (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -139,7 +153,8 @@ void main() {
 
     final ThemeData fallback = ThemeData.fallback();
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(40.0, 40.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
@@ -149,7 +164,8 @@ void main() {
     expect(paragraph.text.style!.color, equals(foregroundColor));
   });
 
-  testWidgets('Material3 - CircleAvatar default colors', (WidgetTester tester) async {
+  testWidgets('Material3 - CircleAvatar default colors',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       wrap(
@@ -162,16 +178,19 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(theme.colorScheme.primaryContainer));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(theme.colorScheme.onPrimaryContainer));
+    expect(paragraph.text.style!.color,
+        equals(theme.colorScheme.onPrimaryContainer));
   });
 
-  testWidgets('CircleAvatar text does not expand with textScaler', (WidgetTester tester) async {
+  testWidgets('CircleAvatar text does not expand with textScaler',
+      (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -229,14 +248,16 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
+    expect(paragraph.text.style!.color,
+        equals(ThemeData.fallback().primaryColorLight));
   });
 
   testWidgets('CircleAvatar respects maxRadius', (WidgetTester tester) async {
@@ -251,17 +272,20 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
+    expect(paragraph.text.style!.color,
+        equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
+  testWidgets('CircleAvatar respects setting both minRadius and maxRadius',
+      (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -274,14 +298,16 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box =
+        tester.renderObject(find.byType(CircleAvatar));
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
+    expect(paragraph.text.style!.color,
+        equals(ThemeData.fallback().primaryColorLight));
   });
 
   group('Material 2', () {
@@ -289,8 +315,10 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Material2 - CircleAvatar default colors with light theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
+    testWidgets('Material2 - CircleAvatar default colors with light theme',
+        (WidgetTester tester) async {
+      final ThemeData theme =
+          ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -302,17 +330,21 @@ void main() {
         ),
       );
 
-      final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+      final RenderConstrainedBox box =
+          tester.renderObject(find.byType(CircleAvatar));
       final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
       final BoxDecoration decoration = child.decoration as BoxDecoration;
       expect(decoration.color, equals(theme.primaryColorLight));
 
       final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-      expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
+      expect(paragraph.text.style!.color,
+          equals(theme.primaryTextTheme.titleLarge!.color));
     });
 
-    testWidgets('Material2 - CircleAvatar default colors with dark theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
+    testWidgets('Material2 - CircleAvatar default colors with dark theme',
+        (WidgetTester tester) async {
+      final ThemeData theme =
+          ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -324,25 +356,26 @@ void main() {
         ),
       );
 
-      final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+      final RenderConstrainedBox box =
+          tester.renderObject(find.byType(CircleAvatar));
       final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
       final BoxDecoration decoration = child.decoration as BoxDecoration;
       expect(decoration.color, equals(theme.primaryColorDark));
 
       final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-      expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
+      expect(paragraph.text.style!.color,
+          equals(theme.primaryTextTheme.titleLarge!.color));
     });
   });
 }
 
-Widget wrap({ required Widget child }) {
+Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
       data: const MediaQueryData(),
       child: MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Center(child: child)),
+          theme: ThemeData(useMaterial3: false), home: Center(child: child)),
     ),
   );
 }

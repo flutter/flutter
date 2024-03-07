@@ -43,16 +43,19 @@ class _FrontLayer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (onTap != null) MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    excludeFromSemantics:
-                        true, // Because there is already a "Close Menu" button on screen.
-                    onTap: onTap,
-                    child: pageTopArea,
-                  ),
-                ) else pageTopArea,
+          if (onTap != null)
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                excludeFromSemantics:
+                    true, // Because there is already a "Close Menu" button on screen.
+                onTap: onTap,
+                child: pageTopArea,
+              ),
+            )
+          else
+            pageTopArea,
           Expanded(
             child: child,
           ),

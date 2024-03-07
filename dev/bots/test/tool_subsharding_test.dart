@@ -23,7 +23,8 @@ void main() {
       {"missing": "entry"}
       {"other": true}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final TestFileReporterResults result =
+          TestFileReporterResults.fromFile(file);
       expect(result.allTestSpecs, isEmpty);
     });
 
@@ -47,10 +48,12 @@ void main() {
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"ProjectValidatorTask","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}
       {"success":true,"type":"done","time":4870}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = TestFileReporterResults.fromFile(file).allTestSpecs;
+      final Map<int, TestSpecs> result =
+          TestFileReporterResults.fromFile(file).allTestSpecs;
       expect(result, contains(0));
       expect(result, contains(1));
-      expect(result[0]!.path, 'test/general.shard/project_validator_result_test.dart');
+      expect(result[0]!.path,
+          'test/general.shard/project_validator_result_test.dart');
       expect(result[0]!.milliseconds, 4841);
       expect(result[1]!.path, 'other_path');
       expect(result[1]!.milliseconds, 4000);
@@ -62,7 +65,8 @@ void main() {
       {"suite":{"id":1,"platform":"vm","path":"other_path"},"type":"suite","time":1000}
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final TestFileReporterResults result =
+          TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
     });
 
@@ -87,11 +91,14 @@ void main() {
       {"testID":6,"error":"my error","isFailure":true,"type":"error","time":1107}
       {"success":false,"type":"done","time":1120}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
+      final TestFileReporterResults result =
+          TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
       expect(result.errors.length == 3, true);
-      expect(result.errors[0].contains('Expected: <true>  Actual: <false>'), true);
-      expect(result.errors[1].contains('Expected: <false>  Actual: <true>'), true);
+      expect(
+          result.errors[0].contains('Expected: <true>  Actual: <false>'), true);
+      expect(
+          result.errors[1].contains('Expected: <false>  Actual: <true>'), true);
       expect(result.errors[2].contains('my error'), true);
     });
   });

@@ -22,10 +22,11 @@ void main() {
   });
 
   testWithoutContext(
-      'gradle prints warning when Flutter\'s Gradle plugins are applied using deprecated "apply plugin" way', () async {
+      'gradle prints warning when Flutter\'s Gradle plugins are applied using deprecated "apply plugin" way',
+      () async {
     // Create a new flutter project.
     final String flutterBin =
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -44,9 +45,14 @@ void main() {
 
     // Change build files to use deprecated "apply plugin:" way.
     // Contents are taken from https://github.com/flutter/flutter/issues/135392 (for Flutter 3.10)
-    final File settings = tempDir.childDirectory('android').childFile('settings.gradle');
-    final File buildGradle = tempDir.childDirectory('android').childFile('build.gradle');
-    final File appBuildGradle = tempDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    final File settings =
+        tempDir.childDirectory('android').childFile('settings.gradle');
+    final File buildGradle =
+        tempDir.childDirectory('android').childFile('build.gradle');
+    final File appBuildGradle = tempDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
     settings.writeAsStringSync(r'''
 include ':app'
 
@@ -59,9 +65,8 @@ localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
-'''
-    );
-  buildGradle.writeAsStringSync(r'''
+''');
+    buildGradle.writeAsStringSync(r'''
 buildscript {
     ext.kotlin_version = '1.7.10'
     repositories {
@@ -94,7 +99,7 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 ''');
-  appBuildGradle.writeAsStringSync(r'''
+    appBuildGradle.writeAsStringSync(r'''
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -178,16 +183,19 @@ dependencies {
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     // Verify that stderr output contains deprecation warnings.
-    final List<String> actualLines = LineSplitter.split(result.stderr.toString()).toList();
+    final List<String> actualLines =
+        LineSplitter.split(result.stderr.toString()).toList();
     expect(
-      actualLines.any((String msg) => msg.contains(
-        "You are applying Flutter's main Gradle plugin imperatively"),
+      actualLines.any(
+        (String msg) => msg.contains(
+            "You are applying Flutter's main Gradle plugin imperatively"),
       ),
       isTrue,
     );
     expect(
-      actualLines.any((String msg) => msg.contains(
-        "You are applying Flutter's app_plugin_loader Gradle plugin imperatively"),
+      actualLines.any(
+        (String msg) => msg.contains(
+            "You are applying Flutter's app_plugin_loader Gradle plugin imperatively"),
       ),
       isTrue,
     );

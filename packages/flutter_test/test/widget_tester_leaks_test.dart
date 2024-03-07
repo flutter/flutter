@@ -49,7 +49,10 @@ void main() {
       _testExecutions.add(execution);
       testWidgets(execution.name, experimentalLeakTesting: settings,
           (WidgetTester tester) async {
-        await test.body((Widget widget, [Duration? duration]) => tester.pumpWidget(widget, duration: duration), tester.runAsync);
+        await test.body(
+            (Widget widget, [Duration? duration]) =>
+                tester.pumpWidget(widget, duration: duration),
+            tester.runAsync);
       });
     }
   }

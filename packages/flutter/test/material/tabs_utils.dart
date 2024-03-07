@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 // This returns render paragraph of the Tab label text.
 RenderParagraph getTabText(WidgetTester tester, String text) {
   return tester.renderObject<RenderParagraph>(find.descendant(
-    of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_TabStyle'),
+    of: find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TabStyle'),
     matching: find.text(text),
   ));
 }
@@ -33,7 +34,7 @@ TabController createTabController({
 
 // This widget is used to test widget state in the tabs_test.dart file.
 class TabStateMarker extends StatefulWidget {
-  const TabStateMarker({ super.key, this.child });
+  const TabStateMarker({super.key, this.child});
 
   final Widget? child;
 
@@ -51,7 +52,8 @@ class TabStateMarkerState extends State<TabStateMarker> {
 }
 
 // Tab controller builder for TabControllerFrame widget.
-typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
+typedef TabControllerFrameBuilder = Widget Function(
+    BuildContext context, TabController controller);
 
 // This widget creates a TabController and passes it to the builder.
 class TabControllerFrame extends StatefulWidget {
@@ -70,7 +72,8 @@ class TabControllerFrame extends StatefulWidget {
   TabControllerFrameState createState() => TabControllerFrameState();
 }
 
-class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
+class TabControllerFrameState extends State<TabControllerFrame>
+    with SingleTickerProviderStateMixin {
   late TabController _controller;
 
   @override
@@ -113,10 +116,10 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
 }
 
 // This creates a Fake implementation of ScrollMetrics.
-class TabMockScrollMetrics extends Fake implements ScrollMetrics { }
+class TabMockScrollMetrics extends Fake implements ScrollMetrics {}
 
 class TabBarTestScrollPhysics extends ScrollPhysics {
-  const TabBarTestScrollPhysics({ super.parent });
+  const TabBarTestScrollPhysics({super.parent});
 
   @override
   TabBarTestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -128,7 +131,8 @@ class TabBarTestScrollPhysics extends ScrollPhysics {
     return offset == 10 ? 20 : offset;
   }
 
-  static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
+  static final SpringDescription _kDefaultSpring =
+      SpringDescription.withDampingRatio(
     mass: 0.5,
     stiffness: 500.0,
     ratio: 1.1,
@@ -179,15 +183,15 @@ class TabBodyState extends State<TabBody> {
   Widget build(BuildContext context) {
     return Center(
       child: widget.marker.isEmpty
-        ? Text('${widget.index}')
-        : Text('${widget.index}-${widget.marker}'),
+          ? Text('${widget.index}')
+          : Text('${widget.index}-${widget.marker}'),
     );
   }
 }
 
 // This widget is used to test the lifecycle of the TabBarView children with Ink widget.
 class TabKeepAliveInk extends StatefulWidget {
-  const TabKeepAliveInk({ super.key, required this.title });
+  const TabKeepAliveInk({super.key, required this.title});
 
   final String title;
 
@@ -195,7 +199,8 @@ class TabKeepAliveInk extends StatefulWidget {
   State<StatefulWidget> createState() => _TabKeepAliveInkState();
 }
 
-class _TabKeepAliveInkState extends State<TabKeepAliveInk> with AutomaticKeepAliveClientMixin {
+class _TabKeepAliveInkState extends State<TabKeepAliveInk>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -215,10 +220,12 @@ class TabAlwaysKeepAliveWidget extends StatefulWidget {
   static String text = 'AlwaysKeepAlive';
 
   @override
-  State<TabAlwaysKeepAliveWidget> createState() => _TabAlwaysKeepAliveWidgetState();
+  State<TabAlwaysKeepAliveWidget> createState() =>
+      _TabAlwaysKeepAliveWidgetState();
 }
 
-class _TabAlwaysKeepAliveWidgetState extends State<TabAlwaysKeepAliveWidget> with AutomaticKeepAliveClientMixin {
+class _TabAlwaysKeepAliveWidgetState extends State<TabAlwaysKeepAliveWidget>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 

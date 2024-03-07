@@ -32,7 +32,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   static List<String> getDaysOfWeek([String? locale]) {
     final DateTime now = DateTime.now();
-    final DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final DateTime firstDayOfWeek =
+        now.subtract(Duration(days: now.weekday - 1));
     return List<int>.generate(7, (int index) => index)
         .map((int value) => DateFormat(DateFormat.WEEKDAY, locale)
             .format(firstDayOfWeek.add(Duration(days: value))))

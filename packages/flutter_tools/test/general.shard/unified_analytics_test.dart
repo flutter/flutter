@@ -44,7 +44,10 @@ void main() {
 
       final String? enabledFeatures = getEnabledFeatures(config);
       expect(enabledFeatures, isNotNull);
-      expect(enabledFeatures!.split(','), unorderedEquals(<String>['enable-flutter-preview', 'cli-animations']));
+      expect(
+          enabledFeatures!.split(','),
+          unorderedEquals(
+              <String>['enable-flutter-preview', 'cli-animations']));
     });
   });
 
@@ -128,7 +131,9 @@ void main() {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
-        environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
+        environment: const <String, String>{
+          'FLUTTER_SUPPRESS_ANALYTICS': 'true'
+        },
         analyticsOverride: analyticsOverride,
         clientIde: clientIde,
         config: config,

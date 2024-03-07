@@ -155,7 +155,8 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
       letterSpacing: letterSpacingOrNone(0.5),
     );
 
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       // When the widget is larger, we increase the font size.
       TextStyle? headlineStyle = constraints.maxHeight >= pieChartMaxSize
           ? textTheme.headlineSmall!.copyWith(fontSize: 70)
@@ -254,7 +255,8 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
     double cumulativeTotal = 0.0;
     for (final RallyPieChartSegment segment in segments) {
       final Paint paint = Paint()..color = segment.color;
-      final double startAngle = _calculateStartAngle(cumulativeTotal, cumulativeSpace);
+      final double startAngle =
+          _calculateStartAngle(cumulativeTotal, cumulativeSpace);
       final double sweepAngle = _calculateSweepAngle(segment.value, 0);
       canvas.drawArc(outerRect, startAngle, sweepAngle, true, paint);
       cumulativeTotal += segment.value;

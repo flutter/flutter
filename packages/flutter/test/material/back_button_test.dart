@@ -34,7 +34,8 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
-  testWidgets('BackButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+  testWidgets('BackButton onPressed overrides default pop behavior',
+      (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -43,7 +44,8 @@ void main() {
           '/next': (BuildContext context) {
             return Material(
               child: Center(
-                child: BackButton(onPressed: () => customCallbackWasCalled = true),
+                child:
+                    BackButton(onPressed: () => customCallbackWasCalled = true),
               ),
             );
           },
@@ -56,7 +58,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Home'), findsNothing); // Start off on the second page.
-    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled,
+        false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(BackButton));
 
     await tester.pumpAndSettle();
@@ -103,11 +106,16 @@ void main() {
       ),
     );
 
-    final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
-    final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
-    final Icon linuxIcon = tester.widget(find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
-    final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
-    final Icon windowsIcon = tester.widget(find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)));
+    final Icon androidIcon = tester.widget(find.descendant(
+        of: find.byKey(androidKey), matching: find.byType(Icon)));
+    final Icon iOSIcon = tester.widget(
+        find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+    final Icon linuxIcon = tester.widget(
+        find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
+    final Icon macOSIcon = tester.widget(
+        find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
+    final Icon windowsIcon = tester.widget(find.descendant(
+        of: find.byKey(windowsKey), matching: find.byType(Icon)));
     expect(iOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(linuxIcon.icon == androidIcon.icon, isTrue);
     expect(macOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
@@ -154,7 +162,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('BackButton.style.iconColor parameter overrides BackButton.color', (WidgetTester tester) async {
+  testWidgets('BackButton.style.iconColor parameter overrides BackButton.color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -208,15 +217,17 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
-      tooltip: 'Back',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(BackButton)),
+        matchesSemantics(
+          tooltip: 'Back',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -251,15 +262,17 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(CloseButton)), matchesSemantics(
-      tooltip: 'Close',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(CloseButton)),
+        matchesSemantics(
+          tooltip: 'Close',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -281,7 +294,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('CloseButton color with ButtonStyle', (WidgetTester tester) async {
+  testWidgets('CloseButton color with ButtonStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -302,7 +316,9 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('CloseButton.style.iconColor parameter overrides CloseButton.color', (WidgetTester tester) async {
+  testWidgets(
+      'CloseButton.style.iconColor parameter overrides CloseButton.color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -325,7 +341,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+  testWidgets('CloseButton onPressed overrides default pop behavior',
+      (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -334,7 +351,8 @@ void main() {
           '/next': (BuildContext context) {
             return Material(
               child: Center(
-                child: CloseButton(onPressed: () => customCallbackWasCalled = true),
+                child: CloseButton(
+                    onPressed: () => customCallbackWasCalled = true),
               ),
             );
           },
@@ -346,7 +364,8 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('Home'), findsNothing); // Start off on the second page.
-    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled,
+        false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(CloseButton));
 
     await tester.pumpAndSettle();

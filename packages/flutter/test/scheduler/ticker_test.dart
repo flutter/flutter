@@ -104,7 +104,7 @@ void main() {
     addTearDown(() => ticker.dispose());
 
     void testFunction() {
-      ticker = Ticker((Duration _) { });
+      ticker = Ticker((Duration _) {});
     }
 
     testFunction();
@@ -113,7 +113,8 @@ void main() {
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
   });
 
-  testWidgets('Ticker can be sped up with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be sped up with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 0.5; // Move twice as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -131,7 +132,8 @@ void main() {
     timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
-  testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be slowed down with time dilation',
+      (WidgetTester tester) async {
     timeDilation = 2.0; // Move half as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -149,7 +151,8 @@ void main() {
     timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
-  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
+  testWidgets('Ticker stops ticking when application is paused',
+      (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
@@ -173,7 +176,8 @@ void main() {
     setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
+  testWidgets('Ticker can be created before application unpauses',
+      (WidgetTester tester) async {
     setAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;
@@ -205,7 +209,10 @@ void main() {
 
   test('Ticker dispatches memory events', () async {
     await expectLater(
-      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker,),
+      await memoryEvents(
+        () => Ticker((_) {}).dispose(),
+        Ticker,
+      ),
       areCreateAndDispose,
     );
   });

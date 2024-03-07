@@ -36,7 +36,8 @@ class _DesktopExampleState extends State<DesktopExample> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -72,7 +73,8 @@ class _DesktopExampleState extends State<DesktopExample> {
                 thickness: 20.0,
                 thumbVisibility: true,
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,

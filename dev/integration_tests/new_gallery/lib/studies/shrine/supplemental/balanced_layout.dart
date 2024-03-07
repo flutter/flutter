@@ -47,8 +47,9 @@ String _encodeParameters({
   required double largeImageWidth,
   required double smallImageWidth,
 }) {
-  final String productString =
-      <String>[for (final Product product in products) product.id.toString()].join(',');
+  final String productString = <String>[
+    for (final Product product in products) product.id.toString()
+  ].join(',');
   return '$columnCount;$productString,$largeImageWidth,$smallImageWidth';
 }
 
@@ -95,11 +96,14 @@ void _iterateUntilBalanced(
 
         bool success = false;
 
-        final double bestHeight = (columnHeights[source] + columnHeights[target]) / 2;
+        final double bestHeight =
+            (columnHeights[source] + columnHeights[target]) / 2;
         final double scoreLimit = (columnHeights[source] - bestHeight).abs();
 
-        final List<_TaggedHeightData> sourceObjects = _toListAndAddEmpty(columnObjects[source]);
-        final List<_TaggedHeightData> targetObjects = _toListAndAddEmpty(columnObjects[target]);
+        final List<_TaggedHeightData> sourceObjects =
+            _toListAndAddEmpty(columnObjects[source]);
+        final List<_TaggedHeightData> targetObjects =
+            _toListAndAddEmpty(columnObjects[target]);
 
         _TaggedHeightData? bestA, bestB;
         double? bestScore;
@@ -165,8 +169,9 @@ List<List<int>> _balancedDistribution({
 }) {
   assert(biases.length == columnCount);
 
-  final List<Set<_TaggedHeightData>> columnObjects = List<Set<_TaggedHeightData>>.generate(
-      columnCount, (int column) => <_TaggedHeightData>{});
+  final List<Set<_TaggedHeightData>> columnObjects =
+      List<Set<_TaggedHeightData>>.generate(
+          columnCount, (int column) => <_TaggedHeightData>{});
 
   final List<double> columnHeights = List<double>.from(biases);
 
@@ -180,7 +185,8 @@ List<List<int>> _balancedDistribution({
 
   return <List<int>>[
     for (final Set<_TaggedHeightData> column in columnObjects)
-      <int>[for (final _TaggedHeightData object in column) object.index]..sort(),
+      <int>[for (final _TaggedHeightData object in column) object.index]
+        ..sort(),
   ];
 }
 

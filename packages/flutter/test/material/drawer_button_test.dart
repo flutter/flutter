@@ -28,15 +28,16 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
-  testWidgets('DrawerButton onPressed overrides default end drawer open behaviour',
+  testWidgets(
+      'DrawerButton onPressed overrides default end drawer open behaviour',
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: DrawerButton(
-                onPressed: () => customCallbackWasCalled = true),
+            child:
+                DrawerButton(onPressed: () => customCallbackWasCalled = true),
           ),
           drawer: const Drawer(),
         ),
@@ -129,7 +130,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('DrawerButton color with ButtonStyle', (WidgetTester tester) async {
+  testWidgets('DrawerButton color with ButtonStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -175,15 +177,17 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(DrawerButton)), matchesSemantics(
-      tooltip: 'Open navigation menu',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(DrawerButton)),
+        matchesSemantics(
+          tooltip: 'Open navigation menu',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -232,15 +236,17 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(EndDrawerButton)), matchesSemantics(
-      tooltip: 'Open navigation menu',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(EndDrawerButton)),
+        matchesSemantics(
+          tooltip: 'Open navigation menu',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -262,7 +268,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('EndDrawerButton color with ButtonStyle', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton color with ButtonStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -283,14 +290,16 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('EndDrawerButton onPressed overrides default end drawer open behaviour',
+  testWidgets(
+      'EndDrawerButton onPressed overrides default end drawer open behaviour',
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: EndDrawerButton(onPressed: () => customCallbackWasCalled = true),
+            child: EndDrawerButton(
+                onPressed: () => customCallbackWasCalled = true),
           ),
           endDrawer: const Drawer(),
         ),

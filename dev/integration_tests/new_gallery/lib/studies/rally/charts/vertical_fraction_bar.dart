@@ -16,7 +16,8 @@ class VerticalFractionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       return SizedBox(
         height: constraints.maxHeight,
         width: 4,

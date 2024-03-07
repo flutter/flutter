@@ -10,8 +10,10 @@ void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
+    await tester.pumpWidget(
+        RawKeyboardListener(focusNode: focusNode, child: Container()));
+    await tester.pumpWidget(
+        RawKeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(Container());
   });
 
@@ -38,11 +40,15 @@ void main() {
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
-    final RawKeyEventDataFuchsia typedData = events[0].data as RawKeyEventDataFuchsia;
+    final RawKeyEventDataFuchsia typedData =
+        events[0].data as RawKeyEventDataFuchsia;
     expect(typedData.hidUsage, 0x700e3);
     expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
-    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
+    expect(
+        typedData.isModifierPressed(ModifierKey.metaModifier,
+            side: KeyboardSide.left),
+        isTrue);
 
     await tester.pumpWidget(Container());
   }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
@@ -73,12 +79,16 @@ void main() {
     final RawKeyEventDataWeb typedData = events[0].data as RawKeyEventDataWeb;
     expect(typedData.code, 'MetaLeft');
     expect(typedData.metaState, RawKeyEventDataWeb.modifierMeta);
-    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
+    expect(
+        typedData.isModifierPressed(ModifierKey.metaModifier,
+            side: KeyboardSide.left),
+        isTrue);
 
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events',
+      (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = FocusNode();

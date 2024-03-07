@@ -62,7 +62,8 @@ class ExpandingBottomSheet extends StatefulWidget {
 
   static ExpandingBottomSheetState? of(BuildContext context,
       {bool isNullOk = false}) {
-    final ExpandingBottomSheetState? result = context.findAncestorStateOfType<ExpandingBottomSheetState>();
+    final ExpandingBottomSheetState? result =
+        context.findAncestorStateOfType<ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }
@@ -233,7 +234,8 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   Animation<double> _getShapeTopStartAnimation(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
 
-    final double cornerRadius = isDesktop ? _desktopCornerRadius : _mobileCornerRadius;
+    final double cornerRadius =
+        isDesktop ? _desktopCornerRadius : _mobileCornerRadius;
 
     if (_controller.status == AnimationStatus.forward) {
       return Tween<double>(begin: cornerRadius, end: 0).animate(
@@ -557,9 +559,11 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
         animation: widget.hideController,
         builder: (BuildContext context, Widget? child) => AnimatedBuilder(
           animation: widget.expandingController,
-          builder: (BuildContext context, Widget? child) => ScopedModelDescendant<AppStateModel>(
-            builder: (BuildContext context, Widget? child, AppStateModel model) =>
-                _buildSlideAnimation(context, _buildCart(context)),
+          builder: (BuildContext context, Widget? child) =>
+              ScopedModelDescendant<AppStateModel>(
+            builder:
+                (BuildContext context, Widget? child, AppStateModel model) =>
+                    _buildSlideAnimation(context, _buildCart(context)),
           ),
         ),
       ),
@@ -609,7 +613,8 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
 
   Widget _buildThumbnail(
       BuildContext context, int index, Animation<double> animation) {
-    final Animation<double> thumbnailSize = Tween<double>(begin: 0.8, end: 1).animate(
+    final Animation<double> thumbnailSize =
+        Tween<double>(begin: 0.8, end: 1).animate(
       CurvedAnimation(
         curve: const Interval(0.33, 1, curve: Curves.easeIn),
         parent: animation,
@@ -723,7 +728,8 @@ class ExtraProductsNumber extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext builder, Widget? child, AppStateModel model) => _buildOverflow(model, context),
+      builder: (BuildContext builder, Widget? child, AppStateModel model) =>
+          _buildOverflow(model, context),
     );
   }
 }
@@ -800,7 +806,8 @@ class _ListModel {
 
   void _removeAt(int index) {
     final int removedItem = _items.removeAt(index);
-    _animatedList!.removeItem(index, (BuildContext context, Animation<double> animation) {
+    _animatedList!.removeItem(index,
+        (BuildContext context, Animation<double> animation) {
       return removedItemBuilder(removedItem, context, animation);
     });
   }

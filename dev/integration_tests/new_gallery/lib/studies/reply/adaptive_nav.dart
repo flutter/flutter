@@ -26,7 +26,8 @@ import 'waterfall_notched_rectangle.dart';
 
 const String _assetsPackage = 'flutter_gallery_assets';
 const String _iconAssetLocation = 'reply/icons';
-const String _folderIconAssetLocation = '$_iconAssetLocation/twotone_folder.png';
+const String _folderIconAssetLocation =
+    '$_iconAssetLocation/twotone_folder.png';
 final GlobalKey<NavigatorState> desktopMailNavKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> mobileMailNavKey = GlobalKey<NavigatorState>();
 const double _kFlingVelocity = 2.0;
@@ -49,7 +50,8 @@ class _AdaptiveNavState extends State<AdaptiveNav> {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isTablet = isDisplaySmallDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final List<_Destination> navigationDestinations = <_Destination>[
       _Destination(
         type: MailboxPageType.inbox,
@@ -170,8 +172,8 @@ class _DesktopNavState extends State<_DesktopNav>
             builder: (BuildContext context, EmailStore model, Widget? child) {
               return LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
-                  final int selectedIndex =
-                      widget.destinations.indexWhere((_Destination destination) {
+                  final int selectedIndex = widget.destinations
+                      .indexWhere((_Destination destination) {
                     return destination.type == model.selectedMailboxPage;
                   });
                   return Container(
@@ -186,10 +188,12 @@ class _DesktopNavState extends State<_DesktopNav>
                         child: IntrinsicHeight(
                           child: ValueListenableBuilder<bool>(
                             valueListenable: _isExtended,
-                            builder: (BuildContext context, bool value, Widget? child) {
+                            builder: (BuildContext context, bool value,
+                                Widget? child) {
                               return NavigationRail(
                                 destinations: <NavigationRailDestination>[
-                                  for (final _Destination destination in widget.destinations)
+                                  for (final _Destination destination
+                                      in widget.destinations)
                                     NavigationRailDestination(
                                       icon: Material(
                                         key: ValueKey<String>(
@@ -259,7 +263,8 @@ class _NavigationRailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final Animation<double> animation =
+        NavigationRail.extendedAnimation(context);
 
     return AnimatedBuilder(
       animation: animation,
@@ -355,8 +360,10 @@ class _NavigationRailFolderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
-    final NavigationRailThemeData navigationRailTheme = theme.navigationRailTheme;
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final NavigationRailThemeData navigationRailTheme =
+        theme.navigationRailTheme;
+    final Animation<double> animation =
+        NavigationRail.extendedAnimation(context);
 
     return AnimatedBuilder(
       animation: animation,
@@ -457,7 +464,8 @@ class _MobileNav extends StatefulWidget {
 }
 
 class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
-  final GlobalKey<State<StatefulWidget>> _bottomDrawerKey = GlobalKey(debugLabel: 'Bottom Drawer');
+  final GlobalKey<State<StatefulWidget>> _bottomDrawerKey =
+      GlobalKey(debugLabel: 'Bottom Drawer');
   late AnimationController _drawerController;
   late AnimationController _dropArrowController;
   late AnimationController _bottomAppBarController;
@@ -644,7 +652,8 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
               leading: Consumer<EmailStore>(
-                builder: (BuildContext context, EmailStore model, Widget? child) {
+                builder:
+                    (BuildContext context, EmailStore model, Widget? child) {
                   return _BottomDrawerDestinations(
                     destinations: widget.destinations,
                     drawerController: _drawerController,
@@ -724,7 +733,8 @@ class _AnimatedBottomAppBar extends StatelessWidget {
     );
 
     return Selector<EmailStore, bool>(
-      selector: (BuildContext context, EmailStore emailStore) => emailStore.onMailView,
+      selector: (BuildContext context, EmailStore emailStore) =>
+          emailStore.onMailView,
       builder: (BuildContext context, bool onMailView, Widget? child) {
         bottomAppBarController.forward();
 
@@ -769,8 +779,8 @@ class _AnimatedBottomAppBar extends StatelessWidget {
                                 : FadeTransition(
                                     opacity: fadeOut,
                                     child: Text(
-                                      navigationDestinations
-                                          .firstWhere((_Destination destination) {
+                                      navigationDestinations.firstWhere(
+                                          (_Destination destination) {
                                         return destination.type ==
                                             selectedMailbox;
                                       }).textLabel,
@@ -1000,7 +1010,8 @@ class _BottomDrawerFolderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final NavigationRailThemeData navigationRailTheme = theme.navigationRailTheme;
+    final NavigationRailThemeData navigationRailTheme =
+        theme.navigationRailTheme;
 
     return Column(
       children: <Widget>[
@@ -1133,9 +1144,11 @@ class _ReplyFabState extends State<_ReplyFab>
     const CircleBorder circleFabBorder = CircleBorder();
 
     return Selector<EmailStore, bool>(
-      selector: (BuildContext context, EmailStore emailStore) => emailStore.onMailView,
+      selector: (BuildContext context, EmailStore emailStore) =>
+          emailStore.onMailView,
       builder: (BuildContext context, bool onMailView, Widget? child) {
-        final _FadeThroughTransitionSwitcher fabSwitcher = _FadeThroughTransitionSwitcher(
+        final _FadeThroughTransitionSwitcher fabSwitcher =
+            _FadeThroughTransitionSwitcher(
           fillColor: Colors.transparent,
           child: onMailView
               ? Icon(
@@ -1151,7 +1164,8 @@ class _ReplyFabState extends State<_ReplyFab>
         final String tooltip = onMailView ? 'Reply' : 'Compose';
 
         if (isDesktop) {
-          final Animation<double> animation = NavigationRail.extendedAnimation(context);
+          final Animation<double> animation =
+              NavigationRail.extendedAnimation(context);
           return Container(
             height: 56,
             padding: EdgeInsets.symmetric(
@@ -1195,14 +1209,16 @@ class _ReplyFabState extends State<_ReplyFab>
         } else {
           // TODO(x): State restoration of compose page on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
           return OpenContainer(
-            openBuilder: (BuildContext context, void Function() closedContainer) {
+            openBuilder:
+                (BuildContext context, void Function() closedContainer) {
               return const ComposePage();
             },
             openColor: theme.cardColor,
             closedShape: circleFabBorder,
             closedColor: theme.colorScheme.secondary,
             closedElevation: 6,
-            closedBuilder: (BuildContext context, void Function() openContainer) {
+            closedBuilder:
+                (BuildContext context, void Function() openContainer) {
               return Tooltip(
                 message: tooltip,
                 child: InkWell(
@@ -1238,7 +1254,8 @@ class _FadeThroughTransitionSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTransitionSwitcher(
-      transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+      transitionBuilder: (Widget child, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
         return FadeThroughTransition(
           fillColor: fillColor,
           animation: animation,
@@ -1259,11 +1276,13 @@ class _SharedAxisTransitionSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<EmailStore, bool>(
-      selector: (BuildContext context, EmailStore emailStore) => emailStore.onSearchPage,
+      selector: (BuildContext context, EmailStore emailStore) =>
+          emailStore.onSearchPage,
       builder: (BuildContext context, bool onSearchPage, Widget? child) {
         return PageTransitionSwitcher(
           reverse: !onSearchPage,
-          transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+          transitionBuilder: (Widget child, Animation<double> animation,
+              Animation<double> secondaryAnimation) {
             return SharedAxisTransition(
               fillColor: Theme.of(context).colorScheme.background,
               animation: animation,

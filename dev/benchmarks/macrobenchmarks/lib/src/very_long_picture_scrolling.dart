@@ -17,7 +17,8 @@ class VeryLongPictureScrollingPerf extends StatefulWidget {
   State createState() => VeryLongPictureScrollingPerfState();
 }
 
-class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPerf> {
+class VeryLongPictureScrollingPerfState
+    extends State<VeryLongPictureScrollingPerf> {
   bool consolidate = false;
   bool useList = false;
   Int16List waveData = loadGraph();
@@ -30,17 +31,23 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
           Row(
             children: <Widget>[
               const Text('list:'),
-              Checkbox(value: useList, onChanged: (bool? value) => setState(() {
-                useList = value!;
-              }),),
+              Checkbox(
+                value: useList,
+                onChanged: (bool? value) => setState(() {
+                  useList = value!;
+                }),
+              ),
             ],
           ),
           Row(
             children: <Widget>[
               const Text('consolidate:'),
-              Checkbox(value: consolidate, onChanged: (bool? value) => setState(() {
-                consolidate = value!;
-              }),),
+              Checkbox(
+                value: consolidate,
+                onChanged: (bool? value) => setState(() {
+                  consolidate = value!;
+                }),
+              ),
             ],
           ),
         ],
@@ -51,36 +58,35 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
         height: MediaQuery.of(context).size.height,
         child: useList
             ? ListView.builder(
-          key: const ValueKey<String>('vlp_list_view_scrollable'),
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          itemCount: (waveData.length / 200).ceil(),
-          itemExtent: 100,
-          itemBuilder: (BuildContext context, int index) => CustomPaint(
-              painter: PaintSomeTest(
-                waveData: waveData,
-                from: index * 200,
-                to: min((index + 1) * 200, waveData.length - 1),
-              )
-          ),
-        )
-            : SingleChildScrollView(
-          key: const ValueKey<String>('vlp_single_child_scrollable'),
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 20,
-            height: MediaQuery.of(context).size.height,
-            child: RepaintBoundary(
-              child: CustomPaint(
-                isComplex: true,
-                painter: PaintTest(
-                  consolidate: consolidate,
+                key: const ValueKey<String>('vlp_list_view_scrollable'),
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                itemCount: (waveData.length / 200).ceil(),
+                itemExtent: 100,
+                itemBuilder: (BuildContext context, int index) => CustomPaint(
+                    painter: PaintSomeTest(
                   waveData: waveData,
+                  from: index * 200,
+                  to: min((index + 1) * 200, waveData.length - 1),
+                )),
+              )
+            : SingleChildScrollView(
+                key: const ValueKey<String>('vlp_single_child_scrollable'),
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 20,
+                  height: MediaQuery.of(context).size.height,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      isComplex: true,
+                      painter: PaintTest(
+                        consolidate: consolidate,
+                        waveData: waveData,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -122,7 +128,8 @@ class PaintTest extends CustomPainter {
 
     int index = 0;
     Paint? listPaint;
-    final Float32List offsets = Float32List(consolidate ? waveData.length * 4 : 4);
+    final Float32List offsets =
+        Float32List(consolidate ? waveData.length * 4 : 4);
     int used = 0;
     for (index = 0; index < waveData.length; index++) {
       Paint curPaint;
@@ -140,7 +147,8 @@ class PaintTest extends CustomPainter {
       final Offset p0 = Offset(x, height * 1 / 2);
       if (consolidate) {
         if (listPaint != null && listPaint != curPaint) {
-          canvas.drawRawPoints(PointMode.lines, offsets.sublist(0, used), listPaint);
+          canvas.drawRawPoints(
+              PointMode.lines, offsets.sublist(0, used), listPaint);
           used = 0;
         }
         listPaint = curPaint;
@@ -154,7 +162,8 @@ class PaintTest extends CustomPainter {
       x += zoomFactor;
     }
     if (consolidate && used > 0) {
-      canvas.drawRawPoints(PointMode.lines, offsets.sublist(0, used), listPaint!);
+      canvas.drawRawPoints(
+          PointMode.lines, offsets.sublist(0, used), listPaint!);
     }
   }
 
@@ -171,7 +180,8 @@ class PaintSomeTest extends CustomPainter {
     required this.waveData,
     int? from,
     int? to,
-  }) : from = from ?? 0, to = to?? waveData.length;
+  })  : from = from ?? 0,
+        to = to ?? waveData.length;
 
   final Int16List waveData;
   final int from;

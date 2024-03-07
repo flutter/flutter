@@ -39,7 +39,8 @@ double _doIntegral({
 
 /// Probability is defined as the probability that the mean is within the
 /// [margin] of the true value.
-double _doProbability({required double mean, required double stddev, required double margin}) {
+double _doProbability(
+    {required double mean, required double stddev, required double margin}) {
   return _doIntegral(
     func: (double x) => _doNormal(mean: mean, stddev: stddev, x: x),
     start: (1.0 - margin) * mean,
@@ -64,7 +65,6 @@ double _doProbability({required double mean, required double stddev, required do
 ///     printer.printToStdout();
 ///
 class BenchmarkResultPrinter {
-
   final List<_BenchmarkResult> _results = <_BenchmarkResult>[];
 
   /// Adds a benchmark result to the list of results.
@@ -73,7 +73,11 @@ class BenchmarkResultPrinter {
   /// result value. [unit] is the unit of measurement, such as "ms", "km", "h".
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
-  void addResult({ required String description, required double value, required String unit, required String name }) {
+  void addResult(
+      {required String description,
+      required double value,
+      required String unit,
+      required String name}) {
     _results.add(_BenchmarkResult(description, value, unit, name));
   }
 
@@ -93,10 +97,14 @@ class BenchmarkResultPrinter {
     final double mean = _doMean(values);
     final double stddev = _doStddev(values, mean);
     const double margin = 0.05;
-    final double probability = _doProbability(mean: mean, stddev: stddev, margin: margin);
+    final double probability =
+        _doProbability(mean: mean, stddev: stddev, margin: margin);
     _results.add(_BenchmarkResult(description, mean, unit, name));
-    _results.add(_BenchmarkResult('$description - probability margin of error $margin', probability,
-        'percent', '${name}_probability_5pct'));
+    _results.add(_BenchmarkResult(
+        '$description - probability margin of error $margin',
+        probability,
+        'percent',
+        '${name}_probability_5pct'));
   }
 
   /// Prints the results added via [addResult] to standard output, once as JSON
@@ -124,7 +132,8 @@ class BenchmarkResultPrinter {
   String _printPlainText() {
     final StringBuffer buf = StringBuffer();
     for (final _BenchmarkResult result in _results) {
-      buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
+      buf.writeln(
+          '${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }
     return buf.toString();
   }

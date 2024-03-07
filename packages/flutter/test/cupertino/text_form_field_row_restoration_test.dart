@@ -10,7 +10,8 @@ const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgets('CupertinoTextFormFieldRow restoration', (WidgetTester tester) async {
+  testWidgets('CupertinoTextFormFieldRow restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
@@ -21,7 +22,8 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('CupertinoTextFormFieldRow restoration with external controller', (WidgetTester tester) async {
+  testWidgets('CupertinoTextFormFieldRow restoration with external controller',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'root',
@@ -34,7 +36,9 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
+  testWidgets(
+      'State restoration (No Form ancestor) - onUserInteraction error text validation',
+      (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
@@ -92,7 +96,9 @@ void main() {
     expect(find.text(errorText('bar')!), findsOneWidget);
   });
 
-  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
+  testWidgets(
+      'State Restoration (No Form ancestor) - validator sets the error text only when validate is called',
+      (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
@@ -169,37 +175,44 @@ void main() {
 
 Future<void> restoreAndVerify(WidgetTester tester) async {
   expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      0);
 
   await tester.enterText(find.byType(CupertinoTextFormFieldRow), text);
   await skipPastScrollingAnimation(tester);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      0);
 
   await tester.drag(find.byType(Scrollable), const Offset(0, -80));
   await skipPastScrollingAnimation(tester);
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 
   await tester.restartAndRestore();
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 
   final TestRestorationData data = await tester.getRestorationData();
 
-  await tester.enterText(find.byType(CupertinoTextFormFieldRow), alternativeText);
+  await tester.enterText(
+      find.byType(CupertinoTextFormFieldRow), alternativeText);
   await skipPastScrollingAnimation(tester);
   await tester.drag(find.byType(Scrollable), const Offset(0, 80));
   await skipPastScrollingAnimation(tester);
 
   expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, isNot(60));
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      isNot(60));
 
   await tester.restoreFrom(data);
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 }
 
 class RestorableTestWidget extends StatefulWidget {
@@ -211,8 +224,10 @@ class RestorableTestWidget extends StatefulWidget {
   RestorableTestWidgetState createState() => RestorableTestWidgetState();
 }
 
-class RestorableTestWidgetState extends State<RestorableTestWidget> with RestorationMixin {
-  final RestorableTextEditingController controller = RestorableTextEditingController();
+class RestorableTestWidgetState extends State<RestorableTestWidget>
+    with RestorationMixin {
+  final RestorableTextEditingController controller =
+      RestorableTextEditingController();
 
   @override
   String get restorationId => 'widget';

@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/expansion_tile/expansion_tile.2.dart' as example;
+import 'package:flutter_api_samples/material/expansion_tile/expansion_tile.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ExpansionTile animation can be customized using AnimationStyle', (WidgetTester tester) async {
+  testWidgets('ExpansionTile animation can be customized using AnimationStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExpansionTileAnimationStyleApp(),
     );

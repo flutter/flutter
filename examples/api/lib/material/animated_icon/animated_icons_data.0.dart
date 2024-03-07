@@ -51,7 +51,8 @@ class AnimatedIconExample extends StatefulWidget {
   State<AnimatedIconExample> createState() => _AnimatedIconExampleState();
 }
 
-class _AnimatedIconExampleState extends State<AnimatedIconExample> with SingleTickerProviderStateMixin {
+class _AnimatedIconExampleState extends State<AnimatedIconExample>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> animation;
 
@@ -80,7 +81,8 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample> with SingleTi
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
-        children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
+        children:
+            iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
           return Card(
             child: Center(
               child: Column(

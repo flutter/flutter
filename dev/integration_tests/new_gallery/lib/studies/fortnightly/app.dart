@@ -33,7 +33,8 @@ class FortnightlyApp extends StatelessWidget {
       ),
       home: ApplyTextOptions(child: home),
       routes: <String, WidgetBuilder>{
-        FortnightlyApp.defaultRoute: (BuildContext context) => ApplyTextOptions(child: home),
+        FortnightlyApp.defaultRoute: (BuildContext context) =>
+            ApplyTextOptions(child: home),
       },
       initialRoute: FortnightlyApp.defaultRoute,
       // L10n settings.

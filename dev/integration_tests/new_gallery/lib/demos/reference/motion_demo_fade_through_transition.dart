@@ -27,7 +27,8 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -88,7 +89,8 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
 class _ExampleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Expanded(
@@ -178,7 +180,8 @@ class _PhotosPage extends StatelessWidget {
 class _SearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations =
+        GalleryLocalizations.of(context);
 
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {

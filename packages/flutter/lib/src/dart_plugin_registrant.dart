@@ -7,4 +7,5 @@
 /// DartPluginRegistrant.ensureInitialized() is called from a background
 /// Isolate.
 @pragma('vm:entry-point')
-const String dartPluginRegistrantLibrary = String.fromEnvironment('flutter.dart_plugin_registrant');
+const String dartPluginRegistrantLibrary =
+    String.fromEnvironment('flutter.dart_plugin_registrant');

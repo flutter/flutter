@@ -85,10 +85,13 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   final int? specifiedLogicalKey;
 
   @override
-  String get keyLabel => unicodeScalarValues == 0 ? '' : String.fromCharCode(unicodeScalarValues);
+  String get keyLabel =>
+      unicodeScalarValues == 0 ? '' : String.fromCharCode(unicodeScalarValues);
 
   @override
-  PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + scanCode);
+  PhysicalKeyboardKey get physicalKey =>
+      kLinuxToPhysicalKey[scanCode] ??
+      PhysicalKeyboardKey(LogicalKeyboardKey.webPlane + scanCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
@@ -110,8 +113,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     // plane.
     if (keyLabel.isNotEmpty &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
-      final int keyId = LogicalKeyboardKey.unicodePlane | (unicodeScalarValues & LogicalKeyboardKey.valueMask);
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
+      final int keyId = LogicalKeyboardKey.unicodePlane |
+          (unicodeScalarValues & LogicalKeyboardKey.valueMask);
+      return LogicalKeyboardKey.findKeyByKeyId(keyId) ??
+          LogicalKeyboardKey(keyId);
     }
 
     // Look to see if the keyCode is one we know about and have a mapping for.
@@ -126,8 +131,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
-    return keyHelper.isModifierPressed(key, modifiers, side: side, keyCode: keyCode, isDown: isDown);
+  bool isModifierPressed(ModifierKey key,
+      {KeyboardSide side = KeyboardSide.any}) {
+    return keyHelper.isModifierPressed(key, modifiers,
+        side: side, keyCode: keyCode, isDown: isDown);
   }
 
   @override
@@ -138,41 +145,45 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.debugToolkit));
-    properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
+    properties
+        .add(DiagnosticsProperty<String>('toolkit', keyHelper.debugToolkit));
+    properties.add(
+        DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
     properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
     properties.add(DiagnosticsProperty<bool>('isDown', isDown));
-    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
+    properties.add(DiagnosticsProperty<int?>(
+        'specifiedLogicalKey', specifiedLogicalKey,
+        defaultValue: null));
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataLinux
-        && other.keyHelper.runtimeType == keyHelper.runtimeType
-        && other.unicodeScalarValues == unicodeScalarValues
-        && other.scanCode == scanCode
-        && other.keyCode == keyCode
-        && other.modifiers == modifiers
-        && other.isDown == isDown;
+    return other is RawKeyEventDataLinux &&
+        other.keyHelper.runtimeType == keyHelper.runtimeType &&
+        other.unicodeScalarValues == unicodeScalarValues &&
+        other.scanCode == scanCode &&
+        other.keyCode == keyCode &&
+        other.modifiers == modifiers &&
+        other.isDown == isDown;
   }
 
   @override
   int get hashCode => Object.hash(
-    keyHelper.runtimeType,
-    unicodeScalarValues,
-    scanCode,
-    keyCode,
-    modifiers,
-    isDown,
-  );
+        keyHelper.runtimeType,
+        unicodeScalarValues,
+        scanCode,
+        keyCode,
+        modifiers,
+        isDown,
+      );
 }
 
 /// Abstract class for window-specific key mappings.
@@ -222,7 +233,10 @@ abstract class KeyHelper {
     'No longer supported. '
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown});
+  bool isModifierPressed(ModifierKey key, int modifiers,
+      {KeyboardSide side = KeyboardSide.any,
+      required int keyCode,
+      required bool isDown});
 
   /// The numpad key from the specific key code mapping.
   LogicalKeyboardKey? numpadKey(int keyCode);
@@ -279,7 +293,6 @@ class GLFWKeyHelper implements KeyHelper {
   /// {@macro flutter.services.GLFWKeyHelper.modifierCapsLock}
   static const int modifierMeta = 0x0008;
 
-
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
   /// test whether any key in the numeric keypad is pressed.
   ///
@@ -289,7 +302,8 @@ class GLFWKeyHelper implements KeyHelper {
   @override
   String get debugToolkit => 'GLFW';
 
-  int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
+  int _mergeModifiers(
+      {required int modifiers, required int keyCode, required bool isDown}) {
     // GLFW Key codes for modifier keys.
     const int shiftLeftKeyCode = 340;
     const int shiftRightKeyCode = 344;
@@ -308,12 +322,12 @@ class GLFWKeyHelper implements KeyHelper {
     // key up, we need to remove them.
 
     final int modifierChange = switch (keyCode) {
-      shiftLeftKeyCode   || shiftRightKeyCode   => modifierShift,
+      shiftLeftKeyCode || shiftRightKeyCode => modifierShift,
       controlLeftKeyCode || controlRightKeyCode => modifierControl,
-      altLeftKeyCode     || altRightKeyCode     => modifierAlt,
-      metaLeftKeyCode    || metaRightKeyCode    => modifierMeta,
+      altLeftKeyCode || altRightKeyCode => modifierAlt,
+      metaLeftKeyCode || metaRightKeyCode => modifierMeta,
       capsLockKeyCode => modifierCapsLock,
-      numLockKeyCode  => modifierNumericPad,
+      numLockKeyCode => modifierNumericPad,
       _ => 0,
     };
 
@@ -321,18 +335,22 @@ class GLFWKeyHelper implements KeyHelper {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
-    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+  bool isModifierPressed(ModifierKey key, int modifiers,
+      {KeyboardSide side = KeyboardSide.any,
+      required int keyCode,
+      required bool isDown}) {
+    modifiers =
+        _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
     return switch (key) {
-      ModifierKey.controlModifier  => modifiers & modifierControl != 0,
-      ModifierKey.shiftModifier    => modifiers & modifierShift != 0,
-      ModifierKey.altModifier      => modifiers & modifierAlt != 0,
-      ModifierKey.metaModifier     => modifiers & modifierMeta != 0,
+      ModifierKey.controlModifier => modifiers & modifierControl != 0,
+      ModifierKey.shiftModifier => modifiers & modifierShift != 0,
+      ModifierKey.altModifier => modifiers & modifierAlt != 0,
+      ModifierKey.metaModifier => modifiers & modifierMeta != 0,
       ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
-      ModifierKey.numLockModifier  => modifiers & modifierNumericPad != 0,
+      ModifierKey.numLockModifier => modifiers & modifierNumericPad != 0,
       // These are not used in GLFW keyboards.
-      ModifierKey.functionModifier   => false,
-      ModifierKey.symbolModifier     => false,
+      ModifierKey.functionModifier => false,
+      ModifierKey.symbolModifier => false,
       ModifierKey.scrollLockModifier => false,
     };
   }
@@ -413,7 +431,8 @@ class GtkKeyHelper implements KeyHelper {
   @override
   String get debugToolkit => 'GTK';
 
-  int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
+  int _mergeModifiers(
+      {required int modifiers, required int keyCode, required bool isDown}) {
     // GTK Key codes for modifier keys.
     const int shiftLeftKeyCode = 0xffe1;
     const int shiftRightKeyCode = 0xffe2;
@@ -433,11 +452,11 @@ class GtkKeyHelper implements KeyHelper {
     // key up, we need to remove them.
 
     final int modifierChange = switch (keyCode) {
-      shiftLeftKeyCode   || shiftRightKeyCode   => modifierShift,
+      shiftLeftKeyCode || shiftRightKeyCode => modifierShift,
       controlLeftKeyCode || controlRightKeyCode => modifierControl,
-      altLeftKeyCode     || altRightKeyCode     => modifierMod1,
-      metaLeftKeyCode    || metaRightKeyCode    => modifierMeta,
-      capsLockKeyCode    || shiftLockKeyCode    => modifierCapsLock,
+      altLeftKeyCode || altRightKeyCode => modifierMod1,
+      metaLeftKeyCode || metaRightKeyCode => modifierMeta,
+      capsLockKeyCode || shiftLockKeyCode => modifierCapsLock,
       numLockKeyCode => modifierMod2,
       _ => 0,
     };
@@ -446,18 +465,22 @@ class GtkKeyHelper implements KeyHelper {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
-    modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+  bool isModifierPressed(ModifierKey key, int modifiers,
+      {KeyboardSide side = KeyboardSide.any,
+      required int keyCode,
+      required bool isDown}) {
+    modifiers =
+        _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
     return switch (key) {
-      ModifierKey.controlModifier  => modifiers & modifierControl != 0,
-      ModifierKey.shiftModifier    => modifiers & modifierShift != 0,
-      ModifierKey.altModifier      => modifiers & modifierMod1 != 0,
-      ModifierKey.metaModifier     => modifiers & modifierMeta != 0,
+      ModifierKey.controlModifier => modifiers & modifierControl != 0,
+      ModifierKey.shiftModifier => modifiers & modifierShift != 0,
+      ModifierKey.altModifier => modifiers & modifierMod1 != 0,
+      ModifierKey.metaModifier => modifiers & modifierMeta != 0,
       ModifierKey.capsLockModifier => modifiers & modifierCapsLock != 0,
-      ModifierKey.numLockModifier  => modifiers & modifierMod2 != 0,
+      ModifierKey.numLockModifier => modifiers & modifierMod2 != 0,
       // These are not used in GTK keyboards.
-      ModifierKey.functionModifier   => false,
-      ModifierKey.symbolModifier     => false,
+      ModifierKey.functionModifier => false,
+      ModifierKey.symbolModifier => false,
       ModifierKey.scrollLockModifier => false,
     };
   }

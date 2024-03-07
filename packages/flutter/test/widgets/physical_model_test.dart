@@ -12,39 +12,52 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('PhysicalModel updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: PhysicalModel(color: Colors.red)),
     );
 
-    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
+    final RenderPhysicalModel renderPhysicalModel =
+        tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
 
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red)),
+      const MaterialApp(
+          home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red)),
     );
 
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('PhysicalShape updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalShape(color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
+      const MaterialApp(
+          home: PhysicalShape(
+              color: Colors.red,
+              clipper: ShapeBorderClipper(shape: CircleBorder()))),
     );
 
-    final RenderPhysicalShape renderPhysicalShape = tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
+    final RenderPhysicalShape renderPhysicalShape =
+        tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(home: PhysicalShape(clipBehavior: Clip.antiAlias, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()))),
+      const MaterialApp(
+          home: PhysicalShape(
+              clipBehavior: Clip.antiAlias,
+              color: Colors.red,
+              clipper: ShapeBorderClipper(shape: CircleBorder()))),
     );
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
+  testWidgets('PhysicalModel - clips when overflows and elevation is 0',
+      (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       Theme(
@@ -58,10 +71,18 @@ void main() {
               padding: EdgeInsets.all(50),
               child: Row(
                 children: <Widget>[
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
+                  Material(
+                      child:
+                          Text('A long long long long long long long string')),
+                  Material(
+                      child:
+                          Text('A long long long long long long long string')),
+                  Material(
+                      child:
+                          Text('A long long long long long long long string')),
+                  Material(
+                      child:
+                          Text('A long long long long long long long string')),
                 ],
               ),
             ),
@@ -75,7 +96,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     // ignore: avoid_dynamic_calls
-    expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
+    expect(exception.diagnostics.first.toString(),
+        startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('physical_model_overflow.png'),

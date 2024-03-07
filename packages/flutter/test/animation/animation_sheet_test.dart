@@ -10,99 +10,107 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   /*
    * Here lies tests for packages/flutter_test/lib/src/animation_sheet.dart
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('recording disposes images',
-  (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
-    addTearDown(builder.dispose);
+  testWidgets(
+    'recording disposes images',
+    (WidgetTester tester) async {
+      final AnimationSheetBuilder builder =
+          AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+      addTearDown(builder.dispose);
 
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-      ),
-      const Duration(milliseconds: 200),
-      const Duration(milliseconds: 100),
-    );
-  },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+      await tester.pumpFrames(
+        builder.record(
+          const _DecuplePixels(Duration(seconds: 1)),
+        ),
+        const Duration(milliseconds: 200),
+        const Duration(milliseconds: 100),
+      );
+    },
+    skip:
+        isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   );
 
-  testWidgets('correctly records frames using collate',
-  (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
-    addTearDown(builder.dispose);
+  testWidgets(
+    'correctly records frames using collate',
+    (WidgetTester tester) async {
+      final AnimationSheetBuilder builder =
+          AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+      addTearDown(builder.dispose);
 
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-      ),
-      const Duration(milliseconds: 200),
-      const Duration(milliseconds: 100),
-    );
+      await tester.pumpFrames(
+        builder.record(
+          const _DecuplePixels(Duration(seconds: 1)),
+        ),
+        const Duration(milliseconds: 200),
+        const Duration(milliseconds: 100),
+      );
 
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-        recording: false,
-      ),
-      const Duration(milliseconds: 200),
-      const Duration(milliseconds: 100),
-    );
+      await tester.pumpFrames(
+        builder.record(
+          const _DecuplePixels(Duration(seconds: 1)),
+          recording: false,
+        ),
+        const Duration(milliseconds: 200),
+        const Duration(milliseconds: 100),
+      );
 
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-      ),
-      const Duration(milliseconds: 400),
-      const Duration(milliseconds: 100),
-    );
+      await tester.pumpFrames(
+        builder.record(
+          const _DecuplePixels(Duration(seconds: 1)),
+        ),
+        const Duration(milliseconds: 400),
+        const Duration(milliseconds: 100),
+      );
 
-    await expectLater(
-      builder.collate(5),
-      matchesGoldenFile('test.animation_sheet_builder.collate.png'),
-    );
-  },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+      await expectLater(
+        builder.collate(5),
+        matchesGoldenFile('test.animation_sheet_builder.collate.png'),
+      );
+    },
+    skip:
+        isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   ); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(
-      frameSize: const Size(8, 2),
-      allLayers: true,
-    );
-    addTearDown(builder.dispose);
+  testWidgets(
+    'use allLayers to record out-of-subtree contents',
+    (WidgetTester tester) async {
+      final AnimationSheetBuilder builder = AnimationSheetBuilder(
+        frameSize: const Size(8, 2),
+        allLayers: true,
+      );
+      addTearDown(builder.dispose);
 
-    // The `record` (sized 8, 2) is placed on top of `_DecuplePixels`
-    // (sized 12, 3), aligned at its top left.
-    await tester.pumpFrames(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          children: <Widget>[
-            const _DecuplePixels(Duration(seconds: 1)),
-            Align(
-              alignment: Alignment.topLeft,
-              child: builder.record(Container()),
-            ),
-          ],
+      // The `record` (sized 8, 2) is placed on top of `_DecuplePixels`
+      // (sized 12, 3), aligned at its top left.
+      await tester.pumpFrames(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              const _DecuplePixels(Duration(seconds: 1)),
+              Align(
+                alignment: Alignment.topLeft,
+                child: builder.record(Container()),
+              ),
+            ],
+          ),
         ),
-      ),
-      const Duration(milliseconds: 600),
-      const Duration(milliseconds: 100),
-    );
+        const Duration(milliseconds: 600),
+        const Duration(milliseconds: 100),
+      );
 
-    await expectLater(
-      builder.collate(5),
-      matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
-    );
-  },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+      await expectLater(
+        builder.collate(5),
+        matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
+      );
+    },
+    skip:
+        isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   );
 }
 
@@ -119,7 +127,8 @@ class _DecuplePixels extends StatefulWidget {
   State<StatefulWidget> createState() => _DecuplePixelsState();
 }
 
-class _DecuplePixelsState extends State<_DecuplePixels> with SingleTickerProviderStateMixin<_DecuplePixels> {
+class _DecuplePixelsState extends State<_DecuplePixels>
+    with SingleTickerProviderStateMixin<_DecuplePixels> {
   late AnimationController _controller;
 
   @override

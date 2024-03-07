@@ -65,7 +65,8 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
-    final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
+    final double paddingAbove =
+        MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(

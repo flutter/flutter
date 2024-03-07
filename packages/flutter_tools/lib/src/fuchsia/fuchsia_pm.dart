@@ -168,7 +168,9 @@ class FuchsiaPM {
 /// }
 class FuchsiaPackageServer {
   FuchsiaPackageServer(String repo, this.name, String host, int port)
-      : _repo = repo, _host = host, _port = port;
+      : _repo = repo,
+        _host = host,
+        _port = port;
 
   static const String deviceHost = 'fuchsia.com';
   static const String toolHost = 'flutter-tool';

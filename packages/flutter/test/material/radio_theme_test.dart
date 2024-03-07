@@ -10,7 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('RadioThemeData copyWith, ==, hashCode basics', () {
     expect(const RadioThemeData(), const RadioThemeData().copyWith());
-    expect(const RadioThemeData().hashCode, const RadioThemeData().copyWith().hashCode);
+    expect(const RadioThemeData().hashCode,
+        const RadioThemeData().copyWith().hashCode);
   });
 
   test('RadioThemeData lerp special cases', () {
@@ -28,7 +29,8 @@ void main() {
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.visualDensity, null);
 
-    const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
+    const RadioTheme theme =
+        RadioTheme(data: RadioThemeData(), child: SizedBox());
     expect(theme.data.mouseCursor, null);
     expect(theme.data.fillColor, null);
     expect(theme.data.overlayColor, null);
@@ -37,22 +39,25 @@ void main() {
     expect(theme.data.visualDensity, null);
   });
 
-  testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default RadioThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('RadioThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData(
-      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
+      mouseCursor:
+          MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       fillColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
       splashRadius: 1.0,
@@ -61,9 +66,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -79,7 +84,8 @@ void main() {
   });
 
   testWidgets('Radio is themeable', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    tester.binding.focusManager.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff0);
@@ -87,21 +93,26 @@ void main() {
     const Color focusOverlayColor = Color(0xfffffff2);
     const Color hoverOverlayColor = Color(0xfffffff3);
     const double splashRadius = 1.0;
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const MaterialTapTargetSize materialTapTargetSize =
+        MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity =
+        VisualDensity(horizontal: 1, vertical: 1);
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            mouseCursor:
+                const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
+            fillColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusOverlayColor;
               }
@@ -131,7 +142,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(_findRadio()), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(_findRadio()),
+        const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected radio.
     await tester.pumpWidget(buildRadio(selected: true));
@@ -143,16 +155,20 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverOverlayColor));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));
     await tester.pumpAndSettle();
-    expect(_getRadioMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
+    expect(_getRadioMaterial(tester),
+        paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgets('Radio properties are taken over the theme values', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+  testWidgets('Radio properties are taken over the theme values',
+      (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const Color themeDefaultFillColor = Color(0xfffffff0);
@@ -160,7 +176,8 @@ void main() {
     const Color themeFocusOverlayColor = Color(0xfffffff2);
     const Color themeHoverOverlayColor = Color(0xfffffff3);
     const double themeSplashRadius = 1.0;
-    const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
+    const MaterialTapTargetSize themeMaterialTapTargetSize =
+        MaterialTapTargetSize.padded;
     const VisualDensity themeVisualDensity = VisualDensity.standard;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -169,21 +186,26 @@ void main() {
     const Color focusColor = Color(0xfffffff2);
     const Color hoverColor = Color(0xfffffff3);
     const double splashRadius = 2.0;
-    const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const MaterialTapTargetSize materialTapTargetSize =
+        MaterialTapTargetSize.shrinkWrap;
+    const VisualDensity visualDensity =
+        VisualDensity(horizontal: 1, vertical: 1);
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            mouseCursor:
+                const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
+            fillColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
               }
               return themeDefaultFillColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return themeFocusOverlayColor;
               }
@@ -204,7 +226,8 @@ void main() {
             groupValue: 0,
             autofocus: autofocus,
             mouseCursor: mouseCursor,
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
@@ -225,7 +248,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(_findRadio()), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(_findRadio()),
+        const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected radio.
     await tester.pumpWidget(buildRadio(selected: true));
@@ -237,15 +261,18 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverColor));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));
     await tester.pumpAndSettle();
-    expect(_getRadioMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
+    expect(_getRadioMaterial(tester),
+        paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
+  testWidgets('Radio activeColor property is taken over the theme',
+      (WidgetTester tester) async {
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color themeSelectedFillColor = Color(0xfffffff1);
 
@@ -255,7 +282,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           radioTheme: RadioThemeData(
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor:
+                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return themeSelectedFillColor;
               }
@@ -278,7 +306,8 @@ void main() {
     // Radio.
     await tester.pumpWidget(buildRadio());
     await tester.pumpAndSettle();
-    expect(_getRadioMaterial(tester), paints..circle(color: themeDefaultFillColor));
+    expect(_getRadioMaterial(tester),
+        paints..circle(color: themeDefaultFillColor));
 
     // Selected radio.
     await tester.pumpWidget(buildRadio(selected: true));
@@ -286,7 +315,8 @@ void main() {
     expect(_getRadioMaterial(tester), paints..circle(color: selectedFillColor));
   });
 
-  testWidgets('Radio theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Radio theme overlay color resolves in active/pressed states',
+      (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -299,6 +329,7 @@ void main() {
       }
       return null;
     }
+
     const double splashRadius = 24.0;
 
     Widget buildRadio({required bool active}) {
@@ -313,7 +344,7 @@ void main() {
           body: Radio<int>(
             value: active ? 1 : 0,
             groupValue: 1,
-            onChanged: (_) { },
+            onChanged: (_) {},
           ),
         ),
       );
@@ -330,7 +361,8 @@ void main() {
           color: inactivePressedOverlayColor,
           radius: splashRadius,
         ),
-      reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
+      reason:
+          'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
     );
 
     await tester.pumpWidget(buildRadio(active: true));
@@ -344,11 +376,13 @@ void main() {
           color: activePressedOverlayColor,
           radius: splashRadius,
         ),
-      reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
+      reason:
+          'Active pressed Radio should have overlay color: $activePressedOverlayColor',
     );
   });
 
-  testWidgets('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
+  testWidgets('Local RadioTheme can override global RadioTheme',
+      (WidgetTester tester) async {
     const Color globalThemeFillColor = Color(0xfffffff1);
     const Color localThemeFillColor = Color(0xffff0000);
 
@@ -367,7 +401,7 @@ void main() {
             child: Radio<int>(
               value: active ? 1 : 0,
               groupValue: 1,
-              onChanged: (_) { },
+              onChanged: (_) {},
             ),
           ),
         ),
@@ -376,7 +410,8 @@ void main() {
 
     await tester.pumpWidget(buildRadio(active: true));
     await tester.pumpAndSettle();
-    expect(_getRadioMaterial(tester), paints..circle(color: localThemeFillColor));
+    expect(
+        _getRadioMaterial(tester), paints..circle(color: localThemeFillColor));
   });
 }
 
@@ -385,7 +420,8 @@ Finder _findRadio() {
 }
 
 Future<void> _pointGestureToRadio(WidgetTester tester) async {
-  final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  final TestGesture gesture =
+      await tester.createGesture(kind: PointerDeviceKind.mouse);
   await gesture.addPointer();
   addTearDown(gesture.removePointer);
   await gesture.moveTo(tester.getCenter(_findRadio()));

@@ -17,7 +17,8 @@ class TestPaintingContext implements PaintingContext {
 
 void main() {
   group('AnimatedSize', () {
-    testWidgets('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
+    testWidgets('animates forwards then backwards with stable-sized children',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -87,7 +88,8 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
-    testWidgets('calls onEnd when animation is completed', (WidgetTester tester) async {
+    testWidgets('calls onEnd when animation is completed',
+        (WidgetTester tester) async {
       int callCount = 0;
       void handleEnd() {
         callCount++;
@@ -142,10 +144,11 @@ void main() {
       expect(callCount, equals(2));
     });
 
-    testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
+    testWidgets('clamps animated size to constraints',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
-          child: SizedBox (
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -166,7 +169,7 @@ void main() {
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
         const Center(
-          child: SizedBox (
+          child: SizedBox(
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -187,14 +190,17 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
-    testWidgets('tracks unstable child, then resumes animation when child stabilizes', (WidgetTester tester) async {
+    testWidgets(
+        'tracks unstable child, then resumes animation when child stabilizes',
+        (WidgetTester tester) async {
       Future<void> pumpMillis(int millis) async {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({ double? size, RenderAnimatedSizeState? state }) {
+      void verify({double? size, RenderAnimatedSizeState? state}) {
         assert(size != null || state != null);
-        final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+        final RenderAnimatedSize box =
+            tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
           expect(box.size.width, size);
           expect(box.size.height, size);
@@ -270,7 +276,8 @@ void main() {
       verify(size: 100.0, state: RenderAnimatedSizeState.stable);
     });
 
-    testWidgets('resyncs its animation controller', (WidgetTester tester) async {
+    testWidgets('resyncs its animation controller',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -301,7 +308,8 @@ void main() {
       expect(box.size.width, equals(150.0));
     });
 
-    testWidgets('does not run animation unnecessarily', (WidgetTester tester) async {
+    testWidgets('does not run animation unnecessarily',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -315,7 +323,8 @@ void main() {
       );
 
       for (int i = 0; i < 20; i++) {
-        final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+        final RenderAnimatedSize box =
+            tester.renderObject(find.byType(AnimatedSize));
         expect(box.size.width, 100.0);
         expect(box.size.height, 100.0);
         expect(box.state, RenderAnimatedSizeState.stable);
@@ -338,7 +347,8 @@ void main() {
       );
 
       // By default, clipBehavior should be Clip.hardEdge
-      final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
+      final RenderAnimatedSize renderObject =
+          tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
       for (final Clip clip in Clip.values) {
@@ -358,7 +368,8 @@ void main() {
       }
     });
 
-    testWidgets('works wrapped in IntrinsicHeight and Wrap', (WidgetTester tester) async {
+    testWidgets('works wrapped in IntrinsicHeight and Wrap',
+        (WidgetTester tester) async {
       Future<void> pumpWidget(Size size, [Duration? duration]) async {
         return tester.pumpWidget(
           Center(
@@ -383,29 +394,36 @@ void main() {
       }
 
       await pumpWidget(const Size(100, 100));
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(100, 100));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(100, 100));
 
       await pumpWidget(const Size(150, 200));
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(100, 100));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(100, 100));
 
       // Each pump triggers verification of dry layout.
       for (int total = 0; total < 200; total += 10) {
         await tester.pump(const Duration(milliseconds: 10));
       }
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(150, 200));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(150, 200));
 
       // Change every pump
       await pumpWidget(const Size(100, 100));
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(150, 200));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(150, 200));
 
       await pumpWidget(const Size(111, 111), const Duration(milliseconds: 10));
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(111, 111));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(111, 111));
 
       await pumpWidget(const Size(222, 222), const Duration(milliseconds: 10));
-      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(222, 222));
+      expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size,
+          const Size(222, 222));
     });
 
-    testWidgets('re-attach with interrupted animation', (WidgetTester tester) async {
+    testWidgets('re-attach with interrupted animation',
+        (WidgetTester tester) async {
       const Key key1 = ValueKey<String>('key1');
       const Key key2 = ValueKey<String>('key2');
       late StateSetter setState;
@@ -431,24 +449,22 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            children: <Widget>[
-              SizedBox(
-                key: key1,
-                height: 200,
-                child: animatedSize,
-              ),
-              const SizedBox(
-                key: key2,
-                height: 200,
-              ),
-            ],
-          ),
-        )
-      );
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              key: key1,
+              height: 200,
+              child: animatedSize,
+            ),
+            const SizedBox(
+              key: key2,
+              height: 200,
+            ),
+          ],
+        ),
+      ));
 
       setState(() {
         childSize = const Size.square(150);
@@ -489,7 +505,8 @@ void main() {
       );
     });
 
-    testWidgets('disposes animation and controller', (WidgetTester tester) async {
+    testWidgets('disposes animation and controller',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -502,7 +519,8 @@ void main() {
         ),
       );
 
-      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+      final RenderAnimatedSize box =
+          tester.renderObject(find.byType(AnimatedSize));
 
       await tester.pumpWidget(
         const Center(),

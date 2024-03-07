@@ -24,7 +24,8 @@ class _BudgetsViewState extends State<BudgetsView>
     final List<BudgetData> items = DummyDataService.getBudgetDataList(context);
     final double capTotal = sumBudgetDataPrimaryAmount(items);
     final double usedTotal = sumBudgetDataAmountUsed(items);
-    final List<UserDetailData> detailItems = DummyDataService.getBudgetDetailList(
+    final List<UserDetailData> detailItems =
+        DummyDataService.getBudgetDetailList(
       context,
       capTotal: capTotal,
       usedTotal: usedTotal,

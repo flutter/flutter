@@ -39,14 +39,17 @@ void main() {
 
     await tester.tap(find.text('X'));
 
-    expect(log, equals(<String>[
-      'bottom',
-      'middle',
-      'top',
-    ]));
+    expect(
+        log,
+        equals(<String>[
+          'bottom',
+          'middle',
+          'top',
+        ]));
   });
 
-  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+  testWidgets('Detects hover events from touch devices',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -68,9 +71,11 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(Listener)));
 
-    expect(log, equals(<String>[
-      'bottom',
-    ]));
+    expect(
+        log,
+        equals(<String>[
+          'bottom',
+        ]));
   });
 
   group('transformed events', () {
@@ -114,7 +119,8 @@ void main() {
       final PointerMoveEvent move = events[1] as PointerMoveEvent;
       final PointerUpEvent up = events[2] as PointerUpEvent;
 
-      final Matrix4 expectedTransform = Matrix4.translationValues(-topLeft.dx, -topLeft.dy, 0);
+      final Matrix4 expectedTransform =
+          Matrix4.translationValues(-topLeft.dx, -topLeft.dy, 0);
 
       expect(center, isNot(const Offset(50, 50)));
 
@@ -222,7 +228,8 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
+    testWidgets('scaled and offset for touch/signal',
+        (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -308,7 +315,8 @@ void main() {
         Center(
           child: Transform(
             transform: Matrix4.identity()
-              ..rotateZ(math.pi / 2), // 90 degrees clockwise around Container origin
+              ..rotateZ(
+                  math.pi / 2), // 90 degrees clockwise around Container origin
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 events.add(event);
@@ -333,7 +341,8 @@ void main() {
         ),
       );
       const Offset moved = Offset(20, 30);
-      final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
+      final Offset downPosition =
+          tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
       await gesture.moveBy(moved);
       await gesture.up();
@@ -348,21 +357,25 @@ void main() {
         ..rotateZ(-math.pi / 2)
         ..translate(-offset.dx, -offset.dy);
 
-      final Offset localDownPosition = const Offset(50, 50) + const Offset(5, -10);
-      expect(down.localPosition, within(distance: 0.001, from: localDownPosition));
+      final Offset localDownPosition =
+          const Offset(50, 50) + const Offset(5, -10);
+      expect(
+          down.localPosition, within(distance: 0.001, from: localDownPosition));
       expect(down.position, downPosition);
       expect(down.delta, Offset.zero);
       expect(down.localDelta, Offset.zero);
       expect(down.transform, expectedTransform);
 
       const Offset localDelta = Offset(30, -20);
-      expect(move.localPosition, within(distance: 0.001, from: localDownPosition + localDelta));
+      expect(move.localPosition,
+          within(distance: 0.001, from: localDownPosition + localDelta));
       expect(move.position, downPosition + moved);
       expect(move.delta, moved);
       expect(move.localDelta, localDelta);
       expect(move.transform, expectedTransform);
 
-      expect(up.localPosition, within(distance: 0.001, from: localDownPosition + localDelta));
+      expect(up.localPosition,
+          within(distance: 0.001, from: localDownPosition + localDelta));
       expect(up.position, downPosition + moved);
       expect(up.delta, Offset.zero);
       expect(up.localDelta, Offset.zero);
@@ -370,7 +383,8 @@ void main() {
 
       events.clear();
       await scrollAt(downPosition, tester);
-      expect(events.single.localPosition, within(distance: 0.001, from: localDownPosition));
+      expect(events.single.localPosition,
+          within(distance: 0.001, from: localDownPosition));
       expect(events.single.position, downPosition);
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
@@ -378,7 +392,8 @@ void main() {
     });
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when default",
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     final RenderPointerListener renderListener = RenderPointerListener();
     addTearDown(renderListener.dispose);
@@ -386,9 +401,9 @@ void main() {
     renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'parentData: MISSING',
@@ -399,7 +414,8 @@ void main() {
     ]);
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when full",
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     final RenderErrorBox renderErrorBox = RenderErrorBox();
@@ -420,9 +436,9 @@ void main() {
     renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'parentData: MISSING',

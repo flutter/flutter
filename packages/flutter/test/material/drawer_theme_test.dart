@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('copyWith, ==, hashCode basics', () {
     expect(const DrawerThemeData(), const DrawerThemeData().copyWith());
-    expect(const DrawerThemeData().hashCode, const DrawerThemeData().copyWith().hashCode);
+    expect(const DrawerThemeData().hashCode,
+        const DrawerThemeData().copyWith().hashCode);
   });
 
   test('DrawerThemeData lerp special cases', () {
@@ -38,7 +39,8 @@ void main() {
       elevation: 5.0,
       shadowColor: Color(0x00000097),
       surfaceTintColor: Color(0x00000096),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(2.0))),
       width: 200.0,
     ).debugFillProperties(builder);
 
@@ -58,7 +60,9 @@ void main() {
     ]);
   });
 
-  testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
@@ -82,7 +86,9 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -97,19 +103,23 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(_drawerMaterial(tester).color, theme.colorScheme.surfaceContainerLow);
+    expect(
+        _drawerMaterial(tester).color, theme.colorScheme.surfaceContainerLow);
     expect(_drawerMaterial(tester).elevation, 1.0);
     expect(_drawerMaterial(tester).shadowColor, Colors.transparent);
     expect(_drawerMaterial(tester).surfaceTintColor, Colors.transparent);
     expect(
-      _drawerMaterial(tester).shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)))
-    );
+        _drawerMaterial(tester).shape,
+        const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.horizontal(right: Radius.circular(16.0))));
     expect(_scrim(tester).color, Colors.black54);
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
@@ -133,7 +143,9 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -148,25 +160,30 @@ void main() {
     scaffoldKey.currentState!.openEndDrawer();
     await tester.pumpAndSettle();
 
-    expect(_drawerMaterial(tester).color, theme.colorScheme.surfaceContainerLow);
+    expect(
+        _drawerMaterial(tester).color, theme.colorScheme.surfaceContainerLow);
     expect(_drawerMaterial(tester).elevation, 1.0);
     expect(_drawerMaterial(tester).shadowColor, Colors.transparent);
     expect(_drawerMaterial(tester).surfaceTintColor, Colors.transparent);
     expect(
-      _drawerMaterial(tester).shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)))
-    );
+        _drawerMaterial(tester).shape,
+        const RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.horizontal(left: Radius.circular(16.0))));
     expect(_scrim(tester).color, Colors.black54);
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'DrawerThemeData values are used when no Drawer properties are specified',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
     const Color shadowColor = Color(0x00000003);
     const Color surfaceTintColor = Color(0x00000004);
-    const RoundedRectangleBorder shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+    const RoundedRectangleBorder shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const double width = 200.0;
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -201,13 +218,16 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'Drawer values take priority over DrawerThemeData values when both properties are specified',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
     const Color shadowColor = Color(0x00000003);
     const Color surfaceTintColor = Color(0x00000004);
-    const RoundedRectangleBorder shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+    const RoundedRectangleBorder shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const double width = 200.0;
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -218,7 +238,8 @@ void main() {
             backgroundColor: Color(0x00000005),
             scrimColor: Color(0x00000006),
             elevation: 13.0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(29.0))),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(29.0))),
             width: 400.0,
           ),
         ),
@@ -248,13 +269,16 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
     const Color shadowColor = Color(0x00000003);
     const Color surfaceTintColor = Color(0x00000004);
-    const RoundedRectangleBorder shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+    const RoundedRectangleBorder shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const double width = 200.0;
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -262,14 +286,14 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           drawerTheme: const DrawerThemeData(
-            backgroundColor: Color(0x00000005),
-            scrimColor: Color(0x00000006),
-            elevation: 13.0,
-            shadowColor: Color(0x00000007),
-            surfaceTintColor: Color(0x00000007),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(29.0))),
-            width: 400.0
-          ),
+              backgroundColor: Color(0x00000005),
+              scrimColor: Color(0x00000006),
+              elevation: 13.0,
+              shadowColor: Color(0x00000007),
+              surfaceTintColor: Color(0x00000007),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(29.0))),
+              width: 400.0),
         ),
         home: DrawerTheme(
           data: const DrawerThemeData(
@@ -318,8 +342,7 @@ Container _scrim(WidgetTester tester) {
       of: find.descendant(
         of: find.byType(DrawerController),
         matching: find.byWidgetPredicate((Widget widget) {
-          return widget is Semantics
-              && widget.properties.label == 'Dismiss';
+          return widget is Semantics && widget.properties.label == 'Dismiss';
         }),
       ),
       matching: find.byType(Container),

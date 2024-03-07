@@ -50,11 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
   static Widget get _buttonText {
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => const Text('Continue in Android view'),
-      TargetPlatform.iOS     => const Text('Continue in iOS view'),
+      TargetPlatform.iOS => const Text('Continue in iOS view'),
       TargetPlatform.windows => const Text('Continue in Windows view'),
-      TargetPlatform.macOS   => const Text('Continue in macOS view'),
-      TargetPlatform.linux   => const Text('Continue in Linux view'),
-      TargetPlatform.fuchsia => throw UnimplementedError('Platform not yet implemented'),
+      TargetPlatform.macOS => const Text('Continue in macOS view'),
+      TargetPlatform.linux => const Text('Continue in Linux view'),
+      TargetPlatform.fuchsia =>
+        throw UnimplementedError('Platform not yet implemented'),
     };
   }
 
@@ -80,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
+                      'Button tapped $_counter time${_counter == 1 ? '' : 's'}.',
                       style: const TextStyle(fontSize: 17.0),
                     ),
                     Padding(

@@ -93,8 +93,8 @@ void main() {
       const PluginEventChannel<String> sendingChannel =
           PluginEventChannel<String>('test3');
 
-      final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}));
+      final StreamController<String> controller =
+          StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),
@@ -109,8 +109,8 @@ void main() {
       const PluginEventChannel<String> sendingChannel =
           PluginEventChannel<String>('test3');
 
-      final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}));
+      final StreamController<String> controller =
+          StreamController<String>(onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),

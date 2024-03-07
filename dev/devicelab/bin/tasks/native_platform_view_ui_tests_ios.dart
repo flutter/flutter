@@ -12,10 +12,10 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() async {
-    final String projectDirectory = '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests';
+    final String projectDirectory =
+        '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests';
 
     await inDirectory(projectDirectory, () async {
-
       // To address "Failed to terminate" failure.
       section('Uninstall previously installed app');
 

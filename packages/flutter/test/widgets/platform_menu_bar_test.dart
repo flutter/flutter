@@ -57,10 +57,18 @@ void main() {
                   onOpen: onOpen,
                   onClose: onClose,
                   shortcuts: <String, MenuSerializableShortcut>{
-                    subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                    subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                    subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                    subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                    subSubMenu10[0]: const SingleActivator(
+                        LogicalKeyboardKey.keyA,
+                        control: true),
+                    subSubMenu10[1]: const SingleActivator(
+                        LogicalKeyboardKey.keyB,
+                        shift: true),
+                    subSubMenu10[2]: const SingleActivator(
+                        LogicalKeyboardKey.keyC,
+                        alt: true),
+                    subSubMenu10[3]: const SingleActivator(
+                        LogicalKeyboardKey.keyD,
+                        meta: true),
                   },
                 ),
                 child: const Center(child: Text('Body')),
@@ -88,10 +96,18 @@ void main() {
                   onOpen: onOpen,
                   onClose: onClose,
                   shortcuts: <String, MenuSerializableShortcut>{
-                    subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                    subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                    subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                    subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                    subSubMenu10[0]: const SingleActivator(
+                        LogicalKeyboardKey.keyA,
+                        control: true),
+                    subSubMenu10[1]: const SingleActivator(
+                        LogicalKeyboardKey.keyB,
+                        shift: true),
+                    subSubMenu10[2]: const SingleActivator(
+                        LogicalKeyboardKey.keyC,
+                        alt: true),
+                    subSubMenu10[3]: const SingleActivator(
+                        LogicalKeyboardKey.keyD,
+                        meta: true),
                   },
                 ),
                 child: const Center(child: Text('Body')),
@@ -110,7 +126,8 @@ void main() {
         );
       });
     });
-    testWidgets('asserts when more than one has locked the delegate', (WidgetTester tester) async {
+    testWidgets('asserts when more than one has locked the delegate',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -171,7 +188,8 @@ void main() {
       item.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .where(
+              (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 
@@ -183,29 +201,43 @@ void main() {
 
   group('ShortcutSerialization', () {
     testWidgets('character constructor', (WidgetTester tester) async {
-      final ShortcutSerialization serialization = ShortcutSerialization.character('?');
-      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
-        'shortcutCharacter': '?',
-        'shortcutModifiers': 0,
-      }));
-      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.character('?', alt: true, control: true, meta: true);
-      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
-        'shortcutCharacter': '?',
-        'shortcutModifiers': 13,
-      }));
+      final ShortcutSerialization serialization =
+          ShortcutSerialization.character('?');
+      expect(
+          serialization.toChannelRepresentation(),
+          equals(<String, Object?>{
+            'shortcutCharacter': '?',
+            'shortcutModifiers': 0,
+          }));
+      final ShortcutSerialization serializationWithModifiers =
+          ShortcutSerialization.character('?',
+              alt: true, control: true, meta: true);
+      expect(
+          serializationWithModifiers.toChannelRepresentation(),
+          equals(<String, Object?>{
+            'shortcutCharacter': '?',
+            'shortcutModifiers': 13,
+          }));
     });
 
     testWidgets('modifier constructor', (WidgetTester tester) async {
-      final ShortcutSerialization serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
-      expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
-        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
-        'shortcutModifiers': 0,
-      }));
-      final ShortcutSerialization serializationWithModifiers = ShortcutSerialization.modifier(LogicalKeyboardKey.home, alt: true, control: true, meta: true, shift: true);
-      expect(serializationWithModifiers.toChannelRepresentation(), equals(<String, Object?>{
-        'shortcutTrigger': LogicalKeyboardKey.home.keyId,
-        'shortcutModifiers': 15,
-      }));
+      final ShortcutSerialization serialization =
+          ShortcutSerialization.modifier(LogicalKeyboardKey.home);
+      expect(
+          serialization.toChannelRepresentation(),
+          equals(<String, Object?>{
+            'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+            'shortcutModifiers': 0,
+          }));
+      final ShortcutSerialization serializationWithModifiers =
+          ShortcutSerialization.modifier(LogicalKeyboardKey.home,
+              alt: true, control: true, meta: true, shift: true);
+      expect(
+          serializationWithModifiers.toChannelRepresentation(),
+          equals(<String, Object?>{
+            'shortcutTrigger': LogicalKeyboardKey.home.keyId,
+            'shortcutModifiers': 15,
+          }));
     });
   });
 }
@@ -243,7 +275,8 @@ List<PlatformMenuItem> createTestMenus({
   Intent? onSelectedIntent,
   void Function(String)? onOpen,
   void Function(String)? onClose,
-  Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
+  Map<String, MenuSerializableShortcut> shortcuts =
+      const <String, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
   final List<PlatformMenuItem> result = <PlatformMenuItem>[
@@ -269,7 +302,8 @@ List<PlatformMenuItem> createTestMenus({
           members: <PlatformMenuItem>[
             PlatformMenuItem(
               label: subMenu1[0],
-              onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
+              onSelected:
+                  onSelected != null ? () => onSelected(subMenu0[0]) : null,
               onSelectedIntent: onSelectedIntent,
               shortcut: shortcuts[subMenu1[0]],
             ),
@@ -284,7 +318,9 @@ List<PlatformMenuItem> createTestMenus({
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[0],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[0]) : null,
+                  onSelected: onSelected != null
+                      ? () => onSelected(subSubMenu10[0])
+                      : null,
                   onSelectedIntent: onSelectedIntent,
                   shortcut: shortcuts[subSubMenu10[0]],
                 ),
@@ -294,7 +330,9 @@ List<PlatformMenuItem> createTestMenus({
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[1],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[1]) : null,
+                  onSelected: onSelected != null
+                      ? () => onSelected(subSubMenu10[1])
+                      : null,
                   onSelectedIntent: onSelectedIntent,
                   shortcut: shortcuts[subSubMenu10[1]],
                 ),
@@ -302,7 +340,8 @@ List<PlatformMenuItem> createTestMenus({
             ),
             PlatformMenuItem(
               label: subSubMenu10[2],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
+              onSelected:
+                  onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
               onSelectedIntent: onSelectedIntent,
               shortcut: shortcuts[subSubMenu10[2]],
             ),
@@ -310,7 +349,9 @@ List<PlatformMenuItem> createTestMenus({
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: subSubMenu10[3],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[3]) : null,
+                  onSelected: onSelected != null
+                      ? () => onSelected(subSubMenu10[3])
+                      : null,
                   onSelectedIntent: onSelectedIntent,
                   shortcut: shortcuts[subSubMenu10[3]],
                 ),
@@ -431,7 +472,12 @@ const Map<String, Object?> expectedStructure = <String, Object?>{
         },
       ],
     },
-    <String, Object?>{'id': 21, 'label': 'Menu 3', 'enabled': false, 'children': <Map<String, Object?>>[]},
+    <String, Object?>{
+      'id': 21,
+      'label': 'Menu 3',
+      'enabled': false,
+      'children': <Map<String, Object?>>[]
+    },
   ],
 };
 
@@ -450,10 +496,12 @@ class FakeMenuChannel implements MethodChannel {
   MethodCodec get codec => const StandardMethodCodec();
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) =>
+      throw UnimplementedError();
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) =>
+      throw UnimplementedError();
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
@@ -466,5 +514,6 @@ class FakeMenuChannel implements MethodChannel {
   String get name => 'flutter/menu';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
+  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) =>
+      incoming = handler;
 }

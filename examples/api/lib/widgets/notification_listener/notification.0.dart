@@ -51,7 +51,8 @@ class NotificationExample extends StatelessWidget {
             return true;
           },
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
                   title: const Text('Notification Sample'),

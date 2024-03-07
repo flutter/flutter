@@ -82,22 +82,29 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
     _dessertsDataSource ??= _DessertDataSource(context);
     switch (_sortColumnIndex.value) {
       case 0:
-        _dessertsDataSource!._sort<String>((_Dessert d) => d.name, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<String>((_Dessert d) => d.name, _sortAscending.value);
       case 1:
         _dessertsDataSource!
             ._sort<num>((_Dessert d) => d.calories, _sortAscending.value);
       case 2:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.fat, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.fat, _sortAscending.value);
       case 3:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.carbs, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.carbs, _sortAscending.value);
       case 4:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.protein, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.protein, _sortAscending.value);
       case 5:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.sodium, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.sodium, _sortAscending.value);
       case 6:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.calcium, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.calcium, _sortAscending.value);
       case 7:
-        _dessertsDataSource!._sort<num>((_Dessert d) => d.iron, _sortAscending.value);
+        _dessertsDataSource!
+            ._sort<num>((_Dessert d) => d.iron, _sortAscending.value);
     }
     _dessertsDataSource!.updateSelectedDesserts(_dessertSelections);
     _dessertsDataSource!.addListener(_updateSelectedDessertRowListener);
@@ -138,7 +145,8 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -169,14 +177,14 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
               columns: <DataColumn>[
                 DataColumn(
                   label: Text(localizations.dataTableColumnDessert),
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<String>((_Dessert d) => d.name, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<String>(
+                      (_Dessert d) => d.name, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalories),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.calories, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.calories, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnFat),
@@ -187,32 +195,32 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
                 DataColumn(
                   label: Text(localizations.dataTableColumnCarbs),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.carbs, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.carbs, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnProtein),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.protein, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.protein, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnSodium),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.sodium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.sodium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnCalcium),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.calcium, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.calcium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: Text(localizations.dataTableColumnIron),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) =>
-                      _sort<num>((_Dessert d) => d.iron, columnIndex, ascending),
+                  onSort: (int columnIndex, bool ascending) => _sort<num>(
+                      (_Dessert d) => d.iron, columnIndex, ascending),
                 ),
               ],
               source: _dessertsDataSource!,
@@ -249,7 +257,8 @@ class _Dessert {
 
 class _DessertDataSource extends DataTableSource {
   _DessertDataSource(this.context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     _desserts = <_Dessert>[
       _Dessert(
         localizations.dataTableRowFrozenYogurt,

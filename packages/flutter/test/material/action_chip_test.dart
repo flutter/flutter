@@ -54,15 +54,18 @@ IconThemeData getIconData(WidgetTester tester) {
 
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
+    find
+        .ancestor(
+          of: find.text(labelText),
+          matching: find.byType(DefaultTextStyle),
+        )
+        .first,
   );
 }
 
 void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  final Iterable<Material> materials =
+      tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
   // last Material is from the "RawChip".
   expect(materials.length, 2);
@@ -103,7 +106,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
     // Test disabled ActionChip defaults.
@@ -124,7 +128,8 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black38);
   });
 
@@ -170,7 +175,8 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test disabled ActionChip defaults.
@@ -198,11 +204,13 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
   });
 
-  testWidgets('Material3 - ActionChip.elevated defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - ActionChip.elevated defaults',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     const String label = 'action chip';
 
@@ -244,7 +252,8 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    ShapeDecoration decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ActionChip.elevated defaults.
@@ -272,30 +281,33 @@ void main() {
       ),
     );
 
-    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    decoration =
+        tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ActionChip.color resolves material states', (WidgetTester tester) async {
+  testWidgets('ActionChip.color resolves material states',
+      (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    final MaterialStateProperty<Color?> color =
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return disabledColor;
       }
       return backgroundColor;
     });
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: Column(
           children: <Widget>[
             ActionChip(
-              onPressed: enabled ? () { } : null,
+              onPressed: enabled ? () {} : null,
               color: color,
               label: const Text('ActionChip'),
             ),
             ActionChip.elevated(
-              onPressed: enabled ? () { } : null,
+              onPressed: enabled ? () {} : null,
               color: color,
               label: const Text('ActionChip.elevated'),
             ),
@@ -334,21 +346,22 @@ void main() {
     );
   });
 
-  testWidgets('ActionChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgets('ActionChip uses provided state color properties',
+      (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: Column(
           children: <Widget>[
             ActionChip(
-              onPressed: enabled ? () { } : null,
+              onPressed: enabled ? () {} : null,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
               label: const Text('ActionChip'),
             ),
             ActionChip.elevated(
-              onPressed: enabled ? () { } : null,
+              onPressed: enabled ? () {} : null,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
               label: const Text('ActionChip.elevated'),
@@ -393,7 +406,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: ActionChip(
-            onPressed: () { },
+            onPressed: () {},
             label: const Text('action chip'),
           ),
         ),
@@ -404,23 +417,28 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('ActionChip clipBehavior properly passes through to the Material',
+      (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () { })));
+    await tester.pumpWidget(
+        wrapForChip(child: ActionChip(label: label, onPressed: () {})));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
+    await tester.pumpWidget(wrapForChip(
+        child: ActionChip(
+            label: label, clipBehavior: Clip.antiAlias, onPressed: () {})));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ActionChip uses provided iconTheme', (WidgetTester tester) async {
-    Widget buildChip({ IconThemeData? iconTheme }) {
+  testWidgets('ActionChip uses provided iconTheme',
+      (WidgetTester tester) async {
+    Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
         home: Material(
           child: ActionChip(
             iconTheme: iconTheme,
             avatar: const Icon(Icons.add),
-            onPressed: () { },
+            onPressed: () {},
             label: const Text('action chip'),
           ),
         ),
@@ -433,12 +451,14 @@ void main() {
     expect(getIconData(tester).color, ThemeData().colorScheme.primary);
 
     // Test provided icon theme.
-    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
+    await tester.pumpWidget(
+        buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 
-  testWidgets('ActionChip avatar layout constraints can be customized', (WidgetTester tester) async {
+  testWidgets('ActionChip avatar layout constraints can be customized',
+      (WidgetTester tester) async {
     const double border = 1.0;
     const double iconSize = 18.0;
     const double labelPadding = 8.0;
@@ -470,15 +490,19 @@ void main() {
     // Calculate the distance between avatar and chip edges.
     Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
     final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
-    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
-    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dx,
+        avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy,
+        avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
     // Calculate the distance between avatar and label.
     Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
-    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+    expect(labelTopLeft.dx,
+        avatarCenter.dx + (labelSize.width / 2) + labelPadding);
 
     // Test custom avatar layout constraints.
-    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pumpWidget(
+        buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
     await tester.pump();
 
     expect(tester.getSize(find.byType(ActionChip)).width, equals(152.0));
@@ -487,7 +511,8 @@ void main() {
     // Calculate the distance between avatar and chip edges.
     chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
     expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
-    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy,
+        avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
     // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));

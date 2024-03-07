@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
+  testWidgets('Material3 - Card defaults (Elevated card)',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(MaterialApp(
@@ -26,10 +27,15 @@ void main() {
     expect(container.margin, const EdgeInsets.all(4.0));
     expect(material.color, colors.surfaceContainerLow);
     expect(material.shadowColor, colors.shadow);
-    expect(material.surfaceTintColor, Colors.transparent); // Don't use surface tint. Toned surface container is used instead.
-    expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-    ));
+    expect(
+        material.surfaceTintColor,
+        Colors
+            .transparent); // Don't use surface tint. Toned surface container is used instead.
+    expect(
+        material.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+        ));
   });
 
   testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
@@ -51,12 +57,15 @@ void main() {
     expect(material.color, colors.surfaceContainerHighest);
     expect(material.shadowColor, colors.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
-    expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-    ));
+    expect(
+        material.shape,
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+        ));
   });
 
-  testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Card.outlined defaults',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     await tester.pumpWidget(MaterialApp(
@@ -75,13 +84,16 @@ void main() {
     expect(material.color, colors.surface);
     expect(material.shadowColor, colors.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
-    expect(material.shape, RoundedRectangleBorder(
-      side: BorderSide(color: colors.outlineVariant),
-      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-    ));
+    expect(
+        material.shape,
+        RoundedRectangleBorder(
+          side: BorderSide(color: colors.outlineVariant),
+          borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+        ));
   });
 
-  testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
+  testWidgets('Card can take semantic text from multiple children',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -95,7 +107,7 @@ void main() {
                   const Text('I am text!'),
                   const Text('Moar text!!1'),
                   ElevatedButton(
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('Button'),
                   ),
                 ],
@@ -106,50 +118,53 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            elevation: 1.0,
-            thickness: 0.0,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 2,
-                label: 'I am text!',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                id: 3,
-                label: 'Moar text!!1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                id: 4,
-                label: 'Button',
-                textDirection: TextDirection.ltr,
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocusable,
+                id: 1,
+                elevation: 1.0,
+                thickness: 0.0,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    label: 'I am text!',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    id: 3,
+                    label: 'Moar text!!1',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    id: 4,
+                    label: 'Button',
+                    textDirection: TextDirection.ltr,
+                    actions: <SemanticsAction>[
+                      SemanticsAction.tap,
+                    ],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.isEnabled,
+                      SemanticsFlag.isFocusable,
+                    ],
+                  ),
                 ],
               ),
             ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
+  testWidgets('Card merges children when it is a semanticContainer',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
@@ -171,19 +186,21 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            label: 'First child\nSecond child',
-            textDirection: TextDirection.ltr,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                label: 'First child\nSecond child',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-      ignoreRect: true,
-    ));
+          ignoreTransform: true,
+          ignoreRect: true,
+        ));
 
     semantics.dispose();
   });
@@ -235,15 +252,19 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 
-  testWidgets('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {
+  testWidgets('Card clipBehavior property passes through to the Material',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Card());
-    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.none);
+    expect(
+        tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.none);
 
     await tester.pumpWidget(const Card(clipBehavior: Clip.antiAlias));
-    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAlias);
+    expect(tester.widget<Material>(find.byType(Material)).clipBehavior,
+        Clip.antiAlias);
   });
 
-  testWidgets('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
+  testWidgets('Card clipBehavior property defers to theme when null',
+      (WidgetTester tester) async {
     await tester.pumpWidget(Builder(builder: (BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Theme(
@@ -255,7 +276,8 @@ void main() {
         child: const Card(),
       );
     }));
-    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);
+    expect(tester.widget<Material>(find.byType(Material)).clipBehavior,
+        Clip.antiAliasWithSaveLayer);
   });
 
   testWidgets('Card shadowColor', (WidgetTester tester) async {

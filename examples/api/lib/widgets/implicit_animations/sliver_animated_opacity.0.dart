@@ -28,10 +28,12 @@ class SliverAnimatedOpacityExample extends StatefulWidget {
   const SliverAnimatedOpacityExample({super.key});
 
   @override
-  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
+  State<SliverAnimatedOpacityExample> createState() =>
+      _SliverAnimatedOpacityExampleState();
 }
 
-class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
+class _SliverAnimatedOpacityExampleState
+    extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 

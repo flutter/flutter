@@ -71,10 +71,11 @@ TaskFunction createWindowsRunReleaseTest() {
 }
 
 class AndroidRunOutputTest extends RunOutputTask {
-  AndroidRunOutputTest({required super.release}) : super(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/main.dart',
-  );
+  AndroidRunOutputTest({required super.release})
+      : super(
+          '${flutterDirectory.path}/dev/integration_tests/ui',
+          'lib/main.dart',
+        );
 
   @override
   Future<void> prepare(String deviceId) async {
@@ -83,22 +84,27 @@ class AndroidRunOutputTest extends RunOutputTask {
     print('uninstalling...');
     final Process uninstall = await startFlutter(
       'install',
-      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId],
+      options: <String>[
+        '--suppress-analytics',
+        '--uninstall-only',
+        '-d',
+        deviceId
+      ],
       isBot: false,
     );
     uninstall.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        print('uninstall:stdout: $line');
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+      print('uninstall:stdout: $line');
+    });
     uninstall.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        print('uninstall:stderr: $line');
-        stderr.add(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+      print('uninstall:stderr: $line');
+      stderr.add(line);
+    });
     if (await uninstall.exitCode != 0) {
       throw 'flutter install --uninstall-only failed.';
     }
@@ -120,8 +126,9 @@ class AndroidRunOutputTest extends RunOutputTask {
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') &&
-        line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
+      (String line) =>
+          line.startsWith('Launching lib/main.dart on ') &&
+          line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
       'Launching lib/main.dart on',
     );
 
@@ -134,20 +141,23 @@ class AndroidRunOutputTest extends RunOutputTask {
     // Size information is only included in release builds.
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
-        (!release || line.contains('MB).')),
+      (String line) =>
+          line.contains('Built build/app/outputs/flutter-apk/$apk') &&
+          (!release || line.contains('MB).')),
       'Built build/app/outputs/flutter-apk/$apk',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/$apk...'),
+      (String line) =>
+          line.startsWith('Installing build/app/outputs/flutter-apk/$apk...'),
       'Installing build/app/outputs/flutter-apk/$apk...',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Quit (terminate the application on the device).'),
+      (String line) =>
+          line.contains('Quit (terminate the application on the device).'),
       'q Quit (terminate the application on the device)',
     );
 
@@ -165,12 +175,11 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
   WindowsRunOutputTest(
     super.testDirectory,
     super.testTarget, {
-      required super.release,
-      super.allowStderr = false,
-    }
-  );
+    required super.release,
+    super.allowStderr = false,
+  });
 
-  final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
+  final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
 
   static final RegExp _buildOutput = RegExp(
     r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
@@ -213,10 +222,9 @@ class DesktopRunOutputTest extends RunOutputTask {
   DesktopRunOutputTest(
     super.testDirectory,
     super.testTarget, {
-      required super.release,
-      this.allowStderr = false,
-    }
-  );
+    required super.release,
+    this.allowStderr = false,
+  });
 
   /// Whether `flutter run` is expected to produce output on stderr.
   final bool allowStderr;
@@ -228,8 +236,9 @@ class DesktopRunOutputTest extends RunOutputTask {
   TaskResult verify(List<String> stdout, List<String> stderr) {
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching $testTarget on ') &&
-        line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
+      (String line) =>
+          line.startsWith('Launching $testTarget on ') &&
+          line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
       'Launching $testTarget on',
     );
 
@@ -237,7 +246,8 @@ class DesktopRunOutputTest extends RunOutputTask {
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Quit (terminate the application on the device).'),
+      (String line) =>
+          line.contains('Quit (terminate the application on the device).'),
       'q Quit (terminate the application on the device)',
     );
 
@@ -259,9 +269,8 @@ abstract class RunOutputTask {
   RunOutputTask(
     this.testDirectory,
     this.testTarget, {
-      required this.release,
-    }
-  );
+    required this.release,
+  });
 
   static final RegExp _engineLogRegex = RegExp(
     r'\[(VERBOSE|INFO|WARNING|ERROR|FATAL):.+\(\d+\)\]',
@@ -269,8 +278,10 @@ abstract class RunOutputTask {
 
   /// The directory where the app under test is defined.
   final String testDirectory;
+
   /// The main entry-point file of the application, as run on the device.
   final String testTarget;
+
   /// Whether to run the app in release mode.
   final bool release;
 
@@ -301,25 +312,27 @@ abstract class RunOutputTask {
 
       int? runExitCode;
       run.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run:stdout: $line');
-          stdout.add(line);
-          if (line.contains('Quit (terminate the application on the device).')) {
-            ready.complete();
-          }
-        });
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        print('run:stdout: $line');
+        stdout.add(line);
+        if (line.contains('Quit (terminate the application on the device).')) {
+          ready.complete();
+        }
+      });
       final Stream<String> runStderr = run.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .asBroadcastStream();
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .asBroadcastStream();
       runStderr.listen((String line) => print('run:stderr: $line'));
       runStderr
-        .skipWhile(isExpectedStderr)
-        .listen((String line) => stderr.add(line));
-      unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
-      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+          .skipWhile(isExpectedStderr)
+          .listen((String line) => stderr.add(line));
+      unawaited(run.exitCode.then<void>((int exitCode) {
+        runExitCode = exitCode;
+      }));
+      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
       }
@@ -349,15 +362,13 @@ abstract class RunOutputTask {
   bool isExpectedStderr(String line) => false;
 
   /// Verify the output of `flutter run`.
-  TaskResult verify(List<String> stdout, List<String> stderr) => throw UnimplementedError('verify is not implemented');
+  TaskResult verify(List<String> stdout, List<String> stderr) =>
+      throw UnimplementedError('verify is not implemented');
 
   /// Helper that verifies a line in [list] matches [matcher].
   /// The [list] is updated to contain the lines remaining after the match.
-  void _findNextMatcherInList(
-    List<String> list,
-    bool Function(String testLine) matcher,
-    String errorMessageExpectedLine
-  ) {
+  void _findNextMatcherInList(List<String> list,
+      bool Function(String testLine) matcher, String errorMessageExpectedLine) {
     final List<String> copyOfListForErrorMessage = List<String>.from(list);
 
     while (list.isNotEmpty) {

@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
+  testWidgets('value is not accessible when not registered',
+      (WidgetTester tester) async {
     final RestorableNum<num> numValue = RestorableNum<num>(0);
     addTearDown(numValue.dispose);
     expect(() => numValue.value, throwsAssertionError);
@@ -38,19 +39,24 @@ void main() {
     final RestorableBoolN nullableBoolValue = RestorableBoolN(true);
     addTearDown(nullableBoolValue.dispose);
     expect(() => nullableBoolValue.value, throwsAssertionError);
-    final RestorableTextEditingController controllerValue = RestorableTextEditingController();
+    final RestorableTextEditingController controllerValue =
+        RestorableTextEditingController();
     addTearDown(controllerValue.dispose);
     expect(() => controllerValue.value, throwsAssertionError);
-    final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2020, 4, 3));
+    final RestorableDateTime dateTimeValue =
+        RestorableDateTime(DateTime(2020, 4, 3));
     addTearDown(dateTimeValue.dispose);
     expect(() => dateTimeValue.value, throwsAssertionError);
-    final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(DateTime(2020, 4, 3));
+    final RestorableDateTimeN nullableDateTimeValue =
+        RestorableDateTimeN(DateTime(2020, 4, 3));
     addTearDown(nullableDateTimeValue.dispose);
     expect(() => nullableDateTimeValue.value, throwsAssertionError);
-    final RestorableEnumN<TestEnum> nullableEnumValue = RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values);
+    final RestorableEnumN<TestEnum> nullableEnumValue =
+        RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values);
     addTearDown(nullableEnumValue.dispose);
     expect(() => nullableEnumValue.value, throwsAssertionError);
-    final RestorableEnum<TestEnum> enumValue = RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
+    final RestorableEnum<TestEnum> enumValue =
+        RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
     addTearDown(enumValue.dispose);
     expect(() => enumValue.value, throwsAssertionError);
     final _TestRestorableValue objectValue = _TestRestorableValue();
@@ -58,18 +64,22 @@ void main() {
     expect(() => objectValue.value, throwsAssertionError);
   });
 
-  testWidgets('$RestorableProperty dispatches creation in constructor', (WidgetTester widgetTester) async {
+  testWidgets('$RestorableProperty dispatches creation in constructor',
+      (WidgetTester widgetTester) async {
     await expectLater(
-      await memoryEvents(() => RestorableDateTimeN(null).dispose(), RestorableDateTimeN),
+      await memoryEvents(
+          () => RestorableDateTimeN(null).dispose(), RestorableDateTimeN),
       areCreateAndDispose,
     );
   });
 
-  testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+  testWidgets('work when not in restoration scope',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const _RestorableWidget());
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     // Initialized to default values.
     expect(state.numValue.value, 99);
@@ -227,7 +237,8 @@ void main() {
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     // Modify values.
     state.setProperties(() {
@@ -251,7 +262,8 @@ void main() {
     await tester.pump();
     expect(find.text('guten tag'), findsOneWidget);
 
-    final TestRestorationData restorationData = await tester.getRestorationData();
+    final TestRestorationData restorationData =
+        await tester.getRestorationData();
 
     // Modify values.
     state.setProperties(() {
@@ -325,7 +337,8 @@ void main() {
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     final List<String> notifyLog = <String>[];
 
@@ -500,14 +513,16 @@ void main() {
     expect(notifyLog, isEmpty);
   });
 
-  testWidgets('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
+  testWidgets('RestorableValue calls didUpdateValue',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
 
     expect(state.objectValue.didUpdateValueCallCount, 0);
 
@@ -524,53 +539,69 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
-    expect(() => RestorableEnum<TestEnum>(
-      TestEnum.four,
-      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
-    expect(() => RestorableEnumN<TestEnum>(
-      TestEnum.four,
-      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
+  testWidgets(
+      'RestorableEnum and RestorableEnumN assert if default value is not in enum',
+      (WidgetTester tester) async {
+    expect(
+        () => RestorableEnum<TestEnum>(TestEnum.four,
+            values:
+                TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})),
+        throwsAssertionError);
+    expect(
+        () => RestorableEnumN<TestEnum>(TestEnum.four,
+            values:
+                TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})),
+        throwsAssertionError);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
+  testWidgets(
+      'RestorableEnum and RestorableEnumN assert if unknown values are set',
+      (WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(enumMissingValue.dispose);
     expect(() => enumMissingValue.value = TestEnum.four, throwsAssertionError);
-    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue =
+        RestorableEnumN<TestEnum>(
       null,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(nullableEnumMissingValue.dispose);
-    expect(() => nullableEnumMissingValue.value = TestEnum.four, throwsAssertionError);
+    expect(() => nullableEnumMissingValue.value = TestEnum.four,
+        throwsAssertionError);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
+  testWidgets(
+      'RestorableEnum and RestorableEnumN assert if unknown values are restored',
+      (WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(enumMissingValue.dispose);
     expect(() => enumMissingValue.fromPrimitives('four'), throwsAssertionError);
-    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue =
+        RestorableEnumN<TestEnum>(
       null,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
     );
     addTearDown(nullableEnumMissingValue.dispose);
-    expect(() => nullableEnumMissingValue.fromPrimitives('four'), throwsAssertionError);
+    expect(() => nullableEnumMissingValue.fromPrimitives('four'),
+        throwsAssertionError);
   });
 
-  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
+  testWidgets('RestorableN types are properly defined',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
     ));
 
     expect(find.text('hello world'), findsOneWidget);
-    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    final _RestorableWidgetState state =
+        tester.state(find.byType(_RestorableWidget));
     state.setProperties(() {
       state.nullableIntValue.value = 24;
       state.nullableDoubleValue.value = 1.5;
@@ -632,22 +663,27 @@ class _RestorableWidget extends StatefulWidget {
   State<_RestorableWidget> createState() => _RestorableWidgetState();
 }
 
-class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
+class _RestorableWidgetState extends State<_RestorableWidget>
+    with RestorationMixin {
   final RestorableNum<num> numValue = RestorableNum<num>(99);
   final RestorableDouble doubleValue = RestorableDouble(123.2);
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
-  final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
-  final RestorableEnum<TestEnum> enumValue = RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
+  final RestorableDateTime dateTimeValue =
+      RestorableDateTime(DateTime(2021, 3, 16));
+  final RestorableEnum<TestEnum> enumValue =
+      RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
   final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(null);
-  final RestorableEnumN<TestEnum> nullableEnumValue = RestorableEnumN<TestEnum>(null, values: TestEnum.values);
-  final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
+  final RestorableEnumN<TestEnum> nullableEnumValue =
+      RestorableEnumN<TestEnum>(null, values: TestEnum.values);
+  final RestorableTextEditingController controllerValue =
+      RestorableTextEditingController(text: 'FooBar');
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override

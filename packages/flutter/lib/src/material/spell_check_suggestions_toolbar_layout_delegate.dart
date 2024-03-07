@@ -11,7 +11,8 @@ import 'package:flutter/widgets.dart' show TextSelectionToolbarLayoutDelegate;
 /// See also:
 ///
 ///   * [SpellCheckSuggestionsToolbar], which uses this to position itself.
-class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelegate {
+class SpellCheckSuggestionsToolbarLayoutDelegate
+    extends SingleChildLayoutDelegate {
   /// Creates an instance of [SpellCheckSuggestionsToolbarLayoutDelegate].
   SpellCheckSuggestionsToolbarLayoutDelegate({
     required this.anchor,

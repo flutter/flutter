@@ -11,7 +11,7 @@ void main() {
 }
 
 class TextButtonExampleApp extends StatefulWidget {
-  const TextButtonExampleApp({ super.key });
+  const TextButtonExampleApp({super.key});
 
   @override
   State<TextButtonExampleApp> createState() => _TextButtonExampleAppState();
@@ -32,7 +32,9 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
           child: TextButtonExample(
             darkMode: darkMode,
             updateDarkMode: (bool value) {
-              setState(() { darkMode = value; });
+              setState(() {
+                darkMode = value;
+              });
             },
           ),
         ),
@@ -42,7 +44,8 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
 }
 
 class TextButtonExample extends StatefulWidget {
-  const TextButtonExample({ super.key, required this.darkMode, required this.updateDarkMode });
+  const TextButtonExample(
+      {super.key, required this.darkMode, required this.updateDarkMode});
 
   final bool darkMode;
   final ValueChanged<bool> updateDarkMode;
@@ -96,9 +99,18 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // Adapt colors that are not part of the color scheme to
     // the current dark/light mode. Used to define TextButton #7's
     // gradients.
-    final (Color color1, Color color2, Color color3) = switch (colorScheme.brightness) {
-      Brightness.light => (Colors.blue.withOpacity(1.0),  Colors.orange.withOpacity(1.0), Colors.yellow.withOpacity(1.0)),
-      Brightness.dark  => (Colors.purple.withOpacity(1.0), Colors.cyan.withOpacity(1.0),  Colors.yellow.withOpacity(1.0)),
+    final (Color color1, Color color2, Color color3) =
+        switch (colorScheme.brightness) {
+      Brightness.light => (
+          Colors.blue.withOpacity(1.0),
+          Colors.orange.withOpacity(1.0),
+          Colors.yellow.withOpacity(1.0)
+        ),
+      Brightness.dark => (
+          Colors.purple.withOpacity(1.0),
+          Colors.cyan.withOpacity(1.0),
+          Colors.yellow.withOpacity(1.0)
+        ),
     };
 
     // This gradient's appearance reflects the button's state.
@@ -107,7 +119,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     Decoration? statesToDecoration(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return BoxDecoration(
-          gradient: LinearGradient(colors: <Color>[color2, color2]), // solid fill
+          gradient:
+              LinearGradient(colors: <Color>[color2, color2]), // solid fill
         );
       }
       return BoxDecoration(
@@ -159,7 +172,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           foregroundColor: colorScheme.onError,
           backgroundColor: colorScheme.error,
         ),
-        onPressed: () { },
+        onPressed: () {},
         icon: const Icon(Icons.access_alarm),
         label: const Text('TextButton.icon #2'),
       ),
@@ -182,7 +195,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             ),
           ),
         ),
-        onPressed: () { },
+        onPressed: () {},
         child: const Text('TextButton #3'),
       ),
       verticalSpacer,
@@ -198,7 +211,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         style: TextButton.styleFrom(
           overlayColor: Colors.yellow,
         ),
-        onPressed: () { },
+        onPressed: () {},
         child: const Text('TextButton #4'),
       ),
     ];
@@ -213,7 +226,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // theme or the MaterialApp theme's ThemeData.textButtonTheme.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder:
+              (BuildContext context, Set<MaterialState> states, Widget? child) {
             return ShaderMask(
               shaderCallback: (Rect bounds) {
                 return LinearGradient(
@@ -230,7 +244,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             );
           },
         ),
-        onPressed: () { },
+        onPressed: () {},
         child: const Text('TextButton #5'),
       ),
       verticalSpacer,
@@ -248,18 +262,19 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // outlines the button's shape.
       TextButton(
         style: TextButton.styleFrom(
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder:
+              (BuildContext context, Set<MaterialState> states, Widget? child) {
             return DecoratedBox(
               decoration: BoxDecoration(
                 border: states.contains(MaterialState.hovered)
-                  ? Border(bottom: BorderSide(color: colorScheme.primary))
-                  : const Border(), // essentially "no border"
+                    ? Border(bottom: BorderSide(color: colorScheme.primary))
+                    : const Border(), // essentially "no border"
               ),
               child: child,
             );
           },
         ),
-        onPressed: () { },
+        onPressed: () {},
         child: const Text('TextButton #6'),
       ),
       verticalSpacer,
@@ -284,7 +299,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           overlayColor: color2,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder:
+              (BuildContext context, Set<MaterialState> states, Widget? child) {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 500),
               decoration: statesToDecoration(states),
@@ -292,7 +308,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
             );
           },
         ).copyWith(
-          side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
+          side: MaterialStateProperty.resolveWith<BorderSide?>(
+              (Set<MaterialState> states) {
             if (states.contains(MaterialState.hovered)) {
               return BorderSide(width: 3, color: color3);
             }
@@ -315,7 +332,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         onPressed: () {},
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          backgroundBuilder:
+              (BuildContext context, Set<MaterialState> states, Widget? child) {
             return Ink(
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -351,14 +369,19 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           late final Future<void> thisAction;
           thisAction = Future<void>.delayed(const Duration(seconds: 1), () {
             if (currentAction == thisAction) {
-              setState(() { currentAction = null; });
+              setState(() {
+                currentAction = null;
+              });
             }
           });
-          setState(() { currentAction = thisAction; });
+          setState(() {
+            currentAction = thisAction;
+          });
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder:
+              (BuildContext context, Set<MaterialState> states, Widget? child) {
             late final ImageProvider image;
             if (currentAction != null) {
               image = runningImage;
@@ -388,7 +411,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     ];
 
     return Row(
-      children: <Widget> [
+      children: <Widget>[
         // The dark/light and LTR/RTL switches. We use the updateDarkMode function
         // provided by the parent TextButtonExampleApp to rebuild the MaterialApp
         // in the appropriate dark/light ThemeMdoe. The directionality of the rest
@@ -407,7 +430,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         horizontalSpacer,
 
         Expanded(
-          child:  Scrollbar(
+          child: Scrollbar(
             controller: scrollController,
             thumbVisibility: true,
             child: SingleChildScrollView(
@@ -424,12 +447,9 @@ class _TextButtonExampleState extends State<TextButtonExample> {
                     ),
                   ),
                   horizontalSpacer,
-
                   Directionality(
                     textDirection: textDirection,
-                    child: Column(
-                      children: columnTwoButtons
-                    ),
+                    child: Column(children: columnTwoButtons),
                   ),
                   horizontalSpacer,
                 ],
@@ -443,13 +463,12 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 }
 
 class TextButtonExampleSwitches extends StatelessWidget {
-  const TextButtonExampleSwitches({
-    super.key,
-    required this.darkMode,
-    required this.updateDarkMode,
-    required this.textDirection,
-    required this.updateRTL
-  });
+  const TextButtonExampleSwitches(
+      {super.key,
+      required this.darkMode,
+      required this.updateDarkMode,
+      required this.textDirection,
+      required this.updateRTL});
 
   final bool darkMode;
   final ValueChanged<bool> updateDarkMode;

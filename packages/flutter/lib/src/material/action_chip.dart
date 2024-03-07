@@ -78,7 +78,8 @@ enum _ChipVariant { flat, elevated }
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
-class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
+class ActionChip extends StatelessWidget
+    implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
   /// Create a chip that acts like a button.
   ///
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
@@ -110,9 +111,9 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.surfaceTintColor,
     this.iconTheme,
     this.avatarBoxConstraints,
-  }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0),
-       _chipVariant = _ChipVariant.flat;
+  })  : assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0),
+        _chipVariant = _ChipVariant.flat;
 
   /// Create an elevated chip that acts like a button.
   ///
@@ -145,9 +146,9 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.surfaceTintColor,
     this.iconTheme,
     this.avatarBoxConstraints,
-  }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0),
-       _chipVariant = _ChipVariant.elevated;
+  })  : assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0),
+        _chipVariant = _ChipVariant.elevated;
 
   @override
   final Widget? avatar;
@@ -205,8 +206,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
-      : null;
+        ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
+        : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -246,10 +247,11 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   _ActionChipDefaultsM3(this.context, this.isEnabled, this._chipVariant)
-    : super(
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        showCheckmark: true,
-      );
+      : super(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          showCheckmark: true,
+        );
 
   final BuildContext context;
   final bool isEnabled;
@@ -259,36 +261,35 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
 
   @override
   double? get elevation => _chipVariant == _ChipVariant.flat
-    ? 0.0
-    : isEnabled ? 1.0 : 0.0;
+      ? 0.0
+      : isEnabled
+          ? 1.0
+          : 0.0;
 
   @override
   double? get pressElevation => 1.0;
 
   @override
   TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
-    color: isEnabled
-      ? _colors.onSurface
-      : _colors.onSurface,
-  );
+        color: isEnabled ? _colors.onSurface : _colors.onSurface,
+      );
 
   @override
   MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return _chipVariant == _ChipVariant.flat
+              ? null
+              : _colors.onSurface.withOpacity(0.12);
+        }
         return _chipVariant == _ChipVariant.flat
-          ? null
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      return _chipVariant == _ChipVariant.flat
-        ? null
-        : _colors.surfaceContainerLow;
-    });
+            ? null
+            : _colors.surfaceContainerLow;
+      });
 
   @override
-  Color? get shadowColor => _chipVariant == _ChipVariant.flat
-    ? Colors.transparent
-    : _colors.shadow;
+  Color? get shadowColor =>
+      _chipVariant == _ChipVariant.flat ? Colors.transparent : _colors.shadow;
 
   @override
   Color? get surfaceTintColor => Colors.transparent;
@@ -301,18 +302,16 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat
-    ? isEnabled
-        ? BorderSide(color: _colors.outline)
-        : BorderSide(color: _colors.onSurface.withOpacity(0.12))
-    : const BorderSide(color: Colors.transparent);
+      ? isEnabled
+          ? BorderSide(color: _colors.outline)
+          : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+      : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? _colors.primary
-      : _colors.onSurface,
-    size: 18.0,
-  );
+        color: isEnabled ? _colors.primary : _colors.onSurface,
+        size: 18.0,
+      );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
@@ -328,7 +327,8 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get labelPadding {
     final double fontSize = labelStyle?.fontSize ?? 14.0;
-    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    final double fontSizeRatio =
+        MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
     return EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),

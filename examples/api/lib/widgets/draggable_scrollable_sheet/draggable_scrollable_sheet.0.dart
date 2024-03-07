@@ -32,10 +32,12 @@ class DraggableScrollableSheetExample extends StatefulWidget {
   const DraggableScrollableSheetExample({super.key});
 
   @override
-  State<DraggableScrollableSheetExample> createState() => _DraggableScrollableSheetExampleState();
+  State<DraggableScrollableSheetExample> createState() =>
+      _DraggableScrollableSheetExampleState();
 }
 
-class _DraggableScrollableSheetExampleState extends State<DraggableScrollableSheetExample> {
+class _DraggableScrollableSheetExampleState
+    extends State<DraggableScrollableSheetExample> {
   double _sheetPosition = 0.5;
   final double _dragSensitivity = 600;
 

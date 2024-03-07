@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/basic/listener.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Listener detects press & release, and cursor location', (WidgetTester tester) async {
+  testWidgets('Listener detects press & release, and cursor location',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.ListenerExample()),
     );
@@ -17,7 +17,8 @@ void main() {
     expect(find.text('0 presses\n0 releases'), findsOneWidget);
     expect(find.text('The cursor is here: (0.00, 0.00)'), findsOneWidget);
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.down(tester.getCenter(find.byType(ColoredBox)));
     await tester.pump();

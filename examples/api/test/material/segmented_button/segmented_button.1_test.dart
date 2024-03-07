@@ -8,7 +8,8 @@ import 'package:flutter_api_samples/material/segmented_button/segmented_button.1
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can use SegmentedButton.styleFrom to customize SegmentedButton', (WidgetTester tester) async {
+  testWidgets('Can use SegmentedButton.styleFrom to customize SegmentedButton',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SegmentedButtonApp(),
     );
@@ -19,10 +20,12 @@ void main() {
     const Color selectedForegroundColor = Colors.white;
 
     Material getMaterial(String text) {
-      return tester.widget<Material>(find.ancestor(
-        of: find.text(text),
-        matching: find.byType(Material),
-      ).first);
+      return tester.widget<Material>(find
+          .ancestor(
+            of: find.text(text),
+            matching: find.byType(Material),
+          )
+          .first);
     }
 
     // Verify the unselected button style.

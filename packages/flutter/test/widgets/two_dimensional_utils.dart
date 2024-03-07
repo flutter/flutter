@@ -9,26 +9,26 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ViewportOffset;
 
-
 // BUILDER DELEGATE ---
 
-final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
-  maxXIndex: 5,
-  maxYIndex: 5,
-  builder: (BuildContext context, ChildVicinity vicinity) {
-    return Container(
-      key: ValueKey<ChildVicinity>(vicinity),
-      color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
-        ? Colors.amber[100]
-        : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
-        ? Colors.blueAccent[100]
-        : null),
-      height: 200,
-      width: 200,
-      child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
-    );
-  }
-);
+final TwoDimensionalChildBuilderDelegate builderDelegate =
+    TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return Container(
+            key: ValueKey<ChildVicinity>(vicinity),
+            color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
+                ? Colors.amber[100]
+                : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
+                    ? Colors.blueAccent[100]
+                    : null),
+            height: 200,
+            width: 200,
+            child:
+                Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+          );
+        });
 
 // Creates a simple 2D table of 200x200 squares with a builder delegate.
 Widget simpleBuilderTest({
@@ -53,7 +53,8 @@ Widget simpleBuilderTest({
       body: SimpleBuilderTableView(
         mainAxis: mainAxis,
         verticalDetails: verticalDetails ?? const ScrollableDetails.vertical(),
-        horizontalDetails: horizontalDetails ?? const ScrollableDetails.horizontal(),
+        horizontalDetails:
+            horizontalDetails ?? const ScrollableDetails.horizontal(),
         cacheExtent: cacheExtent,
         useCacheExtent: useCacheExtent,
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
@@ -93,7 +94,8 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
   final bool setLayoutOffset;
 
   @override
-  Widget buildViewport(BuildContext context, ViewportOffset verticalOffset, ViewportOffset horizontalOffset) {
+  Widget buildViewport(BuildContext context, ViewportOffset verticalOffset,
+      ViewportOffset horizontalOffset) {
     return SimpleBuilderTableViewport(
       horizontalOffset: horizontalOffset,
       horizontalAxisDirection: horizontalDetails.direction,
@@ -154,7 +156,8 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSimpleBuilderTableViewport renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderSimpleBuilderTableViewport renderObject) {
     renderObject
       ..horizontalOffset = horizontalOffset
       ..horizontalAxisDirection = horizontalAxisDirection
@@ -211,9 +214,12 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
-    final double viewportWidth = viewportDimension.width + (useCacheExtent ? cacheExtent : 0.0);
-    final double viewportHeight = viewportDimension.height + (useCacheExtent ? cacheExtent : 0.0);
-    final TwoDimensionalChildBuilderDelegate builderDelegate = delegate as TwoDimensionalChildBuilderDelegate;
+    final double viewportWidth =
+        viewportDimension.width + (useCacheExtent ? cacheExtent : 0.0);
+    final double viewportHeight =
+        viewportDimension.height + (useCacheExtent ? cacheExtent : 0.0);
+    final TwoDimensionalChildBuilderDelegate builderDelegate =
+        delegate as TwoDimensionalChildBuilderDelegate;
 
     final int maxRowIndex;
     final int maxColumnIndex;
@@ -235,14 +241,16 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     for (int column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset = (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
-        final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
+        final ChildVicinity vicinity =
+            ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
         if (!forgetToLayoutChild) {
           child.layout(constraints.tighten(width: 200.0, height: 200.0));
         }
 
         if (setLayoutOffset) {
-          parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
+          parentDataOf(child).layoutOffset =
+              Offset(xLayoutOffset, yLayoutOffset);
         }
         yLayoutOffset += 200;
       }
@@ -252,12 +260,14 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
       final double verticalExtent = 200 * (maxRowIndex + 1);
       verticalOffset.applyContentDimensions(
         0.0,
-        clampDouble(verticalExtent - viewportDimension.height, 0.0, double.infinity),
+        clampDouble(
+            verticalExtent - viewportDimension.height, 0.0, double.infinity),
       );
       final double horizontalExtent = 200 * (maxColumnIndex + 1);
       horizontalOffset.applyContentDimensions(
         0.0,
-        clampDouble(horizontalExtent - viewportDimension.width, 0.0, double.infinity),
+        clampDouble(
+            horizontalExtent - viewportDimension.width, 0.0, double.infinity),
       );
     }
   }
@@ -272,10 +282,8 @@ final List<List<Widget>> children = List<List<Widget>>.generate(
       (int yIndex) {
         return Container(
           color: xIndex.isEven && yIndex.isEven
-            ? Colors.amber[100]
-            : (xIndex.isOdd && yIndex.isOdd
-              ? Colors.blueAccent[100]
-              : null),
+              ? Colors.amber[100]
+              : (xIndex.isOdd && yIndex.isOdd ? Colors.blueAccent[100] : null),
           height: 200,
           width: 200,
           child: Center(child: Text('R$xIndex:C$yIndex')),
@@ -302,11 +310,13 @@ Widget simpleListTest({
       body: SimpleListTableView(
         mainAxis: mainAxis,
         verticalDetails: verticalDetails ?? const ScrollableDetails.vertical(),
-        horizontalDetails: horizontalDetails ?? const ScrollableDetails.horizontal(),
+        horizontalDetails:
+            horizontalDetails ?? const ScrollableDetails.horizontal(),
         cacheExtent: cacheExtent,
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
         clipBehavior: clipBehavior ?? Clip.hardEdge,
-        delegate: delegate ?? TwoDimensionalChildListDelegate(children: children),
+        delegate:
+            delegate ?? TwoDimensionalChildListDelegate(children: children),
       ),
     ),
   );
@@ -328,7 +338,8 @@ class SimpleListTableView extends TwoDimensionalScrollView {
   }) : super(delegate: delegate);
 
   @override
-  Widget buildViewport(BuildContext context, ViewportOffset verticalOffset, ViewportOffset horizontalOffset) {
+  Widget buildViewport(BuildContext context, ViewportOffset verticalOffset,
+      ViewportOffset horizontalOffset) {
     return SimpleListTableViewport(
       horizontalOffset: horizontalOffset,
       horizontalAxisDirection: horizontalDetails.direction,
@@ -371,7 +382,8 @@ class SimpleListTableViewport extends TwoDimensionalViewport {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSimpleListTableViewport renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderSimpleListTableViewport renderObject) {
     renderObject
       ..horizontalOffset = horizontalOffset
       ..horizontalAxisDirection = horizontalAxisDirection
@@ -403,7 +415,8 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
-    final TwoDimensionalChildListDelegate listDelegate = delegate as TwoDimensionalChildListDelegate;
+    final TwoDimensionalChildListDelegate listDelegate =
+        delegate as TwoDimensionalChildListDelegate;
     final int rowCount;
     final int columnCount;
     rowCount = listDelegate.children.length;
@@ -424,7 +437,8 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     for (int column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset = (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
-        final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
+        final ChildVicinity vicinity =
+            ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
         child.layout(constraints.tighten(width: 200.0, height: 200.0));
 
@@ -446,13 +460,14 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
 }
 
 class KeepAliveCheckBox extends StatefulWidget {
-  const KeepAliveCheckBox({ super.key });
+  const KeepAliveCheckBox({super.key});
 
   @override
   KeepAliveCheckBoxState createState() => KeepAliveCheckBoxState();
 }
 
-class KeepAliveCheckBoxState extends State<KeepAliveCheckBox> with AutomaticKeepAliveClientMixin {
+class KeepAliveCheckBoxState extends State<KeepAliveCheckBox>
+    with AutomaticKeepAliveClientMixin {
   bool checkValue = false;
 
   @override
@@ -503,7 +518,8 @@ class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is TestExtendedParentData);
-    final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
+    final TestExtendedParentData parentData =
+        renderObject.parentData! as TestExtendedParentData;
     parentData.testValue = testValue;
   }
 

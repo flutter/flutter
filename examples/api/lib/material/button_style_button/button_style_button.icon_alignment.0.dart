@@ -27,10 +27,12 @@ class ButtonStyleButtonIconAlignmentExample extends StatefulWidget {
   const ButtonStyleButtonIconAlignmentExample({super.key});
 
   @override
-  State<ButtonStyleButtonIconAlignmentExample> createState() => _ButtonStyleButtonIconAlignmentExampleState();
+  State<ButtonStyleButtonIconAlignmentExample> createState() =>
+      _ButtonStyleButtonIconAlignmentExampleState();
 }
 
-class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButtonIconAlignmentExample> {
+class _ButtonStyleButtonIconAlignmentExampleState
+    extends State<ButtonStyleButtonIconAlignmentExample> {
   TextDirection _textDirection = TextDirection.ltr;
   IconAlignment _iconAlignment = IconAlignment.start;
 
@@ -101,8 +103,9 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                             _iconAlignment = value.first;
                           });
                         },
-                        selected: <IconAlignment>{ _iconAlignment },
-                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                        selected: <IconAlignment>{_iconAlignment},
+                        segments: IconAlignment.values
+                            .map((IconAlignment iconAlignment) {
                           return ButtonSegment<IconAlignment>(
                             value: iconAlignment,
                             label: Text(iconAlignment.name),
@@ -121,7 +124,7 @@ class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButto
                             _textDirection = value.first;
                           });
                         },
-                        selected: <TextDirection>{ _textDirection },
+                        selected: <TextDirection>{_textDirection},
                         segments: const <ButtonSegment<TextDirection>>[
                           ButtonSegment<TextDirection>(
                             value: TextDirection.ltr,

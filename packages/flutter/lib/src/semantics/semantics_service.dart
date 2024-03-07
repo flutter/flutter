@@ -6,7 +6,8 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
+import 'semantics_event.dart'
+    show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
 
 export 'dart:ui' show TextDirection;
 
@@ -29,8 +30,11 @@ abstract final class SemanticsService {
   /// The assertiveness level of the announcement is determined by [assertiveness].
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
-  static Future<void> announce(String message, TextDirection textDirection, {Assertiveness assertiveness = Assertiveness.polite}) async {
-    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, assertiveness: assertiveness);
+  static Future<void> announce(String message, TextDirection textDirection,
+      {Assertiveness assertiveness = Assertiveness.polite}) async {
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
+        message, textDirection,
+        assertiveness: assertiveness);
     await SystemChannels.accessibility.send(event.toMap());
   }
 

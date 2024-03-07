@@ -30,7 +30,9 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testUsingContext('devices can display no connected devices with the --machine flag', () async {
+  testUsingContext(
+      'devices can display no connected devices with the --machine flag',
+      () async {
     final DevicesCommand command = DevicesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);

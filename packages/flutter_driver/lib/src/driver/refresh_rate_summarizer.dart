@@ -119,11 +119,14 @@ class RefreshRateSummary {
       assert(event.arguments != null);
       final Map<String, dynamic> arguments = event.arguments!;
       const double nanosecondsPerSecond = 1e+9;
-      final int startTimeInNanoseconds = int.parse(arguments['StartTime'] as String);
-      final int targetTimeInNanoseconds = int.parse(arguments['TargetTime'] as String);
-      final int frameDurationInNanoseconds = targetTimeInNanoseconds - startTimeInNanoseconds;
-      final double refreshRate = nanosecondsPerSecond /
-          frameDurationInNanoseconds;
+      final int startTimeInNanoseconds =
+          int.parse(arguments['StartTime'] as String);
+      final int targetTimeInNanoseconds =
+          int.parse(arguments['TargetTime'] as String);
+      final int frameDurationInNanoseconds =
+          targetTimeInNanoseconds - startTimeInNanoseconds;
+      final double refreshRate =
+          nanosecondsPerSecond / frameDurationInNanoseconds;
       result.add(refreshRate);
     }
     return result;

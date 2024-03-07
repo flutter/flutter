@@ -35,12 +35,18 @@ void main() {
         ),
       );
 
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp]));
 
       // Jump to the end.
       controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollDown]));
 
       semantics.dispose();
     });
@@ -67,12 +73,18 @@ void main() {
         ),
       );
 
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollDown]));
 
       // Jump to the end.
       controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp]));
 
       semantics.dispose();
     });
@@ -99,12 +111,18 @@ void main() {
         ),
       );
 
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
 
       // Jump to the end.
       controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollRight]));
 
       semantics.dispose();
     });
@@ -132,12 +150,18 @@ void main() {
         ),
       );
 
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollRight]));
 
       // Jump to the end.
       controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
-      expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+      expect(
+          semantics,
+          includesNodeWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
 
       semantics.dispose();
     });

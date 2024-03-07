@@ -59,7 +59,10 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, true);
+    expect(
+        tester.getTopLeft(find.byType(Text)).dx >
+            tester.getTopLeft(find.byType(CupertinoTextField)).dx,
+        true);
   });
 
   testWidgets('LTR puts child after prefix', (WidgetTester tester) async {
@@ -80,7 +83,10 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, false);
+    expect(
+        tester.getTopLeft(find.byType(Text)).dx >
+            tester.getTopLeft(find.byType(CupertinoTextField)).dx,
+        false);
   });
 
   testWidgets('Shows error widget', (WidgetTester tester) async {
@@ -117,7 +123,8 @@ void main() {
     expect(helper, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper text above error text', (WidgetTester tester) async {
+  testWidgets('Shows helper text above error text',
+      (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = CupertinoActivityIndicator();
 
@@ -134,12 +141,14 @@ void main() {
     );
 
     expect(
-      tester.getTopLeft(find.byType(CupertinoActivityIndicator)).dy > tester.getTopLeft(find.byType(Text)).dy,
+      tester.getTopLeft(find.byType(CupertinoActivityIndicator)).dy >
+          tester.getTopLeft(find.byType(Text)).dy,
       true,
     );
   });
 
-  testWidgets('Shows helper in label color and error text in red color', (WidgetTester tester) async {
+  testWidgets('Shows helper in label color and error text in red color',
+      (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = Text('Error');
 
@@ -166,7 +175,8 @@ void main() {
     expect(errorTextStyle.style.color, CupertinoColors.destructiveRed);
   });
 
-  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode',
+      (WidgetTester tester) async {
     const Widget prefix = Text('Prefix');
     const Widget helper = Text('Helper');
 
@@ -188,21 +198,25 @@ void main() {
     RenderParagraph helperParagraph = tester.renderObject(find.text('Helper'));
     expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
-    expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'),
+        isFalse);
     RenderParagraph prefixParagraph = tester.renderObject(find.text('Prefix'));
     expect(prefixParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
-    expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'),
+        isFalse);
 
     // CupertinoFormRow with light theme.
     await tester.pumpWidget(buildFormRow(Brightness.dark));
     helperParagraph = tester.renderObject(find.text('Helper'));
     expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
-    expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'),
+        isFalse);
     prefixParagraph = tester.renderObject(find.text('Prefix'));
     expect(prefixParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
-    expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+    expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'),
+        isFalse);
   });
 }

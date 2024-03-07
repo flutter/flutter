@@ -37,25 +37,30 @@ class WindowsVersionValidator extends DoctorValidator {
   final ProcessLister _processLister;
 
   Future<ValidationResult> _topazScan() async {
-      final ProcessResult getProcessesResult = await _processLister.getProcessesWithPath();
-      if (getProcessesResult.exitCode != 0) {
-        return const ValidationResult(ValidationType.missing, <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')]);
-      }
-      final RegExp topazRegex = RegExp(kCoreProcessPattern, caseSensitive: false,  multiLine: true);
-      final String processes = getProcessesResult.stdout as String;
-      final bool topazFound = topazRegex.hasMatch(processes);
-      if (topazFound) {
-        return const ValidationResult(
-          ValidationType.missing,
-          <ValidationMessage>[
-            ValidationMessage.hint(
-              'The Topaz OFD Security Module was detected on your machine. '
-              'You may need to disable it to build Flutter applications.',
-            ),
-          ],
-        );
-      }
-      return const ValidationResult(ValidationType.success, <ValidationMessage>[]);
+    final ProcessResult getProcessesResult =
+        await _processLister.getProcessesWithPath();
+    if (getProcessesResult.exitCode != 0) {
+      return const ValidationResult(ValidationType.missing, <ValidationMessage>[
+        ValidationMessage.hint('Get-Process failed to complete')
+      ]);
+    }
+    final RegExp topazRegex =
+        RegExp(kCoreProcessPattern, caseSensitive: false, multiLine: true);
+    final String processes = getProcessesResult.stdout as String;
+    final bool topazFound = topazRegex.hasMatch(processes);
+    if (topazFound) {
+      return const ValidationResult(
+        ValidationType.missing,
+        <ValidationMessage>[
+          ValidationMessage.hint(
+            'The Topaz OFD Security Module was detected on your machine. '
+            'You may need to disable it to build Flutter applications.',
+          ),
+        ],
+      );
+    }
+    return const ValidationResult(
+        ValidationType.success, <ValidationMessage>[]);
   }
 
   @override

@@ -24,7 +24,8 @@ class Scrim extends StatelessWidget {
 
           final bool ignorePointer =
               (controller.status == AnimationStatus.dismissed);
-          final bool tapToRevert = (controller.status == AnimationStatus.completed);
+          final bool tapToRevert =
+              (controller.status == AnimationStatus.completed);
 
           if (tapToRevert) {
             return MouseRegion(

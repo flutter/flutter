@@ -107,7 +107,8 @@ class _SaveableFormState extends State<_SaveableForm> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
+          const Text(
+              'If the field below is unsaved, a confirmation dialog will be shown on back.'),
           const SizedBox(height: 20.0),
           Form(
             canPop: !_isDirty,
@@ -153,7 +154,8 @@ class _SaveableFormState extends State<_SaveableForm> {
           ),
           TextButton(
             onPressed: () async {
-              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
+              final bool shouldPop =
+                  !_isDirty || (await _showDialog() ?? false);
               if (!shouldPop) {
                 return;
               }

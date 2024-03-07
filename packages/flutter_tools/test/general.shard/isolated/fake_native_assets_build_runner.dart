@@ -23,7 +23,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     CCompilerConfig? cCompilerConfigResult,
     CCompilerConfig? ndkCCompilerConfigResult,
   })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig(),
-        ndkCCompilerConfigResult = ndkCCompilerConfigResult ?? CCompilerConfig();
+        ndkCCompilerConfigResult =
+            ndkCCompilerConfigResult ?? CCompilerConfig();
 
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.DryRunResult dryRunResult;

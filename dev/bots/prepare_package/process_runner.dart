@@ -56,7 +56,8 @@ class ProcessRunner {
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
-      stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
+      stderr.write(
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
     final List<int> output = <int>[];
     final Completer<void> stdoutComplete = Completer<void>();
@@ -94,18 +95,21 @@ class ProcessRunner {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final String message =
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
     } on ArgumentError catch (e) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+      final String message =
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final String message =
+          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw PreparePackageException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),

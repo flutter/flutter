@@ -13,11 +13,15 @@ const BorderSide borderSide = BorderSide(width: 4, color: Color(0x0f00ff00));
 List<Offset> rectIncludes(Rect r) {
   return <Offset>[r.topLeft, r.topRight, r.bottomLeft, r.bottomRight, r.center];
 }
-final List<Offset> leftRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 4, 100));
-final List<Offset> rightRectIncludes = rectIncludes(const Rect.fromLTWH(96, 0, 4, 100));
-final List<Offset> topRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 100, 4));
-final List<Offset> bottomRectIncludes = rectIncludes(const Rect.fromLTWH(0, 96, 100, 4));
 
+final List<Offset> leftRectIncludes =
+    rectIncludes(const Rect.fromLTWH(0, 0, 4, 100));
+final List<Offset> rightRectIncludes =
+    rectIncludes(const Rect.fromLTWH(96, 0, 4, 100));
+final List<Offset> topRectIncludes =
+    rectIncludes(const Rect.fromLTWH(0, 0, 100, 4));
+final List<Offset> bottomRectIncludes =
+    rectIncludes(const Rect.fromLTWH(0, 96, 100, 4));
 
 void main() {
   test('LinearBorderEdge defaults', () {
@@ -35,6 +39,7 @@ void main() {
       expect(border.top, null);
       expect(border.bottom, null);
     }
+
     expectEmptyBorder(LinearBorder.none);
 
     expect(LinearBorder.start().side, BorderSide.none);
@@ -66,7 +71,8 @@ void main() {
     expect(LinearBorder.none, LinearBorder.none.copyWith());
     expect(LinearBorder.none.hashCode, LinearBorder.none.copyWith().hashCode);
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
-    expect(LinearBorder.none.copyWith(side: side), const LinearBorder(side: side));
+    expect(
+        LinearBorder.none.copyWith(side: side), const LinearBorder(side: side));
   });
 
   test('LinearBorder lerp identical a,b', () {
@@ -81,34 +87,40 @@ void main() {
     expect(identical(LinearBorderEdge.lerp(edge, edge, 0.5), edge), true);
   });
 
-  test('LinearBorderEdge, LinearBorder toString()', () {
-    expect(const LinearBorderEdge(size: 0.5, alignment: -0.5).toString(), 'LinearBorderEdge(size: 0.5, alignment: -0.5)');
-    expect(LinearBorder.none.toString(), 'LinearBorder.none');
-    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
-    expect(const LinearBorder(side: side).toString(), 'LinearBorder(side: BorderSide(color: Color(0xff123456), width: 10.0))');
-    expect(
-      const LinearBorder(
-        side: side,
-        start: LinearBorderEdge(size: 0, alignment: -0.75),
-        end: LinearBorderEdge(size: 0.25, alignment: -0.5),
-        top: LinearBorderEdge(size: 0.5, alignment: 0.5),
-        bottom: LinearBorderEdge(size: 0.75, alignment: 0.75),
-      ).toString(),
-      'LinearBorder('
+  test(
+    'LinearBorderEdge, LinearBorder toString()',
+    () {
+      expect(const LinearBorderEdge(size: 0.5, alignment: -0.5).toString(),
+          'LinearBorderEdge(size: 0.5, alignment: -0.5)');
+      expect(LinearBorder.none.toString(), 'LinearBorder.none');
+      const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+      expect(const LinearBorder(side: side).toString(),
+          'LinearBorder(side: BorderSide(color: Color(0xff123456), width: 10.0))');
+      expect(
+        const LinearBorder(
+          side: side,
+          start: LinearBorderEdge(size: 0, alignment: -0.75),
+          end: LinearBorderEdge(size: 0.25, alignment: -0.5),
+          top: LinearBorderEdge(size: 0.5, alignment: 0.5),
+          bottom: LinearBorderEdge(size: 0.75, alignment: 0.75),
+        ).toString(),
+        'LinearBorder('
         'side: BorderSide(color: Color(0xff123456), width: 10.0), '
         'start: LinearBorderEdge(size: 0.0, alignment: -0.75), '
         'end: LinearBorderEdge(size: 0.25, alignment: -0.5), '
         'top: LinearBorderEdge(size: 0.5, alignment: 0.5), '
         'bottom: LinearBorderEdge(size: 0.75, alignment: 0.75))',
-    );
-  },
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/118207
+      );
+    },
+    skip:
+        isBrowser, // [intended] see https://github.com/flutter/flutter/issues/118207
   );
 
   test('LinearBorder.start()', () {
     final LinearBorder border = LinearBorder.start(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: leftRectIncludes,
@@ -117,7 +129,8 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
       paints
         ..path(
           includes: rightRectIncludes,
@@ -130,7 +143,8 @@ void main() {
   test('LinearBorder.end()', () {
     final LinearBorder border = LinearBorder.end(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: rightRectIncludes,
@@ -139,7 +153,8 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
       paints
         ..path(
           includes: leftRectIncludes,
@@ -152,7 +167,8 @@ void main() {
   test('LinearBorder.top()', () {
     final LinearBorder border = LinearBorder.top(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: topRectIncludes,
@@ -165,7 +181,8 @@ void main() {
   test('LinearBorder.bottom()', () {
     final LinearBorder border = LinearBorder.bottom(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (Canvas canvas) =>
+          border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: bottomRectIncludes,

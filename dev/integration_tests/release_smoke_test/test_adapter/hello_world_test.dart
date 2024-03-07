@@ -10,7 +10,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Hello world smoke test', (WidgetTester tester) async {
-    smoke.main(); // builds the app and schedules a frame but doesn't trigger one
+    smoke
+        .main(); // builds the app and schedules a frame but doesn't trigger one
 
     await tester.pump(); // triggers a frame
 

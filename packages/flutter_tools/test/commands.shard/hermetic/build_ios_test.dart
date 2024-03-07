@@ -33,17 +33,20 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-  FakeXcodeProjectInterpreterWithBuildSettings({this.productBundleIdentifier, this.developmentTeam = 'abc'});
+class FakeXcodeProjectInterpreterWithBuildSettings
+    extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithBuildSettings(
+      {this.productBundleIdentifier, this.developmentTeam = 'abc'});
 
   @override
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
+    String projectPath, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return <String, String>{
-      'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
+      'PRODUCT_BUNDLE_IDENTIFIER':
+          productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'Runner.app',
       if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
@@ -56,18 +59,14 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final String? developmentTeam;
 }
 
-final Platform macosPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-    'HOME': '/',
-  }
-);
-final Platform notMacosPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-  }
-);
+final Platform macosPlatform =
+    FakePlatform(operatingSystem: 'macos', environment: <String, String>{
+  'FLUTTER_ROOT': '/',
+  'HOME': '/',
+});
+final Platform notMacosPlatform = FakePlatform(environment: <String, String>{
+  'FLUTTER_ROOT': '/',
+});
 
 void main() {
   late FileSystem fileSystem;
@@ -102,19 +101,32 @@ void main() {
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
   void createMinimalMockProjectFiles() {
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    fileSystem
+        .directory(fileSystem.path.join('ios', 'Runner.xcodeproj'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
+        .createSync(recursive: true);
+    fileSystem
+        .file(
+            fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
+        .createSync();
     createCoreMockProjectFiles();
   }
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
-    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
+    'xattr',
+    '-r',
+    '-d',
+    'com.apple.FinderInfo',
+    '/',
   ]);
 
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
@@ -131,7 +143,8 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
+  FakeCommand setUpXCResultCommand(
+      {String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -164,20 +177,15 @@ void main() {
         'xcrun',
         'xcodebuild',
         '-configuration',
-        if (simulator)
-          'Debug'
-        else
-          'Release',
-        if (verbose)
-          'VERBOSE_SCRIPT_LOGGING=YES'
-        else
-          '-quiet',
+        if (simulator) 'Debug' else 'Release',
+        if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-workspace',
         if (customNaming)
           'RenamedWorkspace.xcworkspace'
         else
           'Runner.xcworkspace',
-        '-scheme', 'Runner',
+        '-scheme',
+        'Runner',
         'BUILD_DIR=/build/ios',
         '-sdk',
         if (simulator) ...<String>[
@@ -195,10 +203,11 @@ void main() {
           '-destination',
           'generic/platform=iOS',
         ],
-        '-resultBundlePath', _xcBundleDirectoryPath,
-        '-resultBundleVersion', '3',
-        if (disablePortPublication)
-          'DISABLE_PORT_PUBLICATION=YES',
+        '-resultBundlePath',
+        _xcBundleDirectoryPath,
+        '-resultBundleVersion',
+        '3',
+        if (disablePortPublication) 'DISABLE_PORT_PUBLICATION=YES',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
@@ -224,14 +233,16 @@ void main() {
     );
     createCoreMockProjectFiles();
 
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub']
-    ), throwsToolExit(message: 'Application not configured for iOS'));
+    expect(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(message: 'Application not configured for iOS'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios build fails in debug with code analysis', () async {
@@ -246,14 +257,22 @@ void main() {
     );
     createCoreMockProjectFiles();
 
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']
-    ), throwsToolExit(message: '--analyze-size" can only be used on release builds'));
+    expect(
+        createTestCommandRunner(command).run(const <String>[
+          'build',
+          'ios',
+          '--no-pub',
+          '--debug',
+          '--analyze-size'
+        ]),
+        throwsToolExit(
+            message: '--analyze-size" can only be used on release builds'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios build fails on non-macOS platform', () async {
@@ -268,18 +287,23 @@ void main() {
     );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
-      .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
 
-    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub']
-    ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
+    final bool supported =
+        BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false)
+            .supported;
+    expect(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
+        supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios build invokes xcode build', () async {
@@ -297,23 +321,27 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem
+            .directory('build/ios/Release-iphoneos/Runner.app')
+            .createSync(recursive: true);
       }),
       setUpRsyncCommand(),
     ]);
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'ios', '--no-pub']);
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ios build invokes xcode build with disable port publication setting', () async {
+  testUsingContext(
+      'ios build invokes xcode build with disable port publication setting',
+      () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -325,27 +353,36 @@ void main() {
     );
     createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']
-    );
+    await createTestCommandRunner(command).run(const <String>[
+      'build',
+      'ios',
+      '--no-pub',
+      '--no-publish-port',
+      '--ci'
+    ]);
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      xattrCommand,
-      setUpFakeXcodeBuildHandler(
-        disablePortPublication: true,
-        onRun: (_) {
-          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-        },
-      ),
-      setUpRsyncCommand(),
-    ]),
+          xattrCommand,
+          setUpFakeXcodeBuildHandler(
+            disablePortPublication: true,
+            onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            },
+          ),
+          setUpRsyncCommand(),
+        ]),
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ios build invokes xcode build without disable port publication setting when not in CI', () async {
+  testUsingContext(
+      'ios build invokes xcode build without disable port publication setting when not in CI',
+      () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -357,26 +394,30 @@ void main() {
     );
     createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub', '--no-publish-port']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      xattrCommand,
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-        },
-      ),
-      setUpRsyncCommand(),
-    ]),
+          xattrCommand,
+          setUpFakeXcodeBuildHandler(
+            onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            },
+          ),
+          setUpRsyncCommand(),
+        ]),
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ios build invokes xcode build with renamed xcodeproj and xcworkspace', () async {
+  testUsingContext(
+      'ios build invokes xcode build with renamed xcodeproj and xcworkspace',
+      () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -389,26 +430,37 @@ void main() {
 
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(customNaming: true, onRun: (_) {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-      }),
+      setUpFakeXcodeBuildHandler(
+          customNaming: true,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          }),
       setUpRsyncCommand(),
     ]);
 
-    fileSystem.directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj')).createSync();
+    fileSystem
+        .directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace'))
+        .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path
+            .join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj'))
+        .createSync();
     createCoreMockProjectFiles();
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'ios', '--no-pub']);
     expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios build invokes xcode build with device ID', () async {
@@ -423,9 +475,13 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(deviceId: '1234', onRun: (_) {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-      }),
+      setUpFakeXcodeBuildHandler(
+          deviceId: '1234',
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          }),
       setUpRsyncCommand(),
     ]);
     createMinimalMockProjectFiles();
@@ -438,7 +494,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios simulator build invokes xcode build', () async {
@@ -453,9 +510,13 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(simulator: true, onRun: (_) {
-        fileSystem.directory('build/ios/Debug-iphonesimulator/Runner.app').createSync(recursive: true);
-      }),
+      setUpFakeXcodeBuildHandler(
+          simulator: true,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Debug-iphonesimulator/Runner.app')
+                .createSync(recursive: true);
+          }),
       setUpRsyncCommand(),
     ]);
     createMinimalMockProjectFiles();
@@ -467,7 +528,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ios build invokes xcode build with verbosity', () async {
@@ -483,9 +545,13 @@ void main() {
     createMinimalMockProjectFiles();
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(verbose: true, onRun: (_) {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
-      }),
+      setUpFakeXcodeBuildHandler(
+          verbose: true,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          }),
       setUpRsyncCommand(),
     ]);
 
@@ -496,7 +562,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
@@ -512,7 +579,9 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
-        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        fileSystem
+            .directory('build/ios/Release-iphoneos/Runner.app')
+            .createSync(recursive: true);
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -528,33 +597,38 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpRsyncCommand(onRun: (_) => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
+      setUpRsyncCommand(
+          onRun: (_) => fileSystem.file(
+              'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
     ]);
     createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'ios', '--no-pub', '--analyze-size']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
 
-    expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(logger.statusText,
+        contains('A summary of your iOS bundle analysis can be found at'));
     expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'ios'),
-    ));
-    expect(fakeAnalytics.sentEvents, contains(
-      Event.codeSizeAnalysis(platform: 'ios')
-    ));
+    expect(
+        usage.events,
+        contains(
+          const TestUsageEvent('code-size-analysis', 'ios'),
+        ));
+    expect(fakeAnalytics.sentEvents,
+        contains(Event.codeSizeAnalysis(platform: 'ios')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
-    FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+    FileSystemUtils: () =>
+        FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
     Analytics: () => fakeAnalytics,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   group('Analytics for impeller plist setting', () {
@@ -570,12 +644,18 @@ void main() {
 ''';
     const FakeCommand plutilCommand = FakeCommand(
       command: <String>[
-        '/usr/bin/plutil', '-convert', 'xml1', '-o', '-', '/ios/Runner/Info.plist',
+        '/usr/bin/plutil',
+        '-convert',
+        'xml1',
+        '-o',
+        '-',
+        '/ios/Runner/Info.plist',
       ],
       stdout: plistContents,
     );
 
-    testUsingContext('Sends an analytics event when Impeller is enabled', () async {
+    testUsingContext('Sends an analytics event when Impeller is enabled',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -587,48 +667,57 @@ void main() {
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'ios', '--no-pub']
-      );
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub']);
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-enabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
+      expect(
+          usage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'ios',
+              label: 'plist-impeller-enabled',
+              parameters: CustomDimensions(),
+            ),
+          ));
 
-      expect(fakeAnalytics.sentEvents, contains(
-        Event.flutterBuildInfo(
-          label: 'plist-impeller-enabled',
-          buildType: 'ios',
-        ),
-      ));
+      expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'plist-impeller-enabled',
+              buildType: 'ios',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: (_) {
-          fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
-            .createSync(recursive: true);
-        }),
-        setUpRsyncCommand(onRun: (_) =>
-          fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
-      ]),
+            xattrCommand,
+            setUpFakeXcodeBuildHandler(onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            }),
+            setUpRsyncCommand(
+                onRun: (_) => fileSystem.file(
+                    'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(
+                      List<int>.generate(10000, (int index) => 0))),
+          ]),
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: macosPlatform,
-      ),
+            fileSystem: fileSystem,
+            platform: macosPlatform,
+          ),
       Usage: () => usage,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
       Analytics: () => fakeAnalytics,
     });
 
-    testUsingContext('Sends an analytics event when Impeller is disabled', () async {
+    testUsingContext('Sends an analytics event when Impeller is disabled',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -640,65 +729,80 @@ void main() {
       );
       createMinimalMockProjectFiles();
 
-      fileSystem.file(
-        fileSystem.path.join('usr', 'bin', 'plutil'),
-      ).createSync(recursive: true);
+      fileSystem
+          .file(
+            fileSystem.path.join('usr', 'bin', 'plutil'),
+          )
+          .createSync(recursive: true);
 
       final File infoPlist = fileSystem.file(fileSystem.path.join(
-        'ios', 'Runner', 'Info.plist',
-      ))..createSync(recursive: true);
+        'ios',
+        'Runner',
+        'Info.plist',
+      ))
+        ..createSync(recursive: true);
 
       infoPlist.writeAsStringSync(plistContents);
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'ios', '--no-pub']
-      );
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub']);
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-disabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
+      expect(
+          usage.events,
+          contains(
+            const TestUsageEvent(
+              'build',
+              'ios',
+              label: 'plist-impeller-disabled',
+              parameters: CustomDimensions(),
+            ),
+          ));
 
-      expect(fakeAnalytics.sentEvents, contains(
-        Event.flutterBuildInfo(
-          label: 'plist-impeller-disabled',
-          buildType: 'ios',
-        ),
-      ));
+      expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'plist-impeller-disabled',
+              buildType: 'ios',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(onRun: (_) {
-          fileSystem.directory('build/ios/Release-iphoneos/Runner.app')
-            .createSync(recursive: true);
-        }),
-        setUpRsyncCommand(onRun: (_) =>
-          fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
-      ]),
+            xattrCommand,
+            setUpFakeXcodeBuildHandler(onRun: (_) {
+              fileSystem
+                  .directory('build/ios/Release-iphoneos/Runner.app')
+                  .createSync(recursive: true);
+            }),
+            setUpRsyncCommand(
+                onRun: (_) => fileSystem.file(
+                    'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(
+                      List<int>.generate(10000, (int index) => 0))),
+          ]),
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: macosPlatform,
-      ),
+            fileSystem: fileSystem,
+            platform: macosPlatform,
+          ),
       Usage: () => usage,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
       FlutterProjectFactory: () => FlutterProjectFactory(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-      ),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+          ),
       PlistParser: () => PlistParser(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          plutilCommand, plutilCommand, plutilCommand,
-        ]),
-      ),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+            ]),
+          ),
       Analytics: () => fakeAnalytics,
     });
   });
@@ -716,9 +820,13 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-        }),
+        setUpFakeXcodeBuildHandler(
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(),
         setUpRsyncCommand(),
       ]);
@@ -726,20 +834,25 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+      expect(logger.traceText,
+          contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Display xcresult issues on console if parsed, suppress Xcode output', () async {
+    testUsingContext(
+        'Display xcresult issues on console if parsed, suppress Xcode output',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -751,9 +864,14 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-        }, stdout: 'Lots of spew from Xcode',
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          onRun: (_) {
+            fileSystem.systemTempDirectory
+                .childDirectory(_xcBundleDirectoryPath)
+                .createSync();
+          },
+          stdout: 'Lots of spew from Xcode',
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
         setUpRsyncCommand(),
@@ -762,12 +880,17 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(
+          logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+          logger.errorText,
+          contains(
+              '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
       expect(logger.statusText, isNot(contains("Xcode's output")));
       expect(logger.statusText, isNot(contains('Lots of spew from Xcode')));
     }, overrides: <Type, Generator>{
@@ -775,10 +898,12 @@ void main() {
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
+    testUsingContext(
+        'Do not display xcresult issues that needs to be discarded.', () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -790,9 +915,13 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-        }),
+        setUpFakeXcodeBuildHandler(
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
         setUpRsyncCommand(),
       ]);
@@ -800,20 +929,32 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
+      expect(
+          logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+          logger.errorText,
+          contains(
+              '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(
+          logger.errorText,
+          isNot(contains(
+              'Command PhaseScriptExecution failed with a nonzero exit code')));
+      expect(
+          logger.warningText,
+          isNot(contains(
+              'but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
     testUsingContext('Trace if xcresult bundle does not exist.', () async {
@@ -836,58 +977,26 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(testLogger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+      expect(
+          testLogger.traceText,
+          contains(
+              'The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Extra error message for provision profile issue in xcresult bundle.', () async {
-      final BuildCommand command = BuildCommand(
-        artifacts: artifacts,
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        processUtils: processUtils,
-        osUtils: FakeOperatingSystemUtils(),
-      );
-      processManager.addCommands(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-        }),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
-        setUpRsyncCommand(),
-      ]);
-
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(logger.errorText, contains('Some Provisioning profile issue.'));
-      expect(logger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
-      expect(logger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
-      expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
-      expect(logger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      Logger: () => logger,
-      ProcessManager: () => processManager,
-      Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-    });
-
-    testUsingContext('Display xcresult issues with no provisioning profile.', () async {
+    testUsingContext(
+        'Extra error message for provision profile issue in xcresult bundle.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -900,33 +1009,47 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
+        setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
         setUpRsyncCommand(),
       ]);
 
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains('Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor'));
-      expect(logger.errorText, contains(noProvisioningProfileInstruction));
+      expect(logger.errorText, contains('Some Provisioning profile issue.'));
+      expect(
+          logger.errorText,
+          contains(
+              'It appears that there was a problem signing your application prior to installation on the device.'));
+      expect(
+          logger.errorText,
+          contains(
+              'Verify that the Bundle Identifier in your project is your signing id in Xcode'));
+      expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
+      expect(logger.errorText,
+          contains("Also try selecting 'Product > Build' to fix the problem."));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Extra error message for missing simulator platform in xcresult bundle.', () async {
+    testUsingContext('Display xcresult issues with no provisioning profile.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -938,9 +1061,61 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-        }),
+        setUpFakeXcodeBuildHandler(
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
+        setUpXCResultCommand(
+            stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+        setUpRsyncCommand(),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(
+          logger.errorText,
+          contains(
+              'Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor'));
+      expect(logger.errorText, contains(noProvisioningProfileInstruction));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => processManager,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
+    testUsingContext(
+        'Extra error message for missing simulator platform in xcresult bundle.',
+        () async {
+      final BuildCommand command = BuildCommand(
+        artifacts: artifacts,
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        processUtils: processUtils,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      processManager.addCommands(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
         setUpRsyncCommand(),
       ]);
@@ -948,20 +1123,24 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
+      expect(
+          logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Delete xcresult bundle before each xcodebuild command.', () async {
+    testUsingContext('Delete xcresult bundle before each xcodebuild command.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -975,29 +1154,36 @@ void main() {
         xattrCommand,
         // Intentionally fail the first xcodebuild command with concurrent run failure message.
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
-          }
-        ),
+            exitCode: 1,
+            stdout:
+                '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .childFile('result.xcresult')
+                  .createSync(recursive: true);
+            }),
         // The second xcodebuild is triggered due to above concurrent run failure message.
-        setUpFakeXcodeBuildHandler(
-          onRun: (_) {
-            // If the file is not cleaned, throw an error, test failure.
-            if (fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).existsSync()) {
-              throwToolExit('xcresult bundle file existed.', exitCode: 2);
-            }
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
+        setUpFakeXcodeBuildHandler(onRun: (_) {
+          // If the file is not cleaned, throw an error, test failure.
+          if (fileSystem.systemTempDirectory
+              .childDirectory(_xcBundleDirectoryPath)
+              .existsSync()) {
+            throwToolExit('xcresult bundle file existed.', exitCode: 2);
           }
-        ),
+          fileSystem.systemTempDirectory
+              .childDirectory(_xcBundleDirectoryPath)
+              .childFile('result.xcresult')
+              .createSync(recursive: true);
+        }),
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
         setUpRsyncCommand(),
       ]);
 
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub']);
 
       expect(logger.statusText, contains('Xcode build done.'));
     }, overrides: <Type, Generator>{
@@ -1005,10 +1191,13 @@ void main() {
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Failed to parse xcresult but display missing provisioning profile issue from stdout.', () async {
+    testUsingContext(
+        'Failed to parse xcresult but display missing provisioning profile issue from stdout.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1021,14 +1210,15 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          stdout: '''
+            exitCode: 1,
+            stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
         setUpRsyncCommand(),
       ]);
@@ -1036,7 +1226,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1046,10 +1237,13 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Failed to parse xcresult but detected no development team issue.', () async {
+    testUsingContext(
+        'Failed to parse xcresult but detected no development team issue.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1062,11 +1256,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
         setUpRsyncCommand(),
       ]);
@@ -1074,7 +1269,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1084,10 +1280,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
 
-    testUsingContext('xcresult did not detect issue but detected by stdout.', () async {
+    testUsingContext('xcresult did not detect issue but detected by stdout.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1101,7 +1299,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1109,25 +1308,29 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          stdout: '''
+            xattrCommand,
+            setUpFakeXcodeBuildHandler(
+                exitCode: 1,
+                stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
-        setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
-        setUpRsyncCommand(),
-      ]),
+                onRun: (_) {
+                  fileSystem.systemTempDirectory
+                      .childDirectory(_xcBundleDirectoryPath)
+                      .createSync();
+                }),
+            setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+            setUpRsyncCommand(),
+          ]),
       EnvironmentType: () => EnvironmentType.physical,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('xcresult did not detect issue, no development team is detected from build setting.', () async {
+    testUsingContext(
+        'xcresult did not detect issue, no development team is detected from build setting.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1140,11 +1343,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
         setUpRsyncCommand(),
       ]);
@@ -1152,7 +1356,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1161,10 +1366,13 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
 
-    testUsingContext('No development team issue error message is not displayed if no provisioning profile issue is detected from xcresult first.', () async {
+    testUsingContext(
+        'No development team issue error message is not displayed if no provisioning profile issue is detected from xcresult first.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1177,19 +1385,22 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
+        setUpXCResultCommand(
+            stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
         setUpRsyncCommand(),
       ]);
 
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
@@ -1200,10 +1411,13 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
 
-    testUsingContext('General provisioning profile issue error message is not displayed if no development team issue is detected first.', () async {
+    testUsingContext(
+        'General provisioning profile issue error message is not displayed if no development team issue is detected first.',
+        () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1216,11 +1430,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       processManager.addCommands(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(
-          exitCode: 1,
-          onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
-          }
-        ),
+            exitCode: 1,
+            onRun: (_) {
+              fileSystem.systemTempDirectory
+                  .childDirectory(_xcBundleDirectoryPath)
+                  .createSync();
+            }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
         setUpRsyncCommand(),
       ]);
@@ -1228,18 +1443,23 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub']),
         throwsToolExit(),
       );
 
       expect(logger.errorText, contains(noDevelopmentTeamInstruction));
-      expect(logger.errorText, isNot(contains('It appears that there was a problem signing your application prior to installation on the device.')));
+      expect(
+          logger.errorText,
+          isNot(contains(
+              'It appears that there was a problem signing your application prior to installation on the device.')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
   });
 
@@ -1260,7 +1480,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+            fileSystem.systemTempDirectory
+                .childDirectory(_xcBundleDirectoryPath)
+                .createSync();
           },
         ),
         setUpXCResultCommand(),
@@ -1270,17 +1492,20 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+      expect(logger.traceText,
+          contains('xcresult parser: Unrecognized top level json format.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
     testUsingContext('Display xcresult issues on console if parsed.', () async {
@@ -1299,7 +1524,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+            fileSystem.systemTempDirectory
+                .childDirectory(_xcBundleDirectoryPath)
+                .createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -1309,21 +1536,28 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--simulator',  '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(
+          logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+          logger.errorText,
+          contains(
+              '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
+    testUsingContext(
+        'Do not display xcresult issues that needs to be discarded.', () async {
       final BuildCommand command = BuildCommand(
         artifacts: artifacts,
         androidSdk: FakeAndroidSdk(),
@@ -1340,7 +1574,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: (_) {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+            fileSystem.systemTempDirectory
+                .childDirectory(_xcBundleDirectoryPath)
+                .createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -1350,20 +1586,32 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
+      expect(
+          logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+          logger.errorText,
+          contains(
+              '/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
+      expect(
+          logger.errorText,
+          isNot(contains(
+              'Command PhaseScriptExecution failed with a nonzero exit code')));
+      expect(
+          logger.warningText,
+          isNot(contains(
+              'but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
     testUsingContext('Trace if xcresult bundle does not exist.', () async {
@@ -1389,22 +1637,28 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
         throwsToolExit(),
       );
 
-      expect(logger.traceText, contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'));
+      expect(
+          logger.traceText,
+          contains(
+              'The xcresult bundle are not generated. Displaying xcresult is disabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(),
     });
   });
 }
 
-const String _xcBundleDirectoryPath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
+const String _xcBundleDirectoryPath =
+    '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override

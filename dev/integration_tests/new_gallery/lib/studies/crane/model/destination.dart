@@ -49,12 +49,14 @@ class FlyDestination extends Destination {
 
   @override
   String subtitle(BuildContext context) {
-    final String stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
+    final String stopsText =
+        GalleryLocalizations.of(context)!.craneFlyStops(stops);
 
     if (duration == null) {
       return stopsText;
     } else {
-      final TextDirection? textDirection = GalleryOptions.of(context).resolvedTextDirection();
+      final TextDirection? textDirection =
+          GalleryOptions.of(context).resolvedTextDirection();
       final String durationText =
           formattedDuration(context, duration!, abbreviated: true);
       return textDirection == TextDirection.ltr
@@ -65,7 +67,8 @@ class FlyDestination extends Destination {
 
   @override
   String subtitleSemantics(BuildContext context) {
-    final String stopsText = GalleryLocalizations.of(context)!.craneFlyStops(stops);
+    final String stopsText =
+        GalleryLocalizations.of(context)!.craneFlyStops(stops);
 
     if (duration == null) {
       return stopsText;

@@ -74,7 +74,8 @@ flutter:
         logger: logger,
       );
 
-      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+      expect(logger.errorText,
+          contains('Asset manifest contains a null or empty uri.'));
     });
 
     testWithoutContext('handles special characters in asset URIs', () {
@@ -135,7 +136,9 @@ flutter:
       ]);
     });
 
-    testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
+    testWithoutContext(
+        "prints an error when an asset entry's flavor is not a string",
+        () async {
       final BufferLogger logger = BufferLogger.test();
 
       const String manifest = '''
@@ -153,11 +156,11 @@ flutter:
           key2: value2
 ''';
       FlutterManifest.createFromString(manifest, logger: logger);
-      expect(logger.errorText, contains(
-        'Unable to parse assets section.\n'
-        'In flavors section of asset "assets/vanilla/": Expected flavors '
-        'to be a list of String, but element at index 0 was a YamlMap.\n'
-      ));
+      expect(
+          logger.errorText,
+          contains('Unable to parse assets section.\n'
+              'In flavors section of asset "assets/vanilla/": Expected flavors '
+              'to be a list of String, but element at index 0 was a YamlMap.\n'));
     });
   });
 }

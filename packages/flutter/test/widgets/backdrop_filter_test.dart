@@ -13,7 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets("Material2 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
+  testWidgets("Material2 - BackdropFilter's cull rect does not shrink",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -51,7 +52,8 @@ void main() {
     );
   });
 
-  testWidgets("Material3 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
+  testWidgets("Material3 - BackdropFilter's cull rect does not shrink",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -89,7 +91,8 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
+  testWidgets('Material2 - BackdropFilter blendMode on saveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -148,7 +151,8 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
+  testWidgets('Material3 - BackdropFilter blendMode on saveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),

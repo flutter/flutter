@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Traversal order handles touching elements', (WidgetTester tester) async {
+  testWidgets('Traversal order handles touching elements',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
@@ -96,7 +97,8 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expected, ignoreRect: true, ignoreTransform: true));
+    expect(semantics,
+        hasSemantics(expected, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
 }

@@ -59,7 +59,8 @@ void main() {
     );
     await server.run();
     expect(bindCalledTimes, 2);
-    expect(bindAddresses, <Object?>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6]);
+    expect(bindAddresses,
+        <Object?>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6]);
     expect(bindPorts, <int>[123, 123]);
   });
 }

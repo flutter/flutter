@@ -144,7 +144,8 @@ Future<void> _copyNativeAssetsAndroid(
     for (final MapEntry<Asset, KernelAsset> assetMapping
         in assetTargetLocations.entries) {
       final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
-      final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
+      final Uri target =
+          (assetMapping.value.path as KernelAssetAbsolutePath).uri;
       final AndroidArch androidArch =
           _getAndroidArch(assetMapping.value.target);
       final String jniArchDir = androidArch.archName;

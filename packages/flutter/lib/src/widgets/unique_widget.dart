@@ -17,7 +17,8 @@ import 'framework.dart';
 ///
 /// When subclassing [UniqueWidget], provide the corresponding [State] subclass
 /// as the type argument.
-abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWidget {
+abstract class UniqueWidget<T extends State<StatefulWidget>>
+    extends StatefulWidget {
   /// Creates a widget that has exactly one inflated instance in the tree.
   ///
   /// The [key] argument is required because it identifies the unique inflated

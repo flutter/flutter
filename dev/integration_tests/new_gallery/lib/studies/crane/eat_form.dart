@@ -16,10 +16,14 @@ class EatForm extends BackLayerItem {
 }
 
 class _EatFormState extends State<EatForm> with RestorationMixin {
-  final RestorableTextEditingController dinerController = RestorableTextEditingController();
-  final RestorableTextEditingController dateController = RestorableTextEditingController();
-  final RestorableTextEditingController timeController = RestorableTextEditingController();
-  final RestorableTextEditingController locationController = RestorableTextEditingController();
+  final RestorableTextEditingController dinerController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController dateController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController timeController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController locationController =
+      RestorableTextEditingController();
 
   @override
   String get restorationId => 'eat_form';
@@ -43,7 +47,8 @@ class _EatFormState extends State<EatForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return HeaderForm(
       fields: <HeaderFormField>[
         HeaderFormField(

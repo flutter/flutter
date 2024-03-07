@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:typed_data';
 
 import 'package:pool/pool.dart';
@@ -47,21 +46,24 @@ final class AssetTransformer {
     required String workingDirectory,
     required List<AssetTransformerEntry> transformerEntries,
   }) async {
-
     String getTempFilePath(int transformStep) {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
       return '$basename-transformOutput$transformStep$ext';
     }
 
-    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
+    File tempInputFile =
+        _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
+    File tempOutputFile =
+        _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
     ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
     try {
-      for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
-        final AssetTransformationFailure? transformerFailure = await _applyTransformer(
+      for (final (int i, AssetTransformerEntry transformer)
+          in transformerEntries.indexed) {
+        final AssetTransformationFailure? transformerFailure =
+            await _applyTransformer(
           asset: tempInputFile,
           output: tempOutputFile,
           transformer: transformer,
@@ -81,7 +83,8 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
+          tempOutputFile =
+              _fileSystem.systemTempDirectory.childFile(getTempFilePath(i + 2));
           ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
@@ -121,12 +124,11 @@ final class AssetTransformer {
 
     if (result.exitCode != 0) {
       return AssetTransformationFailure(
-        'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
-        'Transformer package: ${transformer.package}\n'
-        'Full command: ${command.join(' ')}\n'
-        'stdout:\n$stdout\n'
-        'stderr:\n$stderr'
-      );
+          'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
+          'Transformer package: ${transformer.package}\n'
+          'Full command: ${command.join(' ')}\n'
+          'stdout:\n$stdout\n'
+          'stderr:\n$stderr');
     }
 
     if (!_fileSystem.file(output).existsSync()) {
@@ -143,7 +145,6 @@ final class AssetTransformer {
     return null;
   }
 }
-
 
 // A wrapper around [AssetTransformer] to support hot reload of transformed assets.
 final class DevelopmentAssetTransformer {
@@ -170,7 +171,8 @@ final class DevelopmentAssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
     required String workingDirectory,
   }) async {
-    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+    final File output = _fileSystem.systemTempDirectory
+        .childFile('retransformerInput-$inputAssetKey');
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
     bool cleanupInput = false;
@@ -181,11 +183,13 @@ final class DevelopmentAssetTransformer {
       if (inputAssetContent is DevFSFileContent) {
         inputFile = inputAssetContent.file as File;
       } else {
-        inputFile = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+        inputFile = _fileSystem.systemTempDirectory
+            .childFile('retransformerInput-$inputAssetKey');
         inputFile.writeAsBytesSync(await inputAssetContent.contentsAsBytes());
         cleanupInput = true;
       }
-      final AssetTransformationFailure? failure = await _transformer.transformAsset(
+      final AssetTransformationFailure? failure =
+          await _transformer.transformAsset(
         asset: inputFile,
         outputPath: output.path,
         transformerEntries: transformerEntries,

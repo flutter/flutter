@@ -37,18 +37,19 @@ class DispatchedEventKey {
 }
 
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
-    TestWidgetInspectorService() {
+  TestWidgetInspectorService() {
     selection.addListener(() {
       if (selectionChangedCallback != null) {
         selectionChangedCallback!();
       }
     });
   }
-  final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
+  final Map<String, ServiceExtensionCallback> extensions =
+      <String, ServiceExtensionCallback>{};
 
   final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
       <DispatchedEventKey, List<Map<Object, Object?>>>{};
-  final  List<Object?> objectsInspected = <Object?>[];
+  final List<Object?> objectsInspected = <Object?>[];
 
   @override
   void registerServiceExtension({
@@ -84,27 +85,32 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     );
   }
 
-  List<Object?> inspectedObjects(){
+  List<Object?> inspectedObjects() {
     return objectsInspected;
   }
 
-  Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return dispatchedEvents('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object?> event) => event['extension'] == extensionName);
+  Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(
+      String extensionName) {
+    return dispatchedEvents('Flutter.ServiceExtensionStateChanged').where(
+        (Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
-  Future<Object?> testExtension(String name, Map<String, String> arguments) async {
+  Future<Object?> testExtension(
+      String name, Map<String, String> arguments) async {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
-    return (json.decode(json.encode(await extensions[name]!(arguments))) as Map<String, dynamic>)['result'];
+    return (json.decode(json.encode(await extensions[name]!(arguments)))
+        as Map<String, dynamic>)['result'];
   }
 
-  Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
+  Future<String> testBoolExtension(
+      String name, Map<String, String> arguments) async {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service
     // extension where only JSON is allowed.
-    return (json.decode(json.encode(await extensions[name]!(arguments))) as Map<String, dynamic>)['enabled'] as String;
+    return (json.decode(json.encode(await extensions[name]!(arguments)))
+        as Map<String, dynamic>)['enabled'] as String;
   }
 
   int rebuildCount = 0;

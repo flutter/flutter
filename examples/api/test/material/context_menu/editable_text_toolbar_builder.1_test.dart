@@ -6,11 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_builder.1.dart' as example;
+import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_builder.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the custom context menu in TextField with a specific selection', (WidgetTester tester) async {
+  testWidgets(
+      'showing and hiding the custom context menu in TextField with a specific selection',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.EditableTextToolbarBuilderExampleApp(),
     );
@@ -41,7 +44,7 @@ void main() {
 
     // Select the email address.
     final EditableTextState state =
-      tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
     state.updateEditingValue(state.textEditingValue.copyWith(
       selection: TextSelection(
         baseOffset: example.text.indexOf(example.emailAddress),

@@ -42,7 +42,8 @@ class FlutterAttachRequestArguments
         program = obj['program'] as String?,
         super.fromMap();
 
-  factory FlutterAttachRequestArguments.fromJson(Map<String, Object?> obj) = FlutterAttachRequestArguments.fromMap;
+  factory FlutterAttachRequestArguments.fromJson(Map<String, Object?> obj) =
+      FlutterAttachRequestArguments.fromMap;
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
@@ -127,7 +128,8 @@ class FlutterLaunchRequestArguments
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         super.fromMap();
 
-  factory FlutterLaunchRequestArguments.fromJson(Map<String, Object?> obj) = FlutterLaunchRequestArguments.fromMap;
+  factory FlutterLaunchRequestArguments.fromJson(Map<String, Object?> obj) =
+      FlutterLaunchRequestArguments.fromMap;
 
   /// If noDebug is true the launch request should launch the program without enabling debugging.
   @override

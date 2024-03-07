@@ -130,7 +130,8 @@ class NavigationBarThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
+  static NavigationBarThemeData? lerp(
+      NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -142,27 +143,30 @@ class NavigationBarThemeData with Diagnosticable {
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
-      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
+      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+          a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
+      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(
+          a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
-      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      overlayColor: MaterialStateProperty.lerp<Color?>(
+          a?.overlayColor, b?.overlayColor, t, Color.lerp),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    height,
-    backgroundColor,
-    elevation,
-    shadowColor,
-    surfaceTintColor,
-    indicatorColor,
-    indicatorShape,
-    labelTextStyle,
-    iconTheme,
-    labelBehavior,
-    overlayColor,
-  );
+        height,
+        backgroundColor,
+        elevation,
+        shadowColor,
+        surfaceTintColor,
+        indicatorColor,
+        indicatorShape,
+        labelTextStyle,
+        iconTheme,
+        labelBehavior,
+        overlayColor,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -172,34 +176,48 @@ class NavigationBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NavigationBarThemeData
-      && other.height == height
-      && other.backgroundColor == backgroundColor
-      && other.elevation == elevation
-      && other.shadowColor == shadowColor
-      && other.surfaceTintColor == surfaceTintColor
-      && other.indicatorColor == indicatorColor
-      && other.indicatorShape == indicatorShape
-      && other.labelTextStyle == labelTextStyle
-      && other.iconTheme == iconTheme
-      && other.labelBehavior == labelBehavior
-      && other.overlayColor == overlayColor;
+    return other is NavigationBarThemeData &&
+        other.height == height &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.indicatorColor == indicatorColor &&
+        other.indicatorShape == indicatorShape &&
+        other.labelTextStyle == labelTextStyle &&
+        other.iconTheme == iconTheme &&
+        other.labelBehavior == labelBehavior &&
+        other.overlayColor == overlayColor;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(
+        ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties
+        .add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor,
+        defaultValue: null));
+    properties.add(
+        ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>(
+        'indicatorShape', indicatorShape,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+        'labelTextStyle', labelTextStyle,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>(
+        'iconTheme', iconTheme,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>(
+        'labelBehavior', labelBehavior,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>(
+        'overlayColor', overlayColor,
+        defaultValue: null));
   }
 }
 
@@ -237,7 +255,8 @@ class NavigationBarTheme extends InheritedTheme {
   /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
   static NavigationBarThemeData of(BuildContext context) {
-    final NavigationBarTheme? navigationBarTheme = context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
+    final NavigationBarTheme? navigationBarTheme =
+        context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 
@@ -247,5 +266,6 @@ class NavigationBarTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(NavigationBarTheme oldWidget) =>
+      data != oldWidget.data;
 }

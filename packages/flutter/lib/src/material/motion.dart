@@ -147,7 +147,6 @@ abstract final class Durations {
   static const Duration extralong4 = Duration(milliseconds: 1000);
 }
 
-
 // TODO(guidezpl): Improve with description and assets, b/289870605
 
 /// The set of easing curves in the Material specification.

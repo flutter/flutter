@@ -136,7 +136,8 @@ class _ShrineAppState extends State<ShrineApp>
         menuController: _controller,
         cartController: _expandingController,
         child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) => HomePage(
+          builder: (BuildContext context, BoxConstraints constraints) =>
+              HomePage(
             backdrop: isDisplayDesktop(context)
                 ? desktopBackdrop()
                 : mobileBackdrop(),
@@ -190,14 +191,16 @@ class _RestorableAppStateModel extends RestorableListenable<AppStateModel> {
   @override
   AppStateModel fromPrimitives(Object? data) {
     final AppStateModel appState = AppStateModel()..loadProducts();
-    final Map<String, dynamic> appData = Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
+    final Map<String, dynamic> appData =
+        Map<String, dynamic>.from(data! as Map<dynamic, dynamic>);
 
     // Reset selected category.
     final int categoryIndex = appData['category_index'] as int;
     appState.setCategory(categories[categoryIndex]);
 
     // Reset cart items.
-    final Map<dynamic, dynamic> cartItems = appData['cart_data'] as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> cartItems =
+        appData['cart_data'] as Map<dynamic, dynamic>;
     cartItems.forEach((dynamic id, dynamic quantity) {
       appState.addMultipleProductsToCart(id as int, quantity as int);
     });

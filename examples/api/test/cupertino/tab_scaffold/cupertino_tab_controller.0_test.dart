@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/tab_scaffold/cupertino_tab_controller.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/tab_scaffold/cupertino_tab_controller.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can switch tabs using CupertinoTabController', (WidgetTester tester) async {
+  testWidgets('Can switch tabs using CupertinoTabController',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TabControllerApp(),
     );

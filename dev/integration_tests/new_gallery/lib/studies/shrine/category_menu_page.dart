@@ -59,15 +59,16 @@ class CategoryMenuPage extends StatelessWidget {
         .bodyLarge!
         .copyWith(fontSize: isDesktop ? 17 : 19);
 
-    final TextStyle unselectedCategoryTextStyle = selectedCategoryTextStyle.copyWith(
-        color: shrineBrown900.withOpacity(0.6));
+    final TextStyle unselectedCategoryTextStyle = selectedCategoryTextStyle
+        .copyWith(color: shrineBrown900.withOpacity(0.6));
 
     final double indicatorHeight = (isDesktop ? 28 : 30) *
         GalleryOptions.of(context).textScaleFactor(context);
     final double indicatorWidth = indicatorHeight * 34 / 28;
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) => Semantics(
+      builder: (BuildContext context, Widget? child, AppStateModel model) =>
+          Semantics(
         selected: model.selectedCategory == category,
         button: true,
         enabled: true,
@@ -100,10 +101,11 @@ class CategoryMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
 
-    final TextStyle logoutTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
-          fontSize: isDesktop ? 17 : 19,
-          color: shrineBrown900.withOpacity(0.6),
-        );
+    final TextStyle logoutTextStyle =
+        Theme.of(context).textTheme.bodyLarge!.copyWith(
+              fontSize: isDesktop ? 17 : 19,
+              color: shrineBrown900.withOpacity(0.6),
+            );
 
     if (isDesktop) {
       return AnimatedBuilder(

@@ -18,8 +18,8 @@ void main() {
         fit: StackFit.expand,
         children: <Widget>[
           Semantics(
-            // this tests that empty nodes disappear
-          ),
+              // this tests that empty nodes disappear
+              ),
           Semantics(
             // this tests whether you can have a container with no other semantics
             container: true,
@@ -32,21 +32,23 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+              ),
+              TestSemantics.rootChild(
+                id: 2,
+                label: 'label',
+                rect: TestSemantics.fullScreen,
+              ),
+            ],
           ),
-          TestSemantics.rootChild(
-            id: 2,
-            label: 'label',
-            rect: TestSemantics.fullScreen,
-          ),
-        ],
-      ),
-    ));
+        ));
 
     semantics.dispose();
   });

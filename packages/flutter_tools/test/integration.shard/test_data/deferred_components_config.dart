@@ -25,22 +25,45 @@ abstract class DeferredComponentsConfig {
   List<DeferredComponentModule> get deferredComponents;
 
   void setUpIn(Directory dir) {
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'),
+        deferredLibrary);
     final String? golden = deferredComponentsGolden;
     if (golden != null) {
-      writeFile(fileSystem.path.join(dir.path, 'deferred_components_loading_units.yaml'), golden);
+      writeFile(
+          fileSystem.path
+              .join(dir.path, 'deferred_components_loading_units.yaml'),
+          golden);
     }
-    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'key.properties'), androidKeyProperties);
-    writeBytesFile(fileSystem.path.join(dir.path, 'android', 'app', 'key.jks'), androidKey);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'),
+        androidSettings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'),
+        androidBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'),
+        androidLocalProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'),
+        androidGradleProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'key.properties'),
+        androidKeyProperties);
+    writeBytesFile(fileSystem.path.join(dir.path, 'android', 'app', 'key.jks'),
+        androidKey);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'),
+        appBuild);
+    writeFile(
+        fileSystem.path.join(
+            dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+        appManifest);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'values', 'strings.xml'),
+        appStrings);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'values', 'styles.xml'),
+        appStyles);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'drawable', 'launch_background.xml'),
+        appLaunchBackground);
     writeFile(fileSystem.path.join(dir.path, 'test_assets/asset1.txt'), asset1);
     writeFile(fileSystem.path.join(dir.path, 'test_assets/asset2.txt'), asset2);
     for (final DeferredComponentModule component in deferredComponents) {
@@ -55,7 +78,8 @@ class DeferredComponentModule {
   String name;
 
   void setUpIn(Directory dir) {
-    writeFile(fileSystem.path.join(dir.path, 'android', name, 'build.gradle'), r'''
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', name, 'build.gradle'), r'''
     def localProperties = new Properties()
     def localPropertiesFile = rootProject.file('local.properties')
     if (localPropertiesFile.exists()) {
@@ -103,7 +127,10 @@ class DeferredComponentModule {
     }
     ''');
 
-    writeFile(fileSystem.path.join(dir.path, 'android', name, 'src', 'main', 'AndroidManifest.xml'), '''
+    writeFile(
+        fileSystem.path.join(
+            dir.path, 'android', name, 'src', 'main', 'AndroidManifest.xml'),
+        '''
     <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:dist="http://schemas.android.com/apk/distribution"
         package="com.example.$name">

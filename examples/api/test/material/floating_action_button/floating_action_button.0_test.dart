@@ -22,7 +22,8 @@ void main() {
 
     Color? getIconColor() {
       final RichText iconRichText = tester.widget<RichText>(
-        find.descendant(of: find.byIcon(Icons.navigation), matching: find.byType(RichText)),
+        find.descendant(
+            of: find.byIcon(Icons.navigation), matching: find.byType(RichText)),
       );
       return iconRichText.text.style?.color;
     }

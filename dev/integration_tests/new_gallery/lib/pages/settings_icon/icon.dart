@@ -54,8 +54,10 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// A rectangle with a fixed location, used to locate gradients.
   Rect get _fixedRect {
-    final Offset topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
-    final Offset bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
+    final Offset topLeft =
+        Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
+    final Offset bottomRight =
+        Offset(_size(stickLength / 2), _size(stickWidth / 2));
     return Rect.fromPoints(topLeft, bottomRight);
   }
 
@@ -70,7 +72,8 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Pink paint with horizontal gradient.
   Paint get _pinkPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
+    const LinearGradient shader =
+        LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
     final Rect shaderRect = _fixedRect.translate(
       _size(-(stickLength - colorLength(time)) / 2),
       0,
@@ -81,7 +84,8 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Teal paint with horizontal gradient.
   Paint get _tealPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
+    const LinearGradient shader =
+        LinearGradient(colors: <Color>[tealLeft, tealRight]);
     final Rect shaderRect = _fixedRect.translate(
       _size((stickLength - colorLength(time)) / 2),
       0,

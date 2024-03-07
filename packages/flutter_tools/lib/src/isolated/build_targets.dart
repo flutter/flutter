@@ -27,6 +27,7 @@ class BuildTargetsImpl extends BuildTargets {
   Target get dartPluginRegistrantTarget => const DartPluginRegistrantTarget();
 
   @override
-  Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs) =>
+  Target webServiceWorker(
+          FileSystem fileSystem, List<WebCompilerConfig> compileConfigs) =>
       WebServiceWorker(fileSystem, compileConfigs);
 }

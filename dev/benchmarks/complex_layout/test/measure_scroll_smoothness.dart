@@ -24,7 +24,9 @@ Iterable<PointerEvent> dragInputEvents(
   final Offset startLocation = center - totalMove / 2;
   // The issue is about 120Hz input on 90Hz refresh rate device.
   // We test 90Hz input on 60Hz device here, which shows similar pattern.
-  final int moveEventCount = totalTime.inMicroseconds * frequency ~/ const Duration(seconds: 1).inMicroseconds;
+  final int moveEventCount = totalTime.inMicroseconds *
+      frequency ~/
+      const Duration(seconds: 1).inMicroseconds;
   final Offset movePerEvent = totalMove / moveEventCount.toDouble();
   yield PointerAddedEvent(
     timeStamp: epoch,
@@ -69,10 +71,11 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   late TestScenario currentValue;
   bool get resample {
     return switch (currentValue) {
-      TestScenario.resampleOn90Hz  || TestScenario.resampleOn59Hz  => true,
+      TestScenario.resampleOn90Hz || TestScenario.resampleOn59Hz => true,
       TestScenario.resampleOff90Hz || TestScenario.resampleOff59Hz => false,
     };
   }
+
   double get frequency {
     return switch (currentValue) {
       TestScenario.resampleOn90Hz || TestScenario.resampleOff90Hz => 90.0,
@@ -85,8 +88,8 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   @override
   String describeValue(TestScenario value) {
     return switch (value) {
-      TestScenario.resampleOn90Hz  => 'resample on with 90Hz input',
-      TestScenario.resampleOn59Hz  => 'resample on with 59Hz input',
+      TestScenario.resampleOn90Hz => 'resample on with 90Hz input',
+      TestScenario.resampleOn59Hz => 'resample on with 59Hz input',
       TestScenario.resampleOff90Hz => 'resample off with 90Hz input',
       TestScenario.resampleOff59Hz => 'resample off with 59Hz input',
     };
@@ -108,16 +111,19 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding widgetsBinding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding =
+      widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
   testWidgets('Smoothness test', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-    final Finder scrollerFinder = find.byKey(const ValueKey<String>('complex-scroll'));
+    final Finder scrollerFinder =
+        find.byKey(const ValueKey<String>('complex-scroll'));
     final ListView scroller = tester.widget<ListView>(scrollerFinder);
     final ScrollController? controller = scroller.controller;
     final List<int> frameTimestamp = <int>[];
@@ -152,7 +158,8 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
+        tester.binding.handlePointerEventForSource(event,
+            source: TestBindingEventSource.test);
       }
     }
 
@@ -217,15 +224,16 @@ Map<String, dynamic> scrollSummary(
   double jankyCount = 0;
   double absJerkAvg = 0;
   int lostFrame = 0;
-  for (int i = 1; i < scrollOffset.length-1; i += 1) {
-    if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3 ||
+  for (int i = 1; i < scrollOffset.length - 1; i += 1) {
+    if (frameTimestamp[i + 1] - frameTimestamp[i - 1] > 40E3 ||
         (i >= delays.length || delays[i] > const Duration(milliseconds: 16))) {
       // filter data points from slow frame building or input simulation artifact
       lostFrame += 1;
       continue;
     }
     //
-    final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
+    final double absJerk =
+        (scrollOffset[i - 1] + scrollOffset[i + 1] - 2 * scrollOffset[i]).abs();
     absJerkAvg += absJerk;
     if (absJerk > 0.5) {
       jankyCount += 1;
@@ -240,6 +248,7 @@ Map<String, dynamic> scrollSummary(
     'dropped_frame_count': lostFrame,
     'frame_timestamp': List<int>.from(frameTimestamp),
     'scroll_offset': List<double>.from(scrollOffset),
-    'input_delay': delays.map<int>((Duration data) => data.inMicroseconds).toList(),
+    'input_delay':
+        delays.map<int>((Duration data) => data.inMicroseconds).toList(),
   };
 }

@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ super.key, this.stable, this.swapper });
+  const Swapper({super.key, this.stable, this.swapper});
 
   final Widget? stable;
   final Widget? swapper;
@@ -96,13 +96,16 @@ abstract class SwapperElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void insertRenderObjectChild(
+      covariant RenderObject child, covariant Object? slot) {}
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+  void moveRenderObjectChild(covariant RenderObject child,
+      covariant Object? oldSlot, covariant Object? newSlot) {}
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void removeRenderObjectChild(
+      covariant RenderObject child, covariant Object? slot) {}
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
@@ -119,7 +122,8 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, bool oldIsOnTop, bool newIsOnTop) {
+  void moveRenderObjectChild(
+      RenderBox child, bool oldIsOnTop, bool newIsOnTop) {
     moveSlots.add(Pair<bool>(oldIsOnTop, newIsOnTop));
     assert(oldIsOnTop == !newIsOnTop);
     renderObject.setSwapper(child, newIsOnTop);
@@ -211,12 +215,14 @@ class RenderSwapper extends RenderBox {
       maxHeight: constraints.maxHeight / 2,
     );
     if (stable != null) {
-      final BoxParentData stableParentData = stable!.parentData! as BoxParentData;
+      final BoxParentData stableParentData =
+          stable!.parentData! as BoxParentData;
       stable!.layout(childConstraints);
       stableParentData.offset = _swapperIsOnTop! ? bottomOffset : topOffset;
     }
     if (swapper != null) {
-      final BoxParentData swapperParentData = swapper!.parentData! as BoxParentData;
+      final BoxParentData swapperParentData =
+          swapper!.parentData! as BoxParentData;
       swapper!.layout(childConstraints);
       swapperParentData.offset = _swapperIsOnTop! ? topOffset : bottomOffset;
     }
@@ -236,10 +242,13 @@ class RenderSwapper extends RenderBox {
   }
 }
 
-BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
+BoxParentData parentDataFor(RenderObject renderObject) =>
+    renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+  testWidgets(
+      'RenderObjectElement *RenderObjectChild methods get called with correct arguments',
+      (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {
@@ -256,9 +265,11 @@ void main() {
     }
 
     await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
+    final SwapperElement swapper =
+        tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
     final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
+    final RenderBox blueBox =
+        tester.renderObject<RenderBox>(find.byKey(blueKey));
     expect(swapper.insertSlots.length, 2);
     expect(swapper.insertSlots, contains('stable'));
     expect(swapper.insertSlots, contains(true));

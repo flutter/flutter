@@ -18,7 +18,8 @@ const double _kQuarterTurnsInRadians = math.pi / 2.0;
 /// Unlike [RenderTransform], which applies a transform just prior to painting,
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
-class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+class RenderRotatedBox extends RenderBox
+    with RenderObjectWithChildMixin<RenderBox> {
   /// Creates a rotated render box.
   RenderRotatedBox({
     required int quarterTurns,
@@ -45,7 +46,9 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null) {
       return 0.0;
     }
-    return _isVertical ? child!.getMinIntrinsicHeight(height) : child!.getMinIntrinsicWidth(height);
+    return _isVertical
+        ? child!.getMinIntrinsicHeight(height)
+        : child!.getMinIntrinsicWidth(height);
   }
 
   @override
@@ -53,7 +56,9 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null) {
       return 0.0;
     }
-    return _isVertical ? child!.getMaxIntrinsicHeight(height) : child!.getMaxIntrinsicWidth(height);
+    return _isVertical
+        ? child!.getMaxIntrinsicHeight(height)
+        : child!.getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -61,7 +66,9 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null) {
       return 0.0;
     }
-    return _isVertical ? child!.getMinIntrinsicWidth(width) : child!.getMinIntrinsicHeight(width);
+    return _isVertical
+        ? child!.getMinIntrinsicWidth(width)
+        : child!.getMinIntrinsicHeight(width);
   }
 
   @override
@@ -69,7 +76,9 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null) {
       return 0.0;
     }
-    return _isVertical ? child!.getMaxIntrinsicWidth(width) : child!.getMaxIntrinsicHeight(width);
+    return _isVertical
+        ? child!.getMaxIntrinsicWidth(width)
+        : child!.getMaxIntrinsicHeight(width);
   }
 
   Matrix4? _paintTransform;
@@ -80,7 +89,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null) {
       return constraints.smallest;
     }
-    final Size childSize = child!.getDryLayout(_isVertical ? constraints.flipped : constraints);
+    final Size childSize =
+        child!.getDryLayout(_isVertical ? constraints.flipped : constraints);
     return _isVertical ? Size(childSize.height, childSize.width) : childSize;
   }
 
@@ -88,8 +98,11 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   void performLayout() {
     _paintTransform = null;
     if (child != null) {
-      child!.layout(_isVertical ? constraints.flipped : constraints, parentUsesSize: true);
-      size = _isVertical ? Size(child!.size.height, child!.size.width) : child!.size;
+      child!.layout(_isVertical ? constraints.flipped : constraints,
+          parentUsesSize: true);
+      size = _isVertical
+          ? Size(child!.size.height, child!.size.width)
+          : child!.size;
       _paintTransform = Matrix4.identity()
         ..translate(size.width / 2.0, size.height / 2.0)
         ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
@@ -100,7 +113,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null) {
       return false;
@@ -133,7 +146,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     }
   }
 
-  final LayerHandle<TransformLayer> _transformLayer = LayerHandle<TransformLayer>();
+  final LayerHandle<TransformLayer> _transformLayer =
+      LayerHandle<TransformLayer>();
 
   @override
   void dispose() {

@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can call setState from didUpdateWidget', (WidgetTester tester) async {
+  testWidgets('Can call setState from didUpdateWidget',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: WidgetUnderTest(text: 'hello'),
@@ -14,7 +15,8 @@ void main() {
 
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('world'), findsNothing);
-    final _WidgetUnderTestState state = tester.state<_WidgetUnderTestState>(find.byType(WidgetUnderTest));
+    final _WidgetUnderTestState state =
+        tester.state<_WidgetUnderTestState>(find.byType(WidgetUnderTest));
     expect(state.setStateCalled, 0);
     expect(state.didUpdateWidgetCalled, 0);
 

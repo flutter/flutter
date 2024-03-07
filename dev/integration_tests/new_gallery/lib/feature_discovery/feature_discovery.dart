@@ -16,7 +16,6 @@ import 'overlay.dart';
 /// Users wanting to use [FeatureDiscovery] need to put this controller
 /// above [FeatureDiscovery] widgets in the widget tree.
 class FeatureDiscoveryController extends StatefulWidget {
-
   const FeatureDiscoveryController(this.child, {super.key});
   final Widget child;
 
@@ -81,7 +80,6 @@ class _FeatureDiscoveryControllerState
 /// This widget loosely follows the guidelines set forth in the Material Specs:
 /// https://material.io/archive/guidelines/growth-communications/feature-discovery.html.
 class FeatureDiscovery extends StatefulWidget {
-
   const FeatureDiscovery({
     super.key,
     required this.title,
@@ -92,6 +90,7 @@ class FeatureDiscovery extends StatefulWidget {
     this.onTap,
     this.color,
   });
+
   /// Title to be displayed in the overlay.
   final String title;
 

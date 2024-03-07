@@ -162,7 +162,8 @@ void main() {
       expect(_findColor(result, _deepRed), isTrue);
       expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
     });
-    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
+    testWidgets('draw image with wide gamut works',
+        (WidgetTester tester) async {
       app.run(app.Setup.drawnImage);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 

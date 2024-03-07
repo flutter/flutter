@@ -22,8 +22,10 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route<void> _createHomeRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+      pageBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        final GalleryLocalizations localizations =
+            GalleryLocalizations.of(context)!;
 
         return Scaffold(
           appBar: AppBar(
@@ -52,7 +54,8 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
           body: const _RecipePage(),
         );
       },
-      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      transitionsBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation, Widget child) {
         return SharedAxisTransition(
           fillColor: Colors.transparent,
           transitionType: SharedAxisTransitionType.scaled,
@@ -66,9 +69,11 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route<void> _createSettingsRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+      pageBuilder: (BuildContext context, Animation<double> animation,
+              Animation<double> secondaryAnimation) =>
           const _SettingsPage(),
-      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      transitionsBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation, Widget child) {
         return SharedAxisTransition(
           fillColor: Colors.transparent,
           transitionType: SharedAxisTransitionType.scaled,
@@ -86,7 +91,8 @@ class _SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     final List<_SettingsInfo> settingsList = <_SettingsInfo>[
       _SettingsInfo(
@@ -115,7 +121,8 @@ class _SettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          for (final _SettingsInfo setting in settingsList) _SettingsTile(setting),
+          for (final _SettingsInfo setting in settingsList)
+            _SettingsTile(setting),
         ],
       ),
     );
@@ -152,7 +159,8 @@ class _RecipePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     final List<_RecipeInfo> savedRecipes = <_RecipeInfo>[
       _RecipeInfo(

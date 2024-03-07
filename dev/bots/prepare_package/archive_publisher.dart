@@ -45,8 +45,10 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
-  String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
-  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
+  String get destinationArchivePath =>
+      '${branch.name}/$platformName/${path.basename(outputFile.path)}';
+  static String getMetadataFilename(Platform platform) =>
+      'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
     final AccumulatorSink<Digest> digestSink = AccumulatorSink<Digest>();
@@ -87,12 +89,14 @@ class ArchivePublisher {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+  Future<Map<String, dynamic>> _addRelease(
+      Map<String, dynamic> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] = revision;
+    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] =
+        revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }
@@ -110,17 +114,18 @@ class ArchivePublisher {
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
-      for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
+      for (final Map<String, dynamic> entry
+          in releases.cast<Map<String, dynamic>>())
         if (entry['hash'] != newEntry['hash'] ||
             entry['channel'] != newEntry['channel'] ||
             entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
           entry,
       newEntry,
     ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final DateTime aDate = DateTime.parse(a['release_date'] as String);
-      final DateTime bDate = DateTime.parse(b['release_date'] as String);
-      return bDate.compareTo(aDate);
-    });
+        final DateTime aDate = DateTime.parse(a['release_date'] as String);
+        final DateTime bDate = DateTime.parse(b['release_date'] as String);
+        return bDate.compareTo(aDate);
+      });
     return jsonData;
   }
 
@@ -142,7 +147,8 @@ class ArchivePublisher {
       try {
         jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
       } on FormatException catch (e) {
-        throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
+        throw PreparePackageException(
+            'Unable to parse JSON metadata received from cloud: $e');
       }
     }
     // Run _addRelease, even on a dry run, so we can inspect the metadata on a
@@ -179,7 +185,12 @@ class ArchivePublisher {
       return '';
     }
     return _processRunner.runProcess(
-      <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
+      <String>[
+        'python3',
+        path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'),
+        '--',
+        ...args
+      ],
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
@@ -220,7 +231,10 @@ class ArchivePublisher {
       // Use our preferred MIME type for the files we care about
       // and let gsutil figure it out for anything else.
       if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
-      if (cacheSeconds != null) ...<String>['-h', 'Cache-Control:max-age=$cacheSeconds'],
+      if (cacheSeconds != null) ...<String>[
+        '-h',
+        'Cache-Control:max-age=$cacheSeconds'
+      ],
       'cp',
       src,
       dest,

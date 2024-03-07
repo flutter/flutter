@@ -22,9 +22,10 @@ Widget boilerplate({
   required Widget child,
 }) {
   return Theme(
-    data: theme ?? ThemeData(
-      materialTapTargetSize: tapTargetSize,
-    ),
+    data: theme ??
+        ThemeData(
+          materialTapTargetSize: tapTargetSize,
+        ),
     child: Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -37,11 +38,14 @@ Widget boilerplate({
 void main() {
   testWidgets('Initial toggle state is reflected', (WidgetTester tester) async {
     TextStyle buttonTextStyle(String text) {
-      return tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, text),
-        matching: find.byType(DefaultTextStyle),
-      )).style;
+      return tester
+          .widget<DefaultTextStyle>(find.descendant(
+            of: find.widgetWithText(TextButton, text),
+            matching: find.byType(DefaultTextStyle),
+          ))
+          .style;
     }
+
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
@@ -70,11 +74,14 @@ void main() {
     'onPressed is triggered on button tap',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(TextButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(TextButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
@@ -129,11 +136,14 @@ void main() {
     'onPressed that is null disables buttons',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(TextButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(TextButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
 
@@ -220,22 +230,27 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'First child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
     expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
 
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, 'Second child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'Second child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
     expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
   });
 
-  testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
+  testWidgets('Custom text style except color is applied',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
@@ -255,18 +270,22 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'First child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(TextButton, 'Second child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(TextButton, 'Second child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
@@ -363,17 +382,21 @@ void main() {
     'Default text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(TextButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(TextButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
           of: find.widgetWithIcon(TextButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
+
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         boilerplate(
@@ -455,17 +478,21 @@ void main() {
     'Custom text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(TextButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(TextButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
           of: find.widgetWithIcon(TextButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
+
       final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
@@ -474,7 +501,8 @@ void main() {
       // Tests are ineffective if the custom colors are the same as the theme's
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      expect(theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
+      expect(
+          theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
 
       await tester.pumpWidget(
         boilerplate(
@@ -537,7 +565,8 @@ void main() {
     },
   );
 
-  testWidgets('Default button fillColor - unselected', (WidgetTester tester) async {
+  testWidgets('Default button fillColor - unselected',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
@@ -564,7 +593,8 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default button fillColor - selected', (WidgetTester tester) async {
+  testWidgets('Default button fillColor - selected',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
@@ -591,7 +621,8 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default button fillColor - disabled', (WidgetTester tester) async {
+  testWidgets('Default button fillColor - disabled',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
@@ -642,7 +673,8 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - Non MaterialState',
+      (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
@@ -671,7 +703,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('First child').color,
+        theme.colorScheme.surface.withOpacity(0.0));
     expect(buttonColor('Second child').color, selectedFillColor);
 
     await tester.pumpWidget(
@@ -689,11 +722,14 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
-    expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('First child').color,
+        theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color,
+        theme.colorScheme.surface.withOpacity(0.0));
   });
 
-  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+  testWidgets('Custom button fillColor - MaterialState',
+      (WidgetTester tester) async {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
@@ -752,7 +788,8 @@ void main() {
     expect(buttonColor('Second child').color, defaultFillColor);
   });
 
-  testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
+  testWidgets('Default InkWell colors - unselected',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
@@ -779,7 +816,8 @@ void main() {
     await tester.pumpAndSettle();
     await hoverGesture.moveTo(Offset.zero);
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+    RenderObject inkFeatures =
+        tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(
@@ -797,8 +835,7 @@ void main() {
     });
     expect(
       inkFeatures,
-      paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.16)),
+      paints..circle(color: theme.colorScheme.onSurface.withOpacity(0.16)),
     );
 
     await touchGesture.up();
@@ -812,7 +849,8 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(inkFeatures,
+        paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
 
@@ -845,7 +883,8 @@ void main() {
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+    RenderObject inkFeatures =
+        tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(
@@ -864,8 +903,7 @@ void main() {
     });
     expect(
       inkFeatures,
-      paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.16)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.16)),
     );
 
     await touchGesture.up();
@@ -879,7 +917,8 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    expect(inkFeatures,
+        paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
 
@@ -923,8 +962,7 @@ void main() {
     });
     expect(
       inkFeatures,
-      paints
-        ..circle(color: splashColor),
+      paints..circle(color: splashColor),
     );
 
     await touchGesture.up();
@@ -975,8 +1013,10 @@ void main() {
       );
 
       RenderObject toggleButtonRenderObject;
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1002,8 +1042,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1028,8 +1070,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1068,8 +1112,10 @@ void main() {
       );
 
       RenderObject toggleButtonRenderObject;
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1097,8 +1143,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1125,8 +1173,10 @@ void main() {
         ),
       );
 
-      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      toggleButtonRenderObject =
+          tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() ==
+            '_SelectToggleButtonRenderObject';
       });
       expect(
         toggleButtonRenderObject,
@@ -1142,13 +1192,15 @@ void main() {
     },
   );
 
-  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
+  testWidgets('Height of segmented control is determined by tallest widget',
+      (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
       Container(
         constraints: const BoxConstraints.tightFor(height: 100.0),
       ),
       Container(
-        constraints: const BoxConstraints.tightFor(height: 400.0), // tallest widget
+        constraints:
+            const BoxConstraints.tightFor(height: 400.0), // tallest widget
       ),
       Container(
         constraints: const BoxConstraints.tightFor(height: 200.0),
@@ -1174,7 +1226,8 @@ void main() {
     }
   });
 
-  testWidgets('Sizes of toggle buttons rebuilds with the correct dimensions', (WidgetTester tester) async {
+  testWidgets('Sizes of toggle buttons rebuilds with the correct dimensions',
+      (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
       Container(
         constraints: const BoxConstraints.tightFor(
@@ -1273,7 +1326,8 @@ void main() {
     }
   });
 
-  testWidgets('Material2 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
+  testWidgets('Material2 - ToggleButtons text baseline alignment',
+      (WidgetTester tester) async {
     // The point size of the fonts must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
@@ -1287,19 +1341,23 @@ void main() {
               borderWidth: 5.0,
               isSelected: const <bool>[false, true],
               children: const <Widget>[
-                Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
-                Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('First child',
+                    style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('Second child',
+                    style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
               ],
             ),
             ElevatedButton(
               onPressed: null,
-              style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+              style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(
                 fontFamily: 'FlutterTest',
                 fontSize: 20.0,
               )),
               child: const Text('Elevated Button'),
             ),
-            const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
+            const Text('Text',
+                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
           ],
         ),
       ),
@@ -1313,9 +1371,12 @@ void main() {
     //  2.0           5.0             7.0      space below the baseline = 0.25 * fontSize
     //  ------------------------------------   widget text dy values
 
-    final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
-    final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
-    final double elevatedButtonDy = tester.getBottomLeft(find.text('Elevated Button')).dy;
+    final double firstToggleButtonDy =
+        tester.getBottomLeft(find.text('First child')).dy;
+    final double secondToggleButtonDy =
+        tester.getBottomLeft(find.text('Second child')).dy;
+    final double elevatedButtonDy =
+        tester.getBottomLeft(find.text('Elevated Button')).dy;
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
@@ -1323,7 +1384,8 @@ void main() {
     expect(firstToggleButtonDy, textDy - 5.0);
   });
 
-  testWidgets('Material3 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
+  testWidgets('Material3 - ToggleButtons text baseline alignment',
+      (WidgetTester tester) async {
     // The point size of the fonts must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
@@ -1336,19 +1398,23 @@ void main() {
               borderWidth: 5.0,
               isSelected: const <bool>[false, true],
               children: const <Widget>[
-                Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
-                Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('First child',
+                    style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('Second child',
+                    style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
               ],
             ),
             ElevatedButton(
               onPressed: null,
-              style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+              style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(
                 fontFamily: 'FlutterTest',
                 fontSize: 20.0,
               )),
               child: const Text('Elevated Button'),
             ),
-            const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
+            const Text('Text',
+                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
           ],
         ),
       ),
@@ -1362,15 +1428,20 @@ void main() {
     //  2.0           5.0             7.0      space below the baseline = 0.25 * fontSize
     //  ------------------------------------   widget text dy values
 
-    final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
-    final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
-    final double elevatedButtonDy = tester.getBottomLeft(find.text('Elevated Button')).dy;
+    final double firstToggleButtonDy =
+        tester.getBottomLeft(find.text('First child')).dy;
+    final double secondToggleButtonDy =
+        tester.getBottomLeft(find.text('Second child')).dy;
+    final double elevatedButtonDy =
+        tester.getBottomLeft(find.text('Elevated Button')).dy;
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
     expect(firstToggleButtonDy, closeTo(elevatedButtonDy - 1.7, 0.1));
     expect(firstToggleButtonDy, closeTo(textDy - 9.7, 0.1));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  },
+      skip: kIsWeb &&
+          !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1392,7 +1463,8 @@ void main() {
     );
 
     expect(
-      tester.getTopRight(find.text('First child')).dx < tester.getTopRight(find.text('Second child')).dx,
+      tester.getTopRight(find.text('First child')).dx <
+          tester.getTopRight(find.text('Second child')).dx,
       isTrue,
     );
 
@@ -1415,7 +1487,8 @@ void main() {
     );
 
     expect(
-      tester.getTopRight(find.text('First child')).dx > tester.getTopRight(find.text('Second child')).dx,
+      tester.getTopRight(find.text('First child')).dx >
+          tester.getTopRight(find.text('Second child')).dx,
       isTrue,
     );
   });
@@ -1438,9 +1511,14 @@ void main() {
         ),
       );
 
-      final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
-      }).toSet().toList();
+      final List<RenderObject> toggleButtonRenderObject =
+          tester.allRenderObjects
+              .where((RenderObject object) {
+                return object.runtimeType.toString() ==
+                    '_SelectToggleButtonRenderObject';
+              })
+              .toSet()
+              .toList();
 
       // The first button paints the leading, top and bottom sides with a path
       expect(
@@ -1502,7 +1580,7 @@ void main() {
 
   testWidgets(
     'Properly draws borders based on state when direction is vertical and verticalDirection is down.',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         boilerplate(
@@ -1521,21 +1599,29 @@ void main() {
 
       // The children should be laid out along vertical and the first child at top.
       // The item height is icon height + default border width (48.0 + 1.0) pixels.
-      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 251.0));
-      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
-      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 349.0));
+      expect(tester.getCenter(find.text('First child')),
+          const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')),
+          const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('Third child')),
+          const Offset(400.0, 349.0));
 
-      final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
-        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
-      }).toSet().toList();
+      final List<RenderObject> toggleButtonRenderObject =
+          tester.allRenderObjects
+              .where((RenderObject object) {
+                return object.runtimeType.toString() ==
+                    '_SelectToggleButtonRenderObject';
+              })
+              .toSet()
+              .toList();
 
       // The first button paints the left, top and right sides with a path.
       expect(
         toggleButtonRenderObject[0],
         paints
-        // physical model
+          // physical model
           ..path()
-        // left side, top and right - enabled.
+          // left side, top and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1548,15 +1634,15 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
-        // physical model
+          // physical model
           ..path()
-        // top side - selected.
+          // top side - selected.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
-        // left and right - selected.
+          // left and right - selected.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1569,15 +1655,15 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
-        // physical model
+          // physical model
           ..path()
-        // top side - selected, since previous button is selected.
+          // top side - selected, since previous button is selected.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
-        // left side, bottom and right - enabled.
+          // left side, bottom and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1607,13 +1693,18 @@ void main() {
       );
 
       // The children should be laid out along vertical and the last child at top.
-      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 251.0));
-      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
-      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 349.0));
+      expect(tester.getCenter(find.text('Third child')),
+          const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')),
+          const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('First child')),
+          const Offset(400.0, 349.0));
     },
   );
 
-  testWidgets('Material2 - Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Tap target size is configurable by ThemeData.materialTapTargetSize',
+      (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
         theme: ThemeData(useMaterial3: false),
@@ -1641,7 +1732,9 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(228.0, 48.0));
   });
 
-  testWidgets('Material3 - Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Tap target size is configurable by ThemeData.materialTapTargetSize',
+      (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
         tapTargetSize: tapTargetSize,
@@ -1668,7 +1761,8 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(232.0, 34.0));
   });
 
-  testWidgets('Material2 - Tap target size is configurable', (WidgetTester tester) async {
+  testWidgets('Material2 - Tap target size is configurable',
+      (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
         theme: ThemeData(useMaterial3: false),
@@ -1696,7 +1790,8 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
   });
 
-  testWidgets('Material3 - Tap target size is configurable', (WidgetTester tester) async {
+  testWidgets('Material3 - Tap target size is configurable',
+      (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
         child: ToggleButtons(
@@ -1723,22 +1818,23 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(232.0, 34.0));
   });
 
-  testWidgets('Tap target size is configurable for vertical axis', (WidgetTester tester) async {
+  testWidgets('Tap target size is configurable for vertical axis',
+      (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
-     return boilerplate(
-       child: ToggleButtons(
-         key: key,
-         tapTargetSize: tapTargetSize,
-         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-         direction: Axis.vertical,
-         isSelected: const <bool>[false, true, false],
-         onPressed: (int index) {},
-         children: const <Widget>[
-           Text('1'),
-           Text('2'),
-           Text('3'),
-         ],
-       ),
+      return boilerplate(
+        child: ToggleButtons(
+          key: key,
+          tapTargetSize: tapTargetSize,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          direction: Axis.vertical,
+          isSelected: const <bool>[false, true, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('1'),
+            Text('2'),
+            Text('3'),
+          ],
+        ),
       );
     }
 
@@ -1752,7 +1848,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/73725
-  testWidgets('Material2 - Border radius paint test when there is only one button', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Border radius paint test when there is only one button',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       boilerplate(
@@ -1771,19 +1869,24 @@ void main() {
     );
 
     // The only button should be laid out at the center of the screen.
-    expect(tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
+    expect(
+        tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
 
-    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
-      return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
-    }).toSet().toList();
+    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects
+        .where((RenderObject object) {
+          return object.runtimeType.toString() ==
+              '_SelectToggleButtonRenderObject';
+        })
+        .toSet()
+        .toList();
 
     // The first button paints the left, top and right sides with a path.
     expect(
       toggleButtonRenderObject[0],
       paints
-      // physical model paints
+        // physical model paints
         ..path()
-      // left side, top and right - enabled.
+        // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,
           color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1797,7 +1900,9 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Border radius paint test when there is only one button', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Border radius paint test when there is only one button',
+      (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
@@ -1815,19 +1920,24 @@ void main() {
     );
 
     // The only button should be laid out at the center of the screen.
-    expect(tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
+    expect(
+        tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
 
-    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
-      return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
-    }).toSet().toList();
+    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects
+        .where((RenderObject object) {
+          return object.runtimeType.toString() ==
+              '_SelectToggleButtonRenderObject';
+        })
+        .toSet()
+        .toList();
 
     // The first button paints the left, top and right sides with a path.
     expect(
       toggleButtonRenderObject[0],
       paints
-      // physical model paints
+        // physical model paints
         ..path()
-      // left side, top and right - enabled.
+        // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,
           color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1841,7 +1951,9 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Border radius paint test when Radius.x or Radius.y equal 0.0',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         theme: ThemeData(useMaterial3: false),
@@ -1869,7 +1981,9 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Border radius paint test when Radius.x or Radius.y equal 0.0',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: RepaintBoundary(
@@ -1896,7 +2010,8 @@ void main() {
     );
   });
 
-  testWidgets('ToggleButtons implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ToggleButtons implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     ToggleButtons(
@@ -1919,7 +2034,8 @@ void main() {
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'Buttons are enabled',
@@ -1934,7 +2050,8 @@ void main() {
     ]);
   });
 
-  testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
+  testWidgets('ToggleButtons changes mouse cursor when the button is hovered',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: MouseRegion(
@@ -1952,12 +2069,15 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.text('First child')));
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(
+        location: tester.getCenter(find.text('First child')));
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -1976,7 +2096,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -1994,16 +2115,18 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
   });
 
-  testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {
+  testWidgets('ToggleButtons focus, hover, and highlight elevations are 0',
+      (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
           isSelected: const <bool>[true, false],
-          onPressed: (int index) { },
+          onPressed: (int index) {},
           focusNodes: focusNodes,
           children: const <Widget>[Text('one'), Text('two')],
         ),
@@ -2011,7 +2134,9 @@ void main() {
     );
 
     double toggleButtonElevation(String text) {
-      return tester.widget<Material>(find.widgetWithText(Material, text).first).elevation;
+      return tester
+          .widget<Material>(find.widgetWithText(Material, text).first)
+          .elevation;
     }
 
     // Default toggle button elevation
@@ -2019,7 +2144,8 @@ void main() {
     expect(toggleButtonElevation('two'), 0); // not highlighted
 
     // Hovered button elevation
-    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture hoverGesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(tester.getCenter(find.text('one')));
     await tester.pumpAndSettle();
@@ -2047,7 +2173,9 @@ void main() {
     }
   });
 
-  testWidgets('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
+  testWidgets(
+      'Toggle buttons height matches MaterialTapTargetSize.padded height',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
@@ -2070,7 +2198,9 @@ void main() {
     expect(thirdRect.height, 48.0);
   });
 
-  testWidgets('Toggle buttons constraints size does not affect minimum input padding', (WidgetTester tester) async {
+  testWidgets(
+      'Toggle buttons constraints size does not affect minimum input padding',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/97302
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -2120,19 +2250,15 @@ void main() {
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
             ),
-            TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
-                SemanticsFlag.isFocusable,
-              ],
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
-            ),
+            TestSemantics(flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.hasCheckedState,
+              SemanticsFlag.isFocusable,
+            ], actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ], rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)),
             TestSemantics(
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
@@ -2157,7 +2283,8 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Toggle buttons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Toggle buttons have correct semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

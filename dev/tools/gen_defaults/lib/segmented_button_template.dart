@@ -5,7 +5,11 @@
 import 'template.dart';
 
 class SegmentedButtonTemplate extends TokenTemplate {
-  const SegmentedButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const SegmentedButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -25,11 +29,13 @@ class SegmentedButtonTemplate extends TokenTemplate {
   }
 
   String _stateColor(String componentToken, String type, String state) {
-    final String baseColor = color('$componentToken.$type.$state.state-layer.color', '');
+    final String baseColor =
+        color('$componentToken.$type.$state.state-layer.color', '');
     if (baseColor.isEmpty) {
       return 'null';
     }
-    final String opacity = _layerOpacity('$componentToken.$state.state-layer.opacity');
+    final String opacity =
+        _layerOpacity('$componentToken.$state.state-layer.opacity');
     return '$baseColor$opacity';
   }
 

@@ -22,11 +22,12 @@ class _HoverDemoState extends State<HoverDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final ButtonStyle overrideFocusColor = ButtonStyle(
-      overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-        return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : Colors.transparent;
-      })
-    );
+    final ButtonStyle overrideFocusColor = ButtonStyle(overlayColor:
+        MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+      return states.contains(MaterialState.focused)
+          ? Colors.deepOrangeAccent
+          : Colors.transparent;
+    }));
 
     return DefaultTextStyle(
       style: textTheme.headlineMedium!,
@@ -65,7 +66,8 @@ class _HoverDemoState extends State<HoverDemo> {
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: TextField(
-                    decoration: InputDecoration(labelText: 'Enter Text', filled: true),
+                    decoration:
+                        InputDecoration(labelText: 'Enter Text', filled: true),
                   ),
                 ),
                 const Padding(

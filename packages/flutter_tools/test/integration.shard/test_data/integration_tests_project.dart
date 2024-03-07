@@ -55,7 +55,8 @@ class IntegrationTestsProject extends Project implements TestsProject {
   }
 
   @override
-  String get testFilePath => fileSystem.path.join(dir.path, 'integration_test', 'app_test.dart');
+  String get testFilePath =>
+      fileSystem.path.join(dir.path, 'integration_test', 'app_test.dart');
 
   @override
   Uri get breakpointUri => Uri.file(testFilePath);

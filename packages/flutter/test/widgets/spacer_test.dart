@@ -19,7 +19,8 @@ void main() {
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
   });
 
-  testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space proportional to flex.',
+      (WidgetTester tester) async {
     const Spacer spacer1 = Spacer();
     const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);

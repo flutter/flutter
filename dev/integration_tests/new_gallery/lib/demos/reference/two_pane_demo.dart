@@ -83,7 +83,6 @@ class TwoPaneDemoState extends State<TwoPaneDemo> with RestorationMixin {
 }
 
 class ListPane extends StatelessWidget {
-
   const ListPane({
     super.key,
     required this.onSelect,
@@ -125,7 +124,6 @@ class ListPane extends StatelessWidget {
 }
 
 class DetailsPane extends StatelessWidget {
-
   const DetailsPane({
     super.key,
     required this.selectedIndex,
@@ -195,9 +193,11 @@ class SimulateScreen extends StatelessWidget {
               : type == TwoPaneDemoType.tablet
                   ? tabletAspectRatio
                   : singleScreenAspectRatio,
-          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
             final Size size = Size(constraints.maxWidth, constraints.maxHeight);
-            final Size hingeSize = Size(size.width * hingeProportion, size.height);
+            final Size hingeSize =
+                Size(size.width * hingeProportion, size.height);
             // Position the hinge in the middle of the display
             final Rect hingeBounds = Rect.fromLTWH(
               (size.width - hingeSize.width) / 2,

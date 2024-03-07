@@ -167,7 +167,8 @@ class Board extends Object with IterableMixin<BoardPoint?> {
   Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
     final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
 
-    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
+    final List<Offset> positions =
+        positionsForHexagonAtOrigin.map((Offset offset) {
       return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
     }).toList();
 
@@ -196,14 +197,16 @@ class Board extends Object with IterableMixin<BoardPoint?> {
   // Return a new board where boardPoint has the given color.
   Board copyWithBoardPointColor(BoardPoint boardPoint, Color color) {
     final BoardPoint nextBoardPoint = boardPoint.copyWithColor(color);
-    final int boardPointIndex = _boardPoints.indexWhere((BoardPoint boardPointI) =>
-        boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r);
+    final int boardPointIndex = _boardPoints.indexWhere(
+        (BoardPoint boardPointI) =>
+            boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r);
 
     if (elementAt(boardPointIndex) == boardPoint && boardPoint.color == color) {
       return this;
     }
 
-    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
+    final List<BoardPoint> nextBoardPoints =
+        List<BoardPoint>.from(_boardPoints);
     nextBoardPoints[boardPointIndex] = nextBoardPoint;
     final BoardPoint? selectedBoardPoint =
         boardPoint == selected ? nextBoardPoint : selected;

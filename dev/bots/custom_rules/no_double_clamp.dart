@@ -21,7 +21,8 @@ import 'analyze.dart';
 final AnalyzeRule noDoubleClamp = _NoDoubleClamp();
 
 class _NoDoubleClamp implements AnalyzeRule {
-  final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
+  final Map<ResolvedUnitResult, List<AstNode>> _errors =
+      <ResolvedUnitResult, List<AstNode>>{};
 
   @override
   void applyTo(ResolvedUnitResult unit) {
@@ -44,7 +45,8 @@ class _NoDoubleClamp implements AnalyzeRule {
     }
 
     foundError(<String>[
-      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
+      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry
+          in _errors.entries)
         for (final AstNode node in entry.value)
           '${locationInFile(entry.key, node)}: ${node.parent}',
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
@@ -60,13 +62,13 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
 
   // We don't care about directives or comments.
   @override
-  void visitImportDirective(ImportDirective node) { }
+  void visitImportDirective(ImportDirective node) {}
 
   @override
-  void visitExportDirective(ExportDirective node) { }
+  void visitExportDirective(ExportDirective node) {}
 
   @override
-  void visitComment(Comment node) { }
+  void visitComment(Comment node) {}
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
@@ -81,20 +83,35 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
       // final f = 1.clamp;
       // final y = f(0, 2)       // The inferred return type is num.
       PropertyAccess(
-        target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
-      ) => false,
+        target: Expression(
+          staticType: DartType(isDartCoreDouble: true) ||
+              DartType(isDartCoreNum: true) ||
+              DartType(isDartCoreInt: true)
+        ),
+      ) =>
+        false,
 
       // Expressions like `final int x = 1.clamp(0, 2);` should be allowed.
       MethodInvocation(
         target: Expression(staticType: DartType(isDartCoreInt: true)),
-        argumentList: ArgumentList(arguments: [Expression(staticType: DartType(isDartCoreInt: true)), Expression(staticType: DartType(isDartCoreInt: true))]),
-      ) => true,
+        argumentList: ArgumentList(
+          arguments: [
+            Expression(staticType: DartType(isDartCoreInt: true)),
+            Expression(staticType: DartType(isDartCoreInt: true))
+          ]
+        ),
+      ) =>
+        true,
 
       // Otherwise, disallow num.clamp() invocations.
       MethodInvocation(
-        target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
-      ) => false,
-
+        target: Expression(
+          staticType: DartType(isDartCoreDouble: true) ||
+              DartType(isDartCoreNum: true) ||
+              DartType(isDartCoreInt: true)
+        ),
+      ) =>
+        false,
       _ => true,
     };
     if (!isAllowed) {

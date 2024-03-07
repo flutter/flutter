@@ -42,7 +42,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   }
 
   String _title(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case BottomNavigationDemoType.withLabels:
         return localizations.demoBottomNavigationPersistentLabels;
@@ -55,9 +56,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
-    List<BottomNavigationBarItem> bottomNavigationBarItems = <BottomNavigationBarItem>[
+    List<BottomNavigationBarItem> bottomNavigationBarItems =
+        <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: const Icon(Icons.add_comment),
         label: localizations.bottomNavigationCommentsTab,
@@ -83,9 +86,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     if (widget.type == BottomNavigationDemoType.withLabels) {
       bottomNavigationBarItems = bottomNavigationBarItems.sublist(
           0, bottomNavigationBarItems.length - 2);
-      _currentIndex.value = _currentIndex.value
-          .clamp(0, bottomNavigationBarItems.length - 1)
-          ;
+      _currentIndex.value =
+          _currentIndex.value.clamp(0, bottomNavigationBarItems.length - 1);
     }
 
     return Scaffold(
@@ -95,7 +97,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       ),
       body: Center(
         child: PageTransitionSwitcher(
-          transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+          transitionBuilder: (Widget child, Animation<double> animation,
+              Animation<double> secondaryAnimation) {
             return FadeThroughTransition(
               animation: animation,
               secondaryAnimation: secondaryAnimation,

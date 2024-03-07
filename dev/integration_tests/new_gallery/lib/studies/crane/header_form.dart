@@ -11,7 +11,6 @@ const double appPaddingLarge = 120.0;
 const double appPaddingSmall = 24.0;
 
 class HeaderFormField {
-
   const HeaderFormField({
     required this.index,
     required this.iconData,
@@ -25,7 +24,6 @@ class HeaderFormField {
 }
 
 class HeaderForm extends StatelessWidget {
-
   const HeaderForm({super.key, required this.fields});
   final List<HeaderFormField> fields;
 
@@ -40,7 +38,8 @@ class HeaderForm extends StatelessWidget {
             isDesktop && !isSmallDesktop ? appPaddingLarge : appPaddingSmall,
       ),
       child: isDesktop
-          ? LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          ? LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
               int crossAxisCount = isSmallDesktop ? 2 : 4;
               if (fields.length < crossAxisCount) {
                 crossAxisCount = fields.length;
@@ -77,7 +76,6 @@ class HeaderForm extends StatelessWidget {
 }
 
 class _HeaderTextField extends StatelessWidget {
-
   const _HeaderTextField({required this.field});
   final HeaderFormField field;
 

@@ -7,7 +7,8 @@ import 'package:flutter_api_samples/widgets/heroes/hero.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Hero flight animation with default rect tween', (WidgetTester tester) async {
+  testWidgets('Hero flight animation with default rect tween',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.HeroApp(),
     );
@@ -70,7 +71,8 @@ void main() {
     expect(heroSize, const Size(50.0, 50.0));
   });
 
-  testWidgets('Hero flight animation with custom rect tween', (WidgetTester tester) async {
+  testWidgets('Hero flight animation with custom rect tween',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.HeroApp(),
     );

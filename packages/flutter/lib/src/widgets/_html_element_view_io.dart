@@ -15,7 +15,8 @@ extension HtmlElementViewImpl on HtmlElementView {
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
   }) {
-    throw UnimplementedError('HtmlElementView is only available on Flutter Web');
+    throw UnimplementedError(
+        'HtmlElementView is only available on Flutter Web');
   }
 
   /// Called from [HtmlElementView.build] to build the widget tree.
@@ -26,6 +27,7 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// The implementation on Flutter Web builds a platform view and handles its
   /// lifecycle.
   Widget buildImpl(BuildContext context) {
-    throw UnimplementedError('HtmlElementView is only available on Flutter Web');
+    throw UnimplementedError(
+        'HtmlElementView is only available on Flutter Web');
   }
 }

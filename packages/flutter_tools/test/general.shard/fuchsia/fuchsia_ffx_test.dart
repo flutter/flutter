@@ -30,18 +30,26 @@ void main() {
     fakeFuchsiaArtifacts.ffx = ffx;
   });
 
-  testUsingContext('isFuchsiaSupportedPlatform returns true when opted in on Linux and macOS', () {
-    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')), true);
+  testUsingContext(
+      'isFuchsiaSupportedPlatform returns true when opted in on Linux and macOS',
+      () {
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')),
+        true);
     expect(isFuchsiaSupportedPlatform(FakePlatform()), true);
-    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')), false);
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')),
+        false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
   });
 
-  testUsingContext('isFuchsiaSupportedPlatform returns false when opted out on Linux and macOS', () {
-    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')), false);
+  testUsingContext(
+      'isFuchsiaSupportedPlatform returns false when opted out on Linux and macOS',
+      () {
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')),
+        false);
     expect(isFuchsiaSupportedPlatform(FakePlatform()), false);
-    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')), false);
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')),
+        false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
   });

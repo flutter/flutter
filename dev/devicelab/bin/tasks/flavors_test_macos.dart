@@ -19,7 +19,8 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
 
-    final String projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final String projectDir =
+        '${flutterDirectory.path}/dev/integration_tests/flavors';
     final TaskResult installTestsResult = await inDirectory(
       projectDir,
       () async {
@@ -29,7 +30,13 @@ Future<void> main() async {
         );
         await flutter(
           'install',
-          options: <String>['--flavor', 'paid', '--uninstall-only', '-d', 'macos'],
+          options: <String>[
+            '--flavor',
+            'paid',
+            '--uninstall-only',
+            '-d',
+            'macos'
+          ],
         );
         final StringBuffer stderr = StringBuffer();
         await evalFlutter(
@@ -41,35 +48,37 @@ Future<void> main() async {
 
         final Uint8List assetManifestFileData = File(
           path.join(
-            projectDir,
-            'build',
-            'macos',
-            'Build',
-            'Products',
-            'Debug-paid',
-            'Debug Paid.app',
-            'Contents',
-            'Frameworks',
-            'App.framework',
-            'Resources',
-            'flutter_assets',
-            'AssetManifest.bin'
-          ),
+              projectDir,
+              'build',
+              'macos',
+              'Build',
+              'Products',
+              'Debug-paid',
+              'Debug Paid.app',
+              'Contents',
+              'Frameworks',
+              'App.framework',
+              'Resources',
+              'flutter_assets',
+              'AssetManifest.bin'),
         ).readAsBytesSync();
 
         final Map<Object?, Object?> assetManifest = const StandardMessageCodec()
-          .decodeMessage(ByteData.sublistView(assetManifestFileData)) as Map<Object?, Object?>;
+                .decodeMessage(ByteData.sublistView(assetManifestFileData))
+            as Map<Object?, Object?>;
 
         if (assetManifest.containsKey('assets/free/free.txt')) {
-          return TaskResult.failure('Expected the asset "assets/free/free.txt", which '
-            ' was declared with a flavor of "free" to not be included in the asset bundle '
-            ' because the --flavor was set to "paid".');
+          return TaskResult.failure(
+              'Expected the asset "assets/free/free.txt", which '
+              ' was declared with a flavor of "free" to not be included in the asset bundle '
+              ' because the --flavor was set to "paid".');
         }
 
         if (!assetManifest.containsKey('assets/paid/paid.txt')) {
-          return TaskResult.failure('Expected the asset "assets/paid/paid.txt", which '
-            ' was declared with a flavor of "paid" to be included in the asset bundle '
-            ' because the --flavor was set to "paid".');
+          return TaskResult.failure(
+              'Expected the asset "assets/paid/paid.txt", which '
+              ' was declared with a flavor of "paid" to be included in the asset bundle '
+              ' because the --flavor was set to "paid".');
         }
 
         final String stderrString = stderr.toString();

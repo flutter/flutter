@@ -68,9 +68,11 @@ void main() {
   });
 
   testUsingContext(
-      'AGP version out of "warn" support band prints warning but still builds', () async {
+      'AGP version out of "warn" support band prints warning but still builds',
+      () async {
     // Create a new flutter project.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -82,24 +84,25 @@ void main() {
     const String agpVersion = '4.2.0';
     const String kgpVersion = '1.7.10';
 
-    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+    final Directory app =
+        Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
     // Modify gradle version to passed in version.
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
+    final String propertyContent =
+        gradleWrapperPropertiesFileContent.replaceFirst(
       gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-    final File gradleSettings = File(fileSystem.path.join(
-        app.path, 'android', 'settings.gradle'));
+    final File gradleSettings =
+        File(fileSystem.path.join(app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
         .replaceFirst(agpReplacementString, agpVersion)
         .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
-
 
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[
@@ -109,14 +112,18 @@ void main() {
       '--debug',
     ], workingDirectory: app.path);
     expect(result, const ProcessResultMatcher());
-    expect(result.stderr, contains('Please upgrade your Android Gradle '
-        'Plugin version'));
+    expect(
+        result.stderr,
+        contains('Please upgrade your Android Gradle '
+            'Plugin version'));
   });
 
   testUsingContext(
-      'Gradle version out of "warn" support band prints warning but still builds', () async {
+      'Gradle version out of "warn" support band prints warning but still builds',
+      () async {
     // Create a new flutter project.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -128,24 +135,25 @@ void main() {
     const String agpVersion = '4.2.0';
     const String kgpVersion = '1.7.10';
 
-    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+    final Directory app =
+        Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
     // Modify gradle version to passed in version.
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
+    final String propertyContent =
+        gradleWrapperPropertiesFileContent.replaceFirst(
       gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-    final File gradleSettings = File(fileSystem.path.join(
-        app.path, 'android', 'settings.gradle'));
+    final File gradleSettings =
+        File(fileSystem.path.join(app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
         .replaceFirst(agpReplacementString, agpVersion)
         .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
-
 
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[
@@ -159,9 +167,11 @@ void main() {
   });
 
   testUsingContext(
-      'Kotlin version out of "warn" support band prints warning but still builds', () async {
+      'Kotlin version out of "warn" support band prints warning but still builds',
+      () async {
     // Create a new flutter project.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin =
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',
@@ -173,24 +183,25 @@ void main() {
     const String agpVersion = '7.4.0';
     const String kgpVersion = '1.4.10';
 
-    final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+    final Directory app =
+        Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
     // Modify gradle version to passed in version.
     final File gradleWrapperProperties = File(fileSystem.path.join(
         app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
-    final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
+    final String propertyContent =
+        gradleWrapperPropertiesFileContent.replaceFirst(
       gradleReplacementString,
       gradleVersion,
     );
     await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-    final File gradleSettings = File(fileSystem.path.join(
-        app.path, 'android', 'settings.gradle'));
+    final File gradleSettings =
+        File(fileSystem.path.join(app.path, 'android', 'settings.gradle'));
     final String settingsContent = gradleSettingsFileContent
         .replaceFirst(agpReplacementString, agpVersion)
         .replaceFirst(kgpReplacementString, kgpVersion);
     await gradleSettings.writeAsString(settingsContent, flush: true);
-
 
     // Ensure that gradle files exists from templates.
     result = await processManager.run(<String>[

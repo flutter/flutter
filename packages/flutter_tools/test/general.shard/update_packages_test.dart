@@ -103,7 +103,10 @@ void main() {
     // Create version file
     flutterSdk.childFile('version').writeAsStringSync('1.2.3');
     // Create version JSON file
-    flutterSdk.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json')
+    flutterSdk
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childFile('flutter.version.json')
       ..createSync(recursive: true)
       ..writeAsStringSync(kVersionJson);
     // Create a pubspec file
@@ -115,8 +118,10 @@ void main() {
   testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
     expect(
       kManuallyPinnedDependencies.values,
-      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
-      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
+      isNot(contains(
+          anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
+      reason:
+          'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
     );
   });
 
@@ -162,13 +167,18 @@ void main() {
     // The version file exists.
     expect(result.childFile('version'), exists);
     expect(result.childFile('version').readAsStringSync(), '1.2.3');
-    expect(fileSystem.file(fileSystem.path.join(result.path, 'bin', 'cache', 'flutter.version.json')), exists);
+    expect(
+        fileSystem.file(fileSystem.path
+            .join(result.path, 'bin', 'cache', 'flutter.version.json')),
+        exists);
 
     // The sky_engine package exists
-    expect(fileSystem.directory('${result.path}/bin/cache/pkg/sky_engine'), exists);
+    expect(fileSystem.directory('${result.path}/bin/cache/pkg/sky_engine'),
+        exists);
 
     // The flutter pubspec exists
-    final File pubspecFile = fileSystem.file('${result.path}/packages/flutter/pubspec.yaml');
+    final File pubspecFile =
+        fileSystem.file('${result.path}/packages/flutter/pubspec.yaml');
     expect(pubspecFile, exists);
 
     // The flutter pubspec contains `any` dependencies.
@@ -192,7 +202,8 @@ void main() {
     final PubspecYaml pubspecYaml = PubspecYaml(flutter);
     expect(
         pubspecYaml.allDependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) =>
+                '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -207,7 +218,8 @@ void main() {
         }));
     expect(
         pubspecYaml.allExplicitDependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) =>
+                '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -221,7 +233,8 @@ void main() {
         }));
     expect(
         pubspecYaml.dependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((PubspecDependency dependency) =>
+                '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',

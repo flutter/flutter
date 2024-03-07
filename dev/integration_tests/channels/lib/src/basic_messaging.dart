@@ -41,8 +41,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
 }
 
 Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
-  const BasicMessageChannel<ByteData?> channel =
-      BasicMessageChannel<ByteData?>(
+  const BasicMessageChannel<ByteData?> channel = BasicMessageChannel<ByteData?>(
     'binary-msg',
     BinaryCodec(),
   );
@@ -59,8 +58,7 @@ Future<TestStepResult> basicStringHandshake(String? message) async {
 }
 
 Future<TestStepResult> basicJsonHandshake(dynamic message) async {
-  const BasicMessageChannel<dynamic> channel =
-      BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
     'json-msg',
     JSONMessageCodec(),
   );
@@ -68,8 +66,7 @@ Future<TestStepResult> basicJsonHandshake(dynamic message) async {
 }
 
 Future<TestStepResult> basicStandardHandshake(dynamic message) async {
-  const BasicMessageChannel<dynamic> channel =
-      BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
     'std-msg',
     ExtendedStandardMessageCodec(),
   );
@@ -113,8 +110,7 @@ Future<TestStepResult> basicBackgroundStandardEcho(Object message) async {
 }
 
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
-  const BasicMessageChannel<ByteData?> channel =
-      BasicMessageChannel<ByteData?>(
+  const BasicMessageChannel<ByteData?> channel = BasicMessageChannel<ByteData?>(
     'binary-unknown',
     BinaryCodec(),
   );
@@ -130,8 +126,7 @@ Future<TestStepResult> basicStringMessageToUnknownChannel() async {
 }
 
 Future<TestStepResult> basicJsonMessageToUnknownChannel() async {
-  const BasicMessageChannel<dynamic> channel =
-      BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
     'json-unknown',
     JSONMessageCodec(),
   );
@@ -139,8 +134,7 @@ Future<TestStepResult> basicJsonMessageToUnknownChannel() async {
 }
 
 Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
-  const BasicMessageChannel<dynamic> channel =
-      BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
     'std-unknown',
     ExtendedStandardMessageCodec(),
   );

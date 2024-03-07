@@ -11,6 +11,7 @@ String formattedDuration(BuildContext context, Duration duration,
   final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
   final String hoursShortForm = localizations.craneHours(duration.inHours);
-  final String minutesShortForm = localizations.craneMinutes(duration.inMinutes % 60);
+  final String minutesShortForm =
+      localizations.craneMinutes(duration.inMinutes % 60);
   return localizations.craneFlightDuration(hoursShortForm, minutesShortForm);
 }

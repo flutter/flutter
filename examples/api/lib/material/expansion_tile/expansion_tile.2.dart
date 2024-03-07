@@ -11,7 +11,9 @@ void main() {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
   (AnimationStyles.defaultStyle, 'Default'),
   (AnimationStyles.custom, 'Custom'),
   (AnimationStyles.none, 'None'),
@@ -21,11 +23,15 @@ class ExpansionTileAnimationStyleApp extends StatefulWidget {
   const ExpansionTileAnimationStyleApp({super.key});
 
   @override
-  State<ExpansionTileAnimationStyleApp> createState() => _ExpansionTileAnimationStyleAppState();
+  State<ExpansionTileAnimationStyleApp> createState() =>
+      _ExpansionTileAnimationStyleAppState();
 }
 
-class _ExpansionTileAnimationStyleAppState extends State<ExpansionTileAnimationStyleApp> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+class _ExpansionTileAnimationStyleAppState
+    extends State<ExpansionTileAnimationStyleApp> {
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -55,10 +61,11 @@ class _ExpansionTileAnimationStyleAppState extends State<ExpansionTileAnimationS
                   });
                 },
                 segments: animationStyleSegments
-                  .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                    return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                  })
-                  .toList(),
+                    .map<ButtonSegment<AnimationStyles>>(
+                        ((AnimationStyles, String) shirt) {
+                  return ButtonSegment<AnimationStyles>(
+                      value: shirt.$1, label: Text(shirt.$2));
+                }).toList(),
               ),
               const SizedBox(height: 20),
               ExpansionTile(

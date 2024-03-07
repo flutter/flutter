@@ -28,7 +28,8 @@ void main() {
   const ui.Color transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
 
   group('succeeds', () {
-    testWidgets('when images have the same content', (WidgetTester tester) async {
+    testWidgets('when images have the same content',
+        (WidgetTester tester) async {
       final ui.Image image1 = await createTestImage(100, 100, red);
       addTearDown(image1.dispose);
       final ui.Image referenceImage1 = await createTestImage(100, 100, red);
@@ -45,7 +46,8 @@ void main() {
 
       final ui.Image image3 = await createTestImage(100, 100, transparentRed);
       addTearDown(image3.dispose);
-      final ui.Image referenceImage3 = await createTestImage(100, 100, transparentRed);
+      final ui.Image referenceImage3 =
+          await createTestImage(100, 100, transparentRed);
       addTearDown(referenceImage3.dispose);
 
       await expectLater(image3, matchesReferenceImage(referenceImage3));
@@ -72,10 +74,14 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
+      final ui.Image referenceImage =
+          (tester.renderObject(find.byKey(repaintBoundaryKey))
+                  as RenderRepaintBoundary)
+              .toImageSync();
       addTearDown(referenceImage.dispose);
 
-      await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(referenceImage));
+      await expectLater(find.byKey(repaintBoundaryKey),
+          matchesReferenceImage(referenceImage));
     });
   });
 
@@ -88,14 +94,16 @@ void main() {
 
       expect(
         await matchesReferenceImage(red50).matchAsync(red100),
-        equals('does not match as width or height do not match. [100×100] != [50×50]'),
+        equals(
+            'does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
       final ui.Image red100 = await createTestImage(100, 100, red);
       addTearDown(red100.dispose);
-      final ui.Image transparentRed100 = await createTestImage(100, 100, transparentRed);
+      final ui.Image transparentRed100 =
+          await createTestImage(100, 100, transparentRed);
       addTearDown(transparentRed100.dispose);
 
       expect(
@@ -112,7 +120,8 @@ void main() {
       );
     });
 
-    testWidgets('when widget does not look the same', (WidgetTester tester) async {
+    testWidgets('when widget does not look the same',
+        (WidgetTester tester) async {
       addTearDown(tester.view.reset);
       tester.view
         ..physicalSize = const Size(10, 10)
@@ -127,7 +136,10 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
+      final ui.Image referenceImage =
+          (tester.renderObject(find.byKey(repaintBoundaryKey))
+                  as RenderRepaintBoundary)
+              .toImageSync();
       addTearDown(referenceImage.dispose);
 
       await tester.pumpWidget(

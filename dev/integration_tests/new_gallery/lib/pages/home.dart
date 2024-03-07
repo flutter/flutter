@@ -42,7 +42,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final Map<String, GalleryDemo> studyDemos = Demos.studies(localizations);
     final List<Widget> carouselCards = <Widget>[
       _CarouselCard(
@@ -138,7 +139,8 @@ class HomePage extends StatelessWidget {
 
     if (isDesktop) {
       // Desktop layout
-      final List<_DesktopCategoryItem> desktopCategoryItems = <_DesktopCategoryItem>[
+      final List<_DesktopCategoryItem> desktopCategoryItems =
+          <_DesktopCategoryItem>[
         _DesktopCategoryItem(
           category: GalleryDemoCategory.material,
           asset: const AssetImage(
@@ -380,7 +382,8 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final bool isTestMode = GalleryOptions.of(context).isTestMode;
     return Stack(
       children: <Widget>[
@@ -665,7 +668,8 @@ class _AnimatedCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       return Stack(
         children: <Widget>[
           SizedBox(height: _carouselHeight(.4, context)),
@@ -1055,10 +1059,12 @@ class _CarouselCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final bool isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
+    final bool isDark =
+        Theme.of(context).colorScheme.brightness == Brightness.dark;
     final ImageProvider<Object>? asset = isDark ? assetDark : this.asset;
     final Color? assetColor = isDark ? assetDarkColor : this.assetColor;
-    final Color? textColor = isDark ? Colors.white.withOpacity(0.87) : this.textColor;
+    final Color? textColor =
+        isDark ? Colors.white.withOpacity(0.87) : this.textColor;
     final bool isDesktop = isDisplayDesktop(context);
 
     return Container(
@@ -1113,8 +1119,8 @@ class _CarouselCard extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    Navigator.of(context)
-                        .popUntil((Route<void> route) => route.settings.name == '/');
+                    Navigator.of(context).popUntil(
+                        (Route<void> route) => route.settings.name == '/');
                     Navigator.of(context).restorablePushNamed(studyRoute);
                   },
                 ),
@@ -1186,8 +1192,8 @@ class _StudyWrapperState extends State<StudyWrapper> {
                       heroTag: _BackButtonHeroTag(),
                       key: const ValueKey<String>('Back'),
                       onPressed: () {
-                        Navigator.of(context)
-                            .popUntil((Route<void> route) => route.settings.name == '/');
+                        Navigator.of(context).popUntil(
+                            (Route<void> route) => route.settings.name == '/');
                       },
                       icon: IconTheme(
                         data: IconThemeData(color: colorScheme.onPrimary),

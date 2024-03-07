@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_platform_io.dart'
-  if (dart.library.js_util) '_platform_web.dart' as platform;
+import '_platform_io.dart' if (dart.library.js_util) '_platform_web.dart'
+    as platform;
 import 'assertions.dart';
 import 'constants.dart';
 
@@ -104,7 +104,7 @@ TargetPlatform? get debugDefaultTargetPlatformOverride =>
 set debugDefaultTargetPlatformOverride(TargetPlatform? value) {
   if (!kDebugMode) {
     throw FlutterError(
-      'Cannot modify debugDefaultTargetPlatformOverride in non-debug builds.');
+        'Cannot modify debugDefaultTargetPlatformOverride in non-debug builds.');
   }
   _debugDefaultTargetPlatformOverride = value;
 }

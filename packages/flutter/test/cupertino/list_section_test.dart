@@ -40,7 +40,8 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgets('shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -59,7 +60,8 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgets('shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgets('shows long dividers in edge-to-edge section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -80,7 +82,8 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgets('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -100,7 +103,8 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgets('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgets('does not show long dividers in insetGrouped section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -139,12 +143,15 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).first);
-    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    final DecoratedBox decoratedBox =
+        tester.widget(find.byType(DecoratedBox).first);
+    final BoxDecoration boxDecoration =
+        decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgets('setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgets('setting clipBehavior clips children section',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -161,7 +168,8 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgets('not setting clipBehavior does not clip children section',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -177,7 +185,8 @@ void main() {
     expect(find.byType(ClipRRect), findsNothing);
   });
 
-  testWidgets('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
+  testWidgets('CupertinoListSection respects separatorColor',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -200,7 +209,9 @@ void main() {
     }
   });
 
-  testWidgets('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoListSection.separatorColor defaults CupertinoColors.separator',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -214,7 +225,8 @@ void main() {
       ),
     );
 
-    final BuildContext context = tester.element(find.byType(CupertinoListSection));
+    final BuildContext context =
+        tester.element(find.byType(CupertinoListSection));
     final Column childrenColumn = tester.widget(find.byType(Column).at(1));
     for (final Widget e in childrenColumn.children) {
       if (e is Container) {
@@ -239,7 +251,8 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(0, 41), epsilon: 1));
+    expect(tester.getTopLeft(find.byWidget(child)),
+        offsetMoreOrLessEquals(const Offset(0, 41), epsilon: 1));
   });
 
   testWidgets('shows custom margin', (WidgetTester tester) async {
@@ -260,6 +273,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byWidget(child)), offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1));
+    expect(tester.getTopLeft(find.byWidget(child)),
+        offsetMoreOrLessEquals(const Offset(margin, 41 + margin), epsilon: 1));
   });
 }

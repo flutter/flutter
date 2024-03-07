@@ -176,7 +176,8 @@ class _HomePageState extends State<HomePage>
       {required BuildContext context,
       required ThemeData theme,
       bool isVertical = false}) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return <Widget>[
       _RallyTab(
         theme: theme,

@@ -10,7 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Instantiating WidgetsFlutterBinding does neither schedule a frame nor register frame callbacks', () async {
+  test(
+      'Instantiating WidgetsFlutterBinding does neither schedule a frame nor register frame callbacks',
+      () async {
     // Regression test for https://github.com/flutter/flutter/issues/39494.
 
     // Preconditions.
@@ -18,15 +20,18 @@ void main() {
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
-    final WidgetsFlutterBindingWithTestBinaryMessenger binding = WidgetsFlutterBindingWithTestBinaryMessenger();
+    final WidgetsFlutterBindingWithTestBinaryMessenger binding =
+        WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(binding, isA<WidgetsFlutterBinding>());
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     expect(PlatformDispatcher.instance.onBeginFrame, isNull);
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    final ByteData message =
+        const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(PlatformDispatcher.instance.onBeginFrame, isNull);
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
@@ -39,4 +44,5 @@ void main() {
   });
 }
 
-class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }
+class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding
+    with TestDefaultBinaryMessengerBinding {}

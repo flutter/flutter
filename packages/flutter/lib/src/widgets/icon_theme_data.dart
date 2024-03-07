@@ -32,10 +32,10 @@ class IconThemeData with Diagnosticable {
     double? opacity,
     this.shadows,
     this.applyTextScaling,
-  }) : _opacity = opacity,
-       assert(fill == null || (0.0 <= fill && fill <= 1.0)),
-       assert(weight == null || (0.0 < weight)),
-       assert(opticalSize == null || (0.0 < opticalSize));
+  })  : _opacity = opacity,
+        assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+        assert(weight == null || (0.0 < weight)),
+        assert(opticalSize == null || (0.0 < opticalSize));
 
   /// Creates an icon theme with some reasonable default values.
   ///
@@ -117,14 +117,15 @@ class IconThemeData with Diagnosticable {
   IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties (except shadows) of this object are non-null.
-  bool get isConcrete => size != null
-    && fill != null
-    && weight != null
-    && grade != null
-    && opticalSize != null
-    && color != null
-    && opacity != null
-    && applyTextScaling != null;
+  bool get isConcrete =>
+      size != null &&
+      fill != null &&
+      weight != null &&
+      grade != null &&
+      opticalSize != null &&
+      color != null &&
+      opacity != null &&
+      applyTextScaling != null;
 
   /// The default for [Icon.size].
   ///
@@ -163,7 +164,8 @@ class IconThemeData with Diagnosticable {
   /// An opacity to apply to both explicit and default icon colors.
   ///
   /// Falls back to 1.0.
-  double? get opacity => _opacity == null ? null : clampDouble(_opacity, 0.0, 1.0);
+  double? get opacity =>
+      _opacity == null ? null : clampDouble(_opacity, 0.0, 1.0);
   final double? _opacity;
 
   /// The default for [Icon.shadows].
@@ -197,30 +199,30 @@ class IconThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconThemeData
-        && other.size == size
-        && other.fill == fill
-        && other.weight == weight
-        && other.grade == grade
-        && other.opticalSize == opticalSize
-        && other.color == color
-        && other.opacity == opacity
-        && listEquals(other.shadows, shadows)
-        && other.applyTextScaling == applyTextScaling;
+    return other is IconThemeData &&
+        other.size == size &&
+        other.fill == fill &&
+        other.weight == weight &&
+        other.grade == grade &&
+        other.opticalSize == opticalSize &&
+        other.color == color &&
+        other.opacity == opacity &&
+        listEquals(other.shadows, shadows) &&
+        other.applyTextScaling == applyTextScaling;
   }
 
   @override
   int get hashCode => Object.hash(
-    size,
-    fill,
-    weight,
-    grade,
-    opticalSize,
-    color,
-    opacity,
-    shadows == null ? null : Object.hashAll(shadows!),
-    applyTextScaling,
-  );
+        size,
+        fill,
+        weight,
+        grade,
+        opticalSize,
+        color,
+        opacity,
+        shadows == null ? null : Object.hashAll(shadows!),
+        applyTextScaling,
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -229,10 +231,14 @@ class IconThemeData with Diagnosticable {
     properties.add(DoubleProperty('fill', fill, defaultValue: null));
     properties.add(DoubleProperty('weight', weight, defaultValue: null));
     properties.add(DoubleProperty('grade', grade, defaultValue: null));
-    properties.add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
+    properties
+        .add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
-    properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
+    properties
+        .add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>(
+        'applyTextScaling', applyTextScaling,
+        defaultValue: null));
   }
 }

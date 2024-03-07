@@ -23,7 +23,8 @@ class AppStateModel extends Model {
   Map<int, int> get productsInCart => Map<int, int>.from(_productsInCart);
 
   // Total number of items in the cart.
-  int get totalCartQuantity => _productsInCart.values.fold(0, (int v, int e) => v + e);
+  int get totalCartQuantity =>
+      _productsInCart.values.fold(0, (int v, int e) => v + e);
 
   Category get selectedCategory => _selectedCategory;
 

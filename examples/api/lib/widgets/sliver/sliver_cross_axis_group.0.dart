@@ -67,7 +67,8 @@ class SliverCrossAxisGroupExample extends StatelessWidget {
               sliver: SliverList.builder(
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
-                    color: index.isEven ? Colors.purple[300] : Colors.orange[300],
+                    color:
+                        index.isEven ? Colors.purple[300] : Colors.orange[300],
                     height: 100.0,
                     child: Center(
                       child: Text(

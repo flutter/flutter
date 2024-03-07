@@ -46,7 +46,8 @@ void main() {
     final PrintCallback oldPrint = print;
     print = log.add;
     try {
-      await runCommand('/usr/bin/sh', <String>['-c', 'echo ${"meow" * 1024}; false']);
+      await runCommand(
+          '/usr/bin/sh', <String>['-c', 'echo ${"meow" * 1024}; false']);
       expect(log, <Object>[
         startsWith('RUNNING:'),
         'workingDirectory: null, executable: /usr/bin/sh, arguments: [-c, echo ${"meow" * 1024}; false]',

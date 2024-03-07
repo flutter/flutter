@@ -27,7 +27,7 @@ void main() {
     return path.replaceAll('/', globals.fs.path.separator);
   }
 
-  void writePubspecFile(String path, String name, { List<String>? assets }) {
+  void writePubspecFile(String path, String name, {List<String>? assets}) {
     String assetsSection;
     if (assets == null) {
       assetsSection = '';
@@ -65,18 +65,15 @@ $assetsSection
 
   Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
     List<Object> convertList(List<Object> variants) => variants
-      .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
-      .toList();
+        .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
+        .toList();
 
-    return manifest.map((Object key, Object value) => MapEntry<Object, Object>(key, convertList(value as List<Object>)));
+    return manifest.map((Object key, Object value) =>
+        MapEntry<Object, Object>(key, convertList(value as List<Object>)));
   }
 
-  Future<void> buildAndVerifyAssets(
-    List<String> assets,
-    List<String> packages,
-    Map<Object,Object> expectedAssetManifest
-  ) async {
-
+  Future<void> buildAndVerifyAssets(List<String> assets, List<String> packages,
+      Map<Object, Object> expectedAssetManifest) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
@@ -84,7 +81,7 @@ $assetsSection
       for (final String asset in assets) {
         final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
         expect(bundle.entries, contains(entryKey),
-          reason: 'Cannot find key on bundle: $entryKey');
+            reason: 'Cannot find key on bundle: $entryKey');
         expect(
           utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
           asset,
@@ -92,22 +89,17 @@ $assetsSection
       }
     }
 
-    final Map<Object?, Object?> assetManifest = const StandardMessageCodec().decodeMessage(
-      ByteData.sublistView(
-        Uint8List.fromList(
-          await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
-        )
-      )
-    ) as Map<Object?, Object?>;
+    final Map<Object?, Object?> assetManifest = const StandardMessageCodec()
+            .decodeMessage(ByteData.sublistView(Uint8List.fromList(
+                await bundle.entries['AssetManifest.bin']!.contentsAsBytes())))
+        as Map<Object?, Object?>;
 
     expect(
-      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
+      json.decode(utf8.decode(
+          await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
       assetManifestBinToJson(expectedAssetManifest),
     );
-    expect(
-      assetManifest,
-      expectedAssetManifest
-    );
+    expect(assetManifest, expectedAssetManifest);
   }
 
   void writeAssets(String path, List<String> assets) {
@@ -125,29 +117,39 @@ $assetsSection
   setUp(() async {
     testFileSystem = MemoryFileSystem(
       style: globals.platform.isWindows
-        ? FileSystemStyle.windows
-        : FileSystemStyle.posix,
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
     );
-    testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+    testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+        .createTempSync('flutter_asset_bundle_test.');
   });
 
   group('AssetBundle assets from packages', () {
-    testUsingContext('No assets are bundled when the package has no assets', () async {
+    testUsingContext('No assets are bundled when the package has no assets',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'NOTICES.Z',
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json'
+          ]));
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -155,7 +157,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
+    testUsingContext(
+        'No assets are bundled when the package has an asset that is not listed',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -165,15 +169,23 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'NOTICES.Z',
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json'
+          ]));
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['FontManifest.json']!.contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -181,8 +193,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled when the package has and lists one '
-      'asset its pubspec', () async {
+    testUsingContext(
+        'One asset is bundled when the package has and lists one '
+        'asset its pubspec', () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -213,8 +226,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled when the package has one asset, '
-      "listed in the app's pubspec", () async {
+    testUsingContext(
+        'One asset is bundled when the package has one asset, '
+        "listed in the app's pubspec", () async {
       final List<String> assetEntries = <String>['packages/test_package/a/foo'];
       writePubspecFile(
         'pubspec.yaml',
@@ -227,24 +241,22 @@ $assetsSection
       final List<String> assets = <String>['a/foo'];
       writeAssets('p/p/lib/', assets);
 
-
       const Map<Object, Object> expectedAssetManifest = <Object, Object>{
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'}
         ]
       };
       await buildAndVerifyAssets(
-        assets,
-        <String>['test_package'],
-        expectedAssetManifest
-      );
+          assets, <String>['test_package'], expectedAssetManifest);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset and its variant are bundled when the package '
-      'has an asset and a variant, and lists the asset in its pubspec', () async {
+    testUsingContext(
+        'One asset and its variant are bundled when the package '
+        'has an asset and a variant, and lists the asset in its pubspec',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile(
@@ -262,7 +274,10 @@ $assetsSection
         ],
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'},
-          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
 
@@ -276,8 +291,10 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset and its variant are bundled when the package '
-      'has an asset and a variant, and the app lists the asset in its pubspec', () async {
+    testUsingContext(
+        'One asset and its variant are bundled when the package '
+        'has an asset and a variant, and the app lists the asset in its pubspec',
+        () async {
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -295,7 +312,10 @@ $assetsSection
       const Map<Object, Object> expectedManifest = <Object, Object>{
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'},
-          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
 
@@ -309,8 +329,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Two assets are bundled when the package has and lists '
-      'two assets in its pubspec', () async {
+    testUsingContext(
+        'Two assets are bundled when the package has and lists '
+        'two assets in its pubspec', () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -341,7 +362,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
+    testUsingContext(
+        "Two assets are bundled when the package has two assets, listed in the app's pubspec",
+        () async {
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
         'packages/test_package/a/bar',
@@ -349,7 +372,7 @@ $assetsSection
       writePubspecFile(
         'pubspec.yaml',
         'test',
-         assets: assetEntries,
+        assets: assetEntries,
       );
       writePackagesFile('test_package:p/p/lib/');
 
@@ -379,7 +402,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Two assets are bundled when two packages each have and list an asset their pubspec', () async {
+    testUsingContext(
+        'Two assets are bundled when two packages each have and list an asset their pubspec',
+        () async {
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -403,11 +428,17 @@ $assetsSection
       const Map<Object, Object> expectedAssetManifest = <Object, Object>{
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'},
-          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package/a/2x/foo',
+            'dpr': 2.0
+          }
         ],
         'packages/test_package2/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package2/a/foo'},
-          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package2/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
 
@@ -421,7 +452,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
+    testUsingContext(
+        "Two assets are bundled when two packages each have an asset, listed in the app's pubspec",
+        () async {
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
         'packages/test_package2/a/foo',
@@ -448,11 +481,17 @@ $assetsSection
       const Map<Object, Object> expectedAssetManifest = <Object, Object>{
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'},
-          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package/a/2x/foo',
+            'dpr': 2.0
+          }
         ],
         'packages/test_package2/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package2/a/foo'},
-          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package2/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
 
@@ -466,8 +505,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled when the app depends on a package, '
-      'listing in its pubspec an asset from another package', () async {
+    testUsingContext(
+        'One asset is bundled when the app depends on a package, '
+        'listing in its pubspec an asset from another package', () async {
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -489,7 +529,10 @@ $assetsSection
       const Map<Object, Object> expectedAssetManifest = <Object, Object>{
         'packages/test_package2/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package2/a/foo'},
-          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package2/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
 
@@ -532,11 +575,12 @@ $assetsSection
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   group('AssetBundle assets from scanned paths', () {
-    testUsingContext('Two assets are bundled when scanning their directory', () async {
+    testUsingContext('Two assets are bundled when scanning their directory',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -569,7 +613,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Two assets are bundled when listing one and scanning second directory', () async {
+    testUsingContext(
+        'Two assets are bundled when listing one and scanning second directory',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -602,12 +648,17 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled with variant, scanning wrong directory', () async {
+    testUsingContext(
+        'One asset is bundled with variant, scanning wrong directory',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo','a/b/foo','a/bar'];
-      final List<String> assetOnManifest = <String>['a','a/bar']; // can't list 'a' as asset, should be 'a/'
+      final List<String> assetsOnDisk = <String>['a/foo', 'a/b/foo', 'a/bar'];
+      final List<String> assetOnManifest = <String>[
+        'a',
+        'a/bar'
+      ]; // can't list 'a' as asset, should be 'a/'
 
       writePubspecFile(
         'p/p/pubspec.yaml',
@@ -621,7 +672,8 @@ $assetsSection
       await bundle.build(packagesPath: '.packages');
 
       expect(bundle.entries['AssetManifest.json'], isNull,
-        reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
+          reason:
+              'Invalid pubspec.yaml should not generate AssetManifest.json');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -629,12 +681,15 @@ $assetsSection
   });
 
   group('AssetBundle assets from scanned paths with MemoryFileSystem', () {
-    testUsingContext('One asset is bundled with variant, scanning directory', () async {
+    testUsingContext('One asset is bundled with variant, scanning directory',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assetsOnDisk = <String>['a/foo','a/2x/foo'];
-      final List<String> assetOnManifest = <String>['a/',];
+      final List<String> assetsOnDisk = <String>['a/foo', 'a/2x/foo'];
+      final List<String> assetOnManifest = <String>[
+        'a/',
+      ];
 
       writePubspecFile(
         'p/p/pubspec.yaml',
@@ -646,7 +701,10 @@ $assetsSection
       const Map<Object, Object> expectedAssetManifest = <Object, Object>{
         'packages/test_package/a/foo': <Map<String, Object>>[
           <String, Object>{'asset': 'packages/test_package/a/foo'},
-          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+          <String, Object>{
+            'asset': 'packages/test_package/a/2x/foo',
+            'dpr': 2.0
+          }
         ]
       };
       await buildAndVerifyAssets(
@@ -659,7 +717,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('No asset is bundled with variant, no assets or directories are listed', () async {
+    testUsingContext(
+        'No asset is bundled with variant, no assets or directories are listed',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -685,7 +745,9 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Expect error generating manifest, wrong non-existing directory is listed', () async {
+    testUsingContext(
+        'Expect error generating manifest, wrong non-existing directory is listed',
+        () async {
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -697,8 +759,8 @@ $assetsSection
         assets: assetOnManifest,
       );
 
-    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packagesPath: '.packages');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

@@ -43,7 +43,8 @@ void main() {
   });
 
   testWidgets('Widget builds with initial value', (WidgetTester tester) async {
-    final SpyStringValueNotifier valueListenable = SpyStringValueNotifier('Bachman');
+    final SpyStringValueNotifier valueListenable =
+        SpyStringValueNotifier('Bachman');
     addTearDown(valueListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(valueListenable));
@@ -71,7 +72,8 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final SpyStringValueNotifier differentListenable = SpyStringValueNotifier('Hendricks');
+    final SpyStringValueNotifier differentListenable =
+        SpyStringValueNotifier('Hendricks');
     addTearDown(differentListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
@@ -80,14 +82,16 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after changing listenable',
+      (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final SpyStringValueNotifier differentListenable = SpyStringValueNotifier('Hendricks');
+    final SpyStringValueNotifier differentListenable =
+        SpyStringValueNotifier('Hendricks');
     addTearDown(differentListenable.dispose);
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));

@@ -46,7 +46,8 @@ void main() {
     expect(decoration.border!.bottom.width, 5.0);
   });
 
-  testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
+  testWidgets('Horizontal divider custom indentation',
+      (WidgetTester tester) async {
     const double customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
@@ -98,7 +99,8 @@ void main() {
         home: const Center(child: VerticalDivider()),
       ),
     );
-    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+    final RenderBox box =
+        tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     final Container container = tester.widget(find.byType(Container));
     final BoxDecoration decoration = container.decoration! as BoxDecoration;
@@ -113,7 +115,8 @@ void main() {
         home: const Center(child: VerticalDivider()),
       ),
     );
-    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+    final RenderBox box =
+        tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     final Container container = tester.widget(find.byType(Container));
     final BoxDecoration decoration = container.decoration! as BoxDecoration;
@@ -151,15 +154,18 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
-    final RenderBox containerBox = tester.firstRenderObject(find.byType(Container).last);
+    final RenderBox box =
+        tester.firstRenderObject(find.byType(VerticalDivider));
+    final RenderBox containerBox =
+        tester.firstRenderObject(find.byType(Container).last);
 
     expect(box.size.width, 16.0);
     expect(containerBox.size.height, 600.0);
     expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
   });
 
-  testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
+  testWidgets('Vertical divider custom indentation',
+      (WidgetTester tester) async {
     const double customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
@@ -205,9 +211,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39533
-  testWidgets('createBorderSide does not throw exception with null context', (WidgetTester tester) async {
+  testWidgets('createBorderSide does not throw exception with null context',
+      (WidgetTester tester) async {
     // Passing a null context used to throw an exception but no longer does.
     expect(() => Divider.createBorderSide(null), isNot(throwsAssertionError));
-    expect(() => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
+    expect(
+        () => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
   });
 }

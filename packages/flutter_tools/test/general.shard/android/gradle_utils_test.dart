@@ -257,7 +257,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
-        testWithoutContext('ignores gradle comments', () async {
+    testWithoutContext('ignores gradle comments', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
@@ -284,7 +284,8 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
-    testWithoutContext('returns gradlew version, whitespace, location', () async {
+    testWithoutContext('returns gradlew version, whitespace, location',
+        () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
@@ -320,9 +321,8 @@ zipStorePath=wrapper/dists
         ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
-      wrapperDirectory
-          .childFile('gradle-wrapper.properties')
-          .writeAsStringSync(r'distributionUrl=https\://services.gradle.org/distributions/gradle_7.4.2_all.zip');
+      wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync(
+          r'distributionUrl=https\://services.gradle.org/distributions/gradle_7.4.2_all.zip');
 
       // FakeProcessManager.any is used here and not in other getGradleVersion
       // tests because this test does not care about process fallback logic.
@@ -367,7 +367,8 @@ OS:           Mac OS X 13.2.1 aarch64
       );
     });
 
-    testWithoutContext('returns the installed gradle with whitespace formatting', () async {
+    testWithoutContext(
+        'returns the installed gradle with whitespace formatting', () async {
       const String expectedVersion = '7.4.2';
       const String gradleOutput = 'Gradle   $expectedVersion';
       final Directory androidDirectory = fileSystem.directory('/android')
@@ -452,7 +453,6 @@ allprojects {
         expectedVersion,
       );
     });
-
 
     testWithoutContext(
         'returns the AGP version when set in Groovy build file as compileOnly with double quotes',
@@ -575,7 +575,6 @@ allprojects {
       );
     });
 
-
     testWithoutContext('returns null when AGP version not set', () async {
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
@@ -630,8 +629,8 @@ allprojects {
       );
     });
 
-    testWithoutContext('returns the AGP version when in Groovy settings as plugin',
-        () async {
+    testWithoutContext(
+        'returns the AGP version when in Groovy settings as plugin', () async {
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
       // File must exist and can not have agp defined.
@@ -677,8 +676,7 @@ pluginManagement {
       );
     });
 
-    testWithoutContext(
-        'returns null when agp version is misconfigured',
+    testWithoutContext('returns null when agp version is misconfigured',
         () async {
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
@@ -712,8 +710,12 @@ dependencies {
         GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.1'),
 
         // Template versions of Gradle/AGP.
-        GradleAgpTestData(true, agpVersion: templateAndroidGradlePluginVersion, gradleVersion: templateDefaultGradleVersion),
-        GradleAgpTestData(true, agpVersion: templateAndroidGradlePluginVersionForModule, gradleVersion: templateDefaultGradleVersion),
+        GradleAgpTestData(true,
+            agpVersion: templateAndroidGradlePluginVersion,
+            gradleVersion: templateDefaultGradleVersion),
+        GradleAgpTestData(true,
+            agpVersion: templateAndroidGradlePluginVersionForModule,
+            gradleVersion: templateDefaultGradleVersion),
 
         // Minimums as defined in
         // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
@@ -795,18 +797,24 @@ dependencies {
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
       });
 
-      testWithoutContext("recognizable 'all' format returns correct version", () {
-        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
+      testWithoutContext("recognizable 'all' format returns correct version",
+          () {
+        const String distributionUrl =
+            r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
-      testWithoutContext("recognizable 'bin' format returns correct version", () {
-        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
+      testWithoutContext("recognizable 'bin' format returns correct version",
+          () {
+        const String distributionUrl =
+            r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
-      testWithoutContext("recognizable 'rc' format returns correct version", () {
-        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
+      testWithoutContext("recognizable 'rc' format returns correct version",
+          () {
+        const String distributionUrl =
+            r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '8.1');
       });
     });
@@ -820,7 +828,9 @@ dependencies {
         // Newer tools version requires newer gradle version.
         JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
         // Max known unsupported Java version.
-        JavaGradleTestData(true, javaVersion: '24', gradleVersion: maxKnownAndSupportedGradleVersion),
+        JavaGradleTestData(true,
+            javaVersion: '24',
+            gradleVersion: maxKnownAndSupportedGradleVersion),
         // Minimums as defined in
         // https://docs.gradle.org/current/userguide/compatibility.html#java
         JavaGradleTestData(true, javaVersion: '19', gradleVersion: '7.6'),
@@ -901,7 +911,8 @@ dependencies {
     testWithoutContext('prefers build.gradle over build.gradle.kts', () async {
       const String versionInGroovy = '4.0.0';
       const String versionInKotlin = '7.4.2';
-      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
 
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
 buildscript {
@@ -943,7 +954,6 @@ allprojects {
 }
 ''');
 
-
       expect(
         getGradleVersionForAndroidPlugin(androidDirectory, testLogger),
         '6.7', // as per compatibility matrix in gradle_utils.dart
@@ -954,8 +964,10 @@ allprojects {
   group('validates java/AGP versions', () {
     final List<JavaAgpTestData> testData = <JavaAgpTestData>[
       // Strictly too old Java versions for known AGP versions.
-      JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
-      JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(false,
+          javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
+      JavaAgpTestData(false,
+          javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: '4.2'),
       // Strictly too old AGP versions.
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '1.0'),
@@ -974,12 +986,14 @@ allprojects {
       // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
       JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.2'),
-      JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true,
+          javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
       JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '8.2'),
-      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true,
+          javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '7.4'),
@@ -996,7 +1010,10 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '11.0.18', agpVersion: '4.2'),
       // Java 8 compatibility cases
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '7.0'),
-      JavaAgpTestData(true, javaVersion: '1.8', agpVersion: oldestDocumentedJavaAgpCompatibilityVersion), // agpVersion = 4.2
+      JavaAgpTestData(true,
+          javaVersion: '1.8',
+          agpVersion:
+              oldestDocumentedJavaAgpCompatibilityVersion), // agpVersion = 4.2
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       // Null value cases
       // ignore: avoid_redundant_argument_values
@@ -1007,255 +1024,281 @@ allprojects {
       JavaAgpTestData(false, javaVersion: null, agpVersion: null),
     ];
 
-      for (final JavaAgpTestData data in testData) {
-        testWithoutContext(
-            '(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
-          expect(
-              validateJavaAndAgp(
-                BufferLogger.test(),
-                javaV: data.javaVersion,
-                agpV: data.agpVersion,
-              ),
-              data.validPair ? isTrue : isFalse,
-              reason: 'J: ${data.javaVersion}, G: ${data.agpVersion}');
-        });
-      }
+    for (final JavaAgpTestData data in testData) {
+      testWithoutContext(
+          '(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
+        expect(
+            validateJavaAndAgp(
+              BufferLogger.test(),
+              javaV: data.javaVersion,
+              agpV: data.agpVersion,
+            ),
+            data.validPair ? isTrue : isFalse,
+            reason: 'J: ${data.javaVersion}, G: ${data.agpVersion}');
+      });
+    }
   });
 
-  group('detecting valid Gradle/AGP versions for given Java version and vice versa', () {
-    testWithoutContext('getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version', () {
+  group(
+      'detecting valid Gradle/AGP versions for given Java version and vice versa',
+      () {
+    testWithoutContext(
+        'getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version',
+        () {
       final Logger testLogger = BufferLogger.test();
       // Java version too high.
-      expect(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion), isNull);
+      expect(
+          getValidGradleVersionRangeForJavaVersion(testLogger,
+              javaV: oneMajorVersionHigherJavaVersion),
+          isNull);
       // Maximum known Java version.
       // *The test case that follows needs to be updated* when higher versions of Java are supported:
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20.0.2')),
-          isNull));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '20.0.2')),
+              isNull));
       // Known supported Java versions.
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '19',
-              javaMax: '20',
-              gradleMin: '7.6',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '19'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '19.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '19',
+                  javaMax: '20',
+                  gradleMin: '7.6',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '18',
-              javaMax: '19',
-              gradleMin: '7.5',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '18'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '18.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '18',
+                  javaMax: '19',
+                  gradleMin: '7.5',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '17',
-              javaMax: '18',
-              gradleMin: '7.3',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '17'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '17.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '17',
+                  javaMax: '18',
+                  gradleMin: '7.3',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '16',
-              javaMax: '17',
-              gradleMin: '7.0',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '16'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '16.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '16',
+                  javaMax: '17',
+                  gradleMin: '7.0',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '15',
-              javaMax: '16',
-              gradleMin: '6.7',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '15'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '15.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '15',
+                  javaMax: '16',
+                  gradleMin: '6.7',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '14',
-              javaMax: '15',
-              gradleMin: '6.3',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '14'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '14.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '14',
+                  javaMax: '15',
+                  gradleMin: '6.3',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '13',
-              javaMax: '14',
-              gradleMin: '6.0',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '13'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '13.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '13',
+                  javaMax: '14',
+                  gradleMin: '6.0',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '12',
-              javaMax: '13',
-              gradleMin: '5.4',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '12'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '12.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '12',
+                  javaMax: '13',
+                  gradleMin: '5.4',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11.0.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '11',
-              javaMax: '12',
-              gradleMin: '5.0',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '11'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '11.0.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '11',
+                  javaMax: '12',
+                  gradleMin: '5.0',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '1.10',
-              javaMax: '1.11',
-              gradleMin: '4.7',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.10'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '1.10.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '1.10',
+                  javaMax: '1.11',
+                  gradleMin: '4.7',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '1.9',
-              javaMax: '1.10',
-              gradleMin: '4.3',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.9'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '1.9.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '1.9',
+                  javaMax: '1.10',
+                  gradleMin: '4.3',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       // Java 1.8 -- return oldest documented compatibility info
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8.2')),
-          equals(
-            const JavaGradleCompat(
-              javaMin: '1.8',
-              javaMax: '1.9',
-              gradleMin: '2.0',
-              gradleMax: maxKnownAndSupportedGradleVersion))));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.8'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '1.8.2')),
+              equals(const JavaGradleCompat(
+                  javaMin: '1.8',
+                  javaMax: '1.9',
+                  gradleMin: '2.0',
+                  gradleMax: maxKnownAndSupportedGradleVersion))));
       // Java version too low.
       expect(
-        getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7'),
-        allOf(
-          equals(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7.2')),
-          isNull));
+          getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '1.7'),
+          allOf(
+              equals(getValidGradleVersionRangeForJavaVersion(testLogger,
+                  javaV: '1.7.2')),
+              isNull));
     });
 
-    testWithoutContext('getMinimumAgpVersionForJavaVersion returns minimum AGP version for Java version', () {
+    testWithoutContext(
+        'getMinimumAgpVersionForJavaVersion returns minimum AGP version for Java version',
+        () {
       final Logger testLogger = BufferLogger.test();
       // Maximum known Java version.
       // *The test case that follows needs to be updated* as higher versions of AGP are supported:
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
-        equals(
-          const JavaAgpCompat(
-            javaMin: '17',
-            javaDefault: '17',
-            agpMin: '8.0',
-            agpMax: '8.1')));
+          getMinimumAgpVersionForJavaVersion(testLogger,
+              javaV: oneMajorVersionHigherJavaVersion),
+          equals(const JavaAgpCompat(
+              javaMin: '17', javaDefault: '17', agpMin: '8.0', agpMax: '8.1')));
       // Known Java versions.
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17.0.2')),
-          equals(
-            const JavaAgpCompat(
-              javaMin: '17',
-              javaDefault: '17',
-              agpMin: '8.0',
-              agpMax: '8.1'))));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '17'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '17.0.2')),
+              equals(const JavaAgpCompat(
+                  javaMin: '17',
+                  javaDefault: '17',
+                  agpMin: '8.0',
+                  agpMax: '8.1'))));
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15.0.2')),
-          equals(
-            const JavaAgpCompat(
-              javaMin: '11',
-              javaDefault: '11',
-              agpMin: '7.0',
-              agpMax: '7.4'))));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '15'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '15.0.2')),
+              equals(const JavaAgpCompat(
+                  javaMin: '11',
+                  javaDefault: '11',
+                  agpMin: '7.0',
+                  agpMax: '7.4'))));
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11.0.2')),
-          equals(
-            const JavaAgpCompat(
-              javaMin: '11',
-              javaDefault: '11',
-              agpMin: '7.0',
-              agpMax: '7.4'))));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '11'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '11.0.2')),
+              equals(const JavaAgpCompat(
+                  javaMin: '11',
+                  javaDefault: '11',
+                  agpMin: '7.0',
+                  agpMax: '7.4'))));
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9.2')),
-          equals(
-            const JavaAgpCompat(
-              javaMin: '1.8',
-              javaDefault: '1.8',
-              agpMin: '4.2',
-              agpMax: '4.2'))));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.9'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '1.9.2')),
+              equals(const JavaAgpCompat(
+                  javaMin: '1.8',
+                  javaDefault: '1.8',
+                  agpMin: '4.2',
+                  agpMax: '4.2'))));
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8.2')),
-          equals(
-            const JavaAgpCompat(
-              javaMin: '1.8',
-              javaDefault: '1.8',
-              agpMin: '4.2',
-              agpMax: '4.2'))));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.8'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '1.8.2')),
+              equals(const JavaAgpCompat(
+                  javaMin: '1.8',
+                  javaDefault: '1.8',
+                  agpMin: '4.2',
+                  agpMax: '4.2'))));
       // Java version too low.
       expect(
-        getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7'),
-        allOf(
-          equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7.2')),
-          isNull));
+          getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7'),
+          allOf(
+              equals(getMinimumAgpVersionForJavaVersion(testLogger,
+                  javaV: '1.7.2')),
+              isNull));
     });
 
-    testWithoutContext('getJavaVersionFor returns expected Java version range', () {
+    testWithoutContext('getJavaVersionFor returns expected Java version range',
+        () {
       // Strictly too old Gradle and AGP versions.
-      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.1'), equals(const VersionRange(null, null)));
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.1'),
+          equals(const VersionRange(null, null)));
       // Strictly too old Gradle or AGP version.
-      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.2'), equals(const VersionRange('1.8', null)));
-      expect(getJavaVersionFor(gradleV: '2.0', agpV: '4.1'), equals(const VersionRange(null, '1.9')));
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.2'),
+          equals(const VersionRange('1.8', null)));
+      expect(getJavaVersionFor(gradleV: '2.0', agpV: '4.1'),
+          equals(const VersionRange(null, '1.9')));
       // Strictly too new Gradle and AGP versions.
-      expect(getJavaVersionFor(gradleV: '8.1', agpV: '8.2'), equals(const VersionRange(null, null)));
+      expect(getJavaVersionFor(gradleV: '8.1', agpV: '8.2'),
+          equals(const VersionRange(null, null)));
       // Strictly too new Gradle version and maximum version of AGP.
       //*This test case will need its expected Java range updated when a new version of AGP is supported.*
-      expect(getJavaVersionFor(gradleV: '8.1', agpV: maxKnownAndSupportedAgpVersion), equals(const VersionRange('17', null)));
+      expect(
+          getJavaVersionFor(
+              gradleV: '8.1', agpV: maxKnownAndSupportedAgpVersion),
+          equals(const VersionRange('17', null)));
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
-      expect(getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.2'), equals(const VersionRange(null, '20')));
+      expect(
+          getJavaVersionFor(
+              gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.2'),
+          equals(const VersionRange(null, '20')));
       // Tests with a known compatible Gradle/AGP version pair.
-      expect(getJavaVersionFor(gradleV: '7.0', agpV: '7.2'), equals(const VersionRange('11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(const VersionRange('11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.2.2', agpV: '7.2'), equals(const VersionRange('11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.0'), equals(const VersionRange('11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(const VersionRange('11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.4'), equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.0', agpV: '7.2'),
+          equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'),
+          equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.2.2', agpV: '7.2'),
+          equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.0'),
+          equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'),
+          equals(const VersionRange('11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.4'),
+          equals(const VersionRange('11', '17')));
     });
   });
 }
@@ -1281,16 +1324,12 @@ class JavaAgpTestData {
   final bool validPair;
 }
 
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{
-    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
-    'FLUTTER_ROOT': r'C:\flutter',
-    'USERPROFILE': '/',
-  }
-);
-final Platform notWindowsPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': r'/users/someuser/flutter',
-  }
-);
+final Platform windowsPlatform =
+    FakePlatform(operatingSystem: 'windows', environment: <String, String>{
+  'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
+  'FLUTTER_ROOT': r'C:\flutter',
+  'USERPROFILE': '/',
+});
+final Platform notWindowsPlatform = FakePlatform(environment: <String, String>{
+  'FLUTTER_ROOT': r'/users/someuser/flutter',
+});

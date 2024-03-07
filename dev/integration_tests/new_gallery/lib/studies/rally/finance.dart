@@ -38,8 +38,10 @@ class FinancialEntityView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double maxWidth = pieChartMaxSize + (cappedTextScale(context) - 1.0) * 100.0;
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    final double maxWidth =
+        pieChartMaxSize + (cappedTextScale(context) - 1.0) * 100.0;
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       return Column(
         children: <Widget>[
           ConstrainedBox(
@@ -259,7 +261,8 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   BuildContext context,
 ) {
   final String amountUsed = usdWithSignFormat(context).format(model.amountUsed);
-  final String primaryAmount = usdWithSignFormat(context).format(model.primaryAmount);
+  final String primaryAmount =
+      usdWithSignFormat(context).format(model.primaryAmount);
   final String amount =
       usdWithSignFormat(context).format(model.primaryAmount - model.amountUsed);
 

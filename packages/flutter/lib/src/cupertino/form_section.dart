@@ -9,7 +9,8 @@ import 'list_section.dart';
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin =
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 /// An iOS-style form section.
 ///

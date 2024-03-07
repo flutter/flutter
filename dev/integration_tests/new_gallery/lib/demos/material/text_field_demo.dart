@@ -200,7 +200,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   }
 
   String? _validatePassword(String? value) {
-    final FormFieldState<String> passwordField = _passwordFieldKey.currentState!;
+    final FormFieldState<String> passwordField =
+        _passwordFieldKey.currentState!;
     if (passwordField.value == null || passwordField.value!.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterPassword;
     }
@@ -213,7 +214,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   @override
   Widget build(BuildContext context) {
     const SizedBox sizedBoxSpace = SizedBox(height: 24);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Form(
       key: _formKey,

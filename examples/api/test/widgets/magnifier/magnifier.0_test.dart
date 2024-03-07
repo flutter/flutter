@@ -8,7 +8,8 @@ import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('should update magnifier position on drag', (WidgetTester tester) async {
+  testWidgets('should update magnifier position on drag',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
     Matcher isPositionedAt(Offset at) {
@@ -24,8 +25,10 @@ void main() {
       isPositionedAt(Offset.zero),
     );
 
-    final Offset centerOfFlutterLogo = tester.getCenter(find.byType(Positioned));
-    final Offset topLeftOfFlutterLogo = tester.getTopLeft(find.byType(FlutterLogo));
+    final Offset centerOfFlutterLogo =
+        tester.getCenter(find.byType(Positioned));
+    final Offset topLeftOfFlutterLogo =
+        tester.getTopLeft(find.byType(FlutterLogo));
 
     const Offset dragDistance = Offset(10, 10);
 
@@ -35,14 +38,16 @@ void main() {
     expect(
       tester.widget(find.byType(Positioned)),
       // Need to adjust by the topleft since the position is local.
-      isPositionedAt((centerOfFlutterLogo - topLeftOfFlutterLogo) + dragDistance),
+      isPositionedAt(
+          (centerOfFlutterLogo - topLeftOfFlutterLogo) + dragDistance),
     );
   });
 
   testWidgets('should match golden', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
-    final Offset centerOfFlutterLogo = tester.getCenter(find.byType(Positioned));
+    final Offset centerOfFlutterLogo =
+        tester.getCenter(find.byType(Positioned));
     const Offset dragDistance = Offset(10, 10);
 
     await tester.dragFrom(centerOfFlutterLogo, dragDistance);

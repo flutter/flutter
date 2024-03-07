@@ -13,7 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar centers title on iOS',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -32,7 +33,10 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS
+    ]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
 
@@ -56,13 +60,16 @@ void main() {
     }
   });
 
-  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
+  testWidgets(
+      'FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar',
+      (WidgetTester tester) async {
     const double minExtent = 100.0;
     const double initExtent = 200.0;
     const double maxExtent = 300.0;
     const double alpha = 0.5;
 
-    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
+    final FlexibleSpaceBarSettings customSettings =
+        FlexibleSpaceBar.createSettings(
       currentExtent: initExtent,
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -70,7 +77,7 @@ void main() {
       child: AppBar(
         flexibleSpace: const FlexibleSpaceBar(
           title: Text('title'),
-          background:  Text('X2'),
+          background: Text('X2'),
           collapseMode: CollapseMode.pin,
         ),
       ),
@@ -120,9 +127,11 @@ void main() {
 
     final Element actionTextBox = tester.element(find.text('title'));
     final Text textWidget = actionTextBox.widget as Text;
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    final DefaultTextStyle defaultTextStyle =
+        DefaultTextStyle.of(actionTextBox);
 
-    final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+    final TextStyle effectiveStyle =
+        defaultTextStyle.style.merge(textWidget.style);
     expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
@@ -132,7 +141,9 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+  testWidgets(
+      'FlexibleSpaceBar.background is visible when using height other than kToolbarHeight',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80451
     await tester.pumpWidget(
       MaterialApp(
@@ -141,7 +152,7 @@ void main() {
             toolbarHeight: 300,
             flexibleSpace: const FlexibleSpaceBar(
               title: Text('Title'),
-              background:  Text('Background'),
+              background: Text('Background'),
               collapseMode: CollapseMode.pin,
             ),
           ),
@@ -160,14 +171,16 @@ void main() {
       ),
     );
 
-    final dynamic backgroundOpacity = tester.firstWidget(
-      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity'));
+    final dynamic backgroundOpacity = tester.firstWidget(find.byWidgetPredicate(
+        (Widget widget) =>
+            widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity'));
     // accessing private type member.
     // ignore: avoid_dynamic_calls
     expect(backgroundOpacity.opacity, 1.0);
   });
 
-  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -222,7 +235,8 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 9,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
+                          rect: const Rect.fromLTRB(
+                              0.0, 0.0, 800.0, expandedHeight),
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 12,
@@ -230,7 +244,8 @@ void main() {
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 13,
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                                  rect: const Rect.fromLTRB(
+                                      0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
                                     SemanticsFlag.namesRoute,
@@ -246,7 +261,8 @@ void main() {
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 11,
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 800.0, expandedHeight),
+                                  rect: const Rect.fromLTRB(
+                                      0.0, 0.0, 800.0, expandedHeight),
                                   label: 'Expanded title',
                                   textDirection: TextDirection.ltr,
                                 ),
@@ -256,7 +272,9 @@ void main() {
                         ),
                         TestSemantics(
                           id: 14,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasImplicitScrolling
+                          ],
                           rect: TestSemantics.fullScreen,
                           actions: <SemanticsAction>[SemanticsAction.scrollUp],
                           children: <TestSemantics>[
@@ -286,7 +304,6 @@ void main() {
                               label: 'Item 3',
                               textDirection: TextDirection.ltr,
                             ),
-
                           ],
                         ),
                       ],
@@ -336,7 +353,8 @@ void main() {
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 13,
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 20.0),
+                                  rect: const Rect.fromLTRB(
+                                      0.0, 0.0, 100.0, 20.0),
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHeader,
                                     SemanticsFlag.namesRoute,
@@ -354,7 +372,8 @@ void main() {
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 11,
-                                  rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
+                                  rect: const Rect.fromLTRB(
+                                      0.0, 36.0, 800.0, 92.0),
                                   label: 'Expanded title',
                                   textDirection: TextDirection.ltr,
                                 ),
@@ -364,13 +383,19 @@ void main() {
                         ),
                         TestSemantics(
                           id: 14,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasImplicitScrolling
+                          ],
                           rect: TestSemantics.fullScreen,
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.scrollUp,
+                            SemanticsAction.scrollDown
+                          ],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 5,
-                              rect: const Rect.fromLTRB(0.0, 150.0, 800.0, 200.0),
+                              rect:
+                                  const Rect.fromLTRB(0.0, 150.0, 800.0, 200.0),
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 0',
                               textDirection: TextDirection.ltr,
@@ -384,7 +409,8 @@ void main() {
                             ),
                             TestSemantics(
                               id: 7,
-                              rect: const Rect.fromLTRB(0.0, 56.0, 800.0, 200.0),
+                              rect:
+                                  const Rect.fromLTRB(0.0, 56.0, 800.0, 200.0),
                               label: 'Item 2',
                               textDirection: TextDirection.ltr,
                             ),
@@ -433,7 +459,8 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
-  testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets width constraints for the title',
+      (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     late double width;
@@ -476,11 +503,15 @@ void main() {
     // as the font size, with 10 dps bottom margin.
     expect(
       tester.getRect(find.byType(Text)),
-      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - 10, textWidth, height), epsilon: 0.0001),
+      rectMoreOrLessEquals(
+          Rect.fromLTRB(0, height - titleFontSize - 10, textWidth, height),
+          epsilon: 0.0001),
     );
   });
 
-  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets(
+      'FlexibleSpaceBar sets constraints for the title - override expandedTitleScale',
+      (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -501,7 +532,9 @@ void main() {
                     'X' * 41,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: titleFontSize,),
+                    style: const TextStyle(
+                      fontSize: titleFontSize,
+                    ),
                   ),
                   centerTitle: false,
                 ),
@@ -545,7 +578,10 @@ void main() {
     // as the font size, with 40 dps bottom margin to maintain its bottom position.
     expect(
       tester.getRect(title),
-      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - bottomMargin, textWidth, height), epsilon: 0.0001),
+      rectMoreOrLessEquals(
+          Rect.fromLTRB(
+              0, height - titleFontSize - bottomMargin, textWidth, height),
+          epsilon: 0.0001),
     );
   });
 
@@ -566,7 +602,9 @@ void main() {
                   child: FlexibleSpaceBar(
                     title: Text(
                       'X',
-                      style: TextStyle(fontSize: titleFontSize,),
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                      ),
                     ),
                     centerTitle: false,
                   ),
@@ -593,23 +631,26 @@ void main() {
     await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
     await tester.pumpAndSettle();
 
-    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    final Finder flexibleSpaceBar = find.ancestor(
+        of: find.byType(FlexibleSpaceBar),
+        matching: find.byType(RepaintBoundary).first);
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
-    );
+        flexibleSpaceBar,
+        matchesGoldenFile(
+            'flexible_space_bar.expanded_title_scale_default.collapsed.png'));
 
     // We drag down to fully expand the space bar.
     await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
     await tester.pumpAndSettle();
 
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.expanded.png')
-    );
+        flexibleSpaceBar,
+        matchesGoldenFile(
+            'flexible_space_bar.expanded_title_scale_default.expanded.png'));
   });
 
-  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale',
+      (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -627,7 +668,9 @@ void main() {
                   child: FlexibleSpaceBar(
                     title: Text(
                       'X',
-                      style: TextStyle(fontSize: titleFontSize,),
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                      ),
                     ),
                     centerTitle: false,
                     expandedTitleScale: expandedTitleScale,
@@ -655,24 +698,27 @@ void main() {
     await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
     await tester.pumpAndSettle();
 
-    final Finder flexibleSpaceBar = find.ancestor(of: find.byType(FlexibleSpaceBar), matching: find.byType(RepaintBoundary).first);
+    final Finder flexibleSpaceBar = find.ancestor(
+        of: find.byType(FlexibleSpaceBar),
+        matching: find.byType(RepaintBoundary).first);
     // This should match the default behavior
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_default.collapsed.png')
-    );
+        flexibleSpaceBar,
+        matchesGoldenFile(
+            'flexible_space_bar.expanded_title_scale_default.collapsed.png'));
 
     // We drag down to fully expand the space bar.
     await tester.drag(find.text('Item 2'), const Offset(0, 600.0));
     await tester.pumpAndSettle();
 
     await expectLater(
-      flexibleSpaceBar,
-      matchesGoldenFile('flexible_space_bar.expanded_title_scale_override.expanded.png')
-    );
+        flexibleSpaceBar,
+        matchesGoldenFile(
+            'flexible_space_bar.expanded_title_scale_override.expanded.png'));
   });
 
-  testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar test titlePadding defaults',
+      (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform, useMaterial3: false),
@@ -692,7 +738,8 @@ void main() {
     Offset getTitleBottomLeft() {
       return Offset(
         tester.getTopLeft(title).dx,
-        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+        tester.getBottomRight(flexibleSpaceBar).dy -
+            tester.getBottomRight(title).dy,
       );
     }
 
@@ -721,7 +768,8 @@ void main() {
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
   });
 
-  testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar test titlePadding override',
+      (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform, useMaterial3: false),
@@ -742,7 +790,8 @@ void main() {
     Offset getTitleBottomLeft() {
       return Offset(
         tester.getTopLeft(title).dx,
-        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+        tester.getBottomRight(flexibleSpaceBar).dy -
+            tester.getBottomRight(title).dy,
       );
     }
 
@@ -789,7 +838,8 @@ void main() {
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   });
 
-  testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar rebuilds when scrolling.',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SubCategoryScreenView(),
     ));
@@ -802,17 +852,20 @@ void main() {
 
     // We drag up to fully collapse the space bar.
     for (int i = 0; i < 9; i++) {
-      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.drag(
+          find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
 
     expect(
       tester.layers.lastWhere((Layer element) => element is OpacityLayer),
-      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', lessThan(255)),
+      isA<OpacityLayer>()
+          .having((OpacityLayer p0) => p0.alpha, 'alpha', lessThan(255)),
     );
 
     for (int i = 0; i < 11; i++) {
-      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.drag(
+          find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
 
@@ -821,8 +874,11 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132030.
-  testWidgets('FlexibleSpaceBarSettings.hasLeading provides a gap between leading and title', (WidgetTester tester) async {
-    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
+  testWidgets(
+      'FlexibleSpaceBarSettings.hasLeading provides a gap between leading and title',
+      (WidgetTester tester) async {
+    final FlexibleSpaceBarSettings customSettings =
+        FlexibleSpaceBar.createSettings(
       currentExtent: 200.0,
       hasLeading: true,
       child: AppBar(
@@ -863,15 +919,19 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/135698.
-  testWidgets('_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing', (WidgetTester tester) async {
+  testWidgets(
+      '_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   sliver: const SliverAppBar(
                     pinned: true,
                     expandedHeight: 200.0,
@@ -896,14 +956,16 @@ void main() {
     // Drag the scroll view to the top to collapse the sliver app bar.
     // Ensure collapsed height - current extent is near zero for the
     // FlexibleSpaceBar to avoid compositing.
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -(200.0 - 56.08787892026129)));
+    await tester.drag(find.byType(SingleChildScrollView),
+        const Offset(0, -(200.0 - 56.08787892026129)));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.mobile());
 
   // This is a regression test for https://github.com/flutter/flutter/issues/138608.
-  testWidgets('FlexibleSpaceBar centers title with a leading widget', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar centers title with a leading widget',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -947,13 +1009,13 @@ void main() {
       ),
     );
 
-    final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
+    final DefaultTextStyle textStyle =
+        DefaultTextStyle.of(tester.element(find.text('Title')));
     expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
   });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-
   const TestDelegate({
     required this.settings,
   });
@@ -967,7 +1029,8 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => settings.minExtent;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return settings;
   }
 

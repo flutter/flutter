@@ -37,7 +37,8 @@ class _SwitchExampleState extends State<SwitchExample> {
 
   @override
   Widget build(BuildContext context) {
-    final MaterialStateProperty<Color?> trackColor = MaterialStateProperty.resolveWith<Color?>(
+    final MaterialStateProperty<Color?> trackColor =
+        MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) {
         // Track color when the switch is selected.
         if (states.contains(MaterialState.selected)) {
@@ -49,7 +50,8 @@ class _SwitchExampleState extends State<SwitchExample> {
         return null;
       },
     );
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final MaterialStateProperty<Color?> overlayColor =
+        MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) {
         // Material color when switch is selected.
         if (states.contains(MaterialState.selected)) {

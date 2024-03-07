@@ -108,7 +108,8 @@ class _DestinationImage extends StatelessWidget {
           fit: BoxFit.cover,
           width: isDesktop ? null : mobileThumbnailSize,
           height: isDesktop ? null : mobileThumbnailSize,
-          placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          placeholder: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
             return Container(
               color: Colors.black.withOpacity(0.1),
               width: constraints.maxWidth,

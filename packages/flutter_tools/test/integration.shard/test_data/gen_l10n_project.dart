@@ -11,28 +11,40 @@ class GenL10nProject extends Project {
   GenL10nProject({required this.useNamedParameters});
 
   @override
-  Future<void> setUpIn(Directory dir, {
+  Future<void> setUpIn(
+    Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
-      useDeferredLoading: useDeferredLoading,
-      useSyntheticPackage: useSyntheticPackage,
-      useNamedParameters: useNamedParameters,
-    ));
+    writeFile(
+        fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'),
+        appEnCa);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'),
+        appEnGb);
+    writeFile(
+        fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'),
+        appEs419);
+    writeFile(
+        fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'),
+        appZhHant);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'),
+        appZhHans);
+    writeFile(
+        fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'),
+        appZhHantTw);
+    writeFile(
+        fileSystem.path.join(dir.path, 'l10n.yaml'),
+        l10nYaml(
+          useDeferredLoading: useDeferredLoading,
+          useSyntheticPackage: useSyntheticPackage,
+          useNamedParameters: useNamedParameters,
+        ));
     return super.setUpIn(dir);
   }
-
 
   @override
   final String pubspec = '''
@@ -51,8 +63,8 @@ dependencies:
   String? _main;
 
   @override
-  String get main =>
-      _main ??= (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
+  String get main => _main ??=
+      (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
 
   final bool useNamedParameters;
 

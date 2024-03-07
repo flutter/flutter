@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/popup_menu/popup_menu.2.dart' as example;
+import 'package:flutter_api_samples/material/popup_menu/popup_menu.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Popup animation can be customized using AnimationStyle', (WidgetTester tester) async {
+  testWidgets('Popup animation can be customized using AnimationStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PopupMenuApp(),
     );
@@ -18,12 +20,14 @@ void main() {
     // Advance the animation by half of the default duration.
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(224.0, 130.0)));
+    expect(tester.getSize(find.byType(Material).last),
+        within(distance: 0.1, from: const Size(224.0, 130.0)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(224.0, 312.0)));
+    expect(tester.getSize(find.byType(Material).last),
+        within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Tap outside the popup menu to close it.
     await tester.tapAt(const Offset(1, 1));
@@ -38,12 +42,14 @@ void main() {
     // Advance the animation by one third of the custom duration.
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(224.0, 312.0)));
+    expect(tester.getSize(find.byType(Material).last),
+        within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(224.0, 312.0)));
+    expect(tester.getSize(find.byType(Material).last),
+        within(distance: 0.1, from: const Size(224.0, 312.0)));
 
     // Tap outside the popup menu to close it.
     await tester.tapAt(const Offset(1, 1));
@@ -58,6 +64,7 @@ void main() {
     await tester.pump();
 
     // The popup menu is shown immediately.
-    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(224.0, 312.0)));
+    expect(tester.getSize(find.byType(Material).last),
+        within(distance: 0.1, from: const Size(224.0, 312.0)));
   });
 }

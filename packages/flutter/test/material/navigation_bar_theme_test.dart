@@ -16,8 +16,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
-    expect(const NavigationBarThemeData(), const NavigationBarThemeData().copyWith());
-    expect(const NavigationBarThemeData().hashCode, const NavigationBarThemeData().copyWith().hashCode);
+    expect(const NavigationBarThemeData(),
+        const NavigationBarThemeData().copyWith());
+    expect(const NavigationBarThemeData().hashCode,
+        const NavigationBarThemeData().copyWith().hashCode);
   });
 
   test('NavigationBarThemeData lerp special cases', () {
@@ -46,8 +48,10 @@ void main() {
       elevation: 20.0,
       indicatorColor: Color(0x00000098),
       indicatorShape: CircleBorder(),
-      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
+      labelTextStyle:
+          MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: MaterialStatePropertyAll<IconThemeData>(
+          IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
       overlayColor: MaterialStatePropertyAll<Color>(Color(0x00000096)),
     ).debugFillProperties(builder);
@@ -61,16 +65,25 @@ void main() {
     expect(description[1], 'backgroundColor: Color(0x00000099)');
     expect(description[2], 'elevation: 20.0');
     expect(description[3], 'indicatorColor: Color(0x00000098)');
-    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
-    expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
+    expect(description[4],
+        'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
+    expect(description[5],
+        'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
     // Ignore instance address for IconThemeData.
-    expect(description[6].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'), isTrue);
+    expect(
+        description[6]
+            .contains('iconTheme: MaterialStatePropertyAll(IconThemeData'),
+        isTrue);
     expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
-    expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
-    expect(description[8], 'overlayColor: MaterialStatePropertyAll(Color(0x00000096))');
+    expect(description[7],
+        'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
+    expect(description[8],
+        'overlayColor: MaterialStatePropertyAll(Color(0x00000096))');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'NavigationBarThemeData values are used when no NavigationBar properties are specified',
+      (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -84,7 +97,8 @@ void main() {
     const double unselectedIconOpacity = 0.98;
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
-    const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const NavigationDestinationLabelBehavior labelBehavior =
+        NavigationDestinationLabelBehavior.alwaysShow;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -96,7 +110,8 @@ void main() {
               elevation: elevation,
               indicatorColor: indicatorColor,
               indicatorShape: indicatorShape,
-              iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              iconTheme: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const IconThemeData(
                     size: selectedIconSize,
@@ -110,7 +125,8 @@ void main() {
                   opacity: unselectedIconOpacity,
                 );
               }),
-              labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              labelTextStyle: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const TextStyle(fontSize: selectedLabelFontSize);
                 }
@@ -142,11 +158,14 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets(
+      'NavigationBar values take priority over NavigationBarThemeData values when both properties are specified',
+      (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
-    const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const NavigationDestinationLabelBehavior labelBehavior =
+        NavigationDestinationLabelBehavior.alwaysShow;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -176,8 +195,9 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
-    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+  testWidgets('Custom label style renders ink ripple properly',
+      (WidgetTester tester) async {
+    Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
         theme: ThemeData(
           navigationBarTheme: const NavigationBarThemeData(
@@ -201,7 +221,7 @@ void main() {
                   label: 'Alarm',
                 ),
               ],
-              onDestinationSelected: (int i) { },
+              onDestinationSelected: (int i) {},
             ),
           ),
         ),
@@ -210,35 +230,43 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(NavigationDestination).last));
+    await gesture
+        .moveTo(tester.getCenter(find.byType(NavigationDestination).last));
     await tester.pumpAndSettle();
 
-    await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_custom_label_style.png'));
+    await expectLater(find.byType(NavigationBar),
+        matchesGoldenFile('indicator_custom_label_style.png'));
   });
 
-  testWidgets('NavigationBar respects NavigationBarTheme.overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+  testWidgets(
+      'NavigationBar respects NavigationBarTheme.overlayColor in active/pressed/hovered states',
+      (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     const Color hoverColor = Color(0xff0000ff);
     const Color focusColor = Color(0xff00ffff);
     const Color pressedColor = Color(0xffff00ff);
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.hovered)) {
-          return hoverColor;
-        }
-        if (states.contains(MaterialState.focused)) {
-          return focusColor;
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return pressedColor;
-        }
-        return Colors.transparent;
+    final MaterialStateProperty<Color?> overlayColor =
+        MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusColor;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      return Colors.transparent;
     });
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(navigationBarTheme: NavigationBarThemeData(overlayColor: overlayColor)),
+      theme: ThemeData(
+          navigationBarTheme:
+              NavigationBarThemeData(overlayColor: overlayColor)),
       home: Scaffold(
         bottomNavigationBar: RepaintBoundary(
           child: NavigationBar(
@@ -252,25 +280,32 @@ void main() {
                 label: 'Alarm',
               ),
             ],
-            onDestinationSelected: (int i) { },
+            onDestinationSelected: (int i) {},
           ),
         ),
       ),
     ));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
+    await gesture
+        .moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
+        (RenderObject object) =>
+            object.runtimeType.toString() == '_RenderInkFeatures');
 
     // Test hovered state.
     expect(
       inkFeatures,
       kIsWeb
-        ? (paints..rrect()..rrect()..circle(color: hoverColor))
-        : (paints..circle(color: hoverColor)),
+          ? (paints
+            ..rrect()
+            ..rrect()
+            ..circle(color: hoverColor))
+          : (paints..circle(color: hoverColor)),
     );
 
     await gesture.down(tester.getCenter(find.byType(NavigationIndicator).last));
@@ -280,8 +315,13 @@ void main() {
     expect(
       inkFeatures,
       kIsWeb
-        ? (paints..circle()..circle()..circle(color: pressedColor))
-        : (paints..circle()..circle(color: pressedColor)),
+          ? (paints
+            ..circle()
+            ..circle()
+            ..circle(color: pressedColor))
+          : (paints
+            ..circle()
+            ..circle(color: pressedColor)),
     );
 
     await gesture.up();
@@ -294,7 +334,13 @@ void main() {
     // Test focused state.
     expect(
       inkFeatures,
-      kIsWeb ? (paints..circle()..circle(color: focusColor)) : (paints..circle()..circle(color: focusColor)),
+      kIsWeb
+          ? (paints
+            ..circle()
+            ..circle(color: focusColor))
+          : (paints
+            ..circle()
+            ..circle(color: focusColor)),
     );
   });
 }
@@ -315,9 +361,11 @@ List<NavigationDestination> _destinations() {
 }
 
 double _barHeight(WidgetTester tester) {
-  return tester.getRect(
-    find.byType(NavigationBar),
-  ).height;
+  return tester
+      .getRect(
+        find.byType(NavigationBar),
+      )
+      .height;
 }
 
 Material _barMaterial(WidgetTester tester) {
@@ -330,12 +378,14 @@ Material _barMaterial(WidgetTester tester) {
 }
 
 ShapeDecoration? _indicator(WidgetTester tester) {
-  return tester.firstWidget<Container>(
-    find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ),
-  ).decoration as ShapeDecoration?;
+  return tester
+      .firstWidget<Container>(
+        find.descendant(
+          of: find.byType(FadeTransition),
+          matching: find.byType(Container),
+        ),
+      )
+      .decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -347,34 +397,43 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 }
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
-  return tester.firstWidget<IconTheme>(
-    find.ancestor(
-      of: find.byIcon(icon),
-      matching: find.byType(IconTheme),
-    ),
-  ).data;
+  return tester
+      .firstWidget<IconTheme>(
+        find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(IconTheme),
+        ),
+      )
+      .data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Abc'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Abc'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Def'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Def'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
+  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty &&
+      _opacityAboveLabel('Def').evaluate().isNotEmpty) {
     return _labelOpacity(tester, 'Abc') == 1
         ? NavigationDestinationLabelBehavior.onlyShowSelected
         : NavigationDestinationLabelBehavior.alwaysHide;

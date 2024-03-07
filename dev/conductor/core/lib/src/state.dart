@@ -292,7 +292,8 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
     case ReleasePhase.VERIFY_RELEASE:
     case ReleasePhase.RELEASE_COMPLETED:
-      final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
+      final ReleasePhase? nextPhase =
+          ReleasePhase.valueOf(currentPhase.value + 1);
       if (nextPhase != null) {
         return nextPhase;
       }

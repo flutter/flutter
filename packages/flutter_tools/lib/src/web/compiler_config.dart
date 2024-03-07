@@ -12,7 +12,8 @@ enum CompileTarget {
 }
 
 sealed class WebCompilerConfig {
-  const WebCompilerConfig({required this.renderer, required this.optimizationLevel});
+  const WebCompilerConfig(
+      {required this.renderer, required this.optimizationLevel});
 
   /// The default optimization level for dart2js/dart2wasm.
   static const int kDefaultOptimizationLevel = 4;
@@ -32,13 +33,12 @@ sealed class WebCompilerConfig {
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    'optimizationLevel': optimizationLevel,
-  };
-
+        'optimizationLevel': optimizationLevel,
+      };
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
-    'optimizationLevel': optimizationLevel,
-  };
+        'optimizationLevel': optimizationLevel,
+      };
 }
 
 /// Configuration for the Dart-to-Javascript compiler (dart2js).
@@ -59,7 +59,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     required WebRendererMode renderer,
   }) : this(
           nativeNullAssertions: nativeNullAssertions,
-          optimizationLevel: WebCompilerConfig.kDefaultOptimizationLevel ,
+          optimizationLevel: WebCompilerConfig.kDefaultOptimizationLevel,
           renderer: renderer,
         );
 

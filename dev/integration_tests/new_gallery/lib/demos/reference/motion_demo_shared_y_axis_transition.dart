@@ -68,7 +68,8 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,7 +136,8 @@ class _SharedYAxisTransitionDemoState extends State<SharedYAxisTransitionDemo>
           Expanded(
             child: PageTransitionSwitcher(
               reverse: _isAlphabetical,
-              transitionBuilder: (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+              transitionBuilder: (Widget child, Animation<double> animation,
+                  Animation<double> secondaryAnimation) {
                 return SharedAxisTransition(
                   animation: animation,
                   secondaryAnimation: secondaryAnimation,
@@ -159,7 +161,8 @@ class _AlbumTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Random randomNumberGenerator = Random();
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Column(
       children: <Widget>[

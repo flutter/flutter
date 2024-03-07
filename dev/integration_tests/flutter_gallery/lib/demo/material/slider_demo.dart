@@ -17,20 +17,22 @@ class SliderDemo extends StatefulWidget {
   State<SliderDemo> createState() => _SliderDemoState();
 }
 
-Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double height = math.sqrt(3.0) / 2.0;
   final double centerHeight = size * height / 3.0;
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSize, thumbCenter.dy + sign * centerHeight);
+  thumbPath.moveTo(
+      thumbCenter.dx - halfSize, thumbCenter.dy + sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy + sign * centerHeight);
+  thumbPath.lineTo(
+      thumbCenter.dx + halfSize, thumbCenter.dy + sign * centerHeight);
   thumbPath.close();
   return thumbPath;
 }
 
-Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
@@ -41,9 +43,11 @@ Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   return thumbPath;
 }
 
-Path _upTriangle(double size, Offset thumbCenter) => _downTriangle(size, thumbCenter, invert: true);
+Path _upTriangle(double size, Offset thumbCenter) =>
+    _downTriangle(size, thumbCenter, invert: true);
 
-Path _leftTriangle(double size, Offset thumbCenter) => _rightTriangle(size, thumbCenter, invert: true);
+Path _leftTriangle(double size, Offset thumbCenter) =>
+    _rightTriangle(size, thumbCenter, invert: true);
 
 class _CustomRangeThumbShape extends RangeSliderThumbShape {
   static const double _thumbSize = 4.0;
@@ -51,7 +55,9 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
+    return isEnabled
+        ? const Size.fromRadius(_thumbSize)
+        : const Size.fromRadius(_disabledThumbSize);
   }
 
   static final Animatable<double> sizeTween = Tween<double>(
@@ -103,7 +109,8 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
       case null:
         break;
     }
-    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
+    canvas.drawPath(
+        thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
   }
 }
 
@@ -113,7 +120,9 @@ class _CustomThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
+    return isEnabled
+        ? const Size.fromRadius(_thumbSize)
+        : const Size.fromRadius(_disabledThumbSize);
   }
 
   static final Animatable<double> sizeTween = Tween<double>(
@@ -143,7 +152,8 @@ class _CustomThumbShape extends SliderComponentShape {
     );
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     final Path thumbPath = _downTriangle(size, thumbCenter);
-    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
+    canvas.drawPath(
+        thumbPath, Paint()..color = colorTween.evaluate(enableAnimation)!);
   }
 }
 
@@ -187,9 +197,12 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       end: _slideUpHeight,
     );
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
-    final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
+    final Offset slideUpOffset =
+        Offset(0.0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
-    final Color paintColor = enableColor.evaluate(enableAnimation)!.withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor = enableColor
+        .evaluate(enableAnimation)!
+        .withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,
@@ -201,7 +214,11 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
           ..color = paintColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0);
-    labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
+    labelPainter.paint(
+        canvas,
+        thumbCenter +
+            slideUpOffset +
+            Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
 
@@ -213,13 +230,15 @@ class _SliderDemoState extends State<SliderDemo> {
         tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
         demoWidget: _Sliders(),
-        documentationUrl: 'https://api.flutter.dev/flutter/material/Slider-class.html',
+        documentationUrl:
+            'https://api.flutter.dev/flutter/material/Slider-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RANGE',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
-        documentationUrl: 'https://api.flutter.dev/flutter/material/RangeSlider-class.html',
+        documentationUrl:
+            'https://api.flutter.dev/flutter/material/RangeSlider-class.html',
       ),
     ];
 
@@ -320,21 +339,26 @@ class _SlidersState extends State<_Sliders> {
               SliderTheme(
                 data: theme.sliderTheme.copyWith(
                   activeTrackColor: Colors.deepPurple,
-                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
-                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
-                  inactiveTickMarkColor: theme.colorScheme.surface.withOpacity(0.7),
+                  inactiveTrackColor:
+                      theme.colorScheme.onSurface.withOpacity(0.5),
+                  activeTickMarkColor:
+                      theme.colorScheme.onSurface.withOpacity(0.7),
+                  inactiveTickMarkColor:
+                      theme.colorScheme.surface.withOpacity(0.7),
                   overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
                   thumbColor: Colors.deepPurple,
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyLarge!
+                      .copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,
                   max: 200.0,
                   divisions: 5,
-                  semanticFormatterCallback: (double value) => value.round().toString(),
+                  semanticFormatterCallback: (double value) =>
+                      value.round().toString(),
                   label: '${_discreteCustomValue.round()}',
                   onChanged: (double value) {
                     setState(() {
@@ -389,7 +413,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              RangeSlider(values: const RangeValues(0.25, 0.75), onChanged: null),
+              RangeSlider(
+                  values: const RangeValues(0.25, 0.75), onChanged: null),
               const Text('Disabled'),
             ],
           ),
@@ -400,7 +425,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 values: _discreteValues,
                 max: 200.0,
                 divisions: 5,
-                labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
+                labels: RangeLabels('${_discreteValues.start.round()}',
+                    '${_discreteValues.end.round()}'),
                 onChanged: (RangeValues values) {
                   setState(() {
                     _discreteValues = values;
@@ -428,7 +454,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   values: _discreteCustomValues,
                   max: 200.0,
                   divisions: 5,
-                  labels: RangeLabels('${_discreteCustomValues.start.round()}', '${_discreteCustomValues.end.round()}'),
+                  labels: RangeLabels('${_discreteCustomValues.start.round()}',
+                      '${_discreteCustomValues.end.round()}'),
                   onChanged: (RangeValues values) {
                     setState(() {
                       _discreteCustomValues = values;

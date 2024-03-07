@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    hide NativeAssetsBuildRunner;
 import 'package:package_config/package_config_types.dart';
 
 import '../../android/gradle_utils.dart';
@@ -53,16 +54,20 @@ class NativeAssets extends Target {
     final String? nativeAssetsEnvironment = environment.defines[kNativeAssets];
     final List<Uri> dependencies;
     final FileSystem fileSystem = environment.fileSystem;
-    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final File nativeAssetsFile =
+        environment.buildDir.childFile('native_assets.yaml');
     if (nativeAssetsEnvironment == 'false') {
       dependencies = <Uri>[];
-      await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
+      await writeNativeAssetsYaml(
+          KernelAssets(), environment.buildDir.uri, fileSystem);
     } else {
-      final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
+      final String? targetPlatformEnvironment =
+          environment.defines[kTargetPlatform];
       if (targetPlatformEnvironment == null) {
         throw MissingDefineException(kTargetPlatform, name);
       }
-      final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+      final TargetPlatform targetPlatform =
+          getTargetPlatformForName(targetPlatformEnvironment);
       final Uri projectUri = environment.projectDir.uri;
       final File packagesFile = fileSystem
           .directory(projectUri)
@@ -145,7 +150,8 @@ class NativeAssets extends Target {
           } else {
             // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
             // Write the file we claim to have in the [outputs].
-            await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
+            await writeNativeAssetsYaml(
+                KernelAssets(), environment.buildDir.uri, fileSystem);
             dependencies = <Uri>[];
           }
         case TargetPlatform.android_arm:
@@ -165,7 +171,8 @@ class NativeAssets extends Target {
         case TargetPlatform.web_javascript:
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
           // Write the file we claim to have in the [outputs].
-          await writeNativeAssetsYaml(KernelAssets(), environment.buildDir.uri, fileSystem);
+          await writeNativeAssetsYaml(
+              KernelAssets(), environment.buildDir.uri, fileSystem);
           dependencies = <Uri>[];
       }
     }
@@ -178,7 +185,8 @@ class NativeAssets extends Target {
         nativeAssetsFile,
       ],
     );
-    final File outputDepfile = environment.buildDir.childFile('native_assets.d');
+    final File outputDepfile =
+        environment.buildDir.childFile('native_assets.d');
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
@@ -367,26 +375,27 @@ class NativeAssets extends Target {
 
   @override
   List<String> get depfiles => <String>[
-    'native_assets.d',
-  ];
+        'native_assets.d',
+      ];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
-    // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
+        // If different packages are resolved, different native assets might need to be built.
+        Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+      ];
 
   @override
   String get name => 'native_assets';
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
-  ];
+        Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+      ];
 }
 
 String? _emptyToNull(String? input) {

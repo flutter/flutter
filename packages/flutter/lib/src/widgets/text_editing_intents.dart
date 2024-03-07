@@ -43,35 +43,35 @@ abstract class DirectionalTextEditingIntent extends Intent {
 /// caret ([TextSelection.isValid] is false for the current selection).
 class DeleteCharacterIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteCharacterIntent].
-  const DeleteCharacterIntent({ required bool forward }) : super(forward);
+  const DeleteCharacterIntent({required bool forward}) : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next word
 /// boundary, based on whether `forward` is true.
 class DeleteToNextWordBoundaryIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToNextWordBoundaryIntent].
-  const DeleteToNextWordBoundaryIntent({ required bool forward }) : super(forward);
+  const DeleteToNextWordBoundaryIntent({required bool forward})
+      : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next soft or hard
 /// line break, based on whether `forward` is true.
 class DeleteToLineBreakIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToLineBreakIntent].
-  const DeleteToLineBreakIntent({ required bool forward }) : super(forward);
+  const DeleteToLineBreakIntent({required bool forward}) : super(forward);
 }
 
 /// A [DirectionalTextEditingIntent] that moves the caret or the selection to a
 /// new location.
-abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingIntent {
+abstract class DirectionalCaretMovementIntent
+    extends DirectionalTextEditingIntent {
   /// Creates a [DirectionalCaretMovementIntent].
   const DirectionalCaretMovementIntent(
     super.forward,
-    this.collapseSelection,
-    [
-      this.collapseAtReversal = false,
-      this.continuesAtWrap = false,
-    ]
-  ) : assert(!collapseSelection || !collapseAtReversal);
+    this.collapseSelection, [
+    this.collapseAtReversal = false,
+    this.continuesAtWrap = false,
+  ]) : assert(!collapseSelection || !collapseAtReversal);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -118,7 +118,8 @@ class ExtendSelectionByCharacterIntent extends DirectionalCaretMovementIntent {
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next word
 /// boundary.
-class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionToNextWordBoundaryIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryIntent].
   const ExtendSelectionToNextWordBoundaryIntent({
     required bool forward,
@@ -137,7 +138,8 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
 /// reverse.
 ///
 /// This is typically only used on MacOS.
-class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent({
     required bool forward,
@@ -154,7 +156,8 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
 ///
 ///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
 ///   moves the extent.
-class ExpandSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
+class ExpandSelectionToDocumentBoundaryIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
   const ExpandSelectionToDocumentBoundaryIntent({
     required bool forward,
@@ -195,14 +198,15 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool collapseSelection,
     bool collapseAtReversal = false,
     bool continuesAtWrap = false,
-  }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
+  })  : assert(!collapseSelection || !collapseAtReversal),
+        super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the closest position on the adjacent
 /// line.
-class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionVerticallyToAdjacentLineIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionVerticallyToAdjacentLineIntent].
   const ExtendSelectionVerticallyToAdjacentLineIntent({
     required bool forward,
@@ -213,7 +217,8 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
 /// Expands, or moves the current selection from the current
 /// [TextSelection.extent] position to the closest position on the adjacent
 /// page.
-class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionVerticallyToAdjacentPageIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionVerticallyToAdjacentPageIntent].
   const ExtendSelectionVerticallyToAdjacentPageIntent({
     required bool forward,
@@ -224,7 +229,8 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next paragraph
 /// boundary.
-class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionToNextParagraphBoundaryIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextParagraphBoundaryIntent].
   const ExtendSelectionToNextParagraphBoundaryIntent({
     required bool forward,
@@ -242,7 +248,8 @@ class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovem
 /// reverse.
 ///
 /// This is typically only used on MacOS.
-class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent({
     required bool forward,
@@ -256,7 +263,8 @@ class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends Direct
 ///
 ///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
 ///   increases the size of the selection.
-class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
+class ExtendSelectionToDocumentBoundaryIntent
+    extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToDocumentBoundaryIntent].
   const ExtendSelectionToDocumentBoundaryIntent({
     required bool forward,
@@ -300,11 +308,13 @@ class CopySelectionTextIntent extends Intent {
 
   /// Creates an [Intent] that represents a user interaction that attempts to
   /// cut the current selection in the field.
-  const CopySelectionTextIntent.cut(SelectionChangedCause cause) : this._(cause, true);
+  const CopySelectionTextIntent.cut(SelectionChangedCause cause)
+      : this._(cause, true);
 
   /// An [Intent] that represents a user interaction that attempts to copy the
   /// current selection in the field.
-  static const CopySelectionTextIntent copy = CopySelectionTextIntent._(SelectionChangedCause.keyboard, false);
+  static const CopySelectionTextIntent copy =
+      CopySelectionTextIntent._(SelectionChangedCause.keyboard, false);
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
@@ -337,7 +347,8 @@ class RedoTextIntent extends Intent {
 /// current [TextEditingValue] in an input field.
 class ReplaceTextIntent extends Intent {
   /// Creates a [ReplaceTextIntent].
-  const ReplaceTextIntent(this.currentTextEditingValue, this.replacementText, this.replacementRange, this.cause);
+  const ReplaceTextIntent(this.currentTextEditingValue, this.replacementText,
+      this.replacementRange, this.cause);
 
   /// The [TextEditingValue] that this [Intent]'s action should perform on.
   final TextEditingValue currentTextEditingValue;
@@ -366,7 +377,8 @@ class UndoTextIntent extends Intent {
 /// selection in an input field.
 class UpdateSelectionIntent extends Intent {
   /// Creates an [UpdateSelectionIntent].
-  const UpdateSelectionIntent(this.currentTextEditingValue, this.newSelection, this.cause);
+  const UpdateSelectionIntent(
+      this.currentTextEditingValue, this.newSelection, this.cause);
 
   /// The [TextEditingValue] that this [Intent]'s action should perform on.
   final TextEditingValue currentTextEditingValue;

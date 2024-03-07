@@ -3,14 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/listenable_builder.1.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/listenable_builder.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tapping FAB increments counter', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ListenableBuilderExample());
 
-    String getCount() => (tester.widget(find.descendant(of: find.byType(ListenableBuilder), matching: find.byType(Text))) as Text).data!;
+    String getCount() => (tester.widget(find.descendant(
+            of: find.byType(ListenableBuilder),
+            matching: find.byType(Text))) as Text)
+        .data!;
 
     expect(find.text('Current counter value:'), findsOneWidget);
     expect(find.text('0'), findsOneWidget);

@@ -10,7 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  test('handleMetricsChanged does not scheduleForcedFrame unless there a registered renderView with a child', () async {
+  test(
+      'handleMetricsChanged does not scheduleForcedFrame unless there a registered renderView with a child',
+      () async {
     expect(SchedulerBinding.instance.hasScheduledFrame, false);
     RendererBinding.instance.handleMetricsChanged();
     expect(SchedulerBinding.instance.hasScheduledFrame, false);
@@ -23,10 +25,12 @@ void main() {
     RendererBinding.instance.handleMetricsChanged();
     expect(SchedulerBinding.instance.hasScheduledFrame, true);
 
-    RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
+    RendererBinding.instance
+        .removeRenderView(RendererBinding.instance.renderView);
   });
 
-  test('debugDumpSemantics prints explanation when semantics are unavailable', () {
+  test('debugDumpSemantics prints explanation when semantics are unavailable',
+      () {
     RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);
     final List<String?> log = <String?>[];
     debugPrint = (String? message, {int? wrapWidth}) {
@@ -35,12 +39,14 @@ void main() {
     debugDumpSemanticsTree();
     expect(log, hasLength(1));
     expect(log.single, startsWith('Semantics not generated'));
-    expect(log.single, endsWith(
-      'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-      'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-      'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
-    ));
-    RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
+    expect(
+        log.single,
+        endsWith(
+            'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+            'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+            'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'));
+    RendererBinding.instance
+        .removeRenderView(RendererBinding.instance.renderView);
   });
 
   test('root pipeline owner cannot manage root node', () {

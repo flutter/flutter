@@ -18,8 +18,8 @@ import 'package:flutter/widgets.dart';
 /// This mixin is used to implement the Cupertino components for
 /// [CupertinoCheckbox] controls.
 @optionalTypeArgs
-mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
-
+mixin ToggleableStateMixin<S extends StatefulWidget>
+    on TickerProviderStateMixin<S> {
   /// Whether the [value] of this control can be changed by user interaction.
   ///
   /// The control is considered interactive if the [onChanged] callback is
@@ -86,14 +86,18 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   void _handleTapEnd([TapUpDetails? _]) {
     if (_downPosition != null) {
-      setState(() { _downPosition = null; });
+      setState(() {
+        _downPosition = null;
+      });
     }
   }
 
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
-      setState(() { _focused = focused; });
+      setState(() {
+        _focused = focused;
+      });
     }
   }
 
@@ -147,7 +151,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 ///
 /// Subclasses must implement the [paint] method to draw the actual visuals of
 /// the Toggleable.
-abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
+abstract class ToggleablePainter extends ChangeNotifier
+    implements CustomPainter {
   /// The color that should be used in the active state (i.e., when
   /// [ToggleableStateMixin.value] is true).
   ///

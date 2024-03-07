@@ -27,9 +27,9 @@ import 'overlay.dart';
 /// during the lifetime of the built magnifier, e.g. as the user moves their
 /// finger around the text field.
 typedef MagnifierBuilder = Widget? Function(
-    BuildContext context,
-    MagnifierController controller,
-    ValueNotifier<MagnifierInfo> magnifierInfo,
+  BuildContext context,
+  MagnifierController controller,
+  ValueNotifier<MagnifierInfo> magnifierInfo,
 );
 
 /// A data class that contains the geometry information of text layouts
@@ -71,20 +71,20 @@ class MagnifierInfo {
     if (identical(this, other)) {
       return true;
     }
-    return other is MagnifierInfo
-        && other.globalGesturePosition == globalGesturePosition
-        && other.caretRect == caretRect
-        && other.currentLineBoundaries == currentLineBoundaries
-        && other.fieldBounds == fieldBounds;
+    return other is MagnifierInfo &&
+        other.globalGesturePosition == globalGesturePosition &&
+        other.caretRect == caretRect &&
+        other.currentLineBoundaries == currentLineBoundaries &&
+        other.fieldBounds == fieldBounds;
   }
 
   @override
   int get hashCode => Object.hash(
-    globalGesturePosition,
-    caretRect,
-    fieldBounds,
-    currentLineBoundaries,
-  );
+        globalGesturePosition,
+        caretRect,
+        fieldBounds,
+        currentLineBoundaries,
+      );
 }
 
 /// A configuration object for a magnifier (e.g. in a text field).
@@ -109,7 +109,8 @@ class TextMagnifierConfiguration {
     BuildContext context,
     MagnifierController controller,
     ValueNotifier<MagnifierInfo> magnifierInfo,
-  ) => null;
+  ) =>
+      null;
 
   /// Whether a magnifier should show the text editing handles or not.
   ///
@@ -121,7 +122,8 @@ class TextMagnifierConfiguration {
 
   /// A constant for a [TextMagnifierConfiguration] that is disabled, meaning it
   /// never builds anything, regardless of platform.
-  static const TextMagnifierConfiguration disabled = TextMagnifierConfiguration();
+  static const TextMagnifierConfiguration disabled =
+      TextMagnifierConfiguration();
 }
 
 /// A controller for a magnifier.
@@ -376,7 +378,9 @@ class MagnifierDecoration extends ShapeDecoration {
       return true;
     }
 
-    return super == other && other is MagnifierDecoration && other.opacity == opacity;
+    return super == other &&
+        other is MagnifierDecoration &&
+        other.opacity == opacity;
   }
 
   @override
@@ -414,13 +418,13 @@ class RawMagnifier extends StatelessWidget {
   /// originally.
   /// {@endtemplate}
   const RawMagnifier({
-      super.key,
-      this.child,
-      this.decoration = const MagnifierDecoration(),
-      this.focalPointOffset = Offset.zero,
-      this.magnificationScale = 1,
-      required this.size,
-      }) : assert(magnificationScale != 0,
+    super.key,
+    this.child,
+    this.decoration = const MagnifierDecoration(),
+    this.focalPointOffset = Offset.zero,
+    this.magnificationScale = 1,
+    required this.size,
+  }) : assert(magnificationScale != 0,
             'Magnification scale of 0 results in undefined behavior.');
 
   /// An optional widget to position inside the len of the [RawMagnifier].
@@ -433,7 +437,6 @@ class RawMagnifier extends StatelessWidget {
   ///
   /// {@macro flutter.widgets.magnifier.RawMagnifier.invisibility_warning}
   final MagnifierDecoration decoration;
-
 
   /// The offset of the magnifier from [RawMagnifier]'s center.
   ///
@@ -638,10 +641,13 @@ class _RenderMagnification extends RenderProxyBox {
     final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(
-          magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
-          magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
+          magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) +
+              thisCenter.dx,
+          magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) +
+              thisCenter.dy)
       ..scale(magnificationScale);
-    final ImageFilter filter = ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high);
+    final ImageFilter filter =
+        ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high);
 
     if (layer == null) {
       layer = BackdropFilterLayer(

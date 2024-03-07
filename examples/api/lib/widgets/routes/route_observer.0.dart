@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RouteObserver].
 
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 void main() {
   runApp(const RouteObserverApp());
@@ -18,7 +19,7 @@ class RouteObserverApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: <NavigatorObserver>[ routeObserver ],
+      navigatorObservers: <NavigatorObserver>[routeObserver],
       home: const RouteObserverExample(),
     );
   }
@@ -31,7 +32,8 @@ class RouteObserverExample extends StatefulWidget {
   State<RouteObserverExample> createState() => _RouteObserverExampleState();
 }
 
-class _RouteObserverExampleState extends State<RouteObserverExample> with RouteAware {
+class _RouteObserverExampleState extends State<RouteObserverExample>
+    with RouteAware {
   List<String> log = <String>[];
 
   @override
@@ -108,13 +110,12 @@ class NextPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: FilledButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Go back to RouteAware page'),
-        )
-      ),
+          child: FilledButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Go back to RouteAware page'),
+      )),
     );
   }
 }

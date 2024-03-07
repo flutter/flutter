@@ -36,7 +36,7 @@ class ElevatedButtonThemeData with Diagnosticable {
   /// Creates an [ElevatedButtonThemeData].
   ///
   /// The [style] may be null.
-  const ElevatedButtonThemeData({ this.style });
+  const ElevatedButtonThemeData({this.style});
 
   /// Overrides for [ElevatedButton]'s default style.
   ///
@@ -48,7 +48,8 @@ class ElevatedButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two elevated button themes.
-  static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
+  static ElevatedButtonThemeData? lerp(
+      ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -74,7 +75,8 @@ class ElevatedButtonThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
 }
 
@@ -111,7 +113,8 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// ElevatedButtonThemeData theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
-    final ElevatedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
+    final ElevatedButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
   }
 
@@ -121,5 +124,6 @@ class ElevatedButtonTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(ElevatedButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(ElevatedButtonTheme oldWidget) =>
+      data != oldWidget.data;
 }

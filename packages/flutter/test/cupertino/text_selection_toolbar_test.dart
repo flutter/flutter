@@ -19,7 +19,8 @@ const double _kToolbarContentDistance = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // A custom text selection menu that just displays a single custom button.
-class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
+class _CustomCupertinoTextSelectionControls
+    extends CupertinoTextSelectionControls {
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -32,9 +33,12 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     Offset? lastSecondaryTapDownPosition,
   ) {
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
-    final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
+    final double anchorX =
+        (selectionMidpoint.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQueryPadding.left,
-      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
+      MediaQuery.sizeOf(context).width -
+          mediaQueryPadding.right -
+          _kArrowScreenPadding,
     );
     final Offset anchorAbove = Offset(
       anchorX,
@@ -65,7 +69,8 @@ class TestBox extends SizedBox {
   static const double itemWidth = 100.0;
 }
 
-const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+const CupertinoDynamicColor _kToolbarTextColor =
+    CupertinoDynamicColor.withBrightness(
   color: CupertinoColors.black,
   darkColor: CupertinoColors.white,
 );
@@ -77,7 +82,8 @@ void main() {
   Finder findPrivate(String type) {
     return find.descendant(
       of: find.byType(CupertinoApp),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
+      matching:
+          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
     );
   }
 
@@ -98,22 +104,26 @@ void main() {
     ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
 
   Finder findOverflowNextButton() {
-    return find.byWidgetPredicate((Widget widget) =>
-    widget is CustomPaint &&
-        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    return find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
     );
   }
 
   Finder findOverflowBackButton() {
-    return find.byWidgetPredicate((Widget widget) =>
-    widget is CustomPaint &&
-        '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+    return find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
     );
   }
 
-  testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
+  testWidgets('chevrons point to the correct side',
+      (WidgetTester tester) async {
     // Add enough TestBoxes to need 3 pages.
-    final List<Widget> children = List<Widget>.generate(15, (int i) => const TestBox());
+    final List<Widget> children =
+        List<Widget>.generate(15, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -149,11 +159,15 @@ void main() {
     expect(findOverflowNextButton(), findsNothing);
 
     expect(findOverflowBackButton(), overflowBackPaintPattern());
-  }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
+  },
+      skip:
+          kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('paginates children if they overflow', (WidgetTester tester) async {
+  testWidgets('paginates children if they overflow',
+      (WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final List<Widget> children =
+        List<Widget>.generate(7, (int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -244,14 +258,20 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
     expect(findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+  testWidgets('does not paginate if children fit with zero margin',
+      (WidgetTester tester) async {
+    final List<Widget> children =
+        List<Widget>.generate(7, (int i) => const TestBox());
     final double spacerWidth = 1.0 / tester.view.devicePixelRatio;
     final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
     const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
-    final double width = 7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
+    final double width = 7 * TestBox.itemWidth +
+        6 * (dividerWidth + 2 * spacerWidth) +
+        2 * borderRadius;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -271,9 +291,12 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('correctly sizes large toolbar buttons', (WidgetTester tester) async {
+  testWidgets('correctly sizes large toolbar buttons',
+      (WidgetTester tester) async {
     final GlobalKey firstBoxKey = GlobalKey();
     final GlobalKey secondBoxKey = GlobalKey();
     final GlobalKey thirdBoxKey = GlobalKey();
@@ -327,9 +350,12 @@ void main() {
     expect(find.byKey(secondBoxKey), findsNothing);
     expect(find.byKey(thirdBoxKey), findsOneWidget);
     expect(find.byKey(fourthBoxKey), findsOneWidget);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits',
+      (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 50.0;
     const double anchorBelowY = 500.0;
@@ -357,9 +383,18 @@ void main() {
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, anchorBelowY),
                   children: <Widget>[
-                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                    Container(
+                        color: const Color(0xffff0000),
+                        width: 50.0,
+                        height: height),
+                    Container(
+                        color: const Color(0xff00ff00),
+                        width: 50.0,
+                        height: height),
+                    Container(
+                        color: const Color(0xff0000ff),
+                        width: 50.0,
+                        height: height),
                   ],
                 ),
               );
@@ -374,8 +409,10 @@ void main() {
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
     expect(find.byType(CustomSingleChildLayout), findsOneWidget);
-    final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
-    final TextSelectionToolbarLayoutDelegate delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
+    final CustomSingleChildLayout layout =
+        tester.widget(find.byType(CustomSingleChildLayout));
+    final TextSelectionToolbarLayoutDelegate delegate =
+        layout.delegate as TextSelectionToolbarLayoutDelegate;
     expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.
@@ -392,10 +429,18 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    expect(
+        toolbarY,
+        equals(anchorAboveY -
+            height +
+            _kToolbarArrowSize.height -
+            _kToolbarContentDistance));
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar',
+      (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
@@ -416,7 +461,8 @@ void main() {
 
     // Long press on "custom" to select it.
     final Offset customPos = textOffsetToPosition(tester, 11);
-    final TestGesture gesture = await tester.startGesture(customPos, pointer: 7);
+    final TestGesture gesture =
+        await tester.startGesture(customPos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -427,11 +473,21 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
-    for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
-      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
+  for (final Brightness? themeBrightness in <Brightness?>[
+    ...Brightness.values,
+    null
+  ]) {
+    for (final Brightness? mediaBrightness in <Brightness?>[
+      ...Brightness.values,
+      null
+    ]) {
+      testWidgets(
+          'draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             theme: CupertinoThemeData(
@@ -441,7 +497,8 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return MediaQuery(
-                    data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
+                    data: MediaQuery.of(context)
+                        .copyWith(platformBrightness: mediaBrightness),
                     child: CupertinoTextSelectionToolbar(
                       anchorAbove: const Offset(100.0, 0.0),
                       anchorBelow: const Offset(100.0, 0.0),
@@ -463,15 +520,14 @@ void main() {
         expect(buttonFinder, findsOneWidget);
 
         final Finder textFinder = find.descendant(
-          of: find.byType(CupertinoButton),
-          matching: find.byType(Text)
-        );
+            of: find.byType(CupertinoButton), matching: find.byType(Text));
         expect(textFinder, findsOneWidget);
         final Text text = tester.widget(textFinder);
 
         // Theme brightness is preferred, otherwise MediaQuery brightness is
         // used. If both are null, defaults to light.
-        final Brightness effectiveBrightness = themeBrightness ?? mediaBrightness ?? Brightness.light;
+        final Brightness effectiveBrightness =
+            themeBrightness ?? mediaBrightness ?? Brightness.light;
 
         expect(
           text.style!.color!.value,
@@ -479,11 +535,14 @@ void main() {
               ? _kToolbarTextColor.darkColor.value
               : _kToolbarTextColor.color.value,
         );
-      }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+      },
+          skip:
+              kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }
   }
 
-  testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
+  testWidgets('draws a shadow below the toolbar in light mode',
+      (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 50.0;
     double anchorAboveY = 0.0;
@@ -512,9 +571,18 @@ void main() {
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, 500.0),
                   children: <Widget>[
-                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
-                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
-                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                    Container(
+                        color: const Color(0xffff0000),
+                        width: 50.0,
+                        height: height),
+                    Container(
+                        color: const Color(0xff00ff00),
+                        width: 50.0,
+                        height: height),
+                    Container(
+                        color: const Color(0xff0000ff),
+                        width: 50.0,
+                        height: height),
                   ],
                 ),
               );
@@ -528,10 +596,12 @@ void main() {
 
     expect(
       find.byType(CupertinoTextSelectionToolbar),
-      paints..rrect(
-        rrect: RRect.fromLTRBR(8.0, 515.0, 158.0 + 2 * dividerWidth, 558.0, const Radius.circular(8.0)),
-        color: const Color(0x33000000),
-      ),
+      paints
+        ..rrect(
+          rrect: RRect.fromLTRBR(8.0, 515.0, 158.0 + 2 * dividerWidth, 558.0,
+              const Radius.circular(8.0)),
+          color: const Color(0x33000000),
+        ),
     );
 
     // When the toolbar is above the content, the shadow sits around the arrow
@@ -543,12 +613,16 @@ void main() {
 
     expect(
       find.byType(CupertinoTextSelectionToolbar),
-      paints..rrect(
-        rrect: RRect.fromLTRBR(8.0, 29.0, 158.0 + 2 * dividerWidth, 72.0, const Radius.circular(8.0)),
-        color: const Color(0x33000000),
-      ),
+      paints
+        ..rrect(
+          rrect: RRect.fromLTRBR(8.0, 29.0, 158.0 + 2 * dividerWidth, 72.0,
+              const Radius.circular(8.0)),
+          color: const Color(0x33000000),
+        ),
     );
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('Basic golden tests', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -557,10 +631,15 @@ void main() {
         anchorAbove: offset,
         anchorBelow: offset,
         children: <Widget>[
-          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum'),
-          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'dolor sit amet'),
-          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum \ndolor sit amet'),
-          CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: ContextMenuButtonItem(onPressed: () {}, type: ContextMenuButtonType.copy)),
+          CupertinoTextSelectionToolbarButton.text(
+              onPressed: () {}, text: 'Lorem ipsum'),
+          CupertinoTextSelectionToolbarButton.text(
+              onPressed: () {}, text: 'dolor sit amet'),
+          CupertinoTextSelectionToolbarButton.text(
+              onPressed: () {}, text: 'Lorem ipsum \ndolor sit amet'),
+          CupertinoTextSelectionToolbarButton.buttonItem(
+              buttonItem: ContextMenuButtonItem(
+                  onPressed: () {}, type: ContextMenuButtonType.copy)),
         ],
       );
       return CupertinoApp(
@@ -590,10 +669,13 @@ void main() {
         await tester.pumpWidget(buildToolbar(brightness, offset));
         await expectLater(
           find.byKey(key),
-          matchesGoldenFile('cupertino_selection_toolbar.$location.$brightness.png'),
+          matchesGoldenFile(
+              'cupertino_selection_toolbar.$location.$brightness.png'),
         );
       }
     }
     debugDisableShadows = true;
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  },
+      skip:
+          kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

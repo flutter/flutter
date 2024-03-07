@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
+  testWidgets('position in the toolbar changes width',
+      (WidgetTester tester) async {
     late StateSetter setState;
     int index = 1;
     int total = 3;
@@ -21,7 +22,8 @@ void main() {
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
                 return TextSelectionToolbarTextButton(
-                  padding: TextSelectionToolbarTextButton.getPadding(index, total),
+                  padding:
+                      TextSelectionToolbarTextButton.getPadding(index, total),
                   child: const Text('button'),
                 );
               },
@@ -31,14 +33,16 @@ void main() {
       ),
     );
 
-    final Size middleSize = tester.getSize(find.byType(TextSelectionToolbarTextButton));
+    final Size middleSize =
+        tester.getSize(find.byType(TextSelectionToolbarTextButton));
 
     setState(() {
       index = 0;
       total = 3;
     });
     await tester.pump();
-    final Size firstSize = tester.getSize(find.byType(TextSelectionToolbarTextButton));
+    final Size firstSize =
+        tester.getSize(find.byType(TextSelectionToolbarTextButton));
     expect(firstSize.width, greaterThan(middleSize.width));
 
     setState(() {
@@ -46,7 +50,8 @@ void main() {
       total = 3;
     });
     await tester.pump();
-    final Size lastSize = tester.getSize(find.byType(TextSelectionToolbarTextButton));
+    final Size lastSize =
+        tester.getSize(find.byType(TextSelectionToolbarTextButton));
     expect(lastSize.width, greaterThan(middleSize.width));
     expect(lastSize.width, equals(firstSize.width));
 
@@ -55,13 +60,17 @@ void main() {
       total = 1;
     });
     await tester.pump();
-    final Size onlySize = tester.getSize(find.byType(TextSelectionToolbarTextButton));
+    final Size onlySize =
+        tester.getSize(find.byType(TextSelectionToolbarTextButton));
     expect(onlySize.width, greaterThan(middleSize.width));
     expect(onlySize.width, greaterThan(firstSize.width));
     expect(onlySize.width, greaterThan(lastSize.width));
   });
 
-  for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
+  for (final ColorScheme colorScheme in <ColorScheme>[
+    ThemeData.light().colorScheme,
+    ThemeData.dark().colorScheme
+  ]) {
     testWidgets('foreground color by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -154,7 +163,8 @@ void main() {
       );
     });
 
-    testWidgets('textButtonTheme should not override default background color', (WidgetTester tester) async {
+    testWidgets('textButtonTheme should not override default background color',
+        (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/133027
       await tester.pumpWidget(
         MaterialApp(

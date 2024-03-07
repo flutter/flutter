@@ -17,7 +17,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size,
+        const Size(100.0, 100.0));
   });
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
@@ -36,7 +37,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size,
+        const Size(100.0, 100.0));
     expect(
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       const Size(100.0, 200),
@@ -63,7 +65,9 @@ void main() {
     expect(calls, 1);
     await tester.pump();
     expect(calls, 1);
-    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
+    tester
+        .renderObject<RenderBaselineDetector>(find.byType(BaselineDetector))
+        .dirty();
     await tester.pump();
     expect(calls, 2);
   });
@@ -88,12 +92,15 @@ void main() {
     expect(calls, 1);
     await tester.pump();
     expect(calls, 1);
-    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
+    tester
+        .renderObject<RenderBaselineDetector>(find.byType(BaselineDetector))
+        .dirty();
     await tester.pump();
     expect(calls, 2);
   });
 
-  testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
+  testWidgets("LayoutBuilder returns child's baseline",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -115,15 +122,17 @@ void main() {
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { super.key });
+  const BaselineDetector(this.callback, {super.key});
 
   final VoidCallback callback;
 
   @override
-  RenderBaselineDetector createRenderObject(BuildContext context) => RenderBaselineDetector(callback);
+  RenderBaselineDetector createRenderObject(BuildContext context) =>
+      RenderBaselineDetector(callback);
 
   @override
-  void updateRenderObject(BuildContext context, RenderBaselineDetector renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderBaselineDetector renderObject) {
     renderObject.callback = callback;
   }
 }
@@ -164,5 +173,5 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) { }
+  void paint(PaintingContext context, Offset offset) {}
 }

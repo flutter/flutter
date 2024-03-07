@@ -17,7 +17,8 @@ import 'package:integration_test/integration_test.dart';
 // The accessibility focus actions are added when a semantics node receives or
 // lose accessibility focus. This test ignores these actions since it is hard to
 // predict which node has the accessibility focus after a screen changes.
-const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions =
+    <AndroidSemanticsAction>[
   AndroidSemanticsAction.accessibilityFocus,
   AndroidSemanticsAction.clearAccessibilityFocus,
 ];
@@ -27,11 +28,13 @@ const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 Future<void> setClipboard(String message) async {
   final Completer<void> completer = Completer<void>();
   Future<void> completeSetClipboard([Object? _]) async {
-    await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+    await kSemanticsChannel
+        .invokeMethod<dynamic>('setClipboard', <String, dynamic>{
       'message': message,
     });
     completer.complete();
   }
+
   if (SchedulerBinding.instance.hasScheduledFrame) {
     SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
   } else {
@@ -40,15 +43,18 @@ Future<void> setClipboard(String message) async {
   await completer.future;
 }
 
-Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
+Future<AndroidSemanticsNode> getSemantics(
+    Finder finder, WidgetTester tester) async {
   final int id = tester.getSemantics(finder).id;
   final Completer<String> completer = Completer<String>();
   Future<void> completeSemantics([Object? _]) async {
-    final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
+    final dynamic result = await kSemanticsChannel
+        .invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
       'id': id,
     });
     completer.complete(json.encode(result));
   }
+
   if (SchedulerBinding.instance.hasScheduledFrame) {
     SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
   } else {
@@ -79,7 +85,8 @@ Future<void> main() async {
         await tester.pumpAndSettle();
       }
 
-      testWidgets('TextField has correct Android semantics', (WidgetTester tester) async {
+      testWidgets('TextField has correct Android semantics',
+          (WidgetTester tester) async {
         final Finder normalTextField = find.descendant(
           of: find.byKey(const ValueKey<String>(normalTextFieldKeyValue)),
           matching: find.byType(EditableText),
@@ -148,7 +155,8 @@ Future<void> main() async {
         );
       }, timeout: Timeout.none);
 
-      testWidgets('password TextField has correct Android semantics', (WidgetTester tester) async {
+      testWidgets('password TextField has correct Android semantics',
+          (WidgetTester tester) async {
         final Finder passwordTextField = find.descendant(
           of: find.byKey(const ValueKey<String>(passwordTextFieldKeyValue)),
           matching: find.byType(EditableText),
@@ -227,9 +235,12 @@ Future<void> main() async {
         await tester.pumpAndSettle();
       }
 
-      testWidgets('Checkbox has correct Android semantics', (WidgetTester tester) async {
-        final Finder checkbox = find.byKey(const ValueKey<String>(checkboxKeyValue));
-        final Finder disabledCheckbox = find.byKey(const ValueKey<String>(disabledCheckboxKeyValue));
+      testWidgets('Checkbox has correct Android semantics',
+          (WidgetTester tester) async {
+        final Finder checkbox =
+            find.byKey(const ValueKey<String>(checkboxKeyValue));
+        final Finder disabledCheckbox =
+            find.byKey(const ValueKey<String>(disabledCheckboxKeyValue));
 
         await prepareSelectionControls(tester);
         expect(
@@ -276,7 +287,8 @@ Future<void> main() async {
         );
       }, timeout: Timeout.none);
 
-      testWidgets('Radio has correct Android semantics', (WidgetTester tester) async {
+      testWidgets('Radio has correct Android semantics',
+          (WidgetTester tester) async {
         final Finder radio = find.byKey(const ValueKey<String>(radio2KeyValue));
 
         await prepareSelectionControls(tester);
@@ -314,8 +326,10 @@ Future<void> main() async {
         );
       }, timeout: Timeout.none);
 
-      testWidgets('Switch has correct Android semantics', (WidgetTester tester) async {
-        final Finder switchFinder = find.byKey(const ValueKey<String>(switchKeyValue));
+      testWidgets('Switch has correct Android semantics',
+          (WidgetTester tester) async {
+        final Finder switchFinder =
+            find.byKey(const ValueKey<String>(switchKeyValue));
 
         await prepareSelectionControls(tester);
         expect(
@@ -354,7 +368,8 @@ Future<void> main() async {
 
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       testWidgets('Switch can be labeled', (WidgetTester tester) async {
-        final Finder switchFinder = find.byKey(const ValueKey<String>(labeledSwitchKeyValue));
+        final Finder switchFinder =
+            find.byKey(const ValueKey<String>(labeledSwitchKeyValue));
 
         await prepareSelectionControls(tester);
         expect(
@@ -383,8 +398,10 @@ Future<void> main() async {
         await tester.pumpAndSettle();
       }
 
-      testWidgets('Popup Menu has correct Android semantics', (WidgetTester tester) async {
-        final Finder popupButton = find.byKey(const ValueKey<String>(popupButtonKeyValue));
+      testWidgets('Popup Menu has correct Android semantics',
+          (WidgetTester tester) async {
+        final Finder popupButton =
+            find.byKey(const ValueKey<String>(popupButtonKeyValue));
 
         await preparePopupControls(tester);
         expect(
@@ -408,7 +425,8 @@ Future<void> main() async {
         try {
           for (final String item in popupItems) {
             expect(
-              await getSemantics(find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
+              await getSemantics(
+                  find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
               hasAndroidSemantics(
                 className: AndroidClassName.button,
                 isChecked: false,
@@ -423,7 +441,8 @@ Future<void> main() async {
               reason: "Popup $item doesn't have the right semantics",
             );
           }
-          await tester.tap(find.byKey(ValueKey<String>('$popupKeyValue.${popupItems.first}')));
+          await tester.tap(find
+              .byKey(ValueKey<String>('$popupKeyValue.${popupItems.first}')));
           await tester.pumpAndSettle();
 
           // Pop up the menu again, to verify that TalkBack gets the right answer
@@ -433,7 +452,8 @@ Future<void> main() async {
 
           for (final String item in popupItems) {
             expect(
-              await getSemantics(find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
+              await getSemantics(
+                  find.byKey(ValueKey<String>('$popupKeyValue.$item')), tester),
               hasAndroidSemantics(
                 className: AndroidClassName.button,
                 isChecked: false,
@@ -445,16 +465,20 @@ Future<void> main() async {
                   AndroidSemanticsAction.click,
                 ],
               ),
-              reason: "Popup $item doesn't have the right semantics the second time",
+              reason:
+                  "Popup $item doesn't have the right semantics the second time",
             );
           }
         } finally {
-          await tester.tap(find.byKey(ValueKey<String>('$popupKeyValue.${popupItems.first}')));
+          await tester.tap(find
+              .byKey(ValueKey<String>('$popupKeyValue.${popupItems.first}')));
         }
       }, timeout: Timeout.none);
 
-      testWidgets('Dropdown Menu has correct Android semantics', (WidgetTester tester) async {
-        final Finder dropdownButton = find.byKey(const ValueKey<String>(dropdownButtonKeyValue));
+      testWidgets('Dropdown Menu has correct Android semantics',
+          (WidgetTester tester) async {
+        final Finder dropdownButton =
+            find.byKey(const ValueKey<String>(dropdownButtonKeyValue));
 
         await preparePopupControls(tester);
         expect(
@@ -483,7 +507,8 @@ Future<void> main() async {
               await getSemantics(
                 find.descendant(
                   of: find.byType(Scrollable),
-                  matching: find.byKey(ValueKey<String>('$dropdownKeyValue.$item')),
+                  matching:
+                      find.byKey(ValueKey<String>('$dropdownKeyValue.$item')),
                 ),
                 tester,
               ),
@@ -504,7 +529,8 @@ Future<void> main() async {
           await tester.tap(
             find.descendant(
               of: find.byType(Scrollable),
-              matching: find.byKey(ValueKey<String>('$dropdownKeyValue.${popupItems.first}')),
+              matching: find.byKey(
+                  ValueKey<String>('$dropdownKeyValue.${popupItems.first}')),
             ),
           );
           await tester.pumpAndSettle();
@@ -521,7 +547,8 @@ Future<void> main() async {
               await getSemantics(
                 find.descendant(
                   of: find.byType(Scrollable),
-                  matching: find.byKey(ValueKey<String>('$dropdownKeyValue.$item')),
+                  matching:
+                      find.byKey(ValueKey<String>('$dropdownKeyValue.$item')),
                 ),
                 tester,
               ),
@@ -536,21 +563,25 @@ Future<void> main() async {
                   AndroidSemanticsAction.click,
                 ],
               ),
-              reason: "Dropdown $item doesn't have the right semantics the second time.",
+              reason:
+                  "Dropdown $item doesn't have the right semantics the second time.",
             );
           }
         } finally {
           await tester.tap(
             find.descendant(
               of: find.byType(Scrollable),
-              matching: find.byKey(ValueKey<String>('$dropdownKeyValue.${popupItems.first}')),
+              matching: find.byKey(
+                  ValueKey<String>('$dropdownKeyValue.${popupItems.first}')),
             ),
           );
         }
       }, timeout: Timeout.none);
 
-      testWidgets('Modal alert dialog has correct Android semantics', (WidgetTester tester) async {
-        final Finder alertButton = find.byKey(const ValueKey<String>(alertButtonKeyValue));
+      testWidgets('Modal alert dialog has correct Android semantics',
+          (WidgetTester tester) async {
+        final Finder alertButton =
+            find.byKey(const ValueKey<String>(alertButtonKeyValue));
 
         await preparePopupControls(tester);
         expect(
@@ -573,7 +604,9 @@ Future<void> main() async {
 
         try {
           expect(
-            await getSemantics(find.byKey(const ValueKey<String>('$alertKeyValue.OK')), tester),
+            await getSemantics(
+                find.byKey(const ValueKey<String>('$alertKeyValue.OK')),
+                tester),
             hasAndroidSemantics(
               className: AndroidClassName.button,
               isChecked: false,
@@ -590,7 +623,8 @@ Future<void> main() async {
 
           for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
-              await getSemantics(find.byKey(ValueKey<String>('$alertKeyValue.$item')), tester),
+              await getSemantics(
+                  find.byKey(ValueKey<String>('$alertKeyValue.$item')), tester),
               hasAndroidSemantics(
                 className: AndroidClassName.view,
                 isChecked: false,
@@ -604,7 +638,8 @@ Future<void> main() async {
             );
           }
 
-          await tester.tap(find.byKey(const ValueKey<String>('$alertKeyValue.OK')));
+          await tester
+              .tap(find.byKey(const ValueKey<String>('$alertKeyValue.OK')));
           await tester.pumpAndSettle();
 
           // Pop up the alert again, to verify that TalkBack gets the right answer
@@ -613,7 +648,9 @@ Future<void> main() async {
           await tester.pumpAndSettle();
 
           expect(
-            await getSemantics(find.byKey(const ValueKey<String>('$alertKeyValue.OK')), tester),
+            await getSemantics(
+                find.byKey(const ValueKey<String>('$alertKeyValue.OK')),
+                tester),
             hasAndroidSemantics(
               className: AndroidClassName.button,
               isChecked: false,
@@ -630,7 +667,8 @@ Future<void> main() async {
 
           for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
-              await getSemantics(find.byKey(ValueKey<String>('$alertKeyValue.$item')), tester),
+              await getSemantics(
+                  find.byKey(ValueKey<String>('$alertKeyValue.$item')), tester),
               hasAndroidSemantics(
                 className: AndroidClassName.view,
                 isChecked: false,
@@ -644,7 +682,8 @@ Future<void> main() async {
             );
           }
         } finally {
-          await tester.tap(find.byKey(const ValueKey<String>('$alertKeyValue.OK')));
+          await tester
+              .tap(find.byKey(const ValueKey<String>('$alertKeyValue.OK')));
         }
       }, timeout: Timeout.none);
     });
@@ -657,18 +696,22 @@ Future<void> main() async {
         await tester.pumpAndSettle();
       }
 
-      testWidgets('AppBar title has correct Android heading semantics', (WidgetTester tester) async {
+      testWidgets('AppBar title has correct Android heading semantics',
+          (WidgetTester tester) async {
         await prepareHeading(tester);
         expect(
-          await getSemantics(find.byKey(const ValueKey<String>(appBarTitleKeyValue)), tester),
+          await getSemantics(
+              find.byKey(const ValueKey<String>(appBarTitleKeyValue)), tester),
           hasAndroidSemantics(isHeading: true),
         );
       }, timeout: Timeout.none);
 
-      testWidgets('body text does not have Android heading semantics', (WidgetTester tester) async {
+      testWidgets('body text does not have Android heading semantics',
+          (WidgetTester tester) async {
         await prepareHeading(tester);
         expect(
-          await getSemantics(find.byKey(const ValueKey<String>(bodyTextKeyValue)), tester),
+          await getSemantics(
+              find.byKey(const ValueKey<String>(bodyTextKeyValue)), tester),
           hasAndroidSemantics(isHeading: false),
         );
       }, timeout: Timeout.none);

@@ -32,15 +32,19 @@ class FakeProcessLister extends Fake implements ProcessLister {
 }
 
 FakeProcessLister ofdRunning() {
-  return FakeProcessLister(result: r'Path: "C:\Program Files\Topaz OFD\Warsaw\core.exe"');
+  return FakeProcessLister(
+      result: r'Path: "C:\Program Files\Topaz OFD\Warsaw\core.exe"');
 }
 
 FakeProcessLister ofdNotRunning() {
-  return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe');
+  return FakeProcessLister(
+      result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe');
 }
 
 FakeProcessLister failure() {
-  return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe', exitCode: 10);
+  return FakeProcessLister(
+      result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe',
+      exitCode: 10);
 }
 
 /// The expected validation result object for
@@ -146,27 +150,34 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         reason: 'There should be only 5 matches for the pattern provided');
   });
 
-  testWithoutContext('Successfully checks for Topaz OFD when it is running', () async {
-    final WindowsVersionValidator validator =
-        WindowsVersionValidator(
-            operatingSystemUtils: FakeValidOperatingSystemUtils(),
-            processLister: ofdRunning());
+  testWithoutContext('Successfully checks for Topaz OFD when it is running',
+      () async {
+    final WindowsVersionValidator validator = WindowsVersionValidator(
+        operatingSystemUtils: FakeValidOperatingSystemUtils(),
+        processLister: ofdRunning());
     final ValidationResult result = await validator.validate();
-    expect(result.type, ofdFoundRunning.type, reason: 'The ValidationResult type should be the same (partial)');
-    expect(result.statusInfo, ofdFoundRunning.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
-    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
-    expect(result.messages[0].message, ofdFoundRunning.messages[0].message, reason: 'The ValidationMessage message should be the same');
+    expect(result.type, ofdFoundRunning.type,
+        reason: 'The ValidationResult type should be the same (partial)');
+    expect(result.statusInfo, ofdFoundRunning.statusInfo,
+        reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1,
+        reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, ofdFoundRunning.messages[0].message,
+        reason: 'The ValidationMessage message should be the same');
   });
 
   testWithoutContext('Reports failure of Get-Process', () async {
-    final WindowsVersionValidator validator =
-        WindowsVersionValidator(
-            operatingSystemUtils: FakeValidOperatingSystemUtils(),
-            processLister: failure());
+    final WindowsVersionValidator validator = WindowsVersionValidator(
+        operatingSystemUtils: FakeValidOperatingSystemUtils(),
+        processLister: failure());
     final ValidationResult result = await validator.validate();
-    expect(result.type, getProcessFailed.type, reason: 'The ValidationResult type should be the same (partial)');
-    expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
-    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
-    expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
+    expect(result.type, getProcessFailed.type,
+        reason: 'The ValidationResult type should be the same (partial)');
+    expect(result.statusInfo, getProcessFailed.statusInfo,
+        reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1,
+        reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, getProcessFailed.messages[0].message,
+        reason: 'The ValidationMessage message should be the same');
   });
 }

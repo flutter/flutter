@@ -86,7 +86,8 @@ void main() {
       final ByteData errorData = buffer.done();
       expect(
         () => method.decodeEnvelope(errorData),
-        throwsA(predicate((PlatformException e) => e.stacktrace == 'errorStacktrace')),
+        throwsA(predicate(
+            (PlatformException e) => e.stacktrace == 'errorStacktrace')),
       );
     });
 
@@ -100,8 +101,8 @@ void main() {
         throwsA(
           predicate((PlatformException e) {
             return e.code == 'errorCode' &&
-              e.message == null &&
-              e.details == 'errorDetails';
+                e.message == null &&
+                e.details == 'errorDetails';
           }),
         ),
       );
@@ -121,14 +122,15 @@ void main() {
         () => jsonMethodCodec.decodeEnvelope(errorData),
         throwsA(predicate(
           (PlatformException e) =>
-            e.code == 'errorCode' &&
-            e.message == 'errorMessage' &&
-            e.details == 'errorDetails',
+              e.code == 'errorCode' &&
+              e.message == 'errorMessage' &&
+              e.details == 'errorDetails',
         )),
       );
     });
     test('should decode error envelope with native stacktrace.', () {
-      final ByteData? errorData = stringCodec.encodeMessage(json.encode(<dynamic>[
+      final ByteData? errorData =
+          stringCodec.encodeMessage(json.encode(<dynamic>[
         'errorCode',
         'errorMessage',
         'errorDetails',
@@ -136,7 +138,8 @@ void main() {
       ]));
       expect(
         () => jsonMethodCodec.decodeEnvelope(errorData!),
-        throwsA(predicate((PlatformException e) => e.stacktrace == 'errorStacktrace')),
+        throwsA(predicate(
+            (PlatformException e) => e.stacktrace == 'errorStacktrace')),
       );
     });
   });
@@ -282,10 +285,12 @@ void main() {
   test('toString works as intended', () async {
     const MethodCall methodCall = MethodCall('sample method');
     final PlatformException platformException = PlatformException(code: '100');
-    final MissingPluginException missingPluginException = MissingPluginException();
+    final MissingPluginException missingPluginException =
+        MissingPluginException();
 
     expect(methodCall.toString(), 'MethodCall(sample method, null)');
-    expect(platformException.toString(), 'PlatformException(100, null, null, null)');
+    expect(platformException.toString(),
+        'PlatformException(100, null, null, null)');
     expect(missingPluginException.toString(), 'MissingPluginException(null)');
   });
 }

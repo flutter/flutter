@@ -96,16 +96,17 @@ void main() {
           child: MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
-            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+            debugShowCheckedModeBanner:
+                false, // https://github.com/flutter/flutter/issues/143616
             home: Scaffold(
               appBar: AppBar(
                 title: const Text('Matrix ImageFilter Test'),
               ),
               body: const Center(
-                child:Text('Hooray!'),
+                child: Text('Hooray!'),
               ),
               floatingActionButton: FloatingActionButton(
-                onPressed: () { },
+                onPressed: () {},
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -134,16 +135,17 @@ void main() {
             child: MaterialApp(
               title: 'Flutter Demo',
               theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
-              debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+              debugShowCheckedModeBanner:
+                  false, // https://github.com/flutter/flutter/issues/143616
               home: Scaffold(
                 appBar: AppBar(
                   title: const Text('Matrix ImageFilter Test'),
                 ),
                 body: const Center(
-                  child:Text('Hooray!'),
+                  child: Text('Hooray!'),
                 ),
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () { },
+                  onPressed: () {},
                   tooltip: 'Increment',
                   child: const Icon(Icons.add),
                 ),
@@ -172,15 +174,18 @@ void main() {
     }
 
     await pumpWithSigma(5.0);
-    final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
+    final RenderObject renderObject =
+        tester.firstRenderObject(find.byType(ImageFiltered));
+    final ImageFilterLayer originalLayer =
+        renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);
     expect(renderObject.debugLayer, same(originalLayer));
   });
 
-  testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
+  testWidgets('Image filter - enabled and disabled',
+      (WidgetTester tester) async {
     Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(
@@ -195,7 +200,6 @@ void main() {
 
     await pumpWithEnabledState(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
-
 
     await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));

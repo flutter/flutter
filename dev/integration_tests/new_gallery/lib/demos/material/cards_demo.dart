@@ -278,7 +278,8 @@ class TravelDestinationContent extends StatelessWidget {
       color: Colors.white,
     );
     final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

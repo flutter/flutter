@@ -48,7 +48,8 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
   }
 
   Future<void> _quit() async {
-    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    final AppExitType exitType =
+        _shouldExit ? AppExitType.required : AppExitType.cancelable;
     setState(() {
       lastResponse = 'App requesting ${exitType.name} exit';
     });
@@ -57,7 +58,8 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
 
   @override
   Future<AppExitResponse> didRequestAppExit() async {
-    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response =
+        _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
     setState(() {
       lastResponse = 'App responded ${response.name} to exit request';
     });

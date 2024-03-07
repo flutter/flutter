@@ -10,7 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87099
-  testWidgets('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
+  testWidgets('TextField.autofocus should skip the element that never layout',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -53,7 +54,8 @@ void main() {
 
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
+      builder: (BuildContext context) =>
+          const SimpleDialog(title: Text('Dialog')),
     );
 
     await tester.pump();
@@ -89,7 +91,8 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
 
-    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    FocusScope.of(tester.element(find.byType(TextField)))
+        .requestFocus(focusNode);
     await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
@@ -145,7 +148,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     tester.testTextInput.hide();
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
     state.connectionClosed();
 
     expect(tester.testTextInput.isVisible, isFalse);
@@ -184,7 +188,8 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(tester.testTextInput.isVisible, isFalse);
 
-    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    FocusScope.of(tester.element(find.byType(TextField)))
+        .requestFocus(focusNode);
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
     expect(tester.testTextInput.isVisible, isTrue);
@@ -201,7 +206,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Focus keep-alive works with GlobalKey reparenting',
+      (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -226,14 +232,16 @@ void main() {
     }
 
     await tester.pumpWidget(makeTest(null));
-    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    FocusScope.of(tester.element(find.byType(TextField)))
+        .requestFocus(focusNode);
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
     await tester.drag(find.byType(TextField), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
     await tester.pumpWidget(makeTest('test'));
-    await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
+    await tester
+        .pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
   });
 
@@ -279,13 +287,15 @@ void main() {
                 FocusScope(
                   node: focusScopeNode0,
                   child: Builder(
-                    builder: (BuildContext context) => TextField(key: textField0),
+                    builder: (BuildContext context) =>
+                        TextField(key: textField0),
                   ),
                 ),
                 FocusScope(
                   node: focusScopeNode1,
                   child: Builder(
-                    builder: (BuildContext context) => TextField(key: textField1),
+                    builder: (BuildContext context) =>
+                        TextField(key: textField1),
                   ),
                 ),
               ],
@@ -402,7 +412,9 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
+  testWidgets(
+      'A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop',
+      (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode();
@@ -431,7 +443,9 @@ void main() {
       ),
     );
 
-    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
+    final TestGesture down1 = await tester.startGesture(
+        tester.getCenter(find.byType(TextField).first),
+        kind: PointerDeviceKind.mouse);
     await tester.pump();
     await tester.pumpAndSettle();
     await down1.up();
@@ -441,7 +455,9 @@ void main() {
     expect(focusNodeB.hasFocus, false);
 
     // Click on the container to not hit either text field.
-    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(key)), kind: PointerDeviceKind.mouse);
+    final TestGesture down2 = await tester.startGesture(
+        tester.getCenter(find.byKey(key)),
+        kind: PointerDeviceKind.mouse);
     await tester.pump();
     await tester.pumpAndSettle();
     await down2.up();
@@ -452,7 +468,9 @@ void main() {
 
     // Second text field can still gain focus.
 
-    final TestGesture down3 = await tester.startGesture(tester.getCenter(find.byType(TextField).last), kind: PointerDeviceKind.mouse);
+    final TestGesture down3 = await tester.startGesture(
+        tester.getCenter(find.byType(TextField).last),
+        kind: PointerDeviceKind.mouse);
     await tester.pump();
     await tester.pumpAndSettle();
     await down3.up();
@@ -462,7 +480,9 @@ void main() {
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
+  testWidgets(
+      'A Focused text-field will not lose focus when clicking on its decoration',
+      (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     addTearDown(focusNodeA.dispose);
     final Key iconKey = UniqueKey();
@@ -484,14 +504,18 @@ void main() {
       ),
     );
 
-    final TestGesture down1 = await tester.startGesture(tester.getCenter(find.byType(TextField).first), kind: PointerDeviceKind.mouse);
+    final TestGesture down1 = await tester.startGesture(
+        tester.getCenter(find.byType(TextField).first),
+        kind: PointerDeviceKind.mouse);
     await tester.pump();
     await down1.removePointer();
 
     expect(focusNodeA.hasFocus, true);
 
     // Click on the icon which has a different RO than the text field's focus node context
-    final TestGesture down2 = await tester.startGesture(tester.getCenter(find.byKey(iconKey)), kind: PointerDeviceKind.mouse);
+    final TestGesture down2 = await tester.startGesture(
+        tester.getCenter(find.byKey(iconKey)),
+        kind: PointerDeviceKind.mouse);
     await tester.pump();
     await tester.pumpAndSettle();
     await down2.up();
@@ -500,7 +524,9 @@ void main() {
     expect(focusNodeA.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
+  testWidgets(
+      'A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation',
+      (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
     addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
@@ -570,9 +596,9 @@ class _APage extends Page<void> {
 
   @override
   Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
-    settings: this,
-    pageBuilder: (_, __, ___) => const TextField(autofocus: true),
-  );
+        settings: this,
+        pageBuilder: (_, __, ___) => const TextField(autofocus: true),
+      );
 }
 
 class _BPage extends Page<void> {
@@ -580,7 +606,7 @@ class _BPage extends Page<void> {
 
   @override
   Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
-    settings: this,
-    pageBuilder: (_, __, ___) => const Text('B'),
-  );
+        settings: this,
+        pageBuilder: (_, __, ___) => const Text('B'),
+      );
 }

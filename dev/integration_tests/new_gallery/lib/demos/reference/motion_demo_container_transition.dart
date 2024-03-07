@@ -55,13 +55,15 @@ class _OpenContainerTransformDemoState
   ContainerTransitionType _transitionType = ContainerTransitionType.fade;
 
   void _showSettingsBottomModalSheet(BuildContext context) {
-    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations =
+        GalleryLocalizations.of(context);
 
     showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, void Function(void Function()) setModalState) {
+          builder: (BuildContext context,
+              void Function(void Function()) setModalState) {
             return Container(
               height: 125,
               padding: const EdgeInsets.all(15),
@@ -116,7 +118,8 @@ class _OpenContainerTransformDemoState
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations? localizations = GalleryLocalizations.of(context);
+    final GalleryLocalizations? localizations =
+        GalleryLocalizations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Navigator(
@@ -159,14 +162,16 @@ class _OpenContainerTransformDemoState
               children: <Widget>[
                 _OpenContainerWrapper(
                   transitionType: _transitionType,
-                  closedBuilder: (BuildContext context, void Function() openContainer) {
+                  closedBuilder:
+                      (BuildContext context, void Function() openContainer) {
                     return _DetailsCard(openContainer: openContainer);
                   },
                 ),
                 const SizedBox(height: 16),
                 _OpenContainerWrapper(
                   transitionType: _transitionType,
-                  closedBuilder: (BuildContext context, void Function() openContainer) {
+                  closedBuilder:
+                      (BuildContext context, void Function() openContainer) {
                     return _DetailsListTile(openContainer: openContainer);
                   },
                 ),
@@ -178,7 +183,8 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, void Function() openContainer) {
+                        closedBuilder: (BuildContext context,
+                            void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle:
@@ -193,7 +199,8 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, void Function() openContainer) {
+                        closedBuilder: (BuildContext context,
+                            void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle:
@@ -212,7 +219,8 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, void Function() openContainer) {
+                        closedBuilder: (BuildContext context,
+                            void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -227,7 +235,8 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, void Function() openContainer) {
+                        closedBuilder: (BuildContext context,
+                            void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -242,7 +251,8 @@ class _OpenContainerTransformDemoState
                     Expanded(
                       child: _OpenContainerWrapper(
                         transitionType: _transitionType,
-                        closedBuilder: (BuildContext context, void Function() openContainer) {
+                        closedBuilder: (BuildContext context,
+                            void Function() openContainer) {
                           return _SmallDetailsCard(
                             openContainer: openContainer,
                             subtitle: localizations
@@ -259,12 +269,14 @@ class _OpenContainerTransformDemoState
                 ...List<OpenContainer<bool>>.generate(10, (int index) {
                   return OpenContainer<bool>(
                     transitionType: _transitionType,
-                    openBuilder: (BuildContext context, void Function() openContainer) =>
-                        const _DetailsPage(),
+                    openBuilder:
+                        (BuildContext context, void Function() openContainer) =>
+                            const _DetailsPage(),
                     tappable: false,
                     closedShape: const RoundedRectangleBorder(),
                     closedElevation: 0,
-                    closedBuilder: (BuildContext context, void Function() openContainer) {
+                    closedBuilder:
+                        (BuildContext context, void Function() openContainer) {
                       return ListTile(
                         leading: Image.asset(
                           'placeholders/avatar_logo.png',
@@ -286,7 +298,9 @@ class _OpenContainerTransformDemoState
             ),
             floatingActionButton: OpenContainer(
               transitionType: _transitionType,
-              openBuilder: (BuildContext context, void Function() openContainer) => const _DetailsPage(),
+              openBuilder:
+                  (BuildContext context, void Function() openContainer) =>
+                      const _DetailsPage(),
               closedElevation: 6,
               closedShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
@@ -294,7 +308,8 @@ class _OpenContainerTransformDemoState
                 ),
               ),
               closedColor: colorScheme.secondary,
-              closedBuilder: (BuildContext context, void Function() openContainer) {
+              closedBuilder:
+                  (BuildContext context, void Function() openContainer) {
                 return SizedBox(
                   height: _fabDimension,
                   width: _fabDimension,
@@ -327,7 +342,8 @@ class _OpenContainerWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return OpenContainer<bool>(
       transitionType: transitionType,
-      openBuilder: (BuildContext context, void Function() openContainer) => const _DetailsPage(),
+      openBuilder: (BuildContext context, void Function() openContainer) =>
+          const _DetailsPage(),
       tappable: false,
       closedBuilder: closedBuilder,
     );
@@ -341,7 +357,8 @@ class _DetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return _InkWellOverlay(
       openContainer: openContainer,
@@ -533,7 +550,8 @@ class _DetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(

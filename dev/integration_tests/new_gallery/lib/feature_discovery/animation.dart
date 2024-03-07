@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 ///
 /// Values are loosely based on Material Design specs, which are minimal.
 class Animations {
-
   Animations(
     this.openController,
     this.tapController,

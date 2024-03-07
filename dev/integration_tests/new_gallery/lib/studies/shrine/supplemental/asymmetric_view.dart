@@ -45,8 +45,9 @@ class MobileAsymmetricView extends StatelessWidget {
             TwoProductCardColumn.spacerHeight) /
         2;
 
-    final double imageWidth = _cardToScreenWidthRatio * constraints.biggest.width -
-        TwoProductCardColumn.horizontalPadding;
+    final double imageWidth =
+        _cardToScreenWidthRatio * constraints.biggest.width -
+            TwoProductCardColumn.horizontalPadding;
 
     final double imageHeight = cardHeight -
         MobileProductCard.defaultTextBoxHeight *
@@ -68,8 +69,10 @@ class MobileAsymmetricView extends StatelessWidget {
       // helpers for creating the index of the product list that will correspond
       // to the index of the list of columns.
 
-      return List<SizedBox>.generate(_listItemCount(products.length), (int index) {
-        double width = _cardToScreenWidthRatio * MediaQuery.of(context).size.width;
+      return List<SizedBox>.generate(_listItemCount(products.length),
+          (int index) {
+        double width =
+            _cardToScreenWidthRatio * MediaQuery.of(context).size.width;
         Widget column;
         if (index.isEven) {
           /// Even cases
@@ -176,7 +179,8 @@ class DesktopAsymmetricView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine the scale factor for the desktop asymmetric view.
 
-    final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
+    final double textScaleFactor =
+        GalleryOptions.of(context).textScaleFactor(context);
 
     // When text is larger, the images becomes wider, but at half the rate.
     final double imageScaleFactor = reducedTextScale(context);
@@ -252,7 +256,8 @@ class DesktopColumns extends StatelessWidget {
       smallImageWidth: smallImageWidth,
     );
 
-    final List<DesktopProductCardColumn> productCardColumns = List<DesktopProductCardColumn>.generate(
+    final List<DesktopProductCardColumn> productCardColumns =
+        List<DesktopProductCardColumn>.generate(
       columnCount,
       (int column) {
         final bool alignToEnd = (column.isOdd) || (column == columnCount - 1);

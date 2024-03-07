@@ -44,7 +44,8 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('menuItem'))).brightness,
+        equals(Brightness.dark));
   });
 
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
@@ -58,20 +59,19 @@ void main() {
         theme: ThemeData(brightness: Brightness.dark),
         home: Scaffold(
           body: DefaultSelectionStyle(
-            selectionColor: defaultSelectionColor,
-            cursorColor: defaultCursorColor,
-            child: Theme(
-              data: ThemeData(
-                textSelectionTheme: const TextSelectionThemeData(
-                  selectionColor: themeSelectionColor,
-                  cursorColor: themeCursorColor,
+              selectionColor: defaultSelectionColor,
+              cursorColor: defaultCursorColor,
+              child: Theme(
+                data: ThemeData(
+                  textSelectionTheme: const TextSelectionThemeData(
+                    selectionColor: themeSelectionColor,
+                    cursorColor: themeCursorColor,
+                  ),
                 ),
-              ),
-              child: TextField(
-                key: key,
-              ),
-            )
-          ),
+                child: TextField(
+                  key: key,
+                ),
+              )),
         ),
       ),
     );
@@ -85,6 +85,7 @@ void main() {
       }
       child.visitChildren(recursiveFinder);
     }
+
     root.visitChildren(recursiveFinder);
 
     // Focus text field so it has a selection color. The selection color is null
@@ -93,7 +94,8 @@ void main() {
     await tester.pump();
 
     expect(renderEditable.selectionColor, themeSelectionColor);
-    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor,
+        themeCursorColor);
   });
 
   testWidgets('Material2 - Fallback theme', (WidgetTester tester) async {
@@ -110,7 +112,10 @@ void main() {
       ),
     );
 
-    expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(useMaterial3: false), defaultGeometryTheme)));
+    expect(
+        Theme.of(capturedContext),
+        equals(ThemeData.localize(
+            ThemeData.fallback(useMaterial3: false), defaultGeometryTheme)));
   });
 
   testWidgets('Material3 - Fallback theme', (WidgetTester tester) async {
@@ -127,10 +132,14 @@ void main() {
       ),
     );
 
-    expect(Theme.of(capturedContextM3), equals(ThemeData.localize(ThemeData.fallback(useMaterial3: true), defaultGeometryThemeM3)));
+    expect(
+        Theme.of(capturedContextM3),
+        equals(ThemeData.localize(
+            ThemeData.fallback(useMaterial3: true), defaultGeometryThemeM3)));
   });
 
-  testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
+  testWidgets('ThemeData.localize memoizes the result',
+      (WidgetTester tester) async {
     final ThemeData light = ThemeData.light();
     final ThemeData dark = ThemeData.dark();
 
@@ -153,17 +162,21 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - ThemeData with null typography uses proper defaults',
+      (WidgetTester tester) async {
     final ThemeData m2Theme = ThemeData(useMaterial3: false);
     expect(m2Theme.typography, Typography.material2014());
   });
 
-  testWidgets('Material3 - ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - ThemeData with null typography uses proper defaults',
+      (WidgetTester tester) async {
     final ThemeData m3Theme = ThemeData(useMaterial3: true);
-    expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
+    expect(m3Theme.typography,
+        Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
-  testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('PopupMenu inherits shadowed app theme',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5572
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
@@ -192,10 +205,12 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.light));
+    expect(Theme.of(tester.element(find.text('menuItem'))).brightness,
+        equals(Brightness.light));
   });
 
-  testWidgets('DropdownMenu inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('DropdownMenu inherits shadowed app theme',
+      (WidgetTester tester) async {
     final Key dropdownMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -207,7 +222,7 @@ void main() {
               actions: <Widget>[
                 DropdownButton<String>(
                   key: dropdownMenuButtonKey,
-                  onChanged: (String? newValue) { },
+                  onChanged: (String? newValue) {},
                   value: 'menuItem',
                   items: const <DropdownMenuItem<String>>[
                     DropdownMenuItem<String>(
@@ -231,7 +246,8 @@ void main() {
     }
   });
 
-  testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('ModalBottomSheet inherits shadowed app theme',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.dark),
@@ -245,7 +261,8 @@ void main() {
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
-                        builder: (BuildContext context) => const Text('bottomSheet'),
+                        builder: (BuildContext context) =>
+                            const Text('bottomSheet'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -261,10 +278,12 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
-    expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
+    expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness,
+        equals(Brightness.light));
   });
 
-  testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('Dialog inherits shadowed app theme',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -295,10 +314,12 @@ void main() {
 
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('dialog'))).brightness, equals(Brightness.light));
+    expect(Theme.of(tester.element(find.text('dialog'))).brightness,
+        equals(Brightness.light));
   });
 
-  testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
+  testWidgets("Scaffold inherits theme's scaffoldBackgroundColor",
+      (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
 
     await tester.pumpWidget(
@@ -334,7 +355,8 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materials =
+        tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold
@@ -343,7 +365,8 @@ void main() {
   testWidgets('IconThemes are applied', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
+        theme: ThemeData(
+            iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
         home: const Icon(Icons.computer),
       ),
     );
@@ -355,18 +378,22 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(iconTheme: const IconThemeData(color: Colors.orange, size: 20.0)),
+        theme: ThemeData(
+            iconTheme: const IconThemeData(color: Colors.orange, size: 20.0)),
         home: const Icon(Icons.computer),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 100)); // Halfway through the theme transition
+    await tester.pump(const Duration(
+        milliseconds: 100)); // Halfway through the theme transition
 
     glyphText = tester.renderObject(find.byType(RichText));
 
-    expect(glyphText.text.style!.color, Color.lerp(Colors.green, Colors.orange, 0.5));
+    expect(glyphText.text.style!.color,
+        Color.lerp(Colors.green, Colors.orange, 0.5));
     expect(glyphText.text.style!.fontSize, 15.0);
 
-    await tester.pump(const Duration(milliseconds: 100)); // Finish the transition
+    await tester
+        .pump(const Duration(milliseconds: 100)); // Finish the transition
     glyphText = tester.renderObject(find.byType(RichText));
 
     expect(glyphText.text.style!.color, Colors.orange);
@@ -408,7 +435,9 @@ void main() {
     },
   );
 
-  testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
+  testWidgets(
+      'Text geometry set in Theme has higher precedence than that of Localizations',
+      (WidgetTester tester) async {
     const double kMagicFontSize = 4321.0;
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
@@ -439,7 +468,9 @@ void main() {
     expect(actualFontSize, kMagicFontSize);
   });
 
-  testWidgets('Material2 - Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
+  testWidgets(
+      'Material2 - Default Theme provides all basic TextStyle properties',
+      (WidgetTester tester) async {
     late ThemeData theme;
     await tester.pumpWidget(Theme(
       data: ThemeData(useMaterial3: false),
@@ -473,8 +504,12 @@ void main() {
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
-      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[
+      theme.textTheme,
+      theme.primaryTextTheme
+    ]) {
+      for (final TextStyle style in extractStyles(textTheme)
+          .map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -494,10 +529,13 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.displayLarge!.debugLabel, '(englishLike displayLarge 2014).merge(blackMountainView displayLarge)');
+    expect(theme.textTheme.displayLarge!.debugLabel,
+        '(englishLike displayLarge 2014).merge(blackMountainView displayLarge)');
   });
 
-  testWidgets('Material3 - Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
+  testWidgets(
+      'Material3 - Default Theme provides all basic TextStyle properties',
+      (WidgetTester tester) async {
     late ThemeData theme;
     await tester.pumpWidget(Theme(
       data: ThemeData(useMaterial3: true),
@@ -530,8 +568,12 @@ void main() {
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
-      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[
+      theme.textTheme,
+      theme.primaryTextTheme
+    ]) {
+      for (final TextStyle style in extractStyles(textTheme)
+          .map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -551,7 +593,8 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.displayLarge!.debugLabel, '(englishLike displayLarge 2021).merge((blackMountainView displayLarge).apply)');
+    expect(theme.textTheme.displayLarge!.debugLabel,
+        '(englishLike displayLarge 2021).merge((blackMountainView displayLarge).apply)');
   });
 
   group('Cupertino theme', () {
@@ -570,7 +613,8 @@ void main() {
       },
     );
 
-    Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
+    Future<CupertinoThemeData> testTheme(
+        WidgetTester tester, ThemeData theme) async {
       await tester.pumpWidget(Theme(data: theme, child: singletonThemeSubtree));
       return actualTheme!;
     }
@@ -582,8 +626,10 @@ void main() {
       context = null;
     });
 
-    testWidgets('Material2 - Default light theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM2 = await testTheme(tester, ThemeData(useMaterial3: false));
+    testWidgets('Material2 - Default light theme has defaults',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM2 =
+          await testTheme(tester, ThemeData(useMaterial3: false));
 
       expect(themeM2.brightness, Brightness.light);
       expect(themeM2.primaryColor, Colors.blue);
@@ -593,19 +639,24 @@ void main() {
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Material3 - Default light theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(useMaterial3: true));
+    testWidgets('Material3 - Default light theme has defaults',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM3 =
+          await testTheme(tester, ThemeData(useMaterial3: true));
 
       expect(themeM3.brightness, Brightness.light);
       expect(themeM3.primaryColor, const Color(0xff6750a4));
-      expect(themeM3.scaffoldBackgroundColor, const Color(0xfffef7ff)); // ColorScheme.background
+      expect(themeM3.scaffoldBackgroundColor,
+          const Color(0xfffef7ff)); // ColorScheme.background
       expect(themeM3.primaryContrastingColor, Colors.white);
       expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Material2 - Dark theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM2 = await testTheme(tester, ThemeData.dark(useMaterial3: false));
+    testWidgets('Material2 - Dark theme has defaults',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM2 =
+          await testTheme(tester, ThemeData.dark(useMaterial3: false));
 
       expect(themeM2.brightness, Brightness.dark);
       expect(themeM2.primaryColor, Colors.blue);
@@ -615,8 +666,10 @@ void main() {
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Material3 - Dark theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData.dark(useMaterial3: true));
+    testWidgets('Material3 - Dark theme has defaults',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM3 =
+          await testTheme(tester, ThemeData.dark(useMaterial3: true));
 
       expect(themeM3.brightness, Brightness.dark);
       expect(themeM3.primaryColor, const Color(0xffd0bcff));
@@ -626,7 +679,8 @@ void main() {
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
+    testWidgets('MaterialTheme overrides the brightness',
+        (WidgetTester tester) async {
       await testTheme(tester, ThemeData.dark());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
@@ -634,118 +688,145 @@ void main() {
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
 
       // Overridable by cupertinoOverrideTheme.
-      await testTheme(tester, ThemeData(
-        brightness: Brightness.light,
-        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
-      ));
+      await testTheme(
+          tester,
+          ThemeData(
+            brightness: Brightness.light,
+            cupertinoOverrideTheme:
+                const CupertinoThemeData(brightness: Brightness.dark),
+          ));
       expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
-      await testTheme(tester, ThemeData(
-        brightness: Brightness.dark,
-        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
-      ));
+      await testTheme(
+          tester,
+          ThemeData(
+            brightness: Brightness.dark,
+            cupertinoOverrideTheme:
+                const CupertinoThemeData(brightness: Brightness.light),
+          ));
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
     });
 
-    testWidgets('Material2 - Can override material theme', (WidgetTester tester) async {
-      final CupertinoThemeData themeM2 = await testTheme(tester, ThemeData(
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
-        ),
-        useMaterial3: false,
-      ));
+    testWidgets('Material2 - Can override material theme',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM2 = await testTheme(
+          tester,
+          ThemeData(
+            cupertinoOverrideTheme: const CupertinoThemeData(
+              scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
+            ),
+            useMaterial3: false,
+          ));
 
       expect(themeM2.brightness, Brightness.light);
       // We took the scaffold background override but the rest are still cascaded
       // to the material themeM2.
       expect(themeM2.primaryColor, Colors.blue);
       expect(themeM2.primaryContrastingColor, Colors.white);
-      expect(themeM2.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
+      expect(
+          themeM2.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
       expect(themeM2.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Material3 - Can override material theme', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
-        ),
-        useMaterial3: true,
-      ));
+    testWidgets('Material3 - Can override material theme',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM3 = await testTheme(
+          tester,
+          ThemeData(
+            cupertinoOverrideTheme: const CupertinoThemeData(
+              scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
+            ),
+            useMaterial3: true,
+          ));
 
       expect(themeM3.brightness, Brightness.light);
       // We took the scaffold background override but the rest are still cascaded
       // to the material themeM3.
       expect(themeM3.primaryColor, const Color(0xff6750a4));
       expect(themeM3.primaryContrastingColor, Colors.white);
-      expect(themeM3.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
+      expect(
+          themeM3.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
       expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Material2 - Can override properties that are independent of material', (WidgetTester tester) async {
-      final CupertinoThemeData themeM2 = await testTheme(tester, ThemeData(
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          // The bar colors ignore all things material except brightness.
-          barBackgroundColor: CupertinoColors.black,
-        ),
-        useMaterial3: false,
-      ));
+    testWidgets(
+        'Material2 - Can override properties that are independent of material',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM2 = await testTheme(
+          tester,
+          ThemeData(
+            cupertinoOverrideTheme: const CupertinoThemeData(
+              // The bar colors ignore all things material except brightness.
+              barBackgroundColor: CupertinoColors.black,
+            ),
+            useMaterial3: false,
+          ));
 
       expect(themeM2.primaryColor, Colors.blue);
       // MaterialBasedCupertinoThemeData should also function like a normal CupertinoThemeData.
       expect(themeM2.barBackgroundColor, CupertinoColors.black);
     });
 
-    testWidgets('Material3 - Can override properties that are independent of material', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          // The bar colors ignore all things material except brightness.
-          barBackgroundColor: CupertinoColors.black,
-        ),
-        useMaterial3: true
-      ));
+    testWidgets(
+        'Material3 - Can override properties that are independent of material',
+        (WidgetTester tester) async {
+      final CupertinoThemeData themeM3 = await testTheme(
+          tester,
+          ThemeData(
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                // The bar colors ignore all things material except brightness.
+                barBackgroundColor: CupertinoColors.black,
+              ),
+              useMaterial3: true));
 
       expect(themeM3.primaryColor, const Color(0xff6750a4));
       // MaterialBasedCupertinoThemeData should also function like a normal CupertinoThemeData.
       expect(themeM3.barBackgroundColor, CupertinoColors.black);
     });
 
-    testWidgets('Material2 - Changing material theme triggers rebuilds', (WidgetTester tester) async {
-      CupertinoThemeData themeM2 = await testTheme(tester, ThemeData(
-        useMaterial3: false,
-        primarySwatch: Colors.red,
-      ));
+    testWidgets('Material2 - Changing material theme triggers rebuilds',
+        (WidgetTester tester) async {
+      CupertinoThemeData themeM2 = await testTheme(
+          tester,
+          ThemeData(
+            useMaterial3: false,
+            primarySwatch: Colors.red,
+          ));
 
       expect(buildCount, 1);
       expect(themeM2.primaryColor, Colors.red);
 
-      themeM2 = await testTheme(tester, ThemeData(
-        useMaterial3: false,
-        primarySwatch: Colors.orange,
-      ));
+      themeM2 = await testTheme(
+          tester,
+          ThemeData(
+            useMaterial3: false,
+            primarySwatch: Colors.orange,
+          ));
 
       expect(buildCount, 2);
       expect(themeM2.primaryColor, Colors.orange);
     });
 
-    testWidgets('Material3 - Changing material theme triggers rebuilds', (WidgetTester tester) async {
-      CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(
-        useMaterial3: true,
-        colorScheme: const ColorScheme.light(
-          primary: Colors.red
-        ),
-      ));
+    testWidgets('Material3 - Changing material theme triggers rebuilds',
+        (WidgetTester tester) async {
+      CupertinoThemeData themeM3 = await testTheme(
+          tester,
+          ThemeData(
+            useMaterial3: true,
+            colorScheme: const ColorScheme.light(primary: Colors.red),
+          ));
 
       expect(buildCount, 1);
       expect(themeM3.primaryColor, Colors.red);
 
-      themeM3 = await testTheme(tester, ThemeData(
-        useMaterial3: true,
-        colorScheme: const ColorScheme.light(
-          primary: Colors.orange
-        ),
-      ));
+      themeM3 = await testTheme(
+          tester,
+          ThemeData(
+            useMaterial3: true,
+            colorScheme: const ColorScheme.light(primary: Colors.orange),
+          ));
 
       expect(buildCount, 2);
       expect(themeM3.primaryColor, Colors.orange);
@@ -757,10 +838,13 @@ void main() {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
 
-        await testTheme(tester, ThemeData(
-          iconTheme: const IconThemeData(color: materialIconColor),
-          cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor),
-        ));
+        await testTheme(
+            tester,
+            ThemeData(
+              iconTheme: const IconThemeData(color: materialIconColor),
+              cupertinoOverrideTheme:
+                  const CupertinoThemeData(primaryColor: cupertinoIconColor),
+            ));
 
         expect(buildCount, 1);
         expect(actualIconTheme!.color, materialIconColor);
@@ -770,22 +854,26 @@ void main() {
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',
       (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.purple,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryColor: CupertinoColors.activeOrange,
-          ),
-        ));
+        CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              primarySwatch: Colors.purple,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryColor: CupertinoColors.activeOrange,
+              ),
+            ));
 
         expect(buildCount, 1);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
 
-        theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.purple,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryColor: CupertinoColors.activeGreen,
-          ),
-        ));
+        theme = await testTheme(
+            tester,
+            ThemeData(
+              primarySwatch: Colors.purple,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryColor: CupertinoColors.activeGreen,
+              ),
+            ));
 
         expect(buildCount, 2);
         expect(theme.primaryColor, CupertinoColors.activeGreen);
@@ -795,24 +883,28 @@ void main() {
     testWidgets(
       'Cupertino theme override blocks derivative changes',
       (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.purple,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryColor: CupertinoColors.activeOrange,
-          ),
-        ));
+        CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              primarySwatch: Colors.purple,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryColor: CupertinoColors.activeOrange,
+              ),
+            ));
 
         expect(buildCount, 1);
         expect(theme.primaryColor, CupertinoColors.activeOrange);
 
         // Change the upstream material primary color.
-        theme = await testTheme(tester, ThemeData(
-          primarySwatch: Colors.blue,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            // But the primary material color is preempted by the override.
-            primaryColor: CupertinoColors.systemRed,
-          ),
-        ));
+        theme = await testTheme(
+            tester,
+            ThemeData(
+              primarySwatch: Colors.blue,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                // But the primary material color is preempted by the override.
+                primaryColor: CupertinoColors.systemRed,
+              ),
+            ));
 
         expect(buildCount, 2);
         expect(theme.primaryColor, CupertinoColors.systemRed);
@@ -822,25 +914,29 @@ void main() {
     testWidgets(
       'Material2 - Cupertino overrides do not block derivatives triggering rebuilds when derivatives are not overridden',
       (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.purple,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.destructiveRed,
-          ),
-        ));
+        CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.purple,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.destructiveRed,
+              ),
+            ));
 
         expect(buildCount, 1);
         expect(theme.textTheme.actionTextStyle.color, Colors.purple);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
 
-        theme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.green,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.destructiveRed,
-          ),
-        ));
+        theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.green,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.destructiveRed,
+              ),
+            ));
 
         expect(buildCount, 2);
         expect(theme.textTheme.actionTextStyle.color, Colors.green);
@@ -850,30 +946,34 @@ void main() {
 
     testWidgets(
       'Material3 - Cupertino overrides do not block derivatives triggering rebuilds when derivatives are not overridden',
-          (WidgetTester tester) async {
-        CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(
-            primary: Colors.purple,
-          ),
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.destructiveRed,
-          ),
-        ));
+      (WidgetTester tester) async {
+        CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(
+                primary: Colors.purple,
+              ),
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.destructiveRed,
+              ),
+            ));
 
         expect(buildCount, 1);
         expect(theme.textTheme.actionTextStyle.color, Colors.purple);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
 
-        theme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(
-            primary: Colors.green,
-          ),
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.destructiveRed,
-          ),
-        ));
+        theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(
+                primary: Colors.green,
+              ),
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.destructiveRed,
+              ),
+            ));
 
         expect(buildCount, 2);
         expect(theme.textTheme.actionTextStyle.color, Colors.green);
@@ -884,23 +984,27 @@ void main() {
     testWidgets(
       'Material2 - copyWith only copies the overrides, not the material or cupertino derivatives',
       (WidgetTester tester) async {
-        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.purple,
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.activeOrange,
-          ),
-        ));
+        final CupertinoThemeData originalTheme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.purple,
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.activeOrange,
+              ),
+            ));
 
         final CupertinoThemeData copiedTheme = originalTheme.copyWith(
           barBackgroundColor: CupertinoColors.destructiveRed,
         );
 
-        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.blue,
-          cupertinoOverrideTheme: copiedTheme,
-        ));
+        final CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.blue,
+              cupertinoOverrideTheme: copiedTheme,
+            ));
 
         expect(theme.primaryColor, Colors.blue);
         expect(theme.primaryContrastingColor, CupertinoColors.activeOrange);
@@ -910,24 +1014,28 @@ void main() {
 
     testWidgets(
       'Material3 - copyWith only copies the overrides, not the material or cupertino derivatives',
-          (WidgetTester tester) async {
-        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(primary: Colors.purple),
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            primaryContrastingColor: CupertinoColors.activeOrange,
-          ),
-        ));
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(primary: Colors.purple),
+              cupertinoOverrideTheme: const CupertinoThemeData(
+                primaryContrastingColor: CupertinoColors.activeOrange,
+              ),
+            ));
 
         final CupertinoThemeData copiedTheme = originalTheme.copyWith(
           barBackgroundColor: CupertinoColors.destructiveRed,
         );
 
-        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(primary: Colors.blue),
-          cupertinoOverrideTheme: copiedTheme,
-        ));
+        final CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(primary: Colors.blue),
+              cupertinoOverrideTheme: copiedTheme,
+            ));
 
         expect(theme.primaryColor, Colors.blue);
         expect(theme.primaryContrastingColor, CupertinoColors.activeOrange);
@@ -938,20 +1046,24 @@ void main() {
     testWidgets(
       "Material2 - Material themes with no cupertino overrides can also be copyWith'ed",
       (WidgetTester tester) async {
-        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.purple,
-        ));
+        final CupertinoThemeData originalTheme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.purple,
+            ));
 
         final CupertinoThemeData copiedTheme = originalTheme.copyWith(
           primaryContrastingColor: CupertinoColors.destructiveRed,
         );
 
-        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.blue,
-          cupertinoOverrideTheme: copiedTheme,
-        ));
+        final CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: false,
+              primarySwatch: Colors.blue,
+              cupertinoOverrideTheme: copiedTheme,
+            ));
 
         expect(theme.primaryColor, Colors.blue);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
@@ -960,21 +1072,25 @@ void main() {
 
     testWidgets(
       "Material3 - Material themes with no cupertino overrides can also be copyWith'ed",
-          (WidgetTester tester) async {
-        final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(primary: Colors.purple),
-        ));
+      (WidgetTester tester) async {
+        final CupertinoThemeData originalTheme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(primary: Colors.purple),
+            ));
 
         final CupertinoThemeData copiedTheme = originalTheme.copyWith(
           primaryContrastingColor: CupertinoColors.destructiveRed,
         );
 
-        final CupertinoThemeData theme = await testTheme(tester, ThemeData(
-          useMaterial3: true,
-          colorScheme: const ColorScheme.light(primary: Colors.blue),
-          cupertinoOverrideTheme: copiedTheme,
-        ));
+        final CupertinoThemeData theme = await testTheme(
+            tester,
+            ThemeData(
+              useMaterial3: true,
+              colorScheme: const ColorScheme.light(primary: Colors.blue),
+              cupertinoOverrideTheme: copiedTheme,
+            ));
 
         expect(theme.primaryColor, Colors.blue);
         expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
@@ -984,8 +1100,9 @@ void main() {
 }
 
 int testBuildCalled = 0;
+
 class Test extends StatelessWidget {
-  const Test({ super.key });
+  const Test({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1034,7 +1151,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
-  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  TextLeadingDistribution? get leadingDistribution =>
+      _delegate.leadingDistribution;
   @override
   Locale? get locale => _delegate.locale;
   @override
@@ -1059,11 +1177,12 @@ class _TextStyleProxy implements TextStyle {
   TextOverflow? get overflow => _delegate.overflow;
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       super.toString();
 
   @override
-  DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
+  DiagnosticsNode toDiagnosticsNode(
+      {String? name, DiagnosticsTreeStyle? style}) {
     throw UnimplementedError();
   }
 
@@ -1143,7 +1262,8 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties,
+      {String prefix = ''}) {
     throw UnimplementedError();
   }
 
@@ -1168,7 +1288,9 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0, TextScaler textScaler = TextScaler.noScaling }) {
+  ui.TextStyle getTextStyle(
+      {double textScaleFactor = 1.0,
+      TextScaler textScaler = TextScaler.noScaling}) {
     throw UnimplementedError();
   }
 

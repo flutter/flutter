@@ -28,7 +28,8 @@ class MaterialDemoThemeData {
         color: _colorScheme.primary,
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        fillColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -38,7 +39,8 @@ class MaterialDemoThemeData {
         }),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        fillColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -51,7 +53,8 @@ class MaterialDemoThemeData {
         behavior: SnackBarBehavior.floating,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        thumbColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }
@@ -59,7 +62,8 @@ class MaterialDemoThemeData {
               ? _colorScheme.primary
               : null;
         }),
-        trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        trackColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return null;
           }

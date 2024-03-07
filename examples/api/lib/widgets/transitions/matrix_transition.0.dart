@@ -25,12 +25,14 @@ class MatrixTransitionExample extends StatefulWidget {
   const MatrixTransitionExample({super.key});
 
   @override
-  State<MatrixTransitionExample> createState() => _MatrixTransitionExampleState();
+  State<MatrixTransitionExample> createState() =>
+      _MatrixTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MatrixTransitionExampleState extends State<MatrixTransitionExample> with TickerProviderStateMixin {
+class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

@@ -40,15 +40,15 @@ void main() {
       platform: FakePlatform(),
       defines: <String, String>{},
     );
-    fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
-    fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
-      .createSync(recursive: true);
-    fileSystem.file('assets/foo/bar.png')
-      .createSync(recursive: true);
-    fileSystem.file('assets/wildcard/#bar.png')
-      .createSync(recursive: true);
-    fileSystem.file('.packages')
-      .createSync();
+    fileSystem
+        .file(environment.buildDir.childFile('app.dill'))
+        .createSync(recursive: true);
+    fileSystem
+        .file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+        .createSync(recursive: true);
+    fileSystem.file('assets/foo/bar.png').createSync(recursive: true);
+    fileSystem.file('assets/wildcard/#bar.png').createSync(recursive: true);
+    fileSystem.file('.packages').createSync();
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -63,8 +63,7 @@ flutter:
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem.file('.packages')
-      .writeAsStringSync('foo:file:///bar/lib');
+    fileSystem.file('.packages').writeAsStringSync('foo:file:///bar/lib');
     fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
@@ -78,7 +77,8 @@ flutter:
     final Depfile dependencies = environment.depFileService.parse(depfile);
 
     expect(
-      dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
+      dependencies.inputs
+          .firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
       isNotNull,
     );
   }, overrides: <Type, Generator>{
@@ -89,20 +89,38 @@ flutter:
   testUsingContext('Copies files to correct asset directory', () async {
     await const CopyAssets().build(environment);
 
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'), exists);
+    expect(
+        fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/AssetManifest.json'),
+        exists);
+    expect(
+        fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/FontManifest.json'),
+        exists);
+    expect(
+        fileSystem
+            .file('${environment.buildDir.path}/flutter_assets/NOTICES.Z'),
+        exists);
     // See https://github.com/flutter/flutter/issues/35293
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
+    expect(
+        fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'),
+        exists);
     // See https://github.com/flutter/flutter/issues/46163
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'), exists);
+    expect(
+        fileSystem.file(
+            '${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'),
+        exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  group("Only copies assets with a flavor if the assets' flavor matches the flavor in the environment", () {
-    testUsingContext('When the environment does not have a flavor defined', () async {
+  group(
+      "Only copies assets with a flavor if the assets' flavor matches the flavor in the environment",
+      () {
+    testUsingContext('When the environment does not have a flavor defined',
+        () async {
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('''
@@ -119,14 +137,27 @@ flutter:
   ''');
 
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
-      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      fileSystem
+          .file('assets/vanilla/ice-cream.png')
+          .createSync(recursive: true);
+      fileSystem
+          .file('assets/strawberry/ice-cream.png')
+          .createSync(recursive: true);
 
       await const CopyAssets().build(environment);
 
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'), exists);
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'), isNot(exists));
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'), isNot(exists));
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
+          exists);
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+          isNot(exists));
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'),
+          isNot(exists));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -150,14 +181,27 @@ flutter:
   ''');
 
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
-      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      fileSystem
+          .file('assets/vanilla/ice-cream.png')
+          .createSync(recursive: true);
+      fileSystem
+          .file('assets/strawberry/ice-cream.png')
+          .createSync(recursive: true);
 
       await const CopyAssets().build(environment);
 
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/common/image.png'), exists);
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'), isNot(exists));
-      expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'), exists);
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/common/image.png'),
+          exists);
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+          isNot(exists));
+      expect(
+          fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png'),
+          exists);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -203,49 +247,53 @@ flutter:
 
     expect(logger.errorText, isEmpty);
     expect(globals.processManager, hasNoRemainingExpectations);
-    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/input.txt'), exists);
-  }, overrides: <Type, Generator> {
+    expect(
+        fileSystem
+            .file('${environment.buildDir.path}/flutter_assets/input.txt'),
+        exists);
+  }, overrides: <Type, Generator>{
     Logger: () => logger,
     FileSystem: () => fileSystem,
     Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.list(
-      <FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-            'run',
-            'my_capitalizer_transformer',
-            RegExp('--input=.*'),
-            RegExp('--output=.*'),
-            '-a',
-            '-b',
-            '--color',
-            'green',
+          <FakeCommand>[
+            FakeCommand(
+              command: <Pattern>[
+                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+                'run',
+                'my_capitalizer_transformer',
+                RegExp('--input=.*'),
+                RegExp('--output=.*'),
+                '-a',
+                '-b',
+                '--color',
+                'green',
+              ],
+              onRun: (List<String> args) {
+                final ArgResults parsedArgs = (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output')
+                      ..addOption('color')
+                      ..addFlag('aaa', abbr: 'a')
+                      ..addFlag('bbb', abbr: 'b'))
+                    .parse(args);
+
+                expect(parsedArgs['aaa'], true);
+                expect(parsedArgs['bbb'], true);
+                expect(parsedArgs['color'], 'green');
+
+                final File input =
+                    fileSystem.file(parsedArgs['input'] as String);
+                expect(input, exists);
+                final String inputContents = input.readAsStringSync();
+                expect(inputContents, 'abc');
+                fileSystem.file(parsedArgs['output'])
+                  ..createSync()
+                  ..writeAsStringSync(inputContents.toUpperCase());
+              },
+            ),
           ],
-          onRun: (List<String> args) {
-            final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output')
-                ..addOption('color')
-                ..addFlag('aaa', abbr: 'a')
-                ..addFlag('bbb', abbr: 'b'))
-              .parse(args);
-
-            expect(parsedArgs['aaa'], true);
-            expect(parsedArgs['bbb'], true);
-            expect(parsedArgs['color'], 'green');
-
-            final File input = fileSystem.file(parsedArgs['input'] as String);
-            expect(input, exists);
-            final String inputContents = input.readAsStringSync();
-            expect(inputContents, 'abc');
-            fileSystem.file(parsedArgs['output'])
-              ..createSync()
-              ..writeAsStringSync(inputContents.toUpperCase());
-          },
         ),
-      ],
-    ),
   });
 
   testUsingContext('exits tool if an asset transformation fails', () async {
@@ -286,32 +334,32 @@ flutter:
       startsWith('User-defined transformation of asset "/input.txt" failed.\n'),
     );
     expect(globals.processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator> {
+  }, overrides: <Type, Generator>{
     Logger: () => logger,
     FileSystem: () => fileSystem,
     Platform: () => FakePlatform(),
     ProcessManager: () => FakeProcessManager.list(
-      <FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-            'run',
-            'my_transformer',
-            RegExp('--input=.*'),
-            RegExp('--output=.*'),
-            '-a',
-            '-b',
-            '--color',
-            'green',
+          <FakeCommand>[
+            FakeCommand(
+              command: <Pattern>[
+                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+                'run',
+                'my_transformer',
+                RegExp('--input=.*'),
+                RegExp('--output=.*'),
+                '-a',
+                '-b',
+                '--color',
+                'green',
+              ],
+              exitCode: 1,
+            ),
           ],
-          exitCode: 1,
         ),
-      ],
-    ),
   });
 
-
-  testUsingContext('Throws exception if pubspec contains missing files', () async {
+  testUsingContext('Throws exception if pubspec contains missing files',
+      () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -329,93 +377,103 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('processSkSLBundle returns null if there is no path '
-    'to the bundle', () {
-
-    expect(processSkSLBundle(
-      null,
-      targetPlatform: TargetPlatform.android,
-      fileSystem: MemoryFileSystem.test(),
-      logger: logger,
-    ), isNull);
+  testWithoutContext(
+      'processSkSLBundle returns null if there is no path '
+      'to the bundle', () {
+    expect(
+        processSkSLBundle(
+          null,
+          targetPlatform: TargetPlatform.android,
+          fileSystem: MemoryFileSystem.test(),
+          logger: logger,
+        ),
+        isNull);
   });
 
-  testWithoutContext('processSkSLBundle throws exception if bundle file is '
-    'missing', () {
-
-    expect(() => processSkSLBundle(
-      'does_not_exist.sksl',
-      targetPlatform: TargetPlatform.android,
-      fileSystem: MemoryFileSystem.test(),
-      logger: logger,
-    ), throwsException);
+  testWithoutContext(
+      'processSkSLBundle throws exception if bundle file is '
+      'missing', () {
+    expect(
+        () => processSkSLBundle(
+              'does_not_exist.sksl',
+              targetPlatform: TargetPlatform.android,
+              fileSystem: MemoryFileSystem.test(),
+              logger: logger,
+            ),
+        throwsException);
   });
 
-  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
-    'valid JSON', () {
-
+  testWithoutContext(
+      'processSkSLBundle throws exception if the bundle is not '
+      'valid JSON', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync('{');
 
-    expect(() => processSkSLBundle(
-      'bundle.sksl',
-      targetPlatform: TargetPlatform.android,
-      fileSystem: fileSystem,
-      logger: logger,
-    ), throwsException);
+    expect(
+        () => processSkSLBundle(
+              'bundle.sksl',
+              targetPlatform: TargetPlatform.android,
+              fileSystem: fileSystem,
+              logger: logger,
+            ),
+        throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
-  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
-    'a JSON object', () {
-
+  testWithoutContext(
+      'processSkSLBundle throws exception if the bundle is not '
+      'a JSON object', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync('[]');
 
-    expect(() => processSkSLBundle(
-      'bundle.sksl',
-      targetPlatform: TargetPlatform.android,
-      fileSystem: fileSystem,
-      logger: logger,
-    ), throwsException);
+    expect(
+        () => processSkSLBundle(
+              'bundle.sksl',
+              targetPlatform: TargetPlatform.android,
+              fileSystem: fileSystem,
+              logger: logger,
+            ),
+        throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
-  testWithoutContext('processSkSLBundle throws an exception if the engine '
-    'revision is different', () {
-
+  testWithoutContext(
+      'processSkSLBundle throws an exception if the engine '
+      'revision is different', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, String>{
-        'engineRevision': '1',
-      },
-    ));
+          <String, String>{
+            'engineRevision': '1',
+          },
+        ));
 
-    expect(() => processSkSLBundle(
-      'bundle.sksl',
-      targetPlatform: TargetPlatform.android,
-      fileSystem: fileSystem,
-      logger: logger,
-      engineVersion: '2',
-    ), throwsException);
+    expect(
+        () => processSkSLBundle(
+              'bundle.sksl',
+              targetPlatform: TargetPlatform.android,
+              fileSystem: fileSystem,
+              logger: logger,
+              engineVersion: '2',
+            ),
+        throwsException);
     expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
   });
 
-  testWithoutContext('processSkSLBundle warns if the bundle target platform is '
-    'different from the current target', () async {
-
+  testWithoutContext(
+      'processSkSLBundle warns if the bundle target platform is '
+      'different from the current target', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, Object>{
-        'engineRevision': '2',
-        'platform': 'fuchsia-arm64',
-        'data': <String, Object>{},
-      }
-    ));
+    fileSystem
+        .file('bundle.sksl')
+        .writeAsStringSync(json.encode(<String, Object>{
+          'engineRevision': '2',
+          'platform': 'fuchsia-arm64',
+          'data': <String, Object>{},
+        }));
 
     final DevFSContent content = processSkSLBundle(
       'bundle.sksl',
@@ -426,20 +484,21 @@ flutter:
     )!;
 
     expect(await content.contentsAsBytes(), utf8.encode('{"data":{}}'));
-    expect(logger.errorText, contains('This may lead to less efficient shader caching'));
+    expect(logger.errorText,
+        contains('This may lead to less efficient shader caching'));
   });
 
-  testWithoutContext('processSkSLBundle does not warn and produces bundle', () async {
-
+  testWithoutContext('processSkSLBundle does not warn and produces bundle',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, Object>{
-        'engineRevision': '2',
-        'platform': 'android',
-        'data': <String, Object>{},
-      },
-    ));
+          <String, Object>{
+            'engineRevision': '2',
+            'platform': 'android',
+            'data': <String, Object>{},
+          },
+        ));
 
     final DevFSContent content = processSkSLBundle(
       'bundle.sksl',

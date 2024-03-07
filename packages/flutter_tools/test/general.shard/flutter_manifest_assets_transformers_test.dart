@@ -8,8 +8,11 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import '../src/common.dart';
 
 void main() {
-  group('parsing of assets section in flutter manifests with asset transformers', () {
-    testWithoutContext('parses an asset with a simple transformation', () async {
+  group(
+      'parsing of assets section in flutter manifests with asset transformers',
+      () {
+    testWithoutContext('parses an asset with a simple transformation',
+        () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
 name: test
@@ -23,7 +26,8 @@ flutter:
       transformers:
         - package: my_package
   ''';
-      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(manifest, logger: logger);
+      final FlutterManifest? parsedManifest =
+          FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(parsedManifest!.assets, <AssetsEntry>[
         AssetsEntry(
@@ -37,7 +41,8 @@ flutter:
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('parses an asset with a transformation that has args', () async {
+    testWithoutContext('parses an asset with a transformation that has args',
+        () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
 name: test
@@ -52,7 +57,8 @@ flutter:
         - package: my_package
           args: ["-e", "--color", "purple"]
 ''';
-      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(manifest, logger: logger);
+      final FlutterManifest? parsedManifest =
+          FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(parsedManifest!.assets, <AssetsEntry>[
         AssetsEntry(
@@ -68,7 +74,8 @@ flutter:
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('fails when a transformers section is not a list', () async {
+    testWithoutContext('fails when a transformers section is not a list',
+        () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
 name: test
@@ -90,7 +97,8 @@ flutter:
         'transformers list to be a list of Map, but element at index 0 was a String.\n',
       );
     });
-    testWithoutContext('fails when a transformers section package is not a string', () async {
+    testWithoutContext(
+        'fails when a transformers section package is not a string', () async {
       final BufferLogger logger = BufferLogger.test();
 
       const String manifest = '''
@@ -115,7 +123,8 @@ flutter:
       );
     });
 
-    testWithoutContext('fails when a transformer is missing the package field', () async {
+    testWithoutContext('fails when a transformer is missing the package field',
+        () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
 name: test
@@ -138,7 +147,9 @@ flutter:
       );
     });
 
-    testWithoutContext('fails when a transformer has args field that is not a list of strings', () async {
+    testWithoutContext(
+        'fails when a transformer has args field that is not a list of strings',
+        () async {
       final BufferLogger logger = BufferLogger.test();
       const String manifest = '''
 name: test

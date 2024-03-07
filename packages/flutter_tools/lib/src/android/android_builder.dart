@@ -13,6 +13,7 @@ AndroidBuilder? get androidBuilder {
 
 abstract class AndroidBuilder {
   const AndroidBuilder();
+
   /// Builds an AAR artifact.
   Future<void> buildAar({
     required FlutterProject project,

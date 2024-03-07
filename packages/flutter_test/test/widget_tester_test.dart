@@ -20,7 +20,8 @@ import 'multi_view_testing.dart';
 
 void main() {
   group('expectLater', () {
-    testWidgets('completes when matcher completes', (WidgetTester tester) async {
+    testWidgets('completes when matcher completes',
+        (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
@@ -37,7 +38,8 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
+      final Future<void> future = expectLater(null, FakeMatcher(completer),
+          skip: 'testing skip'); // [intended] API testing
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -74,7 +76,8 @@ void main() {
 
   group('pumping', () {
     testWidgets('pumping', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+      await tester
+          .pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
 
       final AnimationController test = AnimationController(
@@ -113,7 +116,8 @@ void main() {
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
+          final int current =
+              SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
           initial ??= current;
           logPaints.add(current - initial!);
         },
@@ -126,7 +130,8 @@ void main() {
       expect(logPaints, <int>[0, 16683, 33366, 50049]);
       logPaints.clear();
 
-      await tester.pumpFrames(target, const Duration(milliseconds: 30), const Duration(milliseconds: 10));
+      await tester.pumpFrames(target, const Duration(milliseconds: 30),
+          const Duration(milliseconds: 10));
 
       // Since `pumpFrames` was given a 10ms interval per pump, we expect the
       // results to continue from 50049 with 10000 microseconds per pump over
@@ -135,7 +140,8 @@ void main() {
     });
   });
   group('pageBack', () {
-    testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
+    testWidgets('fails when there are no back buttons',
+        (WidgetTester tester) async {
       await tester.pumpWidget(Container());
 
       expect(
@@ -144,7 +150,8 @@ void main() {
       );
     });
 
-    testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+    testWidgets('successfully taps material back buttons',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -164,7 +171,7 @@ void main() {
                     ));
                   },
                 );
-              } ,
+              },
             ),
           ),
         ),
@@ -182,7 +189,8 @@ void main() {
       expect(find.text('Page 2'), findsNothing);
     });
 
-    testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+    testWidgets('successfully taps cupertino back buttons',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -203,7 +211,7 @@ void main() {
                     ));
                   },
                 );
-              } ,
+              },
             ),
           ),
         ),
@@ -255,72 +263,77 @@ void main() {
     expect(await tester.pumpAndSettle(), 1);
     controller.duration = const Duration(seconds: 1);
     controller.forward();
-    expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
+    expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)),
+        5); // 0, 300, 600, 900, 1200ms
   });
 
   testWidgets('Input event array', (WidgetTester tester) async {
-      final List<String> logs = <String>[];
+    final List<String> logs = <String>[];
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
-            child: const Text('test'),
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Listener(
+          onPointerDown: (PointerDownEvent event) =>
+              logs.add('down ${event.buttons}'),
+          onPointerMove: (PointerMoveEvent event) =>
+              logs.add('move ${event.buttons}'),
+          onPointerUp: (PointerUpEvent event) =>
+              logs.add('up ${event.buttons}'),
+          child: const Text('test'),
         ),
-      );
+      ),
+    );
 
-      final Offset location = tester.getCenter(find.text('test'));
-      final List<PointerEventRecord> records = <PointerEventRecord>[
-        PointerEventRecord(Duration.zero, <PointerEvent>[
-          // Typically PointerAddedEvent is not used in testers, but for records
-          // captured on a device it is usually what start a gesture.
-          PointerAddedEvent(
-            position: location,
-          ),
-          PointerDownEvent(
-            position: location,
-            buttons: kSecondaryMouseButton,
-            pointer: 1,
-          ),
-        ]),
-        ...<PointerEventRecord>[
-          for (Duration t = const Duration(milliseconds: 5);
-               t < const Duration(milliseconds: 80);
-               t += const Duration(milliseconds: 16))
-            PointerEventRecord(t, <PointerEvent>[
-              PointerMoveEvent(
-                timeStamp: t - const Duration(milliseconds: 1),
-                position: location,
-                buttons: kSecondaryMouseButton,
-                pointer: 1,
-              ),
-            ]),
-        ],
-        PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
-          PointerUpEvent(
-            timeStamp: const Duration(milliseconds: 79),
-            position: location,
-            buttons: kSecondaryMouseButton,
-            pointer: 1,
-          ),
-        ]),
-      ];
-      final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
-      expect(timeDiffs.length, records.length);
-      for (final Duration diff in timeDiffs) {
-        expect(diff, Duration.zero);
-      }
+    final Offset location = tester.getCenter(find.text('test'));
+    final List<PointerEventRecord> records = <PointerEventRecord>[
+      PointerEventRecord(Duration.zero, <PointerEvent>[
+        // Typically PointerAddedEvent is not used in testers, but for records
+        // captured on a device it is usually what start a gesture.
+        PointerAddedEvent(
+          position: location,
+        ),
+        PointerDownEvent(
+          position: location,
+          buttons: kSecondaryMouseButton,
+          pointer: 1,
+        ),
+      ]),
+      ...<PointerEventRecord>[
+        for (Duration t = const Duration(milliseconds: 5);
+            t < const Duration(milliseconds: 80);
+            t += const Duration(milliseconds: 16))
+          PointerEventRecord(t, <PointerEvent>[
+            PointerMoveEvent(
+              timeStamp: t - const Duration(milliseconds: 1),
+              position: location,
+              buttons: kSecondaryMouseButton,
+              pointer: 1,
+            ),
+          ]),
+      ],
+      PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
+        PointerUpEvent(
+          timeStamp: const Duration(milliseconds: 79),
+          position: location,
+          buttons: kSecondaryMouseButton,
+          pointer: 1,
+        ),
+      ]),
+    ];
+    final List<Duration> timeDiffs =
+        await tester.handlePointerEventRecord(records);
+    expect(timeDiffs.length, records.length);
+    for (final Duration diff in timeDiffs) {
+      expect(diff, Duration.zero);
+    }
 
-      const String b = '$kSecondaryMouseButton';
-      expect(logs.first, 'down $b');
-      for (int i = 1; i < logs.length - 1; i++) {
-        expect(logs[i], 'move $b');
-      }
-      expect(logs.last, 'up $b');
+    const String b = '$kSecondaryMouseButton';
+    expect(logs.first, 'down $b');
+    for (int i = 1; i < logs.length - 1; i++) {
+      expect(logs[i], 'move $b');
+    }
+    expect(logs.last, 'up $b');
   });
 
   group('runAsync', () {
@@ -362,7 +375,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async { }), throwsA(isA<TestFailure>()));
+      expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
@@ -379,18 +392,21 @@ void main() {
     });
 
     testWidgets('control test (return value)', (WidgetTester tester) async {
-      final String? result = await tester.binding.runAsync<String>(() async => 'Judy Turner');
+      final String? result =
+          await tester.binding.runAsync<String>(() async => 'Judy Turner');
       expect(result, 'Judy Turner');
     });
 
     testWidgets('async throw', (WidgetTester tester) async {
-      final String? result = await tester.binding.runAsync<Never>(() async => throw Exception('Lois Dilettente'));
+      final String? result = await tester.binding
+          .runAsync<Never>(() async => throw Exception('Lois Dilettente'));
       expect(result, isNull);
       expect(tester.takeException(), isNotNull);
     });
 
     testWidgets('sync throw', (WidgetTester tester) async {
-      final String? result = await tester.binding.runAsync<Never>(() => throw Exception('Butch Barton'));
+      final String? result = await tester.binding
+          .runAsync<Never>(() => throw Exception('Butch Barton'));
       expect(result, isNull);
       expect(tester.takeException(), isNotNull);
     });
@@ -419,22 +435,23 @@ void main() {
     });
 
     testWidgets(
-      'can focus on offstage text input field if finder says not to skip offstage nodes',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: Offstage(
-                child: TextFormField(),
-              ),
+        'can focus on offstage text input field if finder says not to skip offstage nodes',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Offstage(
+              child: TextFormField(),
             ),
           ),
-        );
-        await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
-      });
+        ),
+      );
+      await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
+    });
   });
 
-  testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
+  testWidgets('verifyTickersWereDisposed control test',
+      (WidgetTester tester) async {
     late FlutterError error;
     final Ticker ticker = tester.createTicker((Duration duration) {});
     ticker.start();
@@ -454,16 +471,18 @@ void main() {
       );
       expect(error.diagnostics.last, isA<DiagnosticsProperty<Ticker>>());
       expect(error.diagnostics.last.value, ticker);
-      expect(error.toStringDeep(), startsWith(
-        'FlutterError\n'
-        '   A Ticker was active .\n'
-        '   All Tickers must be disposed.\n'
-        '   Tickers used by AnimationControllers should be disposed by\n'
-        '   calling dispose() on the AnimationController itself. Otherwise,\n'
-        '   the ticker will leak.\n'
-        '   The offending ticker was:\n'
-        '     _TestTicker()\n',
-      ));
+      expect(
+          error.toStringDeep(),
+          startsWith(
+            'FlutterError\n'
+            '   A Ticker was active .\n'
+            '   All Tickers must be disposed.\n'
+            '   Tickers used by AnimationControllers should be disposed by\n'
+            '   calling dispose() on the AnimationController itself. Otherwise,\n'
+            '   the ticker will leak.\n'
+            '   The offending ticker was:\n'
+            '     _TestTicker()\n',
+          ));
     }
     ticker.stop();
   });
@@ -471,7 +490,8 @@ void main() {
   group('testWidgets variants work', () {
     int numberOfVariationsRun = 0;
 
-    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
+    testWidgets('variant tests run all values provided',
+        (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
       } else {
@@ -479,13 +499,16 @@ void main() {
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
-    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+    testWidgets('variant tests have descriptions with details',
+        (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
-        expect(tester.testDescription, equals('variant tests have descriptions with details'));
+        expect(tester.testDescription,
+            equals('variant tests have descriptions with details'));
       } else {
         expect(
           tester.testDescription,
-          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
+          equals(
+              'variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
         );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
@@ -503,13 +526,15 @@ void main() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
-    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+    testWidgets('TargetPlatformVariant.only tests given value',
+        (WidgetTester tester) async {
       expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     group('all', () {
-      testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+      testWidgets('TargetPlatformVariant.all tests run all variants',
+          (WidgetTester tester) async {
         if (debugDefaultTargetPlatformOverride == null) {
           expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
         } else {
@@ -517,22 +542,29 @@ void main() {
         }
       }, variant: TargetPlatformVariant.all());
 
-      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
-      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.linux
+      };
+      testWidgets(
+          'TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding',
+          (WidgetTester tester) async {
         if (debugDefaultTargetPlatformOverride == null) {
-          expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
-          expect(
-            excludePlatforms,
-            isNot(contains(debugDefaultTargetPlatformOverride)),
-            reason: 'this test should not run on any platform in excludePlatforms'
-          );
+          expect(numberOfVariationsRun,
+              equals(TargetPlatform.values.length - excludePlatforms.length));
+          expect(excludePlatforms,
+              isNot(contains(debugDefaultTargetPlatformOverride)),
+              reason:
+                  'this test should not run on any platform in excludePlatforms');
         } else {
           numberOfVariationsRun += 1;
         }
       }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
     });
 
-    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
+    testWidgets(
+        'TargetPlatformVariant.desktop + mobile contains all TargetPlatform values',
+        (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
       final TargetPlatformVariant desktop = TargetPlatformVariant.all();
       final TargetPlatformVariant mobile = TargetPlatformVariant.all();
@@ -552,36 +584,42 @@ void main() {
 
     test('Throws assertion message without code', () async {
       late FlutterErrorDetails flutterErrorDetails;
-      reportTestException = (FlutterErrorDetails details, String testDescription) {
+      reportTestException =
+          (FlutterErrorDetails details, String testDescription) {
         flutterErrorDetails = details;
       };
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      final TestWidgetsFlutterBinding binding =
+          TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runTest(() async {
         final Timer timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);
       }, () {});
 
       expect(flutterErrorDetails.exception, isA<AssertionError>());
-      expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect((flutterErrorDetails.exception as AssertionError).message,
+          'A Timer is still pending even after the widget tree was disposed.');
       expect(binding.inTest, true);
       binding.postTest();
     });
   });
 
   group('Accessibility announcements testing API', () {
-    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
-
+    testWidgets('Returns the list of announcements',
+        (WidgetTester tester) async {
       // Make sure the handler is properly set
-      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
+      expect(
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .checkMockMessageHandler(SystemChannels.accessibility.name, null),
+          isFalse);
 
       await SemanticsService.announce('announcement 1', TextDirection.ltr);
       await SemanticsService.announce('announcement 2', TextDirection.rtl,
           assertiveness: Assertiveness.assertive);
       await SemanticsService.announce('announcement 3', TextDirection.rtl);
 
-      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
+      final List<CapturedAccessibilityAnnouncement> list =
+          tester.takeAnnouncements();
       expect(list, hasLength(3));
       final CapturedAccessibilityAnnouncement first = list[0];
       expect(first.message, 'announcement 1');
@@ -597,7 +635,8 @@ void main() {
       expect(third.textDirection, TextDirection.rtl);
       expect(third.assertiveness, Assertiveness.polite);
 
-      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
+      final List<CapturedAccessibilityAnnouncement> emptyList =
+          tester.takeAnnouncements();
       expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
     });
 
@@ -605,7 +644,8 @@ void main() {
       final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
       Future<dynamic> handleMessage(dynamic mockMessage) async {
-        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> message =
+            mockMessage as Map<dynamic, dynamic>;
         log.add(message);
       }
 
@@ -626,7 +666,7 @@ void main() {
                 'assertiveness': 1
               }
             },
-      ]));
+          ]));
 
       // Remove the handler
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -636,12 +676,15 @@ void main() {
 
     tearDown(() {
       // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
-      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
+      expect(
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .checkMockMessageHandler(SystemChannels.accessibility.name, null),
+          isTrue);
     });
   });
 
-  testWidgets('wrapWithView: false does not include View', (WidgetTester tester) async {
+  testWidgets('wrapWithView: false does not include View',
+      (WidgetTester tester) async {
     FlutterView? flutterView;
     View? view;
     int builderCount = 0;
@@ -663,7 +706,8 @@ void main() {
     expect(find.byType(View), findsNothing);
   });
 
-  testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (WidgetTester tester) async {
+  testWidgets('passing a view to pumpWidget with wrapWithView: true throws',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       View(
         view: FakeView(tester.view),
@@ -675,12 +719,14 @@ void main() {
       isFlutterError.having(
         (FlutterError e) => e.message,
         'message',
-        contains('consider setting the "wrapWithView" parameter of that method to false'),
+        contains(
+            'consider setting the "wrapWithView" parameter of that method to false'),
       ),
     );
   });
 
-  testWidgets('can pass a View to pumpWidget when wrapWithView: false', (WidgetTester tester) async {
+  testWidgets('can pass a View to pumpWidget when wrapWithView: false',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithView: false,
       View(
@@ -719,7 +765,8 @@ class _AlwaysAnimating extends StatefulWidget {
   State<StatefulWidget> createState() => _AlwaysAnimatingState();
 }
 
-class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerProviderStateMixin {
+class _AlwaysAnimatingState extends State<_AlwaysAnimating>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override

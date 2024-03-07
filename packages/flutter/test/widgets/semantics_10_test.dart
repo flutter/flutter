@@ -10,7 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
+  testWidgets(
+      'can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -104,7 +106,6 @@ class RenderTest extends RenderProxyBox {
       ..isSemanticBoundary = isSemanticBoundary
       ..label = label
       ..textDirection = TextDirection.ltr;
-
   }
 
   String get label => _label;
@@ -116,7 +117,6 @@ class RenderTest extends RenderProxyBox {
     _label = value;
     markNeedsSemanticsUpdate();
   }
-
 
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;

@@ -144,11 +144,8 @@ class CommonFinders {
     bool findRichText = false,
     bool skipOffstage = true,
   }) {
-    return _TextContainingWidgetFinder(
-      pattern,
-      findRichText: findRichText,
-      skipOffstage: skipOffstage
-    );
+    return _TextContainingWidgetFinder(pattern,
+        findRichText: findRichText, skipOffstage: skipOffstage);
   }
 
   /// Looks for widgets that contain a [Text] descendant with `text`
@@ -168,7 +165,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder widgetWithText(Type widgetType, String text, { bool skipOffstage = true }) {
+  Finder widgetWithText(Type widgetType, String text,
+      {bool skipOffstage = true}) {
     return find.ancestor(
       of: find.text(text, skipOffstage: skipOffstage),
       matching: find.byType(widgetType, skipOffstage: skipOffstage),
@@ -186,7 +184,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder image(ImageProvider image, { bool skipOffstage = true }) => _ImageWidgetFinder(image, skipOffstage: skipOffstage);
+  Finder image(ImageProvider image, {bool skipOffstage = true}) =>
+      _ImageWidgetFinder(image, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for one with the given `key`.
   ///
@@ -198,7 +197,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byKey(Key key, { bool skipOffstage = true }) => _KeyWidgetFinder(key, skipOffstage: skipOffstage);
+  Finder byKey(Key key, {bool skipOffstage = true}) =>
+      _KeyWidgetFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets implementing a particular type.
   ///
@@ -216,7 +216,8 @@ class CommonFinders {
   ///
   /// See also:
   /// * [byType], which does not do subtype tests.
-  Finder bySubtype<T extends Widget>({ bool skipOffstage = true }) => _SubtypeWidgetFinder<T>(skipOffstage: skipOffstage);
+  Finder bySubtype<T extends Widget>({bool skipOffstage = true}) =>
+      _SubtypeWidgetFinder<T>(skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets with a particular type.
   ///
@@ -237,7 +238,8 @@ class CommonFinders {
   ///
   /// See also:
   /// * [bySubtype], which allows subtype tests.
-  Finder byType(Type type, { bool skipOffstage = true }) => _TypeWidgetFinder(type, skipOffstage: skipOffstage);
+  Finder byType(Type type, {bool skipOffstage = true}) =>
+      _TypeWidgetFinder(type, skipOffstage: skipOffstage);
 
   /// Finds [Icon] widgets containing icon data equal to the `icon`
   /// argument.
@@ -250,7 +252,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byIcon(IconData icon, { bool skipOffstage = true }) => _IconWidgetFinder(icon, skipOffstage: skipOffstage);
+  Finder byIcon(IconData icon, {bool skipOffstage = true}) =>
+      _IconWidgetFinder(icon, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
   /// `icon` in it.
@@ -269,7 +272,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage = true }) {
+  Finder widgetWithIcon(Type widgetType, IconData icon,
+      {bool skipOffstage = true}) {
     return find.ancestor(
       of: find.byIcon(icon),
       matching: find.byType(widgetType),
@@ -293,7 +297,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder widgetWithImage(Type widgetType, ImageProvider image, { bool skipOffstage = true }) {
+  Finder widgetWithImage(Type widgetType, ImageProvider image,
+      {bool skipOffstage = true}) {
     return find.ancestor(
       of: find.image(image),
       matching: find.byType(widgetType),
@@ -316,7 +321,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementType(Type type, { bool skipOffstage = true }) => _ElementTypeWidgetFinder(type, skipOffstage: skipOffstage);
+  Finder byElementType(Type type, {bool skipOffstage = true}) =>
+      _ElementTypeWidgetFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets whose current widget is the instance given by the `widget`
   /// argument.
@@ -335,7 +341,8 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidget(Widget widget, { bool skipOffstage = true }) => _ExactWidgetFinder(widget, skipOffstage: skipOffstage);
+  Finder byWidget(Widget widget, {bool skipOffstage = true}) =>
+      _ExactWidgetFinder(widget, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget `predicate`.
   ///
@@ -355,8 +362,10 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidgetPredicate(WidgetPredicate predicate, { String? description, bool skipOffstage = true }) {
-    return _WidgetPredicateWidgetFinder(predicate, description: description, skipOffstage: skipOffstage);
+  Finder byWidgetPredicate(WidgetPredicate predicate,
+      {String? description, bool skipOffstage = true}) {
+    return _WidgetPredicateWidgetFinder(predicate,
+        description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds [Tooltip] widgets with the given `message`.
@@ -369,7 +378,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byTooltip(String message, { bool skipOffstage = true }) {
+  Finder byTooltip(String message, {bool skipOffstage = true}) {
     return byWidgetPredicate(
       (Widget widget) => widget is Tooltip && widget.message == message,
       skipOffstage: skipOffstage,
@@ -397,8 +406,10 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementPredicate(ElementPredicate predicate, { String? description, bool skipOffstage = true }) {
-    return _ElementPredicateWidgetFinder(predicate, description: description, skipOffstage: skipOffstage);
+  Finder byElementPredicate(ElementPredicate predicate,
+      {String? description, bool skipOffstage = true}) {
+    return _ElementPredicateWidgetFinder(predicate,
+        description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets that are descendants of the `of` parameter and that match
@@ -424,7 +435,8 @@ class CommonFinders {
     bool matchRoot = false,
     bool skipOffstage = true,
   }) {
-    return _DescendantWidgetFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
+    return _DescendantWidgetFinder(of, matching,
+        matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets that are ancestors of the `of` parameter and that match
@@ -477,11 +489,11 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
+  Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
       throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.ensureSemantics() before using '
-                       'this finder, and call dispose on its return value after.');
+          'Make sure to call tester.ensureSemantics() before using '
+          'this finder, and call dispose on its return value after.');
     }
     return byElementPredicate(
       (Element element) {
@@ -490,7 +502,8 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
+        final String? semanticsLabel =
+            element.renderObject.debugSemantics?.label;
         if (semanticsLabel == null) {
           return false;
         }
@@ -502,7 +515,6 @@ class CommonFinders {
     );
   }
 }
-
 
 /// Provides lightweight syntax for getting frequently used semantics finders.
 ///
@@ -620,8 +632,10 @@ class CommonSemanticsFinders {
   /// [SemanticsAction]s.
   ///
   /// {@macro flutter_test.finders.CommonSemanticsFinders.viewParameter}
-  SemanticsFinder byAnyAction(List<SemanticsAction> actions, {FlutterView? view}) {
-    final int actionsInt = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
+  SemanticsFinder byAnyAction(List<SemanticsAction> actions,
+      {FlutterView? view}) {
+    final int actionsInt = actions.fold(
+        0, (int value, SemanticsAction action) => value | action.index);
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().actions & actionsInt != 0,
       describeMatch: (Plurality plurality) => '${switch (plurality) {
@@ -651,7 +665,8 @@ class CommonSemanticsFinders {
   ///
   /// {@macro flutter_test.finders.CommonSemanticsFinders.viewParameter}
   SemanticsFinder byAnyFlag(List<SemanticsFlag> flags, {FlutterView? view}) {
-    final int flagsInt = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
+    final int flagsInt =
+        flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().flags & flagsInt != 0,
       describeMatch: (Plurality plurality) => '${switch (plurality) {
@@ -711,11 +726,15 @@ final class CommonTextRangeFinders {
   /// the text. After finding a matching substring in the text, the method
   /// continues the search from the end of the match, thus skipping overlapping
   /// occurrences of the substring.
-  FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf }) {
-    final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage, findRichText: true);
+  FinderBase<TextRangeContext> ofSubstring(String substring,
+      {bool skipOffstage = true, FinderBase<Element>? descendentOf}) {
+    final _TextContainingWidgetFinder textWidgetFinder =
+        _TextContainingWidgetFinder(substring,
+            skipOffstage: skipOffstage, findRichText: true);
     final Finder elementFinder = descendentOf == null
-      ? textWidgetFinder
-      : _DescendantWidgetFinder(descendentOf, textWidgetFinder, matchRoot: true, skipOffstage: skipOffstage);
+        ? textWidgetFinder
+        : _DescendantWidgetFinder(descendentOf, textWidgetFinder,
+            matchRoot: true, skipOffstage: skipOffstage);
     return _StaticTextRangeFinder(elementFinder, substring);
   }
 }
@@ -724,13 +743,16 @@ final class CommonTextRangeFinders {
 enum Plurality {
   /// Text should be pluralized to describe zero items.
   zero,
+
   /// Text should be pluralized to describe a single item.
   one,
+
   /// Text should be pluralized to describe more than one item.
   many;
 
   static Plurality _fromNum(num source) {
-    assert(source >= 0, 'A Plurality can only be created with a positive number.');
+    assert(
+        source >= 0, 'A Plurality can only be created with a positive number.');
     return switch (source) {
       0 => Plurality.zero,
       1 => Plurality.one,
@@ -770,6 +792,7 @@ abstract class FinderBase<CandidateType> {
     );
     return _found!;
   }
+
   FinderResult<CandidateType>? _found;
 
   /// Whether or not this finder has any results in [found].
@@ -817,7 +840,8 @@ abstract class FinderBase<CandidateType> {
 
   /// Returns a variant of this finder that only matches the item at the
   /// given index found by this finder.
-  FinderBase<CandidateType> at(int index) => _IndexFinder<CandidateType>(this, index);
+  FinderBase<CandidateType> at(int index) =>
+      _IndexFinder<CandidateType>(this, index);
 
   /// Returns all the items in the given list that match this
   /// finder's requirements.
@@ -841,7 +865,8 @@ abstract class FinderBase<CandidateType> {
   ///     than directly returning results.
   FinderResult<CandidateType> evaluate() {
     if (!_cached || _found == null) {
-      _found = FinderResult<CandidateType>(describeMatch, findInCandidates(allCandidates));
+      _found = FinderResult<CandidateType>(
+          describeMatch, findInCandidates(allCandidates));
     }
     return found;
   }
@@ -926,8 +951,10 @@ class FinderResult<CandidateType> extends Iterable<CandidateType> {
   /// `describeMatch` callback.
   ///
   /// {@macro flutter_test.finders.FinderBase.describeMatch}
-  FinderResult(DescribeMatchCallback describeMatch, Iterable<CandidateType> values)
-    : _describeMatch = describeMatch, _values = values;
+  FinderResult(
+      DescribeMatchCallback describeMatch, Iterable<CandidateType> values)
+      : _describeMatch = describeMatch,
+        _values = values;
 
   final DescribeMatchCallback _describeMatch;
   final Iterable<CandidateType> _values;
@@ -944,8 +971,8 @@ class FinderResult<CandidateType> extends Iterable<CandidateType> {
       (String current, CandidateType candidate) => '$current\n  $candidate,',
     );
     return 'Found ${valuesList.length} ${_describeMatch(Plurality._fromNum(valuesList.length))}: ['
-      '${valuesString.isNotEmpty ? '$valuesString\n' : ''}'
-      ']';
+        '${valuesString.isNotEmpty ? '$valuesString\n' : ''}'
+        ']';
   }
 }
 
@@ -955,11 +982,9 @@ mixin _LegacyFinderMixin on FinderBase<Element> {
 
   /// Describes what the finder is looking for. The description should be
   /// a brief English noun phrase describing the finder's requirements.
-  @Deprecated(
-    'Use FinderBase.describeMatch instead. '
-    'FinderBase.describeMatch allows for more readable descriptions and removes ambiguity about pluralization. '
-    'This feature was deprecated after v3.13.0-0.2.pre.'
-  )
+  @Deprecated('Use FinderBase.describeMatch instead. '
+      'FinderBase.describeMatch allows for more readable descriptions and removes ambiguity about pluralization. '
+      'This feature was deprecated after v3.13.0-0.2.pre.')
   String get description;
 
   /// Returns all the elements in the given list that match this
@@ -971,11 +996,9 @@ mixin _LegacyFinderMixin on FinderBase<Element> {
   /// version of Flutter. If the finder can efficiently be described just in
   /// terms of a predicate function, consider mixing in [MatchFinderMixin]
   /// instead.
-  @Deprecated(
-    'Override FinderBase.findInCandidates instead. '
-    'Using the FinderBase API allows for more consistent caching behavior and cleaner options for interacting with the widget tree. '
-    'This feature was deprecated after v3.13.0-0.2.pre.'
-  )
+  @Deprecated('Override FinderBase.findInCandidates instead. '
+      'Using the FinderBase API allows for more consistent caching behavior and cleaner options for interacting with the widget tree. '
+      'This feature was deprecated after v3.13.0-0.2.pre.')
   Iterable<Element> apply(Iterable<Element> candidates) {
     return findInCandidates(candidates);
   }
@@ -985,11 +1008,9 @@ mixin _LegacyFinderMixin on FinderBase<Element> {
   /// from [evaluate].
   ///
   /// If this returns true, you must call [evaluate] before you call [precache] again.
-  @Deprecated(
-    'Use FinderBase.tryFind or FinderBase.runCached instead. '
-    'Using the FinderBase API allows for more consistent caching behavior and cleaner options for interacting with the widget tree. '
-    'This feature was deprecated after v3.13.0-0.2.pre.'
-  )
+  @Deprecated('Use FinderBase.tryFind or FinderBase.runCached instead. '
+      'Using the FinderBase API allows for more consistent caching behavior and cleaner options for interacting with the widget tree. '
+      'This feature was deprecated after v3.13.0-0.2.pre.')
   bool precache() {
     assert(_precacheResults == null);
     if (tryEvaluate()) {
@@ -1051,7 +1072,8 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
   ///
   /// The `at` parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({ Alignment at = Alignment.center }) => _HitTestableWidgetFinder(this, at);
+  Finder hitTestable({Alignment at = Alignment.center}) =>
+      _HitTestableWidgetFinder(this, at);
 }
 
 /// A base class for creating finders that search the semantics tree.
@@ -1080,7 +1102,8 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
 
   @override
   Iterable<SemanticsNode> get allCandidates {
-    return roots.expand((SemanticsNode root) => collectAllSemanticsNodesFrom(root));
+    return roots
+        .expand((SemanticsNode root) => collectAllSemanticsNodesFrom(root));
   }
 
   static Iterable<SemanticsNode> get _allRoots {
@@ -1092,6 +1115,7 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
       }
       owner.visitChildren(collectSemanticsRoots);
     }
+
     collectSemanticsRoots(TestWidgetsFlutterBinding.instance.rootPipelineOwner);
     return roots;
   }
@@ -1121,40 +1145,48 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
       switch (child) {
         case RenderParagraph():
           paragraphs.add(child);
-          // No need to continue, we are piggybacking off of a text matcher, so
-          // inline text widgets will be reported separately.
+        // No need to continue, we are piggybacking off of a text matcher, so
+        // inline text widgets will be reported separately.
         case RenderBox():
           child.visitChildren(visitor);
         case _:
       }
     }
+
     visitor(renderObject);
     Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
-      final String text = paragraph.text.toPlainText(includeSemanticsLabels: false);
-      return pattern.allMatches(text)
-        .map((Match match) => TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)));
+      final String text =
+          paragraph.text.toPlainText(includeSemanticsLabels: false);
+      return pattern.allMatches(text).map((Match match) => TextRangeContext._(
+          view, paragraph, TextRange(start: match.start, end: match.end)));
     }
+
     return paragraphs.expand(searchInParagraph);
   }
 
   @override
-  Iterable<TextRangeContext> findInCandidates(Iterable<TextRangeContext> candidates) => candidates;
+  Iterable<TextRangeContext> findInCandidates(
+          Iterable<TextRangeContext> candidates) =>
+      candidates;
 
   @override
-  Iterable<TextRangeContext> get allCandidates => _parent.evaluate().expand(_flatMap);
+  Iterable<TextRangeContext> get allCandidates =>
+      _parent.evaluate().expand(_flatMap);
 
   @override
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
-      Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
-      Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
+      Plurality.zero ||
+      Plurality.many =>
+        'non-overlapping TextRanges that match the Pattern "$pattern"',
+      Plurality.one =>
+        'non-overlapping TextRange that matches the Pattern "$pattern"',
     };
   }
 }
 
 /// A mixin that applies additional filtering to the results of a parent [Finder].
- mixin ChainedFinderMixin<CandidateType> on FinderBase<CandidateType> {
-
+mixin ChainedFinderMixin<CandidateType> on FinderBase<CandidateType> {
   /// Another finder whose results will be further filtered.
   FinderBase<CandidateType> get parent;
 
@@ -1182,20 +1214,21 @@ abstract class ChainedFinder extends Finder with ChainedFinderMixin<Element> {
   final FinderBase<Element> parent;
 }
 
-mixin _FirstFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType>{
+mixin _FirstFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType> {
   @override
   String describeMatch(Plurality plurality) {
     return '${parent.describeMatch(plurality)} (ignoring all but first)';
   }
 
   @override
-  Iterable<CandidateType> filter(Iterable<CandidateType> parentCandidates) sync* {
+  Iterable<CandidateType> filter(
+      Iterable<CandidateType> parentCandidates) sync* {
     yield parentCandidates.first;
   }
 }
 
 class _FirstFinder<CandidateType> extends FinderBase<CandidateType>
-  with ChainedFinderMixin<CandidateType>, _FirstFinderMixin<CandidateType> {
+    with ChainedFinderMixin<CandidateType>, _FirstFinderMixin<CandidateType> {
   _FirstFinder(this.parent);
 
   @override
@@ -1216,13 +1249,14 @@ mixin _LastFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType> {
   }
 
   @override
-  Iterable<CandidateType> filter(Iterable<CandidateType> parentCandidates) sync* {
+  Iterable<CandidateType> filter(
+      Iterable<CandidateType> parentCandidates) sync* {
     yield parentCandidates.last;
   }
 }
 
 class _LastFinder<CandidateType> extends FinderBase<CandidateType>
-  with ChainedFinderMixin<CandidateType>, _LastFinderMixin<CandidateType>{
+    with ChainedFinderMixin<CandidateType>, _LastFinderMixin<CandidateType> {
   _LastFinder(this.parent);
 
   @override
@@ -1245,7 +1279,8 @@ mixin _IndexFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType> {
   }
 
   @override
-  Iterable<CandidateType> filter(Iterable<CandidateType> parentCandidates) sync* {
+  Iterable<CandidateType> filter(
+      Iterable<CandidateType> parentCandidates) sync* {
     yield parentCandidates.elementAt(index);
   }
 }
@@ -1287,9 +1322,11 @@ class _HitTestableWidgetFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
-      final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
+      final int viewId =
+          candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderBox box = candidate.renderObject! as RenderBox;
-      final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
+      final Offset absoluteOffset =
+          box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
@@ -1320,7 +1357,7 @@ mixin MatchFinderMixin<CandidateType> on FinderBase<CandidateType> {
 abstract class MatchFinder extends Finder with MatchFinderMixin<Element> {
   /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// `skipOffstage` property.
-  MatchFinder({ super.skipOffstage });
+  MatchFinder({super.skipOffstage});
 }
 
 abstract class _MatchTextFinder extends MatchFinder {
@@ -1422,7 +1459,7 @@ class _TextContainingWidgetFinder extends _MatchTextFinder {
 }
 
 class _KeyWidgetFinder extends MatchFinder {
-  _KeyWidgetFinder(this.key, { super.skipOffstage });
+  _KeyWidgetFinder(this.key, {super.skipOffstage});
 
   final Key key;
 
@@ -1436,7 +1473,7 @@ class _KeyWidgetFinder extends MatchFinder {
 }
 
 class _SubtypeWidgetFinder<T extends Widget> extends MatchFinder {
-  _SubtypeWidgetFinder({ super.skipOffstage });
+  _SubtypeWidgetFinder({super.skipOffstage});
 
   @override
   String get description => 'is "$T"';
@@ -1448,7 +1485,7 @@ class _SubtypeWidgetFinder<T extends Widget> extends MatchFinder {
 }
 
 class _TypeWidgetFinder extends MatchFinder {
-  _TypeWidgetFinder(this.widgetType, { super.skipOffstage });
+  _TypeWidgetFinder(this.widgetType, {super.skipOffstage});
 
   final Type widgetType;
 
@@ -1462,7 +1499,7 @@ class _TypeWidgetFinder extends MatchFinder {
 }
 
 class _ImageWidgetFinder extends MatchFinder {
-  _ImageWidgetFinder(this.image, { super.skipOffstage });
+  _ImageWidgetFinder(this.image, {super.skipOffstage});
 
   final ImageProvider image;
 
@@ -1482,7 +1519,7 @@ class _ImageWidgetFinder extends MatchFinder {
 }
 
 class _IconWidgetFinder extends MatchFinder {
-  _IconWidgetFinder(this.icon, { super.skipOffstage });
+  _IconWidgetFinder(this.icon, {super.skipOffstage});
 
   final IconData icon;
 
@@ -1497,7 +1534,7 @@ class _IconWidgetFinder extends MatchFinder {
 }
 
 class _ElementTypeWidgetFinder extends MatchFinder {
-  _ElementTypeWidgetFinder(this.elementType, { super.skipOffstage });
+  _ElementTypeWidgetFinder(this.elementType, {super.skipOffstage});
 
   final Type elementType;
 
@@ -1511,7 +1548,7 @@ class _ElementTypeWidgetFinder extends MatchFinder {
 }
 
 class _ExactWidgetFinder extends MatchFinder {
-  _ExactWidgetFinder(this.widget, { super.skipOffstage });
+  _ExactWidgetFinder(this.widget, {super.skipOffstage});
 
   final Widget widget;
 
@@ -1525,8 +1562,9 @@ class _ExactWidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateWidgetFinder extends MatchFinder {
-  _WidgetPredicateWidgetFinder(this.predicate, { String? description, super.skipOffstage })
-    : _description = description;
+  _WidgetPredicateWidgetFinder(this.predicate,
+      {String? description, super.skipOffstage})
+      : _description = description;
 
   final WidgetPredicate predicate;
   final String? _description;
@@ -1541,8 +1579,9 @@ class _WidgetPredicateWidgetFinder extends MatchFinder {
 }
 
 class _ElementPredicateWidgetFinder extends MatchFinder {
-  _ElementPredicateWidgetFinder(this.predicate, { String? description, super.skipOffstage })
-    : _description = description;
+  _ElementPredicateWidgetFinder(this.predicate,
+      {String? description, super.skipOffstage})
+      : _description = description;
 
   final ElementPredicate predicate;
   final String? _description;
@@ -1558,16 +1597,16 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 
 class _PredicateSemanticsFinder extends SemanticsFinder
     with MatchFinderMixin<SemanticsNode> {
-  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
-    : _describeMatch = describeMatch;
+  _PredicateSemanticsFinder(
+      this.predicate, DescribeMatchCallback? describeMatch, super.view)
+      : _describeMatch = describeMatch;
 
   final SemanticsNodePredicate predicate;
   final DescribeMatchCallback? _describeMatch;
 
   @override
   String describeMatch(Plurality plurality) {
-    return _describeMatch?.call(plurality) ??
-      'matching semantics predicate';
+    return _describeMatch?.call(plurality) ?? 'matching semantics predicate';
   }
 
   @override
@@ -1577,7 +1616,6 @@ class _PredicateSemanticsFinder extends SemanticsFinder
 }
 
 mixin _DescendantFinderMixin<CandidateType> on FinderBase<CandidateType> {
-
   FinderBase<CandidateType> get ancestor;
   FinderBase<CandidateType> get descendant;
   bool get matchRoot;
@@ -1585,22 +1623,25 @@ mixin _DescendantFinderMixin<CandidateType> on FinderBase<CandidateType> {
   @override
   String describeMatch(Plurality plurality) {
     return '${descendant.describeMatch(plurality)} descending from '
-      '${ancestor.describeMatch(plurality)}'
-      '${matchRoot ? ' inclusive' : ''}';
+        '${ancestor.describeMatch(plurality)}'
+        '${matchRoot ? ' inclusive' : ''}';
   }
 
   @override
   Iterable<CandidateType> findInCandidates(Iterable<CandidateType> candidates) {
     final Iterable<CandidateType> descendants = descendant.evaluate();
-    return candidates.where((CandidateType candidate) => descendants.contains(candidate));
+    return candidates
+        .where((CandidateType candidate) => descendants.contains(candidate));
   }
 
   @override
   Iterable<CandidateType> get allCandidates {
     final Iterable<CandidateType> ancestors = ancestor.evaluate();
-    final List<CandidateType> candidates = ancestors.expand<CandidateType>(
-      (CandidateType ancestor) => _collectDescendants(ancestor)
-    ).toSet().toList();
+    final List<CandidateType> candidates = ancestors
+        .expand<CandidateType>(
+            (CandidateType ancestor) => _collectDescendants(ancestor))
+        .toSet()
+        .toList();
     if (matchRoot) {
       candidates.insertAll(0, ancestors);
     }
@@ -1637,7 +1678,8 @@ class _DescendantWidgetFinder extends Finder
 
 class _DescendantSemanticsFinder extends FinderBase<SemanticsNode>
     with _DescendantFinderMixin<SemanticsNode> {
-  _DescendantSemanticsFinder(this.ancestor, this.descendant, {this.matchRoot = false});
+  _DescendantSemanticsFinder(this.ancestor, this.descendant,
+      {this.matchRoot = false});
 
   @override
   final FinderBase<SemanticsNode> ancestor;
@@ -1662,14 +1704,15 @@ mixin _AncestorFinderMixin<CandidateType> on FinderBase<CandidateType> {
   @override
   String describeMatch(Plurality plurality) {
     return '${ancestor.describeMatch(plurality)} that are ancestors of '
-    '${descendant.describeMatch(plurality)}'
-    '${matchLeaves ? ' inclusive' : ''}';
+        '${descendant.describeMatch(plurality)}'
+        '${matchLeaves ? ' inclusive' : ''}';
   }
 
   @override
   Iterable<CandidateType> findInCandidates(Iterable<CandidateType> candidates) {
     final Iterable<CandidateType> ancestors = ancestor.evaluate();
-    return candidates.where((CandidateType element) => ancestors.contains(element));
+    return candidates
+        .where((CandidateType element) => ancestors.contains(element));
   }
 
   @override
@@ -1687,9 +1730,10 @@ mixin _AncestorFinderMixin<CandidateType> on FinderBase<CandidateType> {
   Iterable<CandidateType> _collectAncestors(CandidateType child);
 }
 
-class _AncestorWidgetFinder extends Finder
-    with _AncestorFinderMixin<Element> {
-  _AncestorWidgetFinder(this.descendant, this.ancestor, { this.matchLeaves = false }) : super(skipOffstage: false);
+class _AncestorWidgetFinder extends Finder with _AncestorFinderMixin<Element> {
+  _AncestorWidgetFinder(this.descendant, this.ancestor,
+      {this.matchLeaves = false})
+      : super(skipOffstage: false);
 
   @override
   final FinderBase<Element> ancestor;

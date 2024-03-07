@@ -132,7 +132,8 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
 
     _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
       onComplete: _selectTime,
-      onPresent: (NavigatorState navigator, Object? arguments) => navigator.restorablePush(
+      onPresent: (NavigatorState navigator, Object? arguments) =>
+          navigator.restorablePush(
         _timePickerRoute,
         arguments: <int>[_fromTime.value.hour, _fromTime.value.minute],
       ),
@@ -163,7 +164,8 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _title {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     switch (widget.type) {
       case PickerDemoType.date:
         return localizations.demoDatePickerTitle;

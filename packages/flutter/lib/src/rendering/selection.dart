@@ -26,11 +26,13 @@ enum SelectionResult {
   /// [SelectionEdgeUpdateEvent].
   /// {@endtemplate}
   next,
+
   /// Selection does not reach this [Selectable] and is located before it in
   /// screen order.
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   previous,
+
   /// Selection ends in this [Selectable].
   ///
   /// Part of the [Selectable] may or may not be selected, but there is still
@@ -38,6 +40,7 @@ enum SelectionResult {
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   end,
+
   /// The result can't be determined in this frame.
   ///
   /// This is typically used when the subtree is scrolling to reveal more
@@ -47,6 +50,7 @@ enum SelectionResult {
   // See `_SelectableRegionState._triggerSelectionEndEdgeUpdate` for how this
   // result affects the selection.
   pending,
+
   /// There is no result for the selection event.
   ///
   /// This is used when a selection result is not applicable, e.g.
@@ -254,17 +258,22 @@ abstract final class SelectionUtils {
   /// For points in Area 2:
   ///   Move them to bottom-right of the rect if text direction is ltr, or
   ///   bottom-left if rtl.
-  static Offset adjustDragOffset(Rect targetRect, Offset point, {TextDirection direction = TextDirection.ltr}) {
+  static Offset adjustDragOffset(Rect targetRect, Offset point,
+      {TextDirection direction = TextDirection.ltr}) {
     if (targetRect.contains(point)) {
       return point;
     }
     if (point.dy <= targetRect.top ||
         point.dy <= targetRect.bottom && point.dx <= targetRect.left) {
       // Area 1
-      return direction == TextDirection.ltr ? targetRect.topLeft : targetRect.topRight;
+      return direction == TextDirection.ltr
+          ? targetRect.topLeft
+          : targetRect.topRight;
     } else {
       // Area 2
-      return direction == TextDirection.ltr ? targetRect.bottomRight : targetRect.bottomLeft;
+      return direction == TextDirection.ltr
+          ? targetRect.bottomRight
+          : targetRect.bottomLeft;
     }
   }
 }
@@ -349,14 +358,14 @@ abstract class SelectionEvent {
 /// ctrl + A, or cmd + A in macOS.
 class SelectAllSelectionEvent extends SelectionEvent {
   /// Creates a select all selection event.
-  const SelectAllSelectionEvent(): super._(SelectionEventType.selectAll);
+  const SelectAllSelectionEvent() : super._(SelectionEventType.selectAll);
 }
 
 /// Clears the selection from the [Selectable] and removes any existing
 /// highlight as if there is no selection at all.
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
-  const ClearSelectionEvent(): super._(SelectionEventType.clear);
+  const ClearSelectionEvent() : super._(SelectionEventType.clear);
 }
 
 /// Selects the whole word at the location.
@@ -364,7 +373,8 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
+  const SelectWordSelectionEvent({required this.globalPosition})
+      : super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
@@ -392,10 +402,10 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
-  const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition,
-    TextGranularity? granularity
-  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
+  const SelectionEdgeUpdateEvent.forStart(
+      {required this.globalPosition, TextGranularity? granularity})
+      : granularity = granularity ?? TextGranularity.character,
+        super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
@@ -403,10 +413,10 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
-  const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition,
-    TextGranularity? granularity
-  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
+  const SelectionEdgeUpdateEvent.forEnd(
+      {required this.globalPosition, TextGranularity? granularity})
+      : granularity = granularity ?? TextGranularity.character,
+        super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
@@ -611,7 +621,8 @@ class SelectionGeometry {
     this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
-  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
+  }) : assert((startSelectionPoint == null && endSelectionPoint == null) ||
+            status != SelectionStatus.none);
 
   /// The geometry information at the selection start.
   ///
@@ -682,12 +693,12 @@ class SelectionGeometry {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionGeometry
-        && other.startSelectionPoint == startSelectionPoint
-        && other.endSelectionPoint == endSelectionPoint
-        && other.selectionRects == selectionRects
-        && other.status == status
-        && other.hasContent == hasContent;
+    return other is SelectionGeometry &&
+        other.startSelectionPoint == startSelectionPoint &&
+        other.endSelectionPoint == endSelectionPoint &&
+        other.selectionRects == selectionRects &&
+        other.status == status &&
+        other.hasContent == hasContent;
   }
 
   @override
@@ -732,10 +743,10 @@ class SelectionPoint with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionPoint
-        && other.localPosition == localPosition
-        && other.lineHeight == lineHeight
-        && other.handleType == handleType;
+    return other is SelectionPoint &&
+        other.localPosition == localPosition &&
+        other.lineHeight == lineHeight &&
+        other.handleType == handleType;
   }
 
   @override
@@ -752,7 +763,8 @@ class SelectionPoint with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DoubleProperty('lineHeight', lineHeight));
-    properties.add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
+    properties
+        .add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
   }
 }
 

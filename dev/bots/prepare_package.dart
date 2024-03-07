@@ -87,7 +87,8 @@ Future<void> main(List<String> rawArguments) async {
   }
   final String revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
-    errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
+    errorExit(
+        'Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
   if (!parsedArguments.wasParsed('branch')) {
@@ -119,7 +120,8 @@ Future<void> main(List<String> rawArguments) async {
 
   final bool publish = parsedArguments['publish'] as bool;
   final bool dryRun = parsedArguments['dry_run'] as bool;
-  final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
+  final Branch branch =
+      Branch.values.byName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,

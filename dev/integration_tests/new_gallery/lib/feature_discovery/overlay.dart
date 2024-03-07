@@ -16,7 +16,6 @@ const double gutterHeight = 88.0;
 
 /// Background of the overlay.
 class Background extends StatelessWidget {
-
   const Background({
     super.key,
     required this.animations,
@@ -26,6 +25,7 @@ class Background extends StatelessWidget {
     required this.status,
     required this.textDirection,
   });
+
   /// Animations.
   final Animations animations;
 
@@ -159,7 +159,6 @@ class Background extends StatelessWidget {
 
 /// Widget that represents the text to show in the overlay.
 class Content extends StatelessWidget {
-
   const Content({
     super.key,
     required this.animations,
@@ -170,6 +169,7 @@ class Content extends StatelessWidget {
     required this.title,
     required this.textTheme,
   });
+
   /// Animations.
   final Animations animations;
 
@@ -237,13 +237,13 @@ class Content extends StatelessWidget {
 
 /// Widget that represents the ripple effect of [TapTarget].
 class Ripple extends StatelessWidget {
-
   const Ripple({
     super.key,
     required this.animations,
     required this.center,
     required this.status,
   });
+
   /// Animations.
   final Animations animations;
 
@@ -281,7 +281,6 @@ class Ripple extends StatelessWidget {
 
 /// Wrapper widget around [child] representing the anchor of the overlay.
 class TapTarget extends StatelessWidget {
-
   const TapTarget({
     super.key,
     required this.animations,
@@ -290,6 +289,7 @@ class TapTarget extends StatelessWidget {
     required this.onTap,
     required this.child,
   });
+
   /// Animations.
   final Animations animations;
 
@@ -362,7 +362,8 @@ Rect _getContentBounds(Size deviceSize, Offset overlayCenter) {
     }
   }
 
-  final double left = max(contentHorizontalPadding, overlayCenter.dx - contentWidth);
+  final double left =
+      max(contentHorizontalPadding, overlayCenter.dx - contentWidth);
   final double right =
       min(deviceSize.width - contentHorizontalPadding, left + contentWidth);
   return Rect.fromLTRB(left, top, right, top + contentHeight);

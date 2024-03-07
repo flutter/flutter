@@ -42,20 +42,22 @@ void main() {
     bool enableVmService = false,
     bool enableImpeller = false,
   }) =>
-    TestFlutterTesterDevice(
-      platform: platform,
-      fileSystem: fileSystem,
-      processManager: processManager,
-      enableVmService: enableVmService,
-      dartEntrypointArgs: dartEntrypointArgs,
-      uriConverter: (String input) => '$input/converted',
-      enableImpeller: enableImpeller,
-    );
+      TestFlutterTesterDevice(
+        platform: platform,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        enableVmService: enableVmService,
+        dartEntrypointArgs: dartEntrypointArgs,
+        uriConverter: (String input) => '$input/converted',
+        enableImpeller: enableImpeller,
+      );
 
-  testUsingContext('Missing dir error caught for FontConfigManger.dispose', () async {
+  testUsingContext('Missing dir error caught for FontConfigManger.dispose',
+      () async {
     final FontConfigManager fontConfigManager = FontConfigManager();
 
-    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    final Directory fontsDirectory =
+        fileSystem.file(fontConfigManager.fontConfigFile).parent;
     fontsDirectory.deleteSync(recursive: true);
 
     await fontConfigManager.dispose();
@@ -64,29 +66,31 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('Flutter tester passes through impeller config and environment variables.', () async {
+  testUsingContext(
+      'Flutter tester passes through impeller config and environment variables.',
+      () async {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     device = createDevice(enableImpeller: true);
     processManager.addCommand(FakeCommand(command: const <String>[
-        '/',
-        '--disable-vm-service',
-        '--ipv6',
-        '--enable-checked-mode',
-        '--verify-entry-points',
-        '--enable-impeller',
-        '--enable-dart-profiling',
-        '--non-interactive',
-        '--use-test-fonts',
-        '--disable-asset-fonts',
-        '--packages=.dart_tool/package_config.json',
-        'example.dill',
-      ], environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
-        'SERVER_PORT': '0',
-        'APP_NAME': '',
-        'FLUTTER_TEST_IMPELLER': 'true',
-      }));
+      '/',
+      '--disable-vm-service',
+      '--ipv6',
+      '--enable-checked-mode',
+      '--verify-entry-points',
+      '--enable-impeller',
+      '--enable-dart-profiling',
+      '--non-interactive',
+      '--use-test-fonts',
+      '--disable-asset-fonts',
+      '--packages=.dart_tool/package_config.json',
+      'example.dill',
+    ], environment: <String, String>{
+      'FLUTTER_TEST': 'true',
+      'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+      'SERVER_PORT': '0',
+      'APP_NAME': '',
+      'FLUTTER_TEST_IMPELLER': 'true',
+    }));
 
     await device.start('example.dill');
 
@@ -96,13 +100,13 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  group('The FLUTTER_TEST environment variable is passed to the test process', () {
+  group('The FLUTTER_TEST environment variable is passed to the test process',
+      () {
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[]);
       device = createDevice();
 
-      fileSystem
-          .file('.dart_tool/package_config.json')
+      fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"configVersion":2,"packages":[]}');
     });
@@ -154,7 +158,9 @@ void main() {
     });
 
     testUsingContext('unchanged when set', () async {
-      platform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
+      platform.environment = <String, String>{
+        'FLUTTER_TEST': 'neither true nor false'
+      };
       processManager.addCommand(flutterTestCommand('neither true nor false'));
 
       await device.start('example.dill');
@@ -190,7 +196,8 @@ void main() {
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
     });
 
-    testUsingContext('Can pass additional arguments to tester binary', () async {
+    testUsingContext('Can pass additional arguments to tester binary',
+        () async {
       await device.start('example.dill');
 
       expect(processManager, hasNoRemainingExpectations);
@@ -223,11 +230,14 @@ void main() {
       device = createDevice(enableVmService: true);
     });
 
-    testUsingContext('skips setting VM Service port and uses the input port for DDS instead', () async {
+    testUsingContext(
+        'skips setting VM Service port and uses the input port for DDS instead',
+        () async {
       await device.start('example.dill');
       await device.vmServiceUri;
 
-      final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
+      final Uri uri =
+          await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
     });
 
@@ -235,11 +245,9 @@ void main() {
       await device.start('example.dill');
       await device.vmServiceUri;
 
-      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
-      as FakeDartDevelopmentService;
-      final String? result = dds
-          .uriConverter
-          ?.call('test');
+      final FakeDartDevelopmentService dds =
+          (device as TestFlutterTesterDevice).dds as FakeDartDevelopmentService;
+      final String? result = dds.uriConverter?.call('test');
       expect(result, 'test/converted');
     });
   });
@@ -258,28 +266,30 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required UriConverter uriConverter,
     required bool enableImpeller,
   }) : super(
-    id: 999,
-    shellPath: '/',
-    logger: BufferLogger.test(),
-    debuggingOptions: DebuggingOptions.enabled(
-      const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-      ),
-      hostVmServicePort: 1234,
-      dartEntrypointArgs: dartEntrypointArgs,
-      enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
-    ),
-    machine: false,
-    host: InternetAddress.loopbackIPv6,
-    testAssetDirectory: null,
-    flutterProject: null,
-    icudtlPath: null,
-    compileExpression: null,
-    fontConfigManager: FontConfigManager(),
-    uriConverter: uriConverter,
-  );
+          id: 999,
+          shellPath: '/',
+          logger: BufferLogger.test(),
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(
+              BuildMode.debug,
+              '',
+              treeShakeIcons: false,
+            ),
+            hostVmServicePort: 1234,
+            dartEntrypointArgs: dartEntrypointArgs,
+            enableImpeller: enableImpeller
+                ? ImpellerStatus.enabled
+                : ImpellerStatus.platformDefault,
+          ),
+          machine: false,
+          host: InternetAddress.loopbackIPv6,
+          testAssetDirectory: null,
+          flutterProject: null,
+          icudtlPath: null,
+          compileExpression: null,
+          fontConfigManager: FontConfigManager(),
+          uriConverter: uriConverter,
+        );
   late DartDevelopmentService dds;
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
@@ -312,13 +322,16 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   }
 
   @override
-  Future<HttpServer> bind(InternetAddress? host, int port) async => FakeHttpServer();
+  Future<HttpServer> bind(InternetAddress? host, int port) async =>
+      FakeHttpServer();
 
   @override
-  Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;
+  Future<StreamChannel<String>> get remoteChannel async =>
+      StreamChannelController<String>().foreign;
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake
+    implements DartDevelopmentService {
   FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
 
   final Uri original;
@@ -330,6 +343,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Uri get remoteVmServiceUri => original;
 }
+
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;

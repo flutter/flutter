@@ -40,7 +40,8 @@ class DesktopProductCardColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       final int currentColumnProductCount = products.length;
       final int currentColumnWidgetCount =
           max(2 * currentColumnProductCount - 1, 0);

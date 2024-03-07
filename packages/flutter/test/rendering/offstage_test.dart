@@ -20,10 +20,13 @@ void main() {
         child: RenderOffstage(
           child: RenderCustomPaint(
             painter: TestCallbackPainter(
-              onPaint: () { painted = true; },
+              onPaint: () {
+                painted = true;
+              },
             ),
             child: child = RenderConstrainedBox(
-              additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
+              additionalConstraints:
+                  const BoxConstraints.tightFor(height: 10.0, width: 10.0),
             ),
           ),
         ),

@@ -77,7 +77,8 @@ flutter:
     );
 
     expect(
-      createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']),
+      createTestCommandRunner(command)
+          .run(const <String>['build', 'aar', '--no-pub']),
       throwsToolExit(message: 'AARs can only be built from modules'),
     );
     expect(processManager, hasNoRemainingExpectations);
@@ -96,23 +97,28 @@ flutter:
   module:
     foo: bar
 ''');
-    final Directory dotAndroidDir = fs.directory('.android')..createSync(recursive: true);
+    final Directory dotAndroidDir = fs.directory('.android')
+      ..createSync(recursive: true);
     dotAndroidDir.childFile('gradlew').createSync();
 
     processManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['chmod', '755', 'flutter/bin/cache/artifacts']),
+      const FakeCommand(
+          command: <String>['chmod', '755', 'flutter/bin/cache/artifacts']),
       const FakeCommand(command: <String>['which', 'java']),
-      ...<String>['Debug', 'Profile', 'Release'].map((String buildMode) => FakeCommand(
-        command: <Pattern>[
-          '/.android/gradlew',
-          '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
-          ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
-          '-q',
-          ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
-          'assembleAar$buildMode',
-        ],
-        onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
-      )),
+      ...<String>['Debug', 'Profile', 'Release']
+          .map((String buildMode) => FakeCommand(
+                command: <Pattern>[
+                  '/.android/gradlew',
+                  '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
+                  ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
+                  '-q',
+                  ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
+                  'assembleAar$buildMode',
+                ],
+                onRun: (_) => fs
+                    .directory('/build/host/outputs/repo')
+                    .createSync(recursive: true),
+              )),
     ]);
 
     cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
@@ -130,7 +136,8 @@ flutter:
       ),
     );
 
-    await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'aar', '--no-pub']);
     expect(processManager, hasNoRemainingExpectations);
     expect(
       fakeAnalytics.sentEvents,

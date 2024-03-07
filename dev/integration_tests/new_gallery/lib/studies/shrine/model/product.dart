@@ -17,7 +17,8 @@ class Category {
 }
 
 Category categoryAll = Category(
-  name: (BuildContext context) => GalleryLocalizations.of(context)!.shrineCategoryNameAll,
+  name: (BuildContext context) =>
+      GalleryLocalizations.of(context)!.shrineCategoryNameAll,
 );
 
 Category categoryAccessories = Category(
@@ -31,7 +32,8 @@ Category categoryClothing = Category(
 );
 
 Category categoryHome = Category(
-  name: (BuildContext context) => GalleryLocalizations.of(context)!.shrineCategoryNameHome,
+  name: (BuildContext context) =>
+      GalleryLocalizations.of(context)!.shrineCategoryNameHome,
 );
 
 List<Category> categories = <Category>[

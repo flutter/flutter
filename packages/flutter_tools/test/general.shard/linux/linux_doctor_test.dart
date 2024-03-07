@@ -93,14 +93,15 @@ FakeCommand _missingBinaryCommand(String binary) {
 
 FakeCommand _missingBinaryException(String binary) {
   return FakeCommand(
-    command: <String>[binary, '--version'],
-    exitCode: 1,
-    exception: ProcessException(binary, <String>[])
-  );
+      command: <String>[binary, '--version'],
+      exitCode: 1,
+      exception: ProcessException(binary, <String>[]));
 }
 
 void main() {
-  testWithoutContext('Full validation when everything is available at the necessary version',() async {
+  testWithoutContext(
+      'Full validation when everything is available at the necessary version',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -123,7 +124,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when clang++ version is too old', () async {
+  testWithoutContext('Partial validation when clang++ version is too old',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('2.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -147,7 +149,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when CMake version is too old', () async {
+  testWithoutContext('Partial validation when CMake version is too old',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.2.0'),
@@ -171,7 +174,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when ninja version is too old', () async {
+  testWithoutContext('Partial validation when ninja version is too old',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -195,7 +199,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Partial validation when pkg-config version is too old', () async {
+  testWithoutContext('Partial validation when pkg-config version is too old',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -243,7 +248,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when CMake is not available', () async {
+  testWithoutContext('Missing validation when CMake is not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _missingBinaryCommand('cmake'),
@@ -267,7 +273,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when CMake version is unparsable', () async {
+  testWithoutContext('Missing validation when CMake version is unparsable',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('bogus'),
@@ -291,7 +298,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when clang++ is not available', () async {
+  testWithoutContext('Missing validation when clang++ is not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _missingBinaryException('clang++'),
       _cmakePresentCommand('3.16.3'),
@@ -315,7 +323,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when clang++ version is unparsable', () async {
+  testWithoutContext('Missing validation when clang++ version is unparsable',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('bogus'),
       _cmakePresentCommand('3.16.3'),
@@ -339,7 +348,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when ninja is not available', () async {
+  testWithoutContext('Missing validation when ninja is not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -363,7 +373,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when ninja version is unparsable', () async {
+  testWithoutContext('Missing validation when ninja version is unparsable',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -387,7 +398,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when pkg-config is not available', () async {
+  testWithoutContext('Missing validation when pkg-config is not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -411,7 +423,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when pkg-config version is unparsable', () async {
+  testWithoutContext('Missing validation when pkg-config version is unparsable',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -435,7 +448,8 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when GTK libraries are not available', () async {
+  testWithoutContext('Missing validation when GTK libraries are not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -460,7 +474,9 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Missing validation when multiple dependencies are not available', () async {
+  testWithoutContext(
+      'Missing validation when multiple dependencies are not available',
+      () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _missingBinaryCommand('clang++'),
       _missingBinaryCommand('cmake'),

@@ -11,7 +11,8 @@ import './common.dart';
 
 void main() async {
   const String flutterRoot = '/a/b/c';
-  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
+  final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) +
+      binariesWithoutEntitlements(flutterRoot);
   final String allFilesStdout = allExpectedFiles.join('\n');
   final List<String> allExpectedXcframeworks = signedXcframeworks(flutterRoot);
   final String allXcframeworksStdout = allExpectedXcframeworks.join('\n');
@@ -28,7 +29,8 @@ void main() async {
               '-type',
               'f',
             ],
-            stdout: '/a/b/c/bin/cache/artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+            stdout:
+                '/a/b/c/bin/cache/artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
           ),
           const FakeCommand(
             command: <String>[
@@ -54,25 +56,26 @@ void main() async {
           'find',
           '$flutterRoot/bin/cache',
           '-type',
-          'f',],
+          'f',
+        ],
         stdout: allFilesStdout,
-          );
+      );
       commandList.add(findCmd);
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
-            command: <String>[
-              'file',
-              '--mime-type',
-              '-b',
-              expectedFile,
-            ],
-            stdout: 'application/x-mach-binary',
-          )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            expectedFile,
+          ],
+          stdout: 'application/x-mach-binary',
+        ));
       }
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      await expectLater(verifyExist('/a/b/c', processManager: processManager), completes);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
+      await expectLater(
+          verifyExist('/a/b/c', processManager: processManager), completes);
     });
   });
 
@@ -84,25 +87,27 @@ void main() async {
           'find',
           '$flutterRoot/bin/cache',
           '-type',
-          'f',],
+          'f',
+        ],
         stdout: allFilesStdout,
       );
       commandList.add(findCmd);
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
-            command: <String>[
-              'file',
-              '--mime-type',
-              '-b',
-              expectedFile,
-            ],
-            stdout: 'application/x-mach-binary',
-          )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            expectedFile,
+          ],
+          stdout: 'application/x-mach-binary',
+        ));
       }
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      final List<String> foundFiles = await findBinaryPaths('$flutterRoot/bin/cache', processManager: processManager);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
+      final List<String> foundFiles = await findBinaryPaths(
+          '$flutterRoot/bin/cache',
+          processManager: processManager);
       expect(foundFiles, allExpectedFiles);
     });
 
@@ -113,11 +118,15 @@ void main() async {
           'find',
           '$flutterRoot/bin/cache',
           '-type',
-          'f',],
+          'f',
+        ],
       );
       commandList.add(findCmd);
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      final List<String> foundFiles = await findBinaryPaths('$flutterRoot/bin/cache', processManager: processManager);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
+      final List<String> foundFiles = await findBinaryPaths(
+          '$flutterRoot/bin/cache',
+          processManager: processManager);
       expect(foundFiles, <String>[]);
     });
 
@@ -135,114 +144,126 @@ void main() async {
           stdout: allXcframeworksStdout,
         )
       ];
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      final List<String> foundFiles = await findXcframeworksPaths('$flutterRoot/bin/cache', processManager: processManager);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
+      final List<String> foundFiles = await findXcframeworksPaths(
+          '$flutterRoot/bin/cache',
+          processManager: processManager);
       expect(foundFiles, allExpectedXcframeworks);
     });
 
-  group('isBinary', () {
-    test('isTrue', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      const String fileToCheck = '/a/b/c/one.zip';
-      const FakeCommand findCmd = FakeCommand(
-        command: <String>[
-          'file',
-          '--mime-type',
-          '-b',
-          fileToCheck,
-        ],
-        stdout: 'application/x-mach-binary',
-      );
-      commandList.add(findCmd);
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      final bool result = await isBinary(fileToCheck, processManager: processManager);
-      expect(result, isTrue);
+    group('isBinary', () {
+      test('isTrue', () async {
+        final List<FakeCommand> commandList = <FakeCommand>[];
+        const String fileToCheck = '/a/b/c/one.zip';
+        const FakeCommand findCmd = FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            fileToCheck,
+          ],
+          stdout: 'application/x-mach-binary',
+        );
+        commandList.add(findCmd);
+        final ProcessManager processManager =
+            FakeProcessManager.list(commandList);
+        final bool result =
+            await isBinary(fileToCheck, processManager: processManager);
+        expect(result, isTrue);
+      });
+
+      test('isFalse', () async {
+        final List<FakeCommand> commandList = <FakeCommand>[];
+        const String fileToCheck = '/a/b/c/one.zip';
+        const FakeCommand findCmd = FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            fileToCheck,
+          ],
+          stdout: 'text/xml',
+        );
+        commandList.add(findCmd);
+        final ProcessManager processManager =
+            FakeProcessManager.list(commandList);
+        final bool result =
+            await isBinary(fileToCheck, processManager: processManager);
+        expect(result, isFalse);
+      });
     });
 
-    test('isFalse', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      const String fileToCheck = '/a/b/c/one.zip';
-      const FakeCommand findCmd = FakeCommand(
-        command: <String>[
-          'file',
-          '--mime-type',
-          '-b',
-          fileToCheck,
-        ],
-        stdout: 'text/xml',
-      );
-      commandList.add(findCmd);
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      final bool result = await isBinary(fileToCheck, processManager: processManager);
-      expect(result, isFalse);
-    });
-  });
+    group('hasExpectedEntitlements', () {
+      test('expected entitlements', () async {
+        final List<FakeCommand> commandList = <FakeCommand>[];
+        const String fileToCheck = '/a/b/c/one.zip';
+        const FakeCommand codesignCmd = FakeCommand(
+          command: <String>[
+            'codesign',
+            '--display',
+            '--entitlements',
+            ':-',
+            fileToCheck,
+          ],
+        );
+        commandList.add(codesignCmd);
+        final ProcessManager processManager =
+            FakeProcessManager.list(commandList);
+        final bool result = await hasExpectedEntitlements(
+            fileToCheck, flutterRoot,
+            processManager: processManager);
+        expect(result, isTrue);
+      });
 
-  group('hasExpectedEntitlements', () {
-     test('expected entitlements', () async {
-       final List<FakeCommand> commandList = <FakeCommand>[];
-       const String fileToCheck = '/a/b/c/one.zip';
-       const FakeCommand codesignCmd = FakeCommand(
-         command: <String>[
-           'codesign',
-           '--display',
-           '--entitlements',
-           ':-',
-           fileToCheck,
-         ],
-       );
-       commandList.add(codesignCmd);
-       final ProcessManager processManager = FakeProcessManager.list(commandList);
-       final bool result = await hasExpectedEntitlements(fileToCheck, flutterRoot, processManager: processManager);
-       expect(result, isTrue);
-     });
-
-     test('unexpected entitlements', () async {
-       final List<FakeCommand> commandList = <FakeCommand>[];
-       const String fileToCheck = '/a/b/c/one.zip';
-       const FakeCommand codesignCmd = FakeCommand(
-         command: <String>[
-           'codesign',
-           '--display',
-           '--entitlements',
-           ':-',
-           fileToCheck,
-         ],
-         exitCode: 1,
-       );
-       commandList.add(codesignCmd);
-       final ProcessManager processManager = FakeProcessManager.list(commandList);
-       final bool result = await hasExpectedEntitlements(fileToCheck, flutterRoot, processManager: processManager);
-       expect(result, isFalse);
-     });
+      test('unexpected entitlements', () async {
+        final List<FakeCommand> commandList = <FakeCommand>[];
+        const String fileToCheck = '/a/b/c/one.zip';
+        const FakeCommand codesignCmd = FakeCommand(
+          command: <String>[
+            'codesign',
+            '--display',
+            '--entitlements',
+            ':-',
+            fileToCheck,
+          ],
+          exitCode: 1,
+        );
+        commandList.add(codesignCmd);
+        final ProcessManager processManager =
+            FakeProcessManager.list(commandList);
+        final bool result = await hasExpectedEntitlements(
+            fileToCheck, flutterRoot,
+            processManager: processManager);
+        expect(result, isFalse);
+      });
     });
   });
 
   group('verifySignatures', () {
-
-    test('succeeds if every binary is codesigned and has correct entitlements', () async {
+    test('succeeds if every binary is codesigned and has correct entitlements',
+        () async {
       final List<FakeCommand> commandList = <FakeCommand>[];
       final FakeCommand findCmd = FakeCommand(
         command: const <String>[
           'find',
           '$flutterRoot/bin/cache',
           '-type',
-          'f',],
+          'f',
+        ],
         stdout: allFilesStdout,
-          );
+      );
       commandList.add(findCmd);
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
-            command: <String>[
-              'file',
-              '--mime-type',
-              '-b',
-              expectedFile,
-            ],
-            stdout: 'application/x-mach-binary',
-          )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            expectedFile,
+          ],
+          stdout: 'application/x-mach-binary',
+        ));
       }
       commandList.add(
         FakeCommand(
@@ -258,44 +279,41 @@ void main() async {
         ),
       );
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
+        commandList.add(FakeCommand(
+          command: <String>[
+            'codesign',
+            '-vvv',
+            expectedFile,
+          ],
+        ));
+        if (withEntitlements.contains(expectedFile)) {
+          commandList.add(FakeCommand(
             command: <String>[
               'codesign',
-              '-vvv',
+              '--display',
+              '--entitlements',
+              ':-',
               expectedFile,
             ],
-          )
-        );
-        if (withEntitlements.contains(expectedFile)) {
-          commandList.add(
-            FakeCommand(
-              command: <String>[
-                'codesign',
-                '--display',
-                '--entitlements',
-                ':-',
-                expectedFile,
-              ],
-              stdout: expectedEntitlements.join('\n'),
-            )
-          );
+            stdout: expectedEntitlements.join('\n'),
+          ));
         }
       }
 
       for (final String expectedXcframework in allExpectedXcframeworks) {
-        commandList.add(
-            FakeCommand(
-              command: <String>[
-                'codesign',
-                '-vvv',
-                expectedXcframework,
-              ],
-            )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'codesign',
+            '-vvv',
+            expectedXcframework,
+          ],
+        ));
       }
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
-      await expectLater(verifySignatures(flutterRoot, processManager: processManager), completes);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
+      await expectLater(
+          verifySignatures(flutterRoot, processManager: processManager),
+          completes);
     });
 
     test('fails if binaries do not have the right entitlements', () async {
@@ -305,22 +323,21 @@ void main() async {
           'find',
           '$flutterRoot/bin/cache',
           '-type',
-          'f',],
+          'f',
+        ],
         stdout: allFilesStdout,
-          );
+      );
       commandList.add(findCmd);
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
-            command: <String>[
-              'file',
-              '--mime-type',
-              '-b',
-              expectedFile,
-            ],
-            stdout: 'application/x-mach-binary',
-          )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'file',
+            '--mime-type',
+            '-b',
+            expectedFile,
+          ],
+          stdout: 'application/x-mach-binary',
+        ));
       }
       commandList.add(
         FakeCommand(
@@ -336,45 +353,42 @@ void main() async {
         ),
       );
       for (final String expectedFile in allExpectedFiles) {
-        commandList.add(
-          FakeCommand(
+        commandList.add(FakeCommand(
+          command: <String>[
+            'codesign',
+            '-vvv',
+            expectedFile,
+          ],
+        ));
+        if (withEntitlements.contains(expectedFile)) {
+          commandList.add(FakeCommand(
             command: <String>[
               'codesign',
-              '-vvv',
+              '--display',
+              '--entitlements',
+              ':-',
               expectedFile,
             ],
-          )
-        );
-        if (withEntitlements.contains(expectedFile)) {
-          commandList.add(
-            FakeCommand(
-              command: <String>[
-                'codesign',
-                '--display',
-                '--entitlements',
-                ':-',
-                expectedFile,
-              ],
-            )
-          );
+          ));
         }
       }
       for (final String expectedXcframework in allExpectedXcframeworks) {
-        commandList.add(
-            FakeCommand(
-              command: <String>[
-                'codesign',
-                '-vvv',
-                expectedXcframework,
-              ],
-            )
-        );
+        commandList.add(FakeCommand(
+          command: <String>[
+            'codesign',
+            '-vvv',
+            expectedXcframework,
+          ],
+        ));
       }
-      final ProcessManager processManager = FakeProcessManager.list(commandList);
+      final ProcessManager processManager =
+          FakeProcessManager.list(commandList);
 
       expect(
-        () async => verifySignatures(flutterRoot, processManager: processManager),
-        throwsExceptionWith('Test failed because files found with the wrong entitlements'),
+        () async =>
+            verifySignatures(flutterRoot, processManager: processManager),
+        throwsExceptionWith(
+            'Test failed because files found with the wrong entitlements'),
       );
     });
   });

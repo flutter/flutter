@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { super.key });
+  const Alive(this.alive, this.index, {super.key});
   final bool alive;
   final int index;
 
@@ -29,7 +29,8 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
@@ -44,6 +45,7 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
 }
 
 typedef WhetherToKeepAlive = bool Function(int);
+
 class _StatefulListView extends StatefulWidget {
   const _StatefulListView(this.aliveCallback);
 
@@ -77,32 +79,31 @@ class _StatefulListViewState extends State<_StatefulListView> {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('ListView.builder respects findChildIndexCallback',
+      (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return ListView.builder(
-              itemCount: itemCount,
-              itemBuilder: (BuildContext _, int index) => Container(
-                key: Key('$index'),
-                height: 2000.0,
-              ),
-              findChildIndexCallback: (Key key) {
-                finderCalled = true;
-                return null;
-              },
-            );
-          },
-        ),
-      )
-    );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return ListView.builder(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext _, int index) => Container(
+              key: Key('$index'),
+              height: 2000.0,
+            ),
+            findChildIndexCallback: (Key key) {
+              finderCalled = true;
+              return null;
+            },
+          );
+        },
+      ),
+    ));
     expect(finderCalled, false);
 
     // Trigger update.
@@ -113,33 +114,32 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('ListView.separator respects findChildIndexCallback',
+      (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return ListView.separated(
-              itemCount: itemCount,
-              itemBuilder: (BuildContext _, int index) => Container(
-                key: Key('$index'),
-                height: 2000.0,
-              ),
-              findChildIndexCallback: (Key key) {
-                finderCalled = true;
-                return null;
-              },
-              separatorBuilder: (BuildContext _, int __) => const Divider(),
-            );
-          },
-        ),
-      )
-    );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return ListView.separated(
+            itemCount: itemCount,
+            itemBuilder: (BuildContext _, int index) => Container(
+              key: Key('$index'),
+              height: 2000.0,
+            ),
+            findChildIndexCallback: (Key key) {
+              finderCalled = true;
+              return null;
+            },
+            separatorBuilder: (BuildContext _, int __) => const Divider(),
+          );
+        },
+      ),
+    ));
     expect(finderCalled, false);
 
     // Trigger update.
@@ -176,7 +176,8 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
+    final RenderBox box =
+        tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -249,8 +250,10 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
-    Future<void> checkAndScroll([ String zero = '0:false' ]) async {
+  testWidgets(
+      'ListView large scroll jump and keepAlive first child not keepAlive',
+      (WidgetTester tester) async {
+    Future<void> checkAndScroll([String zero = '0:false']) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
       expect(find.text('2:false'), findsOneWidget);
@@ -286,7 +289,8 @@ void main() {
     await checkAndScroll('0:true');
   });
 
-  testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
+  testWidgets('ListView can build out of underflow',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -342,7 +346,8 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('ListView can build out of overflow padding', (WidgetTester tester) async {
+  testWidgets('ListView can build out of overflow padding',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -361,7 +366,8 @@ void main() {
     expect(find.text('padded', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
+  testWidgets('ListView with itemExtent in unbounded context',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -381,7 +387,9 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
-  testWidgets('ListView with shrink wrap in bounded context correctly uses cache extent', (WidgetTester tester) async {
+  testWidgets(
+      'ListView with shrink wrap in bounded context correctly uses cache extent',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -399,13 +407,18 @@ void main() {
       ),
     );
     expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
-    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
-    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
-    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
     handle.dispose();
   });
 
-  testWidgets('ListView hidden items should stay hidden if their semantics are updated', (WidgetTester tester) async {
+  testWidgets(
+      'ListView hidden items should stay hidden if their semantics are updated',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -425,22 +438,28 @@ void main() {
     // Scrollable maybe be marked dirty after layout.
     await tester.pumpAndSettle();
     expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
-    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
-    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
-    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
 
     // Marks Text 6 semantics as dirty.
-    final RenderObject text6 = tester.renderObject(find.text('Text 6', skipOffstage: false));
+    final RenderObject text6 =
+        tester.renderObject(find.text('Text 6', skipOffstage: false));
     text6.markNeedsSemanticsUpdate();
 
     // Verify the semantics is still hidden.
     await tester.pump();
-    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)),
+        matchesSemantics(isHidden: true));
 
     handle.dispose();
   });
 
-  testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
+  testWidgets('didFinishLayout has correct indices',
+      (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = TestSliverChildListDelegate(
       List<Widget>.generate(
         20,
@@ -460,7 +479,8 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
+    expect(delegate.log,
+        equals(<String>['didFinishLayout firstIndex=0 lastIndex=7']));
     delegate.log.clear();
 
     await tester.pumpWidget(
@@ -473,7 +493,8 @@ void main() {
       ),
     );
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=4']));
+    expect(delegate.log,
+        equals(<String>['didFinishLayout firstIndex=0 lastIndex=4']));
     delegate.log.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
@@ -482,11 +503,13 @@ void main() {
 
     await tester.pump();
 
-    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
+    expect(delegate.log,
+        equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
     delegate.log.clear();
   });
 
-  testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
+  testWidgets('ListView automatically pad MediaQuery on axis',
+      (WidgetTester tester) async {
     EdgeInsets? innerMediaQueryPadding;
 
     await tester.pumpWidget(
@@ -511,10 +534,12 @@ void main() {
     // Automatically apply the top/bottom padding into sliver.
     expect(tester.getTopLeft(find.text('top')).dy, 30.0);
     // Leave left/right padding as is for children.
-    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+    expect(
+        innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 
-  testWidgets('ListView clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+  testWidgets('ListView clips if overflow is smaller than cacheExtent',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17426.
 
     await tester.pumpWidget(
@@ -545,7 +570,8 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
+  testWidgets('ListView does not clips if no overflow',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -568,7 +594,9 @@ void main() {
     expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 
-  testWidgets('ListView (fixed extent) clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+  testWidgets(
+      'ListView (fixed extent) clips if overflow is smaller than cacheExtent',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17426.
 
     await tester.pumpWidget(
@@ -600,7 +628,8 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgets('ListView (fixed extent) does not clips if no overflow', (WidgetTester tester) async {
+  testWidgets('ListView (fixed extent) does not clips if no overflow',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -624,7 +653,8 @@ void main() {
     expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 
-  testWidgets('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
+  testWidgets('ListView.horizontal has implicit scrolling by default',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -645,24 +675,27 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(Scrollable)),
         matchesSemantics(
           children: <Matcher>[
-            matchesSemantics(hasImplicitScrolling: true),
+            matchesSemantics(
+              children: <Matcher>[
+                matchesSemantics(hasImplicitScrolling: true),
+              ],
+            ),
           ],
-        ),
-      ],
-    ));
+        ));
     handle.dispose();
   });
 
-  testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
+  testWidgets('Updates viewport dimensions when scroll direction changes',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
-    Widget buildListView({ required Axis scrollDirection }) {
+    Widget buildListView({required Axis scrollDirection}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -706,7 +739,8 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    final RenderViewport renderObject =
+        tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -732,7 +766,8 @@ void main() {
     context.dispose();
   });
 
-  testWidgets('ListView.builder respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.builder respects clipBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -743,11 +778,13 @@ void main() {
         ),
       ),
     );
-    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    final RenderViewport renderObject =
+        tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('ListView.custom respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.custom respects clipBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -760,11 +797,13 @@ void main() {
         ),
       ),
     );
-    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    final RenderViewport renderObject =
+        tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('ListView.separated respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.separated respects clipBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -776,16 +815,22 @@ void main() {
         ),
       ),
     );
-    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    final RenderViewport renderObject =
+        tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/138912
-  testWidgets('itemExtentBuilder should respect item count', (WidgetTester tester) async {
+  testWidgets('itemExtentBuilder should respect item count',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     final List<double> numbers = <double>[
-      10, 20, 30, 40, 50,
+      10,
+      20,
+      30,
+      40,
+      50,
     ];
     await tester.pumpWidget(
       Directionality(
@@ -838,14 +883,13 @@ void main() {
     expect(find.text('Item 5'), findsOneWidget);
     expect(find.text('Item 6'), findsNothing);
     expect(
-      sliverLayoutDimensions,
-      const SliverLayoutDimensions(
-        scrollOffset: 0.0,
-        precedingScrollExtent: 0.0,
-        viewportMainAxisExtent: 600.0,
-        crossAxisExtent: 800.0,
-      )
-    );
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 0.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        ));
     // viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 9);
     expect(buildLog.min, 0);
@@ -868,8 +912,7 @@ void main() {
           precedingScrollExtent: 0.0,
           viewportMainAxisExtent: 600.0,
           crossAxisExtent: 800.0,
-        )
-    );
+        ));
     // Scrolling drastically only loading the visible and cached area items.
     // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 12);
@@ -891,8 +934,7 @@ void main() {
           precedingScrollExtent: 0.0,
           viewportMainAxisExtent: 600.0,
           crossAxisExtent: 800.0,
-        )
-    );
+        ));
     // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 12);
     expect(buildLog.min, 47);
@@ -913,8 +955,7 @@ void main() {
           precedingScrollExtent: 0.0,
           viewportMainAxisExtent: 600.0,
           crossAxisExtent: 800.0,
-        )
-    );
+        ));
     // Only newly entered cached area items need to be loaded.
     expect(buildLog.length, 3);
     expect(buildLog.min, 44);
@@ -935,15 +976,15 @@ void main() {
           precedingScrollExtent: 0.0,
           viewportMainAxisExtent: 600.0,
           crossAxisExtent: 800.0,
-        )
-    );
+        ));
     // Only newly entered cached area items need to be loaded.
     expect(buildLog.length, 6);
     expect(buildLog.min, 56);
     expect(buildLog.max, 61);
   });
 
-  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
+  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test',
+      (WidgetTester tester) async {
     Object? error;
     try {
       await tester.pumpWidget(

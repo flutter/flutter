@@ -4,11 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/rendering/growth_direction/growth_direction.0.dart' as example;
+import 'package:flutter_api_samples/rendering/growth_direction/growth_direction.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Example app has GrowthDirections represented', (WidgetTester tester) async {
+  testWidgets('Example app has GrowthDirections represented',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExampleApp(),
     );
@@ -24,11 +26,9 @@ void main() {
     expect(viewport.anchor, 0.5);
     expect(viewport.center, isNotNull);
 
-    await tester.tap(
-        find.byWidgetPredicate((Widget widget) {
-          return widget is Radio<AxisDirection> && widget.value == AxisDirection.up;
-        })
-    );
+    await tester.tap(find.byWidgetPredicate((Widget widget) {
+      return widget is Radio<AxisDirection> && widget.value == AxisDirection.up;
+    }));
     await tester.pumpAndSettle();
 
     expect(find.text('AxisDirection.up'), findsNWidgets(2));

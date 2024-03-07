@@ -15,7 +15,8 @@ import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.ensureInitialized();
+  final TestRenderingFlutterBinding binding =
+      TestRenderingFlutterBinding.ensureInitialized();
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
@@ -37,17 +38,21 @@ void main() {
 
     test('layout should size to max constraint', () {
       layout(platformViewRenderBox);
-      platformViewRenderBox.layout(const BoxConstraints(minWidth: 50, minHeight: 50, maxWidth: 100, maxHeight: 100));
+      platformViewRenderBox.layout(const BoxConstraints(
+          minWidth: 50, minHeight: 50, maxWidth: 100, maxHeight: 100));
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
     test('send semantics update if id is changed', () {
       final RenderConstrainedBox tree = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+        additionalConstraints:
+            const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.rootPipelineOwner.ensureSemantics(
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding
+          .instance.rootPipelineOwner
+          .ensureSemantics(
         listener: () {
           ++semanticsUpdateCount;
         },
@@ -65,7 +70,8 @@ void main() {
 
       semanticsUpdateCount = 0;
 
-      final FakePlatformViewController updatedFakePlatformViewController = FakePlatformViewController(10);
+      final FakePlatformViewController updatedFakePlatformViewController =
+          FakePlatformViewController(10);
       platformViewRenderBox.controller = updatedFakePlatformViewController;
       pumpFrame(phase: EnginePhase.flushSemantics);
       // Update id should update the semantics.
@@ -74,11 +80,14 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    test('mouse hover events are dispatched via PlatformViewController.dispatchPointerEvent', () {
+    test(
+        'mouse hover events are dispatched via PlatformViewController.dispatchPointerEvent',
+        () {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher
+          .onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -87,11 +96,14 @@ void main() {
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
 
-    test('touch hover events are dispatched via PlatformViewController.dispatchPointerEvent', () {
+    test(
+        'touch hover events are dispatched via PlatformViewController.dispatchPointerEvent',
+        () {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher
+          .onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -99,15 +111,16 @@ void main() {
 
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
-
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    final FakeAndroidPlatformViewsController viewsController =
+        FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =
-      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+        PlatformViewsService.initAndroidView(
+            id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
     final PlatformViewRenderBox platformViewRenderBox = PlatformViewRenderBox(
       controller: viewController,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -120,30 +133,43 @@ void main() {
     layout(platformViewRenderBox);
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    viewController.pointTransformer = (Offset offset) => platformViewRenderBox.globalToLocal(offset);
+    viewController.pointTransformer =
+        (Offset offset) => platformViewRenderBox.globalToLocal(offset);
 
     FakeAsync().run((FakeAsync async) {
       // Put one pointer down.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+      RendererBinding.instance.platformDispatcher
+          .onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero,
+            pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.down, const Offset(10, 10),
+            pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10),
+            pointer: 1, kind: PointerDeviceKind.touch),
       ]));
       async.flushMicrotasks();
 
       // Put another pointer down and then cancel it.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.cancel, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
+      RendererBinding.instance.platformDispatcher
+          .onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero,
+            pointer: 2, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.down, const Offset(20, 10),
+            pointer: 2, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.cancel, const Offset(20, 10),
+            pointer: 2, kind: PointerDeviceKind.touch),
       ]));
       async.flushMicrotasks();
 
       // The first pointer can still moving without crashing.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
+      RendererBinding.instance.platformDispatcher
+          .onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(ui.PointerChange.add, Offset.zero,
+            pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.move, const Offset(10, 10),
+            pointer: 1, kind: PointerDeviceKind.touch),
+        _pointerData(ui.PointerChange.remove, const Offset(10, 10),
+            pointer: 1, kind: PointerDeviceKind.touch),
       ]));
       async.flushMicrotasks();
     });
@@ -152,9 +178,11 @@ void main() {
   });
 
   test('created callback is reset when controller is changed', () {
-    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    final FakeAndroidPlatformViewsController viewsController =
+        FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
-    final AndroidViewController firstController = PlatformViewsService.initAndroidView(
+    final AndroidViewController firstController =
+        PlatformViewsService.initAndroidView(
       id: 0,
       viewType: 'webview',
       layoutDirection: TextDirection.rtl,
@@ -170,7 +198,8 @@ void main() {
     expect(firstController.createdCallbacks, isNotEmpty);
     expect(firstController.createdCallbacks.length, 1);
 
-    final AndroidViewController secondController = PlatformViewsService.initAndroidView(
+    final AndroidViewController secondController =
+        PlatformViewsService.initAndroidView(
       id: 0,
       viewType: 'webview',
       layoutDirection: TextDirection.rtl,
@@ -183,10 +212,12 @@ void main() {
     expect(secondController.createdCallbacks.length, 1);
   });
 
-  test('render object changed its visual appearance after texture is created', () {
+  test('render object changed its visual appearance after texture is created',
+      () {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController =
-        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+          PlatformViewsService.initAndroidView(
+              id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
       final RenderAndroidView renderBox = RenderAndroidView(
         viewController: viewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -195,7 +226,8 @@ void main() {
 
       final Completer<void> viewCreation = Completer<void>();
       const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel,
+          (MethodCall methodCall) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
@@ -225,7 +257,8 @@ void main() {
   test('markNeedsPaint does not get called on a disposed RO', () async {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController =
-        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+          PlatformViewsService.initAndroidView(
+              id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
       final RenderAndroidView renderBox = RenderAndroidView(
         viewController: viewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -234,7 +267,8 @@ void main() {
 
       final Completer<void> viewCreation = Completer<void>();
       const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel,
+          (MethodCall methodCall) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
@@ -261,11 +295,14 @@ void main() {
     });
   });
 
-  test('markNeedsPaint does not get called when setting the same viewController', () {
+  test(
+      'markNeedsPaint does not get called when setting the same viewController',
+      () {
     FakeAsync().run((FakeAsync async) {
       final Completer<void> viewCreation = Completer<void>();
       const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel,
+          (MethodCall methodCall) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
@@ -273,7 +310,9 @@ void main() {
 
       bool futureCallbackRan = false;
 
-      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
+      PlatformViewsService.initUiKitView(
+              id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
+          .then((UiKitViewController viewController) {
         final RenderUiKitView renderBox = RenderUiKitView(
           viewController: viewController,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -305,7 +344,8 @@ ui.PointerData _pointerData(
   PointerDeviceKind kind = PointerDeviceKind.mouse,
   int pointer = 0,
 }) {
-  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
+  final double devicePixelRatio = RendererBinding
+      .instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,

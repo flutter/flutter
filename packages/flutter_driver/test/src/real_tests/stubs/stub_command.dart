@@ -7,8 +7,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 class StubNestedCommand extends CommandWithTarget {
   StubNestedCommand(super.finder, this.times, {super.timeout});
 
-  StubNestedCommand.deserialize(
-      super.json, super.finderFactory)
+  StubNestedCommand.deserialize(super.json, super.finderFactory)
       : times = int.parse(json['times']!),
         super.deserialize();
 

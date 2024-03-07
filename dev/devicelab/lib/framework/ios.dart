@@ -36,10 +36,9 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
   //  ...
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
-    if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
-      final String versionLine = lines
-          .skip(index - 1)
-          .take(4).last;
+    if (line.contains('LC_VERSION_MIN_IPHONEOS') &&
+        lines.length - index - 1 > 3) {
+      final String versionLine = lines.skip(index - 1).take(4).last;
       final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
       minVersion = versionRegex.firstMatch(versionLine)?.group(1);
     }
@@ -81,7 +80,8 @@ Future<void> testWithNewIOSSimulator(
   // Get the preferred runtime build for the selected Xcode version. Preferred
   // means the runtime was either bundled with Xcode, exactly matched your SDK
   // version, or it's indicated a better match for your SDK.
-  final Map<String, Object?> decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
+  final Map<String, Object?> decodeResult =
+      json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
   final String? iosKey = decodeResult.keys
       .where((String key) => key.contains('iphoneos'))
       .firstOrNull;
@@ -187,11 +187,14 @@ Future<bool> runXcodeTests({
   String? provisioningProfile;
   if (!skipCodesign) {
     // If not running on CI, inject the Flutter team code signing properties.
-    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    developmentTeam =
+        environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
     codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+    provisioningProfile =
+        environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
   }
-  final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
+  final String resultBundleTemp =
+      Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
     'xcodebuild',
@@ -208,10 +211,8 @@ Future<bool> runXcodeTests({
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (developmentTeam != null)
-        'DEVELOPMENT_TEAM=$developmentTeam',
-      if (codeSignStyle != null)
-        'CODE_SIGN_STYLE=$codeSignStyle',
+      if (developmentTeam != null) 'DEVELOPMENT_TEAM=$developmentTeam',
+      if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ],
@@ -221,7 +222,8 @@ Future<bool> runXcodeTests({
 
   if (testResultExit != 0) {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
-    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
+    final Directory xcresultBundle =
+        Directory(path.join(resultBundleTemp, 'result.xcresult'));
     if (dumpDirectory != null) {
       if (xcresultBundle.existsSync()) {
         // Zip the test results to the artifacts directory for upload.
@@ -240,7 +242,8 @@ Future<bool> runXcodeTests({
           canFail: true, // Best effort to get the logs.
         );
       } else {
-        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
+        print(
+            'xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
       }
     }
     return false;

@@ -74,8 +74,8 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       _variant = _CardVariant.elevated;
+  })  : assert(elevation == null || elevation >= 0.0),
+        _variant = _CardVariant.elevated;
 
   /// Create a filled variant of Card.
   ///
@@ -93,8 +93,8 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       _variant = _CardVariant.filled;
+  })  : assert(elevation == null || elevation >= 0.0),
+        _variant = _CardVariant.filled;
 
   /// Create an outlined variant of Card.
   ///
@@ -112,8 +112,8 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       _variant = _CardVariant.outlined;
+  })  : assert(elevation == null || elevation >= 0.0),
+        _variant = _CardVariant.outlined;
 
   /// The card's background color.
   ///
@@ -215,7 +215,7 @@ class Card extends StatelessWidget {
     if (Theme.of(context).useMaterial3) {
       defaults = switch (_variant) {
         _CardVariant.elevated => _CardDefaultsM3(context),
-        _CardVariant.filled   => _FilledCardDefaultsM3(context),
+        _CardVariant.filled => _FilledCardDefaultsM3(context),
         _CardVariant.outlined => _OutlinedCardDefaultsM3(context),
       };
     } else {
@@ -229,12 +229,16 @@ class Card extends StatelessWidget {
         child: Material(
           type: MaterialType.card,
           color: color ?? cardTheme.color ?? defaults.color,
-          shadowColor: shadowColor ?? cardTheme.shadowColor ?? defaults.shadowColor,
-          surfaceTintColor: surfaceTintColor ?? cardTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+          shadowColor:
+              shadowColor ?? cardTheme.shadowColor ?? defaults.shadowColor,
+          surfaceTintColor: surfaceTintColor ??
+              cardTheme.surfaceTintColor ??
+              defaults.surfaceTintColor,
           elevation: elevation ?? cardTheme.elevation ?? defaults.elevation!,
           shape: shape ?? cardTheme.shape ?? defaults.shape,
           borderOnForeground: borderOnForeground,
-          clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? defaults.clipBehavior!,
+          clipBehavior:
+              clipBehavior ?? cardTheme.clipBehavior ?? defaults.clipBehavior!,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
             child: child,
@@ -248,14 +252,13 @@ class Card extends StatelessWidget {
 // Hand coded defaults based on Material Design 2.
 class _CardDefaultsM2 extends CardTheme {
   const _CardDefaultsM2(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 1.0,
-        margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        )
-    );
+      : super(
+            clipBehavior: Clip.none,
+            elevation: 1.0,
+            margin: const EdgeInsets.all(4.0),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            ));
 
   final BuildContext context;
 
@@ -275,11 +278,11 @@ class _CardDefaultsM2 extends CardTheme {
 
 class _CardDefaultsM3 extends CardTheme {
   _CardDefaultsM3(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 1.0,
-        margin: const EdgeInsets.all(4.0),
-      );
+      : super(
+          clipBehavior: Clip.none,
+          elevation: 1.0,
+          margin: const EdgeInsets.all(4.0),
+        );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -294,7 +297,8 @@ class _CardDefaultsM3 extends CardTheme {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
+  ShapeBorder? get shape => const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
 
 // END GENERATED TOKEN PROPERTIES - Card
@@ -308,11 +312,11 @@ class _CardDefaultsM3 extends CardTheme {
 
 class _FilledCardDefaultsM3 extends CardTheme {
   _FilledCardDefaultsM3(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 0.0,
-        margin: const EdgeInsets.all(4.0),
-      );
+      : super(
+          clipBehavior: Clip.none,
+          elevation: 0.0,
+          margin: const EdgeInsets.all(4.0),
+        );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -327,7 +331,8 @@ class _FilledCardDefaultsM3 extends CardTheme {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
+  ShapeBorder? get shape => const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
 
 // END GENERATED TOKEN PROPERTIES - FilledCard
@@ -341,11 +346,11 @@ class _FilledCardDefaultsM3 extends CardTheme {
 
 class _OutlinedCardDefaultsM3 extends CardTheme {
   _OutlinedCardDefaultsM3(this.context)
-    : super(
-        clipBehavior: Clip.none,
-        elevation: 0.0,
-        margin: const EdgeInsets.all(4.0),
-      );
+      : super(
+          clipBehavior: Clip.none,
+          elevation: 0.0,
+          margin: const EdgeInsets.all(4.0),
+        );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -360,10 +365,9 @@ class _OutlinedCardDefaultsM3 extends CardTheme {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  ShapeBorder? get shape =>
-    const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))).copyWith(
-      side: BorderSide(color: _colors.outlineVariant)
-    );
+  ShapeBorder? get shape => const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0)))
+      .copyWith(side: BorderSide(color: _colors.outlineVariant));
 }
 
 // END GENERATED TOKEN PROPERTIES - OutlinedCard

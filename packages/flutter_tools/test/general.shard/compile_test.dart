@@ -12,7 +12,8 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can produce output message', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: MemoryFileSystem.test());
+    final StdoutHandler stdoutHandler = StdoutHandler(
+        logger: BufferLogger.test(), fileSystem: MemoryFileSystem.test());
     stdoutHandler.handler('result 12345');
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
@@ -25,8 +26,9 @@ void main() {
 
   testWithoutContext('StdoutHandler can read output bytes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
-    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3 ,4]);
+    final StdoutHandler stdoutHandler =
+        StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
+    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     stdoutHandler.reset(readFile: true);
     stdoutHandler.handler('result 12345');
@@ -40,10 +42,12 @@ void main() {
     expect(output?.expressionData, <int>[1, 2, 3, 4]);
   });
 
-  testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
+  testWithoutContext('StdoutHandler reads output bytes if errorCount > 0',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
-    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3 ,4]);
+    final StdoutHandler stdoutHandler =
+        StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
+    fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     stdoutHandler.reset(readFile: true);
     stdoutHandler.handler('result 12345');
@@ -74,42 +78,75 @@ void main() {
   });
 
   testWithoutContext('toMultiRootPath maps different URIs', () async {
-    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/a/b'], false), 'scheme:///c');
-    expect(toMultiRootPath(Uri.parse('file:///d/b/c'), 'scheme', <String>['/a/b'], false), 'file:///d/b/c');
-    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/d/b', '/a/b'], false), 'scheme:///c');
-    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false), 'file:///a/b/c');
-    expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), null, <String>[], false), 'org-dartlang-app:///a/b/c');
-    expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), 'scheme', <String>['/d/b'], false), 'org-dartlang-app:///a/b/c');
+    expect(
+        toMultiRootPath(
+            Uri.parse('file:///a/b/c'), 'scheme', <String>['/a/b'], false),
+        'scheme:///c');
+    expect(
+        toMultiRootPath(
+            Uri.parse('file:///d/b/c'), 'scheme', <String>['/a/b'], false),
+        'file:///d/b/c');
+    expect(
+        toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme',
+            <String>['/d/b', '/a/b'], false),
+        'scheme:///c');
+    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false),
+        'file:///a/b/c');
+    expect(
+        toMultiRootPath(
+            Uri.parse('org-dartlang-app:///a/b/c'), null, <String>[], false),
+        'org-dartlang-app:///a/b/c');
+    expect(
+        toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), 'scheme',
+            <String>['/d/b'], false),
+        'org-dartlang-app:///a/b/c');
   });
 
   testWithoutContext('buildModeOptions removes matching product define', () {
-    expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.product=true']), <String>[
-      '-Ddart.vm.profile=false',
-      '--enable-asserts',
-    ]);
+    expect(
+        buildModeOptions(BuildMode.debug, <String>['dart.vm.product=true']),
+        <String>[
+          '-Ddart.vm.profile=false',
+          '--enable-asserts',
+        ]);
   });
 
-  testWithoutContext('buildModeOptions removes matching profile define in debug mode', () {
-    expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true']), <String>[
-      '-Ddart.vm.product=false',
-      '--enable-asserts',
-    ]);
+  testWithoutContext(
+      'buildModeOptions removes matching profile define in debug mode', () {
+    expect(
+        buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true']),
+        <String>[
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+        ]);
   });
 
-  testWithoutContext('buildModeOptions removes both matching profile and release define in debug mode', () {
-    expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true', 'dart.vm.product=true']), <String>[
-      '--enable-asserts',
-    ]);
+  testWithoutContext(
+      'buildModeOptions removes both matching profile and release define in debug mode',
+      () {
+    expect(
+        buildModeOptions(BuildMode.debug,
+            <String>['dart.vm.profile=true', 'dart.vm.product=true']),
+        <String>[
+          '--enable-asserts',
+        ]);
   });
 
-  testWithoutContext('buildModeOptions removes matching profile define in profile mode', () {
-    expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']), <String>[
-      '-Ddart.vm.product=false',
-    ]);
+  testWithoutContext(
+      'buildModeOptions removes matching profile define in profile mode', () {
+    expect(
+        buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']),
+        <String>[
+          '-Ddart.vm.product=false',
+        ]);
   });
 
-  testWithoutContext('buildModeOptions removes both matching profile and release define in profile mode', () {
-    expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=false', 'dart.vm.product=true']), <String>[
-    ]);
+  testWithoutContext(
+      'buildModeOptions removes both matching profile and release define in profile mode',
+      () {
+    expect(
+        buildModeOptions(BuildMode.profile,
+            <String>['dart.vm.profile=false', 'dart.vm.product=true']),
+        <String>[]);
   });
 }

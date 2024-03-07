@@ -31,7 +31,8 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.macOS);
-  final Iterable<KernelAsset> nativeAssetPaths = await dryRunNativeAssetsMacOSInternal(
+  final Iterable<KernelAsset> nativeAssetPaths =
+      await dryRunNativeAssetsMacOSInternal(
     fileSystem,
     projectUri,
     flutterTester,

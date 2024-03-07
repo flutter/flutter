@@ -10,19 +10,23 @@ void main() {
   final clipboardData2 = ClipboardData(text: null);
 
   // Changes made in https://github.com/flutter/flutter/pull/60320
-  final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
-      viewId: 10,
-      viewType: 'FixTester',
-      layoutDirection: TextDirection.ltr,
+  final SurfaceAndroidViewController surfaceController =
+      SurfaceAndroidViewController(
+    viewId: 10,
+    viewType: 'FixTester',
+    layoutDirection: TextDirection.ltr,
   );
   int viewId = surfaceController.id;
-  final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
+  final SurfaceAndroidViewController surfaceController =
+      SurfaceAndroidViewController(
     error: '',
   );
-  final TextureAndroidViewController textureController = TextureAndroidViewController(
+  final TextureAndroidViewController textureController =
+      TextureAndroidViewController(
     error: '',
   );
-  final TextureAndroidViewController textureController = TextureAndroidViewController(
+  final TextureAndroidViewController textureController =
+      TextureAndroidViewController(
     viewId: 10,
     viewType: 'FixTester',
     layoutDirection: TextDirection.ltr,
@@ -30,9 +34,12 @@ void main() {
   viewId = textureController.id;
 
   // Changes made in https://github.com/flutter/flutter/pull/81303
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.bottom]);
-  await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
+  await SystemChrome.setEnabledSystemUIOverlays(
+      <SystemUiOverlay>[SystemUiOverlay.top]);
+  await SystemChrome.setEnabledSystemUIOverlays(
+      <SystemUiOverlay>[SystemUiOverlay.bottom]);
+  await SystemChrome.setEnabledSystemUIOverlays(
+      <SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
   await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
   await SystemChrome.setEnabledSystemUIOverlays(error: '');
 }

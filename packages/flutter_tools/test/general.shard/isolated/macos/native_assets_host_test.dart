@@ -34,7 +34,8 @@ void main() {
     );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', <String>{}),
-      equals(Uri.file('atoolongfilenameforaframework.framework/atoolongfilenameforaframework')),
+      equals(Uri.file(
+          'atoolongfilenameforaframework.framework/atoolongfilenameforaframework')),
     );
   });
 
@@ -54,15 +55,18 @@ void main() {
     );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', alreadyTakenNames),
-      equals(Uri.file('atoolongfilenameforaframework.framework/atoolongfilenameforaframework')),
+      equals(Uri.file(
+          'atoolongfilenameforaframework.framework/atoolongfilenameforaframework')),
     );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', alreadyTakenNames),
-      equals(Uri.file('atoolongfilenameforaframework1.framework/atoolongfilenameforaframework1')),
+      equals(Uri.file(
+          'atoolongfilenameforaframework1.framework/atoolongfilenameforaframework1')),
     );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', alreadyTakenNames),
-      equals(Uri.file('atoolongfilenameforaframework2.framework/atoolongfilenameforaframework2')),
+      equals(Uri.file(
+          'atoolongfilenameforaframework2.framework/atoolongfilenameforaframework2')),
     );
   });
 }

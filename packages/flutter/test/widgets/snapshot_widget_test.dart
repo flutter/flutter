@@ -18,8 +18,10 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../impeller_test_helpers.dart';
 
 void main() {
-  testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets('SnapshotWidget can rasterize child',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final Key key = UniqueKey();
 
@@ -36,7 +38,8 @@ void main() {
         ),
       ),
     ));
-    await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
+    await expectLater(
+        find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now change the color and assert the old snapshot still matches.
     await tester.pumpWidget(RepaintBoundary(
@@ -52,16 +55,22 @@ void main() {
         ),
       ),
     ));
-    await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
+    await expectLater(
+        find.byKey(key), matchesGoldenFile('raster_widget.yellow.png'));
 
     // Now invoke clear and the raster is re-generated.
     controller.clear();
     await tester.pump();
 
-    await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+    await expectLater(
+        find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (WidgetTester tester) async {
+  testWidgets(
+      'Changing devicePixelRatio does not repaint if snapshotting is not enabled',
+      (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController();
     addTearDown(controller.dispose);
     final TestPainter painter = TestPainter();
@@ -94,10 +103,14 @@ void main() {
 
     // Not repainted as dpr was not used.
     expect(painter.count, 1);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets('Changing devicePixelRatio forces raster regeneration',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final TestPainter painter = TestPainter();
     addTearDown(painter.dispose);
@@ -133,10 +146,14 @@ void main() {
 
     expect(painter.count, 2);
     expect(raster, isNot(newRaster));
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('SnapshotWidget paints its child as a single picture layer', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets('SnapshotWidget paints its child as a single picture layer',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(RepaintBoundary(
@@ -162,16 +179,19 @@ void main() {
 
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets('SnapshotWidget can update the painter type',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final TestPainter painter1 = TestPainter();
     addTearDown(painter1.dispose);
     final TestPainter2 painter2 = TestPainter2();
     addTearDown(painter2.dispose);
-
 
     await tester.pumpWidget(
       Center(
@@ -198,10 +218,15 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets(
+      'RenderSnapshotWidget does not error on rasterization of child with empty size',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -216,11 +241,15 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-
-  testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets(
+      'RenderSnapshotWidget throws assertion if platform view is encountered',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -238,12 +267,21 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isA<FlutterError>()
-      .having((FlutterError error) => error.message, 'message', contains('SnapshotWidget used with a child that contains a PlatformView')));
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+    expect(
+        tester.takeException(),
+        isA<FlutterError>().having(
+            (FlutterError error) => error.message,
+            'message',
+            contains(
+                'SnapshotWidget used with a child that contains a PlatformView')));
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -263,10 +301,15 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  },
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+  testWidgets(
+      'RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive',
+      (WidgetTester tester) async {
+    final SnapshotController controller =
+        SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -288,9 +331,11 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.layers.last, isA<PlatformViewLayer>());
   },
-  skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+      skip:
+          kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
+  testWidgets('SnapshotWidget should have same result when enabled',
+      (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     tester.view
@@ -319,15 +364,20 @@ void main() {
       ),
     ));
 
-    final ui.Image imageWhenDisabled = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
+    final ui.Image imageWhenDisabled =
+        (tester.renderObject(find.byKey(repaintBoundaryKey))
+                as RenderRepaintBoundary)
+            .toImageSync();
     addTearDown(imageWhenDisabled.dispose);
 
     controller.allowSnapshotting = true;
     await tester.pump();
 
-    await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
+    await expectLater(find.byKey(repaintBoundaryKey),
+        matchesReferenceImage(imageWhenDisabled));
   },
-  skip: kIsWeb || impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+      skip: kIsWeb ||
+          impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   test('SnapshotPainter dispatches memory events', () async {
     await expectLater(
@@ -377,13 +427,15 @@ class TestPainter extends SnapshotPainter {
   }
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  void paintSnapshot(PaintingContext context, Offset offset, Size size,
+      ui.Image image, Size sourceSize, double pixelRatio) {
     count += 1;
     lastImage = image;
   }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
+  void paint(PaintingContext context, ui.Offset offset, ui.Size size,
+      PaintingContextCallback painter) {
     count += 1;
   }
 
@@ -397,7 +449,8 @@ class TestPainter2 extends TestPainter {
 }
 
 class TestDependencies extends StatelessWidget {
-  const TestDependencies({required this.child, super.key, this.devicePixelRatio});
+  const TestDependencies(
+      {required this.child, super.key, this.devicePixelRatio});
 
   final Widget child;
   final double? devicePixelRatio;
@@ -407,7 +460,8 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData().copyWith(devicePixelRatio: devicePixelRatio),
+        data:
+            const MediaQueryData().copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

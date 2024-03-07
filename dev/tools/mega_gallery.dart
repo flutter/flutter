@@ -32,7 +32,8 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
+  final Directory source =
+      Directory(_normalize('dev/integration_tests/flutter_gallery'));
   final Directory out = Directory(_normalize(results['out'] as String));
 
   if (results['delete'] as bool) {
@@ -61,8 +62,10 @@ void main(List<String> args) {
   print('Making $copies copies of flutter_gallery.');
   print('');
   print('Stats:');
-  print('  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
-  print('  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
+  print(
+      '  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
+  print(
+      '  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
 
   final Directory lib = _dir(out, 'lib');
   if (lib.existsSync()) {
@@ -82,19 +85,18 @@ void main(List<String> args) {
 
   // Update the pubspec.
   String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
-  pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
+  pubspec =
+      pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
   // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
-  _file(out, 'analysis_options.yaml').writeAsStringSync(
-    '''
+  _file(out, 'analysis_options.yaml').writeAsStringSync('''
 analyzer:
   errors:
     # See analysis_options.yaml in the flutter root for context.
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
-'''
-  );
+''');
 
   _file(out, '.dartignore').writeAsStringSync('');
 
@@ -137,7 +139,8 @@ void _copyGallery(Directory galleryDir, int index) {
   // Copy demo/, gallery/, and main.dart.
   _copy(_dir(lib, 'demo'), _dir(dest, 'demo'));
   _copy(_dir(lib, 'gallery'), _dir(dest, 'gallery'));
-  _file(dest, 'main.dart').writeAsBytesSync(_file(lib, 'main.dart').readAsBytesSync());
+  _file(dest, 'main.dart')
+      .writeAsBytesSync(_file(lib, 'main.dart').readAsBytesSync());
 }
 
 void _copy(Directory source, Directory target) {
@@ -163,7 +166,8 @@ void _copy(Directory source, Directory target) {
   }
 }
 
-Directory _dir(Directory parent, String name) => Directory(path.join(parent.path, name));
+Directory _dir(Directory parent, String name) =>
+    Directory(path.join(parent.path, name));
 File _file(Directory parent, String name) => File(path.join(parent.path, name));
 String _normalize(String filePath) => path.normalize(path.absolute(filePath));
 
@@ -172,7 +176,8 @@ class SourceStats {
   int lines = 0;
 
   @override
-  String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
+  String toString() =>
+      '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
 SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {

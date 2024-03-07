@@ -76,7 +76,8 @@ class _MainView extends StatelessWidget {
     List<Widget> listViewChildren;
 
     if (isDesktop) {
-      final double desktopMaxWidth = 400.0 + 100.0 * (cappedTextScale(context) - 1);
+      final double desktopMaxWidth =
+          400.0 + 100.0 * (cappedTextScale(context) - 1);
       listViewChildren = <Widget>[
         _UsernameInput(
           maxWidth: desktopMaxWidth,
@@ -137,7 +138,8 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const SizedBox spacing = SizedBox(width: 30);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 8),
@@ -154,7 +156,8 @@ class _TopBar extends StatelessWidget {
                   child: FadeInImagePlaceholder(
                     image:
                         const AssetImage('logo.png', package: 'rally_assets'),
-                    placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                    placeholder: LayoutBuilder(builder:
+                        (BuildContext context, BoxConstraints constraints) {
                       return SizedBox(
                         width: constraints.maxHeight,
                         height: constraints.maxHeight,

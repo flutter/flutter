@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_notification_observer/scroll_notification_observer.0.dart' as example;
+import 'package:flutter_api_samples/widgets/scroll_notification_observer/scroll_notification_observer.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Scroll to top buttons appears when scrolling down', (WidgetTester tester) async {
+  testWidgets('Scroll to top buttons appears when scrolling down',
+      (WidgetTester tester) async {
     const String buttonText = 'Scroll to top';
 
     await tester.pumpWidget(

@@ -7,7 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tracks picture layers accurately when painting is interleaved with a pushLayer', (WidgetTester tester) async {
+  testWidgets(
+      'Tracks picture layers accurately when painting is interleaved with a pushLayer',
+      (WidgetTester tester) async {
     // Creates a RenderObject that will paint into multiple picture layers.
     // Asserts that both layers get a handle, and that all layers get correctly
     // released.
@@ -21,7 +23,8 @@ void main() {
       ),
     ));
 
-    final List<Layer> layers = tester.binding.renderView.debugLayer!.depthFirstIterateChildren();
+    final List<Layer> layers =
+        tester.binding.renderView.debugLayer!.depthFirstIterateChildren();
 
     final RenderObject renderObject = key.currentContext!.findRenderObject()!;
 

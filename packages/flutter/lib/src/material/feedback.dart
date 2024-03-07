@@ -114,7 +114,8 @@ abstract final class Feedback {
   ///
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
-  static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
+  static GestureTapCallback? wrapForTap(
+      GestureTapCallback? callback, BuildContext context) {
     if (callback == null) {
       return null;
     }
@@ -134,7 +135,9 @@ abstract final class Feedback {
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
   static Future<void> forLongPress(BuildContext context) {
-    context.findRenderObject()!.sendSemanticsEvent(const LongPressSemanticsEvent());
+    context
+        .findRenderObject()!
+        .sendSemanticsEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -158,7 +161,8 @@ abstract final class Feedback {
   ///
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
-  static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
+  static GestureLongPressCallback? wrapForLongPress(
+      GestureLongPressCallback? callback, BuildContext context) {
     if (callback == null) {
       return null;
     }
@@ -168,5 +172,6 @@ abstract final class Feedback {
     };
   }
 
-  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
+  static TargetPlatform _platform(BuildContext context) =>
+      Theme.of(context).platform;
 }

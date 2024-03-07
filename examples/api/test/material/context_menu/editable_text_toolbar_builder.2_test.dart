@@ -6,11 +6,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_builder.2.dart' as example;
+import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_builder.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the context menu in TextField with a custom toolbar', (WidgetTester tester) async {
+  testWidgets(
+      'showing and hiding the context menu in TextField with a custom toolbar',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.EditableTextToolbarBuilderExampleApp(),
     );
@@ -31,15 +34,19 @@ void main() {
     // The buttons use the default widgets but with custom labels.
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsAtLeastNWidgets(1));
+        expect(find.byType(CupertinoTextSelectionToolbarButton),
+            findsAtLeastNWidgets(1));
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        expect(find.byType(TextSelectionToolbarTextButton), findsAtLeastNWidgets(1));
+        expect(find.byType(TextSelectionToolbarTextButton),
+            findsAtLeastNWidgets(1));
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsAtLeastNWidgets(1));
+        expect(find.byType(DesktopTextSelectionToolbarButton),
+            findsAtLeastNWidgets(1));
       case TargetPlatform.macOS:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsAtLeastNWidgets(1));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton),
+            findsAtLeastNWidgets(1));
     }
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
@@ -54,7 +61,8 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
     expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
     expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
-    expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
+    expect(
+        find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Paste'), findsNothing);

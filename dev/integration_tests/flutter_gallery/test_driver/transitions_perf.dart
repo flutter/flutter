@@ -17,9 +17,11 @@ import 'run_demos.dart';
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = kAllGalleryDemos.map(
-  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
-).toList();
+List<String> _allDemos = kAllGalleryDemos
+    .map(
+      (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+    )
+    .toList();
 
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
@@ -36,7 +38,7 @@ class _MessageHandler {
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
         controller ??= LiveWidgetController(WidgetsBinding.instance);
-        final List<String> restDemos =  _unTestedDemos.toList();
+        final List<String> restDemos = _unTestedDemos.toList();
         await runDemos(restDemos, controller!);
         return const JsonEncoder.withIndent('  ').convert(restDemos);
       default:
@@ -46,7 +48,8 @@ class _MessageHandler {
 }
 
 void main() {
-  enableFlutterDriverExtension(handler: (String? message) => _MessageHandler().call(message!));
+  enableFlutterDriverExtension(
+      handler: (String? message) => _MessageHandler().call(message!));
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
   runApp(const GalleryApp(testMode: true));

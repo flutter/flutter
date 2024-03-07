@@ -10,7 +10,7 @@ import '../model/app_state_model.dart';
 import '../model/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({ super.key, this.imageAspectRatio = 33 / 49, this.product })
+  const ProductCard({super.key, this.imageAspectRatio = 33 / 49, this.product})
       : assert(imageAspectRatio > 0);
 
   final double imageAspectRatio;
@@ -35,7 +35,9 @@ class ProductCard extends StatelessWidget {
 
     // The fontSize to use for computing the heuristic UI scaling factor.
     const double defaultFontSize = 14.0;
-    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+    final double containerScalingFactor =
+        MediaQuery.textScalerOf(context).scale(defaultFontSize) /
+            defaultFontSize;
 
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget? child, AppStateModel model) {

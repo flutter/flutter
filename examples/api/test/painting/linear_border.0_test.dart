@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_api_samples/painting/linear_border/linear_border.0.dart' as example;
+import 'package:flutter_api_samples/painting/linear_border/linear_border.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -31,7 +32,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.play_arrow));
     await tester.pumpAndSettle();
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Interpolation')));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.text('Interpolation')));
     await gesture.moveTo(tester.getCenter(find.text('Hover')));
     await tester.pumpAndSettle();
     await gesture.moveTo(tester.getCenter(find.text('Interpolation')));

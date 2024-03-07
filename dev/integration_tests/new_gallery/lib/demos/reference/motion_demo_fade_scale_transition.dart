@@ -63,7 +63,8 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -110,7 +111,8 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
                   onPressed: () {
                     showModal<void>(
                         context: context,
-                        builder: (BuildContext context) => _showExampleAlertDialog());
+                        builder: (BuildContext context) =>
+                            _showExampleAlertDialog());
                   },
                   child: Text(localizations.demoFadeScaleShowAlertDialogButton),
                 ),
@@ -141,7 +143,8 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
 class _ExampleAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return AlertDialog(
       content: Text(localizations.demoFadeScaleAlertDialogHeader),

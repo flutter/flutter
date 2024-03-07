@@ -30,10 +30,12 @@ class _AboutDialog extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle bodyTextStyle =
         textTheme.bodyLarge!.apply(color: colorScheme.onPrimary);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     const String name = 'Flutter Gallery'; // Don't need to localize.
-    const String legalese = '© 2021 The Flutter team'; // Don't need to localize.
+    const String legalese =
+        '© 2021 The Flutter team'; // Don't need to localize.
     final String repoText = localizations.githubRepo(name);
     final String seeSource = localizations.aboutDialogDescription(repoText);
     final int repoLinkIndex = seeSource.indexOf(repoText);
@@ -52,7 +54,8 @@ class _AboutDialog extends StatelessWidget {
           children: <Widget>[
             FutureBuilder<String>(
               future: getVersionNumber(),
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) => SelectableText(
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) =>
+                  SelectableText(
                 snapshot.hasData ? '$name ${snapshot.data}' : name,
                 style: textTheme.headlineMedium!.apply(
                   color: colorScheme.onPrimary,

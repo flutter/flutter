@@ -11,7 +11,8 @@ import 'src/binding.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
-  final RenderFlex table = RenderFlex(direction: Axis.vertical, textDirection: TextDirection.ltr);
+  final RenderFlex table =
+      RenderFlex(direction: Axis.vertical, textDirection: TextDirection.ltr);
 
   void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: Color(0xFF000000));
@@ -19,8 +20,12 @@ void main() {
       TextSpan(style: style, text: '$crossAxisAlignment'),
       textDirection: TextDirection.ltr,
     );
-    table.add(RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    final RenderFlex row = RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic, textDirection: TextDirection.ltr);
+    table.add(RenderPadding(
+        child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
+    final RenderFlex row = RenderFlex(
+        crossAxisAlignment: crossAxisAlignment,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr);
     style = const TextStyle(fontSize: 15.0, color: Color(0xFF000000));
     row.add(RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0x7FFFCCCC)),
@@ -37,7 +42,10 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     ));
-    final RenderFlex subrow = RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic, textDirection: TextDirection.ltr);
+    final RenderFlex subrow = RenderFlex(
+        crossAxisAlignment: crossAxisAlignment,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr);
     style = const TextStyle(fontSize: 25.0, color: Color(0xFF000000));
     subrow.add(RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0x7FCCCCFF)),
@@ -46,7 +54,8 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     ));
-    subrow.add(RenderSolidColorBox(const Color(0x7FCCFFFF), desiredSize: const Size(30.0, 40.0)));
+    subrow.add(RenderSolidColorBox(const Color(0x7FCCFFFF),
+        desiredSize: const Size(30.0, 40.0)));
     row.add(subrow);
     table.add(row);
     final FlexParentData rowParentData = row.parentData! as FlexParentData;
@@ -65,11 +74,15 @@ void main() {
       TextSpan(style: style, text: '$justify'),
       textDirection: TextDirection.ltr,
     );
-    table.add(RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
+    table.add(RenderPadding(
+        child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
     final RenderFlex row = RenderFlex(textDirection: TextDirection.ltr);
-    row.add(RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: const Size(80.0, 60.0)));
-    row.add(RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: const Size(64.0, 60.0)));
-    row.add(RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));
+    row.add(RenderSolidColorBox(const Color(0xFFFFCCCC),
+        desiredSize: const Size(80.0, 60.0)));
+    row.add(RenderSolidColorBox(const Color(0xFFCCFFCC),
+        desiredSize: const Size(64.0, 60.0)));
+    row.add(RenderSolidColorBox(const Color(0xFFCCCCFF),
+        desiredSize: const Size(160.0, 60.0)));
     row.mainAxisAlignment = justify;
     table.add(row);
     final FlexParentData rowParentData = row.parentData! as FlexParentData;
@@ -84,7 +97,8 @@ void main() {
 
   final RenderDecoratedBox root = RenderDecoratedBox(
     decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
-    child: RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0)),
+    child: RenderPadding(
+        child: table, padding: const EdgeInsets.symmetric(vertical: 50.0)),
   );
 
   ViewRenderingFlutterBinding(root: root).scheduleFrame();

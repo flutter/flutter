@@ -31,16 +31,19 @@ void main() {
     expect(result.passed, false);
     expect(
       result.reason,
-      contains('expected tap target size of at least Size(48.0, 48.0), but found Size(47.0, 47.0)'),
+      contains(
+          'expected tap target size of at least Size(48.0, 48.0), but found Size(47.0, 47.0)'),
     );
     expect(
       result.reason,
-      contains('expected tap target size of at least Size(48.0, 48.0), but found Size(46.0, 46.0)'),
+      contains(
+          'expected tap target size of at least Size(48.0, 48.0), but found Size(46.0, 46.0)'),
     );
     handle.dispose();
   });
 
-  testWidgets('Detects labeled tap targets in all views', (WidgetTester tester) async {
+  testWidgets('Detects labeled tap targets in all views',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpViews(
       tester: tester,
@@ -61,14 +64,23 @@ void main() {
     expect(result.passed, false);
     final List<String> lines = const LineSplitter().convert(result.reason!);
     expect(lines, hasLength(2));
-    expect(lines.first, startsWith('SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 47.0, 47.0)'));
-    expect(lines.first, endsWith('expected tappable node to have semantic label, but none was found.'));
-    expect(lines.last, startsWith('SemanticsNode#2(Rect.fromLTRB(0.0, 0.0, 46.0, 46.0)'));
-    expect(lines.last, endsWith('expected tappable node to have semantic label, but none was found.'));
+    expect(lines.first,
+        startsWith('SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 47.0, 47.0)'));
+    expect(
+        lines.first,
+        endsWith(
+            'expected tappable node to have semantic label, but none was found.'));
+    expect(lines.last,
+        startsWith('SemanticsNode#2(Rect.fromLTRB(0.0, 0.0, 46.0, 46.0)'));
+    expect(
+        lines.last,
+        endsWith(
+            'expected tappable node to have semantic label, but none was found.'));
     handle.dispose();
   });
 
-  testWidgets('Detects contrast problems in all views', (WidgetTester tester) async {
+  testWidgets('Detects contrast problems in all views',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpViews(
       tester: tester,
@@ -95,13 +107,20 @@ void main() {
     );
     final Evaluation result = await textContrastGuideline.evaluate(tester);
     expect(result.passed, false);
-    expect(result.reason, contains('Expected contrast ratio of at least 4.5 but found 0.88 for a font size of 14.0.'));
-    expect(result.reason, contains('Expected contrast ratio of at least 3.0 but found 0.88 for a font size of 25.0.'));
+    expect(
+        result.reason,
+        contains(
+            'Expected contrast ratio of at least 4.5 but found 0.88 for a font size of 14.0.'));
+    expect(
+        result.reason,
+        contains(
+            'Expected contrast ratio of at least 3.0 but found 0.88 for a font size of 25.0.'));
     handle.dispose();
   });
 }
 
-Future<void> pumpViews({required WidgetTester tester, required  List<Widget> viewContents}) {
+Future<void> pumpViews(
+    {required WidgetTester tester, required List<Widget> viewContents}) {
   final List<Widget> views = <Widget>[
     for (int i = 0; i < viewContents.length; i++)
       View(

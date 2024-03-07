@@ -3,20 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/button_style_button/button_style_button.icon_alignment.0.dart' as example;
+import 'package:flutter_api_samples/material/button_style_button/button_style_button.icon_alignment.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ButtonStyleButton.iconAlignment updates button icons alignment', (WidgetTester tester) async {
+  testWidgets('ButtonStyleButton.iconAlignment updates button icons alignment',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ButtonStyleButtonIconAlignmentApp(),
     );
 
     Finder findButtonMaterial(String text) {
-      return find.ancestor(
-        of: find.text(text),
-        matching: find.byType(Material),
-      ).first;
+      return find
+          .ancestor(
+            of: find.text(text),
+            matching: find.byType(Material),
+          )
+          .first;
     }
 
     void expectedLeftIconPosition({
@@ -41,7 +45,8 @@ void main() {
       );
       expect(
         tester.getTopLeft(findButtonMaterial('TextButton')).dx,
-        tester.getTopLeft(find.byIcon(Icons.flight_takeoff)).dx - textButtonIconOffset,
+        tester.getTopLeft(find.byIcon(Icons.flight_takeoff)).dx -
+            textButtonIconOffset,
       );
     }
 
@@ -67,7 +72,8 @@ void main() {
       );
       expect(
         tester.getTopRight(findButtonMaterial('TextButton')).dx,
-        tester.getTopRight(find.byIcon(Icons.flight_takeoff)).dx + textButtonIconOffset,
+        tester.getTopRight(find.byIcon(Icons.flight_takeoff)).dx +
+            textButtonIconOffset,
       );
     }
 

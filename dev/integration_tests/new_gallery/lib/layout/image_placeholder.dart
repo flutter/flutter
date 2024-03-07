@@ -60,7 +60,8 @@ class FadeInImagePlaceholder extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      frameBuilder: (BuildContext context, Widget child, int? frame,
+          bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded) {
           return this.child ?? child;
         } else {

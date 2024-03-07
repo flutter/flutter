@@ -32,25 +32,27 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
-          id: '/',
-          onTap: () {
-            Navigator.pushNamed(context, '/A');
-          },
-        ),
+            id: '/',
+            onTap: () {
+              Navigator.pushNamed(context, '/A');
+            },
+          ),
       '/A': (BuildContext context) => OnTapPage(
-          id: 'A',
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
+            id: 'A',
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
     };
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -61,7 +63,8 @@ void main() {
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated',
+      isMethodCall(
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
           'uri': '/',
           'state': null,
@@ -107,9 +110,11 @@ void main() {
     );
   });
 
-  testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
+  testWidgets('Navigator does not report route name by default',
+      (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -141,26 +146,28 @@ void main() {
     expect(log, hasLength(0));
   });
 
-  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
-          id: '/',
-          onTap: () {
-            Navigator.pushNamed(context, '/A');
-          },
-        ),
+            id: '/',
+            onTap: () {
+              Navigator.pushNamed(context, '/A');
+            },
+          ),
       '/A': (BuildContext context) => OnTapPage(
-          id: 'A',
-          onTap: () {
-            Navigator.pushReplacementNamed(context, '/B');
-          },
-        ),
+            id: 'A',
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/B');
+            },
+          ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -171,7 +178,8 @@ void main() {
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated',
+      isMethodCall(
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
           'uri': '/',
           'state': null,
@@ -217,9 +225,11 @@ void main() {
     );
   });
 
-  testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
+  testWidgets('Nameless routes should send platform messages',
+      (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -244,7 +254,8 @@ void main() {
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated',
+      isMethodCall(
+        'routeInformationUpdated',
         arguments: <String, dynamic>{
           'uri': '/home',
           'state': null,
@@ -261,14 +272,17 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
+  testWidgets('PlatformRouteInformationProvider reports URL',
+      (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
 
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final PlatformRouteInformationProvider provider =
+        PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
@@ -318,10 +332,12 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+    BuildContext context, RouteInformation information);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 
-class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
+class SimpleRouteInformationParser
+    extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
 
   @override
@@ -335,7 +351,8 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   }
 }
 
-class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
+class SimpleRouterDelegate extends RouterDelegate<RouteInformation>
+    with ChangeNotifier {
   SimpleRouterDelegate({
     required this.builder,
     this.onPopRoute,
@@ -390,7 +407,9 @@ class TestPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(
       settings: this,
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+      pageBuilder: (BuildContext context, Animation<double> animation,
+              Animation<double> secondaryAnimation) =>
+          const Placeholder(),
     );
   }
 }

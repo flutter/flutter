@@ -22,11 +22,10 @@ class _SwitchAppState extends State<SwitchApp> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = ThemeData(
-      platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
-      adaptations: <Adaptation<Object>>[
-        if (isCustomized) const _SwitchThemeAdaptation()
-      ]
-    );
+        platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
+        adaptations: <Adaptation<Object>>[
+          if (isCustomized) const _SwitchThemeAdaptation()
+        ]);
     final ButtonStyle style = OutlinedButton.styleFrom(
       fixedSize: const Size(220, 40),
     );
@@ -45,7 +44,9 @@ class _SwitchAppState extends State<SwitchApp> {
                   isMaterial = !isMaterial;
                 });
               },
-              child: isMaterial ? const Text('Show cupertino style') : const Text('Show material style'),
+              child: isMaterial
+                  ? const Text('Show cupertino style')
+                  : const Text('Show material style'),
             ),
             OutlinedButton(
               style: style,
@@ -54,7 +55,9 @@ class _SwitchAppState extends State<SwitchApp> {
                   isCustomized = !isCustomized;
                 });
               },
-              child: isCustomized ? const Text('Remove customization') : const Text('Add customization'),
+              child: isCustomized
+                  ? const Text('Remove customization')
+                  : const Text('Add customization'),
             ),
             const SizedBox(height: 20),
             const SwitchWithLabel(label: 'enabled', enabled: true),
@@ -89,23 +92,23 @@ class _SwitchWithLabelState extends State<SwitchWithLabel> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Container(
-          width: 150,
-          padding: const EdgeInsets.only(right: 20),
-          child: Text(widget.label)
-        ),
+            width: 150,
+            padding: const EdgeInsets.only(right: 20),
+            child: Text(widget.label)),
         Switch.adaptive(
           value: active,
-          onChanged: !widget.enabled ? null : (bool value) {
-            setState(() {
-              active = value;
-            });
-          },
+          onChanged: !widget.enabled
+              ? null
+              : (bool value) {
+                  setState(() {
+                    active = value;
+                  });
+                },
         ),
       ],
     );
   }
 }
-
 
 class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
   const _SwitchThemeAdaptation();
@@ -121,7 +124,8 @@ class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return SwitchThemeData(
-          thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+          thumbColor: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
             if (states.contains(MaterialState.selected)) {
               return Colors.yellow;
             }

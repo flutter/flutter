@@ -41,14 +41,14 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
     required this.onPressed,
     required String text,
   }) : child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: Theme.of(context).colorScheme.brightness == Brightness.dark
-               ? Colors.white
-               : Colors.black87,
-         ),
-       );
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle.copyWith(
+            color: Theme.of(context).colorScheme.brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black87,
+          ),
+        );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback? onPressed;

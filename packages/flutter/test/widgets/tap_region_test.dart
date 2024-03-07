@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside taps',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -101,7 +102,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside taps when asked',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -206,7 +208,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps',
+      (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -293,7 +296,8 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps correctly with behavior',
+      (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
     const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
@@ -308,7 +312,8 @@ void main() {
               child: Row(
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints:
+                        const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(noGroupKey.value);
@@ -317,7 +322,8 @@ void main() {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints:
+                        const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.opaque,
@@ -328,7 +334,8 @@ void main() {
                     ),
                   ),
                   ConstrainedBox(
-                    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
+                    constraints:
+                        const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.translucent,
@@ -375,11 +382,13 @@ void main() {
     tappedInside.clear();
 
     await click(find.byKey(group1BKey));
-    expect(tappedInside, isEmpty); // No hittable children while translucent, so no hit.
+    expect(tappedInside,
+        isEmpty); // No hittable children while translucent, so no hit.
     tappedInside.clear();
   });
 
-  testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
+  testWidgets('Setting the group updates the registration',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -480,7 +489,8 @@ void main() {
     tappedOutside.clear();
   });
 
-  testWidgets('TapRegionSurface detects outside right click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside right click',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -573,7 +583,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects outside middle click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside middle click',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -666,7 +677,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface consumes outside right click when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside right click when asked',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -718,10 +730,9 @@ void main() {
 
     Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
-        tester.getCenter(finder),
-        kind: PointerDeviceKind.mouse,
-        buttons: kSecondaryButton
-      );
+          tester.getCenter(finder),
+          kind: PointerDeviceKind.mouse,
+          buttons: kSecondaryButton);
       await gesture.up();
       await gesture.removePointer();
     }
@@ -772,7 +783,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface consumes outside middle click when asked', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface consumes outside middle click when asked',
+      (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     int propagatedTaps = 0;
     await tester.pumpWidget(
@@ -878,7 +890,8 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside right click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside right click',
+      (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -966,7 +979,8 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside middle click', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside middle click',
+      (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(

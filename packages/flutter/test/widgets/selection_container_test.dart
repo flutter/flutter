@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(
       Directionality(
@@ -20,7 +19,9 @@ void main() {
     );
   }
 
-  testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
+  testWidgets(
+      'updates its registrar and delegate based on the number of selectables',
+      (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     addTearDown(delegate.dispose);
@@ -69,7 +70,8 @@ void main() {
     expect(delegate.selectables.length, 0);
   });
 
-  testWidgets('Swapping out container delegate does not crash', (WidgetTester tester) async {
+  testWidgets('Swapping out container delegate does not crash',
+      (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     addTearDown(delegate.dispose);
@@ -79,18 +81,17 @@ void main() {
     await pumpContainer(
       tester,
       SelectionContainer(
-        registrar: registrar,
-        delegate: delegate,
-        child: Builder(
-          builder: (BuildContext context) {
-            return SelectionContainer(
-              registrar: SelectionContainer.maybeOf(context),
-              delegate: childDelegate,
-              child: const Text('dummy'),
-            );
-          },
-        )
-      ),
+          registrar: registrar,
+          delegate: delegate,
+          child: Builder(
+            builder: (BuildContext context) {
+              return SelectionContainer(
+                registrar: SelectionContainer.maybeOf(context),
+                delegate: childDelegate,
+                child: const Text('dummy'),
+              );
+            },
+          )),
     );
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
@@ -102,18 +103,17 @@ void main() {
     await pumpContainer(
       tester,
       SelectionContainer(
-        registrar: registrar,
-        delegate: delegate,
-        child: Builder(
-          builder: (BuildContext context) {
-            return SelectionContainer(
-              registrar: SelectionContainer.maybeOf(context),
-              delegate: newDelegate,
-              child: const Text('dummy'),
-            );
-          },
-        )
-      ),
+          registrar: registrar,
+          delegate: delegate,
+          child: Builder(
+            builder: (BuildContext context) {
+              return SelectionContainer(
+                registrar: SelectionContainer.maybeOf(context),
+                delegate: newDelegate,
+                child: const Text('dummy'),
+              );
+            },
+          )),
     );
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
@@ -141,8 +141,7 @@ void main() {
                 child: const Text('dummy'),
               );
             },
-          )
-      ),
+          )),
     );
     await tester.pump();
     // Should finish update after flushing the micro tasks.
@@ -151,7 +150,9 @@ void main() {
     expect(delegate.value.hasContent, isTrue);
   });
 
-  testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
+  testWidgets(
+      'selection container registers itself if there is a selectable child',
+      (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     addTearDown(delegate.dispose);
@@ -161,8 +162,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
-        ),
+        child: const Column(),
       ),
     );
     expect(registrar.selectables.length, 0);
@@ -187,15 +187,15 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
-        ),
+        child: const Column(),
       ),
     );
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 0);
   });
 
-  testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
+  testWidgets('selection container gets registrar from context if not provided',
+      (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     addTearDown(delegate.dispose);
@@ -221,7 +221,8 @@ void main() {
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   @override
-  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
+  SelectionResult dispatchSelectionEventToChild(
+      Selectable selectable, SelectionEvent event) {
     throw UnimplementedError();
   }
 

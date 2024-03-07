@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].
 class FlutterIOOverrides extends io.IOOverrides {
-  FlutterIOOverrides({ FileSystem? fileSystem })
-    : _fileSystemDelegate = fileSystem;
+  FlutterIOOverrides({FileSystem? fileSystem})
+      : _fileSystemDelegate = fileSystem;
 
   final FileSystem? _fileSystemDelegate;
 
@@ -39,8 +39,10 @@ class FlutterIOOverrides extends io.IOOverrides {
 
   @override
   Stream<FileSystemEvent> fsWatch(String path, int events, bool recursive) {
-    return _fileSystemDelegate?.file(path).watch(events: events, recursive: recursive)
-      ?? super.fsWatch(path, events, recursive);
+    return _fileSystemDelegate
+            ?.file(path)
+            .watch(events: events, recursive: recursive) ??
+        super.fsWatch(path, events, recursive);
   }
 
   @override
@@ -50,24 +52,26 @@ class FlutterIOOverrides extends io.IOOverrides {
 
   @override
   Future<FileSystemEntityType> fseGetType(String path, bool followLinks) {
-    return _fileSystemDelegate?.type(path, followLinks: followLinks)
-      ?? super.fseGetType(path, followLinks);
+    return _fileSystemDelegate?.type(path, followLinks: followLinks) ??
+        super.fseGetType(path, followLinks);
   }
 
   @override
   FileSystemEntityType fseGetTypeSync(String path, bool followLinks) {
-    return _fileSystemDelegate?.typeSync(path, followLinks: followLinks)
-      ?? super.fseGetTypeSync(path, followLinks);
+    return _fileSystemDelegate?.typeSync(path, followLinks: followLinks) ??
+        super.fseGetTypeSync(path, followLinks);
   }
 
   @override
   Future<bool> fseIdentical(String path1, String path2) {
-    return _fileSystemDelegate?.identical(path1, path2) ?? super.fseIdentical(path1, path2);
+    return _fileSystemDelegate?.identical(path1, path2) ??
+        super.fseIdentical(path1, path2);
   }
 
   @override
   bool fseIdenticalSync(String path1, String path2) {
-    return _fileSystemDelegate?.identicalSync(path1, path2) ?? super.fseIdenticalSync(path1, path2);
+    return _fileSystemDelegate?.identicalSync(path1, path2) ??
+        super.fseIdenticalSync(path1, path2);
   }
 
   @override
@@ -77,7 +81,8 @@ class FlutterIOOverrides extends io.IOOverrides {
 
   @override
   io.Directory getSystemTempDirectory() {
-    return _fileSystemDelegate?.systemTempDirectory ?? super.getSystemTempDirectory();
+    return _fileSystemDelegate?.systemTempDirectory ??
+        super.getSystemTempDirectory();
   }
 
   @override

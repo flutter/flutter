@@ -10,13 +10,16 @@ void main() {
   // in platform_channel_test.dart) since we rely on the WidgetsFlutterBinding
   // not being initialized and we call ensureInitialized() in the other test
   // file.
-  test('throws assertion error iff WidgetsFlutterBinding is not yet initialized', () {
+  test(
+      'throws assertion error iff WidgetsFlutterBinding is not yet initialized',
+      () {
     const MethodChannel methodChannel = MethodChannel('mock');
 
     // Verify an assertion error is thrown before the binary messenger is
     // accessed (which would result in a _CastError due to the non-null
     // assertion). This way we can hint the caller towards how to fix the error.
-    expect(() => methodChannel.setMethodCallHandler(null), throwsAssertionError);
+    expect(
+        () => methodChannel.setMethodCallHandler(null), throwsAssertionError);
 
     // Verify the assertion is not thrown once the binding has been initialized.
     // This cannot be a separate test case since the execution order is random.

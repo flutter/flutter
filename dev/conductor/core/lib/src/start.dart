@@ -131,8 +131,7 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final String frameworkMirror =
-        'git@github.com:$githubUsername/flutter.git';
+    final String frameworkMirror = 'git@github.com:$githubUsername/flutter.git';
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
       argumentResults,
@@ -318,13 +317,10 @@ class StartContext extends Context {
       ..checkoutPath = (await engine.checkoutDirectory).path
       ..upstream = (pb.Remote.create()
         ..name = 'upstream'
-        ..url = engine.upstreamRemote.url
-      )
+        ..url = engine.upstreamRemote.url)
       ..mirror = (pb.Remote.create()
         ..name = 'mirror'
-        ..url = engine.mirrorRemote!.url
-      )
-    );
+        ..url = engine.mirrorRemote!.url));
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       state.engine.dartRevision = dartRevision!;
     }
@@ -378,13 +374,10 @@ class StartContext extends Context {
       ..checkoutPath = (await framework.checkoutDirectory).path
       ..upstream = (pb.Remote.create()
         ..name = 'upstream'
-        ..url = framework.upstreamRemote.url
-      )
+        ..url = framework.upstreamRemote.url)
       ..mirror = (pb.Remote.create()
         ..name = 'mirror'
-        ..url = framework.mirrorRemote!.url
-      )
-    );
+        ..url = framework.mirrorRemote!.url));
 
     state.currentPhase = ReleasePhase.APPLY_ENGINE_CHERRYPICKS;
 

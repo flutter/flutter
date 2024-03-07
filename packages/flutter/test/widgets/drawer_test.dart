@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-
   testWidgets('Drawer control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
@@ -79,7 +78,8 @@ void main() {
   testWidgets('Drawer hover test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<String> logs = <String>[];
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     // Start out of hoverTarget
     await gesture.addPointer(location: const Offset(100, 100));
 
@@ -91,9 +91,15 @@ void main() {
           body: Align(
             alignment: Alignment.topLeft,
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter'); },
-              onHover: (_) { logs.add('hover'); },
-              onExit: (_) { logs.add('exit'); },
+              onEnter: (_) {
+                logs.add('enter');
+              },
+              onHover: (_) {
+                logs.add('hover');
+              },
+              onExit: (_) {
+                logs.add('exit');
+              },
               child: const SizedBox(width: 10, height: 10),
             ),
           ),
@@ -182,7 +188,8 @@ void main() {
     final double textLeft = tester.getTopLeft(find.text('drawer')).dx;
     expect(textLeft, lessThan(0.0));
 
-    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(100.0, 100.0));
     // drawer should be stopped.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
@@ -236,7 +243,8 @@ void main() {
     final double textRight = tester.getTopRight(find.text('drawer')).dx;
     expect(textRight, greaterThan(800.0));
 
-    final TestGesture gesture = await tester.startGesture(const Offset(700.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(700.0, 100.0));
     // drawer should be stopped.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
@@ -274,7 +282,9 @@ void main() {
               ),
               body: TextButton(
                 child: const Text('button'),
-                onPressed: () { buttonPressed = true; },
+                onPressed: () {
+                  buttonPressed = true;
+                },
               ),
             );
           },
@@ -299,7 +309,8 @@ void main() {
     expect(buttonPressed, equals(true));
   });
 
-  testWidgets('Dismissible ModalBarrier includes button in semantic tree', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier includes button in semantic tree',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -320,13 +331,18 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics,
+        includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
     expect(semantics, includesNodeWith(label: 'Dismiss'));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+  testWidgets(
+      'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -348,13 +364,17 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(
+        semantics,
+        isNot(
+            includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
     expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
+  testWidgets('Drawer contains route semantics flags',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -377,13 +397,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(
-      label: 'Navigation menu',
-      flags: <SemanticsFlag>[
-        SemanticsFlag.scopesRoute,
-        SemanticsFlag.namesRoute,
-      ],
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          label: 'Navigation menu',
+          flags: <SemanticsFlag>[
+            SemanticsFlag.scopesRoute,
+            SemanticsFlag.namesRoute,
+          ],
+        ));
 
     semantics.dispose();
   });

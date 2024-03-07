@@ -50,7 +50,8 @@ Future<void> main() async {
   ));
   await SchedulerBinding.instance.endOfFrame;
 
-  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
+  final WidgetController controller =
+      LiveWidgetController(WidgetsBinding.instance);
 
   debugPrint('Navigating...');
   await controller.tap(find.text('Material'));
@@ -67,7 +68,8 @@ Future<void> main() async {
   final Rect demoItemBounds = boundsFor(controller, demoItem);
   final Rect demoListBounds = boundsFor(controller, demoList);
   if (!demoListBounds.contains(demoItemBounds.center)) {
-    await controller.drag(demoList, Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
+    await controller.drag(demoList,
+        Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
     await endOfAnimation();
   }
 

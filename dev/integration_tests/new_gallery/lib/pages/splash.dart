@@ -115,7 +115,8 @@ class _SplashPageState extends State<SplashPage>
         isFinished: _controller.status == AnimationStatus.dismissed,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            final Animation<RelativeRect> animation = _getPanelAnimation(context, constraints);
+            final Animation<RelativeRect> animation =
+                _getPanelAnimation(context, constraints);
             Widget frontLayer = widget.child;
             if (_isSplashVisible) {
               frontLayer = MouseRegion(

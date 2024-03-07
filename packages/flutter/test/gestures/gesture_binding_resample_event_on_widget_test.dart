@@ -10,11 +10,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
+  testWidgets('PointerEvent resampling on a widget',
+      (WidgetTester tester) async {
     Duration currentTestFrameTime() => Duration(
-      milliseconds: TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch,
-    );
-    void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
+          milliseconds: TestWidgetsFlutterBinding.instance.clock
+              .now()
+              .millisecondsSinceEpoch,
+        );
+    void requestFrame() =>
+        SchedulerBinding.instance.scheduleFrameCallback((_) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -99,7 +103,8 @@ void main() {
     expect(events.length, 2);
     expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[1], isA<PointerMoveEvent>());
-    expect(events[1].position, Offset(22.5 / tester.view.devicePixelRatio, 0.0));
+    expect(
+        events[1].position, Offset(22.5 / tester.view.devicePixelRatio, 0.0));
     expect(events[1].delta, Offset(15.0 / tester.view.devicePixelRatio, 0.0));
 
     // Now the system time is epoch + 30ms
@@ -108,18 +113,21 @@ void main() {
     expect(events.length, 4);
     expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[2], isA<PointerMoveEvent>());
-    expect(events[2].position, Offset(37.5 / tester.view.devicePixelRatio, 0.0));
+    expect(
+        events[2].position, Offset(37.5 / tester.view.devicePixelRatio, 0.0));
     expect(events[2].delta, Offset(15.0 / tester.view.devicePixelRatio, 0.0));
     expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[3], isA<PointerUpEvent>());
   });
 
-  testWidgets('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
+  testWidgets('Timer should be canceled when resampling stopped',
+      (WidgetTester tester) async {
     // A timer will be started when event's timeStamp is larger than sampleTime.
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
-          timeStamp: Duration(microseconds: DateTime.now().microsecondsSinceEpoch),
+          timeStamp:
+              Duration(microseconds: DateTime.now().microsecondsSinceEpoch),
         ),
       ],
     );

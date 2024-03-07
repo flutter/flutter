@@ -20,7 +20,9 @@ class PopupMenuApp extends StatelessWidget {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
   (AnimationStyles.defaultStyle, 'Default'),
   (AnimationStyles.custom, 'Custom'),
   (AnimationStyles.none, 'None'),
@@ -36,7 +38,9 @@ class PopupMenuExample extends StatefulWidget {
 }
 
 class _PopupMenuExampleState extends State<PopupMenuExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -70,16 +74,17 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
                     });
                   },
                   segments: animationStyleSegments
-                    .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                      return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                    })
-                    .toList(),
+                      .map<ButtonSegment<AnimationStyles>>(
+                          ((AnimationStyles, String) shirt) {
+                    return ButtonSegment<AnimationStyles>(
+                        value: shirt.$1, label: Text(shirt.$2));
+                  }).toList(),
                 ),
                 const SizedBox(height: 10),
                 PopupMenuButton<Menu>(
                   popUpAnimationStyle: _animationStyle,
                   icon: const Icon(Icons.more_vert),
-                  onSelected: (Menu item) { },
+                  onSelected: (Menu item) {},
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
                     const PopupMenuItem<Menu>(
                       value: Menu.preview,

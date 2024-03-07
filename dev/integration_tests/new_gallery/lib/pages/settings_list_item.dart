@@ -8,17 +8,16 @@ import 'package:flutter/material.dart';
 
 // Common constants between SlowMotionSetting and SettingsListItem.
 final BorderRadius settingItemBorderRadius = BorderRadius.circular(10);
-const EdgeInsetsDirectional settingItemHeaderMargin = EdgeInsetsDirectional.fromSTEB(32, 0, 32, 8);
+const EdgeInsetsDirectional settingItemHeaderMargin =
+    EdgeInsetsDirectional.fromSTEB(32, 0, 32, 8);
 
 class DisplayOption {
-
   DisplayOption(this.title, {this.subtitle});
   final String title;
   final String? subtitle;
 }
 
 class ToggleSetting extends StatelessWidget {
-
   const ToggleSetting({
     super.key,
     required this.text,
@@ -220,7 +219,8 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
           shrinkWrap: true,
           itemCount: widget.isExpanded ? _options.length : 0,
           itemBuilder: (BuildContext context, int index) {
-            final DisplayOption displayOption = _displayOptions.elementAt(index);
+            final DisplayOption displayOption =
+                _displayOptions.elementAt(index);
             return RadioListTile<T?>(
               value: _options.elementAt(index),
               title: Column(

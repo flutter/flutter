@@ -50,7 +50,7 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestLayer extends Layer{
+class _TestLayer extends Layer {
   @override
   void addToScene(SceneBuilder builder) {}
 }

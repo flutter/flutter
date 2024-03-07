@@ -23,11 +23,11 @@ class SizeAnalyzer {
     required Usage flutterUsage,
     required Analytics analytics,
     Pattern appFilenamePattern = 'libapp.so',
-  }) : _flutterUsage = flutterUsage,
-       _analytics = analytics,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _appFilenamePattern = appFilenamePattern;
+  })  : _flutterUsage = flutterUsage,
+        _analytics = analytics,
+        _fileSystem = fileSystem,
+        _logger = logger,
+        _appFilenamePattern = appFilenamePattern;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -58,12 +58,15 @@ class SizeAnalyzer {
     );
 
     // Convert an AOT snapshot file into a map.
-    final Object? decodedAotSnapshot = json.decode(aotSnapshot.readAsStringSync());
+    final Object? decodedAotSnapshot =
+        json.decode(aotSnapshot.readAsStringSync());
     if (decodedAotSnapshot == null) {
       throwToolExit('AOT snapshot is invalid for analysis');
     }
-    final Map<String, Object?> processedAotSnapshotJson = treemapFromJson(decodedAotSnapshot);
-    final _SymbolNode? aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
+    final Map<String, Object?> processedAotSnapshotJson =
+        treemapFromJson(decodedAotSnapshot);
+    final _SymbolNode? aotSnapshotJsonRoot =
+        _parseAotSnapshot(processedAotSnapshotJson);
 
     for (final _SymbolNode firstLevelPath in aotAnalysisJson.children) {
       _printEntitySize(
@@ -72,8 +75,11 @@ class SizeAnalyzer {
         level: 1,
       );
       // Print the expansion of lib directory to show more info for `appFilename`.
-      if (firstLevelPath.name == _fileSystem.path.basename(outputDirectory.path) && aotSnapshotJsonRoot != null) {
-        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kAotSizeMaxDepth, 0);
+      if (firstLevelPath.name ==
+              _fileSystem.path.basename(outputDirectory.path) &&
+          aotSnapshotJsonRoot != null) {
+        _printLibChildrenPaths(
+            firstLevelPath, '', aotSnapshotJsonRoot, _kAotSizeMaxDepth, 0);
       }
     }
 
@@ -81,13 +87,16 @@ class SizeAnalyzer {
 
     Map<String, Object?> apkAnalysisJson = aotAnalysisJson.toJson();
 
-    apkAnalysisJson['type'] = type; // one of apk, aab, ios, macos, windows, or linux.
+    apkAnalysisJson['type'] =
+        type; // one of apk, aab, ios, macos, windows, or linux.
 
     apkAnalysisJson = _addAotSnapshotDataToAnalysis(
       apkAnalysisJson: apkAnalysisJson,
       path: _locatedAotFilePath,
       aotSnapshotJson: processedAotSnapshotJson,
-      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync())
+              as Map<String, Object?>? ??
+          <String, Object?>{},
     );
 
     assert(_appFilename != null);
@@ -121,15 +130,19 @@ class SizeAnalyzer {
     final _SymbolNode apkAnalysisRoot = _parseUnzipFile(zipFile);
 
     // Convert an AOT snapshot file into a map.
-    final Object? decodedAotSnapshot = json.decode(aotSnapshot.readAsStringSync());
+    final Object? decodedAotSnapshot =
+        json.decode(aotSnapshot.readAsStringSync());
     if (decodedAotSnapshot == null) {
       throwToolExit('AOT snapshot is invalid for analysis');
     }
-    final Map<String, Object?> processedAotSnapshotJson = treemapFromJson(decodedAotSnapshot);
-    final _SymbolNode? aotSnapshotJsonRoot = _parseAotSnapshot(processedAotSnapshotJson);
+    final Map<String, Object?> processedAotSnapshotJson =
+        treemapFromJson(decodedAotSnapshot);
+    final _SymbolNode? aotSnapshotJsonRoot =
+        _parseAotSnapshot(processedAotSnapshotJson);
     if (aotSnapshotJsonRoot != null) {
       for (final _SymbolNode firstLevelPath in apkAnalysisRoot.children) {
-        _printLibChildrenPaths(firstLevelPath, '', aotSnapshotJsonRoot, _kZipSizeMaxDepth, 0);
+        _printLibChildrenPaths(
+            firstLevelPath, '', aotSnapshotJsonRoot, _kZipSizeMaxDepth, 0);
       }
     }
     _logger.printStatus('▒' * tableWidth);
@@ -143,7 +156,9 @@ class SizeAnalyzer {
       apkAnalysisJson: apkAnalysisJson,
       path: _locatedAotFilePath,
       aotSnapshotJson: processedAotSnapshotJson,
-      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync())
+              as Map<String, Object?>? ??
+          <String, Object?>{},
     );
     CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
     _analytics.send(Event.codeSizeAnalysis(platform: kind));
@@ -157,20 +172,23 @@ class SizeAnalyzer {
     for (final ArchiveFile archiveFile in archive.files) {
       final InputStreamBase? rawContent = archiveFile.rawContent;
       if (rawContent != null) {
-        pathsToSize[_fileSystem.path.split(archiveFile.name)] = rawContent.length;
+        pathsToSize[_fileSystem.path.split(archiveFile.name)] =
+            rawContent.length;
       }
     }
     return _buildSymbolTree(pathsToSize);
   }
 
-  _SymbolNode _parseDirectory(Directory directory, String relativeTo, String? excludePath) {
+  _SymbolNode _parseDirectory(
+      Directory directory, String relativeTo, String? excludePath) {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
-    for (final File file in directory.listSync(recursive: true).whereType<File>()) {
+    for (final File file
+        in directory.listSync(recursive: true).whereType<File>()) {
       if (excludePath != null && file.uri.pathSegments.contains(excludePath)) {
         continue;
       }
-      final List<String> path = _fileSystem.path.split(
-        _fileSystem.path.relative(file.path, from: relativeTo));
+      final List<String> path = _fileSystem.path
+          .split(_fileSystem.path.relative(file.path, from: relativeTo));
       pathsToSize[path] = file.lengthSync();
     }
     return _buildSymbolTree(pathsToSize);
@@ -188,7 +206,7 @@ class SizeAnalyzer {
   }
 
   _SymbolNode _buildSymbolTree(Map<List<String>, int> pathsToSize) {
-     final _SymbolNode rootNode = _SymbolNode('Root');
+    final _SymbolNode rootNode = _SymbolNode('Root');
     _SymbolNode currentNode = rootNode;
 
     for (final List<String> paths in pathsToSize.keys) {
@@ -200,7 +218,8 @@ class SizeAnalyzer {
           if (matchesPattern(path, pattern: _appFilenamePattern) != null) {
             _appFilename = path;
             childWithPathAsName.name += ' (Dart AOT)';
-            _locatedAotFilePath = _buildNodeName(childWithPathAsName, currentNode);
+            _locatedAotFilePath =
+                _buildNodeName(childWithPathAsName, currentNode);
           } else if (path == 'libflutter.so') {
             childWithPathAsName.name += ' (Flutter Engine)';
           }
@@ -227,33 +246,38 @@ class SizeAnalyzer {
     totalPath += currentNode.name;
 
     assert(_appFilename != null);
-    if (currentNode.children.isNotEmpty
-      && currentNode.name != '$_appFilename (Dart AOT)'
-      && currentDepth < maxDepth
-      && currentNode.byteSize >= 1000) {
+    if (currentNode.children.isNotEmpty &&
+        currentNode.name != '$_appFilename (Dart AOT)' &&
+        currentDepth < maxDepth &&
+        currentNode.byteSize >= 1000) {
       for (final _SymbolNode child in currentNode.children) {
-        _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot, maxDepth, currentDepth + 1);
+        _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot,
+            maxDepth, currentDepth + 1);
       }
-      _leadingPaths = totalPath.split('/')
-        ..removeLast();
+      _leadingPaths = totalPath.split('/')..removeLast();
     } else {
       // Print total path and size if currentNode does not have any children and is
       // larger than 1KB
-      final bool isAotSnapshotPath = _locatedAotFilePath.join('/').contains(totalPath);
+      final bool isAotSnapshotPath =
+          _locatedAotFilePath.join('/').contains(totalPath);
       if (currentNode.byteSize >= 1000 || isAotSnapshotPath) {
-        _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1, emphasis: currentNode.children.isNotEmpty);
+        _printEntitySize(totalPath,
+            byteSize: currentNode.byteSize,
+            level: 1,
+            emphasis: currentNode.children.isNotEmpty);
         if (isAotSnapshotPath) {
-          _printAotSnapshotSummary(aotSnapshotJsonRoot, level: totalPath.split('/').length);
+          _printAotSnapshotSummary(aotSnapshotJsonRoot,
+              level: totalPath.split('/').length);
         }
-        _leadingPaths = totalPath.split('/')
-          ..removeLast();
+        _leadingPaths = totalPath.split('/')..removeLast();
       }
     }
   }
 
   /// Go through the AOT gen snapshot size JSON and print out a collapsed summary
   /// for the first package level.
-  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot, {int maxDirectoriesShown = 20, required int level}) {
+  void _printAotSnapshotSummary(_SymbolNode aotSnapshotRoot,
+      {int maxDirectoriesShown = 20, required int level}) {
     _printEntitySize(
       'Dart AOT symbols accounted decompressed size',
       byteSize: aotSnapshotRoot.byteSize,
@@ -264,12 +288,15 @@ class SizeAnalyzer {
     final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
       // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
       //  which are not interpretable by end users.
-      ..removeWhere((_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'))
-      ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
+      ..removeWhere((_SymbolNode node) =>
+          node.name.startsWith('@') || node.name.startsWith('dart:_'))
+      ..sort(
+          (_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
       // Node names will have an extra leading `package:*` name, remove it to
       // avoid extra nesting.
-      _printEntitySize(_formatExtraLeadingPackages(node.name), byteSize: node.byteSize, level: level + 1);
+      _printEntitySize(_formatExtraLeadingPackages(node.name),
+          byteSize: node.byteSize, level: level + 1);
     }
   }
 
@@ -295,10 +322,13 @@ class SizeAnalyzer {
     Map<String, Object?> currentLevel = apkAnalysisJson;
     currentLevel['precompiler-trace'] = precompilerTrace;
     while (path.isNotEmpty) {
-      final List<Map<String, Object?>>? children = currentLevel['children'] as List<Map<String, Object?>>?;
+      final List<Map<String, Object?>>? children =
+          currentLevel['children'] as List<Map<String, Object?>>?;
       final Map<String, Object?> childWithPathAsName = children?.firstWhere(
-        (Map<String, Object?> child) => (child['n'] as String?) == path.first,
-      ) ?? <String, Object?>{};
+            (Map<String, Object?> child) =>
+                (child['n'] as String?) == path.first,
+          ) ??
+          <String, Object?>{};
       path.removeAt(0);
       currentLevel = childWithPathAsName;
     }
@@ -329,10 +359,11 @@ class SizeAnalyzer {
     // directories (in _leadingPaths) for the last entity that was printed. The
     // similarly determines whether or not leading directory information needs to
     // be printed.
-    final List<String> localSegments = entityName.split('/')
-        ..removeLast();
+    final List<String> localSegments = entityName.split('/')..removeLast();
     int i = 0;
-    while (i < _leadingPaths.length && i < localSegments.length && _leadingPaths[i] == localSegments[i]) {
+    while (i < _leadingPaths.length &&
+        i < localSegments.length &&
+        _leadingPaths[i] == localSegments[i]) {
       i += 1;
     }
     for (; i < localSegments.length; i += 1) {
@@ -345,7 +376,8 @@ class SizeAnalyzer {
     _leadingPaths = localSegments;
 
     final String baseName = _fileSystem.path.basename(entityName);
-    final int spaceInBetween = tableWidth - (level + i) * 2 - baseName.length - formattedSize.length;
+    final int spaceInBetween =
+        tableWidth - (level + i) * 2 - baseName.length - formattedSize.length;
     _logger.printStatus(
       baseName + ' ' * spaceInBetween,
       newline: false,
@@ -402,7 +434,8 @@ class SizeAnalyzer {
   /// Builds a node by recursively building all of its children first
   /// in order to calculate the sum of its children's sizes.
   _SymbolNode? _buildNodeWithChildren(Map<String, Object?> aotSnapshotJson) {
-    final List<Object?> rawChildren = aotSnapshotJson['children'] as List<Object?>? ?? <Object?>[];
+    final List<Object?> rawChildren =
+        aotSnapshotJson['children'] as List<Object?>? ?? <Object?>[];
     final List<_SymbolNode> symbolNodeChildren = <_SymbolNode>[];
     int totalByteSize = 0;
 
@@ -411,7 +444,8 @@ class SizeAnalyzer {
       if (child == null) {
         continue;
       }
-      final _SymbolNode? childTreemapNode = _parseAotSnapshot(child as Map<String, Object?>);
+      final _SymbolNode? childTreemapNode =
+          _parseAotSnapshot(child as Map<String, Object?>);
       if (childTreemapNode != null) {
         symbolNodeChildren.add(childTreemapNode);
         totalByteSize += childTreemapNode.byteSize;
@@ -436,7 +470,7 @@ class _SymbolNode {
   _SymbolNode(
     this.name, {
     this.byteSize = 0,
-  })  : _children = <String, _SymbolNode>{};
+  }) : _children = <String, _SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;

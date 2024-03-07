@@ -45,7 +45,8 @@ class ShortcutSerialization {
   /// Creates a [ShortcutSerialization] representing a single character.
   ///
   /// This is used by a [CharacterActivator] to serialize itself.
-  ShortcutSerialization.character(String character, {
+  ShortcutSerialization.character(
+    String character, {
     bool alt = false,
     bool control = false,
     bool meta = false,
@@ -73,20 +74,21 @@ class ShortcutSerialization {
     bool control = false,
     bool meta = false,
     bool shift = false,
-  })  : assert(trigger != LogicalKeyboardKey.alt &&
-               trigger != LogicalKeyboardKey.altLeft &&
-               trigger != LogicalKeyboardKey.altRight &&
-               trigger != LogicalKeyboardKey.control &&
-               trigger != LogicalKeyboardKey.controlLeft &&
-               trigger != LogicalKeyboardKey.controlRight &&
-               trigger != LogicalKeyboardKey.meta &&
-               trigger != LogicalKeyboardKey.metaLeft &&
-               trigger != LogicalKeyboardKey.metaRight &&
-               trigger != LogicalKeyboardKey.shift &&
-               trigger != LogicalKeyboardKey.shiftLeft &&
-               trigger != LogicalKeyboardKey.shiftRight,
-               'Specifying a modifier key as a trigger is not allowed. '
-               'Use provided boolean parameters instead.'),
+  })  : assert(
+            trigger != LogicalKeyboardKey.alt &&
+                trigger != LogicalKeyboardKey.altLeft &&
+                trigger != LogicalKeyboardKey.altRight &&
+                trigger != LogicalKeyboardKey.control &&
+                trigger != LogicalKeyboardKey.controlLeft &&
+                trigger != LogicalKeyboardKey.controlRight &&
+                trigger != LogicalKeyboardKey.meta &&
+                trigger != LogicalKeyboardKey.metaLeft &&
+                trigger != LogicalKeyboardKey.metaRight &&
+                trigger != LogicalKeyboardKey.shift &&
+                trigger != LogicalKeyboardKey.shiftLeft &&
+                trigger != LogicalKeyboardKey.shiftRight,
+            'Specifying a modifier key as a trigger is not allowed. '
+            'Use provided boolean parameters instead.'),
         _trigger = trigger,
         _character = null,
         _alt = alt,
@@ -96,9 +98,9 @@ class ShortcutSerialization {
         _internal = <String, Object?>{
           _kShortcutTrigger: trigger.keyId,
           _kShortcutModifiers: (alt ? _shortcutModifierAlt : 0) |
-            (control ? _shortcutModifierControl : 0) |
-            (meta ? _shortcutModifierMeta : 0) |
-            (shift ? _shortcutModifierShift : 0),
+              (control ? _shortcutModifierControl : 0) |
+              (meta ? _shortcutModifierMeta : 0) |
+              (shift ? _shortcutModifierShift : 0),
         };
 
   final Map<String, Object?> _internal;
@@ -306,7 +308,8 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     final List<Map<String, Object?>> representation = <Map<String, Object?>>[];
     if (topLevelMenus.isNotEmpty) {
       for (final PlatformMenuItem childItem in topLevelMenus) {
-        representation.addAll(childItem.toChannelRepresentation(this, getId: _getId));
+        representation
+            .addAll(childItem.toChannelRepresentation(this, getId: _getId));
       }
     }
     // Currently there's only ever one window, but the channel's format allows
@@ -375,10 +378,11 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     final PlatformMenuItem item = _idMap[id]!;
     if (call.method == _kMenuSelectedCallbackMethod) {
       assert(item.onSelected == null || item.onSelectedIntent == null,
-        'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
+          'Only one of PlatformMenuItem.onSelected or PlatformMenuItem.onSelectedIntent may be specified');
       item.onSelected?.call();
       if (item.onSelectedIntent != null) {
-        Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!, item.onSelectedIntent!);
+        Actions.maybeInvoke(FocusManager.instance.primaryFocus!.context!,
+            item.onSelectedIntent!);
       }
     } else if (call.method == _kMenuItemOpenedMethod) {
       item.onOpen?.call();
@@ -464,7 +468,10 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus
+        .map<DiagnosticsNode>(
+            (PlatformMenuItem child) => child.toDiagnosticsNode())
+        .toList();
   }
 }
 
@@ -484,7 +491,9 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
 
   @override
   void dispose() {
-    assert(WidgetsBinding.instance.platformMenuDelegate.debugUnlockDelegate(context),
+    assert(
+        WidgetsBinding.instance.platformMenuDelegate
+            .debugUnlockDelegate(context),
         'tried to unlock the $DefaultPlatformMenuDelegate more than once with context $context.');
     WidgetsBinding.instance.platformMenuDelegate.clearMenus();
     super.dispose();
@@ -599,7 +608,9 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
         // Strip any leading dividers.
         return true;
       }
-      if (previousItem != null && previousItem![_kIsDividerKey] == true && item[_kIsDividerKey] == true) {
+      if (previousItem != null &&
+          previousItem![_kIsDividerKey] == true &&
+          item[_kIsDividerKey] == true) {
         // Strip any duplicate dividers.
         return true;
       }
@@ -619,14 +630,18 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus
+        .map<DiagnosticsNode>(
+            (PlatformMenuItem child) => child.toDiagnosticsNode())
+        .toList();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
-    properties.add(FlagProperty('enabled', value: menus.isNotEmpty, ifFalse: 'DISABLED'));
+    properties.add(
+        FlagProperty('enabled', value: menus.isNotEmpty, ifFalse: 'DISABLED'));
   }
 }
 
@@ -652,7 +667,8 @@ class PlatformMenuItemGroup extends PlatformMenuItem {
     PlatformMenuDelegate delegate, {
     required MenuItemSerializableIdGenerator getId,
   }) {
-    assert(members.isNotEmpty, 'There must be at least one member in a PlatformMenuItemGroup');
+    assert(members.isNotEmpty,
+        'There must be at least one member in a PlatformMenuItemGroup');
     return serialize(this, delegate, getId: getId);
   }
 
@@ -710,7 +726,8 @@ class PlatformMenuItem with Diagnosticable {
     this.shortcut,
     this.onSelected,
     this.onSelectedIntent,
-  }) : assert(onSelected == null || onSelectedIntent == null, 'Only one of onSelected or onSelectedIntent may be specified');
+  }) : assert(onSelected == null || onSelectedIntent == null,
+            'Only one of onSelected or onSelectedIntent may be specified');
 
   /// The required label used for rendering the menu item.
   final String label;
@@ -775,7 +792,9 @@ class PlatformMenuItem with Diagnosticable {
     PlatformMenuDelegate delegate, {
     required MenuItemSerializableIdGenerator getId,
   }) {
-    return <Map<String, Object?>>[PlatformMenuItem.serialize(this, delegate, getId)];
+    return <Map<String, Object?>>[
+      PlatformMenuItem.serialize(this, delegate, getId)
+    ];
   }
 
   /// Converts the given [PlatformMenuItem] into a data structure accepted by
@@ -793,7 +812,8 @@ class PlatformMenuItem with Diagnosticable {
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null || item.onSelectedIntent != null,
-      if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
+      if (shortcut != null)
+        ...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }
 
@@ -804,8 +824,11 @@ class PlatformMenuItem with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
-    properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
-    properties.add(FlagProperty('enabled', value: onSelected != null, ifFalse: 'DISABLED'));
+    properties.add(DiagnosticsProperty<MenuSerializableShortcut?>(
+        'shortcut', shortcut,
+        defaultValue: null));
+    properties.add(FlagProperty('enabled',
+        value: onSelected != null, ifFalse: 'DISABLED'));
   }
 }
 
@@ -909,7 +932,8 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
+    properties
+        .add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
   }
 }
 

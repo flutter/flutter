@@ -48,12 +48,14 @@ import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-export 'fake_process_manager.dart' show FakeCommand, FakeProcessManager, ProcessManager;
+export 'fake_process_manager.dart'
+    show FakeCommand, FakeProcessManager, ProcessManager;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;
 
-FakeDeviceManager get testDeviceManager => context.get<DeviceManager>()! as FakeDeviceManager;
+FakeDeviceManager get testDeviceManager =>
+    context.get<DeviceManager>()! as FakeDeviceManager;
 
 @isTest
 void testUsingContext(
@@ -62,17 +64,18 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String? testOn,
-  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool?
+      skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     throw StateError(
-      'If you override the FileSystem context you must also provide a ProcessManager, '
-      'otherwise the processes you launch will not be dealing with the same file system '
-      'that you are dealing with in your test.'
-    );
+        'If you override the FileSystem context you must also provide a ProcessManager, '
+        'otherwise the processes you launch will not be dealing with the same file system '
+        'that you are dealing with in your test.');
   }
   if (overrides.containsKey(ProcessUtils)) {
-    throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+    throw StateError(
+        'Do not inject ProcessUtils for testing, use ProcessManager instead.');
   }
 
   // Ensure we don't rely on the default [Config] constructor which will
@@ -85,15 +88,18 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    configDir ??= globals.fs.systemTempDirectory
+        .createTempSync('flutter_config_dir_test.');
     return Config.test(
       name: Config.kFlutterSettings,
       directory: configDir,
       logger: globals.logger,
     );
   }
+
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    configDir ??= globals.fs.systemTempDirectory
+        .createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
       directory: configDir!,
       logger: globals.logger,
@@ -105,7 +111,8 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
-          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
+          AnsiTerminal: () =>
+              AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(globals.logger),
@@ -191,7 +198,8 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>()! as BufferLogger;
+    final BufferLogger bufferLogger =
+        testContext.get<Logger>()! as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       // This is where the logger outputting errors is implemented, so it has
       // to use `print`.
@@ -231,19 +239,22 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getAllDevices({
     DeviceDiscoveryFilter? filter,
-  }) async => filteredDevices(filter);
+  }) async =>
+      filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshAllDevices({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
-  }) async => filteredDevices(filter);
+  }) async =>
+      filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
-  }) async => filteredDevices(filter);
+  }) async =>
+      filteredDevices(filter);
 
   @override
   Future<List<Device>> getDevicesById(
@@ -290,21 +301,25 @@ class FakeDeviceManager implements DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices) => null;
 
   List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
+    if (filter?.deviceConnectionInterface ==
+        DeviceConnectionInterface.attached) {
       return attachedDevices;
     }
-    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+    if (filter?.deviceConnectionInterface ==
+        DeviceConnectionInterface.wireless) {
       return wirelessDevices;
     }
     return attachedDevices + wirelessDevices;
   }
 }
 
-class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+class TestDeviceDiscoverySupportFilter extends Fake
+    implements DeviceDiscoverySupportFilter {
   TestDeviceDiscoverySupportFilter();
 }
 
-class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {
+class FakeAndroidLicenseValidator extends Fake
+    implements AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -322,6 +337,7 @@ class FakeDoctor extends Doctor {
   bool get canLaunchAnything => true;
 
   @override
+
   /// Replaces the android workflow with a version that overrides licensesAccepted,
   /// to prevent individual tests from having to mock out the process for
   /// the Doctor.
@@ -343,7 +359,8 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
   Future<List<IOSSimulator>> getAttachedDevices() async => <IOSSimulator>[];
 
   @override
-  Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async => <IOSSimulatorRuntime>[];
+  Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async =>
+      <IOSSimulatorRuntime>[];
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
@@ -370,17 +387,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<String> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
+    Directory podXcodeProject, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return '';
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
+  Future<void> cleanWorkspace(String workspacePath, String scheme,
+      {bool verbose = false}) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath,
+      {String? projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -398,20 +417,22 @@ class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) async { }
+  Future<void> informUser(CrashDetails details, File crashFile) async {}
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   // Use [FakeSignals] so developers running the test suite can kill the test
   // runner.
-  LocalFileSystemBlockingSetCurrentDirectory() : super.test(signals: FakeSignals());
+  LocalFileSystemBlockingSetCurrentDirectory()
+      : super.test(signals: FakeSignals());
 
   @override
   set currentDirectory(dynamic value) {
-    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
-          'tests as this can cause race conditions with concurrent tests. '
-          'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting globals.fs.currentDirectory.');
+    throw Exception(
+        'globals.fs.currentDirectory should not be set on the local file system during '
+        'tests as this can cause race conditions with concurrent tests. '
+        'Consider using a MemoryFileSystem for testing if possible or refactor '
+        'code to not require setting globals.fs.currentDirectory.');
   }
 }
 

@@ -38,7 +38,8 @@ class Cocoon {
     @visibleForTesting this.processRunSync = Process.runSync,
     @visibleForTesting this.requestRetryLimit = 5,
     @visibleForTesting this.requestTimeoutLimit = 30,
-  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: fs);
+  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath,
+            httpClient: httpClient, filesystem: fs);
 
   /// Client to make http requests to Cocoon.
   final AuthenticatedCocoonClient _httpClient;
@@ -46,7 +47,8 @@ class Cocoon {
   final ProcessRunSync processRunSync;
 
   /// Url used to send results to.
-  static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
+  static const String baseCocoonApiUrl =
+      'https://flutter-dashboard.appspot.com/api';
 
   /// Threshold to auto retry a failed test.
   static const int retryNumber = 2;
@@ -67,7 +69,8 @@ class Cocoon {
 
   /// Parse the local repo for the current running commit.
   String _readCommitSha() {
-    final ProcessResult result = processRunSync('git', <String>['rev-parse', 'HEAD']);
+    final ProcessResult result =
+        processRunSync('git', <String>['rev-parse', 'HEAD']);
     if (result.exitCode != 0) {
       throw CocoonException(result.stderr as String);
     }
@@ -95,7 +98,8 @@ class Cocoon {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
     if (resultsPath != null) {
       final File resultFile = fs.file(resultsPath);
-      resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
+      resultsJson =
+          json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
     } else {
       resultsJson['CommitBranch'] = gitBranch;
       resultsJson['CommitSha'] = commitSha;
@@ -105,17 +109,23 @@ class Cocoon {
     resultsJson['TestFlaky'] = isTestFlaky ?? false;
     if (_shouldUpdateCocoon(resultsJson, builderBucket ?? 'prod')) {
       await retry(
-        () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
-        retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+        () async => _sendUpdateTaskRequest(resultsJson)
+            .timeout(Duration(seconds: requestTimeoutLimit)),
+        retryIf: (Exception e) =>
+            e is SocketException ||
+            e is TimeoutException ||
+            e is ClientException,
         maxAttempts: requestRetryLimit,
       );
     }
   }
 
   /// Only post-submit tests on `master` are allowed to update in cocoon.
-  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson, String builderBucket) {
+  bool _shouldUpdateCocoon(
+      Map<String, dynamic> resultJson, String builderBucket) {
     const List<String> supportedBranches = <String>['master'];
-    return supportedBranches.contains(resultJson['CommitBranch']) && builderBucket == 'prod';
+    return supportedBranches.contains(resultJson['CommitBranch']) &&
+        builderBucket == 'prod';
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
@@ -174,7 +184,8 @@ class Cocoon {
 
   Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
     logger.info('Attempting to send update task request to Cocoon.');
-    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
+    final Map<String, dynamic> response =
+        await _sendCocoonRequest('update-task-status', postBody);
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');
     } else {
@@ -184,14 +195,16 @@ class Cocoon {
   }
 
   /// Make an API request to Cocoon.
-  Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath, [dynamic jsonData]) async {
+  Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath,
+      [dynamic jsonData]) async {
     final Uri url = Uri.parse('$baseCocoonApiUrl/$apiPath');
 
     /// Retry requests to Cocoon as sometimes there are issues with the servers, such
     /// as version changes to the backend, datastore issues, or latency issues.
     final Response response = await retry(
       () => _httpClient.post(url, body: json.encode(jsonData)),
-      retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+      retryIf: (Exception e) =>
+          e is SocketException || e is TimeoutException || e is ClientException,
       maxAttempts: requestRetryLimit,
     );
     return json.decode(response.body) as Map<String, dynamic>;
@@ -219,12 +232,14 @@ class AuthenticatedCocoonClient extends BaseClient {
   final FileSystem _fs;
 
   /// Value contained in the service account token file that can be used in http requests.
-  String get serviceAccountToken => _serviceAccountToken ?? _readServiceAccountTokenFile();
+  String get serviceAccountToken =>
+      _serviceAccountToken ?? _readServiceAccountTokenFile();
   String? _serviceAccountToken;
 
   /// Get [serviceAccountToken] from the given service account file.
   String _readServiceAccountTokenFile() {
-    return _serviceAccountToken = _fs.file(_serviceAccountTokenPath).readAsStringSync().trim();
+    return _serviceAccountToken =
+        _fs.file(_serviceAccountTokenPath).readAsStringSync().trim();
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class BadWidget extends StatefulWidget {
-  const BadWidget({ super.key });
+  const BadWidget({super.key});
   @override
   State<StatefulWidget> createState() => BadWidgetState();
 }
@@ -27,7 +27,8 @@ class BadWidgetState extends State<BadWidget> {
 }
 
 void main() {
-  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
+  testWidgets('setState() catches being used inside a constructor',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const BadWidget());
     expect(tester.takeException(), isFlutterError);
   });

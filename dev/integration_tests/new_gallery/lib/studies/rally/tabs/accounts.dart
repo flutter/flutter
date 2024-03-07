@@ -16,8 +16,10 @@ class AccountsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<AccountData> items = DummyDataService.getAccountDataList(context);
-    final List<UserDetailData> detailItems = DummyDataService.getAccountDetailList(context);
+    final List<AccountData> items =
+        DummyDataService.getAccountDataList(context);
+    final List<UserDetailData> detailItems =
+        DummyDataService.getAccountDetailList(context);
     final double balanceTotal = sumAccountDataPrimaryAmount(items);
 
     return TabWithSidebar(

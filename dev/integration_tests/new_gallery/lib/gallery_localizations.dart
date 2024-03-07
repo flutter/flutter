@@ -63,15 +63,18 @@ import 'gallery_localizations_en.dart';
 /// be consistent with the languages listed in the GalleryLocalizations.supportedLocales
 /// property.
 abstract class GalleryLocalizations {
-  GalleryLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
+  GalleryLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale);
 
   final String localeName;
 
   static GalleryLocalizations? of(BuildContext context) {
-    return Localizations.of<GalleryLocalizations>(context, GalleryLocalizations);
+    return Localizations.of<GalleryLocalizations>(
+        context, GalleryLocalizations);
   }
 
-  static const LocalizationsDelegate<GalleryLocalizations> delegate = _GalleryLocalizationsDelegate();
+  static const LocalizationsDelegate<GalleryLocalizations> delegate =
+      _GalleryLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,7 +86,8 @@ abstract class GalleryLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -658,7 +662,8 @@ abstract class GalleryLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{accountName} account {accountNumber} with {amount}.'**
-  String rallyAccountAmount(Object accountName, Object accountNumber, Object amount);
+  String rallyAccountAmount(
+      Object accountName, Object accountNumber, Object amount);
 
   /// Semantics label for row with a bill (example name is rent), when the bill is due (1/12/2019 for example) and for how much money ($12).
   ///
@@ -670,7 +675,8 @@ abstract class GalleryLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{budgetName} budget with {amountUsed} used of {amountTotal}, {amountLeft} left'**
-  String rallyBudgetAmount(Object budgetName, Object amountUsed, Object amountTotal, Object amountLeft);
+  String rallyBudgetAmount(Object budgetName, Object amountUsed,
+      Object amountTotal, Object amountLeft);
 
   /// Study description for Crane.
   ///
@@ -4909,42 +4915,46 @@ abstract class GalleryLocalizations {
   String demoTwoPaneItemDetails(Object value);
 }
 
-class _GalleryLocalizationsDelegate extends LocalizationsDelegate<GalleryLocalizations> {
+class _GalleryLocalizationsDelegate
+    extends LocalizationsDelegate<GalleryLocalizations> {
   const _GalleryLocalizationsDelegate();
 
   @override
   Future<GalleryLocalizations> load(Locale locale) {
-    return SynchronousFuture<GalleryLocalizations>(lookupGalleryLocalizations(locale));
+    return SynchronousFuture<GalleryLocalizations>(
+        lookupGalleryLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_GalleryLocalizationsDelegate old) => false;
 }
 
 GalleryLocalizations lookupGalleryLocalizations(Locale locale) {
-
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'en': {
-  switch (locale.countryCode) {
-    case 'IS': return GalleryLocalizationsEnIs();
-   }
-  break;
-   }
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'IS':
+            return GalleryLocalizationsEnIs();
+        }
+        break;
+      }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return GalleryLocalizationsEn();
+    case 'en':
+      return GalleryLocalizationsEn();
   }
 
   throw FlutterError(
-    'GalleryLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'GalleryLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

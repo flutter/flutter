@@ -102,7 +102,7 @@ void main() {
         find.byKey(appKey),
         matchesGoldenFile('widgets.magnifier.styled.png'),
       );
-    }, skip: kIsWeb);  // [intended] Bdf does not display on web.
+    }, skip: kIsWeb); // [intended] Bdf does not display on web.
 
     group('transition states', () {
       final AnimationController animationController = AnimationController(
@@ -214,7 +214,8 @@ void main() {
     });
 
     group('show', () {
-      testWidgets('should insert below below widget', (WidgetTester tester) async {
+      testWidgets('should insert below below widget',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -226,7 +227,9 @@ void main() {
 
         final OverlayEntry fakeBeforeOverlayEntry =
             OverlayEntry(builder: (_) => fakeBefore);
-        addTearDown(() => fakeBeforeOverlayEntry..remove()..dispose());
+        addTearDown(() => fakeBeforeOverlayEntry
+          ..remove()
+          ..dispose());
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
@@ -248,7 +251,8 @@ void main() {
         expect(allOverlayChildren.first.widget.key, fakeMagnifier.key);
       });
 
-      testWidgets('should insert newly built widget without animating out if overlay != null',
+      testWidgets(
+          'should insert newly built widget without animating out if overlay != null',
           (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
           final _MockAnimationController animationController =
@@ -280,7 +284,8 @@ void main() {
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          magnifierController.show(context: context, builder: (_) => testMagnifier2);
+          magnifierController.show(
+              context: context, builder: (_) => testMagnifier2);
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();

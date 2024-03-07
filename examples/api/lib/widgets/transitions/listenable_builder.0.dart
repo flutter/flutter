@@ -58,7 +58,8 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final OutlinedBorder effectiveBorder = widget.border ?? const RoundedRectangleBorder();
+    final OutlinedBorder effectiveBorder =
+        widget.border ?? const RoundedRectangleBorder();
     return ListenableBuilder(
       listenable: _focusNode,
       child: Focus(
@@ -105,7 +106,8 @@ class _MyFieldState extends State<MyField> {
           child: TextField(
             controller: controller,
             onEditingComplete: () {
-              debugPrint('Field ${widget.label} changed to ${controller.value}');
+              debugPrint(
+                  'Field ${widget.label} changed to ${controller.value}');
             },
           ),
         ),

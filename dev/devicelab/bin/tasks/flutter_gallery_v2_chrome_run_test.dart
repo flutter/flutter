@@ -32,7 +32,9 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final TaskResult result = await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/new_gallery/', () async {
+    final TaskResult result = await inDirectory<TaskResult>(
+        '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
+        () async {
       await flutter('create', options: <String>[
         '--platforms',
         'web,android,ios',
@@ -49,7 +51,12 @@ class NewGalleryChromeRunTest {
         '--no-pub',
       ]);
 
-      final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
+      final List<String> options = <String>[
+        '-d',
+        'chrome',
+        '--verbose',
+        '--resident'
+      ];
       final Process process = await startFlutter(
         'run',
         options: options,
@@ -66,10 +73,9 @@ class NewGalleryChromeRunTest {
           .listen((String line) {
         if (line.contains(successfullyLoadedString)) {
           // Successfully started.
-          Future<void>.delayed(
-            durationToWaitForError,
-            () {process.stdin.write('q');}
-          );
+          Future<void>.delayed(durationToWaitForError, () {
+            process.stdin.write('q');
+          });
         }
         if (line.contains(exceptionString)) {
           success = false;

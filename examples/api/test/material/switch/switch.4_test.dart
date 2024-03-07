@@ -38,25 +38,37 @@ void main() {
         ..rrect(color: Colors.white), // Thumb color
     );
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Show cupertino style'));
+    await tester
+        .tap(find.widgetWithText(OutlinedButton, 'Show cupertino style'));
     await tester.pumpAndSettle();
 
     expect(
       adaptiveSwitch,
       paints
-        ..rrect(color: const Color(0xff795548)) // Customized track color only for cupertino.
-        ..rrect()..rrect()..rrect()..rrect()
-        ..rrect(color: const Color(0xffffeb3b)), // Customized thumb color only for cupertino.
+        ..rrect(
+            color: const Color(
+                0xff795548)) // Customized track color only for cupertino.
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(
+            color: const Color(
+                0xffffeb3b)), // Customized thumb color only for cupertino.
     );
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Remove customization'));
+    await tester
+        .tap(find.widgetWithText(OutlinedButton, 'Remove customization'));
     await tester.pumpAndSettle();
 
     expect(
       adaptiveSwitch,
       paints
         ..rrect(color: const Color(0xff34c759)) // Cupertino system green.
-        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
         ..rrect(color: Colors.white), // Thumb color
     );
   });

@@ -16,10 +16,14 @@ class FlyForm extends BackLayerItem {
 }
 
 class _FlyFormState extends State<FlyForm> with RestorationMixin {
-  final RestorableTextEditingController travelerController = RestorableTextEditingController();
-  final RestorableTextEditingController countryDestinationController = RestorableTextEditingController();
-  final RestorableTextEditingController destinationController = RestorableTextEditingController();
-  final RestorableTextEditingController dateController = RestorableTextEditingController();
+  final RestorableTextEditingController travelerController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController countryDestinationController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController destinationController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController dateController =
+      RestorableTextEditingController();
 
   @override
   String get restorationId => 'fly_form';
@@ -43,7 +47,8 @@ class _FlyFormState extends State<FlyForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return HeaderForm(
       fields: <HeaderFormField>[
         HeaderFormField(

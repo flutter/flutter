@@ -38,12 +38,15 @@ void main() {
         sigint: FakeProcessSignal(),
       );
       await expectLater(
-        () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+        () => createTestCommandRunner(command)
+            .run(<String>['-d', 'abc123', 'logs']),
+        throwsA(isA<ToolExit>().having(
+            (ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
       );
     });
 
-    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+    testUsingContext('does not try to complete exitCompleter multiple times',
+        () async {
       final FakeDevice fakeDevice = FakeDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
       final FakeProcessSignal termSignal = FakeProcessSignal();
@@ -52,7 +55,8 @@ void main() {
         sigterm: termSignal,
         sigint: intSignal,
       );
-      final Future<void> commandFuture = createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(command)
+          .run(<String>['-d', deviceId, 'logs']);
       intSignal.send(1);
       termSignal.send(1);
       await pumpEventQueue(times: 5);
@@ -65,7 +69,8 @@ void main() {
 }
 
 class FakeProcessSignal extends Fake implements ProcessSignal {
-  late final StreamController<ProcessSignal> _controller = StreamController<ProcessSignal>();
+  late final StreamController<ProcessSignal> _controller =
+      StreamController<ProcessSignal>();
 
   @override
   Stream<ProcessSignal> watch() => _controller.stream;

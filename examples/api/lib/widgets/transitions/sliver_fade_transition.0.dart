@@ -28,10 +28,13 @@ class SliverFadeTransitionExample extends StatefulWidget {
   const SliverFadeTransitionExample({super.key});
 
   @override
-  State<SliverFadeTransitionExample> createState() => _SliverFadeTransitionExampleState();
+  State<SliverFadeTransitionExample> createState() =>
+      _SliverFadeTransitionExampleState();
 }
 
-class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExample> with SingleTickerProviderStateMixin {
+class _SliverFadeTransitionExampleState
+    extends State<SliverFadeTransitionExample>
+    with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(
     duration: const Duration(milliseconds: 1000),
     vsync: this,

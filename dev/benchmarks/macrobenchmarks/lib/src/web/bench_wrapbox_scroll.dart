@@ -65,16 +65,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-        controller: scrollController,
+    return ListView(controller: scrollController, children: <Widget>[
+      Wrap(
         children: <Widget>[
-            Wrap(
-              children: <Widget>[
-                for (int i = 0; i < 30; i++)
-                  FractionallySizedBox(
-                    widthFactor: 0.2,
-                    child: ProductPreview(i)), //need case1
-                for (int i = 0; i < 30; i++) ProductPreview(i), //need case2
+          for (int i = 0; i < 30; i++)
+            FractionallySizedBox(
+                widthFactor: 0.2, child: ProductPreview(i)), //need case1
+          for (int i = 0; i < 30; i++) ProductPreview(i), //need case2
         ],
       ),
     ]);

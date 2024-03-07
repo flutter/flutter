@@ -11,6 +11,7 @@ void main() {
     expect(priority.value, equals(Priority.idle.value + Priority.kMaxOffset));
 
     priority = Priority.animation - (Priority.kMaxOffset + 100);
-    expect(priority.value, equals(Priority.animation.value - Priority.kMaxOffset));
+    expect(
+        priority.value, equals(Priority.animation.value - Priority.kMaxOffset));
   });
 }

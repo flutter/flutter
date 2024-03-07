@@ -58,7 +58,8 @@ ${parser.usage}
     rethrow;
   }
 
-  const String mirrorUrl = 'https://github.com/flutter-pub-roller-bot/flutter.git';
+  const String mirrorUrl =
+      'https://github.com/flutter-pub-roller-bot/flutter.git';
   final String upstreamUrl = results[kUpstreamRemote]! as String;
   final String tokenPath = results[kTokenOption]! as String;
   final File tokenFile = fs.file(tokenPath);
@@ -139,6 +140,5 @@ Directory get _localFlutterRoot {
 }
 
 @visibleForTesting
-void validateTokenFile(String filePath, [FileSystem fs = const LocalFileSystem()]) {
-
-}
+void validateTokenFile(String filePath,
+    [FileSystem fs = const LocalFileSystem()]) {}

@@ -180,16 +180,18 @@ class EmailStore with ChangeNotifier {
   Email get currentEmail =>
       _allEmails.firstWhere((Email email) => email.id == _selectedEmailId);
 
-  List<Email> get outboxEmails =>
-      _outbox.where((Email email) => !trashEmailIds.contains(email.id)).toList();
+  List<Email> get outboxEmails => _outbox
+      .where((Email email) => !trashEmailIds.contains(email.id))
+      .toList();
 
-  List<Email> get draftEmails =>
-      _drafts.where((Email email) => !trashEmailIds.contains(email.id)).toList();
+  List<Email> get draftEmails => _drafts
+      .where((Email email) => !trashEmailIds.contains(email.id))
+      .toList();
 
   Set<int> starredEmailIds = <int>{};
 
-  bool isEmailStarred(int id) =>
-      _allEmails.any((Email email) => email.id == id && starredEmailIds.contains(id));
+  bool isEmailStarred(int id) => _allEmails
+      .any((Email email) => email.id == id && starredEmailIds.contains(id));
 
   bool get isCurrentEmailStarred => starredEmailIds.contains(currentEmail.id);
 

@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/draggable_scrollable_sheet/draggable_scrollable_sheet.0.dart' as example;
+import 'package:flutter_api_samples/widgets/draggable_scrollable_sheet/draggable_scrollable_sheet.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test DraggableScrollableSheet initial state', (WidgetTester tester) async {
+  testWidgets('Test DraggableScrollableSheet initial state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DraggableScrollableSheetExampleApp(),
     );
@@ -22,7 +24,8 @@ void main() {
     expect(draggableSheet.initialChildSize, 0.5);
   });
 
-  testWidgets('Test DraggableScrollableSheet drag behavior on mobile platforms', (WidgetTester tester) async {
+  testWidgets('Test DraggableScrollableSheet drag behavior on mobile platforms',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DraggableScrollableSheetExampleApp(),
     );
@@ -43,7 +46,9 @@ void main() {
     expect(listViewCurrentSize.height, greaterThan(listViewInitialSize.height));
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets('Test DraggableScrollableSheet drag behavior on desktop platforms', (WidgetTester tester) async {
+  testWidgets(
+      'Test DraggableScrollableSheet drag behavior on desktop platforms',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DraggableScrollableSheetExampleApp(),
     );
@@ -57,7 +62,8 @@ void main() {
     await tester.pump();
 
     // Verify that the DraggableScrollableSheet's initialChildSize is updated
-    final DraggableScrollableSheet draggableSheet = tester.widget(find.byType(DraggableScrollableSheet));
+    final DraggableScrollableSheet draggableSheet =
+        tester.widget(find.byType(DraggableScrollableSheet));
     expect(draggableSheet.initialChildSize, isNot(0.5));
   }, variant: TargetPlatformVariant.desktop());
 }

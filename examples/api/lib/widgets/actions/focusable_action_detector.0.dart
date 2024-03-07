@@ -39,7 +39,8 @@ class _FadButtonState extends State<FadButton> {
   bool _hovering = false;
   bool _on = false;
   late final Map<Type, Action<Intent>> _actionMap;
-  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+  final Map<ShortcutActivator, Intent> _shortcutMap =
+      const <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
   };
 
@@ -115,10 +116,12 @@ class FocusableActionDetectorExample extends StatefulWidget {
   const FocusableActionDetectorExample({super.key});
 
   @override
-  State<FocusableActionDetectorExample> createState() => _FocusableActionDetectorExampleState();
+  State<FocusableActionDetectorExample> createState() =>
+      _FocusableActionDetectorExampleState();
 }
 
-class _FocusableActionDetectorExampleState extends State<FocusableActionDetectorExample> {
+class _FocusableActionDetectorExampleState
+    extends State<FocusableActionDetectorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,7 +134,8 @@ class _FocusableActionDetectorExampleState extends State<FocusableActionDetector
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextButton(onPressed: () {}, child: const Text('Press Me')),
+              child:
+                  TextButton(onPressed: () {}, child: const Text('Press Me')),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

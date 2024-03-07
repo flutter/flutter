@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
+import 'package:flutter/services.dart'
+    show SelectionChangedCause, SuggestionSpan;
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -41,8 +42,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   CupertinoSpellCheckSuggestionsToolbar.editableText({
     super.key,
     required EditableTextState editableTextState,
-  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
-       anchors = editableTextState.contextMenuAnchors;
+  })  : buttonItems =
+            buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
+        anchors = editableTextState.contextMenuAnchors;
 
   /// The location on which to anchor the menu.
   final TextSelectionToolbarAnchors anchors;
@@ -69,9 +71,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   ) {
     // Determine if composing region is misspelled.
     final SuggestionSpan? spanAtCursorIndex =
-      editableTextState.findSuggestionSpanAtCursorIndex(
-        editableTextState.currentTextEditingValue.selection.baseOffset,
-      );
+        editableTextState.findSuggestionSpanAtCursorIndex(
+      editableTextState.currentTextEditingValue.selection.baseOffset,
+    );
 
     if (spanAtCursorIndex == null) {
       return null;
@@ -91,7 +93,8 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    for (final String suggestion in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
+    for (final String suggestion
+        in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           if (!editableTextState.mounted) {
@@ -109,9 +112,11 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     return buttonItems;
   }
 
-  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+  static void _replaceText(EditableTextState editableTextState, String text,
+      TextRange replacementRange) {
     // Replacement cannot be performed if the text is read only or obscured.
-    assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
+    assert(!editableTextState.widget.readOnly &&
+        !editableTextState.widget.obscureText);
 
     final TextEditingValue newValue = editableTextState.textEditingValue
         .replaced(
@@ -123,12 +128,14 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
             offset: replacementRange.start + text.length,
           ),
         );
-    editableTextState.userUpdateTextEditingValue(newValue,SelectionChangedCause.toolbar);
+    editableTextState.userUpdateTextEditingValue(
+        newValue, SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (editableTextState.mounted) {
-        editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
+        editableTextState
+            .bringIntoView(editableTextState.textEditingValue.selection.extent);
       }
     }, debugLabel: 'SpellCheckSuggestions.bringIntoView');
     editableTextState.hideToolbar();
@@ -152,7 +159,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<Widget> children = _buildToolbarButtons(context);
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchors.primaryAnchor,
-      anchorBelow: anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
+      anchorBelow: anchors.secondaryAnchor == null
+          ? anchors.primaryAnchor
+          : anchors.secondaryAnchor!,
       children: children,
     );
   }

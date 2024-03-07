@@ -136,7 +136,6 @@ class _FrontLayerState extends State<_FrontLayer> {
 /// can make a selection. The user can also configure the titles for when the
 /// front or back layer is showing.
 class Backdrop extends StatefulWidget {
-
   const Backdrop({
     super.key,
     required this.frontLayer,
@@ -189,11 +188,11 @@ class _BackdropState extends State<Backdrop>
     // Offsets to create a horizontal gap between front layers.
     final Animation<double> tabControllerAnimation = _tabController.animation!;
 
-    _flyLayerHorizontalOffset = tabControllerAnimation.drive(
-        Tween<Offset>(begin: Offset.zero, end: const Offset(-0.05, 0)));
+    _flyLayerHorizontalOffset = tabControllerAnimation
+        .drive(Tween<Offset>(begin: Offset.zero, end: const Offset(-0.05, 0)));
 
-    _sleepLayerHorizontalOffset = tabControllerAnimation.drive(
-        Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero));
+    _sleepLayerHorizontalOffset = tabControllerAnimation
+        .drive(Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero));
 
     _eatLayerHorizontalOffset = tabControllerAnimation.drive(Tween<Offset>(
         begin: const Offset(0.10, 0), end: const Offset(0.05, 0)));
@@ -214,8 +213,10 @@ class _BackdropState extends State<Backdrop>
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final double textScaleFactor =
+        GalleryOptions.of(context).textScaleFactor(context);
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return Material(
       color: cranePurple800,
       child: Padding(
@@ -253,7 +254,8 @@ class _BackdropState extends State<Backdrop>
                   // we allow the TabBarView to overflow by an offset
                   // (doubled because it technically overflows top & bottom).
                   // The other front layers are top padded by this offset.
-                  child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                  child: LayoutBuilder(builder:
+                      (BuildContext context, BoxConstraints constraints) {
                     return OverflowBox(
                       maxHeight:
                           constraints.maxHeight + _sleepLayerTopOffset * 2,
@@ -305,7 +307,6 @@ class _BackdropState extends State<Backdrop>
 }
 
 class CraneAppBar extends StatefulWidget {
-
   const CraneAppBar({
     super.key,
     this.tabHandler,
@@ -323,8 +324,10 @@ class _CraneAppBarState extends State<CraneAppBar> {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isSmallDesktop = isDisplaySmallDesktop(context);
-    final double textScaleFactor = GalleryOptions.of(context).textScaleFactor(context);
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final double textScaleFactor =
+        GalleryOptions.of(context).textScaleFactor(context);
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return SafeArea(
       child: Padding(

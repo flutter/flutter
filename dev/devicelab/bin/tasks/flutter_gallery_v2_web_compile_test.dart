@@ -33,13 +33,15 @@ class NewGalleryWebCompileTest {
         ]);
 
         return WebCompileTest.runSingleBuildTest(
-          directory: '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
+          directory:
+              '${flutterDirectory.path}/dev/integration_tests/new_gallery/',
           metric: metricKeyPrefix,
           measureBuildTime: true,
         );
       },
     );
 
-    return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+    return TaskResult.success(metrics,
+        benchmarkScoreKeys: metrics.keys.toList());
   }
 }

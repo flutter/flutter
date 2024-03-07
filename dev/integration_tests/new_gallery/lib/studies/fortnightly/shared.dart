@@ -112,7 +112,8 @@ class VerticalArticlePreview extends StatelessWidget {
                 data.imageUrl,
                 package: 'flutter_gallery_assets',
               ),
-              placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              placeholder: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
                 return Container(
                   color: Colors.black.withOpacity(0.1),
                   width: constraints.maxWidth,
@@ -241,7 +242,8 @@ class HashtagBar extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final double height = 32 * reducedTextScale(context);
 
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return SizedBox(
       height: height,
@@ -298,7 +300,8 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return ListView(
       children: <Widget>[
         if (isCloseable)
@@ -442,7 +445,8 @@ List<Widget> buildStockItems(BuildContext context) {
           'fortnightly/fortnightly_chart.png',
           package: 'flutter_gallery_assets',
         ),
-        placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        placeholder: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
           return Container(
             color: Colors.black.withOpacity(0.1),
             width: constraints.maxWidth,
@@ -512,7 +516,8 @@ class VideoPreview extends StatelessWidget {
               data.imageUrl,
               package: 'flutter_gallery_assets',
             ),
-            placeholder: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            placeholder: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
               return Container(
                 color: Colors.black.withOpacity(0.1),
                 width: constraints.maxWidth,

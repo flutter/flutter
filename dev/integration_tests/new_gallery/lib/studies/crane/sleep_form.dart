@@ -16,9 +16,12 @@ class SleepForm extends BackLayerItem {
 }
 
 class _SleepFormState extends State<SleepForm> with RestorationMixin {
-  final RestorableTextEditingController travelerController = RestorableTextEditingController();
-  final RestorableTextEditingController dateController = RestorableTextEditingController();
-  final RestorableTextEditingController locationController = RestorableTextEditingController();
+  final RestorableTextEditingController travelerController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController dateController =
+      RestorableTextEditingController();
+  final RestorableTextEditingController locationController =
+      RestorableTextEditingController();
 
   @override
   String get restorationId => 'sleep_form';
@@ -40,7 +43,8 @@ class _SleepFormState extends State<SleepForm> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
 
     return HeaderForm(
       fields: <HeaderFormField>[

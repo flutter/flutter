@@ -12,9 +12,9 @@ void main() {
   final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
 
   testWidgets('attach and detach correctly handle gesture',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (_) async {
+      // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
+      experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+      (_) async {
     expect(WidgetsBinding.instance, binding);
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -38,11 +38,13 @@ void main() {
     );
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
-    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () { });
-    final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
+    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {});
+    final _PointerRouterSpy spy =
+        GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
-    editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10,10)));
+    editable.handleEvent(const PointerDownEvent(),
+        BoxHitTestEntry(editable, const Offset(10, 10)));
     GestureBinding.instance.pointerRouter.route(const PointerDownEvent());
     expect(spy.routeCount, greaterThan(0));
     editable.detach();
@@ -57,7 +59,7 @@ class _GestureBindingSpy extends AutomatedTestWidgetsFlutterBinding {
   PointerRouter get pointerRouter => _testPointerRouter;
 }
 
-class FakeEditableTextState extends Fake implements TextSelectionDelegate { }
+class FakeEditableTextState extends Fake implements TextSelectionDelegate {}
 
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;

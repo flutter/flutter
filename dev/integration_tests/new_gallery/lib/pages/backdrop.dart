@@ -179,7 +179,8 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
             Semantics(sortKey: const OrdinalSortKey(2), child: homePage),
             ValueListenableBuilder<bool>(
               valueListenable: _isSettingsOpenNotifier,
-              builder: (BuildContext context, bool isSettingsOpen, Widget? child) {
+              builder:
+                  (BuildContext context, bool isSettingsOpen, Widget? child) {
                 if (isSettingsOpen) {
                   return ExcludeSemantics(
                     child: Listener(

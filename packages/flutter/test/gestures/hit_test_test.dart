@@ -6,7 +6,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('wrapped HitTestResult gets HitTestEntry added to wrapping HitTestResult', () async {
+  test(
+      'wrapped HitTestResult gets HitTestEntry added to wrapping HitTestResult',
+      () async {
     final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
     final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
     final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());

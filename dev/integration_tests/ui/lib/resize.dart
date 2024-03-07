@@ -18,16 +18,13 @@ class ResizeApp extends StatefulWidget {
   static const Key extendedFab = Key('extended FAB');
 
   static const MethodChannel platform =
-    MethodChannel('samples.flutter.dev/resize');
+      MethodChannel('samples.flutter.dev/resize');
 
   static Future<void> resize(Size size) async {
-    await ResizeApp.platform.invokeMethod<void>(
-      'resize',
-      <String, dynamic>{
-        'width': size.width,
-        'height': size.height,
-      }
-    );
+    await ResizeApp.platform.invokeMethod<void>('resize', <String, dynamic>{
+      'width': size.width,
+      'height': size.height,
+    });
   }
 
   @override
@@ -38,39 +35,34 @@ class _ResizeAppState extends State<ResizeApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          final Size currentSize = MediaQuery.of(context).size;
-          return Scaffold(
-            floatingActionButton: FloatingActionButton.extended(
-              key: ResizeApp.extendedFab,
-              label: const Text('Resize'),
-              onPressed: () {
-                final Size nextSize = Size(
-                  currentSize.width + ResizeApp.resizeBy,
-                  currentSize.height + ResizeApp.resizeBy,
-                );
-                ResizeApp.resize(nextSize);
-              },
+      home: Builder(builder: (BuildContext context) {
+        final Size currentSize = MediaQuery.of(context).size;
+        return Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            key: ResizeApp.extendedFab,
+            label: const Text('Resize'),
+            onPressed: () {
+              final Size nextSize = Size(
+                currentSize.width + ResizeApp.resizeBy,
+                currentSize.height + ResizeApp.resizeBy,
+              );
+              ResizeApp.resize(nextSize);
+            },
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(key: ResizeApp.widthLabel, 'width: ${currentSize.width}'),
+                Text(
+                  key: ResizeApp.heightLabel,
+                  'height: ${currentSize.height}',
+                ),
+              ],
             ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    key: ResizeApp.widthLabel,
-                    'width: ${currentSize.width}'
-                  ),
-                  Text(
-                    key: ResizeApp.heightLabel,
-                    'height: ${currentSize.height}',
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-      ),
+          ),
+        );
+      }),
     );
   }
 }

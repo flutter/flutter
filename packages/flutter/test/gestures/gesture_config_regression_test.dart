@@ -34,11 +34,13 @@ class NestedScrollableCase extends StatelessWidget {
                     onVerticalDragDown: (DragDownDetails details) {
                       testResult.dragStarted = true;
                     },
-                    onVerticalDragUpdate: (DragUpdateDetails details){
+                    onVerticalDragUpdate: (DragUpdateDetails details) {
                       testResult.dragUpdate = true;
                     },
                     onVerticalDragEnd: (_) {},
-                    child: Text('List Item $index', key: ValueKey<int>(index),
+                    child: Text(
+                      'List Item $index',
+                      key: ValueKey<int>(index),
                     ),
                   ),
                 );
@@ -74,7 +76,7 @@ class NestedDraggableCase extends StatelessWidget {
                     onDragStarted: () {
                       testResult.dragStarted = true;
                     },
-                    onDragUpdate: (DragUpdateDetails details){
+                    onDragUpdate: (DragUpdateDetails details) {
                       testResult.dragUpdate = true;
                     },
                     onDragEnd: (_) {
@@ -92,8 +94,11 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+  testWidgets(
+      'Scroll Views get the same ScrollConfiguration as GestureDetectors',
+      (WidgetTester tester) async {
+    tester.view.gestureSettings =
+        const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
     final TestResult result = TestResult();
@@ -108,15 +113,18 @@ void main() {
     // that do not receive the same gesture settings to fire at different times than would
     // be expected.
     final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.timedDragFrom(
+        start, const Offset(0, 5), const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
+    expect(result.dragStarted, true);
+    expect(result.dragUpdate, true);
   });
 
-  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables',
+      (WidgetTester tester) async {
+    tester.view.gestureSettings =
+        const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
     final TestResult result = TestResult();
@@ -131,11 +139,12 @@ void main() {
     // that do not receive the same gesture settings to fire at different times than would
     // be expected.
     final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.timedDragFrom(
+        start, const Offset(0, 5), const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
-   expect(result.dragEnd, true);
+    expect(result.dragStarted, true);
+    expect(result.dragUpdate, true);
+    expect(result.dragEnd, true);
   });
 }

@@ -5,16 +5,19 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.1.dart' as example;
+import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
     Finder findMenu() {
-      return find.ancestor(
-        of: find.text(example.MenuEntry.about.label),
-        matching: find.byType(FocusScope),
-      ).first;
+      return find
+          .ancestor(
+            of: find.text(example.MenuEntry.about.label),
+            matching: find.byType(FocusScope),
+          )
+          .first;
     }
 
     await tester.pumpWidget(const example.ContextMenuApp());
@@ -74,7 +77,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(example.ContextMenuApp.kMessage), findsOneWidget);
-    expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'), findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'),
+        findsOneWidget);
   });
 
   testWidgets('Shortcuts work', (WidgetTester tester) async {
@@ -117,20 +121,23 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorRed.label}'), findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorRed.label}'),
+        findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyG);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorGreen.label}'), findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorGreen.label}'),
+        findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
 
-    expect(find.text('Last Selected: ${example.MenuEntry.colorBlue.label}'), findsOneWidget);
+    expect(find.text('Last Selected: ${example.MenuEntry.colorBlue.label}'),
+        findsOneWidget);
   });
 }

@@ -12,7 +12,7 @@ import '../../gallery/demo.dart';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class _Page {
-  _Page({ this.label });
+  _Page({this.label});
   final String? label;
   String get id => label!.characters.first;
   @override
@@ -20,7 +20,7 @@ class _Page {
 }
 
 class _CardData {
-  const _CardData({ this.title, this.imageAsset, this.imageAssetPackage });
+  const _CardData({this.title, this.imageAsset, this.imageAssetPackage});
   final String? title;
   final String? imageAsset;
   final String? imageAssetPackage;
@@ -94,7 +94,7 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
 };
 
 class _CardDataItem extends StatelessWidget {
-  const _CardDataItem({ this.page, this.data });
+  const _CardDataItem({this.page, this.data});
 
   static const double height = 272.0;
   final _Page? page;
@@ -110,8 +110,8 @@ class _CardDataItem extends StatelessWidget {
           children: <Widget>[
             Align(
               alignment: page!.id == 'H'
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
               child: CircleAvatar(child: Text(page!.id)),
             ),
             SizedBox(
@@ -150,7 +150,8 @@ class TabsDemo extends StatelessWidget {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
                   title: const Text('Tabs and scrolling'),
                   actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
@@ -158,9 +159,11 @@ class TabsDemo extends StatelessWidget {
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
-                    tabs: _allPages.keys.map<Widget>(
-                      (_Page page) => Tab(text: page.label),
-                    ).toList(),
+                    tabs: _allPages.keys
+                        .map<Widget>(
+                          (_Page page) => Tab(text: page.label),
+                        )
+                        .toList(),
                   ),
                 ),
               ),
@@ -177,7 +180,9 @@ class TabsDemo extends StatelessWidget {
                       key: PageStorageKey<_Page>(page),
                       slivers: <Widget>[
                         SliverOverlapInjector(
-                          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                  context),
                         ),
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(

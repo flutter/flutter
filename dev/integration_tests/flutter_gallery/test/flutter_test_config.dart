@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens show testExecutable;
+import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens
+    show testExecutable;
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) {

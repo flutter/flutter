@@ -24,15 +24,18 @@ import 'test_config.dart';
 /// of golden files.
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
-  TestGoldenComparator(this.shellPath, this.compilerFactory, {
+  TestGoldenComparator(
+    this.shellPath,
+    this.compilerFactory, {
     required Logger logger,
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required this.webRenderer,
-  }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _processManager = processManager;
+  })  : tempDir = fileSystem.systemTempDirectory
+            .createTempSync('flutter_web_platform.'),
+        _logger = logger,
+        _fileSystem = fileSystem,
+        _processManager = processManager;
 
   final String? shellPath;
   final Directory tempDir;
@@ -59,7 +62,9 @@ class TestGoldenComparator {
       return _previousComparator!;
     }
 
-    final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(_fileSystem.file(testUri), testUri, logger: _logger);
+    final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(
+        _fileSystem.file(testUri), testUri,
+        logger: _logger);
     final Process? process = await _startProcess(bootstrap);
     if (process == null) {
       return null;
@@ -73,7 +78,8 @@ class TestGoldenComparator {
 
   Future<Process?> _startProcess(String testBootstrap) async {
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = (await tempDir.createTemp('listener')).childFile('listener.dart');
+    final File listenerFile =
+        (await tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
 
     // Lazily create the compiler
@@ -93,14 +99,19 @@ class TestGoldenComparator {
     final Map<String, String> environment = <String, String>{
       // Chrome is the only supported browser currently.
       'FLUTTER_TEST_BROWSER': 'chrome',
-      'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
+      'FLUTTER_WEB_RENDERER':
+          webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
     };
     return _processManager.start(command, environment: environment);
   }
 
-  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
-    final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
-    final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
+  Future<String?> compareGoldens(
+      Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
+    final File imageFile = await (await tempDir.createTemp('image'))
+        .childFile('image')
+        .writeAsBytes(bytes);
+    final TestGoldenComparatorProcess? process =
+        await _processForTestFile(testUri);
     if (process == null) {
       return 'process was null';
     }
@@ -108,7 +119,9 @@ class TestGoldenComparator {
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
-    return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
+    return (result['success'] as bool)
+        ? null
+        : ((result['message'] as String?) ?? 'does not match');
   }
 }
 
@@ -116,11 +129,11 @@ class TestGoldenComparator {
 /// handles communication with the child process.
 class TestGoldenComparatorProcess {
   /// Creates a [TestGoldenComparatorProcess] backed by [process].
-  TestGoldenComparatorProcess(this.process, {required Logger logger}) : _logger = logger {
+  TestGoldenComparatorProcess(this.process, {required Logger logger})
+      : _logger = logger {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
-    streamIterator = StreamIterator<Map<String, dynamic>>(
-      process.stdout
+    streamIterator = StreamIterator<Map<String, dynamic>>(process.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .where((String line) {
@@ -134,8 +147,8 @@ class TestGoldenComparatorProcess {
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .forEach((String line) {
-          logger.printError('<<< $line');
-        });
+      logger.printError('<<< $line');
+    });
   }
 
   final Logger _logger;
@@ -163,7 +176,8 @@ class TestGoldenComparatorProcess {
     return streamIterator.current;
   }
 
-  static String generateBootstrap(File testFile, Uri testUri, {required Logger logger}) {
+  static String generateBootstrap(File testFile, Uri testUri,
+      {required Logger logger}) {
     final File? testConfigFile = findTestConfigFile(testFile, logger);
     // Generate comparator process for the file.
     return '''

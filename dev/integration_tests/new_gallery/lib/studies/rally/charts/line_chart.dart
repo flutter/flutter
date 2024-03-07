@@ -180,7 +180,8 @@ class RallyLineChartPainter extends CustomPainter {
               e.date.millisecondsSinceEpoch < endMillis;
         },
       ).toList();
-      lastAmount += sumOf<DetailedEventData>(filteredEvents, (DetailedEventData e) => e.amount);
+      lastAmount += sumOf<DetailedEventData>(
+          filteredEvents, (DetailedEventData e) => e.amount);
       amounts.add(lastAmount);
       startMillis = endMillis;
     }

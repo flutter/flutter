@@ -85,7 +85,8 @@ void handleOverscrollAnimation() {
 
 /// Scroll to the top of the app, given the current demo. Works with both mobile
 /// and desktop layouts.
-Future<void> scrollToTop(SerializableFinder demoItem, FlutterDriver driver) async {
+Future<void> scrollToTop(
+    SerializableFinder demoItem, FlutterDriver driver) async {
   stdout.writeln('scrolling to top');
 
   // Scroll to the Categories header.

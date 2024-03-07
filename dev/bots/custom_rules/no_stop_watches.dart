@@ -14,7 +14,8 @@ import 'analyze.dart';
 
 // The comment pattern representing the "flutter_ignore" inline directive that
 // indicates the line should be exempt from the stopwatch check.
-final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see analyze\.dart\)');
+final Pattern _ignoreStopwatch =
+    RegExp(r'// flutter_ignore: .*stopwatch .*\(see analyze\.dart\)');
 
 /// Use of Stopwatches can introduce test flakes as the logical time of a
 /// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
@@ -23,7 +24,8 @@ final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see
 final AnalyzeRule noStopwatches = _NoStopwatches();
 
 class _NoStopwatches implements AnalyzeRule {
-  final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
+  final Map<ResolvedUnitResult, List<AstNode>> _errors =
+      <ResolvedUnitResult, List<AstNode>>{};
 
   @override
   void applyTo(ResolvedUnitResult unit) {
@@ -46,7 +48,8 @@ class _NoStopwatches implements AnalyzeRule {
     }
 
     foundError(<String>[
-      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
+      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry
+          in _errors.entries)
         for (final AstNode node in entry.value)
           '${locationInFile(entry.key, node)}: ${node.parent}',
       '\n${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
@@ -68,7 +71,8 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
 
   final List<AstNode> stopwatchAccessNodes = <AstNode>[];
 
-  final Map<ClassElement, bool> _isStopwatchClassElementCache = <ClassElement, bool>{};
+  final Map<ClassElement, bool> _isStopwatchClassElementCache =
+      <ClassElement, bool>{};
 
   bool _checkIfImplementsStopwatchRecursively(ClassElement classElement) {
     if (classElement.library.isDartCore) {
@@ -76,15 +80,17 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     }
     return classElement.allSupertypes.any((InterfaceType interface) {
       final InterfaceElement interfaceElement = interface.element;
-      return interfaceElement is ClassElement && _implementsStopwatch(interfaceElement);
+      return interfaceElement is ClassElement &&
+          _implementsStopwatch(interfaceElement);
     });
   }
 
   // The cached version, call this method instead of _checkIfImplementsStopwatchRecursively.
   bool _implementsStopwatch(ClassElement classElement) {
     return classElement.library.isDartCore
-      ? classElement.name == 'Stopwatch'
-      :_isStopwatchClassElementCache.putIfAbsent(classElement, () => _checkIfImplementsStopwatchRecursively(classElement));
+        ? classElement.name == 'Stopwatch'
+        : _isStopwatchClassElementCache.putIfAbsent(classElement,
+            () => _checkIfImplementsStopwatchRecursively(classElement));
   }
 
   bool _isInternal(LibraryElement libraryElement) {
@@ -96,19 +102,22 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
 
   bool _hasTrailingFlutterIgnore(AstNode node) {
     return compilationUnit.content
-      .substring(node.offset + node.length, compilationUnit.lineInfo.getOffsetOfLineAfter(node.offset + node.length))
-      .contains(_ignoreStopwatch);
+        .substring(
+            node.offset + node.length,
+            compilationUnit.lineInfo
+                .getOffsetOfLineAfter(node.offset + node.length))
+        .contains(_ignoreStopwatch);
   }
 
   // We don't care about directives or comments, skip them.
   @override
-  void visitImportDirective(ImportDirective node) { }
+  void visitImportDirective(ImportDirective node) {}
 
   @override
-  void visitExportDirective(ExportDirective node) { }
+  void visitExportDirective(ExportDirective node) {}
 
   @override
-  void visitComment(Comment node) { }
+  void visitComment(Comment node) {}
 
   @override
   void visitConstructorName(ConstructorName node) {
@@ -118,7 +127,8 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(classElement),
+      InterfaceType(element: final ClassElement classElement) =>
+        !_implementsStopwatch(classElement),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
@@ -133,7 +143,8 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
       ExecutableElement(
         returnType: DartType(element: final ClassElement classElement),
         library: final LibraryElement libraryElement
-      ) => _isInternal(libraryElement) || !_implementsStopwatch(classElement),
+      ) =>
+        _isInternal(libraryElement) || !_implementsStopwatch(classElement),
       Element() || null => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {

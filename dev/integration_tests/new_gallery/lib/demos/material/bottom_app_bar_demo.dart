@@ -41,7 +41,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   // Since FloatingActionButtonLocation is not an enum, the index of the
   // selected FloatingActionButtonLocation is used for state restoration.
-  static const List<FloatingActionButtonLocation> _fabLocations = <FloatingActionButtonLocation>[
+  static const List<FloatingActionButtonLocation> _fabLocations =
+      <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.endDocked,
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.endFloat,
@@ -68,7 +69,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -156,14 +158,16 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
 
-  static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
+  static final List<FloatingActionButtonLocation> centerLocations =
+      <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.centerFloat,
   ];
 
   @override
   Widget build(BuildContext context) {
-    final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    final GalleryLocalizations localizations =
+        GalleryLocalizations.of(context)!;
     return Semantics(
       sortKey: const OrdinalSortKey(1),
       container: true,

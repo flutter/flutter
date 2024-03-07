@@ -18,7 +18,8 @@ void main() {
       await driver.close();
     });
 
-    test('Ensure keyboard dismissal resizes the view to original size', () async {
+    test('Ensure keyboard dismissal resizes the view to original size',
+        () async {
       await driver.setTextEntryEmulation(enabled: false);
       final SerializableFinder heightText = find.byValueKey(keys.kHeightText);
       await driver.waitFor(heightText);
@@ -27,7 +28,8 @@ void main() {
       final String startHeight = await driver.getText(heightText);
 
       // Focus the text field to show the keyboard.
-      final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
+      final SerializableFinder defaultTextField =
+          find.byValueKey(keys.kDefaultTextField);
       await driver.waitFor(defaultTextField);
       await driver.tap(defaultTextField);
 
@@ -44,7 +46,8 @@ void main() {
       expect(heightTextDidShrink, isTrue);
 
       // Unfocus the text field to dismiss the keyboard.
-      final SerializableFinder unfocusButton = find.byValueKey(keys.kUnfocusButton);
+      final SerializableFinder unfocusButton =
+          find.byValueKey(keys.kUnfocusButton);
       await driver.waitFor(unfocusButton);
       await driver.tap(unfocusButton);
 

@@ -43,10 +43,8 @@ class StockRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Theme.of(context).dividerColor)
-          )
-        ),
+            border: Border(
+                bottom: BorderSide(color: Theme.of(context).dividerColor))),
         child: Row(
           children: <Widget>[
             Container(
@@ -63,9 +61,7 @@ class StockRow extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     flex: 2,
-                    child: Text(
-                      stock.symbol
-                    ),
+                    child: Text(stock.symbol),
                   ),
                   Expanded(
                     child: Text(
