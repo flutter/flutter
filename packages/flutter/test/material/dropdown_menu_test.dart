@@ -1910,6 +1910,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/139871.
+  testWidgets('setState is not called through addPostFrameCallback after DropdownMenu is unmounted', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView.builder(
+            itemCount: 500,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 250) {
+                return DropdownMenu<TestMenu>(
+                  dropdownMenuEntries: menuChildren,
+                );
+              } else {
+                return Container(height: 50);
+              }
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.byType(ListView), const Offset(0, -20000), 200000.0);
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Menu shows scrollbar when height is limited', (WidgetTester tester) async {
     final List<DropdownMenuEntry<TestMenu>> menuItems = <DropdownMenuEntry<TestMenu>>[
       DropdownMenuEntry<TestMenu>(
