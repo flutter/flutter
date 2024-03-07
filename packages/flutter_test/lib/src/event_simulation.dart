@@ -711,7 +711,7 @@ abstract final class KeyEventSimulator {
   @visibleForTesting
   static KeyDataTransitMode get transitMode => _transitMode;
 
-  static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
+  static String get _defaultPlatform => kIsWeb ? 'web' : defaultTargetPlatform.name.toLowerCase();
 
   /// Simulates sending a hardware key down event.
   ///
@@ -720,7 +720,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -767,7 +768,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -811,7 +813,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -860,7 +863,8 @@ abstract final class KeyEventSimulator {
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
@@ -894,7 +898,8 @@ Future<bool> simulateKeyDownEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -922,7 +927,8 @@ Future<bool> simulateKeyUpEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
