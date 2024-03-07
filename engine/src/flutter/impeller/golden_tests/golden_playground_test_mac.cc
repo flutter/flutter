@@ -12,13 +12,12 @@
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
+#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
-
-#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 namespace impeller {
 
