@@ -532,6 +532,91 @@ void testReportViewWidths() {
   };
 }
 
+void renderDummyToView(FlutterView view) {
+  final SceneBuilder builder = SceneBuilder();
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+  final Picture picture = recorder.endRecording();
+  builder.addPicture(Offset.zero, picture);
+
+  final Scene scene = builder.build();
+  view.render(scene);
+
+  scene.dispose();
+  picture.dispose();
+}
+
+@pragma('vm:entry-point')
+void onDrawFrameRenderAllViews() {
+  PlatformDispatcher.instance.onDrawFrame = () {
+    for (final FlutterView view in PlatformDispatcher.instance.views) {
+      renderDummyToView(view);
+    }
+  };
+  notifyNative();
+}
+
+@pragma('vm:entry-point')
+void renderViewsInFrameAndOutOfFrame() {
+  renderDummyToView(PlatformDispatcher.instance.view(id: 1)!);
+  PlatformDispatcher.instance.onDrawFrame = () {
+    renderDummyToView(PlatformDispatcher.instance.view(id: 2)!);
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:external-name', 'CaptureRootLayer')
+external _captureRootLayer(SceneBuilder sceneBuilder);
+
+@pragma('vm:entry-point')
+void renderTwiceForOneView() {
+  final SceneBuilder builder = SceneBuilder();
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+  final Picture picture = recorder.endRecording();
+  builder.addPicture(Offset.zero, picture);
+
+  PlatformDispatcher.instance.onBeginFrame = (_) {
+    // Tell engine the correct layer tree.
+    _captureRootLayer(builder);
+  };
+
+  PlatformDispatcher.instance.onDrawFrame = () {
+    final Scene scene = builder.build();
+    PlatformDispatcher.instance.implicitView!.render(scene);
+    scene.dispose();
+    picture.dispose();
+
+    // Render a second time. This duplicate render should be ignored.
+    renderDummyToView(PlatformDispatcher.instance.implicitView!);
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void renderSingleViewAndCallAfterOnDrawFrame() {
+  PlatformDispatcher.instance.onDrawFrame = () {
+    final SceneBuilder builder = SceneBuilder();
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    final Scene scene = builder.build();
+    PlatformDispatcher.instance.implicitView!.render(scene);
+    // Notify the engine after the render before the disposal.
+    // The view should have been submitted for rasterization at this moment.
+    notifyNative();
+
+    scene.dispose();
+    picture.dispose();
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
 @pragma('vm:entry-point')
 void renderWarmUpImplicitView() {
   bool beginFrameCalled = false;
@@ -543,19 +628,26 @@ void renderWarmUpImplicitView() {
     },
     drawFrame: () {
       expect(beginFrameCalled, true);
-
-      final SceneBuilder builder = SceneBuilder();
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
-      canvas.drawPaint(Paint()..color = const Color(0xFFABCDEF));
-      final Picture picture = recorder.endRecording();
-      builder.addPicture(Offset.zero, picture);
-
-      final Scene scene = builder.build();
-      PlatformDispatcher.instance.implicitView!.render(scene);
-
-      scene.dispose();
-      picture.dispose();
+      renderDummyToView(PlatformDispatcher.instance.implicitView!);
     },
+  );
+}
+
+@pragma('vm:entry-point')
+void renderWarmUpView1and2() {
+  bool beginFrameCalled = false;
+
+  PlatformDispatcher.instance.scheduleWarmUpFrame(
+    beginFrame: () {
+      expect(beginFrameCalled, false);
+      beginFrameCalled = true;
+    },
+    drawFrame: () {
+      expect(beginFrameCalled, true);
+
+      for (final int viewId in <int>[1, 2]) {
+        renderDummyToView(PlatformDispatcher.instance.view(id: viewId)!);
+      }
+    }
   );
 }

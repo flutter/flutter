@@ -42,6 +42,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
+#include "flutter/shell/common/vsync_waiters_test.h"
 #include "flutter/shell/version/version.h"
 #include "flutter/testing/mock_canvas.h"
 #include "flutter/testing/testing.h"
@@ -884,7 +885,7 @@ TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
   ASSERT_TRUE(end_frame_called);
 
@@ -958,7 +959,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
     backdrop_filter_layer->Add(platform_view_layer2);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
   ASSERT_EQ(visited_platform_views, (std::vector<int64_t>{50, 75}));
   ASSERT_TRUE(stack_75.is_empty());
@@ -1019,7 +1020,7 @@ TEST_F(ShellTest,
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
 
   ASSERT_TRUE(end_frame_called);
@@ -1065,9 +1066,12 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
 
   auto result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
+  // Wait for the rasterizer to process the frame. WaitForFirstFrame only waits
+  // for the Animator, but end_frame_callback is called by the Rasterizer.
+  PostSync(shell->GetTaskRunners().GetRasterTaskRunner(), [] {});
   ASSERT_TRUE(result.ok()) << "Result: " << static_cast<int>(result.code())
                            << ": " << result.message();
 
@@ -1132,12 +1136,12 @@ TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   // Pump one frame to trigger thread merging.
   end_frame_latch.Wait();
   // Pump another frame to ensure threads are merged and a regular layer tree is
   // submitted.
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   // Threads are merged here. PlatformViewNotifyDestroy should be executed
   // successfully.
   ASSERT_TRUE(fml::TaskRunnerChecker::RunsOnTheSameThread(
@@ -1201,7 +1205,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   // Pump one frame and threads aren't merged
   end_frame_latch.Wait();
   ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
@@ -1212,7 +1216,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
   // threads
   external_view_embedder->UpdatePostPrerollResult(
       PostPrerollResult::kResubmitFrame);
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
 
   // Now destroy the platform view immediately.
   // Two things can happen here:
@@ -1268,7 +1272,7 @@ TEST_F(ShellTest,
         SkPoint::Make(10, 10), MakeSizedDisplayList(80, 80), false, false);
     root->Add(display_list_layer);
   };
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
 
   // Threads should not be merged.
@@ -1307,7 +1311,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
         SkPoint::Make(10, 10), MakeSizedDisplayList(80, 80), false, false);
     root->Add(display_list_layer);
   };
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
 
   // Threads should not be merged.
   ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
@@ -1373,7 +1377,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
         SkPoint::Make(10, 10), MakeSizedDisplayList(80, 80), false, false);
     root->Add(display_list_layer);
   };
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
 
   ValidateDestroyPlatformView(shell.get());
@@ -1419,7 +1423,7 @@ TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
         SkPoint::Make(10, 10), MakeSizedDisplayList(80, 80), false, false);
     root->Add(display_list_layer);
   };
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   end_frame_latch.Wait();
   ASSERT_FALSE(used_this_frame);
 
@@ -1569,10 +1573,11 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
   configuration.SetEntrypoint("emptyMain");
 
   RunEngine(shell.get(), std::move(configuration));
-  PumpOneFrame(shell.get(), {1.0, 0.0, 0.0, 22, 0});
+  PumpOneFrame(shell.get(), ViewContent::DummyView({1.0, 0.0, 0.0, 22, 0}));
   fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-  ASSERT_FALSE(result.ok());
-  ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  EXPECT_FALSE(result.ok());
+  EXPECT_EQ(result.message(), "timeout");
+  EXPECT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
 
   DestroyShell(std::move(shell));
 }
@@ -2088,6 +2093,7 @@ TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
 TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
   bool is_on_begin_frame_called = false;
   bool is_secondary_callback_called = false;
+  bool test_started = false;
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners = GetTaskRunnersForFixture();
   fml::AutoResetWaitableEvent latch;
@@ -2097,12 +2103,18 @@ TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
   fml::CountDownLatch count_down_latch(2);
   AddNativeCallback("NativeOnBeginFrame",
                     CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      if (!test_started) {
+                        return;
+                      }
                       EXPECT_FALSE(is_on_begin_frame_called);
                       EXPECT_FALSE(is_secondary_callback_called);
                       is_on_begin_frame_called = true;
                       count_down_latch.CountDown();
                     }));
-  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+  });
   ASSERT_TRUE(shell->IsSetup());
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -2115,12 +2127,16 @@ TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(), [&]() {
         shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
+          if (!test_started) {
+            return;
+          }
           EXPECT_TRUE(is_on_begin_frame_called);
           EXPECT_FALSE(is_secondary_callback_called);
           is_secondary_callback_called = true;
           count_down_latch.CountDown();
         });
         shell->GetEngine()->ScheduleFrame();
+        test_started = true;
       });
   count_down_latch.Wait();
   EXPECT_TRUE(is_on_begin_frame_called);
@@ -2165,7 +2181,7 @@ TEST_F(ShellTest, Screenshot) {
     root->Add(display_list_layer);
   };
 
-  PumpOneFrame(shell.get(), 100, 100, builder);
+  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
   firstFrameLatch.Wait();
 
   std::promise<Rasterizer::Screenshot> screenshot_promise;
@@ -2550,7 +2566,13 @@ TEST_F(ShellTest, OnServiceProtocolRenderFrameWithRasterStatsWorks) {
   configuration.SetEntrypoint("scene_with_red_box");
 
   RunEngine(shell.get(), std::move(configuration));
-  PumpOneFrame(shell.get());
+  // Set a non-zero viewport metrics, otherwise the scene would be discarded.
+  PostSync(shell->GetTaskRunners().GetUITaskRunner(),
+           [engine = shell->GetEngine()]() {
+             engine->SetViewportMetrics(kImplicitViewId,
+                                        ViewportMetrics{1, 1, 1, 22, 0});
+           });
+  PumpOneFrame(shell.get(), ViewContent::NoViews());
 
   ServiceProtocol::Handler::ServiceProtocolMap empty_params;
   rapidjson::Document document;
@@ -2662,7 +2684,7 @@ TEST_F(ShellTest, OnServiceProtocolRenderFrameWithRasterStatsDisableImpeller) {
   configuration.SetEntrypoint("scene_with_red_box");
 
   RunEngine(shell.get(), std::move(configuration));
-  PumpOneFrame(shell.get());
+  PumpOneFrame(shell.get(), ViewContent::NoViews());
 
   ServiceProtocol::Handler::ServiceProtocolMap empty_params;
   rapidjson::Document document;
@@ -2726,14 +2748,16 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
 
   RunEngine(shell.get(), std::move(configuration));
 
-  PumpOneFrame(shell.get(), static_cast<double>(wrong_size.width()),
-               static_cast<double>(wrong_size.height()));
+  PumpOneFrame(shell.get(), ViewContent::DummyView(
+                                static_cast<double>(wrong_size.width()),
+                                static_cast<double>(wrong_size.height())));
   end_frame_latch.Wait();
   // Wrong size, no frames are submitted.
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
-  PumpOneFrame(shell.get(), static_cast<double>(expected_size.width()),
-               static_cast<double>(expected_size.height()));
+  PumpOneFrame(shell.get(), ViewContent::DummyView(
+                                static_cast<double>(expected_size.width()),
+                                static_cast<double>(expected_size.height())));
   end_frame_latch.Wait();
   // Expected size, 1 frame submitted.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
@@ -2804,8 +2828,9 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
 
   RunEngine(shell.get(), std::move(configuration));
 
-  PumpOneFrame(shell.get(), static_cast<double>(origin_size.width()),
-               static_cast<double>(origin_size.height()));
+  PumpOneFrame(shell.get(), ViewContent::DummyView(
+                                static_cast<double>(origin_size.width()),
+                                static_cast<double>(origin_size.height())));
 
   end_frame_latch.Wait();
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
@@ -2826,8 +2851,9 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
   // Threads will be merged at the end of this frame.
-  PumpOneFrame(shell.get(), static_cast<double>(new_size.width()),
-               static_cast<double>(new_size.height()));
+  PumpOneFrame(shell.get(),
+               ViewContent::DummyView(static_cast<double>(new_size.width()),
+                                      static_cast<double>(new_size.height())));
 
   end_frame_latch.Wait();
   ASSERT_TRUE(raster_thread_merger_ref->IsMerged());

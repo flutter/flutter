@@ -6,10 +6,7 @@
 
 #include <cstring>
 
-#include "flutter/common/constants.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
-#include "flutter/shell/common/shell.h"
-#include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
@@ -25,19 +22,6 @@
 namespace flutter {
 
 namespace {
-
-using ::testing::Invoke;
-using ::testing::ReturnRef;
-
-static void PostSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
-                     const fml::closure& task) {
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runner, [&latch, &task] {
-    task();
-    latch.Signal();
-  });
-  latch.Wait();
-}
 
 class FontManifestAssetResolver : public AssetResolver {
  public:
@@ -118,10 +102,10 @@ class MockRuntimeDelegate : public RuntimeDelegate {
  public:
   MOCK_METHOD(std::string, DefaultRouteName, (), (override));
   MOCK_METHOD(void, ScheduleFrame, (bool), (override));
-  MOCK_METHOD(void, EndWarmUpFrame, (), (override));
+  MOCK_METHOD(void, OnAllViewsRendered, (), (override));
   MOCK_METHOD(void,
               Render,
-              (std::unique_ptr<flutter::LayerTree>, float),
+              (int64_t, std::unique_ptr<flutter::LayerTree>, float),
               (override));
   MOCK_METHOD(void,
               UpdateSemantics,
@@ -171,51 +155,6 @@ class MockRuntimeController : public RuntimeController {
               (override));
   MOCK_METHOD(DartVM*, GetDartVM, (), (const, override));
   MOCK_METHOD(bool, NotifyIdle, (fml::TimeDelta), (override));
-};
-
-class MockAnimatorDelegate : public Animator::Delegate {
- public:
-  /* Animator::Delegate */
-  MOCK_METHOD(void,
-              OnAnimatorBeginFrame,
-              (fml::TimePoint frame_target_time, uint64_t frame_number),
-              (override));
-  MOCK_METHOD(void,
-              OnAnimatorNotifyIdle,
-              (fml::TimeDelta deadline),
-              (override));
-  MOCK_METHOD(void,
-              OnAnimatorUpdateLatestFrameTargetTime,
-              (fml::TimePoint frame_target_time),
-              (override));
-  MOCK_METHOD(void,
-              OnAnimatorDraw,
-              (std::shared_ptr<FramePipeline> pipeline),
-              (override));
-  MOCK_METHOD(void,
-              OnAnimatorDrawLastLayerTrees,
-              (std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder),
-              (override));
-};
-
-class MockPlatformMessageHandler : public PlatformMessageHandler {
- public:
-  MOCK_METHOD(void,
-              HandlePlatformMessage,
-              (std::unique_ptr<PlatformMessage> message),
-              (override));
-  MOCK_METHOD(bool,
-              DoesHandlePlatformMessageOnPlatformThread,
-              (),
-              (const, override));
-  MOCK_METHOD(void,
-              InvokePlatformMessageResponseCallback,
-              (int response_id, std::unique_ptr<fml::Mapping> mapping),
-              (override));
-  MOCK_METHOD(void,
-              InvokePlatformMessageEmptyResponseCallback,
-              (int response_id),
-              (override));
 };
 
 class MockFontCollection : public FontCollection {
@@ -292,96 +231,6 @@ class EngineTest : public testing::FixtureTest {
   fml::WeakPtr<IOManager> io_manager_;
   std::unique_ptr<RuntimeController> runtime_controller_;
   std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner_;
-  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
-};
-
-// A class that can launch an Engine with the specified Engine::Delegate.
-//
-// To use this class, contruct this class with Create, call Run, and use the
-// engine with EngineTaskSync().
-class EngineContext {
- public:
-  using EngineCallback = std::function<void(Engine&)>;
-
-  [[nodiscard]] static std::unique_ptr<EngineContext> Create(
-      Engine::Delegate& delegate,       //
-      Settings settings,                //
-      const TaskRunners& task_runners,  //
-      std::unique_ptr<Animator> animator) {
-    auto [vm, isolate_snapshot] = Shell::InferVmInitDataFromSettings(settings);
-    FML_CHECK(vm) << "Must be able to initialize the VM.";
-    // Construct the class with `new` because `make_unique` has no access to the
-    // private constructor.
-    EngineContext* raw_pointer =
-        new EngineContext(delegate, settings, task_runners, std::move(animator),
-                          std::move(vm), isolate_snapshot);
-    return std::unique_ptr<EngineContext>(raw_pointer);
-  }
-
-  void Run(RunConfiguration configuration) {
-    PostSync(task_runners_.GetUITaskRunner(), [this, &configuration] {
-      Engine::RunStatus run_status = engine_->Run(std::move(configuration));
-      FML_CHECK(run_status == Engine::RunStatus::Success)
-          << "Engine failed to run.";
-      (void)run_status;  // Suppress unused-variable warning
-    });
-  }
-
-  // Run a task that operates the Engine on the UI thread, and wait for the
-  // task to end.
-  //
-  // If called on the UI thread, the task is executed synchronously.
-  void EngineTaskSync(EngineCallback task) {
-    ASSERT_TRUE(engine_);
-    ASSERT_TRUE(task);
-    auto runner = task_runners_.GetUITaskRunner();
-    if (runner->RunsTasksOnCurrentThread()) {
-      task(*engine_);
-    } else {
-      PostSync(task_runners_.GetUITaskRunner(), [&]() { task(*engine_); });
-    }
-  }
-
-  ~EngineContext() {
-    PostSync(task_runners_.GetUITaskRunner(), [this] { engine_.reset(); });
-  }
-
- private:
-  EngineContext(Engine::Delegate& delegate,          //
-                Settings settings,                   //
-                const TaskRunners& task_runners,     //
-                std::unique_ptr<Animator> animator,  //
-                DartVMRef vm,                        //
-                fml::RefPtr<const DartSnapshot> isolate_snapshot)
-      : task_runners_(task_runners), vm_(std::move(vm)) {
-    PostSync(task_runners.GetUITaskRunner(), [this, &settings, &animator,
-                                              &delegate, &isolate_snapshot] {
-      auto dispatcher_maker =
-          [](DefaultPointerDataDispatcher::Delegate& delegate) {
-            return std::make_unique<DefaultPointerDataDispatcher>(delegate);
-          };
-      engine_ = std::make_unique<Engine>(
-          /*delegate=*/delegate,
-          /*dispatcher_maker=*/dispatcher_maker,
-          /*vm=*/*&vm_,
-          /*isolate_snapshot=*/std::move(isolate_snapshot),
-          /*task_runners=*/task_runners_,
-          /*platform_data=*/PlatformData(),
-          /*settings=*/settings,
-          /*animator=*/std::move(animator),
-          /*io_manager=*/io_manager_,
-          /*unref_queue=*/nullptr,
-          /*snapshot_delegate=*/snapshot_delegate_,
-          /*volatile_path_tracker=*/nullptr,
-          /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
-    });
-  }
-
-  TaskRunners task_runners_;
-  DartVMRef vm_;
-  std::unique_ptr<Engine> engine_;
-
-  fml::WeakPtr<IOManager> io_manager_;
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
 };
 }  // namespace
@@ -615,71 +464,6 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
 
     engine->LoadDartDeferredLibraryError(error_id, error_message, true);
   });
-}
-
-// The animator should submit to the pipeline the implicit view rendered in a
-// warm up frame if there's already a continuation (i.e. Animator::BeginFrame
-// has been called)
-TEST_F(EngineTest, AnimatorSubmitWarmUpImplicitView) {
-  MockAnimatorDelegate animator_delegate;
-  std::unique_ptr<EngineContext> engine_context;
-
-  std::shared_ptr<PlatformMessageHandler> platform_message_handler =
-      std::make_shared<MockPlatformMessageHandler>();
-  EXPECT_CALL(delegate_, GetPlatformMessageHandler)
-      .WillOnce(ReturnRef(platform_message_handler));
-
-  fml::AutoResetWaitableEvent continuation_ready_latch;
-  fml::AutoResetWaitableEvent draw_latch;
-  EXPECT_CALL(animator_delegate, OnAnimatorDraw)
-      .WillOnce(Invoke([&draw_latch](
-                           const std::shared_ptr<FramePipeline>& pipeline) {
-        auto status = pipeline->Consume([&](std::unique_ptr<FrameItem> item) {
-          EXPECT_EQ(item->layer_tree_tasks.size(), 1u);
-          EXPECT_EQ(item->layer_tree_tasks[0]->view_id, kFlutterImplicitViewId);
-        });
-        EXPECT_EQ(status, PipelineConsumeResult::Done);
-        draw_latch.Signal();
-      }));
-  EXPECT_CALL(animator_delegate, OnAnimatorBeginFrame)
-      .WillRepeatedly(
-          Invoke([&engine_context, &continuation_ready_latch](
-                     fml::TimePoint frame_target_time, uint64_t frame_number) {
-            continuation_ready_latch.Signal();
-            engine_context->EngineTaskSync([&](Engine& engine) {
-              engine.BeginFrame(frame_target_time, frame_number);
-            });
-          }));
-
-  std::unique_ptr<Animator> animator;
-  PostSync(task_runners_.GetUITaskRunner(),
-           [&animator, &animator_delegate, &task_runners = task_runners_] {
-             animator = std::make_unique<Animator>(
-                 animator_delegate, task_runners,
-                 static_cast<std::unique_ptr<VsyncWaiter>>(
-                     std::make_unique<testing::ConstantFiringVsyncWaiter>(
-                         task_runners)));
-           });
-
-  engine_context = EngineContext::Create(delegate_, settings_, task_runners_,
-                                         std::move(animator));
-
-  engine_context->EngineTaskSync([](Engine& engine) {
-    // Schedule a frame to trigger Animator::BeginFrame to create a
-    // continuation. The continuation needs to be available before `Engine::Run`
-    // since the Dart program immediately schedules a warm up frame.
-    engine.ScheduleFrame(true);
-    // Add the implicit view so that the engine recognizes it and that its
-    // metrics is not empty.
-    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1.0, 10, 10, 1, 0});
-  });
-  continuation_ready_latch.Wait();
-
-  auto configuration = RunConfiguration::InferFromSettings(settings_);
-  configuration.SetEntrypoint("renderWarmUpImplicitView");
-  engine_context->Run(std::move(configuration));
-
-  draw_latch.Wait();
 }
 
 TEST_F(EngineTest, SpawnedEngineInheritsAssetManager) {

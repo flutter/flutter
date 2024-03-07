@@ -104,8 +104,8 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   std::unique_ptr<RuntimeController> Spawn(
       RuntimeDelegate& p_client,
-      std::string advisory_script_uri,
-      std::string advisory_script_entrypoint,
+      const std::string& advisory_script_uri,
+      const std::string& advisory_script_entrypoint,
       const std::function<void(int64_t)>& idle_notification_callback,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
@@ -660,6 +660,26 @@ class RuntimeController : public PlatformConfigurationClient {
       std::shared_ptr<PlatformIsolateManager>(new PlatformIsolateManager());
   bool has_flushed_runtime_state_ = false;
 
+  // Tracks the views that have been called `Render` during a frame.
+  //
+  // If all views that have been registered by `AddView` have been called
+  // `Render`, then the runtime controller notifies the client of the end of
+  // frame immediately, allowing the client to submit the views to the pipeline
+  // a bit earlier than having to wait for the end of `BeginFrame`. See also
+  // `Animator::OnAllViewsRendered`.
+  //
+  // This mechanism fixes https://github.com/flutter/flutter/issues/144584 with
+  // option 2 and
+  // https://github.com/flutter/engine/pull/51186#issuecomment-1977820525 with
+  // option a in most cases, except if there are multiple views and only part of
+  // them are rendered.
+  // TODO(dkwingsmt): Fix these problems for all cases.
+  std::unordered_set<uint64_t> rendered_views_during_frame_;
+
+  void MarkAsFrameBorder();
+
+  void CheckIfAllViewsRendered();
+
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
   bool FlushRuntimeStateToIsolate();
@@ -674,7 +694,10 @@ class RuntimeController : public PlatformConfigurationClient {
   void EndWarmUpFrame() override;
 
   // |PlatformConfigurationClient|
-  void Render(Scene* scene, double width, double height) override;
+  void Render(int64_t view_id,
+              Scene* scene,
+              double width,
+              double height) override;
 
   // |PlatformConfigurationClient|
   void UpdateSemantics(SemanticsUpdate* update) override;

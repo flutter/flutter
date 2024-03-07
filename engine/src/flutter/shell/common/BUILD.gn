@@ -310,6 +310,7 @@ if (enable_unittests) {
       "base64_unittests.cc",
       "context_options_unittests.cc",
       "dl_op_spy_unittests.cc",
+      "engine_animator_unittests.cc",
       "engine_unittests.cc",
       "input_events_unittests.cc",
       "persistent_cache_unittests.cc",
