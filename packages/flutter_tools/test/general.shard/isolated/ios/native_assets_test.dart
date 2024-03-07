@@ -266,20 +266,12 @@ void main() {
         ],
         onBuild: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
           assets: <Asset>[
-            if (target == native_assets_cli.Target.iOSArm64)
-              Asset(
-                id: 'package:bar/bar.dart',
-                linkMode: LinkMode.dynamic,
-                target: native_assets_cli.Target.iOSArm64,
-                path: AssetAbsolutePath(Uri.file('arm64/libbar.dylib')),
-              ),
-            if (target == native_assets_cli.Target.iOSX64)
-              Asset(
-                id: 'package:bar/bar.dart',
-                linkMode: LinkMode.dynamic,
-                target: native_assets_cli.Target.iOSX64,
-                path: AssetAbsolutePath(Uri.file('x64/libbar.dylib')),
-              ),
+            Asset(
+              id: 'package:bar/bar.dart',
+              linkMode: LinkMode.dynamic,
+              target: target,
+              path: AssetAbsolutePath(Uri.file('${target.architecture}/libbar.dylib')),
+            ),
           ],
         ),
       ),
