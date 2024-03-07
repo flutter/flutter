@@ -3564,5 +3564,22 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   }
 }
 
+TEST_P(AiksTest, EntityPassClipRecorderRestoresCancelOutClips) {
+  Canvas canvas;
+  canvas.Save();
+  canvas.ClipRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});
+  canvas.DrawRRect(Rect::MakeLTRB(0, 0, 100, 100), {10, 10}, {});
+  canvas.Restore();
+  canvas.DrawRRect(Rect::MakeLTRB(0, 0, 50, 50), {10, 10}, {});
+
+  Picture picture = canvas.EndRecordingAsPicture();
+
+  AiksContext renderer(GetContext(), nullptr);
+  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+
+  EXPECT_EQ(
+      picture.pass->GetEntityPassClipRecorder().GetReplayEntities().size(), 0u);
+}
+
 }  // namespace testing
 }  // namespace impeller
