@@ -1197,7 +1197,6 @@ mixin SchedulerBinding on BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration? rawTimeStamp) {
-    _frameTimelineTask?.start('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null) {
@@ -1332,7 +1331,6 @@ mixin SchedulerBinding on BindingBase {
       }
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
-      _frameTimelineTask?.finish(); // end the Frame
       assert(() {
         if (debugPrintEndFrameBanner) {
           debugPrint('▀' * _debugBanner!.length);
