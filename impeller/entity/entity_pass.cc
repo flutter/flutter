@@ -823,6 +823,7 @@ bool EntityPass::RenderElement(Entity& element_entity,
 
       if constexpr (ContentContext::kEnableStencilThenCover) {
         // Skip all clip restores when stencil-then-cover is enabled.
+        clip_replay_->RecordEntity(element_entity, clip_coverage.type);
         return true;
       }
 
@@ -1205,6 +1206,10 @@ void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
 
 void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
   enable_offscreen_debug_checkerboard_ = enabled;
+}
+
+const EntityPassClipRecorder& EntityPass::GetEntityPassClipRecorder() const {
+  return *clip_replay_;
 }
 
 EntityPassClipRecorder::EntityPassClipRecorder() {}
