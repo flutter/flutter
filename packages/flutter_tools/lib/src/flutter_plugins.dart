@@ -1410,28 +1410,32 @@ Iterable<Plugin> _finalPluginResolution(
   // No default given, use either a dart or a native plugin implementation.
 
   assert(hasInlineDartImplementation || pluginImplementation != null);
-  // An app-facing package (i.e., one with no 'implements') with an
-  // inline implementation should be its own default implementation.
-  // Desktop platforms originally did not work that way, and enabling
-  // it unconditionally would break existing published plugins, so
-  // only treat it as such if either:
-  // - the platform is not desktop, or
-  // - the plugin requires at least Flutter 2.11 (when this opt-in logic
-  //   was added), so that existing plugins continue to work.
-  // See https://github.com/flutter/flutter/issues/87862 for details.
-  final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
-  final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
-  final semver.Version? minFlutterVersion = flutterConstraint != null && flutterConstraint is semver.VersionRange
-          ? flutterConstraint.min
-          : null;
-  final bool hasMinVersionForImplementsRequirement =
-      minFlutterVersion != null &&
-          minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
-  if (isDesktop && !hasMinVersionForImplementsRequirement) {
-    // If it doesn't meet any of the conditions, it isn't eligible for
-    // auto-registration.
-    return (null, null);
+
+  if(selectDartPluginsOnly) {
+    // An app-facing package (i.e., one with no 'implements') with an inline
+    // dart implementation should be its own default implementation.
+    // Desktop platforms originally did not work that way, and enabling it
+    // unconditionally would break existing published plugins, so only treat it
+    // as such if either:
+    // - the platform is not desktop, or
+    // - the plugin requires at least Flutter 2.11 (when this opt-in logic
+    //   was added), so that existing plugins continue to work.
+    // See https://github.com/flutter/flutter/issues/87862 for details.
+    final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
+    final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
+    final semver.Version? minFlutterVersion = flutterConstraint != null && flutterConstraint is semver.VersionRange
+        ? flutterConstraint.min
+        : null;
+    final bool hasMinVersionForImplementsRequirement =
+        minFlutterVersion != null &&
+            minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
+    if (isDesktop && !hasMinVersionForImplementsRequirement) {
+      // If it doesn't meet any of the conditions, it isn't eligible for
+      // auto-registration.
+      return (null, null);
+    }
   }
+
   // Use the plugin as default for inline implementations (dart or native)
   implementsPackage = plugin.name;
   defaultImplementation = plugin.name;
