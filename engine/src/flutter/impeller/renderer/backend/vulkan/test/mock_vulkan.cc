@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "fml/macros.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 #include "third_party/swiftshader/include/vulkan/vulkan_core.h"
@@ -40,9 +39,12 @@ struct MockImage {};
 
 struct MockSwapchainKHR {
   std::array<MockImage, 3> images;
+  size_t current_image = 0;
 };
 
 struct MockSemaphore {};
+
+struct MockFramebuffer {};
 
 static ISize currentImageSize = ISize{1, 1};
 
@@ -721,8 +723,24 @@ VkResult vkAcquireNextImageKHR(VkDevice device,
                                VkSemaphore semaphore,
                                VkFence fence,
                                uint32_t* pImageIndex) {
-  *pImageIndex = 0;
+  auto current_index =
+      reinterpret_cast<MockSwapchainKHR*>(swapchain)->current_image++;
+  *pImageIndex = (current_index + 1) % 3u;
   return VK_SUCCESS;
+}
+
+VkResult vkCreateFramebuffer(VkDevice device,
+                             const VkFramebufferCreateInfo* pCreateInfo,
+                             const VkAllocationCallbacks* pAllocator,
+                             VkFramebuffer* pFramebuffer) {
+  *pFramebuffer = reinterpret_cast<VkFramebuffer>(new MockFramebuffer());
+  return VK_SUCCESS;
+}
+
+void vkDestroyFramebuffer(VkDevice device,
+                          VkFramebuffer framebuffer,
+                          const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<MockFramebuffer*>(framebuffer);
 }
 
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
@@ -861,6 +879,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkDestroySurfaceKHR;
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
     return (PFN_vkVoidFunction)vkAcquireNextImageKHR;
+  } else if (strcmp("vkCreateFramebuffer", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateFramebuffer;
+  } else if (strcmp("vkDestroyFramebuffer", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyFramebuffer;
   }
   return noop;
 }

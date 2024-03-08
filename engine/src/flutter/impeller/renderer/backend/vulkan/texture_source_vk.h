@@ -125,12 +125,40 @@ class TextureSourceVK {
   ///
   virtual bool IsSwapchainImage() const = 0;
 
+  // These methods should only be used by render_pass_vk.h
+
+  /// Store the last framebuffer object used with this texture.
+  ///
+  /// This field is only set if this texture is used as the resolve texture
+  /// of a render pass. By construction, this framebuffer should be compatible
+  /// with any future render passes.
+  void SetCachedFramebuffer(const SharedHandleVK<vk::Framebuffer>& framebuffer);
+
+  /// Store the last render pass object used with this texture.
+  ///
+  /// This field is only set if this texture is used as the resolve texture
+  /// of a render pass. By construction, this framebuffer should be compatible
+  /// with any future render passes.
+  void SetCachedRenderPass(const SharedHandleVK<vk::RenderPass>& render_pass);
+
+  /// Retrieve the last framebuffer object used with this texture.
+  ///
+  /// May be nullptr if no previous framebuffer existed.
+  SharedHandleVK<vk::Framebuffer> GetCachedFramebuffer() const;
+
+  /// Retrieve the last render pass object used with this texture.
+  ///
+  /// May be nullptr if no previous render pass existed.
+  SharedHandleVK<vk::RenderPass> GetCachedRenderPass() const;
+
  protected:
   const TextureDescriptor desc_;
 
   explicit TextureSourceVK(TextureDescriptor desc);
 
  private:
+  SharedHandleVK<vk::Framebuffer> framebuffer_;
+  SharedHandleVK<vk::RenderPass> render_pass_;
   mutable RWMutex layout_mutex_;
   mutable vk::ImageLayout layout_ IPLR_GUARDED_BY(layout_mutex_) =
       vk::ImageLayout::eUndefined;

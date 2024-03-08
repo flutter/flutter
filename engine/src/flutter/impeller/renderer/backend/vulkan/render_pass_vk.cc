@@ -164,8 +164,10 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   SharedHandleVK<vk::RenderPass> recycled_render_pass;
   SharedHandleVK<vk::Framebuffer> recycled_framebuffer;
   if (resolve_image_vk_) {
-    recycled_render_pass = TextureVK::Cast(*resolve_image_vk_).GetRenderPass();
-    recycled_framebuffer = TextureVK::Cast(*resolve_image_vk_).GetFramebuffer();
+    recycled_render_pass =
+        TextureVK::Cast(*resolve_image_vk_).GetCachedRenderPass();
+    recycled_framebuffer =
+        TextureVK::Cast(*resolve_image_vk_).GetCachedFramebuffer();
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
@@ -192,8 +194,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return;
   }
   if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_).SetFramebuffer(framebuffer);
-    TextureVK::Cast(*resolve_image_vk_).SetRenderPass(render_pass_);
+    TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
+    TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
   }
 
   auto clear_values = GetVKClearValues(render_target_);

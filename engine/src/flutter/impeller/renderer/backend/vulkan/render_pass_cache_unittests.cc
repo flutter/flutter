@@ -27,14 +27,14 @@ TEST_P(RendererTest, CachesRenderPassAndFramebuffer) {
       render_target.GetColorAttachments().find(0u)->second.resolve_texture;
   auto& texture_vk = TextureVK::Cast(*resolve_texture);
 
-  EXPECT_EQ(texture_vk.GetFramebuffer(), nullptr);
-  EXPECT_EQ(texture_vk.GetRenderPass(), nullptr);
+  EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
+  EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetFramebuffer(), nullptr);
-  EXPECT_NE(texture_vk.GetRenderPass(), nullptr);
+  EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
+  EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
 
   render_pass->EncodeCommands();
   GetContext()->GetCommandQueue()->Submit({buffer});
