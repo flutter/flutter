@@ -128,6 +128,6 @@ impeller_component("vulkan") {
     "//flutter/flutter_vma",
     "//flutter/fml",
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
-    "//third_party/vulkan_memory_allocator",
+    "//flutter/third_party/vulkan_memory_allocator",
   ]
 }
