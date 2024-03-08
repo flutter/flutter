@@ -1667,7 +1667,6 @@ The Flutter Preview device does not support the following plugins from your pubs
 
         final List<PluginInterfaceResolution> resolutions =
             resolvePlatformImplementation(
-          // ignore: avoid_redundant_argument_values
           selectDartPluginsOnly: false,
           <Plugin>[
             Plugin.fromYaml(

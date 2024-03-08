@@ -1263,7 +1263,7 @@ bool hasPlugins(FlutterProject project) {
 //  not just Dart-only, per the federated plugin spec.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
-  bool selectDartPluginsOnly = false,
+  required bool selectDartPluginsOnly,
 }) {
   // TODO(gustl22): Evaluate merging the web and non-web plugin registry.
   // https://github.com/flutter/flutter/issues/80406
