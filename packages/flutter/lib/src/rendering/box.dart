@@ -973,34 +973,17 @@ extension type const BaselineOffset(double? value) {
   }
 }
 
-typedef _DryBaselineUnavailable = ({RenderBox box, String reason});
+typedef _DryBaselineUnavailableInfo = ({RenderBox box, String reason});
 
-/// A value that represents the results of a [RenderBox.computeDryBaseline] calculation.
-extension type const DryBaselineResult._(Either<_DryBaselineUnavailable, BaselineOffset> _value) implements Either<_DryBaselineUnavailable, BaselineOffset> {
-  /// Creates a [DryBaselineAvailable] value that indicates the
-  /// [RenderBox.computeDryBaseline] returned a valid [BaselineOffset] of
-  /// `baselineOffset`.
-  DryBaselineResult.success(BaselineOffset baselineOffset) : this._(Right<_DryBaselineUnavailable, BaselineOffset>(baselineOffset));
-
-  /// Creates a [DryBaselineUnavailable] value that indicates the [RenderBox]'s
-  /// baseline cannot be computed.
-  DryBaselineResult.fail({ required String reason, required RenderBox box }) : this._(Left<_DryBaselineUnavailable, BaselineOffset>((box: box, reason: reason)));
-
-  /// A [DryBaselineAvailable] value that indicates the [RenderBox] doesn't have
-  /// any baselines.
-  static const DryBaselineResult noBaseline = DryBaselineResult._(Right<_DryBaselineUnavailable, BaselineOffset>(BaselineOffset.noBaseline));
-}
-
-/// A value that represents the result of a succussful [RenderBox.computeDryBaseline]
-/// calculation.
-extension type const DryBaselineAvailable(Right<_DryBaselineUnavailable, BaselineOffset> _value) implements DryBaselineResult {
-  /// The [BaselineOffset] returned by the successful [RenderBox.computeDryBaseline]
-  /// calculation.
-  BaselineOffset get value => _value.value;
-}
-
-/// A value that represents the dry baseline of the [RenderBox] cannot be computed.
-extension type const DryBaselineUnavailable(Left<_DryBaselineUnavailable, BaselineOffset> _value) implements DryBaselineResult {}
+/// A type that represents the result of a [RenderBox.computeDryBaseline]
+/// calculation. This is a sealed type with two subtypes:
+///  * [DryBaselineAvailable] which indicates the computation was successful.
+///  * [DryBaselineUnavailable] which indicates the computation failed.
+typedef DryBaselineResult = Either<_DryBaselineUnavailableInfo, BaselineOffset>;
+/// A type that represents the result of a succussful [RenderBox.computeDryBaseline] calculation.
+typedef DryBaselineAvailable = Right<_DryBaselineUnavailableInfo, BaselineOffset>;
+/// A type that represents the dry baseline of the [RenderBox] cannot be computed.
+typedef DryBaselineUnavailable = Left<_DryBaselineUnavailableInfo, BaselineOffset>;
 
 /// An interface that represents a memoized layout computation run by a [RenderBox].
 ///
@@ -1080,13 +1063,13 @@ final class _Baseline implements _CachedLayoutCalculation<(BoxConstraints, TextB
       TextBaseline.alphabetic => cacheStorage._cachedAlphabeticBaseline ??= <BoxConstraints, DryBaselineResult>{},
       TextBaseline.ideographic => cacheStorage._cachedIdeoBaseline ??= <BoxConstraints, DryBaselineResult>{},
     };
-    DryBaselineResult ifAbsent() => DryBaselineResult.success(computer(input));
+    DryBaselineResult ifAbsent() => DryBaselineAvailable(computer(input));
     switch (cache.putIfAbsent(input.$1, ifAbsent)) {
       case DryBaselineAvailable(:final BaselineOffset value):
         return value;
       case DryBaselineUnavailable():
         final BaselineOffset computedResult = computer(input);
-        cache[input.$1] = DryBaselineResult.success(computedResult);
+        cache[input.$1] = DryBaselineAvailable(computedResult);
         return computedResult;
     }
   }
@@ -2151,10 +2134,10 @@ abstract class RenderBox extends RenderObject {
   /// [DryBaselineResult.noBaseline] if the box does not have any baselines.
   @protected
   DryBaselineResult computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return DryBaselineResult.fail(
+    return DryBaselineUnavailable((
       reason: '${objectRuntimeType(this, "RenderBox")} does not support dry baseline calculation yet.',
       box: this,
-    );
+    ));
   }
 
   static bool _debugDryLayoutCalculationValid = true;
@@ -2641,9 +2624,9 @@ abstract class RenderBox extends RenderObject {
         assert(!RenderObject.debugCheckingIntrinsics);
         final BaselineOffset dryBaseline;
         switch (dryBaselineResult) {
-          case Right<_DryBaselineUnavailable, BaselineOffset>(:final BaselineOffset value) when value != realBaseline:
+          case Right<_DryBaselineUnavailableInfo, BaselineOffset>(:final BaselineOffset value) when value != realBaseline:
             dryBaseline = value;
-          case Right<_DryBaselineUnavailable, BaselineOffset>() || Left<_DryBaselineUnavailable, BaselineOffset>():
+          case Right<_DryBaselineUnavailableInfo, BaselineOffset>() || Left<_DryBaselineUnavailableInfo, BaselineOffset>():
             continue;
         }
         if ((dryBaseline == null) != (realBaseline == null)) {
