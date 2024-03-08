@@ -15,14 +15,21 @@ import sys
 import json
 
 
+def GetDartPath(buildroot):
+  dart_path = path.join(buildroot, 'flutter', 'third_party', 'dart')
+  if not path.exists(dart_path):
+    dart_path = path.join(buildroot, 'third_party', 'dart')
+  return dart_path
+
+
 def GetDartSdkGitRevision(buildroot):
-  project_root = path.join(buildroot, 'third_party', 'dart')
-  return subprocess.check_output(['git', '-C', project_root, 'rev-parse', 'HEAD']).strip()
+  return subprocess.check_output(['git', '-C', GetDartPath(buildroot), 'rev-parse', 'HEAD']).strip()
 
 
 def GetDartSdkSemanticVersion(buildroot):
   project_root = path.join(buildroot, 'third_party', 'dart')
-  return subprocess.check_output(['git', '-C', project_root, 'describe', '--abbrev=0']).strip()
+  return subprocess.check_output(['git', '-C',
+                                  GetDartPath(buildroot), 'describe', '--abbrev=0']).strip()
 
 
 def GetFlutterEngineGitRevision(buildroot):

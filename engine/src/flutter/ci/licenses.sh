@@ -30,12 +30,20 @@ function follow_links() (
   echo "$file"
 )
 
+function dart_bin() {
+  dart_path="$1/flutter/third_party/dart/tools/sdks/dart-sdk/bin"
+  if [[ ! -e "$dart_path" ]]; then
+    dart_path="$1/third_party/dart/tools/sdks/dart-sdk/bin"
+  fi
+  echo "$dart_path"
+}
+
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(
   cd "$SCRIPT_DIR/../.."
   pwd -P
 )"
-DART_BIN="$SRC_DIR/third_party/dart/tools/sdks/dart-sdk/bin"
+DART_BIN=$(dart_bin "$SRC_DIR")
 PATH="$DART_BIN:$PATH"
 
 # Use:
