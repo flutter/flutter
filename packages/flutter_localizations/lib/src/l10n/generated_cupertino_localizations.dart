@@ -14036,13 +14036,13 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => '在网络上搜索';
+  String get searchWebButtonLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
 
   @override
-  String get shareButtonLabel => '分享…';
+  String get shareButtonLabel => '共享…';
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
@@ -14183,7 +14183,7 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get searchTextFieldPlaceholderLabel => '搜尋';
 
   @override
-  String get searchWebButtonLabel => '搜尋網頁';
+  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get selectAllButtonLabel => '全選';
@@ -14240,7 +14240,7 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   });
 
   @override
-  String get searchWebButtonLabel => '在網路上搜尋';
+  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';
