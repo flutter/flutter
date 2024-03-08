@@ -2332,6 +2332,55 @@ void main() {
     // find the selection overlay
     expect(find.byWidget(selectionOverlay), findsExactly(2));
   });
+
+  testWidgets('CupertinoDatePicker selectionOverlayBuilder returns null',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            onDateTimeChanged: (_) {},
+            initialDateTime: DateTime(2018, 9, 15),
+            selectionOverlayBuilder: (
+              BuildContext context,
+              int index,
+              int totalCount,
+            ) {
+              return null;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), isNot(paints..rrect()));
+  });
+
+  testWidgets('CupertinoTimerPicker selectionOverlayBuilder returns null',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTimerPicker(
+            onTimerDurationChanged: (_) {},
+            mode: CupertinoTimerPickerMode.hm,
+            initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
+            selectionOverlayBuilder: (
+              BuildContext context,
+              int index,
+              int totalCount,
+            ) {
+              return null;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), isNot(paints..rrect()));
+  });
 }
 
 Widget _buildPicker({
