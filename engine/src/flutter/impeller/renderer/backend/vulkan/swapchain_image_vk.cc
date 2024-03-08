@@ -36,15 +36,20 @@ bool SwapchainImageVK::IsValid() const {
 }
 
 std::shared_ptr<Texture> SwapchainImageVK::GetMSAATexture() const {
-  return msaa_tex_;
+  return msaa_texture_;
 }
 
-bool SwapchainImageVK::HasMSAATexture() const {
-  return msaa_tex_ != nullptr;
+std::shared_ptr<Texture> SwapchainImageVK::GetDepthStencilTexture() const {
+  return depth_stencil_texture_;
 }
 
-void SwapchainImageVK::SetMSAATexture(std::shared_ptr<Texture> msaa_tex) {
-  msaa_tex_ = std::move(msaa_tex);
+void SwapchainImageVK::SetMSAATexture(std::shared_ptr<Texture> texture) {
+  msaa_texture_ = std::move(texture);
+}
+
+void SwapchainImageVK::SetDepthStencilTexture(
+    std::shared_ptr<Texture> texture) {
+  depth_stencil_texture_ = std::move(texture);
 }
 
 PixelFormat SwapchainImageVK::GetPixelFormat() const {
