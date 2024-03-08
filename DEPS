@@ -257,7 +257,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'vf8imeAzGv_gjYQDoqub2laI-6nkB3gQNiGuVaFForMC',
+  'fuchsia_test_scripts_version': 'XtkBHdNTtIpWdxN_lUNf6VqnvPUhvGTYgPDqob1R65EC',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
@@ -1205,6 +1205,9 @@ hooks = [
     'pattern': '.',
     'condition': 'run_fuchsia_emu',
     'action': [
+      'env',
+      'DOWNLOAD_FUCHSIA_SDK={download_fuchsia_sdk}',
+      'FUCHSIA_SDK_PATH={fuchsia_sdk_path}',
       'python3',
       'src/flutter/tools/fuchsia/with_envs.py',
       'src/flutter/tools/fuchsia/test_scripts/update_product_bundles.py',
