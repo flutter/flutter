@@ -1411,10 +1411,14 @@ abstract final class Curves {
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
+  /// This is the same as the CSS easing function `ease`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
   static const Cubic ease = Cubic(0.25, 0.1, 0.25, 1.0);
 
   /// A cubic animation curve that starts slowly and ends quickly.
+  ///
+  /// This is the same as the CSS easing function `ease-in`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
@@ -1517,6 +1521,8 @@ abstract final class Curves {
 
   /// A cubic animation curve that starts quickly and ends slowly.
   ///
+  /// This is the same as the CSS easing function `ease-out`.
+  ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
 
@@ -1617,6 +1623,8 @@ abstract final class Curves {
 
   /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
+  ///
+  /// This is the same as the CSS easing function `ease-in-out`.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);

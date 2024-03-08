@@ -81,7 +81,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.5-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.3-all.zip\n');
     });
 
     testWithoutContext('injects the wrapper when some files are missing', () {
@@ -126,7 +126,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.5-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.3-all.zip\n');
     });
 
     testWithoutContext(
@@ -461,6 +461,51 @@ allprojects {
         mavenCentral()
     }
 }
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        '7.3.0',
+      );
+    });
+
+    testWithoutContext('returns the AGP version when in settings', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      // File must exist and can not have agp defined.
+      androidDirectory.childFile('build.gradle').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle').writeAsStringSync(r'''
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
+
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    // Decoy value to ensure we ignore commented out lines.
+    // id "com.android.application" version "6.1.0" apply false
+    id "com.android.application" version "7.3.0" apply false
+}
+
+include ":app"
 ''');
 
       expect(

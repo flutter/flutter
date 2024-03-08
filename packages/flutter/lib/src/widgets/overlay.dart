@@ -14,6 +14,8 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+
 // Examples can assume:
 // late BuildContext context;
 
@@ -80,8 +82,13 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
+    this.canSizeOverlay = false,
   }) : _opaque = opaque,
-       _maintainState = maintainState;
+       _maintainState = maintainState {
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
+  }
 
   /// This entry will include the widget built by this builder in the overlay at
   /// the entry's position.
@@ -132,6 +139,25 @@ class OverlayEntry implements Listenable {
     _overlay!._didChangeEntryOpacity();
   }
 
+  /// Whether the content of this [OverlayEntry] can be used to size the
+  /// [Overlay].
+  ///
+  /// In most situations the overlay sizes itself based on its incoming
+  /// constraints to be as large as possible. However, if that would result in
+  /// an infinite size, it has to rely on one of its children to size itself. In
+  /// this situation, the overlay will consult the topmost non-[Positioned]
+  /// overlay entry that has this property set to true, lay it out with the
+  /// incoming [BoxConstraints] of the overlay, and force all other
+  /// non-[Positioned] overlay entries to have the same size. The [Positioned]
+  /// entries are laid out as usual based on the calculated size of the overlay.
+  ///
+  /// Overlay entries that set this to true must be able to handle unconstrained
+  /// [BoxConstraints].
+  ///
+  /// Setting this to true has no effect if the overlay entry uses a [Positioned]
+  /// widget to position itself in the overlay.
+  final bool canSizeOverlay;
+
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
@@ -139,6 +165,19 @@ class OverlayEntry implements Listenable {
 
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
   ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
+
+  // TODO(polina-c): stop duplicating code across disposables
+  // https://github.com/flutter/flutter/issues/137435
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$OverlayEntry',
+        object: this,
+      );
+    }
+  }
 
   @override
   void addListener(VoidCallback listener) {
@@ -177,7 +216,7 @@ class OverlayEntry implements Listenable {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
-      });
+      }, debugLabel: 'OverlayEntry.markDirty');
     } else {
       overlay._markDirty();
     }
@@ -216,6 +255,9 @@ class OverlayEntry implements Listenable {
   void dispose() {
     assert(!_disposedByOwner);
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _disposedByOwner = true;
     if (!mounted) {
       // If we're still mounted when disposed, then this will be disposed in
@@ -384,6 +426,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// For widgets drawn in an [OverlayEntry], do not assume that the size of the
+/// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
+/// have different sizes.
+///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
 /// destination.
@@ -413,6 +459,20 @@ class Overlay extends StatefulWidget {
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
   });
+
+  /// Wrap the provided `child` in an [Overlay] to allow other visual elements
+  /// (packed in [OverlayEntry]s) to float on top of the child.
+  ///
+  /// This is a convenience method over the regular [Overlay] constructor: It
+  /// creates an [Overlay] and puts the provided `child` in an [OverlayEntry]
+  /// at the bottom of that newly created Overlay.
+  static Widget wrap({
+    Key? key,
+    Clip clipBehavior = Clip.hardEdge,
+    required Widget child,
+  }) {
+    return _WrappingOverlay(key: key, clipBehavior: clipBehavior, child: child);
+  }
 
   /// The entries to include in the overlay initially.
   ///
@@ -778,6 +838,40 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 }
 
+class _WrappingOverlay extends StatefulWidget {
+  const _WrappingOverlay({super.key, this.clipBehavior = Clip.hardEdge, required this.child});
+
+  final Clip clipBehavior;
+  final Widget child;
+
+  @override
+  State<_WrappingOverlay> createState() => _WrappingOverlayState();
+}
+
+class _WrappingOverlayState extends State<_WrappingOverlay> {
+  late final OverlayEntry _entry = OverlayEntry(
+    canSizeOverlay: true,
+    opaque: true,
+    builder: (BuildContext context) {
+      return widget.child;
+    }
+  );
+
+  @override
+  void didUpdateWidget(_WrappingOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entry.markNeedsBuild();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(
+      clipBehavior: widget.clipBehavior,
+      initialEntries: <OverlayEntry>[_entry],
+    );
+  }
+}
+
 /// Special version of a [Stack], that doesn't layout and render the first
 /// [skipCount] children.
 ///
@@ -867,28 +961,17 @@ mixin _RenderTheaterMixin on RenderBox {
     }
   }
 
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performLayout() {
-    final Iterator<RenderBox> iterator = _childrenInPaintOrder().iterator;
-    // Same BoxConstraints as used by RenderStack for StackFit.expand.
-    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+  void layoutChild(RenderBox child, BoxConstraints nonPositionedChildConstraints) {
+    final StackParentData childParentData = child.parentData! as StackParentData;
     final Alignment alignment = theater._resolvedAlignment;
-
-    while (iterator.moveNext()) {
-      final RenderBox child = iterator.current;
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      if (!childParentData.isPositioned) {
-        child.layout(nonPositionedChildConstraints, parentUsesSize: true);
-        childParentData.offset = alignment.alongOffset(size - child.size as Offset);
-      } else {
-        assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
-        RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
-      }
-      assert(child.parentData == childParentData);
+    if (!childParentData.isPositioned) {
+      child.layout(nonPositionedChildConstraints, parentUsesSize: true);
+      childParentData.offset = Offset.zero;
+    } else {
+      assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
+      RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
     }
+    assert(child.parentData == childParentData);
   }
 
   @override
@@ -919,12 +1002,26 @@ class _TheaterParentData extends StackParentData {
   // children that are created by an OverlayPortal.
   OverlayEntry? overlayEntry;
 
+  /// A [OverlayPortal] makes its overlay child a render child of an ancestor
+  /// [Overlay]. Currently, to make sure the overlay child is painted after its
+  /// [OverlayPortal], and before the next [OverlayEntry] (which could be
+  /// something that should obstruct the overlay child, such as a [ModalRoute])
+  /// in the host [Overlay], the paint order of each overlay child is managed by
+  /// the [OverlayEntry] that hosts its [OverlayPortal].
+  ///
+  /// The following methods are exposed to allow easy access to the overlay
+  /// children's render objects whose order is managed by [overlayEntry], in the
+  /// right order.
+
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
   Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.iterator;
   Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
-  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
+
+  // A convenience method for traversing `paintOrderIterator` with a
+  // [RenderObjectVisitor].
+  void visitOverlayPortalChildrenOnOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
 }
 
 class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
@@ -974,7 +1071,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(_detachChild);
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(_detachChild);
       child = childParentData.nextSibling;
     }
   }
@@ -1032,6 +1129,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     adoptChild(child);
+    // The Overlay still needs repainting when a deferred child is added. Usually
+    // `markNeedsLayout` implies `markNeedsPaint`, but here `markNeedsLayout` is
+    // skipped when the `_skipMarkNeedsLayout` flag is set.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
 
     // After adding `child` to the render tree, we want to make sure it will be
@@ -1045,6 +1146,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     assert(!_skipMarkNeedsLayout);
     _skipMarkNeedsLayout = true;
     dropChild(child);
+    // The Overlay still needs repainting when a deferred child is dropped. See
+    // the comment in `_addDeferredChild`.
+    markNeedsPaint();
     _skipMarkNeedsLayout = false;
   }
 
@@ -1114,8 +1218,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(constraints.biggest.isFinite);
-    return constraints.biggest;
+    if (constraints.biggest.isFinite) {
+      return constraints.biggest;
+    }
+    return _findSizeDeterminingChild().getDryLayout(constraints);
   }
 
   @override
@@ -1155,6 +1261,53 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
+  @override
+  bool get sizedByParent => false;
+
+  @override
+  void performLayout() {
+    RenderBox? sizeDeterminingChild;
+    if (constraints.biggest.isFinite) {
+      size = constraints.biggest;
+    } else {
+      sizeDeterminingChild = _findSizeDeterminingChild();
+      layoutChild(sizeDeterminingChild, constraints);
+      size = sizeDeterminingChild.size;
+    }
+
+    // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      if (child != sizeDeterminingChild) {
+        layoutChild(child, nonPositionedChildConstraints);
+      }
+    }
+  }
+
+  RenderBox _findSizeDeterminingChild() {
+    RenderBox? child = _lastOnstageChild;
+    while (child != null) {
+      final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      if ((childParentData.overlayEntry?.canSizeOverlay ?? false) && !childParentData.isPositioned) {
+        return child;
+      }
+      child = childParentData.previousSibling;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+      ErrorDescription(
+        'The constraints given to the overlay ($constraints) would result in an illegal '
+        'infinite size (${constraints.biggest}). To avoid that, the Overlay tried to size '
+        'itself to one of its children, but no suitable non-positioned child that belongs to an '
+        'OverlayEntry with canSizeOverlay set to true could be found.',
+      ),
+      ErrorHint(
+        'Try wrapping the Overlay in a SizedBox to give it a finite size or '
+        'use an OverlayEntry with canSizeOverlay set to true.',
+      ),
+    ]);
+  }
+
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
@@ -1186,7 +1339,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(visitor);
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1197,7 +1350,6 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      childParentData.visitChildrenOfOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1253,7 +1405,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       }
 
       int subcount = 1;
-      childParentData.visitChildrenOfOverlayEntry((RenderObject renderObject) {
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject renderObject) {
         final RenderBox child = renderObject as RenderBox;
         if (onstage) {
           onstageChildren.add(
@@ -1403,7 +1555,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
@@ -1428,7 +1580,9 @@ class OverlayPortalController {
 /// widget can depend on.
 ///
 /// This widget requires an [Overlay] ancestor in the widget tree when its
-/// overlay child is showing.
+/// overlay child is showing. The overlay child is rendered by the [Overlay]
+/// ancestor, not by the widget itself. This allows the overlay child to float
+/// above other widgets, independent of its position in the widget tree.
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
@@ -1456,6 +1610,17 @@ class OverlayPortalController {
 /// order between their overlay children is the order in which
 /// [OverlayPortalController.show] was called. The last [OverlayPortal] to have
 /// called `show` gets to paint its overlay child in the foreground.
+///
+/// ### Semantics
+///
+/// The semantics subtree generated by the overlay child is considered attached
+/// to [OverlayPortal] instead of the target [Overlay]. An [OverlayPortal]'s
+/// semantics subtree can be dropped from the semantics tree due to invisibility
+/// while the overlay child is still visible (for example, when the
+/// [OverlayPortal] is completely invisible in a [ListView] but kept alive by
+/// a [KeepAlive] widget). When this happens the semantics subtree generated by
+/// the overlay child is also dropped, even if the overlay child is still visible
+/// on screen.
 ///
 /// {@template flutter.widgets.overlayPortalVsOverlayEntry}
 /// ### Differences between [OverlayPortal] and [OverlayEntry]
@@ -2017,8 +2182,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   }
 }
 
-// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` is
-// laid out.
+// A `RenderProxyBox` that defers its layout until its `_layoutSurrogate` (which
+// is not necessarily an ancestor of this RenderBox, but shares at least one
+// `_RenderTheater` ancestor with this RenderBox) is laid out.
 //
 // This `RenderObject` must be a child of a `_RenderTheater`. It guarantees that:
 //
@@ -2077,6 +2243,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     _layoutSurrogate.markNeedsLayout();
     _callingMarkParentNeedsLayout = false;
   }
+
+  @override
+  bool get sizedByParent => true;
 
   bool _needsLayout = true;
   @override
@@ -2147,7 +2316,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       _needsLayout = false;
       return;
     }
-    super.performLayout();
+    assert(constraints.isTight);
+    layoutChild(child, constraints);
     assert(() {
       _debugMutationsLocked = false;
       return true;
@@ -2188,5 +2358,14 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // layout, this makes sure that _deferredLayoutChild is reachable via tree
     // walk.
     _deferredLayoutChild?.layoutByLayoutSurrogate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildrenForSemantics(visitor);
+    final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
+    if (deferredChild != null) {
+      visitor(deferredChild);
+    }
   }
 }

@@ -21,7 +21,7 @@ void main() {
   }
 
   group(FocusNode, () {
-    testWidgetsWithLeakTracking('Can add children.', (WidgetTester tester) async {
+    testWidgets('Can add children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusNode parent = FocusNode();
       addTearDown(parent.dispose);
@@ -44,7 +44,7 @@ void main() {
       expect(parent.children.last, equals(child2));
     });
 
-    testWidgetsWithLeakTracking('Can remove children.', (WidgetTester tester) async {
+    testWidgets('Can remove children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusNode parent = FocusNode();
       addTearDown(parent.dispose);
@@ -73,7 +73,7 @@ void main() {
       expect(parent.children, isEmpty);
     });
 
-    testWidgetsWithLeakTracking('Geometry is transformed properly.', (WidgetTester tester) async {
+    testWidgets('Geometry is transformed properly.', (WidgetTester tester) async {
       final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       addTearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
@@ -113,7 +113,7 @@ void main() {
       expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
 
-    testWidgetsWithLeakTracking('descendantsAreFocusable disables focus for descendants.', (WidgetTester tester) async {
+    testWidgets('descendantsAreFocusable disables focus for descendants.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -166,7 +166,7 @@ void main() {
       expect(scope.traversalDescendants.contains(child2), isFalse);
     });
 
-    testWidgetsWithLeakTracking('descendantsAreTraversable disables traversal for descendants.', (WidgetTester tester) async {
+    testWidgets('descendantsAreTraversable disables traversal for descendants.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -204,7 +204,7 @@ void main() {
       expect(scope.traversalDescendants, equals(<FocusNode>[]));
     });
 
-    testWidgetsWithLeakTracking("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
+    testWidgets("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -240,7 +240,7 @@ void main() {
       expect(scope.traversalChildren.contains(parent2), isFalse);
     });
 
-    testWidgetsWithLeakTracking('implements debugFillProperties', (WidgetTester tester) async {
+    testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final FocusNode focusNode = FocusNode(debugLabel: 'Label');
       addTearDown(focusNode.dispose);
@@ -256,7 +256,7 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
+    testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
       final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       addTearDown(focusNode1.dispose);
       final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
@@ -352,12 +352,13 @@ void main() {
           false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
   });
 
   group(FocusScopeNode, () {
 
-    testWidgetsWithLeakTracking('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
+    testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -386,7 +387,7 @@ void main() {
       expect(scope.focusedChild, equals(parent));
     });
 
-    testWidgetsWithLeakTracking('Removing a node removes it from scope.', (WidgetTester tester) async {
+    testWidgets('Removing a node removes it from scope.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode();
       addTearDown(scope.dispose);
@@ -415,7 +416,7 @@ void main() {
       expect(scope.focusedChild, isNull);
     });
 
-    testWidgetsWithLeakTracking('Can add children to scope and focus', (WidgetTester tester) async {
+    testWidgets('Can add children to scope and focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode();
       addTearDown(scope.dispose);
@@ -459,7 +460,47 @@ void main() {
       expect(child2.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/136758
+    testWidgets('removing grandchildren from scope updates focusedChild', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+
+      // Sets up this focus node tree:
+      //
+      //  root
+      //   |
+      // scope1
+      //   |
+      // child1
+      //   |
+      // child2
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope2');
+      addTearDown(scope1.dispose);
+      final FocusAttachment scope2Attachment = scope1.attach(context);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+
+      final FocusNode child1 = FocusNode(debugLabel: 'child2');
+      addTearDown(child1.dispose);
+      final FocusAttachment child2Attachment = child1.attach(context);
+
+      final FocusNode child2 = FocusNode(debugLabel: 'child3');
+      addTearDown(child2.dispose);
+      final FocusAttachment child3Attachment = child2.attach(context);
+
+      child2Attachment.reparent(parent: scope1);
+      child3Attachment.reparent(parent: child1);
+      expect(child1.parent, equals(scope1));
+      expect(scope1.children.first, equals(child1));
+      child2.requestFocus();
+      await tester.pump();
+      expect(scope1.focusedChild, equals(child2));
+
+      // Detach the middle child and make sure that the scope is updated so that
+      // it no longer references child2 as the focused child.
+      child2Attachment.detach();
+      expect(scope1.focusedChild, isNull);
+    });
+
+    testWidgets('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode();
       addTearDown(scope.dispose);
@@ -481,7 +522,7 @@ void main() {
       expect(child.hasPrimaryFocus, isTrue); // now attached and parented, so focus finally happened.
     });
 
-    testWidgetsWithLeakTracking('Autofocus works.', (WidgetTester tester) async {
+    testWidgets('Autofocus works.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -522,7 +563,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgetsWithLeakTracking('Adding a focusedChild to a scope sets scope as focusedChild in parent scope', (WidgetTester tester) async {
+    testWidgets('Adding a focusedChild to a scope sets scope as focusedChild in parent scope', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode();
       addTearDown(scope1.dispose);
@@ -558,7 +599,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgetsWithLeakTracking('Can move node with focus without losing focus', (WidgetTester tester) async {
+    testWidgets('Can move node with focus without losing focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -600,7 +641,7 @@ void main() {
       expect(parent2.children.first, equals(child1));
     });
 
-    testWidgetsWithLeakTracking('canRequestFocus affects children.', (WidgetTester tester) async {
+    testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -645,7 +686,7 @@ void main() {
       expect(parent1.traversalChildren.contains(child2), isFalse);
     });
 
-    testWidgetsWithLeakTracking("skipTraversal doesn't affect children.", (WidgetTester tester) async {
+    testWidgets("skipTraversal doesn't affect children.", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
@@ -685,7 +726,7 @@ void main() {
       expect(scope.traversalDescendants.contains(child2), isTrue);
     });
 
-    testWidgetsWithLeakTracking('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
+    testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
@@ -731,7 +772,7 @@ void main() {
       expect(parent2.children.contains(child1), isTrue);
     });
 
-    testWidgetsWithLeakTracking('ancestors and descendants are computed and recomputed properly', (WidgetTester tester) async {
+    testWidgets('ancestors and descendants are computed and recomputed properly', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
@@ -775,7 +816,7 @@ void main() {
       expect(tester.binding.focusManager.rootScope.descendants, equals(<FocusNode>[child1, child3, child4, parent2, scope2, child2, parent1, scope1]));
     });
 
-    testWidgetsWithLeakTracking('Can move focus between scopes and keep focus', (WidgetTester tester) async {
+    testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode();
       addTearDown(scope1.dispose);
@@ -841,7 +882,7 @@ void main() {
       expect(scope2.focusedChild, equals(child4));
     });
 
-    testWidgetsWithLeakTracking('Unfocus with disposition previouslyFocusedChild works properly', (WidgetTester tester) async {
+    testWidgets('Unfocus with disposition previouslyFocusedChild works properly', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
@@ -930,7 +971,7 @@ void main() {
       expect(child3.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('Unfocus with disposition scope works properly', (WidgetTester tester) async {
+    testWidgets('Unfocus with disposition scope works properly', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
@@ -1023,7 +1064,7 @@ void main() {
       expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('Unfocus works properly when some nodes are unfocusable', (WidgetTester tester) async {
+    testWidgets('Unfocus works properly when some nodes are unfocusable', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
@@ -1097,7 +1138,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
 
-    testWidgetsWithLeakTracking('Requesting focus on a scope works properly when some focusedChild nodes are unfocusable', (WidgetTester tester) async {
+    testWidgets('Requesting focus on a scope works properly when some focusedChild nodes are unfocusable', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
@@ -1159,7 +1200,7 @@ void main() {
       expect(child4.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('Key handling bubbles up and terminates when handled.', (WidgetTester tester) async {
+    testWidgets('Key handling bubbles up and terminates when handled.', (WidgetTester tester) async {
       final Set<FocusNode> receivedAnEvent = <FocusNode>{};
       final Set<FocusNode> shouldHandle = <FocusNode>{};
       KeyEventResult handleEvent(FocusNode node, RawKeyEvent event) {
@@ -1229,9 +1270,10 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
+    testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
       switch (defaultTargetPlatform) {
         case TargetPlatform.fuchsia:
@@ -1245,7 +1287,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
+    testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
@@ -1253,7 +1295,7 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.mobile());
 
-    testWidgetsWithLeakTracking('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
+    testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
       RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
@@ -1261,12 +1303,12 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgetsWithLeakTracking('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
+    testWidgets('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Events change focus highlight mode.', (WidgetTester tester) async {
+    testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
       int callCount = 0;
       FocusHighlightMode? lastMode;
@@ -1307,7 +1349,7 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
     });
 
-    testWidgetsWithLeakTracking('implements debugFillProperties', (WidgetTester tester) async {
+    testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope Label');
       addTearDown(scope.dispose);
@@ -1323,7 +1365,7 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
+    testWidgets('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
       addTearDown(scope1.dispose);
@@ -1407,7 +1449,7 @@ void main() {
   });
 
   group('Autofocus', () {
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'works when the previous focused node is detached',
       (WidgetTester tester) async {
         final FocusNode node1 = FocusNode();
@@ -1434,7 +1476,7 @@ void main() {
         expect(node2.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'node detached before autofocus is applied',
       (WidgetTester tester) async {
         final FocusScopeNode scopeNode = FocusScopeNode();
@@ -1464,7 +1506,7 @@ void main() {
         expect(scopeNode.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('autofocus the first candidate', (WidgetTester tester) async {
+    testWidgets('autofocus the first candidate', (WidgetTester tester) async {
       final FocusNode node1 = FocusNode();
       addTearDown(node1.dispose);
       final FocusNode node2 = FocusNode();
@@ -1500,7 +1542,7 @@ void main() {
       expect(node1.hasPrimaryFocus, isTrue);
     });
 
-    testWidgetsWithLeakTracking('Autofocus works with global key reparenting', (WidgetTester tester) async {
+    testWidgets('Autofocus works with global key reparenting', (WidgetTester tester) async {
       final FocusNode node = FocusNode();
       addTearDown(node.dispose);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
@@ -1557,7 +1599,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
+  testWidgets("Doesn't lose focused child when reparenting if the nearestScope doesn't change.", (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
     addTearDown(parent1.dispose);
@@ -1587,7 +1629,7 @@ void main() {
     expect(parent1.focusedChild, equals(child2));
   });
 
-  testWidgetsWithLeakTracking('Ancestors get notified exactly as often as needed if focused child changes focus.', (WidgetTester tester) async {
+  testWidgets('Ancestors get notified exactly as often as needed if focused child changes focus.', (WidgetTester tester) async {
     bool topFocus = false;
     bool parent1Focus = false;
     bool parent2Focus = false;
@@ -1723,7 +1765,7 @@ void main() {
     expect(child2Notify, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Focus changes notify listeners.', (WidgetTester tester) async {
+  testWidgets('Focus changes notify listeners.', (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
     addTearDown(parent1.dispose);
@@ -1784,7 +1826,167 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
+  testWidgets('FocusManager.addEarlyKeyEventHandler works', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    addTearDown(focusNode1.dispose);
+    final List<int> logs = <int>[];
+    KeyEventResult earlyResult = KeyEventResult.ignored;
+    KeyEventResult focusResult = KeyEventResult.ignored;
+
+    await tester.pumpWidget(
+      Focus(
+        focusNode: focusNode1,
+        onKeyEvent: (_, KeyEvent event) {
+          logs.add(0);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        onKey: (_, RawKeyEvent event) {
+          logs.add(1);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: const SizedBox(),
+      ),
+    );
+    focusNode1.requestFocus();
+    await tester.pump();
+
+    KeyEventResult earlyHandler(KeyEvent event) {
+      if (event is KeyDownEvent) {
+        return earlyResult;
+      }
+      return KeyEventResult.ignored;
+    }
+
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.addEarlyKeyEventHandler(earlyHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.removeEarlyKeyEventHandler(earlyHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    earlyResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    earlyResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+  // ignore: deprecated_member_use
+  }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgets('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    addTearDown(focusNode1.dispose);
+    final List<int> logs = <int>[];
+    KeyEventResult lateResult = KeyEventResult.ignored;
+    KeyEventResult focusResult = KeyEventResult.ignored;
+
+    await tester.pumpWidget(
+      Focus(
+        focusNode: focusNode1,
+        onKeyEvent: (_, KeyEvent event) {
+          logs.add(0);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        onKey: (_, RawKeyEvent event) {
+          logs.add(1);
+          if (event is KeyDownEvent) {
+            return focusResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: const SizedBox(),
+      ),
+    );
+    focusNode1.requestFocus();
+    await tester.pump();
+
+    KeyEventResult lateHandler(KeyEvent event) {
+      if (event is KeyDownEvent) {
+        return lateResult;
+      }
+      return KeyEventResult.ignored;
+    }
+
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.addLateKeyEventHandler(lateHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    FocusManager.instance.removeLateKeyEventHandler(lateHandler);
+    logs.clear();
+    focusResult = KeyEventResult.ignored;
+    lateResult = KeyEventResult.handled;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), false);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+
+    logs.clear();
+    focusResult = KeyEventResult.handled;
+    lateResult = KeyEventResult.ignored;
+    expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
+    expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
+    expect(logs, <int>[0, 1, 0, 1]);
+  // ignore: deprecated_member_use
+  }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
     final FocusNode nodeA = FocusNode(debugLabel: 'a');
     addTearDown(nodeA.dispose);
     final FocusNode nodeB = FocusNode(debugLabel: 'b');
@@ -1833,7 +2035,7 @@ void main() {
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
-  testWidgetsWithLeakTracking('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
+  testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
     final DebugPrintCallback oldDebugPrint = debugPrint;
     final StringBuffer messages = StringBuffer();
@@ -1880,7 +2082,7 @@ void main() {
     expect(messagesStr, contains(RegExp(r'FOCUS: Scheduling update, current focus is null, next focus will be FocusScopeNode#.*parent1')));
   });
 
-  testWidgetsWithLeakTracking("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
+  testWidgets("doesn't call toString on a focus node when debugFocusChanges is false", (WidgetTester tester) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
     final DebugPrintCallback oldDebugPrint = debugPrint;
     final StringBuffer messages = StringBuffer();

@@ -3051,6 +3051,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
+    this.fit = OverflowBoxFit.max,
     super.child,
   });
 
@@ -3090,6 +3091,16 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// default) to use the constraint from the parent instead.
   final double? maxHeight;
 
+  /// The way to size the render object.
+  ///
+  /// This only affects scenario when the child does not indeed overflow.
+  /// If set to [OverflowBoxFit.deferToChild], the render object will size itself to
+  /// match the size of its child within the constraints of its parent or be
+  /// as small as the parent allows if no child is set. If set to
+  /// [OverflowBoxFit.max] (the default), the render object will size itself
+  /// to be as large as the parent allows.
+  final OverflowBoxFit fit;
+
   @override
   RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
     return RenderConstrainedOverflowBox(
@@ -3098,6 +3109,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       maxWidth: maxWidth,
       minHeight: minHeight,
       maxHeight: maxHeight,
+      fit: fit,
       textDirection: Directionality.maybeOf(context),
     );
   }
@@ -3110,6 +3122,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..maxWidth = maxWidth
       ..minHeight = minHeight
       ..maxHeight = maxHeight
+      ..fit = fit
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -3121,6 +3134,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     properties.add(DoubleProperty('minHeight', minHeight, defaultValue: null));
     properties.add(DoubleProperty('maxHeight', maxHeight, defaultValue: null));
+    properties.add(EnumProperty<OverflowBoxFit>('fit', fit));
   }
 }
 
@@ -5574,7 +5588,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 /// ## Hit testing and hidden [Flow] widgets
 ///
-/// The [Flow] widget recomputers its children's positions (as used by hit
+/// The [Flow] widget recomputes its children's positions (as used by hit
 /// testing) during the _paint_ phase rather than during the _layout_ phase.
 ///
 /// Widgets like [Opacity] avoid painting their children when those children
@@ -7062,8 +7076,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
-///    be enabled using [WidgetsApp.showSemanticsDebugger] or
-///    [MaterialApp.showSemanticsDebugger].
+///    be enabled using [WidgetsApp.showSemanticsDebugger],
+///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
 @immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
@@ -7109,6 +7123,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? expanded,
     int? maxValueLength,
     int? currentValueLength,
+    String? identifier,
     String? label,
     AttributedString? attributedLabel,
     String? value,
@@ -7177,6 +7192,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       liveRegion: liveRegion,
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
+      identifier: identifier,
       label: label,
       attributedLabel: attributedLabel,
       value: value,

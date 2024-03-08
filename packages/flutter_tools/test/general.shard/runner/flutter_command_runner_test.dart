@@ -10,10 +10,13 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -26,6 +29,8 @@ void main() {
   group('FlutterCommandRunner', () {
     late MemoryFileSystem fileSystem;
     late Platform platform;
+    late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -36,6 +41,11 @@ void main() {
       fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
       fileSystem.directory(_kProjectRoot).createSync(recursive: true);
       fileSystem.currentDirectory = _kProjectRoot;
+      testUsage = TestUsage();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
 
       platform = FakePlatform(
         environment: <String, String>{
@@ -144,14 +154,25 @@ void main() {
         final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
 
         await runner.run(<String>['--version']);
-
         expect(version.didFetchTagsAndUpdate, true);
+        expect(testUsage.commands, contains(
+          const TestUsageCommand('version'),
+        ));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: false,
+          ),
+        ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FlutterVersion: () => FakeFlutterVersion(),
         OutputPreferences: () => OutputPreferences.test(),
+        Usage: () => testUsage,
+        Analytics: () => fakeAnalytics,
       });
 
     testUsingContext("Doesn't crash on invalid .packages file", () async {

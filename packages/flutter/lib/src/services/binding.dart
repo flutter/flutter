@@ -12,8 +12,11 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'debug.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
+import 'platform_channel.dart';
+import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
@@ -41,6 +44,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
+    SystemChannels.accessibility.setMessageHandler((dynamic message) => _handleAccessibilityMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
@@ -63,6 +67,13 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The global singleton instance of [KeyEventManager], which is used
   /// internally to dispatch key messages.
+  ///
+  /// This property is deprecated, and will be removed. See
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Add a handler to HardwareKeyboard instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;
 
@@ -86,8 +97,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
 
-  /// A token that represents the root isolate, used for coordinating with background
-  /// isolates.
+  /// A token that represents the root isolate, used for coordinating with
+  /// background isolates.
   ///
   /// This property is primarily intended for use with
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
@@ -224,6 +235,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       );
       return true;
     }());
+
+    if (!kReleaseMode) {
+      registerBoolServiceExtension(
+        name: ServicesServiceExtensions.profilePlatformChannels.name,
+        getter: () async => debugProfilePlatformChannels,
+        setter: (bool value) async {
+          debugProfilePlatformChannels = value;
+        },
+      );
+    }
   }
 
   /// Called in response to the `ext.flutter.evict` service extension.
@@ -339,6 +360,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         }
     }
     return false;
+  }
+
+
+  /// Listenable that notifies when the accessibility focus on the system have changed.
+  final ValueNotifier<int?> accessibilityFocus = ValueNotifier<int?>(null);
+
+  Future<void> _handleAccessibilityMessage(Object accessibilityMessage) async {
+    final Map<String, dynamic> message =
+        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'didGainFocus':
+       accessibilityFocus.value = message['nodeId'] as int;
+    }
+    return;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {

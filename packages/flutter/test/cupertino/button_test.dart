@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -18,7 +17,7 @@ const TextStyle testStyle = TextStyle(
 );
 
 void main() {
-  testWidgetsWithLeakTracking('Default layout minimum size', (WidgetTester tester) async {
+  testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
         onPressed: null,
@@ -33,7 +32,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Minimum size parameter', (WidgetTester tester) async {
+  testWidgets('Minimum size parameter', (WidgetTester tester) async {
     const double minSize = 60.0;
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
@@ -50,7 +49,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Size grows with text', (WidgetTester tester) async {
+  testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
         onPressed: null,
@@ -68,7 +67,7 @@ void main() {
   // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
   // is fixed.
   /*
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoButton.filled default color contrast meets guideline',
     (WidgetTester tester) async {
       // The native color combination systemBlue text over white background fails
@@ -103,7 +102,7 @@ void main() {
   });
   */
 
-  testWidgetsWithLeakTracking('Button child alignment', (WidgetTester tester) async {
+  testWidgets('Button child alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
@@ -130,7 +129,7 @@ void main() {
     expect(align.alignment, Alignment.centerLeft);
   });
 
-  testWidgetsWithLeakTracking('Button with background is wider', (WidgetTester tester) async {
+  testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       color: Color(0xFFFFFFFF),
@@ -144,7 +143,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Custom padding', (WidgetTester tester) async {
+  testWidgets('Custom padding', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       padding: EdgeInsets.all(100.0),
@@ -157,7 +156,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Button takes taps', (WidgetTester tester) async {
+  testWidgets('Button takes taps', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       StatefulBuilder(
@@ -185,7 +184,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgetsWithLeakTracking("Disabled button doesn't animate", (WidgetTester tester) async {
+  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       child: Text('Tap me'),
@@ -196,7 +195,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Enabled button animates', (WidgetTester tester) async {
+  testWidgets('Enabled button animates', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       child: const Text('Tap me'),
       onPressed: () { },
@@ -232,7 +231,7 @@ void main() {
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
   });
 
-  testWidgetsWithLeakTracking('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       child: const Text('Tap me'),
       onPressed: () { },
@@ -240,7 +239,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -249,9 +248,13 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, 0.4);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('pressedOpacity parameter', (WidgetTester tester) async {
+  testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
     const double pressedOpacity = 0.5;
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       pressedOpacity: pressedOpacity,
@@ -261,7 +264,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -270,9 +273,13 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, pressedOpacity);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Cupertino button is semantically a button', (WidgetTester tester) async {
+  testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
@@ -303,7 +310,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can specify colors', (WidgetTester tester) async {
+  testWidgets('Can specify colors', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       color: const Color(0x000000FF),
       disabledColor: const Color(0x0000FF00),
@@ -331,7 +338,7 @@ void main() {
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
 
-  testWidgetsWithLeakTracking('Can specify dynamic colors', (WidgetTester tester) async {
+  testWidgets('Can specify dynamic colors', (WidgetTester tester) async {
     const Color bgColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
@@ -380,7 +387,7 @@ void main() {
     expect(boxDecoration.color!.value, 0xFF111111);
   });
 
-  testWidgetsWithLeakTracking('Button respects themes', (WidgetTester tester) async {
+  testWidgets('Button respects themes', (WidgetTester tester) async {
     late TextStyle textStyle;
 
     await tester.pumpWidget(
@@ -454,7 +461,7 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 
-  testWidgetsWithLeakTracking('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

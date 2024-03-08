@@ -37,7 +37,7 @@ import 'theme_data.dart';
 ///   for makers to use at their discretion and are intended to support
 ///   broader color expression in products.
 ///
-/// The remaining colors of the scheme are comprised of neutral colors used for
+/// The remaining colors of the scheme are composed of neutral colors used for
 /// backgrounds and surfaces, as well as specific colors for errors, dividers
 /// and shadows.
 ///
@@ -235,8 +235,29 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-  /// Create a ColorScheme based on a purple primary color that matches the
-  /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  /// Create a light ColorScheme based on a purple primary color that matches the
+  /// [baseline Material 2 color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.light]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff6200ee)).copyWith(
+  ///   primaryContainer: const Color(0xff6200ee),
+  ///   onPrimaryContainer: Colors.white,
+  ///   secondaryContainer: const Color(0xff03dac6),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xffb00020),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.light({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff6200ee),
@@ -290,8 +311,34 @@ class ColorScheme with Diagnosticable {
        _inversePrimary = inversePrimary,
        _surfaceTint = surfaceTint;
 
-  /// Create the recommended dark color scheme that matches the
-  /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  /// Create the dark color scheme that matches the
+  /// [baseline Material 2 color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
+  /// dark color scheme.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.dark]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(
+  ///   seedColor: const Color(0xffbb86fc),
+  ///   brightness: Brightness.dark,
+  /// ).copyWith(
+  ///   primaryContainer: const Color(0xffbb86fc),
+  ///   onPrimaryContainer: Colors.black,
+  ///   secondaryContainer: const Color(0xff03dac6),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xffcf6679),
+  ///   onError: Colors.black,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.dark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffbb86fc),
@@ -346,7 +393,28 @@ class ColorScheme with Diagnosticable {
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
-  /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  /// matches the [baseline Material 2 color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastLight]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff0000ba)).copyWith(
+  ///   primaryContainer: const Color(0xff0000ba),
+  ///   onPrimaryContainer: Colors.white,
+  ///   secondaryContainer: const Color(0xff66fff9),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xff790000),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.highContrastLight({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff0000ba),
@@ -401,7 +469,33 @@ class ColorScheme with Diagnosticable {
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on the dark
-  /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  /// [baseline Material 2 color scheme](https://material.io/design/color/dark-theme.html#ui-application).
+  ///
+  /// This constructor shouldn't be used to update the Material 3 color scheme.
+  ///
+  /// For Material 3, use [ColorScheme.fromSeed] to create a color scheme
+  /// from a single seed color based on the Material 3 color system.
+  /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
+  /// dark color scheme.
+  ///
+  /// {@tool snippet}
+  /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastDark]
+  /// using the [ColorScheme.fromSeed] constructor:
+  ///
+  /// ```dart
+  /// colorScheme: ColorScheme.fromSeed(
+  ///   seedColor: const Color(0xffefb7ff),
+  ///   brightness: Brightness.dark,
+  /// ).copyWith(
+  ///   primaryContainer: const Color(0xffefb7ff),
+  ///   onPrimaryContainer: Colors.black,
+  ///   secondaryContainer: const Color(0xff66fff9),
+  ///   onSecondaryContainer: Colors.black,
+  ///   error: const Color(0xff9b374d),
+  ///   onError: Colors.white,
+  /// ),
+  /// ```
+  /// {@end-tool}
   const ColorScheme.highContrastDark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffefb7ff),
@@ -455,10 +549,16 @@ class ColorScheme with Diagnosticable {
        _inversePrimary = inversePrimary,
        _surfaceTint = surfaceTint;
 
-  /// Create a color scheme from a [MaterialColor] swatch.
+  /// Creates a color scheme from a [MaterialColor] swatch.
   ///
-  /// This constructor is used by [ThemeData] to create its default
-  /// color scheme.
+  /// In Material 3, this constructor is ignored by [ThemeData] when creating
+  /// its default color scheme. Instead, [ThemeData] uses [ColorScheme.fromSeed]
+  /// to create its default color scheme. This constructor shouldn't be used
+  /// to update the Material 3 color scheme. It will be phased out gradually;
+  /// see https://github.com/flutter/flutter/issues/120064 for more details.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this constructor is used by
+  /// [ThemeData] to create its default color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
     Color? accentColor,
@@ -467,7 +567,6 @@ class ColorScheme with Diagnosticable {
     Color? errorColor,
     Brightness brightness = Brightness.light,
   }) {
-
     final bool isDark = brightness == Brightness.dark;
     final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
     final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200]! : primarySwatch);
@@ -899,7 +998,7 @@ class ColorScheme with Diagnosticable {
   ///
   /// Material Color Utilities extracts the dominant color from the
   /// supplied [ImageProvider]. Using this color, a [ColorScheme] is generated
-  /// with harmnonious colors that meet contrast requirements for accessibility.
+  /// with harmonious colors that meet contrast requirements for accessibility.
   ///
   /// If any of the optional color parameters are non-null, they will be
   /// used in place of the generated colors for that field in the resulting
@@ -927,7 +1026,7 @@ class ColorScheme with Diagnosticable {
   ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
   ///    Material 3 Color system specification.
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
-  ///    used to algorightmically determine the dominant color and to generate
+  ///    used to algorithmically determine the dominant color and to generate
   ///    the [ColorScheme].
   static Future<ColorScheme> fromImageProvider({
     required ImageProvider provider,

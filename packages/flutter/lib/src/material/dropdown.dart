@@ -611,7 +611,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
 }
 
 class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
-  late ScrollController _scrollSontroller;
+  late ScrollController _scrollController;
 
   @override
   void initState(){
@@ -624,7 +624,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
     final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
-    _scrollSontroller = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+    _scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
   }
 
 
@@ -641,7 +641,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
       dropdownColor: widget.dropdownColor,
       enableFeedback: widget.enableFeedback,
       borderRadius: widget.borderRadius,
-      scrollController: _scrollSontroller,
+      scrollController: _scrollController,
     );
 
     return MediaQuery.removePadding(
@@ -667,7 +667,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
 
   @override
   void dispose() {
-    _scrollSontroller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }

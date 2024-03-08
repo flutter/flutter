@@ -51,7 +51,6 @@
   "reorderItemRight": "오른쪽으로 이동",
   "expandedIconTapHint": "접기",
   "collapsedIconTapHint": "펼치기",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1자 남음",
   "remainingTextFieldCharacterCountOther": "$remainingCount자 남음",
   "refreshIndicatorSemanticLabel": "새로고침",
@@ -143,7 +142,7 @@
   "expandedHint": "접힘",
   "collapsedHint": "펼침",
   "menuDismissLabel": "메뉴 닫기",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "찾기",
+  "searchWebButtonLabel": "웹 검색",
+  "shareButtonLabel": "공유..."
 }

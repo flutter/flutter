@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
@@ -298,6 +299,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -318,6 +320,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -352,10 +355,24 @@ class PackagesGetCommand extends FlutterCommand {
         command: name,
         touchesPackageConfig: !(isHelp || dryRun),
       );
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'success');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'success');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'success'
+      ));
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'failure');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'failure'
+      ));
       rethrow;
     }
 
@@ -371,6 +388,24 @@ class PackagesGetCommand extends FlutterCommand {
 
     return FlutterCommandResult.success();
   }
+
+  late final Future<List<Plugin>> _pluginsFound = (() async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return <Plugin>[];
+    }
+
+    return findPlugins(rootProject, throwOnError: false);
+  })();
+
+  late final String? _androidEmbeddingVersion = (() {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return null;
+    }
+
+    return rootProject.android.getEmbeddingVersion().toString().split('.').last;
+  })();
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
@@ -388,7 +423,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
-      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
+      final List<Plugin> plugins = await _pluginsFound;
       numberPlugins = plugins.length;
     } else {
       numberPlugins = 0;
@@ -397,7 +432,38 @@ class PackagesGetCommand extends FlutterCommand {
     return CustomDimensions(
       commandPackagesNumberPlugins: numberPlugins,
       commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+      commandPackagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
+    );
+  }
+
+  /// The pub packages usage values are incorrect since these are calculated/sent
+  /// before pub get completes. This needs to be performed after dependency resolution.
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
+    }
+
+    final int numberPlugins;
+    // Do not send plugin analytics if pub has not run before.
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
+    if (hasPlugins) {
+      // Do not fail pub get if package config files are invalid before pub has
+      // had a chance to run.
+      final List<Plugin> plugins = await _pluginsFound;
+      numberPlugins = plugins.length;
+    } else {
+      numberPlugins = 0;
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      packagesNumberPlugins: numberPlugins,
+      packagesProjectModule: rootProject.isModule,
+      packagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
 }

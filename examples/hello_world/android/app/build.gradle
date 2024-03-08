@@ -27,7 +27,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "io.flutter.examples.hello_world"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

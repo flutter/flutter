@@ -336,38 +336,44 @@ class FlutterWebPlatform extends PlatformPlugin {
       final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
-      final num width = body['width']! as num;
-      final num height = body['height']! as num;
+      final num? width = body['width'] as num?;
+      final num? height = body['height'] as num?;
       Uint8List bytes;
 
-      try {
-        final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
-          return tab.url.contains(_browserManager!._browser.url!);
-        }))!;
-        final WipConnection connection = await chromeTab.connect();
-        final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
-          // Clip the screenshot to include only the element.
-          // Prior to taking a screenshot, we are calling `window.render()` in
-          // `_matchers_web.dart` to only render the element on screen. That
-          // will make sure that the element will always be displayed on the
-          // origin of the screen.
-          'clip': <String, Object>{
-            'x': 0.0,
-            'y': 0.0,
-            'width': width.toDouble(),
-            'height': height.toDouble(),
-            'scale': 1.0,
-          },
-        });
-        bytes = base64.decode(response.result!['data'] as String);
-      } on WipError catch (ex) {
-        _logger.printError('Caught WIPError: $ex');
-        return shelf.Response.ok('WIP error: $ex');
-      } on FormatException catch (ex) {
-        _logger.printError('Caught FormatException: $ex');
-        return shelf.Response.ok('Caught exception: $ex');
+      if (body.containsKey('bytes')) {
+        bytes = base64.decode(body['bytes']! as String);
+      } else {
+        // TODO(hterkelsen): Do not use browser screenshots for testing on the
+        // web once we transition off the HTML renderer. See:
+        // https://github.com/flutter/flutter/issues/135700
+        try {
+          final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+            return tab.url.contains(_browserManager!._browser.url!);
+          }))!;
+          final WipConnection connection = await chromeTab.connect();
+          final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
+            // Clip the screenshot to include only the element.
+            // Prior to taking a screenshot, we are calling `window.render()` in
+            // `_matchers_web.dart` to only render the element on screen. That
+            // will make sure that the element will always be displayed on the
+            // origin of the screen.
+            'clip': <String, Object>{
+              'x': 0.0,
+              'y': 0.0,
+              'width': width!.toDouble(),
+              'height': height!.toDouble(),
+              'scale': 1.0,
+            },
+          });
+          bytes = base64.decode(response.result!['data'] as String);
+        } on WipError catch (ex) {
+          _logger.printError('Caught WIPError: $ex');
+          return shelf.Response.ok('WIP error: $ex');
+        } on FormatException catch (ex) {
+          _logger.printError('Caught FormatException: $ex');
+          return shelf.Response.ok('Caught exception: $ex');
+        }
       }
-
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {

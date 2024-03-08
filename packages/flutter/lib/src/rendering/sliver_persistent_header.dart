@@ -741,7 +741,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         effectiveMaxExtent);
 
     // Expands the header if needed, with animation.
-    if (targetExtent > childExtent) {
+    if (targetExtent > childExtent && _controller?.status != AnimationStatus.forward) {
       final double targetScrollOffset = maxExtent - targetExtent;
       assert(
         vsync != null,

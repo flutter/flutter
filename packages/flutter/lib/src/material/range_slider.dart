@@ -1193,6 +1193,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   @override
   void dispose() {
+    _drag.dispose();
+    _tap.dispose();
     _startLabelPainter.dispose();
     _endLabelPainter.dispose();
     super.dispose();

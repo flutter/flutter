@@ -68,40 +68,28 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 
   late TestScenario currentValue;
   bool get resample {
-    switch (currentValue) {
-      case TestScenario.resampleOn90Hz:
-      case TestScenario.resampleOn59Hz:
-        return true;
-      case TestScenario.resampleOff90Hz:
-      case TestScenario.resampleOff59Hz:
-        return false;
-    }
+    return switch (currentValue) {
+      TestScenario.resampleOn90Hz  || TestScenario.resampleOn59Hz  => true,
+      TestScenario.resampleOff90Hz || TestScenario.resampleOff59Hz => false,
+    };
   }
   double get frequency {
-    switch (currentValue) {
-      case TestScenario.resampleOn90Hz:
-      case TestScenario.resampleOff90Hz:
-        return 90.0;
-      case TestScenario.resampleOn59Hz:
-      case TestScenario.resampleOff59Hz:
-        return 59.0;
-    }
+    return switch (currentValue) {
+      TestScenario.resampleOn90Hz || TestScenario.resampleOff90Hz => 90.0,
+      TestScenario.resampleOn59Hz || TestScenario.resampleOff59Hz => 59.0,
+    };
   }
 
   Map<String, dynamic>? result;
 
   @override
   String describeValue(TestScenario value) {
-    switch (value) {
-      case TestScenario.resampleOn90Hz:
-        return 'resample on with 90Hz input';
-      case TestScenario.resampleOn59Hz:
-        return 'resample on with 59Hz input';
-      case TestScenario.resampleOff90Hz:
-        return 'resample off with 90Hz input';
-      case TestScenario.resampleOff59Hz:
-        return 'resample off with 59Hz input';
-    }
+    return switch (value) {
+      TestScenario.resampleOn90Hz  => 'resample on with 90Hz input',
+      TestScenario.resampleOn59Hz  => 'resample on with 59Hz input',
+      TestScenario.resampleOff90Hz => 'resample off with 90Hz input',
+      TestScenario.resampleOff59Hz => 'resample off with 59Hz input',
+    };
   }
 
   @override

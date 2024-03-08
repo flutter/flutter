@@ -70,7 +70,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
   // Proxy post-frame callbacks.
   @override
-  void addPostFrameCallback(void Function(Duration) callback) {
+  void addPostFrameCallback(void Function(Duration) callback, {String debugLabel = 'callback'}) {
     postFrameCallbacks.add(callback);
   }
 

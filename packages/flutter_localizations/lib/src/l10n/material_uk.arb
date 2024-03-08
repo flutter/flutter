@@ -57,7 +57,6 @@
   "reorderItemRight": "Перемістити праворуч",
   "expandedIconTapHint": "Згорнути",
   "collapsedIconTapHint": "Розгорнути",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Залишився 1 символ",
   "remainingTextFieldCharacterCountOther": "Залишилося $remainingCount символу",
   "refreshIndicatorSemanticLabel": "Оновити",
@@ -149,7 +148,7 @@
   "expandedHint": "Згорнуто",
   "collapsedHint": "Розгорнуто",
   "menuDismissLabel": "Закрити меню",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Шукати",
+  "searchWebButtonLabel": "Пошук в Інтернеті",
+  "shareButtonLabel": "Поділитися…"
 }

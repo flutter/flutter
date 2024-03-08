@@ -96,11 +96,14 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       await getGoldenBytes(golden),
     );
 
-    if (!result.passed) {
-      final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
+    if (result.passed) {
+      result.dispose();
+      return true;
     }
-    return result.passed;
+
+    final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
   }
 
   @override
@@ -294,6 +297,16 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
 
   @override
   Future<void> update(double width, double height, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }

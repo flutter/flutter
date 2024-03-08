@@ -19,7 +19,7 @@ export 'curves.dart' show Curve;
 
 /// A typedef used by [Animatable.fromCallback] to create an [Animatable]
 /// from a callback.
-typedef AnimatableCallback<T> = T Function(double);
+typedef AnimatableCallback<T> = T Function(double value);
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.

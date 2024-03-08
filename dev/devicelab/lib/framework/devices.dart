@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
+import 'package:retry/retry.dart';
 
 import 'utils.dart';
 
@@ -192,6 +193,20 @@ abstract class Device {
 
   /// Stop a process.
   Future<void> stop(String packageName);
+
+  /// Wait for the device to become ready.
+  Future<void> awaitDevice();
+
+  Future<void> uninstallApp() async {
+    await flutter('install', options: <String>[
+      '--uninstall-only',
+      '-d',
+      deviceId]);
+
+    await Future<void>.delayed(const Duration(seconds: 2));
+
+    await awaitDevice();
+  }
 
   @override
   String toString() {
@@ -848,6 +863,23 @@ class AndroidDevice extends Device {
   Future<void> reboot() {
     return adb(<String>['reboot']);
   }
+
+  @override
+  Future<void> awaitDevice() async {
+    print('Waiting for device.');
+    final String waitOut = await adb(<String>['wait-for-device']);
+    print(waitOut);
+    const RetryOptions retryOptions = RetryOptions(delayFactor: Duration(seconds: 1), maxAttempts: 10, maxDelay: Duration(minutes: 1));
+    await retryOptions.retry(() async {
+      final String adbShellOut = await adb(<String>['shell', 'getprop sys.boot_completed']);
+      if (adbShellOut != '1') {
+        print('Device not ready.');
+        print(adbShellOut);
+        throw const DeviceException('Phone not ready.');
+      }
+    }, retryIf: (Exception e) => e is DeviceException);
+    print('Done waiting for device.');
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -1081,6 +1113,9 @@ class IosDevice extends Device {
   Future<void> reboot() {
     return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class LinuxDevice extends Device {
@@ -1133,6 +1168,9 @@ class LinuxDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class MacosDevice extends Device {
@@ -1185,6 +1223,9 @@ class MacosDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class WindowsDevice extends Device {
@@ -1237,6 +1278,9 @@ class WindowsDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 /// Fuchsia device.
@@ -1291,6 +1335,9 @@ class FuchsiaDevice extends Device {
   Future<void> reboot() async {
     // Unsupported.
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 /// Path to the `adb` executable.
@@ -1299,7 +1346,7 @@ String get adbPath {
 
   if (androidHome == null) {
     throw const DeviceException(
-      'The ANDROID_SDK_ROOT environment variable is '
+      'The ANDROID_HOME environment variable is '
       'missing. The variable must point to the Android '
       'SDK directory containing platform-tools.'
     );
@@ -1366,6 +1413,9 @@ class FakeDevice extends Device {
   Future<void> reboot() async {
     // Unsupported.
   }
+
+  @override
+  Future<void> awaitDevice() async {}
 }
 
 class FakeDeviceDiscovery implements DeviceDiscovery {
@@ -1428,6 +1478,5 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> performPreflightTasks() async {
-  }
+  Future<void> performPreflightTasks() async { }
 }

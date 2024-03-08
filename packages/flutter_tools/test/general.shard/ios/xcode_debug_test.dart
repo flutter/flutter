@@ -1064,6 +1064,96 @@ void main() {
         expect(status, isFalse);
       });
     });
+
+    group('ensureXcodeDebuggerLaunchAction', () {
+      late Xcode xcode;
+
+      setUp(() {
+        xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+      });
+
+      testWithoutContext('succeeds', () async {
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        schemeFile.createSync(recursive: true);
+        schemeFile.writeAsStringSync(validSchemeXml);
+
+        xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile);
+        expect(logger.errorText, isEmpty);
+      });
+
+      testWithoutContext('prints error if scheme file not found', () async {
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+
+        xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile);
+        expect(logger.errorText.contains('Failed to find'), isTrue);
+      });
+
+      testWithoutContext('throws error if launch action is missing debugger info', () async {
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        schemeFile.createSync(recursive: true);
+        schemeFile.writeAsStringSync(disabledDebugExecutableSchemeXml);
+
+        expect(() => xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile),
+            throwsToolExit(message: 'Your Xcode project is not setup to start a debugger.'));
+      });
+
+      testWithoutContext('prints error if unable to find launch action', () async {
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        schemeFile.createSync(recursive: true);
+        schemeFile.writeAsStringSync('<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>');
+
+        xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile);
+        expect(logger.errorText.contains('Failed to find LaunchAction for the Scheme'), isTrue);
+      });
+
+      testWithoutContext('prints error if invalid xml', () async {
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        schemeFile.createSync(recursive: true);
+        schemeFile.writeAsStringSync('<?xml version="1.0" encoding="UTF-8"?><Scheme>');
+
+        xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile);
+        expect(logger.errorText.contains('Failed to parse'), isTrue);
+      });
+    });
   });
 
   group('Debug project through Xcode with app bundle', () {
@@ -1161,3 +1251,89 @@ class FakeProcess extends Fake implements Process {
     return true;
   }
 }
+
+const String validSchemeXml = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1510"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Profile"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+''';
+
+const String disabledDebugExecutableSchemeXml = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1510"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = ""
+      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Profile"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+''';

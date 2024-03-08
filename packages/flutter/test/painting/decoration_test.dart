@@ -330,7 +330,7 @@ void main() {
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
     // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
-    expect(paint.invertColors, !kIsWeb);
+    expect(paint.invertColors, !kIsWeb || isCanvasKit);
   });
 
   test('DecorationImage.toString', () async {

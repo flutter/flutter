@@ -83,14 +83,14 @@ class MultidexProject extends Project {
 
   String get androidBuild => r'''
   buildscript {
-      ext.kotlin_version = '1.3.50'
+      ext.kotlin_version = '1.7.10'
       repositories {
           google()
           mavenCentral()
       }
 
       dependencies {
-          classpath 'com.android.tools.build:gradle:4.1.0'
+          classpath 'com.android.tools.build:gradle:7.3.0'
           classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
       }
   }
@@ -144,7 +144,7 @@ class MultidexProject extends Project {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 33
+      compileSdk 34
 
       compileOptions {
           sourceCompatibility JavaVersion.VERSION_1_8
@@ -209,6 +209,7 @@ class MultidexProject extends Project {
           android:name="${applicationName}">
           <activity
               android:name=".MainActivity"
+              android:exported="true"
               android:launchMode="singleTop"
               android:theme="@style/LaunchTheme"
               android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

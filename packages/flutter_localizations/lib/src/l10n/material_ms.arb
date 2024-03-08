@@ -52,7 +52,6 @@
   "reorderItemRight": "Alih ke kanan",
   "expandedIconTapHint": "Runtuhkan",
   "collapsedIconTapHint": "Kembangkan",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 aksara lagi",
   "remainingTextFieldCharacterCountOther": "$remainingCount aksara lagi",
   "refreshIndicatorSemanticLabel": "Muat semula",
@@ -145,6 +144,6 @@
   "collapsedHint": "Dikembangkan",
   "menuDismissLabel": "Ketepikan menu",
   "lookUpButtonLabel": "Lihat ke Atas",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Buat carian pada Web",
+  "shareButtonLabel": "Kongsi..."
 }

@@ -381,7 +381,11 @@ class FakeTicker implements Ticker {
 }
 
 class TestClipPaintingContext extends PaintingContext {
-  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+  TestClipPaintingContext() : this._(ContainerLayer());
+
+  TestClipPaintingContext._(this._containerLayer) : super(_containerLayer, Rect.zero);
+
+  final ContainerLayer _containerLayer;
 
   @override
   ClipRectLayer? pushClipRect(
@@ -397,6 +401,11 @@ class TestClipPaintingContext extends PaintingContext {
   }
 
   Clip clipBehavior = Clip.none;
+
+  @mustCallSuper
+  void dispose() {
+    _containerLayer.dispose();
+  }
 }
 
 class TestPushLayerPaintingContext extends PaintingContext {

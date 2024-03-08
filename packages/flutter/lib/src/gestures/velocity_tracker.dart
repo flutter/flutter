@@ -5,6 +5,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'events.dart';
 import 'lsq_solver.dart';
 
@@ -150,7 +151,11 @@ class VelocityTracker {
   final PointerDeviceKind kind;
 
   // Time difference since the last sample was added
-  final Stopwatch _sinceLastSample = Stopwatch();
+  Stopwatch get _sinceLastSample {
+    _stopwatch ??= GestureBinding.instance.samplingClock.stopwatch();
+    return _stopwatch!;
+  }
+  Stopwatch? _stopwatch;
 
   // Circular buffer; current sample at _index.
   final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null);
@@ -174,8 +179,8 @@ class VelocityTracker {
   ///
   /// Returns null if there is no data on which to base an estimate.
   VelocityEstimate? getVelocityEstimate() {
-    // no recent user movement?
-    if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
+    // Has user recently moved since last sample?
+    if (_sinceLastSample.elapsedMilliseconds > _assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,
         confidence: 1.0,
@@ -210,7 +215,7 @@ class VelocityTracker {
       final double age = (newestSample.time - sample.time).inMicroseconds.toDouble() / 1000;
       final double delta = (sample.time - previousSample.time).inMicroseconds.abs().toDouble() / 1000;
       previousSample = sample;
-      if (age > _horizonMilliseconds || delta > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
+      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds) {
         break;
       }
 
@@ -343,7 +348,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
 
   @override
   VelocityEstimate getVelocityEstimate() {
-    // no recent user movement?
+    // Has user recently moved since last sample?
     if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,
@@ -414,7 +419,7 @@ class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTrac
 
   @override
   VelocityEstimate getVelocityEstimate() {
-    // no recent user movement?
+    // Has user recently moved since last sample?
     if (_sinceLastSample.elapsedMilliseconds > VelocityTracker._assumePointerMoveStoppedMilliseconds) {
       return const VelocityEstimate(
         pixelsPerSecond: Offset.zero,

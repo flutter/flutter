@@ -17,7 +17,7 @@ class NoConstructor extends StatelessWidget {
 
 class NoConstConstructor extends StatelessWidget {
   // LINT: Missing const constructor generates prefer_const_constructors_in_immutables warning.
-  NoConstConstructor({Key? key, required this.name }) : super(key: key);
+  NoConstConstructor({super.key, required this.name });
 
   final String name;
 

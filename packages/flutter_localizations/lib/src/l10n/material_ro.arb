@@ -55,7 +55,6 @@
   "reorderItemRight": "Mutați la dreapta",
   "expandedIconTapHint": "Restrângeți",
   "collapsedIconTapHint": "Extindeți",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "un caracter rămas",
   "remainingTextFieldCharacterCountOther": "$remainingCount de caractere rămase",
   "refreshIndicatorSemanticLabel": "Actualizați",
@@ -147,7 +146,7 @@
   "expandedHint": "Restrâns",
   "collapsedHint": "Extins",
   "menuDismissLabel": "Respingeți meniul",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Privire în sus",
+  "searchWebButtonLabel": "Căutați pe web",
+  "shareButtonLabel": "Trimiteți…"
 }

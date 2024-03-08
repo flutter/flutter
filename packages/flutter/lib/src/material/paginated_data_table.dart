@@ -112,6 +112,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.controller,
     this.primary,
     this.headingRowColor,
+    this.showEmptyRows = true,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -289,6 +290,14 @@ class PaginatedDataTable extends StatefulWidget {
    /// {@macro flutter.material.dataTable.headingRowColor}
   final MaterialStateProperty<Color?>? headingRowColor;
 
+  /// Controls the visibility of empty rows on the last page of a
+  /// [PaginatedDataTable].
+  ///
+  /// Defaults to `true`, which means empty rows will be populated on the
+  /// last page of the table if there is not enough content.
+  /// When set to `false`, empty rows will not be created.
+  final bool showEmptyRows;
+
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
 }
@@ -407,8 +416,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           haveProgressIndicator = true;
         }
       }
-      row ??= _getBlankRowFor(index);
-      result.add(row);
+
+      if (widget.showEmptyRows) {
+        row ??= _getBlankRowFor(index);
+      }
+
+      if (row != null) {
+        result.add(row);
+      }
     }
     return result;
   }
@@ -600,6 +615,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
+              if (!widget.showEmptyRows)
+                SizedBox(
+                    height: (widget.dataRowMaxHeight ?? kMinInteractiveDimension) * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)),
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(

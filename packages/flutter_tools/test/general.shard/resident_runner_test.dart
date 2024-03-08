@@ -41,6 +41,8 @@ import 'package:native_assets_cli/native_assets_cli.dart'
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
@@ -170,10 +172,16 @@ void main() {
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
   late FakeDevice device;
+  late FakeAnalytics fakeAnalytics;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
     testbed = Testbed(setup: () {
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: globals.fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+
       globals.fs.file('.packages')
         .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
@@ -187,6 +195,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
+        analytics: fakeAnalytics,
       );
     });
     device = FakeDevice();
@@ -236,6 +245,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -259,6 +269,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -328,6 +339,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -387,6 +399,7 @@ void main() {
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -431,7 +444,42 @@ void main() {
         hotEventFullRestart: false,
       )),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.hotRunnerInfo(
+        label: 'exception',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        sdkName: 'Android',
+        emulator: false,
+        fullRestart: false,
+      ),
+    ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => TestUsage(),
+  }));
+
+  testUsingContext('ResidentRunner can handle an RPC exception from debugFrameJankMetrics', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      renderFrameRasterStats,
+    ]);
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+    await futureAppStart.future;
+
+    final bool result = await residentRunner.debugFrameJankMetrics();
+    expect(result, true);
+    expect((globals.flutterUsage as TestUsage).events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
+    expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+    expect((globals.logger as BufferLogger).warningText, contains('Unable to get jank metrics for Impeller renderer'));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -486,6 +534,15 @@ void main() {
         hotEventFullRestart: false,
       )),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.hotRunnerInfo(
+        label: 'reload-barred',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        sdkName: 'Android',
+        emulator: false,
+        fullRestart: false,
+      )
+    ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
@@ -509,6 +566,7 @@ void main() {
         ],
       )),
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -531,6 +589,15 @@ void main() {
         hotEventEmulator: false,
         hotEventFullRestart: false,
       )),
+    ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.hotRunnerInfo(
+        label: 'exception',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        sdkName: 'Android',
+        emulator: false,
+        fullRestart: false,
+      )
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -564,6 +631,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -764,6 +832,12 @@ void main() {
     expect(event.category, 'hot');
     expect(event.parameter, 'reload');
     expect(event.parameters?.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
+
+    final Event newEvent = fakeAnalytics.sentEvents.first;
+    expect(newEvent.eventName.label, 'hot_runner_info');
+    expect(newEvent.eventData['label'], 'reload');
+    expect(newEvent.eventData['targetPlatform'], getNameForTargetPlatform(TargetPlatform.android_arm));
+
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -825,6 +899,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     devFS.nextUpdateReport = UpdateFSReport(
       success: true,
@@ -910,6 +985,16 @@ void main() {
     expect(event.parameter, 'restart');
     expect(event.parameters?.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+
+    // Parse out the event of interest since we may have timing events with
+    // the new analytics package
+    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName == DashEvent.hotRunnerInfo).toList();
+    expect(newEventList, hasLength(1));
+    final Event newEvent = newEventList.first;
+    expect(newEvent.eventName.label, 'hot_runner_info');
+    expect(newEvent.eventData['label'], 'restart');
+    expect(newEvent.eventData['targetPlatform'], getNameForTargetPlatform(TargetPlatform.android_arm));
+
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -1136,6 +1221,15 @@ void main() {
         hotEventFullRestart: true,
       )),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.hotRunnerInfo(
+        label: 'exception',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        sdkName: 'Android',
+        emulator: false,
+        fullRestart: true,
+      ),
+    ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
@@ -1154,6 +1248,7 @@ void main() {
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -1269,6 +1364,7 @@ flutter:
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'custom_main.dart',
         devtoolsHandler: createNoOpHandler,
+        analytics: fakeAnalytics,
       );
     await residentRunner.runSourceGenerators();
 
@@ -1298,7 +1394,7 @@ flutter:
 
     await residentRunner.runSourceGenerators();
 
-    expect(testLogger.errorText, allOf(contains('Exception')));
+    expect(testLogger.errorText, contains('Error'));
     expect(testLogger.statusText, isEmpty);
   }));
 
@@ -1328,6 +1424,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -1597,6 +1694,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     await residentRunner.run(enableDevTools: true);
@@ -1625,6 +1723,7 @@ flutter:
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1654,6 +1753,7 @@ flutter:
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1684,6 +1784,7 @@ flutter:
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1707,6 +1808,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1731,6 +1833,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1758,6 +1861,7 @@ flutter:
       )),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
 
@@ -1780,6 +1884,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     await residentRunner.run();
@@ -1800,6 +1905,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     await residentRunner.run(enableDevTools: true);
@@ -2255,6 +2361,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
     await residentRunner.cleanupAtFinish();
 
@@ -2275,6 +2382,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2299,6 +2407,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     (flutterDevice.devFS! as FakeDevFS).shaderPathsToEvict = <String>{'foo.frag'};
@@ -2320,6 +2429,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     expect(flutterDevice.devFS!.hasSetAssetDirectory, false);
@@ -2341,6 +2451,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
+      analytics: fakeAnalytics,
     );
 
     (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
@@ -2412,6 +2523,7 @@ flutter:
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           buildRunner: buildRunner,
+          analytics: fakeAnalytics,
         );
 
         final int? result = await residentRunner.run();
@@ -2654,9 +2766,6 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String sdkNameAndVersion = 'Android',
@@ -2816,3 +2925,15 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     throw UnimplementedError();
   }
 }
+
+const FakeVmServiceRequest renderFrameRasterStats = FakeVmServiceRequest(
+  method: kRenderFrameWithRasterStatsMethod,
+  args: <String, Object>{
+    'viewId': 'a',
+    'isolateId': '1',
+  },
+  error: FakeRPCError(
+    code: RPCErrorCodes.kServerError,
+    error: 'Raster status not supported on Impeller backend',
+  ),
+);

@@ -413,7 +413,7 @@ void main() {
 
   testWidgets('Shows error text upon invalid input', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: '');
-
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -491,7 +491,8 @@ void main() {
     expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
   });
 
- testWidgets('CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
+  testWidgets(
+      'CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();

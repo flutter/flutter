@@ -655,7 +655,7 @@ void paintImage({
           },
         );
         _pendingImageSizeInfo = <String, ImageSizeInfo>{};
-      });
+      }, debugLabel: 'paintImage.recordImageSizes');
     }
   }
 

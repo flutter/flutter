@@ -7,10 +7,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'multi_view_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Widgets running with runApp can find View', (WidgetTester tester) async {
+  testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
     FlutterView? viewMaybeOf;
 
@@ -30,7 +31,7 @@ void main() {
     expect(viewMaybeOf, isA<FlutterView>());
   });
 
-  testWidgetsWithLeakTracking('Widgets running with pumpWidget can find View', (WidgetTester tester) async {
+  testWidgets('Widgets running with pumpWidget can find View', (WidgetTester tester) async {
     FlutterView? view;
     FlutterView? viewMaybeOf;
 
@@ -50,7 +51,7 @@ void main() {
     expect(viewMaybeOf, isA<FlutterView>());
   });
 
-  testWidgetsWithLeakTracking('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
+  testWidgets('cannot find View behind a LookupBoundary', (WidgetTester tester) async {
     await tester.pumpWidget(
       LookupBoundary(
         child: Container(),
@@ -70,7 +71,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('child of view finds view, parentPipelineOwner, mediaQuery', (WidgetTester tester) async {
+  testWidgets('child of view finds view, parentPipelineOwner, mediaQuery', (WidgetTester tester) async {
     FlutterView? outsideView;
     FlutterView? insideView;
     PipelineOwner? outsideParent;
@@ -112,7 +113,7 @@ void main() {
     expect(pipelineOwners.single, equals(insideParent));
   });
 
-  testWidgetsWithLeakTracking('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
+  testWidgets('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -139,11 +140,11 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ViewCollection must have one view', (WidgetTester tester) async {
-    expect(() => ViewCollection(views: const <Widget>[]), throwsAssertionError);
+  testWidgets('ViewCollection may start with zero views', (WidgetTester tester) async {
+    expect(() => const ViewCollection(views: <Widget>[]), returnsNormally);
   });
 
-  testWidgetsWithLeakTracking('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
+  testWidgets('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
     FlutterView? inside;
     FlutterView? outside;
     await tester.pumpWidget(
@@ -166,7 +167,7 @@ void main() {
     expect(outside, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('ViewAnchor layout order', (WidgetTester tester) async {
+  testWidgets('ViewAnchor layout order', (WidgetTester tester) async {
     Finder findSpyWidget(int label) {
       return find.byWidgetPredicate((Widget w) => w is SpyRenderWidget && w.label == label);
     }
@@ -193,7 +194,7 @@ void main() {
     expect(log, <String>['layout 1', 'layout 3', 'layout 2']);
   });
 
-  testWidgetsWithLeakTracking('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
+  testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         view: View(
@@ -222,7 +223,7 @@ void main() {
     expect(children, hasLength(1));
   });
 
-  testWidgetsWithLeakTracking('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
+  testWidgets('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -268,7 +269,7 @@ void main() {
   });
 
   group('renderObject getter', () {
-    testWidgetsWithLeakTracking('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
+    testWidgets('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await pumpWidgetWithoutViewWrapper(
         tester: tester,
@@ -290,7 +291,7 @@ void main() {
       expect(tester.element(find.byType(Builder)).renderObject, renderObject);
     });
 
-    testWidgetsWithLeakTracking('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
+    testWidgets('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await pumpWidgetWithoutViewWrapper(
         tester: tester,
@@ -318,7 +319,7 @@ void main() {
       expect(tester.element(find.byType(Builder)).renderObject, isNull);
     });
 
-    testWidgetsWithLeakTracking('ancestors of a ViewAnchor see the right RenderObject', (WidgetTester tester) async {
+    testWidgets('ancestors of a ViewAnchor see the right RenderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
       await tester.pumpWidget(
         Builder(
@@ -343,7 +344,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('correctly switches between view configurations', (WidgetTester tester) async {
+  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: View(
@@ -402,7 +403,7 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('attaches itself correctly', (WidgetTester tester) async {
+  testWidgets('attaches itself correctly', (WidgetTester tester) async {
     final Key viewKey = UniqueKey();
     late final PipelineOwner parentPipelineOwner;
     await tester.pumpWidget(
@@ -454,17 +455,6 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }
 
 class SpyRenderWidget extends SizedBox {

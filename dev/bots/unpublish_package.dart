@@ -49,53 +49,39 @@ class UnpublishException implements Exception {
 enum Channel { dev, beta, stable }
 
 String getChannelName(Channel channel) {
-  switch (channel) {
-    case Channel.beta:
-      return 'beta';
-    case Channel.dev:
-      return 'dev';
-    case Channel.stable:
-      return 'stable';
-  }
+  return switch (channel) {
+    Channel.beta   => 'beta',
+    Channel.dev    => 'dev',
+    Channel.stable => 'stable',
+  };
 }
 
 Channel fromChannelName(String? name) {
-  switch (name) {
-    case 'beta':
-      return Channel.beta;
-    case 'dev':
-      return Channel.dev;
-    case 'stable':
-      return Channel.stable;
-    default:
-      throw ArgumentError('Invalid channel name.');
-  }
+  return switch (name) {
+    'beta'   => Channel.beta,
+    'dev'    => Channel.dev,
+    'stable' => Channel.stable,
+    _ => throw ArgumentError('Invalid channel name.'),
+  };
 }
 
 enum PublishedPlatform { linux, macos, windows }
 
 String getPublishedPlatform(PublishedPlatform platform) {
-  switch (platform) {
-    case PublishedPlatform.linux:
-      return 'linux';
-    case PublishedPlatform.macos:
-      return 'macos';
-    case PublishedPlatform.windows:
-      return 'windows';
-  }
+  return switch (platform) {
+    PublishedPlatform.linux   => 'linux',
+    PublishedPlatform.macos   => 'macos',
+    PublishedPlatform.windows => 'windows',
+  };
 }
 
 PublishedPlatform fromPublishedPlatform(String name) {
-  switch (name) {
-    case 'linux':
-      return PublishedPlatform.linux;
-    case 'macos':
-      return PublishedPlatform.macos;
-    case 'windows':
-      return PublishedPlatform.windows;
-    default:
-      throw ArgumentError('Invalid published platform name.');
-  }
+  return switch (name) {
+    'linux'   => PublishedPlatform.linux,
+    'macos'   => PublishedPlatform.macos,
+    'windows' => PublishedPlatform.windows,
+    _ => throw ArgumentError('Invalid published platform name.'),
+  };
 }
 
 /// A helper class for classes that want to run a process, optionally have the

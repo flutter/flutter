@@ -34,7 +34,8 @@
   "searchTextFieldPlaceholderLabel": "Paieška",
   "noSpellCheckReplacementsLabel": "Nerasta jokių pakeitimų",
   "menuDismissLabel": "Atsisakyti meniu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Ieškoti",
+  "searchWebButtonLabel": "Ieškoti žiniatinklyje",
+  "shareButtonLabel": "Bendrinti...",
+  "clearButtonLabel": "Clear"
 }

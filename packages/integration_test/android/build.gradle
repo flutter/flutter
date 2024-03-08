@@ -23,6 +23,10 @@ rootProject.allprojects {
     }
 }
 
+// project.getTasks().withType(JavaCompile){
+//     options.compilerArgs << "-Xlint:all" << "-Werror"
+// }
+
 apply plugin: 'com.android.library'
 
 android {
@@ -31,7 +35,7 @@ android {
         namespace 'dev.flutter.integration_test'
     }
 
-    compileSdkVersion 33
+    compileSdk 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

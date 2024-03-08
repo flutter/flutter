@@ -323,4 +323,7 @@ void main() {
   // const Curve curve = standardEasing; expect Easing.legacy
   // const Curve curve = accelerateEasing; expect Easing.legacyAccelerate
   // const Curve curve = decelerateEasing; expect Easing.legacyDecelerate
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
+  final Widget bodyValue = platformMenuBar.body;
 }

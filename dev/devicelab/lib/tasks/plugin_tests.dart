@@ -84,6 +84,12 @@ class PluginTest {
           section('Test app');
           await app.runFlutterTest();
         }
+        // Validate local engine handling. Currently only implemented for macOS.
+        if (!dartOnlyPlugin) {
+          section('Validate local engine configuration');
+          final String fakeEngineSourcePath = path.join(tempDir.path, 'engine');
+          await _testLocalEngineConfiguration(app, fakeEngineSourcePath);
+        }
       } finally {
         await plugin.delete();
         await app.delete();
@@ -93,6 +99,22 @@ class PluginTest {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
+    }
+  }
+
+  Future<void> _testLocalEngineConfiguration(_FlutterProject app, String fakeEngineSourcePath) async {
+    // The tool requires that a directory that looks like an engine build
+    // actually exists when passing --local-engine, so create a fake skeleton.
+    final Directory buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
+    buildDir.createSync(recursive: true);
+    // Currently this test is only implemented for macOS; it can be extended to
+    // others as needed.
+    if (buildTarget == 'macos') {
+      // Clean before regenerating the config to ensure that the pod steps run.
+      await inDirectory(Directory(app.rootPath), () async {
+        await evalFlutter('clean');
+      });
+      await app.build(buildTarget, configOnly: true, localEngine: buildDir);
     }
   }
 }
@@ -263,17 +285,23 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'ios':
-        await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
-          if (!await runXcodeTests(
-            platformDirectory: path.join(rootPath, 'ios'),
-            destination: 'id=$deviceId',
-            configuration: 'Debug',
-            testName: 'native_plugin_unit_tests_ios',
-            skipCodesign: true,
-          )) {
-            throw TaskResult.failure('Platform unit tests failed');
-          }
-        });
+        String? simulatorDeviceId;
+        try {
+          await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+            simulatorDeviceId = deviceId;
+            if (!await runXcodeTests(
+              platformDirectory: path.join(rootPath, 'ios'),
+              destination: 'id=$deviceId',
+              configuration: 'Debug',
+              testName: 'native_plugin_unit_tests_ios',
+              skipCodesign: true,
+            )) {
+              throw TaskResult.failure('Platform unit tests failed');
+            }
+          });
+        } finally {
+          await removeIOSSimulator(simulatorDeviceId);
+        }
       case 'linux':
         if (await exec(
           path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
@@ -363,13 +391,28 @@ s.dependency 'AppAuth', '1.6.0'
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
+  Future<void> build(
+    String target, {
+    bool validateNativeBuildProject = true,
+    bool configOnly = false,
+    Directory? localEngine,
+  }) async {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[
         target,
         '-v',
         if (target == 'ios')
           '--no-codesign',
+        if (configOnly)
+          '--config-only',
+        if (localEngine != null)
+          // The engine directory is of the form <fake-source-path>/out/<fakename>,
+          // which has to be broken up into the component flags.
+          ...<String>[
+            '--local-engine-src-path=${localEngine.parent.parent.path}',
+            '--local-engine=${path.basename(localEngine.path)}',
+            '--local-engine-host=${path.basename(localEngine.path)}',
+          ]
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -414,6 +457,13 @@ s.dependency 'AppAuth', '1.6.0'
             // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
             if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
               throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+            }
+          }
+
+          if (localEngine != null) {
+            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
+            if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
+              throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
             }
           }
         }

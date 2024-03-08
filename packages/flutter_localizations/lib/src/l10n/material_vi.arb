@@ -51,7 +51,6 @@
   "reorderItemRight": "Di chuyển sang phải",
   "expandedIconTapHint": "Thu gọn",
   "collapsedIconTapHint": "Mở rộng",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Còn lại 1 ký tự",
   "remainingTextFieldCharacterCountOther": "Còn lại $remainingCount ký tự",
   "refreshIndicatorSemanticLabel": "Làm mới",
@@ -143,7 +142,7 @@
   "expandedHint": "Đã thu gọn",
   "collapsedHint": "Đã mở rộng",
   "menuDismissLabel": "Đóng trình đơn",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Tra cứu",
+  "searchWebButtonLabel": "Tìm kiếm trên web",
+  "shareButtonLabel": "Chia sẻ..."
 }

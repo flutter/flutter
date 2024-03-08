@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Tìm kiếm",
   "noSpellCheckReplacementsLabel": "Không tìm thấy phương án thay thế",
   "menuDismissLabel": "Đóng trình đơn",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Tra cứu",
+  "searchWebButtonLabel": "Tìm kiếm trên web",
+  "shareButtonLabel": "Chia sẻ...",
+  "clearButtonLabel": "Clear"
 }

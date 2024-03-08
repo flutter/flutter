@@ -47,13 +47,13 @@ const FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
   args: <String, Object>{
     'fsName': 'test',
   },
-  errorCode: RPCErrorCodes.kServiceDisappeared,
+  error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
 );
 
 const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
   method: '_deleteDevFS',
   args: <String, dynamic>{'fsName': 'test'},
-  errorCode: RPCErrorCodes.kServiceDisappeared,
+  error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
 );
 
 void main() {
@@ -733,7 +733,14 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
+  Future<int> build({
+    String manifestPath = defaultManifestPath,
+    String? assetDirPath,
+    String? packagesPath,
+    bool deferredComponentsEnabled = false,
+    TargetPlatform? targetPlatform,
+    String? flavor,
+  }) async {
     return 0;
   }
 

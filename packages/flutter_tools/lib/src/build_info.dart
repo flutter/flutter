@@ -39,7 +39,6 @@ class BuildInfo {
     this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.dartDefineConfigJsonMap = const <String, Object?>{},
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -140,17 +139,6 @@ class BuildInfo {
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String? performanceMeasurementFile;
-
-  /// Configure a constant pool file.
-  /// Additional constant values to be made available in the Dart program.
-  ///
-  /// These values can be used with the const `fromEnvironment` constructors of
-  ///  [String] the key and field are json values
-  /// json value
-  ///
-  /// An additional field `dartDefineConfigJsonMap` is provided to represent the native JSON value of the configuration file
-  ///
-  final Map<String, Object?> dartDefineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -277,11 +265,7 @@ class BuildInfo {
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    final Map<String, String> map = <String, String>{};
-    dartDefineConfigJsonMap.forEach((String key, Object? value) {
-      map[key] = '$value';
-    });
-    final Map<String, String> environmentMap = <String, String>{
+    return <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       'DART_OBFUSCATION': dartObfuscation.toString(),
@@ -302,24 +286,16 @@ class BuildInfo {
       'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null)
+        'FLAVOR': flavor!,
     };
-    map.forEach((String key, String value) {
-      if (environmentMap.containsKey(key)) {
-        globals.printWarning(
-            'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
-      } else {
-        // System priority is greater than user priority
-        environmentMap[key] = value;
-      }
-    });
-    return environmentMap;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
-    final List<String> result = <String>[
+    return <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       '-Pdart-obfuscation=$dartObfuscation',
@@ -342,16 +318,6 @@ class BuildInfo {
       for (final String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
-    final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
-    dartDefineConfigJsonMap.forEach((String key, Object? value) {
-      if (gradleConfKeys.contains(key)) {
-        globals.printWarning(
-            'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
-      } else {
-        result.add('-P$key=$value');
-      }
-    });
-    return result;
   }
 }
 
@@ -956,16 +922,55 @@ const String kIosArchs = 'IosArchs';
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not
-/// provided, defaults to x86_64.
+/// provided, defaults to x86_64 and arm64.
 ///
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';
+
+/// The define to control what Android architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures.
+const String kAndroidArchs = 'AndroidArchs';
+
+/// If the current build is `flutter build aar`.
+///
+/// This is expected to be a boolean.
+///
+/// If not provided, defaults to false.
+const String kIsAndroidLibrary = 'IsAndroidLibrary';
+
+/// The define to control what min Android SDK version is built for.
+///
+/// This is expected to be int.
+///
+/// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
+///
+/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+///
+/// For more info, see:
+/// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
+/// https://developer.android.com/ndk/guides/other_build_systems#overview
+const String kMinSdkVersion = 'MinSdkVersion';
 
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
 
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
+
+/// Whether to enable Native Assets.
+///
+/// If true, native assets are built and the mapping for native assets lookup
+/// at runtime is embedded in the kernel file.
+///
+/// If false, native assets are not built, and an empty mapping is embedded in
+/// the kernel file. Used for targets that trigger kernel builds but
+/// are not OS/architecture specific.
+///
+/// Supported values are 'true' and 'false'.
+///
+/// Defaults to 'true'.
+const String kNativeAssets = 'NativeAssets';
 
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
@@ -985,6 +990,9 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// The define to pass build name
 const String kBuildName = 'BuildName';
+
+/// The app flavor to build.
+const String kFlavor = 'Flavor';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

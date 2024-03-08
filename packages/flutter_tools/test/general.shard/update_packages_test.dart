@@ -7,6 +7,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
+import 'package:flutter_tools/src/update_packages_pins.dart';
 
 import '../src/common.dart';
 
@@ -98,18 +99,6 @@ void main() {
       kManuallyPinnedDependencies.values,
       isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
       reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
-    );
-    expect(
-      kManuallyPinnedDependencies.keys,
-      unorderedEquals(const <String>[
-        'flutter_gallery_assets',
-        'flutter_template_images',
-        'video_player',
-        'material_color_utilities',
-        'archive',
-        'leak_tracker',
-        'leak_tracker_flutter_testing',
-      ]),
     );
   });
 

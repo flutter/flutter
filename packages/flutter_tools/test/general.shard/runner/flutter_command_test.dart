@@ -27,10 +27,13 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -38,9 +41,13 @@ void main() {
   group('Flutter Command', () {
     late FakeCache cache;
     late TestUsage usage;
+    late FakeAnalytics fakeAnalytics;
     late FakeClock clock;
     late FakeProcessInfo processInfo;
     late MemoryFileSystem fileSystem;
+    late Platform platform;
+    late FileSystemUtils fileSystemUtils;
+    late Logger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
 
@@ -56,8 +63,15 @@ void main() {
       processInfo = FakeProcessInfo();
       processInfo.maxRss = 10;
       fileSystem = MemoryFileSystem.test();
+      platform = FakePlatform();
+      fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
       preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -188,6 +202,7 @@ void main() {
         ProcessManager: () => processManager,
         SystemClock: () => clock,
         Usage: () => usage,
+        Analytics: () => fakeAnalytics,
       });
     }
 
@@ -215,6 +230,14 @@ void main() {
           value: 10,
         ),
       ]);
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'success',
+          maxRss: 10,
+          commandHasTerminal: false,
+        ),
+      ));
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -241,6 +264,14 @@ void main() {
           value: 10,
         ),
       ]);
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'warning',
+          maxRss: 10,
+          commandHasTerminal: false,
+        ),
+      ));
     });
 
     testUsingCommandContext('reports command that results in error', () async {
@@ -269,6 +300,14 @@ void main() {
           value: 10,
         ),
       ]);
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'fail',
+          maxRss: 10,
+          commandHasTerminal: false,
+        ),
+      ));
     });
 
     test('FlutterCommandResult.success()', () async {
@@ -375,6 +414,14 @@ void main() {
             value: 10,
           ),
         ]);
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'killed',
+          maxRss: 10,
+          commandHasTerminal: false,
+        ),
+      ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
@@ -385,6 +432,7 @@ void main() {
         ),
         SystemClock: () => clock,
         Usage: () => usage,
+        Analytics: () => fakeAnalytics,
       });
 
       testUsingContext('command release lock on kill signal', () async {
@@ -438,6 +486,14 @@ void main() {
           Duration(milliseconds: 1000),
           label: 'fail',
         )));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.timing(
+            workflow: 'flutter',
+            variableName: 'dummy',
+            elapsedMilliseconds: 1000,
+            label: 'fail',
+          )
+      ));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
@@ -449,6 +505,19 @@ void main() {
       await flutterCommand.run();
 
       expect(usage.timings, isEmpty);
+      // Iterate through and count all the [Event.timing] instances
+      int timingEventCounts = 0;
+      for (final Event e in fakeAnalytics.sentEvents) {
+        if (e.eventName == DashEvent.timing) {
+          timingEventCounts += 1;
+        }
+      }
+      expect(
+        timingEventCounts,
+        0,
+        reason: 'There should not be any timing events sent, there may '
+            'be other non-timing events',
+      );
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
@@ -474,6 +543,14 @@ void main() {
           Duration(milliseconds: 500),
           label: 'success-blah1-blah2-blah3',
         )));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.timing(
+          workflow: 'flutter',
+          variableName: 'dummy',
+          elapsedMilliseconds: 500,
+          label: 'success-blah1-blah2-blah3',
+        ),
+      ));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
@@ -495,6 +572,14 @@ void main() {
           'flutter',
           'dummy',
           Duration(milliseconds: 1000),
+          label: 'fail',
+        ),
+      ));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.timing(
+          workflow: 'flutter',
+          variableName: 'dummy',
+          elapsedMilliseconds: 1000,
           label: 'fail',
         ),
       ));
@@ -704,6 +789,365 @@ void main() {
       });
     });
 
+    group('--dart-define-from-file', () {
+
+      late FlutterCommand dummyCommand;
+      late CommandRunner<void> dummyCommandRunner;
+
+      setUp(() {
+        dummyCommand = DummyFlutterCommand()..usesDartDefineOption();
+        dummyCommandRunner = createTestCommandRunner(dummyCommand);
+      });
+
+      testUsingContext('parses values from JSON files and includes them in defines list', () async {
+        fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('config1.json').writeAsString(
+          '''
+            {
+              "kInt": 1,
+              "kDouble": 1.1,
+              "name": "denghaizhu",
+              "title": "this is title from config json file",
+              "nullValue": null,
+              "containEqual": "sfadsfv=432f"
+            }
+          '''
+        );
+        await fileSystem.file('config2.json').writeAsString(
+            '''
+            {
+              "body": "this is body from config json file"
+            }
+          '''
+        );
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=config1.json',
+          '--dart-define-from-file=config2.json',
+        ]);
+
+        final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, containsAll(const <String>[
+          'kInt=1',
+          'kDouble=1.1',
+          'name=denghaizhu',
+          'title=this is title from config json file',
+          'nullValue=null',
+          'containEqual=sfadsfv=432f',
+          'body=this is body from config json file',
+        ]));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('has values with identical keys from --dart-define take precedence', () async {
+        fileSystem
+          .file(fileSystem.path.join('lib', 'main.dart'))
+          .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        fileSystem.file('.env').writeAsStringSync('''
+            MY_VALUE=VALUE_FROM_ENV_FILE
+          ''');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define=MY_VALUE=VALUE_FROM_COMMAND',
+          '--dart-define-from-file=.env',
+        ]);
+
+        final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, containsAll(const <String>[
+          'MY_VALUE=VALUE_FROM_ENV_FILE',
+          'MY_VALUE=VALUE_FROM_COMMAND',
+        ]));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('correctly parses a valid env file', () async {
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('.env').writeAsString('''
+            # comment
+            kInt=1
+            kDouble=1.1 # should be double
+
+            name=piotrfleury
+            title=this is title from config env file
+            empty=
+
+            doubleQuotes="double quotes 'value'#=" # double quotes
+            singleQuotes='single quotes "value"#=' # single quotes
+            backQuotes=`back quotes "value" '#=` # back quotes
+
+            hashString="some-#-hash-string-value"
+
+            # Play around with spaces around the equals sign.
+            spaceBeforeEqual =value
+            spaceAroundEqual = value
+            spaceAfterEqual= value
+
+          ''');
+        await fileSystem.file('.env2').writeAsString('''
+            # second comment
+
+            body=this is body from config env file
+          ''');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=.env',
+          '--dart-define-from-file=.env2',
+        ]);
+
+        final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, containsAll(const <String>[
+          'kInt=1',
+          'kDouble=1.1',
+          'name=piotrfleury',
+          'title=this is title from config env file',
+          'empty=',
+          "doubleQuotes=double quotes 'value'#=",
+          'singleQuotes=single quotes "value"#=',
+          'backQuotes=back quotes "value" \'#=',
+          'hashString=some-#-hash-string-value',
+          'spaceBeforeEqual=value',
+          'spaceAroundEqual=value',
+          'spaceAfterEqual=value',
+          'body=this is body from config env file'
+        ]));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('throws a ToolExit when the provided .env file is malformed', () async {
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('.env').writeAsString('what is this');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=.env',
+        ]);
+
+       expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+          throwsToolExit(message: 'Unable to parse file provided for '
+          '--${FlutterOptions.kDartDefineFromFileOption}.\n'
+          'Invalid property line: what is this'));
+
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('throws a ToolExit when .env file contains a multiline value', () async {
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('.env').writeAsString('''
+            # single line value
+            name=piotrfleury
+
+            # multi-line value
+            multiline = """ Welcome to .env demo
+            a simple counter app with .env file support
+            for more info, check out the README.md file
+            Thanks! """ # This is the welcome message that will be displayed on the counter app
+
+          ''');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=.env',
+        ]);
+        expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+          throwsToolExit(message: 'Multi-line value is not supported: multiline = """ Welcome to .env demo'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('works with mixed file formats',
+          () async {
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('.env').writeAsString('''
+            kInt=1
+            kDouble=1.1
+            name=piotrfleury
+            title=this is title from config env file
+          ''');
+        await fileSystem.file('config.json').writeAsString('''
+            {
+              "body": "this is body from config json file"
+            }
+          ''');
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=.env',
+          '--dart-define-from-file=config.json',
+        ]);
+
+        final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, containsAll(const <String>[
+          'kInt=1',
+          'kDouble=1.1',
+          'name=piotrfleury',
+          'title=this is title from config env file',
+          'body=this is body from config json file',
+        ]));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('when files contain entries with duplicate keys, uses the value from the lattermost file', () async {
+        fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('config1.json').writeAsString(
+            '''
+            {
+              "kInt": 1,
+              "kDouble": 1.1,
+              "name": "denghaizhu",
+              "title": "this is title from config json file"
+            }
+          '''
+        );
+        await fileSystem.file('config2.json').writeAsString(
+            '''
+            {
+              "kInt": "2"
+            }
+          '''
+        );
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=config1.json',
+          '--dart-define-from-file=config2.json',
+        ]);
+        final BuildInfo buildInfo = await dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.dartDefines, containsAll(const <String>[
+          'kInt=2',
+          'kDouble=1.1',
+          'name=denghaizhu',
+          'title=this is title from config json file'
+        ]));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('throws a ToolExit when the argued path points to a directory', () async {
+        fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        fileSystem.directory('config').createSync();
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=config',
+        ]);
+        expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+          throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('throws a ToolExit when the given JSON file is malformed', () async {
+        fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        await fileSystem.file('config.json').writeAsString(
+          '''
+            {
+              "kInt": 1Error json format
+              "kDouble": 1.1,
+              "name": "denghaizhu",
+              "title": "this is title from config json file"
+            }
+          '''
+        );
+
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define-from-file=config.json',
+        ]);
+        expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+          throwsToolExit(message: 'Unable to parse the file at path "config.json" due to '
+            'a formatting error. Ensure that the file contains valid JSON.\n'
+            'Error details: FormatException: Missing expected digit (at line 2, character 25)'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+
+      testUsingContext('throws a ToolExit when the provided file does not exist', () async {
+        fileSystem.directory('config').createSync();
+        await dummyCommandRunner.run(<String>[
+          'dummy',
+          '--dart-define=k=v',
+          '--dart-define-from-file=config']);
+        expect(dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        FileSystemUtils: () => fileSystemUtils,
+        Platform: () => platform,
+        ProcessManager: () => processManager,
+      });
+    });
+
     group('--flavor', () {
       late _TestDeviceManager testDeviceManager;
       late Logger logger;
@@ -720,7 +1164,12 @@ void main() {
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.packages').createSync();
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);
@@ -746,7 +1195,12 @@ void main() {
         fileSystem.file('.packages').createSync();
         fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);

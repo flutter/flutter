@@ -95,7 +95,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return child?.getDryLayout(constraints) ?? computeSizeForNoChild(constraints);
   }
 
@@ -284,7 +285,8 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       return child!.getDryLayout(_additionalConstraints.enforce(constraints));
     } else {
@@ -383,7 +385,8 @@ class RenderLimitedBox extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -565,7 +568,8 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _applyAspectRatio(constraints);
   }
 
@@ -726,7 +730,8 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
@@ -826,7 +831,8 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
@@ -2258,6 +2264,12 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }
@@ -2672,7 +2684,8 @@ class RenderFittedBox extends RenderProxyBox {
   // TODO(ianh): The intrinsic dimensions of this box are wrong.
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
 
@@ -3693,7 +3706,8 @@ class RenderOffstage extends RenderProxyBox {
   bool get sizedByParent => offstage;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (offstage) {
       return constraints.smallest;
     }
@@ -4342,6 +4356,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.image != null) {
       config.isImage = _properties.image!;
     }
+    if (_properties.identifier != null) {
+      config.identifier = _properties.identifier!;
+    }
     if (_attributedLabel != null) {
       config.attributedLabel = _attributedLabel!;
     }
@@ -4989,6 +5006,7 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
     RenderBox? child,
   }) : _value = value,
        _sized = sized,
+       _layerHandle = LayerHandle<AnnotatedRegionLayer<T>>(),
        super(child);
 
   /// A value which can be retrieved using [Layer.find].
@@ -5013,6 +5031,8 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  final LayerHandle<AnnotatedRegionLayer<T>> _layerHandle;
+
   @override
   final bool alwaysNeedsCompositing = true;
 
@@ -5024,6 +5044,13 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
       size: sized ? size : null,
       offset: sized ? offset : null,
     );
+    _layerHandle.layer = layer;
     context.pushLayer(layer, super.paint, offset);
+  }
+
+  @override
+  void dispose() {
+    _layerHandle.layer = null;
+    super.dispose();
   }
 }

@@ -22,10 +22,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late BufferLogger logger;
@@ -515,6 +517,7 @@ void main() {
           fileSystem: fileSystem,
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
+          analytics: NoOpAnalytics(),
         );
       });
 
@@ -533,12 +536,17 @@ void main() {
       late XCDevice xcdevice;
       late Xcode xcode;
       late MemoryFileSystem fileSystem;
+      late FakeAnalytics fakeAnalytics;
       late FakeIOSCoreDeviceControl coreDeviceControl;
 
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());
         fileSystem = MemoryFileSystem.test();
         coreDeviceControl = FakeIOSCoreDeviceControl();
+        fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         xcdevice = XCDevice(
           processManager: fakeProcessManager,
           logger: logger,
@@ -550,6 +558,7 @@ void main() {
           fileSystem: fileSystem,
           coreDeviceControl: coreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
+          analytics: fakeAnalytics,
         );
       });
 
@@ -1447,6 +1456,13 @@ void main() {
             expect(devices[4].devModeEnabled, true);
 
             expect(fakeProcessManager, hasNoRemainingExpectations);
+
+            expect(fakeAnalytics.sentEvents, contains(
+              Event.appleUsageEvent(
+                  workflow: 'device',
+                  parameter: 'ios-trust-failure',
+                )
+            ));
           }, overrides: <Type, Generator>{
             Platform: () => macPlatform,
             Artifacts: () => Artifacts.test(),

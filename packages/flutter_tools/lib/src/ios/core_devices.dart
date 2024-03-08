@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -101,7 +102,7 @@ class IOSCoreDeviceControl {
       _logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 

@@ -649,6 +649,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// not be snapshotted.
   final bool allowEnterRouteSnapshotting;
 
+  // Allows devicelab benchmarks to force disable the snapshotting. This is
+  // intended to allow us to profile and fix the underlying performance issues
+  // for the Impeller backend.
+  static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
+
   @override
   Widget buildTransitions<T>(
     PageRoute<T>? route,
@@ -657,6 +662,13 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget? child,
   ) {
+    if (_kProfileForceDisableSnapshotting) {
+      return _ZoomPageTransitionNoCache(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
+      );
+    }
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
@@ -1025,5 +1037,189 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     fade.removeListener(notifyListeners);
     animation.removeStatusListener(_onStatusChange);
     super.dispose();
+  }
+}
+
+// Zooms and fades a new page in, zooming out the previous page. This transition
+// is designed to match the Android Q activity transition.
+//
+// This was the historical implementation of the cacheless zoom page transition
+// that was too slow to run on the Skia backend. This is being benchmarked on
+// the Impeller backend so that we can improve performance enough to restore
+// the default behavior.
+class _ZoomPageTransitionNoCache extends StatelessWidget {
+  /// Creates a [_ZoomPageTransitionNoCache].
+  ///
+  /// The [animation] and [secondaryAnimation] argument are required and must
+  /// not be null.
+  const _ZoomPageTransitionNoCache({
+    required this.animation,
+    required this.secondaryAnimation,
+    this.child,
+  });
+
+  /// The animation that drives the [child]'s entrance and exit.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.animation], which is the value given to this property
+  ///    when the [_ZoomPageTransition] is used as a page transition.
+  final Animation<double> animation;
+
+  /// The animation that transitions [child] when new content is pushed on top
+  /// of it.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.secondaryAnimation], which is the value given to this
+  ///    property when the [_ZoomPageTransition] is used as a page transition.
+  final Animation<double> secondaryAnimation;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// This widget will transition in and out as driven by [animation] and
+  /// [secondaryAnimation].
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DualTransitionBuilder(
+      animation: animation,
+      forwardBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomEnterTransitionNoCache(
+          animation: animation,
+          child: child,
+        );
+      },
+      reverseBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomExitTransitionNoCache(
+          animation: animation,
+          reverse: true,
+          child: child,
+        );
+      },
+      child: DualTransitionBuilder(
+        animation: ReverseAnimation(secondaryAnimation),
+        forwardBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _ZoomEnterTransitionNoCache(
+            animation: animation,
+            reverse: true,
+            child: child,
+          );
+        },
+        reverseBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget? child,
+        ) {
+          return _ZoomExitTransitionNoCache(
+            animation: animation,
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
+class _ZoomEnterTransitionNoCache extends StatelessWidget {
+  const _ZoomEnterTransitionNoCache({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final Widget? child;
+  final bool reverse;
+
+  @override
+  Widget build(BuildContext context) {
+    double opacity = 0;
+    // The transition's scrim opacity only increases on the forward transition.
+    // In the reverse transition, the opacity should always be 0.0.
+    //
+    // Therefore, we need to only apply the scrim opacity animation when
+    // the transition is running forwards.
+    //
+    // The reason that we check that the animation's status is not `completed`
+    // instead of checking that it is `forward` is that this allows
+    // the interrupted reversal of the forward transition to smoothly fade
+    // the scrim away. This prevents a disjointed removal of the scrim.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      opacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
+    }
+
+    final Animation<double> fadeTransition = reverse
+      ? kAlwaysCompleteAnimation
+      : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
+
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomEnterTransitionState._scaleDownTransition
+      : _ZoomEnterTransitionState._scaleUpTransition
+    ).animate(animation);
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return ColoredBox(
+          color: Colors.black.withOpacity(opacity),
+          child: child,
+        );
+      },
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: ScaleTransition(
+          scale: scaleTransition,
+          filterQuality: FilterQuality.none,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _ZoomExitTransitionNoCache extends StatelessWidget {
+  const _ZoomExitTransitionNoCache({
+    required this.animation,
+    this.reverse = false,
+    this.child,
+  });
+
+  final Animation<double> animation;
+  final bool reverse;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> fadeTransition = reverse
+      ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
+      : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (reverse
+      ? _ZoomExitTransitionState._scaleDownTransition
+      : _ZoomExitTransitionState._scaleUpTransition
+    ).animate(animation);
+
+    return FadeTransition(
+      opacity: fadeTransition,
+      child: ScaleTransition(
+        scale: scaleTransition,
+        filterQuality: FilterQuality.none,
+        child: child,
+      ),
+    );
   }
 }

@@ -297,6 +297,35 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
         expect(version.toString(), 'openjdk 19.0 2023-01-17');
         expect(version, equals(Version(19, 0, null)));
       });
+
+      testWithoutContext('parses jdk 21 with patch numbers', () {
+        addJavaVersionCommand('''
+java 21.0.1 2023-09-19 LTS
+Java(TM) SE Runtime Environment (build 21+35-LTS-2513)
+Java HotSpot(TM) 64-Bit Server VM (build 21+35-LTS-2513, mixed mode, sharing)
+''');
+        final Version? version = java.version;
+        expect(version, equals(Version(21, 0, 1)));
+      });
+
+      testWithoutContext('parses jdk 21 with no patch numbers', () {
+        addJavaVersionCommand('''
+java 21 2023-09-19 LTS
+Java(TM) SE Runtime Environment (build 21+35-LTS-2513)
+Java HotSpot(TM) 64-Bit Server VM (build 21+35-LTS-2513, mixed mode, sharing)
+''');
+        final Version? version = java.version;
+        expect(version, equals(Version(21, 0, 0)));
+      });
+      testWithoutContext('parses openjdk 21 with no patch numbers', () {
+        addJavaVersionCommand('''
+openjdk version "21" 2023-09-19
+OpenJDK Runtime Environment (build 21+35)
+OpenJDK 64-Bit Server VM (build 21+35, mixed mode, sharing)
+''');
+        final Version? version = java.version;
+        expect(version, equals(Version(21, 0, 0)));
+      });
     });
   });
 }

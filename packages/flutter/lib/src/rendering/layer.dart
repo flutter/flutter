@@ -140,7 +140,7 @@ abstract class Layer with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterRenderingLibrary,
         className: '$Layer',
         object: this,
@@ -335,7 +335,7 @@ abstract class Layer with DiagnosticableTreeMixin {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     _engineLayer?.dispose();
     _engineLayer = null;
@@ -1077,7 +1077,7 @@ class PerformanceOverlayLayer extends Layer {
 }
 
 /// The signature of the callback added in [Layer.addCompositionCallback].
-typedef CompositionCallback = void Function(Layer);
+typedef CompositionCallback = void Function(Layer layer);
 
 /// A composited layer that has a list of children.
 ///
@@ -2337,7 +2337,7 @@ class LayerLink {
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _debugLeaderCheckScheduled = false;
         assert(_debugPreviousLeaders!.isEmpty);
-      });
+      }, debugLabel: 'LayerLink.leadersCleanUpCheck');
       return true;
     }());
   }

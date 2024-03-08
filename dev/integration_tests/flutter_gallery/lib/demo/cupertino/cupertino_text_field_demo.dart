@@ -153,7 +153,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(
-        fontFamily: '.SF UI Text',
+        fontFamily: 'CupertinoSystemText',
         inherit: false,
         fontSize: 17.0,
         color: CupertinoColors.black,

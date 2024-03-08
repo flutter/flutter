@@ -156,6 +156,12 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     }
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   void _updateObservers() {
     _navigatorObservers =
         List<NavigatorObserver>.of(widget.navigatorObservers)

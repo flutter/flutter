@@ -80,4 +80,30 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
     // Update is handled on the server side, just use the same logic here
     await compare(width, height, golden);
   }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) async {
+    final String key = golden.toString();
+    final String bytesEncoded = base64.encode(bytes);
+    final html.HttpRequest request = await html.HttpRequest.request(
+      'flutter_goldens',
+      method: 'POST',
+      sendData: json.encode(<String, Object>{
+        'testUri': testUri.toString(),
+        'key': key,
+        'bytes': bytesEncoded,
+      }),
+    );
+    final String response = request.response as String;
+    if (response == 'true') {
+      return true;
+    }
+    fail(response);
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) async {
+    // Update is handled on the server side, just use the same logic here
+    await compareBytes(bytes, golden);
+  }
 }

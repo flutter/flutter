@@ -18,29 +18,7 @@ import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-
-/// Map from package name to package version, used to artificially pin a pub
-/// package version in cases when upgrading to the latest breaks Flutter.
-///
-/// These version pins must be pins, not ranges! Allowing these to be ranges
-/// defeats the whole purpose of pinning all our dependencies, which is to
-/// prevent upstream changes from causing our CI to fail randomly in ways
-/// unrelated to the commits. It also, more importantly, risks breaking users
-/// in ways that prevent them from ever upgrading Flutter again!
-const Map<String, String> kManuallyPinnedDependencies = <String, String>{
-  // Add pinned packages here. Please leave a comment explaining why.
-  'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
-  'video_player': '2.2.11',
-  // Keep pinned to latest until 1.0.0.
-  'material_color_utilities': '0.5.0',
-  // https://github.com/flutter/flutter/issues/115660
-  'archive': '3.3.2',
-  // https://github.com/flutter/flutter/issues/135716
-  'leak_tracker': '9.0.7',
-  // https://github.com/flutter/flutter/issues/135716
-  'leak_tracker_flutter_testing': '1.0.5',
-};
+import '../update_packages_pins.dart';
 
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand() {

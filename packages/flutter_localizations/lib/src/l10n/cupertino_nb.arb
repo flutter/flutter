@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Søk",
   "noSpellCheckReplacementsLabel": "Fant ingen erstatninger",
   "menuDismissLabel": "Lukk menyen",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Slå opp",
+  "searchWebButtonLabel": "Søk på nettet",
+  "shareButtonLabel": "Del…",
+  "clearButtonLabel": "Clear"
 }

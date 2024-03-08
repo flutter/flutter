@@ -493,6 +493,12 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
   }
+
+  section('Build frameworks without plugins');
+  await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'ios');
+
+  section('check --static cannot be used with the --no-plugins flag');
+  await _testStaticAndNoPlugins(projectDir);
 }
 
 
@@ -816,6 +822,83 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     outputPath,
     'GeneratedPluginRegistrant.swift',
   ));
+
+  section('Build frameworks without plugins');
+  await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'macos');
+}
+
+Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required String platform}) async {
+  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins';
+
+  await inDirectory(projectDir, () async {
+    await flutter(
+      'build',
+      options: <String>[
+        '$platform-framework',
+        '--cocoapods',
+        '--force', // Allow podspec creation on master.
+        '--output=$noPluginsOutputDir',
+        '--no-plugins',
+      ],
+    );
+  });
+
+  final String noPluginsOutputPath = path.join(projectDir.path, noPluginsOutputDir);
+  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+    checkFileExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'Flutter${platform == 'macos' ? 'MacOS' : ''}.podspec',
+    ));
+    checkDirectoryExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'App.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'package_info.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'connectivity.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputPath,
+      mode,
+      'Reachability.xcframework',
+    ));
+  }
+}
+
+Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
+  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins-static';
+  final ProcessResult result = await inDirectory(projectDir, () async {
+    return executeFlutter(
+        'build',
+        options: <String>[
+          'ios-framework',
+          '--cocoapods',
+          '--force', // Allow podspec creation on master.
+          '--output=$noPluginsOutputDir',
+          '--no-plugins',
+          '--static'
+        ],
+        canFail: true
+    );
+  });
+  if (result.exitCode == 0) {
+    throw TaskResult.failure('Build framework command did not exit with error as expected');
+  }
+  final String output = '${result.stdout}\n${result.stderr}';
+  if (!output.contains('--static cannot be used with the --no-plugins flag')) {
+    throw TaskResult.failure(output);
+  }
 }
 
 Future<void> _checkDylib(String pathToLibrary) async {

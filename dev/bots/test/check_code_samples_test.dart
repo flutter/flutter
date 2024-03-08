@@ -25,7 +25,8 @@ void main() {
     return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
   }
 
-  void writeLink({required File source, required File example}) {
+  void writeLink({required File source, required File example, String? alternateLink}) {
+    final String link = alternateLink ?? ' ** See code in ${getRelativePath(example)} **';
     source
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -34,12 +35,12 @@ void main() {
 /// {@tool dartpad}
 /// Example description
 ///
-/// ** See code in ${getRelativePath(example)} **
+///$link
 /// {@end-tool}
 ''');
   }
 
-  void buildTestFiles({bool missingLinks = false, bool missingTests = false}) {
+  void buildTestFiles({bool missingLinks = false, bool missingTests = false, bool malformedLinks = false}) {
     final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')..createSync(recursive: true);
     final File fooExample = examplesLib.childFile('foo_example.0.dart')
       ..createSync(recursive: true)
@@ -73,9 +74,15 @@ void main() {
     }
     final Directory flutterPackage = packages.childDirectory('flutter').childDirectory('lib').childDirectory('src')
       ..createSync(recursive: true);
-    writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample);
-    writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample);
-    writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample);
+    if (malformedLinks) {
+      writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample, alternateLink: '*See Code *');
+      writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample, alternateLink: ' ** See code examples/api/lib/layer/bar_example.0.dart **');
+      writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample, alternateLink: '* see code in examples/api/lib/animation/curves/curve2_d.0.dart *');
+    } else {
+      writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample);
+      writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample);
+      writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample);
+    }
   }
 
   setUp(() {
@@ -112,7 +119,7 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following examples are not linked from any source file API doc comments:',
       '║   examples/api/lib/layer/missing_example.0.dart',
       '║ Either link them to a source file API doc comment, or remove them.',
@@ -120,6 +127,43 @@ void main() {
     ].map((String line) {
       return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
     }).join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, equals(false));
+  });
+
+  test('check_code_samples.dart - checkCodeSamples catches malformed links', () async {
+    buildTestFiles(malformedLinks: true);
+    bool? success;
+    final String result = await capture(
+      () async {
+        success = checker.checkCodeSamples();
+      },
+      shouldHaveErrors: true,
+    );
+    final bool isWindows = Platform.isWindows;
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following examples are not linked from any source file API doc comments:',
+      if (!isWindows) '║   examples/api/lib/animation/curves/curve2_d.0.dart',
+      if (!isWindows) '║   examples/api/lib/layer/foo_example.0.dart',
+      if (!isWindows) '║   examples/api/lib/layer/bar_example.0.dart',
+      if (isWindows) r'║   examples\api\lib\animation\curves\curve2_d.0.dart',
+      if (isWindows) r'║   examples\api\lib\layer\foo_example.0.dart',
+      if (isWindows) r'║   examples\api\lib\layer\bar_example.0.dart',
+      '║ Either link them to a source file API doc comment, or remove them.',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+      '║ The following malformed links were found in API doc comments:',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/animation/curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\animation\curves.dart:6: ///* see code in examples/api/lib/animation/curves/curve2_d.0.dart *',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      '║ Correct the formatting of these links so that they match the exact pattern:',
+      r"║   r'\*\* See code in (?<path>.+) \*\*'",
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
     expect(result, equals('$lines\n'));
     expect(success, equals(false));
   });
@@ -134,7 +178,7 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following example test files are missing:',
       '║   examples/api/test/layer/bar_example.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',

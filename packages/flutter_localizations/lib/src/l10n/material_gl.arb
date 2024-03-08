@@ -52,7 +52,6 @@
   "reorderItemRight": "Mover cara á dereita",
   "expandedIconTapHint": "Contraer",
   "collapsedIconTapHint": "Despregar",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 carácter restante",
   "remainingTextFieldCharacterCountOther": "$remainingCount caracteres restantes",
   "refreshIndicatorSemanticLabel": "Actualizar",
@@ -145,6 +144,6 @@
   "collapsedHint": "Despregado",
   "menuDismissLabel": "Pechar menú",
   "lookUpButtonLabel": "Mirar cara arriba",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Buscar na Web",
+  "shareButtonLabel": "Compartir…"
 }

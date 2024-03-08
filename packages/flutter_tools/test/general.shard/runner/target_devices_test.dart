@@ -2677,9 +2677,6 @@ class FakeXcdevice extends Fake implements XCDevice {
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String? deviceId,
@@ -2776,9 +2773,6 @@ class FakeDevice extends Fake implements Device {
       getNameForTargetPlatform(await targetPlatform);
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     String? deviceId,

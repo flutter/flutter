@@ -11,7 +11,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -24,7 +23,7 @@ void main() {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
   }
 
-  testWidgetsWithLeakTracking('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
+  testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     const Size timePickerPortraitSize =  Size(310, 468);
@@ -603,7 +602,7 @@ void main() {
         render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('setting orientation should override MediaQuery orientation', (WidgetTester tester) async {
@@ -617,7 +616,7 @@ void main() {
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {
@@ -2098,6 +2097,12 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
       );
     },
   );
+
+  @override
+  void dispose() {
+    _restorableTimePickerRouteFuture.dispose();
+    super.dispose();
+  }
 
   @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(

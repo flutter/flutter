@@ -183,5 +183,30 @@ void main() {
 ''');
       expect(result, const ProcessResultMatcher());
     });
+
+    test('does not add bonjour settings when port publication is disabled', () async {
+      infoPlist.writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+</dict>
+</plist>''');
+
+      final ProcessResult result = await Process.run(
+        xcodeBackendPath,
+        <String>['test_vm_service_bonjour_service'],
+        environment: <String, String>{
+          'CONFIGURATION': 'Debug',
+          'BUILT_PRODUCTS_DIR': buildDirectory.path,
+          'INFOPLIST_PATH': 'Info.plist',
+          'DISABLE_PORT_PUBLICATION': 'YES',
+        },
+      );
+
+      expect(infoPlist.readAsStringSync().contains('NSBonjourServices'), isFalse);
+      expect(infoPlist.readAsStringSync().contains('NSLocalNetworkUsageDescription'), isFalse);
+      expect(result, const ProcessResultMatcher());
+    });
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 }

@@ -14,6 +14,7 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'magnifier.dart';
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
@@ -228,6 +229,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -354,6 +356,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -507,6 +510,12 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Defaults to [OverlayVisibilityMode.never].
   final OverlayVisibilityMode clearButtonMode;
+
+  /// The semantic label for the clear button used by screen readers.
+  ///
+  /// This will be used by screen reading software to identify the clear button
+  /// widget. Defaults to "Clear".
+  final String? clearButtonSemanticLabel;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
@@ -829,6 +838,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
+    properties.add(DiagnosticsProperty<String>('clearButtonSemanticLabel', clearButtonSemanticLabel));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -1116,15 +1126,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
-    return GestureDetector(
-      key: _clearGlobalKey,
-      onTap: widget.enabled ? _onClearButtonTapped : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: Icon(
-          CupertinoIcons.clear_thick_circled,
-          size: 18.0,
-          color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+    final String clearLabel = widget.clearButtonSemanticLabel ?? CupertinoLocalizations.of(context).clearButtonLabel;
+
+    return Semantics(
+      button: true,
+      label: clearLabel,
+      child: GestureDetector(
+        key: _clearGlobalKey,
+        onTap: widget.enabled ? _onClearButtonTapped : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: Icon(
+            CupertinoIcons.clear_thick_circled,
+            size: 18.0,
+            color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+          ),
         ),
       ),
     );

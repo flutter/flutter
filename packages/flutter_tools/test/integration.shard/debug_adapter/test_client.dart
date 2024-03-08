@@ -337,7 +337,7 @@ extension DapTestClientExtension on DapTestClient {
   /// console, stdout and stderr.
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
-  /// the whole start of the session (including initialise) or [launch] to only
+  /// the whole start of the session (including initialize) or [launch] to only
   /// customise the [launchRequest].
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,

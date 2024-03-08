@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,10 @@ import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
+
+double _caretMarginOf(RenderEditable renderEditable) {
+  return renderEditable.cursorWidth + 1.0;
+}
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
   int index = 0;
@@ -1183,8 +1188,107 @@ void main() {
     });
 
     group('hit testing', () {
+      final TextSelectionDelegate delegate = _FakeEditableTextState();
+
+      test('Basic TextSpan Hit testing', () {
+        final TextSpan textSpanA = TextSpan(text: 'A' * 10);
+        const TextSpan textSpanBC = TextSpan(text: 'BC', style: TextStyle(letterSpacing: 26.0));
+
+        final TextSpan text = TextSpan(
+          text: '',
+          style: const TextStyle(fontSize: 10.0),
+          children: <InlineSpan>[textSpanA, textSpanBC],
+        );
+
+        final RenderEditable renderEditable = RenderEditable(
+          text: text,
+          maxLines: null,
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+        layout(renderEditable, constraints:  BoxConstraints.tightFor(width: 100.0 + _caretMarginOf(renderEditable)));
+
+        BoxHitTestResult result;
+
+        // Hit-testing the first line
+        // First A
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+        // The last A.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+        // Far away from the line.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)), isFalse);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+
+        // Hit-testing the second line
+        // Tapping on B (startX = letter-spacing / 2 = 13.0).
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+        // Between B and C, with large letter-spacing.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+        // On C.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
+
+        // After C.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+
+        // Not even remotely close.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)), isFalse);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
+      });
+
+      test('TextSpan Hit testing with text justification', () {
+        const TextSpan textSpanA = TextSpan(text: 'A ');      // The space is a word break.
+        const TextSpan textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
+        final TextSpan textSpanC = TextSpan(text: 'C' * 10);  // The third span starts a new line since it's too long for the first line.
+
+        // The text should look like:
+        // A        B
+        // CCCCCCCCCC
+        final TextSpan text = TextSpan(
+          text: '',
+          style: const TextStyle(fontSize: 10.0),
+          children: <InlineSpan>[textSpanA, textSpanB, textSpanC],
+        );
+        final RenderEditable renderEditable = RenderEditable(
+          text: text,
+          maxLines: null,
+          startHandleLayerLink: LayerLink(),
+          endHandleLayerLink: LayerLink(),
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.justify,
+          offset: ViewportOffset.fixed(0.0),
+          textSelectionDelegate: delegate,
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+
+        layout(renderEditable, constraints: BoxConstraints.tightFor(width: 100.0 + _caretMarginOf(renderEditable)));
+        BoxHitTestResult result;
+
+        // Tapping on A.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+
+        // Between A and B.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
+
+        // On B.
+        expect(renderEditable.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+        expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanB]);
+      });
+
       test('hits correct TextSpan when not scrolled', () {
-        final TextSelectionDelegate delegate = _FakeEditableTextState();
         final RenderEditable editable = RenderEditable(
           text: const TextSpan(
             style: TextStyle(height: 1.0, fontSize: 10.0),
@@ -1632,7 +1736,20 @@ void main() {
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);
+      // Intrinsics can be computed without doing layout.
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
+      expect(editable.computeMinIntrinsicWidth(fixedHeight),
+        math.max(math.max(2.0 * 10.0 * 4, 14.0 * 3), 14.0 * 3),
+        reason: "intrinsic width = max(scale factor * width of 'test', width of 'one', width of 'two')",
+      );
+      expect(editable.computeMaxIntrinsicHeight(fixedHeight), 40.0);
+      expect(editable.computeMinIntrinsicHeight(fixedHeight), 40.0);
+
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
+      // Intrinsics can be computed after layout.
       expect(editable.computeMaxIntrinsicWidth(fixedHeight),
         2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
         reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
@@ -1678,7 +1795,8 @@ void main() {
       // Prepare for painting after layout.
       pumpFrame(phase: EnginePhase.compositingBits);
       BoxHitTestResult result = BoxHitTestResult();
-      editable.hitTest(result, position: Offset.zero);
+      // The WidgetSpans have a height of 14.0, so "test" has a y offset of 4.0.
+      editable.hitTest(result, position: const Offset(1.0, 5.0));
       // We expect two hit test entries in the path because the RenderEditable
       // will add itself as well.
       expect(result.path, hasLength(2));
@@ -1688,7 +1806,7 @@ void main() {
       // Only testing the RenderEditable entry here once, not anymore below.
       expect(result.path.last.target, isA<RenderEditable>());
       result = BoxHitTestResult();
-      editable.hitTest(result, position: const Offset(15.0, 0.0));
+      editable.hitTest(result, position: const Offset(15.0, 5.0));
       expect(result.path, hasLength(2));
       target = result.path.first.target;
       expect(target, isA<TextSpan>());
@@ -1761,7 +1879,8 @@ void main() {
       // Prepare for painting after layout.
       pumpFrame(phase: EnginePhase.compositingBits);
       BoxHitTestResult result = BoxHitTestResult();
-      editable.hitTest(result, position: Offset.zero);
+      // The WidgetSpans have a height of 14.0, so "test" has a y offset of 4.0.
+      editable.hitTest(result, position: const Offset(0.0, 4.0));
       // We expect two hit test entries in the path because the RenderEditable
       // will add itself as well.
       expect(result.path, hasLength(2));
@@ -1771,13 +1890,14 @@ void main() {
       // Only testing the RenderEditable entry here once, not anymore below.
       expect(result.path.last.target, isA<RenderEditable>());
       result = BoxHitTestResult();
-      editable.hitTest(result, position: const Offset(15.0, 0.0));
+      editable.hitTest(result, position: const Offset(15.0, 4.0));
       expect(result.path, hasLength(2));
       target = result.path.first.target;
       expect(target, isA<TextSpan>());
       expect((target as TextSpan).text, text);
 
       result = BoxHitTestResult();
+      // "test" is 40 pixel wide.
       editable.hitTest(result, position: const Offset(41.0, 0.0));
       expect(result.path, hasLength(3));
       target = result.path.first.target;
@@ -1800,7 +1920,7 @@ void main() {
 
       result = BoxHitTestResult();
       editable.hitTest(result, position: const Offset(5.0, 15.0));
-      expect(result.path, hasLength(2));
+      expect(result.path, hasLength(1)); // Only the RenderEditable.
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
   });
 
@@ -1825,11 +1945,13 @@ void main() {
     );
     layout(editable, constraints: constraints);
 
+    // ignore: invalid_use_of_protected_member
     final double initialWidth = editable.computeDryLayout(constraints).width;
     expect(initialWidth, 500);
 
     // Turn off forceLine. Now the width should be significantly smaller.
     editable.forceLine = false;
+    // ignore: invalid_use_of_protected_member
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
 

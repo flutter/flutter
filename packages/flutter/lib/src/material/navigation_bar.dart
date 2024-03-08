@@ -62,12 +62,18 @@ const double _kIndicatorWidth = 64;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows a [NavigationBar] as it is used within a [Scaffold]
-/// widget when there are nested navigators that provide local navigation. The
-/// [NavigationBar] has four [NavigationDestination] widgets with different
-/// color schemes. The [onDestinationSelected] callback changes the selected
-/// item's index and displays a corresponding page with its own local navigator
-/// in the body of a [Scaffold].
+/// This example shows a [NavigationBar] within a main [Scaffold]
+/// widget that's used to control the visibility of destination pages.
+/// Each destination has its own scaffold and a nested navigator that
+/// provides local navigation. The example's [NavigationBar] has four
+/// [NavigationDestination] widgets with different color schemes. Its
+/// [onDestinationSelected] callback changes the selected
+/// destination's index and displays a corresponding page with its own
+/// local navigator and scaffold - all within the body of the main
+/// scaffold. The destination pages are organized in a [Stack] and
+/// switching destinations fades out the current page and
+/// fades in the new one. Destinations that aren't visible or animating
+/// are kept [Offstage].
 ///
 /// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.2.dart **
 /// {@end-tool}
@@ -1379,9 +1385,10 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(color: states.contains(MaterialState.disabled)
-        ? _colors.onSurfaceVariant.withOpacity(0.38)
-        : states.contains(MaterialState.selected)
+      return style.apply(
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? _colors.onSurface
             : _colors.onSurfaceVariant
       );

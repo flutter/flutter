@@ -124,13 +124,16 @@ Future<void> main(List<String> args) async {
           windows: globals.platform.isWindows,
         );
       },
-      Terminal: () {
+      AnsiTerminal: () {
         return AnsiTerminal(
           stdio: globals.stdio,
           platform: globals.platform,
           now: DateTime.now(),
-          isCliAnimationEnabled: featureFlags.isCliAnimationEnabled,
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
         );
+        // runner.run calls "terminal.applyFeatureFlags()"
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
@@ -173,9 +176,11 @@ List<FlutterCommand> generateCommands({
     fileSystem: globals.fs,
   ),
   BuildCommand(
+    artifacts: globals.artifacts!,
     fileSystem: globals.fs,
     buildSystem: globals.buildSystem,
     osUtils: globals.os,
+    processUtils: globals.processUtils,
     verboseHelp: verboseHelp,
     androidSdk: globals.androidSdk,
     logger: globals.logger,
@@ -216,7 +221,10 @@ List<FlutterCommand> generateCommands({
   InstallCommand(
     verboseHelp: verboseHelp,
   ),
-  LogsCommand(),
+  LogsCommand(
+    sigint: ProcessSignal.sigint,
+    sigterm: ProcessSignal.sigterm,
+  ),
   MakeHostAppEditableCommand(),
   PackagesCommand(),
   PrecacheCommand(

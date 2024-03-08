@@ -16,13 +16,14 @@ void main() {
         .handlePlatformMessage('flutter/lifecycle', message, (_) {});
   }
 
-  testWidgetsWithLeakTracking('Ticker mute control test', (WidgetTester tester) async {
+  testWidgets('Ticker mute control test', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);
@@ -98,8 +99,9 @@ void main() {
     expect(ticker.isActive, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Ticker control test', (WidgetTester tester) async {
+  testWidgets('Ticker control test', (WidgetTester tester) async {
     late Ticker ticker;
+    addTearDown(() => ticker.dispose());
 
     void testFunction() {
       ticker = Ticker((Duration _) { });
@@ -111,7 +113,7 @@ void main() {
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
   });
 
-  testWidgetsWithLeakTracking('Ticker can be sped up with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be sped up with time dilation', (WidgetTester tester) async {
     timeDilation = 0.5; // Move twice as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -129,7 +131,7 @@ void main() {
     timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
-  testWidgetsWithLeakTracking('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
+  testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
     timeDilation = 2.0; // Move half as fast.
     late Duration lastDuration;
     void handleTick(Duration duration) {
@@ -147,13 +149,14 @@ void main() {
     timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
-  testWidgetsWithLeakTracking('Ticker stops ticking when application is paused', (WidgetTester tester) async {
+  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(ticker.isTicking, isTrue);
@@ -170,7 +173,7 @@ void main() {
     setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgetsWithLeakTracking('Ticker can be created before application unpauses', (WidgetTester tester) async {
+  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
     setAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;
@@ -179,6 +182,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(tickCount, equals(0));
@@ -197,5 +201,12 @@ void main() {
     expect(ticker.isTicking, isTrue);
 
     ticker.stop();
+  });
+
+  test('Ticker dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker,),
+      areCreateAndDispose,
+    );
   });
 }

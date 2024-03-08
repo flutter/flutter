@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -628,7 +627,7 @@ void main() {
     expect(observations[2].previous, '/A');
   });
 
-  testWidgetsWithLeakTracking('$Route  dispatches memory events', (WidgetTester tester) async {
+  testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
     Future<void> createAndDisposeRoute() async {
       final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
@@ -653,14 +652,14 @@ void main() {
         events.add(event);
       }
     }
-    MemoryAllocations.instance.addListener(listener);
+    FlutterMemoryAllocations.instance.addListener(listener);
 
     await createAndDisposeRoute();
     expect(events, hasLength(2));
     expect(events.first, isA<ObjectCreated>());
     expect(events.last, isA<ObjectDisposed>());
 
-    MemoryAllocations.instance.removeListener(listener);
+    FlutterMemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
@@ -676,6 +675,8 @@ void main() {
       );
     }
     final TabController controller = TabController(length: 3, vsync: tester);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: TabBarView(
@@ -1487,29 +1488,34 @@ void main() {
         return result;
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    final List<String> expected = <String>['building page 1 - false'];
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expected.add('building page 2 - false');
+    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 150));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expected.add('building page 3 - false');
+    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expect(log, expected);
   });
 
   testWidgets('route semantics', (WidgetTester tester) async {
@@ -2360,6 +2366,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2430,6 +2438,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2499,6 +2509,7 @@ void main() {
           ),
         );
       };
+    addTearDown(spy1.dispose);
     final List<NavigatorObservation> observations2 = <NavigatorObservation>[];
     final HeroControllerSpy spy2 = HeroControllerSpy()
       ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
@@ -2510,6 +2521,8 @@ void main() {
           ),
         );
       };
+    addTearDown(spy2.dispose);
+
     await tester.pumpWidget(
       TestDependencies(
         child: Stack(
@@ -2626,6 +2639,8 @@ void main() {
 
   testWidgets('hero controller subscribes to multiple navigators does throw', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -2664,6 +2679,8 @@ void main() {
 
   testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
     final HeroControllerSpy spy = HeroControllerSpy();
+    addTearDown(spy.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
         controller: spy,
@@ -4060,6 +4077,7 @@ void main() {
     };
     late final NavigatorState navigator = navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4136,6 +4154,7 @@ void main() {
     late final NavigatorState navigator =
     navigatorKey.currentState! as NavigatorState;
     final FocusScopeNode focusNode = FocusScopeNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -4266,6 +4285,98 @@ void main() {
     );
     expect(policy, isA<ReadingOrderTraversalPolicy>());
   });
+
+  testWidgets(
+      'Send semantic event to move a11y focus to the last focused item when pop next page',
+      (WidgetTester tester) async {
+    dynamic semanticEvent;
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility, (dynamic message) async {
+      semanticEvent = message;
+    });
+    final Key openSheetKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.blue),
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => _LinksPage(
+            title: 'Home page',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Go to one'),
+              ),
+            ],
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Title 1')),
+                const ListTile(title: Text('Title 2')),
+                const ListTile(title: Text('Title 3')),
+                ElevatedButton(
+                  key: openSheetKey,
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close Sheet'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Open Sheet'),
+                )
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+
+    expect(find.text('Home page'), findsOneWidget);
+
+    await tester.tap(find.text('Go to one'));
+    await tester.pumpAndSettle();
+
+    // The focused node before opening the sheet.
+    final ByteData? fakeMessage =
+        SystemChannels.accessibility.codec.encodeMessage(<String, dynamic>{
+      'type': 'didGainFocus',
+      'nodeId': 5,
+    });
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.accessibility.name,
+      fakeMessage,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('Close Sheet'), findsOneWidget);
+    await tester.tap(find.text('Close Sheet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // The focused node before opening the sheet regains the focus;
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'focus',
+      'nodeId': 5,
+      'data': <String, dynamic>{},
+    });
+
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+  },
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS}),
+    skip: isBrowser, // [intended] only non-web supports move a11y focus back to last item.
+  );
 
   group('RouteSettings.toString', () {
     test('when name is not null, should have double quote', () {

@@ -709,7 +709,17 @@ abstract class InkFeature {
     required MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
-  }) : _controller = controller as _RenderInkFeatures;
+  }) : _controller = controller as _RenderInkFeatures {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$InkFeature',
+        object: this,
+      );
+    }
+  }
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -734,6 +744,11 @@ abstract class InkFeature {
       _debugDisposed = true;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _controller._removeFeature(this);
     onRemoved?.call();
   }

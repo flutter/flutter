@@ -2,15 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -116,4 +124,115 @@ void main() {
               message: 'It appears the output file contains an error message, not valid output.'));
     });
   });
+
+  group('Screenshot for devices unsupported for project', () {
+    late _TestDeviceManager testDeviceManager;
+
+    setUp(() {
+      testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
+    });
+
+    testUsingContext('should not throw for a single device', () async {
+      final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
+
+      final _ScreenshotDevice deviceUnsupportedForProject = _ScreenshotDevice(
+          id: '123', name: 'Device 1', isSupportedForProject: false);
+
+      testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
+
+      await createTestCommandRunner(command).run(<String>['screenshot']);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+    });
+
+    testUsingContext('should tool exit for multiple devices', () async {
+      final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
+
+      final List<_ScreenshotDevice> devicesUnsupportedForProject = <_ScreenshotDevice>[
+        _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
+        _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
+      ];
+
+      testDeviceManager.devices = devicesUnsupportedForProject;
+
+      await expectLater(() => createTestCommandRunner(command).run(<String>['screenshot']), throwsToolExit(
+        message: 'Must have a connected device for screenshot type device',
+      ));
+
+      expect(testLogger.statusText, contains('''
+More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
+
+Device 1 (mobile) • 123 • android • 1.2.3
+Device 2 (mobile) • 456 • android • 1.2.3
+'''));
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+    });
+  });
+}
+
+class _ScreenshotDevice extends Fake implements Device {
+  _ScreenshotDevice({
+    required this.id,
+    required this.name,
+    required bool isSupportedForProject,
+  }) : _isSupportedForProject = isSupportedForProject;
+
+  @override
+  final String name;
+
+  @override
+  final String id;
+
+  final bool _isSupportedForProject;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
+
+  @override
+  bool supportsScreenshot = true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool ephemeral = true;
+
+  @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    outputFile.writeAsBytesSync(<int>[1, 2, 3, 4]);
+  }
+
+  @override
+  Future<String> get targetPlatformDisplayName async => 'android';
+
+  @override
+  Future<String> get sdkNameAndVersion async => '1.2.3';
+
+  @override
+  Future<TargetPlatform> get targetPlatform =>  Future<TargetPlatform>.value(TargetPlatform.android);
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Category get category => Category.mobile;
+}
+
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger});
+  List<Device> devices = <Device>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
 }

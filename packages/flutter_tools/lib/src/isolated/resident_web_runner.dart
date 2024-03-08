@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide StackTrace;
@@ -57,6 +57,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required FileSystem fileSystem,
     required SystemClock systemClock,
     required Usage usage,
+    required Analytics analytics,
     bool machine = false,
   }) {
     return ResidentWebRunner(
@@ -69,6 +70,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       urlTunneller: urlTunneller,
       machine: machine,
       usage: usage,
+      analytics: analytics,
       systemClock: systemClock,
       fileSystem: fileSystem,
       logger: logger,
@@ -93,12 +95,14 @@ class ResidentWebRunner extends ResidentRunner {
     required Logger logger,
     required SystemClock systemClock,
     required Usage usage,
+    required Analytics analytics,
     UrlTunneller? urlTunneller,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
        _usage = usage,
+       _analytics = analytics,
        _urlTunneller = urlTunneller,
        super(
           <FlutterDevice>[device],
@@ -114,6 +118,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Logger _logger;
   final SystemClock _systemClock;
   final Usage _usage;
+  final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
 
   @override
@@ -287,6 +292,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
+          tlsCertPath: debuggingOptions.tlsCertPath,
+          tlsCertKeyPath: debuggingOptions.tlsCertKeyPath,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -297,12 +304,16 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
+          extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
-        final Uri url = await device!.devFS!.create();
+        Uri url = await device!.devFS!.create();
+        if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
+          url = url.replace(scheme: 'https');
+        }
         if (debuggingOptions.buildInfo.isDebug) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
@@ -321,6 +332,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             usage: globals.flutterUsage,
+            analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -335,7 +347,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{
-            'uri': url.toString(),
+             'uri': url.toString(),
           },
         );
         return attach(
@@ -399,6 +411,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
           flutterProject,
@@ -438,15 +451,30 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
       _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
+      _analytics.send(Event.timing(
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: elapsed.inMilliseconds,
+      ));
+      final String sdkName = await device!.device!.sdkNameAndVersion;
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
-        sdkName: await device!.device!.sdkNameAndVersion,
+        sdkName: sdkName,
         emulator: false,
         fullRestart: true,
         reason: reason,
         overallTimeInMs: elapsed.inMilliseconds,
       ).send();
+      _analytics.send(Event.hotRunnerInfo(
+        label: 'restart',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+        sdkName: sdkName,
+        emulator: false,
+        fullRestart: true,
+        reason: reason,
+        overallTimeInMs: elapsed.inMilliseconds
+      ));
     }
     return OperationResult.ok;
   }

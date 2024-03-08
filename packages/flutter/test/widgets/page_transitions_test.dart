@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({ super.settings });
@@ -28,7 +27,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
@@ -48,7 +47,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -130,7 +129,7 @@ void main() {
     expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
   });
 
-  testWidgetsWithLeakTracking('Check back gesture disables Heroes', (WidgetTester tester) async {
+  testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     const String kHeroTag = 'hero';
@@ -199,7 +198,7 @@ void main() {
     expect(settingsOffset.dy, 100.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
+  testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -243,7 +242,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
-  testWidgetsWithLeakTracking('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
+  testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -296,7 +295,7 @@ void main() {
     expect(sheet.setStateCalled, isFalse);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Test completed future', (WidgetTester tester) async {
+  testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => const Center(child: Text('home')),
       '/next': (_) => const Center(child: Text('next')),

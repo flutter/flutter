@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('debugChildrenHaveDuplicateKeys control test', () {
@@ -65,7 +64,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasTable control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasTable control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -96,7 +95,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
@@ -232,7 +231,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
+  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -281,7 +280,7 @@ void main() {
     debugHighlightDeprecatedWidgets = false;
   });
 
-  testWidgetsWithLeakTracking('debugCreator of layers should not be null', (WidgetTester tester) async {
+  testWidgets('debugCreator of layers should not be null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(

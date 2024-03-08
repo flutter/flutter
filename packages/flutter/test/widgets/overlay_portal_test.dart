@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'semantics_tester.dart';
 
 class _ManyRelayoutBoundaries extends StatelessWidget {
   const _ManyRelayoutBoundaries({
@@ -95,7 +97,7 @@ void main() {
     _PaintOrder.paintOrder.clear();
   });
 
-  testWidgetsWithLeakTracking('The overlay child sees the right inherited widgets', (WidgetTester tester) async {
+  testWidgets('The overlay child sees the right inherited widgets', (WidgetTester tester) async {
     int buildCount = 0;
     TextDirection? directionSeenByOverlayChild;
     TextDirection textDirection = TextDirection.rtl;
@@ -144,7 +146,7 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
-  testWidgetsWithLeakTracking('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
+  testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
 
@@ -170,7 +172,7 @@ void main() {
     await tester.pumpWidget(SizedBox(child: widget));
   });
 
-  testWidgetsWithLeakTracking('Safe to hide overlay child and remove OverlayPortal in the same frame', (WidgetTester tester) async {
+  testWidgets('Safe to hide overlay child and remove OverlayPortal in the same frame', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/129025.
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
@@ -201,7 +203,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Safe to hide overlay child and reparent OverlayPortal in the same frame', (WidgetTester tester) async {
+  testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame', (WidgetTester tester) async {
     final OverlayPortal overlayPortal = OverlayPortal(
       key: GlobalKey(debugLabel: 'key'),
       controller: controller1,
@@ -239,7 +241,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Safe to hide overlay child and reparent OverlayPortal in the same frame 2', (WidgetTester tester) async {
+  testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame 2', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
 
@@ -269,43 +271,44 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('No relayout boundary between OverlayPortal and Overlay', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/133545.
-    late final OverlayEntry overlayEntry;
-    addTearDown(() => overlayEntry..remove()..dispose());
-    final GlobalKey key = GlobalKey(debugLabel: 'key');
+  testWidgets(
+    'Overlay child remains accessible via tree walk when there is no relayout boundary between OverlayPortal and Overlay',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/133545.
+      late final OverlayEntry overlayEntry;
+      addTearDown(() => overlayEntry..remove()..dispose());
+      final GlobalKey key = GlobalKey(debugLabel: 'key');
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                // The Positioned widget prevents a relayout boundary from being
+                // introduced between the Overlay and OverlayPortal.
+                return Positioned(
+                  top: 0,
+                  left: 0,
+                  child: OverlayPortal(
+                    controller: controller1,
+                    overlayChildBuilder: (BuildContext context) => SizedBox(key: key),
+                    child: const SizedBox(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
 
-    final Widget widget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: Overlay(
-        initialEntries: <OverlayEntry>[
-          overlayEntry = OverlayEntry(
-            builder: (BuildContext context) {
-              // The Positioned widget prevents a relayout boundary from being
-              // introduced between the Overlay and OverlayPortal.
-              return Positioned(
-                top: 0,
-                left: 0,
-                child: OverlayPortal(
-                  controller: controller1,
-                  overlayChildBuilder: (BuildContext context) => SizedBox(key: key),
-                  child: const SizedBox(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+      controller1.hide();
+      await tester.pumpWidget(widget);
 
-    controller1.hide();
-    await tester.pumpWidget(widget);
-
-    controller1.show();
-    await tester.pump();
-    expect(find.byKey(key), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    verifyTreeIsClean();
+      controller1.show();
+      await tester.pump();
+      expect(find.byKey(key), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      verifyTreeIsClean();
   });
 
   testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
@@ -343,7 +346,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('show/hide works', (WidgetTester tester) async {
+  testWidgets('show/hide works', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
@@ -384,7 +387,7 @@ void main() {
     expect(find.byWidget(target), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('overlayChildBuilder is not evaluated until show is called', (WidgetTester tester) async {
+  testWidgets('overlayChildBuilder is not evaluated until show is called', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
@@ -410,7 +413,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('overlay child can use Positioned', (WidgetTester tester) async {
+  testWidgets('overlay child can use Positioned', (WidgetTester tester) async {
     double dimensions = 30;
     late StateSetter setState;
     late final OverlayEntry overlayEntry;
@@ -458,7 +461,7 @@ void main() {
     expect(tester.getSize(find.byType(Placeholder)), const Size(50, 50)) ;
   });
 
-  testWidgetsWithLeakTracking('overlay child can be hit tested', (WidgetTester tester) async {
+  testWidgets('overlay child can be hit tested', (WidgetTester tester) async {
     double offset = 0;
     late StateSetter setState;
     late final OverlayEntry overlayEntry;
@@ -515,7 +518,7 @@ void main() {
     expect(isHit, true);
   });
 
-  testWidgetsWithLeakTracking('works in a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('works in a LayoutBuilder', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
 
@@ -545,7 +548,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('works in a LayoutBuilder 2', (WidgetTester tester) async {
+  testWidgets('works in a LayoutBuilder 2', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
     late StateSetter setState;
@@ -584,7 +587,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('works in a LayoutBuilder 3', (WidgetTester tester) async {
+  testWidgets('works in a LayoutBuilder 3', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());
     late StateSetter setState;
@@ -632,7 +635,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('throws when no Overlay', (WidgetTester tester) async {
+  testWidgets('throws when no Overlay', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -660,7 +663,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('widget is laid out before overlay child', (WidgetTester tester) async {
+  testWidgets('widget is laid out before overlay child', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
     final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
     final RenderBox overlayChildBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
@@ -715,7 +718,7 @@ void main() {
     verifyTreeIsClean();
   });
 
-  testWidgetsWithLeakTracking('adding/removing overlay child does not redirty overlay more than once', (WidgetTester tester) async {
+  testWidgets('adding/removing overlay child does not redirty overlay more than once', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
     final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');
     final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
@@ -777,7 +780,66 @@ void main() {
     verifyTreeIsClean();
   });
 
-  testWidgetsWithLeakTracking('Adding/Removing OverlayPortal in LayoutBuilder during layout', (WidgetTester tester) async {
+  group('Adding/removing overlay child causes repaint', () {
+    // Regression test for https://github.com/flutter/flutter/issues/134656.
+    const Key childKey = Key('child');
+    final OverlayEntry overlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return RepaintBoundary(
+          child: OverlayPortal(
+            controller: controller1,
+            overlayChildBuilder: (BuildContext context) => const SizedBox(),
+            child: const SizedBox(key: childKey),
+          ),
+        );
+      },
+    );
+    final Widget widget = Directionality(
+      key: GlobalKey(debugLabel: 'key'),
+      textDirection: TextDirection.ltr,
+      child: Overlay(initialEntries: <OverlayEntry>[overlayEntry]),
+    );
+    tearDown(overlayEntry.remove);
+    tearDownAll(overlayEntry.dispose);
+
+    testWidgets('Adding child', (WidgetTester tester) async {
+      controller1.hide();
+      await tester.pumpWidget(widget);
+
+      final RenderBox renderTheater = tester.renderObject<RenderBox>(find.byType(Overlay));
+      final RenderBox renderChild = tester.renderObject<RenderBox>(find.byKey(childKey));
+      assert(!renderTheater.debugNeedsPaint);
+      assert(!renderChild.debugNeedsPaint);
+
+      controller1.show();
+      await tester.pump(null, EnginePhase.layout);
+      expect(renderTheater.debugNeedsPaint, isTrue);
+      expect(renderChild.debugNeedsPaint, isFalse);
+
+      // Discard the dirty render tree.
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('Removing child', (WidgetTester tester) async {
+      controller1.show();
+      await tester.pumpWidget(widget);
+
+      final RenderBox renderTheater = tester.renderObject<RenderBox>(find.byType(Overlay));
+      final RenderBox renderChild = tester.renderObject<RenderBox>(find.byKey(childKey));
+      assert(!renderTheater.debugNeedsPaint);
+      assert(!renderChild.debugNeedsPaint);
+
+      controller1.hide();
+      await tester.pump(null, EnginePhase.layout);
+      expect(renderTheater.debugNeedsPaint, isTrue);
+      expect(renderChild.debugNeedsPaint, isFalse);
+
+      // Discard the dirty render tree.
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  testWidgets('Adding/Removing OverlayPortal in LayoutBuilder during layout', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
     final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');
     controller1.hide();
@@ -999,7 +1061,7 @@ void main() {
   });
 
   group('GlobalKey Reparenting', () {
-    testWidgetsWithLeakTracking('child is laid out before overlay child after OverlayEntry shuffle', (WidgetTester tester) async {
+    testWidgets('child is laid out before overlay child after OverlayEntry shuffle', (WidgetTester tester) async {
       int layoutCount = 0;
 
       final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
@@ -1139,7 +1201,7 @@ void main() {
       expect(layoutCount2, 1);
     });
 
-    testWidgetsWithLeakTracking('Swap child and overlayChild', (WidgetTester tester) async {
+    testWidgets('Swap child and overlayChild', (WidgetTester tester) async {
       final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
       final RenderBox overlayChildBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
 
@@ -1181,7 +1243,7 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgetsWithLeakTracking('forgetChild', (WidgetTester tester) async {
+    testWidgets('forgetChild', (WidgetTester tester) async {
       final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
       final RenderBox overlayChildBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
 
@@ -1296,7 +1358,7 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgetsWithLeakTracking('Paint order', (WidgetTester tester) async {
+    testWidgets('Paint order', (WidgetTester tester) async {
       final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
       final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
 
@@ -1421,7 +1483,7 @@ void main() {
         setState2 = null;
       });
 
-      testWidgetsWithLeakTracking('between OverlayEntry & overlayChild', (WidgetTester tester) async {
+      testWidgets('between OverlayEntry & overlayChild', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1469,7 +1531,7 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
 
-      testWidgetsWithLeakTracking('between OverlayEntry & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
+      testWidgets('between OverlayEntry & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1520,7 +1582,7 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
 
-      testWidgetsWithLeakTracking('between overlayChild & overlayChild', (WidgetTester tester) async {
+      testWidgets('between overlayChild & overlayChild', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1572,7 +1634,7 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
 
-      testWidgetsWithLeakTracking('between overlayChild & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
+      testWidgets('between overlayChild & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1631,7 +1693,7 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
 
-      testWidgetsWithLeakTracking('between child & overlayChild', (WidgetTester tester) async {
+      testWidgets('between child & overlayChild', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1673,7 +1735,7 @@ void main() {
         expect(counter2.layoutCount, 3);
       });
 
-      testWidgetsWithLeakTracking('between child & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
+      testWidgets('between child & overlayChild, featuring LayoutBuilder', (WidgetTester tester) async {
         final _RenderLayoutCounter counter1 = _RenderLayoutCounter();
         final _RenderLayoutCounter counter2 = _RenderLayoutCounter();
 
@@ -1720,7 +1782,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Safe to move the overlay child to a different Overlay and remove the old Overlay', (WidgetTester tester) async {
+    testWidgets('Safe to move the overlay child to a different Overlay and remove the old Overlay', (WidgetTester tester) async {
       controller1.show();
       final GlobalKey key = GlobalKey(debugLabel: 'key');
       final GlobalKey oldOverlayKey = GlobalKey(debugLabel: 'old overlay');
@@ -1786,7 +1848,7 @@ void main() {
   });
 
   group('Paint order', () {
-    testWidgetsWithLeakTracking('show bringsToTop', (WidgetTester tester) async {
+    testWidgets('show bringsToTop', (WidgetTester tester) async {
       controller1.hide();
 
       const _PaintOrder child1 = _PaintOrder();
@@ -1853,7 +1915,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Paint order does not change after global key reparenting', (WidgetTester tester) async {
+    testWidgets('Paint order does not change after global key reparenting', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
 
       late StateSetter setState;
@@ -1914,6 +1976,255 @@ void main() {
       theater.visitChildren(childrenVisited.add);
       // The child list stays the same.
       expect(childrenVisited, containsAllInOrder(<RenderObject>[child1Box.parent!, child2Box.parent!]));
+    });
+  });
+
+  group('Semantics', () {
+    testWidgets('ordering and transform', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      final double rowOriginY = TestSemantics.fullScreen.height - 10;
+
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return DefaultTextStyle(
+                  style: const TextStyle(fontSize: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        child: OverlayPortal(
+                          controller: controller1,
+                          overlayChildBuilder: (BuildContext context) => const Positioned(left: 0.0, top: 0.0, child: Text('BBBB')),
+                          child: const Text('A'),
+                        ),
+                      ),
+                      const Text('CC'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      final Matrix4 node1Transform = Matrix4.identity()
+            ..scale(3.0, 3.0, 1.0)
+            ..translate(0.0, TestSemantics.fullScreen.height - 10.0);
+      final Matrix4 node4Transform = node1Transform.clone()..translate(10.0);
+
+      final TestSemantics expected = TestSemantics.root(children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          rect: Offset.zero & const Size(10, 10),
+          transform: node1Transform,
+          children: <TestSemantics>[
+            TestSemantics(id: 2, label: 'A', rect: Offset.zero & const Size(10, 10)),
+            // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
+            TestSemantics(
+              id: 3,
+              label: 'BBBB',
+              rect: Offset.zero & const Size(40, 10),
+              transform: Matrix4.translationValues(0, -rowOriginY, 0),
+            ),
+          ],
+        ),
+        TestSemantics(
+          id: 4,
+          label: 'CC',
+          rect: Offset.zero & const Size(20, 10),
+          transform: node4Transform
+        ),
+      ]);
+
+      expect(semantics, hasSemantics(expected));
+      semantics.dispose();
+    });
+
+    testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return DefaultTextStyle(
+                  style: const TextStyle(fontSize: 10),
+                  child: ListView(
+                    children: <Widget>[
+                      // Clips OverlayPortal, making it only half visible.
+                      SizedBox(height: TestSemantics.fullScreen.height - 5),
+                      Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        child: OverlayPortal(
+                          controller: controller1,
+                          overlayChildBuilder: (BuildContext context) {
+                            return Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 0,
+                              height: 10,
+                              child: ListView(
+                                children: const <Widget>[
+                                  SizedBox(height: 3), // Clips B so it's only 7 pixels tall.
+                                  Text('B'),
+                                ],
+                              ),
+                            );
+                          },
+                          child: const Text('A'),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(widget);
+
+      final SemanticsNode clippedOverlayPortal = semantics.nodesWith(label: 'A').single;
+      final SemanticsNode clippedOverlayChild = semantics.nodesWith(label: 'B').single;
+
+      expect(clippedOverlayPortal.rect, Offset.zero & const Size(800, 5));
+      expect(clippedOverlayChild.rect, Offset.zero & const Size(800, 7));
+
+      expect(clippedOverlayPortal.transform, isNull);
+      // The parent SemanticsNode is created by the ListView.
+      expect(clippedOverlayChild.transform, Matrix4.translationValues(0.0, 3.0, 0.0));
+
+      semantics.dispose();
+    });
+
+    testWidgets("OverlayPortal's semantics node is hidden", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return DefaultTextStyle(
+                  style: const TextStyle(fontSize: 10),
+                  child: ListView(
+                    children: <Widget>[
+                      // Clips OverlayPortal, making it completely invisible.
+                      SizedBox(height: TestSemantics.fullScreen.height),
+                      Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        child: OverlayPortal(
+                          controller: controller1,
+                          overlayChildBuilder: (BuildContext context) {
+                            return const Positioned(
+                              left: 0,
+                              top: 0,
+                              child: Text('B'),
+                            );
+                          },
+                          child: const Text('A'),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(widget);
+
+      final SemanticsNode clippedOverlayPortal = semantics.nodesWith(label: 'A').single;
+      final SemanticsNode clippedOverlayChild = semantics.nodesWith(label: 'B').single;
+
+      expect(clippedOverlayPortal.rect, Offset.zero & const Size(800, 10));
+      expect(clippedOverlayChild.rect, Offset.zero & const Size(10, 10));
+
+      expect(clippedOverlayPortal.transform, isNull);
+      // The parent SemanticsNode is created by OverlayPortal.
+      expect(clippedOverlayChild.transform, Matrix4.translationValues(0.0, -600.0, 0.0));
+
+      semantics.dispose();
+    });
+
+    testWidgets("OverlayPortal's semantics node is dropped but the element is kept alive", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      final ScrollController controller = ScrollController(initialScrollOffset: 10);
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return DefaultTextStyle(
+                  style: const TextStyle(fontSize: 10),
+                  child: ListView(
+                    controller: controller,
+                    cacheExtent: 0,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    addSemanticIndexes: false,
+                    children: <Widget>[
+                      // Clips OverlayPortal, making it completely invisible.
+                      SizedBox(height: TestSemantics.fullScreen.height),
+                      KeepAlive(
+                        keepAlive: true,
+                        child: Semantics(
+                          container: true,
+                          explicitChildNodes: true,
+                          child: OverlayPortal(
+                            controller: controller1,
+                            overlayChildBuilder: (BuildContext context) {
+                              return const Positioned(
+                                left: 0,
+                                top: 0,
+                                child: Text('B'),
+                              );
+                            },
+                            child: const Text('A'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(widget);
+      expect(semantics.nodesWith(label: 'A'), isNotEmpty);
+      expect(semantics.nodesWith(label: 'B'), isNotEmpty);
+
+      controller.jumpTo(0);
+      await tester.pump();
+
+      expect(semantics.nodesWith(label: 'A'), isEmpty);
+      expect(semantics.nodesWith(label: 'B'), isEmpty);
+      semantics.dispose();
+
+      final RenderObject overlayRenderObject = tester.renderObject(find.byType(Overlay));
+      // Paints 'B' but not both 'A' and 'B'.
+      expect(overlayRenderObject, paints..paragraph());
+      expect(overlayRenderObject, isNot(paints..paragraph()..paragraph()));
     });
   });
 }

@@ -632,7 +632,7 @@ void main() {
       // Distance between the first and the last column should be the same.
       expect(
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
-        distance,
+        moreOrLessEquals(distance),
       );
     });
 
@@ -1685,8 +1685,10 @@ void main() {
     void onSelectedItemChanged(int index) {
       lastSelectedItem = index;
     }
+    final FixedExtentScrollController scrollController1 = FixedExtentScrollController();
+    addTearDown(scrollController1.dispose);
     await tester.pumpWidget(_buildPicker(
-      controller: FixedExtentScrollController(),
+      controller: scrollController1,
       onSelectedItemChanged: onSelectedItemChanged,
     ));
 
@@ -1702,8 +1704,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(lastSelectedItem, 2);
 
+    final FixedExtentScrollController scrollController2 = FixedExtentScrollController();
+    addTearDown(scrollController2.dispose);
     await tester.pumpWidget(_buildPicker(
-      controller: FixedExtentScrollController(),
+      controller: scrollController2,
       onSelectedItemChanged: onSelectedItemChanged,
     ));
 

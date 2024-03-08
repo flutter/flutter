@@ -17,13 +17,16 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     this.dryRunResult = const FakeNativeAssetsBuilderResult(),
     this.buildResult = const FakeNativeAssetsBuilderResult(),
     CCompilerConfig? cCompilerConfigResult,
-  }) : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig();
+    CCompilerConfig? ndkCCompilerConfigResult,
+  })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig(),
+        ndkCCompilerConfigResult = ndkCCompilerConfigResult ?? CCompilerConfig();
 
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfig cCompilerConfigResult;
+  final CCompilerConfig ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int dryRunInvocations = 0;
@@ -70,6 +73,9 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
 
   @override
   Future<CCompilerConfig> get cCompilerConfig async => cCompilerConfigResult;
+
+  @override
+  Future<CCompilerConfig> get ndkCCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeNativeAssetsBuilderResult

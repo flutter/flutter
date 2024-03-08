@@ -12,10 +12,12 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 
 void main() {
   late Environment environment;
@@ -29,6 +31,7 @@ void main() {
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -36,6 +39,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -50,6 +57,7 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       usage: usage,
+      analytics: fakeAnalytics,
     );
 
     binary = environment.outputDir
@@ -398,6 +406,13 @@ void main() {
 
     await const ReleaseMacOSBundleFlutterAssets().build(environment);
     expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.appleUsageEvent(
+        workflow: 'assemble',
+        parameter: 'macos-archive',
+        result: 'success',
+      ),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -411,6 +426,13 @@ void main() {
     await expectLater(() => const ReleaseMacOSBundleFlutterAssets().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()));
     expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.appleUsageEvent(
+        workflow: 'assemble',
+        parameter: 'macos-archive',
+        result: 'fail',
+      ),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

@@ -13,14 +13,12 @@ body:
           - https://flutter.dev/
           - https://api.flutter.dev/
           - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
-  - type: checkboxes
+  - type: markdown
     attributes:
-      label: Is there an existing issue for this?
-      options:
-      - label: I have searched the [existing package issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Apackage)
-        required: true
-      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-        required: true
+      value: |
+        Before filling the form fields, please consider the following:
+        - Ensure that you have searched the [existing package issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Apackage)
+        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
   - type: dropdown
     id: packages
     attributes:
@@ -59,12 +57,15 @@ body:
         - palette_generator
         - path_provider
         - pigeon
+        - platform
         - plugin_platform_interface
         - pointer_interceptor
+        - process
         - quick_actions
         - rfw
         - shared_preferences
         - standard_message_codec
+        - two_dimensional_scrollables
         - url_launcher
         - video_player
         - web_benchmarks
@@ -112,7 +113,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload this.
       value: |
-        <details><summary>pubspec.lock</summary>
+        <details open><summary>pubspec.lock</summary>
 
         ```lock
         [Paste file content here]
@@ -161,7 +162,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload your code sample.
       value: |
-        <details><summary>Code sample</summary>
+        <details open><summary>Code sample</summary>
 
         ```dart
         [Paste your code here]
@@ -176,7 +177,7 @@ body:
       description: |
         Upload any screenshots or videos of the bug if applicable.
       value: |
-        <details>
+        <details open>
         <summary>Screenshots / Video demonstration</summary>
 
         [Upload media here]
@@ -198,7 +199,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload logs.
       value: |
-        <details><summary>Logs</summary>
+        <details open><summary>Logs</summary>
 
         ```console
         [Paste your logs here]
@@ -211,7 +212,7 @@ body:
       description: |
         Please provide the full output of running `flutter doctor -v`
       value: |
-        <details><summary>Doctor output</summary>
+        <details open><summary>Doctor output</summary>
 
         ```console
         [Paste your output here]

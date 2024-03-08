@@ -24,7 +24,7 @@ apply plugin: "com.android.dynamic-feature"
 
 android {
     namespace "io.flutter.integration.deferred_components_test.component1"
-    compileSdkVersion 33
+    compileSdk 34
 
     sourceSets {
         applicationVariants.all { variant ->

@@ -466,11 +466,15 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior - sumAllPointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
-      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      HorizontalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
     final VerticalDragGestureRecognizer drag2 =
-      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      VerticalDragGestureRecognizer()
+        ..dragStartBehavior = DragStartBehavior.down
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
@@ -507,10 +511,17 @@ void main() {
     tester.route(down6);
     log.add('-d');
 
+    // Check all active pointers can trigger 'drag1-update'.
+
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-e');
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
     log.add('-f');
+
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-g');
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    log.add('-h');
 
     tester.route(pointer5.up());
     tester.route(pointer6.up());
@@ -532,7 +543,108 @@ void main() {
       '-e',
       'drag1-update',
       '-f',
-      'drag1-end',
+      'drag1-update',
+      '-g',
+      'drag1-update',
+      '-h',
+      'drag1-end'
+    ]);
+  });
+
+  testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(() => drag1.dispose);
+    addTearDown(() => drag2.dispose);
+
+    final List<String> log = <String>[];
+    drag1.onDown = (_) { log.add('drag1-down'); };
+    drag1.onStart = (_) { log.add('drag1-start'); };
+    drag1.onUpdate = (_) { log.add('drag1-update'); };
+    drag1.onEnd = (_) { log.add('drag1-end'); };
+    drag1.onCancel = () { log.add('drag1-cancel'); };
+    drag2.onDown = (_) { log.add('drag2-down'); };
+    drag2.onStart = (_) { log.add('drag2-start'); };
+    drag2.onUpdate = (_) { log.add('drag2-update'); };
+    drag2.onEnd = (_) { log.add('drag2-end'); };
+    drag2.onCancel = () { log.add('drag2-cancel'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
+    drag1.addPointer(down5);
+    drag2.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    log.add('-a');
+
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    log.add('-b');
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+    log.add('-c');
+
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down6);
+    drag2.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    log.add('-d');
+
+    // Current latest active pointer is pointer6.
+
+    // Should not trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-e');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-f');
+
+    // Latest active pointer can trigger the drag1-update.
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-g');
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    log.add('-h');
+
+    // Release the latest active pointer.
+    tester.route(pointer6.up());
+    log.add('-i');
+
+    // Current latest active pointer is pointer5.
+
+    // Latest active pointer can trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-j');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-k');
+
+    tester.route(pointer5.up());
+
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      '-a',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      '-b',
+      'drag1-update',
+      '-c',
+      'drag2-down',
+      'drag2-cancel',
+      '-d',
+      '-e',
+      '-f',
+      'drag1-update',
+      '-g',
+      'drag1-update',
+      '-h',
+      '-i',
+      'drag1-update',
+      '-j',
+      'drag1-update',
+      '-k',
+      'drag1-end'
     ]);
   });
 

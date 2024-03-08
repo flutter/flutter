@@ -45,6 +45,9 @@ void main() {
         command: <Pattern>['flutter', '--version', '--machine'],
         stdout: testVersionInfo,
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       expect(
         apidocs.FlutterInformation.instance.getBranchName(),
         branchName,
@@ -60,6 +63,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
 
       expect(
@@ -82,6 +88,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
 
       expect(
@@ -125,6 +134,9 @@ void main() {
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
@@ -136,6 +148,9 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
+      ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -150,6 +165,9 @@ void main() {
         command: <Pattern>['git', 'status', '-b', '--porcelain'],
         stdout: '## $branchName',
       ));
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <Pattern>['git', 'rev-parse', 'HEAD'],
+      ));
       final Directory root = flutterInformation.getFlutterRoot();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(root.path, equals('/home/user/flutter'));
@@ -162,10 +180,15 @@ void main() {
     });
     test('parses version properly', () async {
       fakePlatform.environment['FLUTTER_VERSION'] = testVersionInfo;
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+      ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(info['frameworkVersion'], isNotNull);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
@@ -183,14 +206,19 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('realm');
       setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
-        stdout: testVersionInfo,
-      ));
-      fakeProcessManager.addCommand(const FakeCommand(
-        command: <Pattern>['git', 'status', '-b', '--porcelain'],
-        stdout: '## $branchName',
-      ));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+        ),
+      ]);
       final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['engineRealm'], equals('realm'));

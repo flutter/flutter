@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "शोधा",
   "noSpellCheckReplacementsLabel": "कोणतेही बदल आढळले नाहीत",
   "menuDismissLabel": "मेनू डिसमिस करा",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "शोध घ्या",
+  "searchWebButtonLabel": "वेबवर शोधा",
+  "shareButtonLabel": "शेअर करा...",
+  "clearButtonLabel": "Clear"
 }

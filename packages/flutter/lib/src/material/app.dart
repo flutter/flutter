@@ -184,6 +184,7 @@ enum ThemeMode {
 ///   ),
 /// )
 /// ```
+///
 /// See also:
 ///
 ///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].
@@ -246,6 +247,7 @@ class MaterialApp extends StatefulWidget {
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
     this.useInheritedMediaQuery = false,
+    this.themeAnimationStyle,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -296,6 +298,7 @@ class MaterialApp extends StatefulWidget {
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
     this.useInheritedMediaQuery = false,
+    this.themeAnimationStyle,
   }) : assert(routerDelegate != null || routerConfig != null),
        navigatorObservers = null,
        navigatorKey = null,
@@ -753,6 +756,28 @@ class MaterialApp extends StatefulWidget {
   )
   final bool useInheritedMediaQuery;
 
+  /// Used to override the theme animation curve and duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the theme animation duration in the underlying [AnimatedTheme] widget.
+  /// If it is null, then [themeAnimationDuration] will be used. Otherwise,
+  /// defaults to 200ms.
+  ///
+  /// If [AnimationStyle.curve] is provided, it will be used to override
+  /// the theme animation curve in the underlying [AnimatedTheme] widget.
+  /// If it is null, then [themeAnimationCurve] will be used. Otherwise,
+  /// defaults to [Curves.linear].
+  ///
+  /// To disable the theme animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the theme animation curve and
+  /// duration in the [MaterialApp] widget using [AnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/app/app.0.dart **
+  /// {@end-tool}
+  final AnimationStyle? themeAnimationStyle;
+
   @override
   State<MaterialApp> createState() => _MaterialAppState();
 
@@ -930,34 +955,46 @@ class _MaterialAppState extends State<MaterialApp> {
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
+    Widget childWidget = child ?? const SizedBox.shrink();
+
+    if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
+      if (widget.builder != null) {
+        childWidget = Builder(
+          builder: (BuildContext context) {
+            // Why are we surrounding a builder with a builder?
+            //
+            // The widget.builder may contain code that invokes
+            // Theme.of(), which should return the theme we selected
+            // above in AnimatedTheme. However, if we invoke
+            // widget.builder() directly as the child of AnimatedTheme
+            // then there is no Context separating them, and the
+            // widget.builder() will not find the theme. Therefore, we
+            // surround widget.builder with yet another builder so that
+            // a context separates them and Theme.of() correctly
+            // resolves to the theme we passed to AnimatedTheme.
+            return widget.builder!(context, child);
+          },
+        );
+      }
+      childWidget = AnimatedTheme(
+        data: theme,
+        duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
+        curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
+        child: childWidget,
+      );
+    } else {
+      childWidget = Theme(
+        data: theme,
+        child: childWidget,
+      );
+    }
+
     return ScaffoldMessenger(
       key: widget.scaffoldMessengerKey,
       child: DefaultSelectionStyle(
         selectionColor: effectiveSelectionColor,
         cursorColor: effectiveCursorColor,
-        child: AnimatedTheme(
-          data: theme,
-          duration: widget.themeAnimationDuration,
-          curve: widget.themeAnimationCurve,
-          child: widget.builder != null
-            ? Builder(
-                builder: (BuildContext context) {
-                  // Why are we surrounding a builder with a builder?
-                  //
-                  // The widget.builder may contain code that invokes
-                  // Theme.of(), which should return the theme we selected
-                  // above in AnimatedTheme. However, if we invoke
-                  // widget.builder() directly as the child of AnimatedTheme
-                  // then there is no Context separating them, and the
-                  // widget.builder() will not find the theme. Therefore, we
-                  // surround widget.builder with yet another builder so that
-                  // a context separates them and Theme.of() correctly
-                  // resolves to the theme we passed to AnimatedTheme.
-                  return widget.builder!(context, child);
-                },
-              )
-            : child ?? const SizedBox.shrink(),
-        ),
+        child: childWidget,
       ),
     );
   }
@@ -1042,8 +1079,9 @@ class _MaterialAppState extends State<MaterialApp> {
     Widget result = _buildWidgetApp(context);
     result = Focus(
       canRequestFocus: false,
-      onKey: (FocusNode node, RawKeyEvent event) {
-        if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) {
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
+             event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
         }
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;

@@ -1125,7 +1125,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.dwds.screenshot',
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: FakeRPCError(code: RPCErrorCodes.kInternalError),
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
@@ -1165,7 +1165,7 @@ void main() {
             'enabled': 'true',
           },
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: const FakeRPCError(code: RPCErrorCodes.kInternalError),
         ),
       ],
       logger: logger,
@@ -1322,9 +1322,6 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   bool isSupported() => true;

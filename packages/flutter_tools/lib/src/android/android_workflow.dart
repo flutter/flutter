@@ -389,12 +389,16 @@ class AndroidLicenseValidator extends DoctorValidator {
         ),
       );
 
+      final List<String> stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {
         await Future.wait<void>(<Future<void>>[
           _stdio.addStdoutStream(process.stdout),
-          _stdio.addStderrStream(process.stderr),
+          process.stderr.forEach((List<int> event) {
+            _stdio.stderr.add(event);
+            stderrLines.add(utf8.decode(event));
+          }),
         ]);
       } on Exception catch (err, stack) {
         _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
@@ -403,11 +407,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
-        throwToolExit(_userMessages.androidCannotRunSdkManager(
-          _androidSdk.sdkManagerPath ?? '',
-          'exited code $exitCode',
-          _platform,
-        ));
+        throwToolExit(_messageForSdkManagerError(stderrLines, exitCode));
       }
       return true;
     } on ProcessException catch (e) {
@@ -425,5 +425,31 @@ class AndroidLicenseValidator extends DoctorValidator {
       return false;
     }
     return _processManager.canRun(sdkManagerPath);
+  }
+
+  String _messageForSdkManagerError(
+    List<String> androidSdkStderr,
+    int exitCode,
+  ) {
+    final String sdkManagerPath = _androidSdk!.sdkManagerPath!;
+
+    final bool failedDueToJdkIncompatibility = androidSdkStderr.join().contains(
+      RegExp(r'java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
+        r'has been compiled by a more recent version of the Java Runtime'));
+
+    if (failedDueToJdkIncompatibility) {
+      return 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code $exitCode".\n'
+        'It appears the version of the Java binary used (${_java!.binaryPath}) is '
+        'too out-of-date and is incompatible with the Android sdkmanager tool.\n'
+        'If the Java binary came bundled with Android Studio, consider updating '
+        'your installation of Android studio. Alternatively, you can uninstall '
+        'the Android SDK command-line tools and install an earlier version. ';
+    }
+
+    return _userMessages.androidCannotRunSdkManager(
+      sdkManagerPath,
+      'exited code $exitCode',
+      _platform,
+    );
   }
 }

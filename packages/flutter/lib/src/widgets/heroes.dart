@@ -784,7 +784,17 @@ class HeroController extends NavigatorObserver {
   ///
   /// The [createRectTween] argument is optional. If null, the controller uses a
   /// linear [Tween<Rect>].
-  HeroController({ this.createRectTween });
+  HeroController({ this.createRectTween }) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$HeroController',
+        object: this,
+      );
+    }
+  }
 
   /// Used to create [RectTween]s that interpolate the position of heroes in flight.
   ///
@@ -902,7 +912,7 @@ class HeroController extends NavigatorObserver {
           return;
         }
         _startHeroTransition(from, to, flightType, isUserGestureTransition);
-      });
+      }, debugLabel: 'HeroController.startTransition');
     }
   }
 
@@ -1043,6 +1053,12 @@ class HeroController extends NavigatorObserver {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     for (final _HeroFlight flight in _flights.values) {
       flight.dispose();
     }

@@ -70,7 +70,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.asset_sample"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {

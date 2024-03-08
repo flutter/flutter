@@ -69,17 +69,6 @@ void main() {
       AndroidBuilder: () => FakeAndroidBuilder(),
     });
 
-    testUsingContext('indicate that project is a plugin', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=plugin', '--project-name=aar_test']);
-
-      final BuildAarCommand command = await runCommandIn(projectPath);
-      expect((await command.usageValues).commandBuildAarProjectType, 'plugin');
-
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
-    });
-
     testUsingContext('indicate the target platform', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
@@ -128,7 +117,7 @@ void main() {
 
     testUsingContext('defaults', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(projectPath);
 
       expect(fakeAndroidBuilder.buildNumber, '1.0');
@@ -158,7 +147,7 @@ void main() {
 
     testUsingContext('parses flags', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(
         projectPath,
         arguments: <String>[
@@ -228,7 +217,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{

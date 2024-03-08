@@ -4,10 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Use home', (WidgetTester tester) async {
+  testWidgets('Use home', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -19,7 +18,7 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Use routes', (WidgetTester tester) async {
+  testWidgets('Use routes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -33,7 +32,7 @@ void main() {
     expect(find.text('first route'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Use home and named routes', (WidgetTester tester) async {
+  testWidgets('Use home and named routes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -59,7 +58,7 @@ void main() {
     expect(find.text('second named route'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Use onGenerateRoute', (WidgetTester tester) async {
+  testWidgets('Use onGenerateRoute', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -81,7 +80,7 @@ void main() {
     expect(find.text('generated home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Use onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
     late String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
@@ -102,7 +101,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Can use navigatorKey to navigate', (WidgetTester tester) async {
+  testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -123,7 +122,7 @@ void main() {
     expect(find.text('second route'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Changing the key resets the navigator', (WidgetTester tester) async {
+  testWidgets('Changing the key resets the navigator', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -173,7 +172,7 @@ void main() {
     expect(find.text('second route'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Throws FlutterError when onUnknownRoute is null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute is null', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -210,7 +209,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
@@ -240,7 +239,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
+  testWidgets('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',

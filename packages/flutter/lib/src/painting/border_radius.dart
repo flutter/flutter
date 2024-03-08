@@ -400,10 +400,10 @@ class BorderRadius extends BorderRadiusGeometry {
     // RRects don't make sense.
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topLeft: topLeft.clamp(minimum: Radius.zero),
+      topRight: topRight.clamp(minimum: Radius.zero),
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero),
+      bottomRight: bottomRight.clamp(minimum: Radius.zero),
     );
   }
 

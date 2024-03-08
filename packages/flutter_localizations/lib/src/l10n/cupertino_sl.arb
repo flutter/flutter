@@ -34,7 +34,8 @@
   "searchTextFieldPlaceholderLabel": "Iskanje",
   "noSpellCheckReplacementsLabel": "Ni zamenjav",
   "menuDismissLabel": "Opusti meni",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Pogled gor",
+  "searchWebButtonLabel": "Iskanje v spletu",
+  "shareButtonLabel": "Deli …",
+  "clearButtonLabel": "Clear"
 }

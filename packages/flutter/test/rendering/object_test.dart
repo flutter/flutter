@@ -8,11 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
+
+  test('PipelineOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => PipelineOwner().dispose(), PipelineOwner),
+      areCreateAndDispose,
+    );
+  });
 
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window

@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
 const String _expText = 'Éxp'; // renders in the test font as:
@@ -20,7 +19,7 @@ const String _expText = 'Éxp'; // renders in the test font as:
 // ÉÉÉÉxxxxpppp
 
 void main() {
-  testWidgetsWithLeakTracking('Default background', (WidgetTester tester) async {
+  testWidgets('Default background', (WidgetTester tester) async {
     await tester.pumpWidget(const Align(
       alignment: Alignment.topLeft,
       child: Text(_expText, textDirection: TextDirection.ltr, style: TextStyle(color: Color(0xFF345678), fontSize: _crispText))),
@@ -41,7 +40,7 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgetsWithLeakTracking('Default text color', (WidgetTester tester) async {
+  testWidgets('Default text color', (WidgetTester tester) async {
     await tester.pumpWidget(const ColoredBox(
       color: Color(0xFFABCDEF),
       child: Align(
@@ -66,7 +65,7 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgetsWithLeakTracking('Default text selection color', (WidgetTester tester) async {
+  testWidgets('Default text selection color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);

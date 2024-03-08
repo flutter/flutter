@@ -17,7 +17,6 @@ const String _javaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
-
   Java({
     required this.javaHome,
     required this.binaryPath,
@@ -154,15 +153,26 @@ class Java {
     // Should look something like 'openjdk 19.0.2 2023-01-17'.
     final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
-    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
+    final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
+      // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
+      final RegExp secondJdkVersionRegex =
+          RegExp(r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d');
+      final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
+      if (match != null) {
+        final Version? parsedVersion = Version.parse(match.namedGroup('version'));
+        if (parsedVersion == null) {
+          return null;
+        }
+        return parsedVersion;
+      }
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
     }
-    final String? version = matches.first.group(0);
+    final String? version = matches.first.namedGroup('version');
     if (version == null || version.split('_').isEmpty) {
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;

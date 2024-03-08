@@ -984,9 +984,9 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
 
   /// Resolves this [CupertinoDynamicColor] using the provided [BuildContext].
   ///
-  /// Calling this method will create a new [CupertinoDynamicColor] that is almost
-  /// identical to this [CupertinoDynamicColor], except the effective color is
-  /// changed to adapt to the given [BuildContext].
+  /// Calling this method will create a new [CupertinoDynamicColor] that is
+  /// almost identical to this [CupertinoDynamicColor], except the effective
+  /// color is changed to adapt to the given [BuildContext].
   ///
   /// For example, if the given [BuildContext] indicates the widgets in the
   /// subtree should be displayed in dark mode (the surrounding
@@ -1000,17 +1000,18 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// except its effective color will be the `darkHighContrastElevatedColor`
   /// variant from the original [CupertinoDynamicColor].
   ///
-  /// Calling this function may create dependencies on the closest instance of some
-  /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
-  /// is different from [color], this method will call [CupertinoTheme.of], and
-  /// then [MediaQuery.of] if brightness wasn't specified in the theme data retrieved
-  /// from the previous [CupertinoTheme.of] call, in an effort to determine the
-  /// brightness value.
+  /// Calling this function may create dependencies on the closest instance of
+  /// some [InheritedWidget]s that enclose the given [BuildContext]. E.g., if
+  /// [darkColor] is different from [color], this method will call
+  /// [CupertinoTheme.maybeBrightnessOf] in an effort to determine the
+  /// brightness. If [color] is different from [highContrastColor], this method
+  /// will call [MediaQuery.maybeHighContrastOf] in an effort to determine the
+  /// high contrast setting.
   ///
-  /// If any of the required dependencies are missing from the given context, the
-  /// default value of that trait will be used ([Brightness.light] platform
-  /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
-  /// level).
+  /// If any of the required dependencies are missing from the given context,
+  /// the default value of that trait will be used ([Brightness.light] platform
+  /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base]
+  /// elevation level).
   CupertinoDynamicColor resolveFrom(BuildContext context) {
     Brightness brightness = Brightness.light;
     if (_isPlatformBrightnessDependent) {

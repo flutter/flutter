@@ -872,7 +872,7 @@ const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 ///    objects should override [didUpdateWidget] to respond to changes in their
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
-///    calls to [setState] in [didUpdateWidget] are redundant. (See alse the
+///    calls to [setState] in [didUpdateWidget] are redundant. (See also the
 ///    discussion at [Element.rebuild].)
 ///  * During development, if a hot reload occurs (whether initiated from the
 ///    command line `flutter` tool by pressing `r`, or from an IDE), the
@@ -1006,7 +1006,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$State',
         object: this,
@@ -1303,13 +1303,18 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.dispose()`.
   ///
-  /// ## Application shutdown
+  /// ## Caveats
   ///
-  /// This method is _not_ invoked when the application shuts down, because
-  /// there is no way to predict when that will happen. For example, a user's
-  /// battery could catch fire, or the user could drop the device into a
-  /// swimming pool, or the operating system could unilaterally terminate the
-  /// application process due to memory pressure.
+  /// This method is _not_ invoked at times where a developer might otherwise
+  /// expect it, such as application shutdown or dismissal via platform
+  /// native methods.
+  ///
+  /// ### Application shutdown
+  ///
+  /// There is no way to predict when application shutdown will happen. For
+  /// example, a user's battery could catch fire, or the user could drop the
+  /// device into a swimming pool, or the operating system could unilaterally
+  /// terminate the application process due to memory pressure.
   ///
   /// Applications are responsible for ensuring that they are well-behaved
   /// even in the face of a rapid unscheduled termination.
@@ -1319,6 +1324,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// To listen for platform shutdown messages (and other lifecycle changes),
   /// consider the [AppLifecycleListener] API.
+  ///
+  /// ### Dismissing Flutter UI via platform native methods
+  ///
+  /// {@macro flutter.widgets.runApp.dismissal}
   ///
   /// See also:
   ///
@@ -1332,7 +1341,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       return true;
     }());
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
@@ -2178,7 +2187,7 @@ typedef ConditionalElementVisitor = bool Function(Element element);
 ///         return TextButton(
 ///           child: const Text('BUTTON'),
 ///           onPressed: () {
-///             Scaffold.of(context).showBottomSheet<void>(
+///             Scaffold.of(context).showBottomSheet(
 ///               (BuildContext context) {
 ///                 return Container(
 ///                   alignment: Alignment.center,
@@ -3378,7 +3387,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element(Widget widget)
     : _widget = widget {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterWidgetsLibrary,
         className: '$Element',
         object: this,
@@ -4488,7 +4497,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     if (_dependencies != null && _dependencies!.isNotEmpty) {
       for (final InheritedElement dependency in _dependencies!) {
-        dependency._dependents.remove(this);
+        dependency.removeDependent(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -4533,7 +4542,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
@@ -6022,6 +6031,19 @@ class InheritedElement extends ProxyElement {
   @protected
   void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
     dependent.didChangeDependencies();
+  }
+
+  /// Called by [Element.deactivate] to remove the provided `dependent` [Element] from this [InheritedElement].
+  ///
+  /// After the dependent is removed, [Element.didChangeDependencies] will no
+  /// longer be called on it when this [InheritedElement] notifies its dependents.
+  ///
+  /// Subclasses can override this method to release any resources retained for
+  /// a given [dependent].
+  @protected
+  @mustCallSuper
+  void removeDependent(Element dependent) {
+    _dependents.remove(dependent);
   }
 
   /// Calls [Element.didChangeDependencies] of all dependent elements, if

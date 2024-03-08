@@ -585,7 +585,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           _lastOverlayEntry?.dispose();
           _lastOverlayEntry = null;
           _openController.reset();
-        });
+        }, debugLabel: 'removeContextMenuDecoy');
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -685,6 +685,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   void dispose() {
+    _tapGestureRecognizer.dispose();
     _openController.dispose();
     super.dispose();
   }
@@ -1009,7 +1010,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       _updateTweenRects();
       _internalOffstage = false;
       _setOffstageInternally();
-    });
+    }, debugLabel: 'renderContextMenuRouteOffstage');
     return super.didPush();
   }
 

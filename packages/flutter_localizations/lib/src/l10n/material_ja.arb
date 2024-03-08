@@ -28,7 +28,7 @@
   "scanTextButtonLabel": "テキストをスキャン",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべて選択",
+  "selectAllButtonLabel": "すべてを選択",
   "viewLicensesButtonLabel": "ライセンスを表示",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
@@ -51,7 +51,6 @@
   "reorderItemRight": "右に移動",
   "expandedIconTapHint": "折りたたむ",
   "collapsedIconTapHint": "展開",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "残り 1 文字（半角相当）",
   "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）",
   "refreshIndicatorSemanticLabel": "更新",
@@ -144,6 +143,6 @@
   "collapsedHint": "開きました",
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "ウェブを検索",
+  "shareButtonLabel": "共有..."
 }
