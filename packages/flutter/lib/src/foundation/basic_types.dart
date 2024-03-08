@@ -4,6 +4,10 @@
 
 import 'dart:collection';
 
+import 'package:meta/meta.dart' show immutable;
+
+import 'object.dart';
+
 // COMMON SIGNATURES
 
 /// Signature for callbacks that report that an underlying value has changed.
@@ -249,35 +253,55 @@ Duration lerpDuration(Duration a, Duration b, double t) {
   );
 }
 
-/// A wrapper that represents the baseline location of a `RenderBox`.
-extension type const BaselineOffset(double? value) {
-  /// A value that indicates that the associated `RenderBox` does not have any
-  /// baselines.
-  ///
-  /// [BaselineOffset.noBaseline] is an identity element in most binary
-  /// operations involving two [BaselineOffset]s (such as [minOf]), for render
-  /// objects with no baselines typically do not contribute to the baseline
-  /// offset of their parents.
-  static const BaselineOffset noBaseline = BaselineOffset(null);
+/// A value that is either a [Left] containing a value of type [L], or a [Right]
+/// containing a value of type [R].
+///
+/// This sealed class has two final subclasses [Left] and [Right], which can be
+/// used to represent two possible types of a value, similar to nullable types.
+sealed class Either<L, R> { }
 
-  /// Returns a new baseline location that is `offset` pixels further away from
-  /// the origin than `this`, or unchanged if `this` is [noBaseline].
-  BaselineOffset operator +(double offset) {
-    final double? value = this.value;
-    return BaselineOffset(value == null ? null : value + offset);
+/// The left branch of an [Either].
+@immutable
+final class Left<L, R> implements Either<L, R> {
+  /// Creates a [Left] with the given `value`.
+  const Left(this.value);
+  /// The value of this [Left] branch.
+  final L value;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Left<L, Object?> && other.value == value;
   }
 
-  /// Compares this [BaselineOffset] and `other`, and returns whichever is closer
-  /// to the origin.
-  ///
-  /// When both `this` and `other` are [noBaseline], this method returns
-  /// [noBaseline]. When one of them is [noBaseline], this method returns the
-  /// other oprand that's not [noBaseline].
-  BaselineOffset minOf(BaselineOffset other) {
-    return switch ((this, other)) {
-      (final double lhs?, final double rhs?) => lhs >= rhs ? other : this,
-      (final double lhs?, null) => BaselineOffset(lhs),
-      (null, final BaselineOffset rhs) => rhs,
-    };
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'Left')}($value)';
+}
+
+/// The right branch of an [Either].
+@immutable
+final class Right<L, R> implements Either<L, R> {
+  /// Creates a [Right] with the given `value`.
+  const Right(this.value);
+  /// The value of this [Right] branch.
+  final R value;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Right<Object?, R> && other.value == value;
   }
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'Right')}($value)';
 }

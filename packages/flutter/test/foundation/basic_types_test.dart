@@ -54,4 +54,20 @@ void main() {
       );
     });
   });
+
+  group('Either', () {
+    test('toString', () {
+      expect(const Left<int, double>(1).toString(), 'Left<int, double>(1)');
+      expect(const Right<int, bool>(true).toString(), 'Right<int, bool>(true)');
+    });
+
+    test('Equality', () {
+      expect(const Left<int, double>(1) == const Left<int, double>(1), isTrue);
+      expect(Left<int, double>(1) == Left<int, double>(1), isTrue); // ignore: prefer_const_constructors
+
+      expect(const Left<int, double>(1) == const Left<int, Never>(1), isTrue);
+      expect(const Left<int, Never>(1) == const Left<int, double>(1), isTrue);
+    });
+
+  });
 }
