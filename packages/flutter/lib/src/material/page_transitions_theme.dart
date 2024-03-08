@@ -771,7 +771,7 @@ class PageTransitionsTheme with Diagnosticable {
       platform = TargetPlatform.iOS;
     }
 
-    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? switch(platform) {
+    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? switch (platform) {
       TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
       TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
     };
