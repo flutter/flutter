@@ -1145,14 +1145,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
-  // When scribble is available, the FlutterTextInputView will display the native toolbar unless
-  // these text editing actions are disabled.
-  if ([self isScribbleAvailable] && sender == NULL) {
-    return NO;
-  }
   if (action == @selector(paste:)) {
     // Forbid pasting images, memojis, or other non-string content.
-    return [UIPasteboard generalPasteboard].string != nil;
+    return [UIPasteboard generalPasteboard].hasStrings;
   }
 
   return [super canPerformAction:action withSender:sender];

@@ -1299,15 +1299,15 @@ FLUTTER_ASSERT_ARC
     [mockInputView insertText:@"aaaa"];
     [mockInputView selectAll:nil];
 
-    XCTAssertFalse([mockInputView canPerformAction:@selector(copy:) withSender:NULL]);
+    XCTAssertTrue([mockInputView canPerformAction:@selector(copy:) withSender:NULL]);
     XCTAssertTrue([mockInputView canPerformAction:@selector(copy:) withSender:@"sender"]);
     XCTAssertFalse([mockInputView canPerformAction:@selector(paste:) withSender:NULL]);
     XCTAssertFalse([mockInputView canPerformAction:@selector(paste:) withSender:@"sender"]);
 
     [mockInputView copy:NULL];
-    XCTAssertFalse([mockInputView canPerformAction:@selector(copy:) withSender:NULL]);
+    XCTAssertTrue([mockInputView canPerformAction:@selector(copy:) withSender:NULL]);
     XCTAssertTrue([mockInputView canPerformAction:@selector(copy:) withSender:@"sender"]);
-    XCTAssertFalse([mockInputView canPerformAction:@selector(paste:) withSender:NULL]);
+    XCTAssertTrue([mockInputView canPerformAction:@selector(paste:) withSender:NULL]);
     XCTAssertTrue([mockInputView canPerformAction:@selector(paste:) withSender:@"sender"]);
   }
 }
