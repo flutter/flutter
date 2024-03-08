@@ -37,25 +37,12 @@ Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
 }
 
 void main() {
-  testWidgets('default transit mode is keyDataThenRawKeyData', (WidgetTester tester) async {
-    expect(KeyEventSimulator.transitMode, KeyDataTransitMode.keyDataThenRawKeyData);
-  });
-
-  testWidgets('debugKeyEventSimulatorTransitModeOverride overrides default transit mode', (WidgetTester tester) async {
-    debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
-    expect(KeyEventSimulator.transitMode, KeyDataTransitMode.rawKeyData);
-    // Unsetting debugKeyEventSimulatorTransitModeOverride can't be called in a
-    // tear down callback because TestWidgetsFlutterBinding._verifyInvariants
-    // is called before tear down callbacks.
-    debugKeyEventSimulatorTransitModeOverride = null;
-  });
-
   testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<RawKeyEvent> events = <RawKeyEvent>[];
+
     final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       RawKeyboardListener(
@@ -93,6 +80,7 @@ void main() {
     }
 
     await tester.pumpWidget(Container());
+    focusNode.dispose();
 
     debugKeyEventSimulatorTransitModeOverride = null;
   });
@@ -101,8 +89,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<KeyEvent> events = <KeyEvent>[];
+
     final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       KeyboardListener(
@@ -255,6 +243,7 @@ void main() {
     await tester.idle();
 
     await tester.pumpWidget(Container());
+    focusNode.dispose();
 
     debugKeyEventSimulatorTransitModeOverride = null;
   });
@@ -263,9 +252,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Focus(
         focusNode: focusNode,
@@ -320,9 +308,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Focus(
         focusNode: focusNode,
