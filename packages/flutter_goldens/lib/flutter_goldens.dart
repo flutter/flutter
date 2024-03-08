@@ -23,12 +23,7 @@ export 'skia_client.dart';
 //   /packages/flutter/test/widgets/basic_test.dart
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
-
-bool _isMainBranch(String? branch) {
-  return branch == 'main'
-      || branch == 'master';
-}
-
+final RegExp _kMainBranch = RegExp(r'master|main');
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -38,11 +33,11 @@ bool _isMainBranch(String? branch) {
 /// When set, the `namePrefix` is prepended to the names of all gold images.
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
   const Platform platform = LocalPlatform();
-  if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
+  if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix);
-  } else if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
+  } else if (FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform, namePrefix: namePrefix);
-  } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
+  } else if (FlutterSkippingFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromDefaultComparator(
       'Golden file testing is not executed on Cirrus, or LUCI environments outside of flutter/flutter.',
         namePrefix: namePrefix
@@ -264,13 +259,13 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
   /// Decides based on the current environment if goldens tests should be
   /// executed through Skia Gold.
-  static bool isForEnvironment(Platform platform) {
+  static bool isAvailableForEnvironment(Platform platform) {
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
       && !platform.environment.containsKey('GOLD_TRYJOB')
       // Only run on main branch.
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
 
     return luciPostSubmit;
   }
@@ -354,12 +349,12 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   /// Decides based on the current environment if goldens tests should be
   /// executed as pre-submit tests with Skia Gold.
-  static bool isForEnvironment(Platform platform) {
+  static bool isAvailableForEnvironment(Platform platform) {
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       && platform.environment.containsKey('GOLD_TRYJOB')
       // Only run on the main branch
-      && _isMainBranch(platform.environment['GIT_BRANCH']);
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
     return luciPreSubmit;
   }
 }
@@ -425,12 +420,12 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   ///
   /// If we are in a CI environment, LUCI or Cirrus, but are not using the other
   /// comparators, we skip.
-  static bool isForEnvironment(Platform platform) {
+  static bool isAvailableForEnvironment(Platform platform) {
     return (platform.environment.containsKey('SWARMING_TASK_ID')
       // Some builds are still being run on Cirrus, we should skip these.
       || platform.environment.containsKey('CIRRUS_CI'))
       // If we are in CI, skip on branches that are not main.
-      && !_isMainBranch(platform.environment['GIT_BRANCH']);
+      && !_kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
   }
 }
 
@@ -440,7 +435,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 /// This comparator utilizes the [SkiaGoldClient] to request baseline images for
 /// the given device under test for comparison. This comparator is initialized
 /// when conditions for all other [FlutterGoldenFileComparators] have not been
-/// met, see the `isForEnvironment` method for each one listed below.
+/// met, see the `isAvailableForEnvironment` method for each one listed below.
 ///
 /// The [FlutterLocalFileComparator] is intended to run on local machines and
 /// serve as a smoke test during development. As such, it will not be able to
