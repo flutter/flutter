@@ -96,6 +96,16 @@ class FlutterViewManager {
     return _jsViewOptions[viewId];
   }
 
+  /// Returns the [viewId] if [rootElement] corresponds to any of the [views].
+  int? viewIdForRootElement(DomElement rootElement)  {
+    for(final EngineFlutterView view in views) {
+      if (view.dom.rootElement == rootElement) {
+        return view.viewId;
+      }
+    }
+    return null;
+  }
+
   void dispose() {
     // We need to call `toList()` in order to avoid concurrent modification
     // inside the loop.

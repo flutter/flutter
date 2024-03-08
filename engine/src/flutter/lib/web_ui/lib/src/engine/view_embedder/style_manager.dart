@@ -116,6 +116,11 @@ void applyGlobalCssRulesToSheet(
     // Hide placeholder text
     '$cssSelectorPrefix .flt-text-editing::placeholder {'
     '  opacity: 0;'
+    '}'
+
+    // Hide outline when the flutter-view root element is focused.
+    '$cssSelectorPrefix:focus {'
+    ' outline: none;'
     '}',
   );
 
