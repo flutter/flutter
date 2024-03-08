@@ -142,8 +142,8 @@ class Plugin {
     }
 
     // TODO(stuartmorgan): Consider merging web into this common handling; the
-    // fact that its implementation of Dart-only plugins and default packages
-    // are separate is legacy.
+    //  fact that its implementation of Dart-only plugins and default packages
+    //  are separate is legacy.
     final List<String> sharedHandlingPlatforms = <String>[
       AndroidPlugin.kConfigKey,
       IOSPlugin.kConfigKey,
@@ -391,7 +391,7 @@ class Plugin {
   /// This is a mapping from platform config key to the default package implementation.
   final Map<String, String> defaultPackagePlatforms;
 
-  /// This is a mapping from platform config key to the plugin class for the given platform.
+  /// This is a mapping from platform config key to the Dart plugin class for the given platform.
   final Map<String, String> pluginDartClassPlatforms;
 
   /// Whether this plugin is a direct dependency of the app.
