@@ -771,22 +771,10 @@ class PageTransitionsTheme with Diagnosticable {
       platform = TargetPlatform.iOS;
     }
 
-    PageTransitionsBuilder getTransitionBuilder() {
-      late PageTransitionsBuilder defaultBuilder;
-      switch (platform) {
-        case TargetPlatform.iOS:
-          defaultBuilder = const CupertinoPageTransitionsBuilder();
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.windows:
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-          defaultBuilder = const ZoomPageTransitionsBuilder();
-      }
-      return builders[platform] ?? defaultBuilder;
-    }
-
-    final PageTransitionsBuilder matchingBuilder = getTransitionBuilder();
+    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? switch(platform) {
+      TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+    };
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
