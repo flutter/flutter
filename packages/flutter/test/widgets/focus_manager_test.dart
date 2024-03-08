@@ -376,7 +376,7 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
 
       await setAppLifecycleState(AppLifecycleState.paused);
-      expect(focusNode.hasPrimaryFocus, shouldRespond? isFalse : isTrue);
+      expect(focusNode.hasPrimaryFocus, shouldRespond ? isFalse : isTrue);
 
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isTrue);
