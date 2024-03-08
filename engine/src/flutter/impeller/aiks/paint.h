@@ -13,6 +13,7 @@
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
@@ -42,6 +43,9 @@ struct Paint {
     std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<ColorSourceContents> color_source_contents,
         const std::shared_ptr<ColorFilter>& color_filter) const;
+
+    std::shared_ptr<FilterContents> CreateMaskBlur(
+        std::shared_ptr<TextureContents> texture_contents) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         const FilterInput::Ref& input,

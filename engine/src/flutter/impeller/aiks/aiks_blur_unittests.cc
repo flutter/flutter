@@ -839,6 +839,32 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, MaskBlurTexture) {
+  Scalar sigma = 30;
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Sigma", &sigma, 0, 500);
+      ImGui::End();
+    }
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    Paint paint;
+    paint.color = Color::Green();
+    paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+        .style = FilterContents::BlurStyle::kNormal,
+        .sigma = Sigma(sigma),
+    };
+    std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
+    canvas.DrawImage(std::make_shared<Image>(boston), {200, 200}, paint);
+    Paint red;
+    red.color = Color::Red();
+    canvas.DrawRect(Rect::MakeXYWH(0, 0, 200, 200), red);
+    return canvas.EndRecordingAsPicture();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, GuassianBlurUpdatesMipmapContents) {
   // This makes sure if mip maps are recycled across invocations of blurs the
   // contents get updated each frame correctly. If they aren't updated the color
