@@ -101,5 +101,15 @@ Future<void> doTests() async {
             reason: 'Should fire dispose event for view');
       });
     });
+
+    group('viewIdForRootElement', () {
+      test('works', () {
+        final EngineFlutterView view = EngineFlutterView(platformDispatcher, createDomElement('div'));
+        final int viewId = view.viewId;
+        viewManager.registerView(view);
+
+        expect(viewManager.viewIdForRootElement(view.dom.rootElement), viewId);
+      });
+    });
   });
 }
