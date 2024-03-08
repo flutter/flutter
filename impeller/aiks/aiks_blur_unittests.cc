@@ -282,6 +282,172 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+struct MaskBlurTestConfig {
+  FilterContents::BlurStyle style = FilterContents::BlurStyle::kNormal;
+  Scalar sigma = 1.0f;
+  Scalar alpha = 1.0f;
+  std::shared_ptr<ImageFilter> image_filter;
+  bool invert_colors = false;
+  BlendMode blend_mode = BlendMode::kSourceOver;
+};
+
+static Picture MaskBlurVariantTest(const AiksTest& test_context,
+                                   const MaskBlurTestConfig& config) {
+  Canvas canvas;
+  canvas.Scale(test_context.GetContentScale());
+  canvas.Scale(Vector2{0.8f, 0.8f});
+  Paint paint;
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kNormal,
+      .sigma = Sigma{1},
+  };
+
+  canvas.DrawPaint({.color = Color::AntiqueWhite()});
+
+  paint.mask_blur_descriptor->style = config.style;
+  paint.mask_blur_descriptor->sigma = Sigma{config.sigma};
+  paint.image_filter = config.image_filter;
+  paint.invert_colors = config.invert_colors;
+  paint.blend_mode = config.blend_mode;
+
+  const Scalar x = 50;
+  const Scalar radius = 20.0f;
+  const Scalar y_spacing = 100.0f;
+
+  Scalar y = 50;
+  paint.color = Color::Crimson().WithAlpha(config.alpha);
+  canvas.DrawRect(Rect::MakeXYWH(x + 25 - radius / 2, y + radius / 2,  //
+                                 radius, 60.0f - radius),
+                  paint);
+
+  y += y_spacing;
+  paint.color = Color::Blue().WithAlpha(config.alpha);
+  canvas.DrawCircle({x + 25, y + 25}, radius, paint);
+
+  y += y_spacing;
+  paint.color = Color::Green().WithAlpha(config.alpha);
+  canvas.DrawOval(Rect::MakeXYWH(x + 25 - radius / 2, y + radius / 2,  //
+                                 radius, 60.0f - radius),
+                  paint);
+
+  y += y_spacing;
+  paint.color = Color::Purple().WithAlpha(config.alpha);
+  canvas.DrawRRect(Rect::MakeXYWH(x, y, 60.0f, 60.0f),  //
+                   {radius, radius},                    //
+                   paint);
+
+  y += y_spacing;
+  paint.color = Color::Orange().WithAlpha(config.alpha);
+  canvas.DrawRRect(Rect::MakeXYWH(x, y, 60.0f, 60.0f),  //
+                   {radius, 5.0f}, paint);
+
+  y += y_spacing;
+  paint.color = Color::Maroon().WithAlpha(config.alpha);
+  canvas.DrawPath(PathBuilder{}
+                      .MoveTo({x + 0, y + 60})
+                      .LineTo({x + 30, y + 0})
+                      .LineTo({x + 60, y + 60})
+                      .Close()
+                      .TakePath(),
+                  paint);
+
+  y += y_spacing;
+  paint.color = Color::Maroon().WithAlpha(config.alpha);
+  canvas.DrawPath(PathBuilder{}
+                      .AddArc(Rect::MakeXYWH(x + 5, y, 50, 50),
+                              Radians{kPi / 2}, Radians{kPi})
+                      .AddArc(Rect::MakeXYWH(x + 25, y, 50, 50),
+                              Radians{kPi / 2}, Radians{kPi})
+                      .Close()
+                      .TakePath(),
+                  paint);
+
+  return canvas.EndRecordingAsPicture();
+}
+
+static const std::map<std::string, MaskBlurTestConfig> kPaintVariations = {
+    // 1. Normal style, translucent, zero sigma.
+    {"NormalTranslucentZeroSigma",
+     {.style = FilterContents::BlurStyle::kNormal,
+      .sigma = 0.0f,
+      .alpha = 0.5f}},
+    // 2. Normal style, translucent.
+    {"NormalTranslucent",
+     {.style = FilterContents::BlurStyle::kNormal,
+      .sigma = 8.0f,
+      .alpha = 0.5f}},
+    // 3. Solid style, translucent.
+    {"SolidTranslucent",
+     {.style = FilterContents::BlurStyle::kSolid,
+      .sigma = 8.0f,
+      .alpha = 0.5f}},
+    // 4. Solid style, opaque.
+    {"SolidOpaque",
+     {.style = FilterContents::BlurStyle::kSolid, .sigma = 8.0f}},
+    // 5. Solid style, translucent, color & image filtered.
+    {"SolidTranslucentWithFilters",
+     {.style = FilterContents::BlurStyle::kSolid,
+      .sigma = 8.0f,
+      .alpha = 0.5f,
+      .image_filter = ImageFilter::MakeBlur(Sigma{3},
+                                            Sigma{3},
+                                            FilterContents::BlurStyle::kNormal,
+                                            Entity::TileMode::kClamp),
+      .invert_colors = true}},
+    // 6. Solid style, translucent, exclusion blended.
+    {"SolidTranslucentExclusionBlend",
+     {.style = FilterContents::BlurStyle::kSolid,
+      .sigma = 8.0f,
+      .alpha = 0.5f,
+      .blend_mode = BlendMode::kExclusion}},
+    // 7. Inner style, translucent.
+    {"InnerTranslucent",
+     {.style = FilterContents::BlurStyle::kInner,
+      .sigma = 8.0f,
+      .alpha = 0.5f}},
+    // 8. Inner style, translucent, blurred.
+    {"InnerTranslucentWithBlurImageFilter",
+     {.style = FilterContents::BlurStyle::kInner,
+      .sigma = 8.0f,
+      .alpha = 0.5f,
+      .image_filter = ImageFilter::MakeBlur(Sigma{3},
+                                            Sigma{3},
+                                            FilterContents::BlurStyle::kNormal,
+                                            Entity::TileMode::kClamp)}},
+    // 9. Outer style, translucent.
+    {"OuterTranslucent",
+     {.style = FilterContents::BlurStyle::kOuter,
+      .sigma = 8.0f,
+      .alpha = 0.5f}},
+    // 10. Outer style, opaque, image filtered.
+    {"OuterOpaqueWithBlurImageFilter",
+     {.style = FilterContents::BlurStyle::kOuter,
+      .sigma = 8.0f,
+      .image_filter = ImageFilter::MakeBlur(Sigma{3},
+                                            Sigma{3},
+                                            FilterContents::BlurStyle::kNormal,
+                                            Entity::TileMode::kClamp)}},
+};
+
+#define MASK_BLUR_VARIANT_TEST(config)                              \
+  TEST_P(AiksTest, MaskBlurVariantTest##config) {                   \
+    ASSERT_TRUE(OpenPlaygroundHere(                                 \
+        MaskBlurVariantTest(*this, kPaintVariations.at(#config)))); \
+  }
+
+MASK_BLUR_VARIANT_TEST(NormalTranslucentZeroSigma)
+MASK_BLUR_VARIANT_TEST(NormalTranslucent)
+MASK_BLUR_VARIANT_TEST(SolidTranslucent)
+MASK_BLUR_VARIANT_TEST(SolidOpaque)
+MASK_BLUR_VARIANT_TEST(SolidTranslucentWithFilters)
+MASK_BLUR_VARIANT_TEST(SolidTranslucentExclusionBlend)
+MASK_BLUR_VARIANT_TEST(InnerTranslucent)
+MASK_BLUR_VARIANT_TEST(InnerTranslucentWithBlurImageFilter)
+MASK_BLUR_VARIANT_TEST(OuterTranslucent)
+MASK_BLUR_VARIANT_TEST(OuterOpaqueWithBlurImageFilter)
+
+#undef MASK_BLUR_VARIANT_TEST
+
 TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
   Canvas canvas;
 

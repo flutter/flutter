@@ -207,7 +207,7 @@ class Canvas {
   void RestoreClip();
 
   bool AttemptDrawBlurredRRect(const Rect& rect,
-                               Size corner_radius,
+                               Size corner_radii,
                                const Paint& paint);
 
   Canvas(const Canvas&) = delete;
