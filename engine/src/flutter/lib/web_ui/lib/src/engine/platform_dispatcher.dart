@@ -79,7 +79,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     AppLifecycleState.instance.addListener(_setAppLifecycleState);
-    ViewFocusBinding.instance.addListener(invokeOnViewFocusChange);
+    _viewFocusBinding.init();
     domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
@@ -123,7 +123,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     AppLifecycleState.instance.removeListener(_setAppLifecycleState);
-    ViewFocusBinding.instance.removeListener(invokeOnViewFocusChange);
+    _viewFocusBinding.dispose();
     accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
     viewManager.dispose();
@@ -228,6 +228,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  late final ViewFocusBinding _viewFocusBinding =
+    ViewFocusBinding(viewManager, invokeOnViewFocusChange);
+
   @override
   ui.ViewFocusChangeCallback? get onViewFocusChange => _onViewFocusChange;
   ui.ViewFocusChangeCallback? _onViewFocusChange;
@@ -248,7 +251,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     );
   }
 
-
   @override
   void requestViewFocusChange({
     required int viewId,
@@ -257,7 +259,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }) {
     // TODO(tugorez): implement this method. At the moment will be a no op call.
   }
-
 
   /// A set of views which have rendered in the current `onBeginFrame` or
   /// `onDrawFrame` scope.

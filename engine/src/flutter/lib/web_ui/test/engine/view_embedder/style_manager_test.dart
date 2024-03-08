@@ -14,6 +14,24 @@ void main() {
 
 void doTests() {
   group('StyleManager', () {
+    test('attachGlobalStyles hides the outline when focused', () {
+      final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
+
+      domDocument.body!.append(flutterViewElement);
+      StyleManager.attachGlobalStyles(
+        node: flutterViewElement,
+        styleId: 'testing',
+        styleNonce: 'testing',
+        cssSelectorPrefix: DomManager.flutterViewTagName,
+      );
+      final String expected = browserEngine == BrowserEngine.firefox
+        ? 'rgb(0, 0, 0) 0px'
+        : 'rgb(0, 0, 0) none 0px';
+      final String got  = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
+
+      expect(got, expected);
+    });
+
     test('styleSceneHost', () {
       expect(
         () => StyleManager.styleSceneHost(createDomHTMLDivElement()),
