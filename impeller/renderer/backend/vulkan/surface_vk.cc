@@ -30,14 +30,13 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
     msaa_tex_desc.size = swapchain_image->GetSize();
     msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
-    if (!swapchain_image->HasMSAATexture()) {
+    if (!swapchain_image->GetMSAATexture()) {
       msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
       msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
       if (!msaa_tex) {
         VALIDATION_LOG << "Could not allocate MSAA color texture.";
         return nullptr;
       }
-      swapchain_image->SetMSAATexture(msaa_tex);
     } else {
       msaa_tex = swapchain_image->GetMSAATexture();
     }
@@ -77,6 +76,16 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
 
   RenderTarget render_target_desc;
   render_target_desc.SetColorAttachment(color0, 0u);
+  render_target_desc.SetupDepthStencilAttachments(
+      /*context=*/*context,                            //
+      /*allocator=*/*context->GetResourceAllocator(),  //
+      /*size=*/swapchain_image->GetSize(),             //
+      /*msaa=*/enable_msaa,                            //
+      /*label=*/"Onscreen",                            //
+      /*stencil_attachment_config=*/
+      RenderTarget::kDefaultStencilAttachmentConfig,                       //
+      /*depth_stencil_texture=*/swapchain_image->GetDepthStencilTexture()  //
+  );
 
   // The constructor is private. So make_unique may not be used.
   return std::unique_ptr<SurfaceVK>(

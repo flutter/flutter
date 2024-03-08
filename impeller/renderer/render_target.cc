@@ -11,6 +11,7 @@
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
