@@ -728,14 +728,19 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
     return;
   }
 
-  auto contents = TextureContents::MakeRect(dest);
-  contents->SetTexture(image->GetTexture());
-  contents->SetSourceRect(source);
-  contents->SetStrictSourceRect(src_rect_constraint ==
-                                SourceRectConstraint::kStrict);
-  contents->SetSamplerDescriptor(std::move(sampler));
-  contents->SetOpacity(paint.color.alpha);
-  contents->SetDeferApplyingOpacity(paint.HasColorFilter());
+  auto texture_contents = TextureContents::MakeRect(dest);
+  texture_contents->SetTexture(image->GetTexture());
+  texture_contents->SetSourceRect(source);
+  texture_contents->SetStrictSourceRect(src_rect_constraint ==
+                                        SourceRectConstraint::kStrict);
+  texture_contents->SetSamplerDescriptor(std::move(sampler));
+  texture_contents->SetOpacity(paint.color.alpha);
+  texture_contents->SetDeferApplyingOpacity(paint.HasColorFilter());
+
+  std::shared_ptr<Contents> contents = texture_contents;
+  if (paint.mask_blur_descriptor.has_value()) {
+    contents = paint.mask_blur_descriptor->CreateMaskBlur(texture_contents);
+  }
 
   Entity entity;
   entity.SetBlendMode(paint.blend_mode);
