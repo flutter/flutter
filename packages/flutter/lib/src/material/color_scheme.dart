@@ -78,7 +78,7 @@ import 'theme_data.dart';
 class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance from the given colors.
   ///
-  /// [ColorScheme.fromSeed] and [ColorScheme.fromFidelitySeed] can be used as a
+  /// [ColorScheme.fromSeed] and [ColorScheme.fromSeedWithColorFidelity] can be used as a
   /// simpler way to create a full color scheme derived from a single seed
   /// color.
   ///
@@ -91,7 +91,7 @@ class ColorScheme with Diagnosticable {
   /// to [primary]). Material Design 3 makes use of these colors for many
   /// component defaults, so for the best results the application should
   /// supply colors for all the parameters. An easy way to ensure this is to
-  /// [ColorScheme.fromSeed] or [ColorScheme.fromFidelitySeed] to generate a
+  /// [ColorScheme.fromSeed] or [ColorScheme.fromSeedWithColorFidelity] to generate a
   /// full set of colors.
   ///
   /// During the migration to Material Design 3, if an app's
@@ -232,7 +232,7 @@ class ColorScheme with Diagnosticable {
   /// one of the ColorScheme colors.
   ///
   /// If the resulting color scheme is too dark, consider
-  /// [ColorScheme.fromFidelitySeed], which uses the [SchemeFidelity] algorithm
+  /// [ColorScheme.fromSeedWithColorFidelity], which uses the [SchemeFidelity] algorithm
   /// instead.
   ///
   /// See also:
@@ -386,7 +386,7 @@ class ColorScheme with Diagnosticable {
   /// If the resulting color scheme is too bright, consider
   /// [ColorScheme.fromSeed], which uses the [SchemeTonalSpot] algorithm
   /// instead.
-  factory ColorScheme.fromFidelitySeed({
+  factory ColorScheme.fromSeedWithColorFidelity({
     required Color seedColor,
     Brightness brightness = Brightness.light,
     Color? primary,
