@@ -231,6 +231,7 @@ class Dart2JSTarget extends Dart2WebTarget {
   @override
   List<String> get buildFiles => <String>[
     'main.dart.js',
+    if (compilerConfig.sourceMaps) 'main.dart.js.map',
   ];
 }
 

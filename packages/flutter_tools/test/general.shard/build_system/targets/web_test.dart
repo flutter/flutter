@@ -182,6 +182,7 @@ void main() {
     webResources.childFile('foo.txt')
       .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
+    environment.buildDir.childFile('main.dart.js.map').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig()
@@ -190,6 +191,8 @@ void main() {
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
     expect(environment.outputDir.childFile('main.dart.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js.map')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.bin.json').existsSync(), true);
