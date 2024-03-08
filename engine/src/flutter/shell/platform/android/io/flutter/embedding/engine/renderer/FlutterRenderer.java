@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.engine.renderer;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -185,7 +187,7 @@ public class FlutterRenderer implements TextureRegistry {
     // version that is
     // running Vulkan, so we don't have to worry about it not being supported.
     final SurfaceProducer entry;
-    if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= 29) {
+    if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final long id = nextTextureId.getAndIncrement();
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
       registerImageTexture(id, producer);
@@ -401,7 +403,7 @@ public class FlutterRenderer implements TextureRegistry {
   // When we acquire the next image, close any ImageReaders that don't have any
   // more pending images.
   @Keep
-  @TargetApi(29)
+  @TargetApi(API_LEVELS.API_29)
   final class ImageReaderSurfaceProducer
       implements TextureRegistry.SurfaceProducer,
           TextureRegistry.ImageConsumer,
@@ -677,7 +679,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(33)
+    @TargetApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -694,7 +696,7 @@ public class FlutterRenderer implements TextureRegistry {
       if (ignoringFence) {
         return;
       }
-      if (Build.VERSION.SDK_INT >= 33) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         // The fence API is only available on Android >= 33.
         waitOnFence(image);
         return;
@@ -770,7 +772,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(29)
+    @TargetApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       PerImage r = dequeueImage();
       if (r == null) {
@@ -810,7 +812,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(33)
+    @TargetApi(API_LEVELS.API_33)
     private ImageReader createImageReader33() {
       final ImageReader.Builder builder = new ImageReader.Builder(requestedWidth, requestedHeight);
       // Allow for double buffering.
@@ -828,7 +830,7 @@ public class FlutterRenderer implements TextureRegistry {
       return reader;
     }
 
-    @TargetApi(29)
+    @TargetApi(API_LEVELS.API_29)
     private ImageReader createImageReader29() {
       final ImageReader reader =
           ImageReader.newInstance(
@@ -841,9 +843,9 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     private ImageReader createImageReader() {
-      if (Build.VERSION.SDK_INT >= 33) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
-      } else if (Build.VERSION.SDK_INT >= 29) {
+      } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
         return createImageReader29();
       }
       throw new UnsupportedOperationException(
@@ -926,7 +928,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(33)
+    @TargetApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -936,7 +938,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(29)
+    @TargetApi(API_LEVELS.API_29)
     private void maybeWaitOnFence(Image image) {
       if (image == null) {
         return;
@@ -944,7 +946,7 @@ public class FlutterRenderer implements TextureRegistry {
       if (ignoringFence) {
         return;
       }
-      if (Build.VERSION.SDK_INT >= 33) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         // The fence API is only available on Android >= 33.
         waitOnFence(image);
         return;
@@ -955,7 +957,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(29)
+    @TargetApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       Image r;
       synchronized (this) {

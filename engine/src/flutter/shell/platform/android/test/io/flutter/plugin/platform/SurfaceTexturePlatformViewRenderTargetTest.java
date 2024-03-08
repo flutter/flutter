@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -21,7 +22,7 @@ import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@TargetApi(31)
+@TargetApi(API_LEVELS.API_31)
 @RunWith(AndroidJUnit4.class)
 public class SurfaceTexturePlatformViewRenderTargetTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

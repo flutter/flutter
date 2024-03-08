@@ -4,6 +4,7 @@
 
 package io.flutter.util;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -34,7 +35,7 @@ public class PathUtilsTest {
   public void canOnlyGetFilesPathWhenDiskFullAndFilesDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getFilesDir()).thenReturn(null);
-    if (Build.VERSION.SDK_INT >= 24) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
     } else {
       when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
@@ -54,7 +55,7 @@ public class PathUtilsTest {
   public void canOnlyGetFlutterDataPathWhenDiskFullAndFlutterDataDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getDir("flutter", Context.MODE_PRIVATE)).thenReturn(null);
-    if (Build.VERSION.SDK_INT >= 24) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
     } else {
       when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
@@ -66,7 +67,7 @@ public class PathUtilsTest {
   public void canGetCacheDir() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(new File(APP_DATA_PATH + "/cache"));
-    if (Build.VERSION.SDK_INT >= 21) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
       when(context.getCodeCacheDir()).thenReturn(new File(APP_DATA_PATH + "/code_cache"));
     }
     assertTrue(PathUtils.getCacheDirectory(context).startsWith(APP_DATA_PATH));
@@ -76,10 +77,10 @@ public class PathUtilsTest {
   public void canOnlyGetCachePathWhenDiskFullAndCacheDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(null);
-    if (Build.VERSION.SDK_INT >= 21) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
       when(context.getCodeCacheDir()).thenReturn(null);
     }
-    if (Build.VERSION.SDK_INT >= 24) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
     } else {
       when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);

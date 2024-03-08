@@ -194,6 +194,7 @@ embedding_sources_jar_filename = "$embedding_artifact_id-sources.jar"
 embedding_source_jar_path = "$root_out_dir/$embedding_sources_jar_filename"
 
 android_java_sources = [
+  "io/flutter/Build.java",
   "io/flutter/FlutterInjector.java",
   "io/flutter/Log.java",
   "io/flutter/app/FlutterActivity.java",

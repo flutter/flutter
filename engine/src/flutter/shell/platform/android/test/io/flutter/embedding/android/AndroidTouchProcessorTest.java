@@ -1,5 +1,6 @@
 package io.flutter.embedding.android;
 
+import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(28)
+@TargetApi(API_LEVELS.API_28)
 public class AndroidTouchProcessorTest {
   @Mock FlutterRenderer mockRenderer;
   AndroidTouchProcessor touchProcessor;
@@ -351,7 +351,7 @@ public class AndroidTouchProcessorTest {
   }
 
   @Test
-  @Config(minSdk = Build.VERSION_CODES.O)
+  @Config(minSdk = API_LEVELS.API_26)
   public void scrollWheelAbove26() {
     // Pointer id must be zero to match actionIndex in mocked event.
     final int pointerId = 0;
@@ -399,7 +399,7 @@ public class AndroidTouchProcessorTest {
   }
 
   @Test
-  @Config(sdk = {Build.VERSION_CODES.N_MR1})
+  @Config(sdk = API_LEVELS.API_25)
   public void scrollWheelBelow26() {
     // Pointer id must be zero to match actionIndex in mocked event.
     final int pointerId = 0;

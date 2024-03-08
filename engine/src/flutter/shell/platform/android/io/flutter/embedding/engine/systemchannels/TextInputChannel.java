@@ -1,5 +1,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -542,7 +544,7 @@ public class TextInputChannel {
 
       @NonNull
       private static String translateAutofillHint(@NonNull String hint) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_26) {
           return hint;
         }
         switch (hint) {

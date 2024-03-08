@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.engine.loader;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -203,7 +205,7 @@ public class FlutterLoader {
   }
 
   private static boolean areValidationLayersOnByDefault() {
-    if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
       return Build.SUPPORTED_ABIS[0].equals("arm64-v8a");
     }
     return false;

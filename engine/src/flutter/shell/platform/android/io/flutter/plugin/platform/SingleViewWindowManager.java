@@ -4,7 +4,8 @@
 
 package io.flutter.plugin.platform;
 
-import android.os.Build;
+import static io.flutter.Build.API_LEVELS;
+
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,40 +87,40 @@ abstract class SingleViewWindowManager implements WindowManager {
     fakeWindowRootView.removeView(view);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.R)
+  @RequiresApi(api = API_LEVELS.API_30)
   @NonNull
   @Override
   public WindowMetrics getCurrentWindowMetrics() {
     return delegate.getCurrentWindowMetrics();
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.R)
+  @RequiresApi(api = API_LEVELS.API_30)
   @NonNull
   @Override
   public WindowMetrics getMaximumWindowMetrics() {
     return delegate.getMaximumWindowMetrics();
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.S)
+  @RequiresApi(api = API_LEVELS.API_31)
   @Override
   public boolean isCrossWindowBlurEnabled() {
     return delegate.isCrossWindowBlurEnabled();
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.S)
+  @RequiresApi(api = API_LEVELS.API_31)
   @Override
   public void addCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
     delegate.addCrossWindowBlurEnabledListener(listener);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.S)
+  @RequiresApi(api = API_LEVELS.API_31)
   @Override
   public void addCrossWindowBlurEnabledListener(
       @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
     delegate.addCrossWindowBlurEnabledListener(executor, listener);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.S)
+  @RequiresApi(api = API_LEVELS.API_31)
   @Override
   public void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
     delegate.removeCrossWindowBlurEnabledListener(listener);

@@ -1,6 +1,7 @@
 package io.flutter.plugin.platform;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
@@ -9,7 +10,7 @@ import android.view.Surface;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
-@TargetApi(26)
+@TargetApi(API_LEVELS.API_26)
 public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRenderTarget {
   private static final String TAG = "SurfaceTexturePlatformViewRenderTarget";
 
@@ -32,7 +33,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
           // See https://github.com/flutter/flutter/issues/103870 for more details.
           //
           // Here our workaround is to recreate the surface before using it.
-          if (level == TRIM_MEMORY_COMPLETE && Build.VERSION.SDK_INT >= 29) {
+          if (level == TRIM_MEMORY_COMPLETE && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
             shouldRecreateSurfaceForLowMemory = true;
           }
         }
@@ -57,7 +58,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   /** Implementation of PlatformViewRenderTarget */
   public SurfaceTexturePlatformViewRenderTarget(SurfaceTextureEntry surfaceTextureEntry) {
-    if (Build.VERSION.SDK_INT < 23) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
       throw new UnsupportedOperationException(
           "Platform views cannot be displayed below API level 23"
               + "You can prevent this issue by setting `minSdkVersion: 23` in build.gradle.");

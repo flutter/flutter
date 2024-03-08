@@ -1,5 +1,6 @@
 package io.flutter.embedding.engine;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -28,7 +29,7 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(24) // LocaleList and scriptCode are API 24+.
+@TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
 public class FlutterJNITest {
   @Test
   public void itAllowsFirstFrameListenersToRemoveThemselvesInline() {

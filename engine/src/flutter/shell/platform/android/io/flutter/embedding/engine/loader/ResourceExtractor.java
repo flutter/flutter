@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.engine.loader;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -28,7 +30,7 @@ class ResourceExtractor {
   @SuppressWarnings("deprecation")
   static long getVersionCode(@NonNull PackageInfo packageInfo) {
     // Linter needs P (28) hardcoded or else it will fail these lines.
-    if (Build.VERSION.SDK_INT >= 28) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       return packageInfo.getLongVersionCode();
     } else {
       return packageInfo.versionCode;

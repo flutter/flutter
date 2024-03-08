@@ -4,6 +4,8 @@
 
 package io.flutter.view;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -234,7 +236,7 @@ public class FlutterView extends SurfaceView
         new TextInputPlugin(this, new TextInputChannel(dartExecutor), platformViewsController);
     mKeyboardManager = new KeyboardManager(this);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       mMouseCursorPlugin = new MouseCursorPlugin(this, new MouseCursorChannel(dartExecutor));
     } else {
       mMouseCursorPlugin = null;
@@ -516,7 +518,7 @@ public class FlutterView extends SurfaceView
         return ZeroSides.RIGHT;
       } else if (rotation == Surface.ROTATION_270) {
         // In android API >= 23, the nav bar always appears on the "bottom" (USB) side.
-        return Build.VERSION.SDK_INT >= 23 ? ZeroSides.LEFT : ZeroSides.RIGHT;
+        return Build.VERSION.SDK_INT >= API_LEVELS.API_23 ? ZeroSides.LEFT : ZeroSides.RIGHT;
       }
       // Ambiguous orientation due to landscape left/right default. Zero both sides.
       else if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
@@ -560,7 +562,7 @@ public class FlutterView extends SurfaceView
   @SuppressLint({"InlinedApi", "NewApi"})
   public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
     // getSystemGestureInsets() was introduced in API 29 and immediately deprecated in 30.
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT == API_LEVELS.API_29) {
       Insets systemGestureInsets = insets.getSystemGestureInsets();
       mMetrics.systemGestureInsetTop = systemGestureInsets.top;
       mMetrics.systemGestureInsetRight = systemGestureInsets.right;
@@ -572,7 +574,7 @@ public class FlutterView extends SurfaceView
     boolean navigationBarVisible =
         (SYSTEM_UI_FLAG_HIDE_NAVIGATION & getWindowSystemUiVisibility()) == 0;
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
       int mask = 0;
       if (navigationBarVisible) {
         mask = mask | android.view.WindowInsets.Type.navigationBars();
@@ -789,8 +791,8 @@ public class FlutterView extends SurfaceView
   // -------- Start: Mouse -------
 
   @Override
-  @TargetApi(Build.VERSION_CODES.N)
-  @RequiresApi(Build.VERSION_CODES.N)
+  @TargetApi(API_LEVELS.API_24)
+  @RequiresApi(API_LEVELS.API_24)
   @NonNull
   public PointerIcon getSystemPointerIcon(int type) {
     return PointerIcon.getSystemIcon(getContext(), type);

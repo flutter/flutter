@@ -4,9 +4,7 @@
 
 package io.flutter.plugin.platform;
 
-import static android.os.Build.VERSION_CODES.P;
-import static android.os.Build.VERSION_CODES.R;
-import static android.os.Build.VERSION_CODES.S;
+import static io.flutter.Build.API_LEVELS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -24,10 +22,10 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(P)
+@TargetApi(API_LEVELS.API_28)
 public class WindowManagerHandlerTest {
   @Test
-  @Config(minSdk = R)
+  @Config(minSdk = API_LEVELS.API_30)
   public void windowManagerHandler_passesCorrectlyToFakeWindowViewGroup() {
     // Mock the WindowManager and FakeWindowViewGroup that get used by the WindowManagerHandler.
     WindowManager mockWindowManager = mock(WindowManager.class);
@@ -63,7 +61,7 @@ public class WindowManagerHandlerTest {
   }
 
   @Test
-  @Config(minSdk = R)
+  @Config(minSdk = API_LEVELS.API_30)
   public void windowManagerHandler_logAndReturnEarly_whenFakeWindowViewGroupIsNull() {
     // Mock the WindowManager and FakeWindowViewGroup that get used by the WindowManagerHandler.
     WindowManager mockWindowManager = mock(WindowManager.class);
@@ -95,7 +93,7 @@ public class WindowManagerHandlerTest {
   // delegate WindowManager. Because this must include some deprecated WindowManager method calls
   // (because the proxy overrides every method), we suppress deprecation warnings here.
   @Test
-  @Config(minSdk = S)
+  @Config(minSdk = API_LEVELS.API_31)
   @SuppressWarnings("deprecation")
   public void windowManagerHandler_forwardsAllOtherCallsToDelegate() {
     // Mock the WindowManager and FakeWindowViewGroup that get used by the WindowManagerHandler.

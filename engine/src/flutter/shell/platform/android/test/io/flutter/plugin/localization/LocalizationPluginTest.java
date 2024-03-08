@@ -1,5 +1,6 @@
 package io.flutter.plugin.localization;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -10,7 +11,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.LocaleList;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -28,13 +28,13 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(24) // LocaleList and scriptCode are API 24+.
+@TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
 public class LocalizationPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
 
   // This test should be synced with the version for API 24.
   @Test
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = API_LEVELS.API_26)
   public void computePlatformResolvedLocaleAPI26() {
     // --- Test Setup ---
     FlutterJNI flutterJNI = new FlutterJNI();
@@ -142,7 +142,7 @@ public class LocalizationPluginTest {
 
   // This test should be synced with the version for API 26.
   @Test
-  @Config(minSdk = Build.VERSION_CODES.N)
+  @Config(minSdk = API_LEVELS.API_24)
   public void computePlatformResolvedLocale_fromAndroidN() {
     // --- Test Setup ---
     FlutterJNI flutterJNI = new FlutterJNI();
@@ -237,10 +237,7 @@ public class LocalizationPluginTest {
 
   // Tests the legacy pre API 24 algorithm.
   @Test
-  @Config(
-      minSdk = Build.VERSION_CODES.LOLLIPOP,
-      maxSdk = Build.VERSION_CODES.M,
-      qualifiers = "es-rMX")
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_23, qualifiers = "es-rMX")
   public void computePlatformResolvedLocale_emptySupportedLocales_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);
@@ -252,7 +249,7 @@ public class LocalizationPluginTest {
   }
 
   @Test
-  @Config(minSdk = 21, maxSdk = Build.VERSION_CODES.M, qualifiers = "")
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_23, qualifiers = "")
   public void computePlatformResolvedLocale_selectFirstLocaleWhenNoUserSetting_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);
@@ -272,7 +269,7 @@ public class LocalizationPluginTest {
   }
 
   @Test
-  @Config(minSdk = 21, maxSdk = Build.VERSION_CODES.M, qualifiers = "fr-rCH")
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_23, qualifiers = "fr-rCH")
   public void computePlatformResolvedLocale_selectFirstLocaleWhenNoExactMatch_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);
@@ -295,7 +292,7 @@ public class LocalizationPluginTest {
   }
 
   @Test
-  @Config(minSdk = 21, maxSdk = Build.VERSION_CODES.M, qualifiers = "it-rIT")
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_23, qualifiers = "it-rIT")
   public void computePlatformResolvedLocale_selectExactMatchLocale_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);
@@ -318,7 +315,7 @@ public class LocalizationPluginTest {
   }
 
   @Test
-  @Config(minSdk = 21, maxSdk = Build.VERSION_CODES.M, qualifiers = "fr-rCH")
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_23, qualifiers = "fr-rCH")
   public void computePlatformResolvedLocale_selectOnlyLanguageLocale_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);

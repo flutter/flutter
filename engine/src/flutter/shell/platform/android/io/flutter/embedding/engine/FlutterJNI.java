@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.engine;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -566,7 +568,7 @@ public class FlutterJNI {
   @VisibleForTesting
   @Nullable
   public static Bitmap decodeImage(@NonNull ByteBuffer buffer, long imageGeneratorAddress) {
-    if (Build.VERSION.SDK_INT >= 28) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       ImageDecoder.Source source = ImageDecoder.createSource(buffer);
       try {
         return ImageDecoder.decodeBitmap(

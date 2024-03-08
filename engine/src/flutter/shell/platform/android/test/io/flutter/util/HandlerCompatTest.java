@@ -4,6 +4,7 @@
 
 package io.flutter.util;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Handler;
@@ -17,7 +18,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 public class HandlerCompatTest {
   @Test
-  @Config(sdk = 28)
+  @Config(sdk = API_LEVELS.API_28)
   public void createAsync_createsAnAsyncHandler() {
     Handler handler = Handler.createAsync(Looper.getMainLooper());
 
