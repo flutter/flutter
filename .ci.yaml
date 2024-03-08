@@ -501,7 +501,6 @@ targets:
   - name: Linux firebase_abstract_method_smoke_test
     presubmit: false
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -534,7 +533,6 @@ targets:
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -566,7 +564,6 @@ targets:
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -2641,7 +2638,6 @@ targets:
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3661,6 +3657,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/144680
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
