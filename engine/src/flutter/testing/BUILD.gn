@@ -259,13 +259,13 @@ if (use_swiftshader) {
 
     configs -= [ "//build/config/clang:extra_warnings" ]
     configs += [
-      "//third_party/angle:gl_prototypes",
+      "//flutter/third_party/angle:gl_prototypes",
       "//flutter/third_party/swiftshader:swiftshader_config",
     ]
     deps += [
+      "//flutter/third_party/angle:libEGL_static",
+      "//flutter/third_party/angle:libGLESv2_static",
       "//flutter/third_party/swiftshader",
-      "//third_party/angle:libEGL_static",
-      "//third_party/angle:libGLESv2_static",
     ]
   }
 }
