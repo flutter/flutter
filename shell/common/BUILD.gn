@@ -354,9 +354,9 @@ if (enable_unittests) {
 
     if (shell_enable_gl) {
       deps += [
+        "//flutter/third_party/angle:libEGL_static",
+        "//flutter/third_party/angle:libGLESv2_static",
         "//flutter/third_party/swiftshader",
-        "//third_party/angle:libEGL_static",
-        "//third_party/angle:libGLESv2_static",
       ]
     }
   }

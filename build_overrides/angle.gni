@@ -7,7 +7,7 @@ import("//build/toolchain/toolchain.gni")
 
 # The ANGLE build requires this file to point to the location of third-party
 # dependencies.
-angle_root = "//third_party/angle"
+angle_root = "//flutter/third_party/angle"
 
 angle_vma_version = 30000001
 
