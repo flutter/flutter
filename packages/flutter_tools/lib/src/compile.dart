@@ -183,11 +183,15 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
             '-Ddart.vm.profile=true',
           if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
             '-Ddart.vm.product=false',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       _ => throw Exception('Unknown BuildMode: $mode')

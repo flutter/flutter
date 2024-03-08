@@ -105,11 +105,15 @@ void main() {
   testWithoutContext('buildModeOptions removes matching profile define in profile mode', () {
     expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']), <String>[
       '-Ddart.vm.product=false',
+      '--delete-tostring-package-uri=dart:ui',
+      '--delete-tostring-package-uri=package:flutter',
     ]);
   });
 
   testWithoutContext('buildModeOptions removes both matching profile and release define in profile mode', () {
     expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=false', 'dart.vm.product=true']), <String>[
+      '--delete-tostring-package-uri=dart:ui',
+      '--delete-tostring-package-uri=package:flutter',
     ]);
   });
 }
