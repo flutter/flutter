@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io' as io;
 
 import 'package:litetest/litetest.dart';
@@ -19,11 +23,10 @@ void main() {
     return;
   }
 
-
   // Runs `../bin/dir_contents_diff.dart` with the given arguments.
   (int, String) runSync(String goldenPath, String dirPath) {
     final io.ProcessResult result = io.Process.runSync(
-      'dart',
+      io.Platform.resolvedExecutable,
       <String>[binPath, goldenPath, dirPath],
     );
     return (result.exitCode, result.stdout ?? result.stderr);
