@@ -1,5 +1,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.util.DisplayMetrics;
@@ -37,7 +39,7 @@ public class SettingsChannel {
 
   @SuppressLint("AnnotateVersionCheck")
   public static boolean hasNonlinearTextScalingSupport() {
-    return Build.VERSION.SDK_INT >= 34;
+    return Build.VERSION.SDK_INT >= API_LEVELS.API_34;
   }
 
   // This method will only be called on Flutter's UI thread.

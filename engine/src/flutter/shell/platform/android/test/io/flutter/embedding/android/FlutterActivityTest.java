@@ -1,5 +1,6 @@
 package io.flutter.embedding.android;
 
+import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -20,7 +21,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -89,7 +89,7 @@ public class FlutterActivityTest {
   // TODO(garyq): Robolectric does not yet support android api 33 yet. Switch to a robolectric
   // test that directly exercises the OnBackInvoked APIs when API 33 is supported.
   @Test
-  @TargetApi(33)
+  @TargetApi(API_LEVELS.API_33)
   public void itRegistersOnBackInvokedCallbackOnChangingFrameworkHandlesBack() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
@@ -110,7 +110,7 @@ public class FlutterActivityTest {
   // TODO(garyq): Robolectric does not yet support android api 33 yet. Switch to a robolectric
   // test that directly exercises the OnBackInvoked APIs when API 33 is supported.
   @Test
-  @TargetApi(33)
+  @TargetApi(API_LEVELS.API_33)
   public void itUnregistersOnBackInvokedCallbackOnRelease() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
@@ -485,7 +485,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(minSdk = 21, maxSdk = Build.VERSION_CODES.P)
+  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_28)
   public void fullyDrawn_beforeAndroidQ() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
@@ -499,7 +499,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(minSdk = Build.VERSION_CODES.Q)
+  @Config(minSdk = API_LEVELS.API_29)
   public void fullyDrawn_fromAndroidQ() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =

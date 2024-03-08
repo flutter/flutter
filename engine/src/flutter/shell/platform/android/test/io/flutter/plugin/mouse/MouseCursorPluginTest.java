@@ -1,5 +1,6 @@
 package io.flutter.plugin.mouse;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -25,10 +26,10 @@ import org.robolectric.annotation.Config;
 
 @Config(
     manifest = Config.NONE,
-    minSdk = 24,
+    minSdk = API_LEVELS.API_24,
     shadows = {})
 @RunWith(AndroidJUnit4.class)
-@TargetApi(24)
+@TargetApi(API_LEVELS.API_24)
 public class MouseCursorPluginTest {
 
   @SuppressWarnings("deprecation")

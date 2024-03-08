@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.editing;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -476,11 +478,11 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
-  @TargetApi(25)
-  @RequiresApi(25)
+  @TargetApi(API_LEVELS.API_25)
+  @RequiresApi(API_LEVELS.API_25)
   public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
     // Ensure permission is granted.
-    if (Build.VERSION.SDK_INT >= 25
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_25
         && (flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
       try {
         inputContentInfo.requestPermission();

@@ -4,6 +4,8 @@
 
 package dev.flutter.scenarios;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Canvas;
 import android.graphics.ImageFormat;
@@ -19,7 +21,6 @@ import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -102,7 +103,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   private SurfaceRenderer selectSurfaceRenderer(String surfaceRenderer, Bundle extras) {
     switch (surfaceRenderer) {
       case "image":
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        if (VERSION.SDK_INT >= API_LEVELS.API_23) {
           // CanvasSurfaceRenderer doesn't work correctly when used with ImageSurfaceRenderer.
           // Use MediaSurfaceRenderer for now.
           return new ImageSurfaceRenderer(
@@ -186,7 +187,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     @Override
     public void repaint() {
       Canvas canvas =
-          VERSION.SDK_INT >= VERSION_CODES.M
+          VERSION.SDK_INT >= API_LEVELS.API_23
               ? surface.lockHardwareCanvas()
               : surface.lockCanvas(null);
       Paint paint = new Paint();
@@ -337,7 +338,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
    * Takes frames from the inner SurfaceRenderer and feeds it through an ImageReader and ImageWriter
    * pair.
    */
-  @RequiresApi(VERSION_CODES.M)
+  @RequiresApi(API_LEVELS.API_23)
   private static class ImageSurfaceRenderer implements SurfaceRenderer {
     private final SurfaceRenderer inner;
     private final Rect crop;
@@ -360,7 +361,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     @Override
     public void attach(Surface surface, CountDownLatch onFirstFrame) {
       this.onFirstFrame = onFirstFrame;
-      if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+      if (VERSION.SDK_INT >= API_LEVELS.API_29) {
         // On Android Q+, use PRIVATE image format.
         // Also let the frame producer know the images will
         // be sampled from by the GPU.

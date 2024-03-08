@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.android;
 
+import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DART_ENTRYPOINT_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DART_ENTRYPOINT_URI_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_BACKGROUND_MODE;
@@ -654,7 +655,7 @@ public class FlutterActivity extends Activity
    */
   @VisibleForTesting
   public void registerOnBackInvokedCallback() {
-    if (Build.VERSION.SDK_INT >= 33) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
       getOnBackInvokedDispatcher()
           .registerOnBackInvokedCallback(
               OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackInvokedCallback);
@@ -670,14 +671,14 @@ public class FlutterActivity extends Activity
    */
   @VisibleForTesting
   public void unregisterOnBackInvokedCallback() {
-    if (Build.VERSION.SDK_INT >= 33) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
       getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
       hasRegisteredBackCallback = false;
     }
   }
 
   private final OnBackInvokedCallback onBackInvokedCallback =
-      Build.VERSION.SDK_INT >= 33
+      Build.VERSION.SDK_INT >= API_LEVELS.API_33
           ? new OnBackInvokedCallback() {
             // TODO(garyq): Remove SuppressWarnings annotation. This was added to workaround
             // a google3 bug where the linter is not properly running against API 33, causing
@@ -1369,7 +1370,7 @@ public class FlutterActivity extends Activity
     // * reportFullyDrawn behavior isn't tested on pre-Q versions.
     // See https://github.com/flutter/flutter/issues/46172, and
     // https://github.com/flutter/flutter/issues/88767.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       reportFullyDrawn();
     }
   }

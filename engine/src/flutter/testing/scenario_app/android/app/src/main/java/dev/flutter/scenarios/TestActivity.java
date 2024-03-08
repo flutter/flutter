@@ -4,6 +4,8 @@
 
 package dev.flutter.scenarios;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -58,7 +60,7 @@ public abstract class TestActivity extends TestableFlutterActivity {
 
     final Intent launchIntent = getIntent();
     if ("com.google.intent.action.TEST_LOOP".equals(launchIntent.getAction())) {
-      if (Build.VERSION.SDK_INT > 22) {
+      if (Build.VERSION.SDK_INT > API_LEVELS.API_22) {
         requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
       }
       handler.postDelayed(resultsTask, 20000);

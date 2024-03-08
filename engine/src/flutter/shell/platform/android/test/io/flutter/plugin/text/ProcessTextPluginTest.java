@@ -1,5 +1,6 @@
 package io.flutter.plugin.text;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -15,7 +16,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Build;
 import androidx.annotation.RequiresApi;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -36,8 +36,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(AndroidJUnit4.class)
-@TargetApi(Build.VERSION_CODES.N)
-@RequiresApi(Build.VERSION_CODES.N)
+@TargetApi(API_LEVELS.API_24)
+@RequiresApi(API_LEVELS.API_24)
 public class ProcessTextPluginTest {
 
   private static void sendToBinaryMessageHandler(

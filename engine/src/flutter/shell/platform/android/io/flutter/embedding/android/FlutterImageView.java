@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.android;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -109,7 +111,7 @@ public class FlutterImageView extends View implements RenderSurface {
       logW("ImageReader height must be greater than 0, but given height=%d, set height=1", height);
       height = 1;
     }
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       return ImageReader.newInstance(
           width,
           height,
@@ -251,9 +253,9 @@ public class FlutterImageView extends View implements RenderSurface {
     }
   }
 
-  @TargetApi(29)
+  @TargetApi(API_LEVELS.API_29)
   private void updateCurrentBitmap() {
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
       currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
       buffer.close();

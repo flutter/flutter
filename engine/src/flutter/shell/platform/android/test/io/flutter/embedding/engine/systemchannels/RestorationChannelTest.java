@@ -1,5 +1,6 @@
 package io.flutter.embedding.engine.systemchannels;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -24,7 +25,7 @@ import org.robolectric.annotation.Config;
     manifest = Config.NONE,
     shadows = {})
 @RunWith(AndroidJUnit4.class)
-@TargetApi(24)
+@TargetApi(API_LEVELS.API_24)
 public class RestorationChannelTest {
   @Test
   public void itDoesNotDoAnythingWhenRestorationDataIsSetBeforeFrameworkAsks()
