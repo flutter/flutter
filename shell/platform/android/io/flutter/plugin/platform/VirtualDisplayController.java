@@ -5,6 +5,7 @@
 package io.flutter.plugin.platform;
 
 import static android.view.View.OnFocusChangeListener;
+import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -147,7 +148,7 @@ class VirtualDisplayController {
       getView().postDelayed(onNewSizeFrameAvailable, 0);
       return;
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       resize31(getView(), width, height, onNewSizeFrameAvailable);
       return;
     }
@@ -231,7 +232,7 @@ class VirtualDisplayController {
   }
 
   // On Android versions 31+ resizing of a Virtual Display's Presentation is natively supported.
-  @TargetApi(31)
+  @TargetApi(API_LEVELS.API_31)
   private void resize31(
       View embeddedView, int width, int height, final Runnable onNewSizeFrameAvailable) {
     renderTarget.resize(width, height);

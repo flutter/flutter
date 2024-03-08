@@ -4,6 +4,8 @@
 
 package io.flutter.util;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,7 +29,7 @@ public final class HandlerCompat {
    * @see Handler#createAsync(Looper)
    */
   public static Handler createAsyncHandler(Looper looper) {
-    if (Build.VERSION.SDK_INT >= 28) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       return Handler.createAsync(looper);
     }
     return new Handler(looper);

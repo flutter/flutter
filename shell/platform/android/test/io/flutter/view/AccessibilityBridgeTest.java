@@ -4,6 +4,7 @@
 
 package io.flutter.view;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -80,8 +81,8 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.getText(), null);
   }
 
-  @Config(sdk = 28)
-  @TargetApi(28)
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itDescribesTextFieldsWithTextAndHint() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
@@ -322,8 +323,8 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo2, times(1)).setTraversalAfter(eq(mockRootView), eq(1));
   }
 
-  @Config(sdk = 24)
-  @TargetApi(24)
+  @Config(sdk = API_LEVELS.API_24)
+  @TargetApi(API_LEVELS.API_24)
   @Test
   public void itSetsRootViewNotImportantForAccessibility() {
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -351,8 +352,8 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(false));
   }
 
-  @Config(sdk = 24)
-  @TargetApi(24)
+  @Config(sdk = API_LEVELS.API_24)
+  @TargetApi(API_LEVELS.API_24)
   @Test
   public void itSetsNodeImportantForAccessibilityIfItHasContent() {
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -382,8 +383,8 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(true));
   }
 
-  @Config(sdk = 24)
-  @TargetApi(24)
+  @Config(sdk = API_LEVELS.API_24)
+  @TargetApi(API_LEVELS.API_24)
   @Test
   public void itSetsNodeImportantForAccessibilityIfItHasActions() {
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -413,8 +414,8 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(true));
   }
 
-  @Config(sdk = 24)
-  @TargetApi(24)
+  @Config(sdk = API_LEVELS.API_24)
+  @TargetApi(API_LEVELS.API_24)
   @Test
   public void itSetsNodeUnImportantForAccessibilityIfItIsEmpty() {
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -455,8 +456,8 @@ public class AccessibilityBridgeTest {
 
   @SuppressWarnings("deprecation")
   // getSystemWindowInset* methods deprecated.
-  @Config(sdk = 28)
-  @TargetApi(28)
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeNever() {
     int expectedInsetLeft = 5;
@@ -507,8 +508,8 @@ public class AccessibilityBridgeTest {
 
   @SuppressWarnings("deprecation")
   // getSystemWindowInset* methods deprecated.
-  @Config(sdk = 28)
-  @TargetApi(28)
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeDefault() {
     int expectedInsetLeft = 5;
@@ -559,8 +560,8 @@ public class AccessibilityBridgeTest {
 
   @SuppressWarnings("deprecation")
   // getSystemWindowInset* methods deprecated.
-  @Config(sdk = 28)
-  @TargetApi(28)
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeShortEdges() {
     int expectedInsetLeft = 5;
@@ -611,8 +612,8 @@ public class AccessibilityBridgeTest {
   @SuppressWarnings("deprecation")
   // getSystemWindowInset* methods deprecated.
   // fluter#133074 tracks post deprecation work.
-  @Config(sdk = 30)
-  @TargetApi(30)
+  @Config(sdk = API_LEVELS.API_30)
+  @TargetApi(API_LEVELS.API_30)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeAlways() {
     int expectedInsetLeft = 5;
@@ -857,7 +858,7 @@ public class AccessibilityBridgeTest {
     verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("new_node2"));
   }
 
-  @Config(sdk = 21)
+  @Config(sdk = API_LEVELS.API_21)
   @Test
   public void itCanPerformSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -896,7 +897,7 @@ public class AccessibilityBridgeTest {
         .dispatchSemanticsAction(1, AccessibilityBridge.Action.SET_TEXT, expectedText);
   }
 
-  @Config(sdk = 21)
+  @Config(sdk = API_LEVELS.API_21)
   @Test
   public void itCanPredictSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -935,7 +936,7 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.getText().toString(), expectedText);
   }
 
-  @Config(sdk = 21)
+  @Config(sdk = API_LEVELS.API_21)
   @Test
   public void itBuildsAttributedString() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1001,7 +1002,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.getSpanEnd(spellOutSpan), 9);
   }
 
-  @Config(sdk = 21)
+  @Config(sdk = API_LEVELS.API_21)
   @Test
   public void itSetsTextCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1060,8 +1061,8 @@ public class AccessibilityBridgeTest {
     assertEquals(objectSpans.length, 0);
   }
 
-  @Config(sdk = 28)
-  @TargetApi(28)
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itSetsTooltipCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1098,7 +1099,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.toString(), root.tooltip);
   }
 
-  @TargetApi(28)
+  @TargetApi(API_LEVELS.API_28)
   @Test
   public void itSetsIdentifierCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1136,7 +1137,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.toString(), root.identifier);
   }
 
-  @Config(sdk = 21)
+  @Config(sdk = API_LEVELS.API_21)
   @Test
   public void itCanCreateAccessibilityNodeInfoWithSetText() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
@@ -1318,8 +1319,8 @@ public class AccessibilityBridgeTest {
     assertTrue(node2Info.isFocusable());
   }
 
-  @Config(sdk = 31)
-  @TargetApi(31)
+  @Config(sdk = API_LEVELS.API_31)
+  @TargetApi(API_LEVELS.API_31)
   @Test
   public void itSetsBoldTextFlagCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);

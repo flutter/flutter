@@ -4,6 +4,8 @@
 
 package dev.flutter.scenarios;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -22,7 +24,7 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 import java.nio.ByteBuffer;
 
-@TargetApi(23)
+@TargetApi(API_LEVELS.API_23)
 public final class TexturePlatformViewFactory extends PlatformViewFactory {
   TexturePlatformViewFactory() {
     super(

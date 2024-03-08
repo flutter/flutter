@@ -4,6 +4,8 @@
 
 package io.flutter.view;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -324,7 +326,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           //
           // To reproduce native behavior, see
           // https://developer.android.com/guide/topics/ui/tooltips.
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+          if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
             return;
           }
           AccessibilityEvent e =
@@ -478,7 +480,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
     // setting, the configuration will change and trigger a re-build of the accesibiltyBridge.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       setBoldTextFlag();
     }
 
@@ -543,8 +545,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  @TargetApi(31)
-  @RequiresApi(31)
+  @TargetApi(API_LEVELS.API_31)
+  @RequiresApi(API_LEVELS.API_31)
   private void setBoldTextFlag() {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
       return;
@@ -616,7 +618,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
         result.setImportantForAccessibility(false);
       }
       return result;
@@ -652,7 +654,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
     // or skip this node.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
       result.setImportantForAccessibility(isImportant(semanticsNode));
     }
 
@@ -763,7 +765,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setParent(rootAccessibilityView);
     }
 
-    if (semanticsNode.previousNodeId != -1 && Build.VERSION.SDK_INT >= 22) {
+    if (semanticsNode.previousNodeId != -1 && Build.VERSION.SDK_INT >= API_LEVELS.API_22) {
       result.setTraversalAfter(rootAccessibilityView, semanticsNode.previousNodeId);
     }
 
@@ -881,12 +883,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // for non-scopes-routes semantics nodes.
     if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
       result.setText(semanticsNode.getValue());
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
         result.setHintText(semanticsNode.getTextFieldHint());
       }
     } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
       CharSequence content = semanticsNode.getValueLabelHint();
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_28) {
         if (semanticsNode.tooltip != null) {
           // For backward compatibility with Flutter SDK before Android API
           // level 28, the tooltip is appended at the end of content description.
@@ -899,7 +901,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       if (semanticsNode.tooltip != null) {
         result.setTooltipText(semanticsNode.tooltip);
       }
@@ -925,7 +927,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
     // Heading support
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
     }
 
@@ -1623,13 +1625,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // In Android devices API 23 and above, the system nav bar can be placed on the left side
       // of the screen in landscape mode. We must handle the translation ourselves for the
       // a11y nodes.
-      if (Build.VERSION.SDK_INT >= 23) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
         boolean needsToApplyLeftCutoutInset = true;
         // In Android devices API 28 and above, the `layoutInDisplayCutoutMode` window attribute
         // can be set to allow overlapping content within the cutout area. Query the attribute
         // to figure out whether the content overlaps with the cutout and decide whether to
         // apply cutout inset.
-        if (Build.VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
           needsToApplyLeftCutoutInset = doesLayoutInDisplayCutoutModeRequireLeftInset();
         }
 
@@ -1911,7 +1913,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // next.
       routeName = " ";
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       setAccessibilityPaneTitle(routeName);
     } else {
       AccessibilityEvent event =
@@ -1921,8 +1923,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-  @TargetApi(28)
-  @RequiresApi(28)
+  @TargetApi(API_LEVELS.API_28)
+  @RequiresApi(API_LEVELS.API_28)
   private void setAccessibilityPaneTitle(String title) {
     rootAccessibilityView.setAccessibilityPaneTitle(title);
   }
@@ -1970,8 +1972,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *
    * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
    */
-  @TargetApi(28)
-  @RequiresApi(28)
+  @TargetApi(API_LEVELS.API_28)
+  @RequiresApi(API_LEVELS.API_28)
   private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
     Context context = rootAccessibilityView.getContext();
     Activity activity = ViewUtils.getActivity(context);

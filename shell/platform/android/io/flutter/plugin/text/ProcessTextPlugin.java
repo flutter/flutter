@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.text;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -70,7 +72,7 @@ public class ProcessTextPlugin
       return;
     }
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
       result.error("error", "Android version not supported", null);
       return;
     }
@@ -105,14 +107,14 @@ public class ProcessTextPlugin
   private void cacheResolveInfos() {
     resolveInfosById = new HashMap<String, ResolveInfo>();
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
       return;
     }
 
     Intent intent = new Intent().setAction(Intent.ACTION_PROCESS_TEXT).setType("text/plain");
 
     List<ResolveInfo> infos;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
       infos = packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0));
     } else {
       infos = packageManager.queryIntentActivities(intent, 0);
@@ -134,8 +136,8 @@ public class ProcessTextPlugin
    * <p>When an activity does not return a value. the request is completed successfully and returns
    * null.
    */
-  @TargetApi(Build.VERSION_CODES.M)
-  @RequiresApi(Build.VERSION_CODES.M)
+  @TargetApi(API_LEVELS.API_23)
+  @RequiresApi(API_LEVELS.API_23)
   public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
     // Return early if the result is not related to a request sent by this plugin.
     if (!requestsByCode.containsKey(requestCode)) {
