@@ -26,4 +26,5 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
   'web': '0.4.2', // https://github.com/flutter/flutter/issues/144787
+  'metrics_center': '1.0.12' // https://github.com/flutter/flutter/issues/144787
 };
