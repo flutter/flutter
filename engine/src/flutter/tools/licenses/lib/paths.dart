@@ -155,6 +155,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/vulkan-deps/vulkan-tools', // on hosts for tests
   r'flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md', // redundant with licenses inside files
   r'flutter/third_party/vulkan-deps/vulkan-validation-layers/src/docs',
+  r'flutter/third_party/vulkan_memory_allocator/bin',
+  r'flutter/third_party/vulkan_memory_allocator/docs',
+  r'flutter/third_party/vulkan_memory_allocator/media',
+  r'flutter/third_party/vulkan_memory_allocator/src',
+  r'flutter/third_party/vulkan_memory_allocator/tools',
   r'flutter/third_party/wuffs/docs',
   r'flutter/third_party/wuffs/script',
   r'flutter/third_party/yapf', // only used for code formatting
@@ -212,11 +217,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/perfetto/src/trace_processor', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
-  r'third_party/vulkan_memory_allocator/bin',
-  r'third_party/vulkan_memory_allocator/docs',
-  r'third_party/vulkan_memory_allocator/media',
-  r'third_party/vulkan_memory_allocator/src',
-  r'third_party/vulkan_memory_allocator/tools',
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
   r'third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'third_party/zlib/contrib/minizip/minizip.c', // sample file
