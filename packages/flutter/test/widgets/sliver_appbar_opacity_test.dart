@@ -50,6 +50,44 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
+  testWidgets('turn on/off a11y mode to change opacity', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    addTearDown(tester.view.reset);
+
+    tester.platformDispatcher
+      ..textScaleFactorTestValue = 123
+      ..platformBrightnessTestValue = Brightness.dark
+      ..accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    await tester.pumpWidget(
+      _TestWidget(
+        pinned: false,
+        floating: false,
+        bottom: false,
+        controller: controller,
+      ),
+    );
+
+    // AccessibleNavigation is off
+    final RenderParagraph render = tester.renderObject(find.text('Hallo Welt!!1'));
+    controller.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity < 1.0, true);
+
+    // Turn on accessibleNavigation
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(accessibleNavigation: true);
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity, 1.0);
+
+    // Turn off accessibleNavigation
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures();
+    await tester.pumpAndSettle();
+    expect(render.text.style!.color!.opacity < 1.0, true);
+  });
   testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
