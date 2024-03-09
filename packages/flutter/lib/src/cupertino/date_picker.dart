@@ -2040,7 +2040,6 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// ```dart
   /// CupertinoTimerPicker(
   ///   onTimerDurationChanged: (Duration newDateTime) {},
-  ///   mode: CupertinoTimerPickerMode.hms,
   ///   selectionOverlayBuilder: (
   ///     BuildContext context,
   ///     int index,
