@@ -25,7 +25,7 @@
 namespace impeller {
 
 PipelineLibraryVK::PipelineLibraryVK(
-    const std::shared_ptr<DeviceHolder>& device_holder,
+    const std::shared_ptr<DeviceHolderVK>& device_holder,
     std::shared_ptr<const Capabilities> caps,
     fml::UniqueFD cache_directory,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
@@ -63,7 +63,7 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
     return nullptr;
   }
 
-  std::shared_ptr<DeviceHolder> strong_device = device_holder_.lock();
+  std::shared_ptr<DeviceHolderVK> strong_device = device_holder_.lock();
   if (!strong_device) {
     return nullptr;
   }

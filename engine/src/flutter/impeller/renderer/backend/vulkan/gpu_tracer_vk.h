@@ -9,7 +9,7 @@
 #include <thread>
 
 #include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {

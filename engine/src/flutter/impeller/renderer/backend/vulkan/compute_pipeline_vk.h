@@ -9,7 +9,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/pipeline.h"
 
@@ -20,7 +20,7 @@ class ComputePipelineVK final
       public BackendCast<ComputePipelineVK,
                          Pipeline<ComputePipelineDescriptor>> {
  public:
-  ComputePipelineVK(std::weak_ptr<DeviceHolder> device_holder,
+  ComputePipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
                     std::weak_ptr<PipelineLibrary> library,
                     const ComputePipelineDescriptor& desc,
                     vk::UniquePipeline pipeline,
@@ -39,7 +39,7 @@ class ComputePipelineVK final
  private:
   friend class PipelineLibraryVK;
 
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   vk::UniquePipeline pipeline_;
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;

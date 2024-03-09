@@ -7,7 +7,7 @@
 namespace impeller {
 
 ComputePipelineVK::ComputePipelineVK(
-    std::weak_ptr<DeviceHolder> device_holder,
+    std::weak_ptr<DeviceHolderVK> device_holder,
     std::weak_ptr<PipelineLibrary> library,
     const ComputePipelineDescriptor& desc,
     vk::UniquePipeline pipeline,
@@ -22,7 +22,7 @@ ComputePipelineVK::ComputePipelineVK(
 }
 
 ComputePipelineVK::~ComputePipelineVK() {
-  std::shared_ptr<DeviceHolder> device_holder = device_holder_.lock();
+  std::shared_ptr<DeviceHolderVK> device_holder = device_holder_.lock();
   if (device_holder) {
     descriptor_set_layout_.reset();
     layout_.reset();

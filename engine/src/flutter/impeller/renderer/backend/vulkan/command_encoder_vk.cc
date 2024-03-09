@@ -66,7 +66,7 @@ std::shared_ptr<CommandEncoderVK> CommandEncoderFactoryVK::Create() {
 }
 
 CommandEncoderVK::CommandEncoderVK(
-    std::weak_ptr<const DeviceHolder> device_holder,
+    std::weak_ptr<const DeviceHolderVK> device_holder,
     std::shared_ptr<TrackedObjectsVK> tracked_objects,
     const std::shared_ptr<QueueVK>& queue,
     std::shared_ptr<FenceWaiterVK> fence_waiter)

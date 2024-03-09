@@ -9,7 +9,7 @@
 
 namespace impeller {
 
-class DeviceHolder;
+class DeviceHolderVK;
 
 //------------------------------------------------------------------------------
 /// @brief      Due the way the Vulkan spec. treats "identically defined"
@@ -53,11 +53,11 @@ class YUVConversionLibraryVK {
                                             YUVConversionDescriptorVKHash,
                                             YUVConversionDescriptorVKEqual>;
 
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   Mutex conversions_mutex_;
   ConversionsMap conversions_ IPLR_GUARDED_BY(conversions_mutex_);
 
-  explicit YUVConversionLibraryVK(std::weak_ptr<DeviceHolder> device_holder);
+  explicit YUVConversionLibraryVK(std::weak_ptr<DeviceHolderVK> device_holder);
 };
 
 }  // namespace impeller

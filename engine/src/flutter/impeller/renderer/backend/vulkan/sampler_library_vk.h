@@ -7,7 +7,7 @@
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/sampler_descriptor.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
@@ -22,10 +22,10 @@ class SamplerLibraryVK final
  private:
   friend class ContextVK;
 
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   SamplerMap samplers_;
 
-  explicit SamplerLibraryVK(const std::weak_ptr<DeviceHolder>& device_holder);
+  explicit SamplerLibraryVK(const std::weak_ptr<DeviceHolderVK>& device_holder);
 
   // |SamplerLibrary|
   const std::unique_ptr<const Sampler>& GetSampler(
