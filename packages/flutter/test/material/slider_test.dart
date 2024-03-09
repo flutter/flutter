@@ -4253,4 +4253,32 @@ void main() {
       );
     });
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/143524.
+  testWidgets('Discrete Slider.onChanged is called only once', (WidgetTester tester) async {
+    int onChangeCallbackCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Slider(
+              max: 5,
+              divisions: 5,
+              value: 0,
+              onChanged: (double newValue) {
+                onChangeCallbackCount++;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
+    await tester.pump(kLongPressTimeout);
+    await gesture.moveBy(const Offset(160.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    expect(onChangeCallbackCount, 1);
+  });
 }
