@@ -162,9 +162,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  },
-    skip: true, // [intended] Skipped temporarily until headingLevel is added in engine (see issue 41435).
-  );
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
