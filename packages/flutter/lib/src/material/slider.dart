@@ -612,6 +612,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   bool _dragging = false;
 
+  // For discrete sliders, _handleChanged might receive the same value
+  // multiple times. To avoid calling widget.onChanged repeatedly, the
+  // value from _handleChanged is temporarily saved here.
+  double? _currentChangedValue;
+
   FocusNode? _focusNode;
   FocusNode get focusNode => widget.focusNode ?? _focusNode!;
 
@@ -664,8 +669,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
     final double lerpValue = _lerp(value);
-    if (lerpValue != widget.value) {
-      widget.onChanged!(lerpValue);
+    if (_currentChangedValue != lerpValue) {
+      _currentChangedValue = lerpValue;
+      if (_currentChangedValue != widget.value) {
+        widget.onChanged!(_currentChangedValue!);
+      }
     }
   }
 
@@ -676,6 +684,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void _handleDragEnd(double value) {
     _dragging = false;
+    _currentChangedValue = null;
     widget.onChangeEnd?.call(_lerp(value));
   }
 
