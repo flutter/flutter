@@ -222,7 +222,8 @@ void main() {
             '-create',
             '-output',
             '/build/native_assets/ios/bar.framework/bar',
-            'libbar.dylib',
+            'arm64/libbar.dylib',
+            'x64/libbar.dylib',
           ],
         ),
         const FakeCommand(
@@ -253,7 +254,7 @@ void main() {
     await packageConfig.parent.create();
     await packageConfig.create();
     await buildNativeAssetsIOS(
-      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],
       environmentType: EnvironmentType.simulator,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
@@ -263,13 +264,13 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        buildResult: FakeNativeAssetsBuilderResult(
+        onBuild: (native_assets_cli.Target target) => FakeNativeAssetsBuilderResult(
           assets: <Asset>[
             Asset(
               id: 'package:bar/bar.dart',
               linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.iOSArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
+              target: target,
+              path: AssetAbsolutePath(Uri.file('${target.architecture}/libbar.dylib')),
             ),
           ],
         ),
@@ -278,8 +279,8 @@ void main() {
     expect(
       (globals.logger as BufferLogger).traceText,
       stringContainsInOrder(<String>[
-        'Building native assets for [ios_arm64] debug.',
-        'Building native assets for [ios_arm64] done.',
+        'Building native assets for [ios_arm64, ios_x64] debug.',
+        'Building native assets for [ios_arm64, ios_x64] done.',
       ]),
     );
     expect(
