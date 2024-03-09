@@ -34,7 +34,7 @@ void main() {
     expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
   });
 
-  // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
+  // Ref: https://developer.apple.com/design/human-interface-guidelines/typography/
   final Matcher isSanFranciscoDisplayFont = predicate((TextStyle s) {
     return s.fontFamily == 'CupertinoSystemDisplay';
   }, 'Uses SF Display font');

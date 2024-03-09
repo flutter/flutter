@@ -60,7 +60,7 @@ import 'thumb_painter.dart';
 /// See also:
 ///
 ///  * [Switch], the Material Design equivalent.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/toggles/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   ///

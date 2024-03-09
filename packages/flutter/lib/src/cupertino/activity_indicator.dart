@@ -28,7 +28,7 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>
+///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
