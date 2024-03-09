@@ -10,7 +10,7 @@
 #include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 #include <array>
@@ -33,7 +33,7 @@ class AllocatorVK final : public Allocator {
   UniqueAllocatorVMA allocator_;
   UniquePoolVMA staging_buffer_pool_;
   std::weak_ptr<Context> context_;
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   ISize max_texture_size_;
   bool is_valid_ = false;
   bool supports_memoryless_textures_ = false;
@@ -44,7 +44,7 @@ class AllocatorVK final : public Allocator {
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
               const vk::PhysicalDevice& physical_device,
-              const std::shared_ptr<DeviceHolder>& device_holder,
+              const std::shared_ptr<DeviceHolderVK>& device_holder,
               const vk::Instance& instance,
               const CapabilitiesVK& capabilities);
 

@@ -166,7 +166,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 
 std::unique_ptr<PipelineVK> PipelineVK::Create(
     const PipelineDescriptor& desc,
-    const std::shared_ptr<DeviceHolder>& device_holder,
+    const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::weak_ptr<PipelineLibrary>& weak_library,
     std::shared_ptr<SamplerVK> immutable_sampler) {
   TRACE_EVENT0("flutter", "PipelineVK::Create");
@@ -462,7 +462,7 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
   return pipeline_vk;
 }
 
-PipelineVK::PipelineVK(std::weak_ptr<DeviceHolder> device_holder,
+PipelineVK::PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
                        std::weak_ptr<PipelineLibrary> library,
                        const PipelineDescriptor& desc,
                        vk::UniquePipeline pipeline,

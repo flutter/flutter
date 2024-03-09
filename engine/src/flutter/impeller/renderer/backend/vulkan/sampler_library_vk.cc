@@ -11,7 +11,7 @@
 namespace impeller {
 
 SamplerLibraryVK::SamplerLibraryVK(
-    const std::weak_ptr<DeviceHolder>& device_holder)
+    const std::weak_ptr<DeviceHolderVK>& device_holder)
     : device_holder_(device_holder) {}
 
 SamplerLibraryVK::~SamplerLibraryVK() = default;

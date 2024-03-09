@@ -5,12 +5,12 @@
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
 
 #include "impeller/base/validation.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 
 namespace impeller {
 
 YUVConversionLibraryVK::YUVConversionLibraryVK(
-    std::weak_ptr<DeviceHolder> device_holder)
+    std::weak_ptr<DeviceHolderVK> device_holder)
     : device_holder_(std::move(device_holder)) {}
 
 YUVConversionLibraryVK::~YUVConversionLibraryVK() = default;

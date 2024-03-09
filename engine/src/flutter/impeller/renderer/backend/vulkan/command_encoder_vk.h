@@ -13,7 +13,7 @@
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -52,7 +52,7 @@ class CommandEncoderVK {
   using SubmitCallback = std::function<void(bool)>;
 
   // Visible for testing.
-  CommandEncoderVK(std::weak_ptr<const DeviceHolder> device_holder,
+  CommandEncoderVK(std::weak_ptr<const DeviceHolderVK> device_holder,
                    std::shared_ptr<TrackedObjectsVK> tracked_objects,
                    const std::shared_ptr<QueueVK>& queue,
                    std::shared_ptr<FenceWaiterVK> fence_waiter);
@@ -91,7 +91,7 @@ class CommandEncoderVK {
   friend class ContextVK;
   friend class CommandQueueVK;
 
-  std::weak_ptr<const DeviceHolder> device_holder_;
+  std::weak_ptr<const DeviceHolderVK> device_holder_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
   std::shared_ptr<QueueVK> queue_;
   const std::shared_ptr<FenceWaiterVK> fence_waiter_;

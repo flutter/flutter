@@ -11,7 +11,7 @@
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/thread.h"
 #include "impeller/core/texture.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_cache_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
@@ -31,7 +31,7 @@ class PipelineVK final
  public:
   static std::unique_ptr<PipelineVK> Create(
       const PipelineDescriptor& desc,
-      const std::shared_ptr<DeviceHolder>& device_holder,
+      const std::shared_ptr<DeviceHolderVK>& device_holder,
       const std::weak_ptr<PipelineLibrary>& weak_library,
       std::shared_ptr<SamplerVK> immutable_sampler = {});
 
@@ -56,7 +56,7 @@ class PipelineVK final
                          ComparableHash<ImmutableSamplerKeyVK>,
                          ComparableEqual<ImmutableSamplerKeyVK>>;
 
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   vk::UniquePipeline pipeline_;
   vk::UniqueRenderPass render_pass_;
   vk::UniquePipelineLayout layout_;
@@ -67,7 +67,7 @@ class PipelineVK final
       immutable_sampler_variants_mutex_);
   bool is_valid_ = false;
 
-  PipelineVK(std::weak_ptr<DeviceHolder> device_holder,
+  PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
              std::weak_ptr<PipelineLibrary> library,
              const PipelineDescriptor& desc,
              vk::UniquePipeline pipeline,

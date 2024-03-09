@@ -52,7 +52,7 @@ class WaitSetEntry {
   WaitSetEntry& operator=(WaitSetEntry&&) = delete;
 };
 
-FenceWaiterVK::FenceWaiterVK(std::weak_ptr<DeviceHolder> device_holder)
+FenceWaiterVK::FenceWaiterVK(std::weak_ptr<DeviceHolderVK> device_holder)
     : device_holder_(std::move(device_holder)) {
   waiter_thread_ = std::make_unique<std::thread>([&]() { Main(); });
 }
