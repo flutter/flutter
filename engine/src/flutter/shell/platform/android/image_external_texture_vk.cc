@@ -6,7 +6,7 @@
 #include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/core/texture_descriptor.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
-#include "flutter/impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h"
+#include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
@@ -54,9 +54,8 @@ void ImageExternalTextureVK::ProcessFrame(PaintContext& context,
     return;
   }
 
-  auto texture_source =
-      std::make_shared<impeller::AndroidHardwareBufferTextureSourceVK>(
-          impeller_context_, latest_hardware_buffer, hb_desc);
+  auto texture_source = std::make_shared<impeller::AHBTextureSourceVK>(
+      impeller_context_, latest_hardware_buffer, hb_desc);
 
   auto texture =
       std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);

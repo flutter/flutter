@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_
-#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_
-
-#include "flutter/fml/build_config.h"
-#include "vulkan/vulkan_core.h"
-
-#ifdef FML_OS_ANDROID
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_AHB_TEXTURE_SOURCE_VK_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_AHB_TEXTURE_SOURCE_VK_H_
 
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/size.h"
@@ -36,15 +31,14 @@ class ContextVK;
 ///             descriptors. The objects are meant to be used directly (either
 ///             as render targets or sources for sampling), not copied.
 ///
-class AndroidHardwareBufferTextureSourceVK final : public TextureSourceVK {
+class AHBTextureSourceVK final : public TextureSourceVK {
  public:
-  AndroidHardwareBufferTextureSourceVK(
-      const std::shared_ptr<ContextVK>& context,
-      struct AHardwareBuffer* hardware_buffer,
-      const AHardwareBuffer_Desc& hardware_buffer_desc);
+  AHBTextureSourceVK(const std::shared_ptr<ContextVK>& context,
+                     struct AHardwareBuffer* hardware_buffer,
+                     const AHardwareBuffer_Desc& hardware_buffer_desc);
 
   // |TextureSourceVK|
-  ~AndroidHardwareBufferTextureSourceVK() override;
+  ~AHBTextureSourceVK() override;
 
   // |TextureSourceVK|
   vk::Image GetImage() const override;
@@ -71,15 +65,11 @@ class AndroidHardwareBufferTextureSourceVK final : public TextureSourceVK {
   bool needs_yuv_conversion_ = false;
   bool is_valid_ = false;
 
-  AndroidHardwareBufferTextureSourceVK(
-      const AndroidHardwareBufferTextureSourceVK&) = delete;
+  AHBTextureSourceVK(const AHBTextureSourceVK&) = delete;
 
-  AndroidHardwareBufferTextureSourceVK& operator=(
-      const AndroidHardwareBufferTextureSourceVK&) = delete;
+  AHBTextureSourceVK& operator=(const AHBTextureSourceVK&) = delete;
 };
 
 }  // namespace impeller
 
-#endif
-
-#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_AHB_TEXTURE_SOURCE_VK_H_
