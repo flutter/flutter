@@ -8,7 +8,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
-#include "impeller/renderer/backend/vulkan/device_holder.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 
 namespace impeller {
 
@@ -19,7 +19,7 @@ class PipelineCacheVK {
   // at the time of executing `PipelineCacheVK` because of how `ContextVK` does
   // initialization.
   explicit PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
-                           std::shared_ptr<DeviceHolder> device_holder,
+                           std::shared_ptr<DeviceHolderVK> device_holder,
                            fml::UniqueFD cache_directory);
 
   ~PipelineCacheVK();
@@ -36,7 +36,7 @@ class PipelineCacheVK {
 
  private:
   const std::shared_ptr<const Capabilities> caps_;
-  std::weak_ptr<DeviceHolder> device_holder_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   const fml::UniqueFD cache_directory_;
   vk::UniquePipelineCache cache_;
   bool is_valid_ = false;
