@@ -418,7 +418,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
 
-  /// A widget overlaid on the picker to highlight the currently selected entry.
+  /// A function that returns a widget that overlaid on the picker
+  /// to highlight the currently selected entry.
   ///
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
   /// which is a gray rounded rectangle overlay in iOS 14 style.
@@ -2013,7 +2014,8 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Defaults to a value that matches the default iOS timer picker wheel.
   final double itemExtent;
 
-  /// A widget overlaid on the picker to highlight the currently selected entry.
+  /// A function that returns a widget that overlaid on the picker
+  /// to highlight the currently selected entry.
   ///
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
   /// which is a gray rounded rectangle overlay in iOS 14 style.
