@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/backend/vulkan/android_hardware_buffer_texture_source_vk.h"
-
-#include <cstdint>
+#include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
-
-#ifdef FML_OS_ANDROID
 
 namespace impeller {
 
@@ -293,7 +289,7 @@ static TextureDescriptor ToTextureDescriptor(
   return desc;
 }
 
-AndroidHardwareBufferTextureSourceVK::AndroidHardwareBufferTextureSourceVK(
+AHBTextureSourceVK::AHBTextureSourceVK(
     const std::shared_ptr<ContextVK>& context,
     struct AHardwareBuffer* ahb,
     const AHardwareBuffer_Desc& ahb_desc)
@@ -373,40 +369,35 @@ AndroidHardwareBufferTextureSourceVK::AndroidHardwareBufferTextureSourceVK(
 }
 
 // |TextureSourceVK|
-AndroidHardwareBufferTextureSourceVK::~AndroidHardwareBufferTextureSourceVK() =
-    default;
+AHBTextureSourceVK::~AHBTextureSourceVK() = default;
 
-bool AndroidHardwareBufferTextureSourceVK::IsValid() const {
+bool AHBTextureSourceVK::IsValid() const {
   return is_valid_;
 }
 
 // |TextureSourceVK|
-vk::Image AndroidHardwareBufferTextureSourceVK::GetImage() const {
+vk::Image AHBTextureSourceVK::GetImage() const {
   return image_.get();
 }
 
 // |TextureSourceVK|
-vk::ImageView AndroidHardwareBufferTextureSourceVK::GetImageView() const {
+vk::ImageView AHBTextureSourceVK::GetImageView() const {
   return image_view_.get();
 }
 
 // |TextureSourceVK|
-vk::ImageView AndroidHardwareBufferTextureSourceVK::GetRenderTargetView()
-    const {
+vk::ImageView AHBTextureSourceVK::GetRenderTargetView() const {
   return image_view_.get();
 }
 
 // |TextureSourceVK|
-bool AndroidHardwareBufferTextureSourceVK::IsSwapchainImage() const {
+bool AHBTextureSourceVK::IsSwapchainImage() const {
   return false;
 }
 
 // |TextureSourceVK|
-std::shared_ptr<YUVConversionVK>
-AndroidHardwareBufferTextureSourceVK::GetYUVConversion() const {
+std::shared_ptr<YUVConversionVK> AHBTextureSourceVK::GetYUVConversion() const {
   return needs_yuv_conversion_ ? yuv_conversion_ : nullptr;
 }
 
 }  // namespace impeller
-
-#endif
