@@ -1994,9 +1994,11 @@ abstract class RenderBox extends RenderObject {
     return _computeIntrinsics(_CachedLayoutCalculation.dryLayout, constraints, _computeDryLayout);
   }
 
-  /// Returns the distance from the top of the box to the first baseline of the
-  /// box's contents at the given `constraints`, or null if the [RenderBox] does
-  /// not have any baselines.
+  /// Try to compute the distance from the top of the box to the first baseline
+  /// of the box's contents at the given `constraints`,
+  ///
+  /// This method returns `DryBaselineAvailable(Baseline.noBaseline)` if the
+  /// [RenderBox] does not have any baselines.
   ///
   /// This method calls [computeDryBaseline] under the hood and caches the result.
   /// When implementing a new [RenderBox] subclass, this method is typically not
@@ -2023,12 +2025,6 @@ abstract class RenderBox extends RenderObject {
   /// expensive, as it can result in O(N^2) layout performance, where N is the
   /// number of render objects in the render subtree. Consider using
   /// [getDistanceToBaseline] when appropriate.
-  ///
-  /// The [RenderBox] for [LayoutBuilder] in the Flutter framework does not have
-  /// a proper implementation of this method, as changing the constraints
-  /// currently always mutate the live render subtree, violating the "dry"
-  /// contract. Consider avoiding calling [getDryBaseline] or [getDryLayout] on
-  /// a layout builder.
   DryBaselineResult getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     return _computeIntrinsics(_CachedLayoutCalculation.dryBaseline, (constraints, baseline), _computeDryBaseline);
   }
@@ -2673,21 +2669,21 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void markNeedsLayout() {
-    // The _parentUsesIntrinsics flag is also set to true if the parent only uses
-    // the intrinsics for paint. There's no good way to detect that case, so
-    // conservatively mark the parent dirty for layout.
-    //
-    // Whether this [RenderBox]'s layout is used by the parent's layout algorithm.
+    // If `_layoutCacheStorage.clear` returns true, then this [RenderBox]'s layout
+    // is used by the parent's layout algorithm (it's possible that the parent
+    // only used the intrinsics for paint, but there's no good way to detect that
+    // so we conservatively assume it's a layout dependency).
     //
     // A render object's performLayout implementation may depend on the baseline
     // location or the intrinsic dimensions of a descendant, even when there are
-    // relayout boundaries between them. This flag indicates that the parent
-    // depended on this RenderBox's baseline location / intrinsic sizes, and thus
-    // may need relayout (even if this is a relayout boundary).
+    // relayout boundaries between them. The `_layoutCacheStorage` being non-empty
+    // indicates that the parent depended on this RenderBox's baseline location,
+    // or intrinsic sizes, and thus may need relayout, regardless of relayout
+    // boundaries.
     //
-    // Some intrinsics calculations may fail (dry baseline, for example). If the
-    // calculation fails, still set the flag to true so if this RenderBox needs
-    // to redo layout, the parent's performLayout gets called again.
+    // Some calculations may fail (dry baseline, for example). The layout
+    // dependency is still established, but only from the RenderBox that failed
+    // to compute the dry baseline to the ancestor that queried the dry baseline.
     if (_layoutCacheStorage.clear() && parent != null) {
       _layoutCacheStorage.clear();
       markParentNeedsLayout();
