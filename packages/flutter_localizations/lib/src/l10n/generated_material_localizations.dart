@@ -44491,6 +44491,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
 
   @override
+  String get shareButtonLabel => '分享…';
+
+  @override
   String get showAccountsLabel => '顯示帳戶';
 
   @override
@@ -44563,9 +44566,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get scanTextButtonLabel => '掃描文字';

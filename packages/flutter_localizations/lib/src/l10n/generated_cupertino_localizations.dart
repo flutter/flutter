@@ -14189,6 +14189,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get selectAllButtonLabel => '全選';
 
   @override
+  String get shareButtonLabel => '分享…';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount 個分頁中嘅第 $tabIndex 個';
 
   @override
@@ -14238,9 +14241,6 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
-
-  @override
-  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';
