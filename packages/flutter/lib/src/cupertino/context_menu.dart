@@ -676,11 +676,9 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 
     _boxDecoration = DecorationTween(
       begin: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: <BoxShadow>[],
       ),
       end: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: _endBoxShadow,
       ),
     ).animate(CurvedAnimation(
