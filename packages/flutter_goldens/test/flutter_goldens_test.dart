@@ -725,7 +725,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -741,7 +741,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -757,7 +757,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -773,7 +773,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -787,7 +787,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -803,7 +803,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -820,7 +820,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -893,7 +893,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -910,7 +910,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -927,7 +927,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -944,7 +944,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -957,7 +957,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -972,7 +972,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -987,7 +987,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -1004,7 +1004,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -1025,7 +1025,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1041,7 +1041,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1055,7 +1055,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1069,7 +1069,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1082,7 +1082,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
