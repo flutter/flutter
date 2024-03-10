@@ -82,13 +82,14 @@ class Background extends StatelessWidget {
 
       // Horizontal background center shift based on whether the tap target is
       // on the left, center, or right side of the screen.
-      double shift;
+      final double shift;
       if (_isOnLeftHalfOfScreen(center, deviceSize)) {
         shift = horizontalShift;
       } else if (center.dx == deviceSize.width / 2) {
-        shift = textDirection == TextDirection.ltr
-            ? -horizontalShift
-            : horizontalShift;
+        shift = switch (textDirection) {
+          TextDirection.rtl => horizontalShift,
+          TextDirection.ltr => -horizontalShift,
+        };
       } else {
         shift = -horizontalShift;
       }
@@ -324,9 +325,10 @@ class TapTarget extends StatelessWidget {
               height: radius * 2,
               width: radius * 2,
               decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? theme.colorScheme.primary
-                    : Colors.white,
+                color: switch (theme.brightness) {
+                  Brightness.light => Colors.white,
+                  Brightness.dark  => theme.colorScheme.primary,
+                },
                 shape: BoxShape.circle,
               ),
               child: child,

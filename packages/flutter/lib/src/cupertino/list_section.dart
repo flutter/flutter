@@ -464,9 +464,10 @@ class CupertinoListSection extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: type == CupertinoListSectionType.base
-                    ? _kDefaultHeaderMargin
-                    : _kInsetGroupedDefaultHeaderMargin,
+                padding: switch (type) {
+                  CupertinoListSectionType.base => _kDefaultHeaderMargin,
+                  CupertinoListSectionType.insetGrouped => _kInsetGroupedDefaultHeaderMargin,
+                },
                 child: headerWidget,
               ),
             ),
@@ -476,9 +477,10 @@ class CupertinoListSection extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: type == CupertinoListSectionType.base
-                    ? _kDefaultFooterMargin
-                    : _kInsetGroupedDefaultFooterMargin,
+                padding: switch (type) {
+                  CupertinoListSectionType.base => _kDefaultFooterMargin,
+                  CupertinoListSectionType.insetGrouped => _kInsetGroupedDefaultFooterMargin,
+                },
                 child: footerWidget,
               ),
             ),

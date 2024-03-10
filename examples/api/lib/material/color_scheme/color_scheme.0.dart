@@ -271,8 +271,10 @@ class ColorChip extends StatelessWidget {
   final String label;
 
   static Color contrastColor(Color color) {
-    final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
-    return brightness == Brightness.dark ? Colors.white : Colors.black;
+    return switch (ThemeData.estimateBrightnessForColor(color)) {
+      Brightness.light => Colors.black,
+      Brightness.dark  => Colors.white,
+    };
   }
 
   @override

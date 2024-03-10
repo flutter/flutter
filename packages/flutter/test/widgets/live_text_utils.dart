@@ -39,9 +39,10 @@ class LiveTextInputTester {
 /// LiveText button is displayed either using a custom painter,
 /// a Text with an empty label, or a Text with the 'Scan text' label.
 Finder findLiveTextButton() {
-  final bool isMobile = defaultTargetPlatform == TargetPlatform.android ||
-                        defaultTargetPlatform == TargetPlatform.fuchsia ||
-                        defaultTargetPlatform == TargetPlatform.iOS;
+  final bool isMobile = switch (defaultTargetPlatform) {
+    TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => true,
+    TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
+  };
   if (isMobile) {
     return find.byWidgetPredicate((Widget widget) {
       return (widget is CustomPaint && '${widget.painter?.runtimeType}' == '_LiveTextIconPainter')

@@ -44,9 +44,10 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
          text,
          overflow: TextOverflow.ellipsis,
          style: _kToolbarButtonFontStyle.copyWith(
-           color: Theme.of(context).colorScheme.brightness == Brightness.dark
-               ? Colors.white
-               : Colors.black87,
+           color: switch (Theme.of(context).colorScheme.brightness) {
+            Brightness.light => Colors.black87,
+            Brightness.dark  => Colors.white,
+           },
          ),
        );
 

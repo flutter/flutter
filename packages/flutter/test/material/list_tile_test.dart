@@ -3639,11 +3639,14 @@ void main() {
       final Key trailingKey = UniqueKey();
 
       Widget buildFrame({ required Brightness brightness, required bool selected }) {
-        final ThemeData theme = brightness == Brightness.light
-          ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false)
-          : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
         return MaterialApp(
-          theme: theme,
+          theme: ThemeData.from(
+            colorScheme: switch (brightness) {
+              Brightness.light => const ColorScheme.light(),
+              Brightness.dark  => const ColorScheme.dark(),
+            },
+            useMaterial3: false,
+          ),
           home: Material(
             child: Center(
               child: ListTile(

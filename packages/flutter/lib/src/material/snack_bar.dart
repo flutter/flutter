@@ -568,15 +568,16 @@ class _SnackBarState extends State<SnackBar> {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
-    final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor =  isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults = theme.useMaterial3
         ? _SnackbarDefaultsM3(context)
         : _SnackbarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
-    final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
+    final (Brightness brightness, Color buttonColor) = switch (theme.brightness) {
+      Brightness.light => (Brightness.dark, colorScheme.secondary),
+      Brightness.dark => (Brightness.light, colorScheme.primary),
+    };
 
     // Invert the theme values for Material 2. Material 3 values are tokenized to pre-inverted values.
     final ThemeData effectiveTheme = theme.useMaterial3
@@ -863,18 +864,19 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   late final ColorScheme _colors;
 
   @override
-  Color get backgroundColor => _theme.brightness == Brightness.light
-      ? Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface)
-      : _colors.onSurface;
+  Color get backgroundColor => switch (_theme.brightness) {
+    Brightness.light => Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface),
+    Brightness.dark  => _colors.onSurface,
+  };
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
     useMaterial3: _theme.useMaterial3,
-    brightness: _theme.brightness == Brightness.light
-      ? Brightness.dark
-      : Brightness.light)
-    .textTheme
-    .titleMedium;
+    brightness: switch (_theme.brightness) {
+      Brightness.light => Brightness.dark,
+      Brightness.dark => Brightness.light,
+    },
+  ).textTheme.titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;

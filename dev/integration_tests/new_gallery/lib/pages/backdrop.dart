@@ -195,9 +195,10 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
             Semantics(
               sortKey: const OrdinalSortKey(3),
               child: ScaleTransition(
-                alignment: Directionality.of(context) == TextDirection.ltr
-                    ? Alignment.topRight
-                    : Alignment.topLeft,
+                alignment: switch (Directionality.of(context)) {
+                  TextDirection.rtl => Alignment.topLeft,
+                  TextDirection.ltr => Alignment.topRight,
+                },
                 scale: CurvedAnimation(
                   parent: _settingsPanelController,
                   curve: Curves.fastOutSlowIn,

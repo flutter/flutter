@@ -627,9 +627,10 @@ void main() {
     const Widget flexibleSpace = Text('FlexibleSpace');
 
     TestSemantics buildExpected({ required String routeName }) {
-      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      final bool isDesktop = switch (debugDefaultTargetPlatformOverride) {
+        TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
+        TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      };
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -780,9 +781,10 @@ void main() {
 
   group('contributes semantics', () {
     TestSemantics buildExpected({ required String routeName }) {
-      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                             debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
-                             debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      final bool isDesktop = switch (debugDefaultTargetPlatformOverride) {
+        TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
+        TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      };
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(

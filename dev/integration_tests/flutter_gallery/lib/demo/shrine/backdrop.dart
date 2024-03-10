@@ -231,8 +231,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   bool get _frontLayerVisible {
-    final AnimationStatus status = _controller!.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
+    return switch (_controller!.status) {
+      AnimationStatus.forward || AnimationStatus.completed => true,
+      AnimationStatus.reverse || AnimationStatus.dismissed => false,
+    };
   }
 
   void _toggleBackdropLayerVisibility() {

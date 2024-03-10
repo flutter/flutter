@@ -1718,51 +1718,59 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
 
     context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-        thumbCenter.dx,
-        (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
-      ),
+      switch (textDirection) {
+        TextDirection.rtl => RRect.fromLTRBAndCorners(
+          trackRect.left,
+          trackRect.top,
+          thumbCenter.dx,
+          trackRect.bottom,
+          topLeft: trackRadius,
+          bottomLeft: trackRadius,
+        ),
+        TextDirection.ltr => RRect.fromLTRBAndCorners(
+          trackRect.left,
+          trackRect.top - (additionalActiveTrackHeight / 2),
+          thumbCenter.dx,
+          trackRect.bottom + (additionalActiveTrackHeight / 2),
+          topLeft: activeTrackRadius,
+          bottomLeft: activeTrackRadius,
+        ),
+      },
       leftTrackPaint,
     );
     context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
-        (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
-        trackRect.right,
-        (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-        bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-      ),
+      switch (textDirection) {
+        TextDirection.rtl => RRect.fromLTRBAndCorners(
+          thumbCenter.dx,
+          trackRect.top - (additionalActiveTrackHeight / 2),
+          trackRect.right,
+          trackRect.bottom + (additionalActiveTrackHeight / 2),
+          topRight: activeTrackRadius,
+          bottomRight: activeTrackRadius,
+        ),
+        TextDirection.ltr => RRect.fromLTRBAndCorners(
+          thumbCenter.dx,
+          trackRect.top,
+          trackRect.right,
+          trackRect.bottom,
+          topRight: trackRadius,
+          bottomRight: trackRadius,
+        ),
+      },
       rightTrackPaint,
     );
 
-    final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+    final bool showSecondaryTrack = (secondaryOffset != null) && switch (textDirection) {
+      TextDirection.rtl => secondaryOffset.dx < thumbCenter.dx,
+      TextDirection.ltr => secondaryOffset.dx > thumbCenter.dx,
+    };
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      if (textDirection == TextDirection.ltr) {
-        context.canvas.drawRRect(
-          RRect.fromLTRBAndCorners(
-            thumbCenter.dx,
-            trackRect.top,
-            secondaryOffset.dx,
-            trackRect.bottom,
-            topRight: trackRadius,
-            bottomRight: trackRadius,
-          ),
-          secondaryTrackPaint,
-        );
-      } else {
-        context.canvas.drawRRect(
-          RRect.fromLTRBAndCorners(
+      context.canvas.drawRRect(
+        switch (textDirection) {
+          TextDirection.rtl => RRect.fromLTRBAndCorners(
             secondaryOffset.dx,
             trackRect.top,
             thumbCenter.dx,
@@ -1770,9 +1778,17 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
             topLeft: trackRadius,
             bottomLeft: trackRadius,
           ),
-          secondaryTrackPaint,
-        );
-      }
+          TextDirection.ltr => RRect.fromLTRBAndCorners(
+            thumbCenter.dx,
+            trackRect.top,
+            secondaryOffset.dx,
+            trackRect.bottom,
+            topRight: trackRadius,
+            bottomRight: trackRadius,
+          ),
+        },
+        secondaryTrackPaint,
+      );
     }
   }
 }

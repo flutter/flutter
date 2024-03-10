@@ -444,8 +444,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
   AxisDirection? _lastAxisDirection;
 
-  bool get _isVertical => _lastAxisDirection == AxisDirection.down || _lastAxisDirection == AxisDirection.up;
-  bool get _isReversed => _lastAxisDirection == AxisDirection.up || _lastAxisDirection == AxisDirection.left;
+  bool get _isVertical => axisDirectionToAxis(_lastAxisDirection) == Axis.vertical;
+  bool get _isReversed => axisDirectionIsReversed(_lastAxisDirection);
   // The amount of scroll distance before and after the current position.
   double get _beforeExtent => _isReversed ? _lastMetrics!.extentAfter : _lastMetrics!.extentBefore;
   double get _afterExtent => _isReversed ? _lastMetrics!.extentBefore : _lastMetrics!.extentAfter;
@@ -460,9 +460,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollbarOrientation get _resolvedOrientation {
     if (scrollbarOrientation == null) {
       if (_isVertical) {
-        return textDirection == TextDirection.ltr
-          ? ScrollbarOrientation.right
-          : ScrollbarOrientation.left;
+        return switch (textDirection) {
+          TextDirection.rtl => ScrollbarOrientation.left,
+          TextDirection.ltr => ScrollbarOrientation.right,
+        };
       }
       return ScrollbarOrientation.bottom;
     }
@@ -1947,9 +1948,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // direction taken into account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     assert(_cachedController != null);
-    double delta = _cachedController!.position.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    double delta = switch (_cachedController!.position.axis) {
+      Axis.horizontal => event.scrollDelta.dx,
+      Axis.vertical   => event.scrollDelta.dy,
+    };
 
     if (axisDirectionIsReversed(_cachedController!.position.axisDirection)) {
       delta *= -1;

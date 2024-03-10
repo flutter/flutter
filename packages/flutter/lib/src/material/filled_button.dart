@@ -622,12 +622,13 @@ class _FilledButtonWithIconChild extends StatelessWidget {
     final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
-    final double gap = lerpDouble(8, 4, scale)!;
+    final Widget gap = SizedBox(width: lerpDouble(8, 4, scale)!);
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
-        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      children: switch (iconAlignment) {
+        IconAlignment.start => <Widget>[icon, gap, Flexible(child: label)],
+        IconAlignment.end   => <Widget>[Flexible(child: label), gap, icon],
+      },
     );
   }
 }

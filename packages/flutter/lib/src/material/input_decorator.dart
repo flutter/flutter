@@ -1917,9 +1917,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void initState() {
     super.initState();
 
-    final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
-        || (widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
-            widget._labelShouldWithdraw);
+    final bool labelIsInitiallyFloating = switch (widget.decoration.floatingLabelBehavior) {
+      FloatingLabelBehavior.always => true,
+      FloatingLabelBehavior.never => false,
+      FloatingLabelBehavior.auto => widget._labelShouldWithdraw,
+    };
 
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,

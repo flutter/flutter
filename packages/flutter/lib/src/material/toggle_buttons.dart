@@ -455,19 +455,35 @@ class ToggleButtons extends StatelessWidget {
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isFirstButton(int index, int length, TextDirection textDirection) {
-    return index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == length - 1,
+          TextDirection.ltr => index == 0,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == length - 1,
+          VerticalDirection.down => index == 0,
+        };
+    }
   }
 
   // Determines if this is the last child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isLastButton(int index, int length, TextDirection textDirection) {
-    return index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == 0,
+          TextDirection.ltr => index == length - 1,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == 0,
+          VerticalDirection.down => index == length - 1,
+        };
+    }
   }
 
   BorderRadius _getEdgeBorderRadius(
@@ -1161,37 +1177,42 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    return direction == Axis.horizontal
-      ? child!.computeDistanceToActualBaseline(baseline)! + borderSide.width
-      : child!.computeDistanceToActualBaseline(baseline)! + leadingBorderSide.width;
+    return child!.computeDistanceToActualBaseline(baseline)! + switch (direction) {
+      Axis.horizontal => borderSide.width,
+      Axis.vertical => leadingBorderSide.width,
+    };
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return direction == Axis.horizontal
-      ? borderSide.width * 2.0 + _maxHeight(child, width)
-      : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
+    return _maxHeight(child, width) + switch (direction) {
+      Axis.horizontal => borderSide.width * 2,
+      Axis.vertical => leadingBorderSide.width + trailingBorderSide.width,
+    };
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return direction == Axis.horizontal
-        ? borderSide.width * 2.0 + _minHeight(child, width)
-        : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
+    return switch (direction) {
+      Axis.horizontal => borderSide.width * 2.0 + _minHeight(child, width),
+      Axis.vertical => leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width,
+    };
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return direction == Axis.horizontal
-      ? leadingBorderSide.width + _maxWidth(child, height) + trailingBorderSide.width
-      : borderSide.width * 2.0 + _maxWidth(child, height);
+    return _maxWidth(child, height) + switch (direction) {
+      Axis.horizontal => leadingBorderSide.width + trailingBorderSide.width,
+      Axis.vertical => borderSide.width * 2.0 + _maxWidth(child, height),
+    };
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return direction == Axis.horizontal
-      ? leadingBorderSide.width + _minWidth(child, height) + trailingBorderSide.width
-      : borderSide.width * 2.0 + _minWidth(child, height);
+    return _minWidth(child, height) + switch (direction) {
+      Axis.horizontal => leadingBorderSide.width + trailingBorderSide.width,
+      Axis.vertical => borderSide.width * 2.0 + _minWidth(child, height),
+    };
   }
 
   @override

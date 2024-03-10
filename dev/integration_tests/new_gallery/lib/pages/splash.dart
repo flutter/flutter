@@ -68,8 +68,10 @@ class _SplashPageState extends State<SplashPage>
   };
 
   bool get _isSplashVisible {
-    return _controller.status == AnimationStatus.completed ||
-        _controller.status == AnimationStatus.forward;
+    return switch (_controller.status) {
+      AnimationStatus.forward || AnimationStatus.completed => true,
+      AnimationStatus.reverse || AnimationStatus.dismissed => false,
+    };
   }
 
   @override

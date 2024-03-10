@@ -475,9 +475,10 @@ void main() {
 
         expect(
           text.style!.color!.value,
-          effectiveBrightness == Brightness.dark
-              ? _kToolbarTextColor.darkColor.value
-              : _kToolbarTextColor.color.value,
+          switch (effectiveBrightness) {
+            Brightness.light => _kToolbarTextColor.color.value,
+            Brightness.dark  => _kToolbarTextColor.darkColor.value,
+          },
         );
       }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }

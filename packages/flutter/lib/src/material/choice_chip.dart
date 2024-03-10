@@ -271,9 +271,10 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  double? get elevation => _chipVariant == _ChipVariant.flat
-    ? 0.0
-    : isEnabled ? 1.0 : 0.0;
+  double? get elevation => switch (_chipVariant) {
+    _ChipVariant.elevated when isEnabled => 1.0,
+    _ChipVariant.elevated || _ChipVariant.flat => 0.0,
+  };
 
   @override
   double? get pressElevation => 1.0;
@@ -311,9 +312,10 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     });
 
   @override
-  Color? get shadowColor => _chipVariant == _ChipVariant.flat
-    ? Colors.transparent
-    : _colors.shadow;
+  Color? get shadowColor => switch (_chipVariant) {
+    _ChipVariant.flat => Colors.transparent,
+    _ChipVariant.elevated => _colors.shadow,
+  };
 
   @override
   Color? get surfaceTintColor => Colors.transparent;

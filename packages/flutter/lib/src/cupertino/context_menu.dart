@@ -825,20 +825,23 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static Rect _getSheetRectBegin(Orientation? orientation, _ContextMenuLocation contextMenuLocation, Rect childRect, Rect sheetRect) {
     switch (contextMenuLocation) {
       case _ContextMenuLocation.center:
-        final Offset target = orientation == Orientation.portrait
-          ? childRect.bottomCenter
-          : childRect.topCenter;
+        final Offset target = switch (orientation) {
+          Orientation.portrait  => childRect.bottomCenter,
+          Orientation.landscape => childRect.topCenter,
+        };
         final Offset centered = target - Offset(sheetRect.width / 2, 0.0);
         return centered & sheetRect.size;
       case _ContextMenuLocation.right:
-        final Offset target = orientation == Orientation.portrait
-          ? childRect.bottomRight
-          : childRect.topRight;
+        final Offset target = switch (orientation) {
+          Orientation.portrait  => childRect.bottomRight,
+          Orientation.landscape => childRect.topRight,
+        };
         return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
       case _ContextMenuLocation.left:
-        final Offset target = orientation == Orientation.portrait
-          ? childRect.bottomLeft
-          : childRect.topLeft;
+        final Offset target = switch (orientation) {
+          Orientation.portrait  => childRect.bottomLeft,
+          Orientation.landscape => childRect.topLeft,
+        };
         return target & sheetRect.size;
     }
   }

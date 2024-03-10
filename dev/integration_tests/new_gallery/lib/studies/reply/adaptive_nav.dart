@@ -521,9 +521,10 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
   }
 
   bool get _bottomDrawerVisible {
-    final AnimationStatus status = _drawerController.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
+    return switch (_drawerController.status) {
+      AnimationStatus.forward || AnimationStatus.completed => true,
+      AnimationStatus.reverse || AnimationStatus.dismissed => false,
+    };
   }
 
   void _toggleBottomDrawerVisibility() {

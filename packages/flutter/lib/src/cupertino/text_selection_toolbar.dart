@@ -138,9 +138,10 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     return _CupertinoTextSelectionToolbarShape(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      shadowColor: CupertinoTheme.brightnessOf(context) == Brightness.light
-          ? CupertinoColors.black.withOpacity(0.2)
-          : null,
+      shadowColor: switch (CupertinoTheme.brightnessOf(context)) {
+        Brightness.light => CupertinoColors.black.withOpacity(0.2),
+        Brightness.dark  => null,
+      },
       child: ColoredBox(
         color: _kToolbarBackgroundColor.resolveFrom(context),
         child: child,

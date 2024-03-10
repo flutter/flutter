@@ -510,12 +510,13 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
   Widget build(BuildContext context) {
     final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
-    final double gap = lerpDouble(8, 4, scale)!;
+    final Widget gap = SizedBox(width: lerpDouble(8, 4, scale)!);
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
-        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      children: switch (iconAlignment) {
+        IconAlignment.start => <Widget>[icon, gap, Flexible(child: label)],
+        IconAlignment.end   => <Widget>[Flexible(child: label), gap, icon],
+      },
     );
   }
 }

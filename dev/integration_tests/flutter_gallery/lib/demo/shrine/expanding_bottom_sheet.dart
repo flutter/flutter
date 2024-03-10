@@ -232,8 +232,10 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   // Returns true if the cart is open or opening and false otherwise.
   bool get _isOpen {
-    final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
+    return switch (_controller.status) {
+      AnimationStatus.forward || AnimationStatus.completed => true,
+      AnimationStatus.reverse || AnimationStatus.dismissed => false,
+    };
   }
 
   // Opens the ExpandingBottomSheet if it's closed, otherwise does nothing.

@@ -1473,9 +1473,10 @@ void main() {
         ),
       );
       final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-        ? Brightness.dark
-        : Brightness.light;
+      final Brightness onAppBarBrightness = switch (appBarBrightness) {
+        Brightness.light => Brightness.dark,
+        Brightness.dark => Brightness.light,
+      };
 
       expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -1494,9 +1495,10 @@ void main() {
         ),
       );
       final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-      final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-          ? Brightness.dark
-          : Brightness.light;
+      final Brightness onAppBarBrightness = switch (appBarBrightness) {
+        Brightness.light => Brightness.dark,
+        Brightness.dark => Brightness.light,
+      };
 
       expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -3105,9 +3107,10 @@ void main() {
           ),
         );
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-            ? Brightness.dark
-            : Brightness.light;
+        final Brightness onAppBarBrightness = switch (appBarBrightness) {
+        Brightness.light => Brightness.dark,
+        Brightness.dark => Brightness.light,
+      };
 
         expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
           statusBarBrightness: appBarBrightness,
@@ -3125,9 +3128,10 @@ void main() {
           ),
         );
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(appBarMaterial.color!);
-        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
-            ? Brightness.dark
-            : Brightness.light;
+        final Brightness onAppBarBrightness = switch (appBarBrightness) {
+        Brightness.light => Brightness.dark,
+        Brightness.dark => Brightness.light,
+      };
 
         expect(SystemChrome.latestStyle, SystemUiOverlayStyle(
           statusBarBrightness: appBarBrightness,

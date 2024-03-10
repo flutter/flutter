@@ -1452,11 +1452,12 @@ void main() {
     Future<void> testMove(int from, int to, {bool reverse = false, Axis scrollDirection = Axis.vertical}) async {
       await pumpFor(reverse, scrollDirection);
       final double targetOffset = (List<double>.of(itemSizes)..removeAt(from)).sublist(0, to).sum;
-      final Offset targetPosition = reverse
-        ? (scrollDirection == Axis.vertical
-            ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
-            : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
-        : (scrollDirection == Axis.vertical ? Offset(0, targetOffset) : Offset(targetOffset, 0));
+      final Offset targetPosition = switch ((reverse, scrollDirection)) {
+        (true,  Axis.vertical)   => Offset(0, screenSize.height - targetOffset - itemSizes[from]),
+        (true,  Axis.horizontal) => Offset(screenSize.width - targetOffset - itemSizes[from], 0),
+        (false, Axis.vertical)   => Offset(0, targetOffset),
+        (false, Axis.horizontal) => Offset(targetOffset, 0),
+      };
       final Offset moveOffset = targetPosition - tester.getTopLeft(find.text('$from'));
       await tester.timedDrag(find.text('$from'), moveOffset, const Duration(seconds: 1));
       // Before the drop animation starts

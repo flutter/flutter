@@ -87,19 +87,21 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   }
 
   static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.first
-        || position == _TextSelectionToolbarItemPosition.only) {
-      return _kEndPadding;
-    }
-    return _kMiddlePadding;
+    return switch (position) {
+      _TextSelectionToolbarItemPosition.first => _kEndPadding,
+      _TextSelectionToolbarItemPosition.only => _kEndPadding,
+      _TextSelectionToolbarItemPosition.middle => _kMiddlePadding,
+      _TextSelectionToolbarItemPosition.last => _kMiddlePadding,
+    };
   }
 
   static double _getRightPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.last
-        || position == _TextSelectionToolbarItemPosition.only) {
-      return _kEndPadding;
-    }
-    return _kMiddlePadding;
+    return switch (position) {
+      _TextSelectionToolbarItemPosition.first => _kMiddlePadding,
+      _TextSelectionToolbarItemPosition.middle => _kMiddlePadding,
+      _TextSelectionToolbarItemPosition.last => _kEndPadding,
+      _TextSelectionToolbarItemPosition.only => _kEndPadding,
+    };
   }
 
   static _TextSelectionToolbarItemPosition _getPosition(int index, int total) {

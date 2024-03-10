@@ -1449,9 +1449,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
     final Color? surfaceTintColor;
     final ShapeBorder? shape;
     final EdgeInsets insetPadding;
-    final bool showEntryModeButton =
-      _entryMode.value == DatePickerEntryMode.calendar ||
-      _entryMode.value == DatePickerEntryMode.input;
+    final bool showEntryModeButton = switch (_entryMode.value) {
+      DatePickerEntryMode.calendar     || DatePickerEntryMode.input     => true,
+      DatePickerEntryMode.calendarOnly || DatePickerEntryMode.inputOnly => false,
+    };
     switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
@@ -1500,9 +1501,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           currentDate: widget.currentDate,
           picker: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            height: orientation == Orientation.portrait
-                ? _inputFormPortraitHeight
-                : _inputFormLandscapeHeight,
+            height: switch (orientation) {
+              Orientation.portrait  => _inputFormPortraitHeight,
+              Orientation.landscape => _inputFormLandscapeHeight,
+            },
             child: Column(
               children: <Widget>[
                 const Spacer(),
@@ -1553,9 +1555,11 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           ),
         );
         final DialogTheme dialogTheme = theme.dialogTheme;
-        size = orientation == Orientation.portrait
-          ? (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2)
-          : _inputRangeLandscapeDialogSize;
+        size = switch (orientation) {
+          Orientation.portrait when useMaterial3 => _inputPortraitDialogSizeM3,
+          Orientation.portrait  => _inputPortraitDialogSizeM2,
+          Orientation.landscape => _inputRangeLandscapeDialogSize,
+        };
         elevation = useMaterial3
           ? datePickerTheme.elevation ?? defaults.elevation!
           : datePickerTheme.elevation ?? dialogTheme.elevation ?? 24;
@@ -2148,9 +2152,10 @@ class _DayHeaders extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(
-        maxWidth: MediaQuery.orientationOf(context) == Orientation.landscape
-          ? _maxCalendarWidthLandscape
-          : _maxCalendarWidthPortrait,
+        maxWidth: switch (MediaQuery.orientationOf(context)) {
+          Orientation.portrait  => _maxCalendarWidthPortrait,
+          Orientation.landscape => _maxCalendarWidthLandscape,
+        },
         maxHeight: _monthItemRowHeight,
       ),
       child: GridView.custom(
@@ -2487,9 +2492,10 @@ class _MonthItemState extends State<_MonthItem> {
       paddedDayItems.addAll(weekList);
     }
 
-    final double maxWidth = MediaQuery.orientationOf(context) == Orientation.landscape
-      ? _maxCalendarWidthLandscape
-      : _maxCalendarWidthPortrait;
+    final double maxWidth = switch (MediaQuery.orientationOf(context)) {
+      Orientation.portrait  => _maxCalendarWidthPortrait,
+      Orientation.landscape => _maxCalendarWidthLandscape,
+    };
     return Column(
       children: <Widget>[
         Container(
@@ -2833,9 +2839,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     // date range picker. To ensure that the date range displayed in the
     // input date range picker's header fits in landscape mode, we override
     // the M3 default here.
-    TextStyle? headlineStyle = (orientation == Orientation.portrait)
-      ? datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle
-      : Theme.of(context).textTheme.headlineSmall;
+    TextStyle? headlineStyle = switch (orientation) {
+      Orientation.portrait => datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle,
+      Orientation.landscape => Theme.of(context).textTheme.headlineSmall,
+    };
 
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
     headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
