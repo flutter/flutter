@@ -319,13 +319,12 @@ class AnimatedListSeparated extends _AnimatedScrollView {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimatedListSeparated.of() called with a context that does not contain an AnimatedListSeparated.'),
           ErrorDescription(
-            'No AnimatedListSeparated ancestor could be found starting from the context that was passed to AnimatedListSeparated.of().',
+            'No AnimatedListSeparated ancestor could be found starting'
+            ' from the context that was passed to AnimatedListSeparated.of().',
           ),
           ErrorHint(
-            'This can happen when the context provided is from the same StatefulWidget that '
-                'built the AnimatedListSeparated. Please see the AnimatedListSeparated documentation for examples '
-                'of how to refer to an AnimatedListSeparatedState object:\n'
-                '  https://api.flutter.dev/flutter/widgets/AnimatedListSeparatedState-class.html',
+            'This can happen when the context provided is from the same StatefulWidget'
+            ' that built the AnimatedListSeparated.',
           ),
           context.describeElement('The context used was'),
         ]);
