@@ -248,9 +248,9 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
 ///           color: Colors.amber,
 ///           child: Center(child: Text('$index')),
 ///         );
-///       }
+///       },
 ///       separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
-///         return Divider();
+///         return const Divider();
 ///       }
 ///     ),
 ///   );
