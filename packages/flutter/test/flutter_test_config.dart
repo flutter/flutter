@@ -49,7 +49,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
       allNotGCed: true,
-      classes: <String>['CurvedAnimation'],
+      classes: <String>['CurvedAnimation', '_NullElement'],
     );
   // }
 
