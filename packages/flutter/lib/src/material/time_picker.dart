@@ -2439,10 +2439,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       backgroundColor: pickerTheme.backgroundColor ?? defaultTheme.backgroundColor,
       insetPadding: EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: switch (_entryMode.value) {
-          TimePickerEntryMode.input || TimePickerEntryMode.inputOnly => 0,
-          TimePickerEntryMode.dial  || TimePickerEntryMode.dialOnly  => 24,
-        },
+        vertical: (_entryMode.value == TimePickerEntryMode.input || _entryMode.value == TimePickerEntryMode.inputOnly) ? 0 : 24,
       ),
       child: Padding(
         padding: pickerTheme.padding ?? defaultTheme.padding,

@@ -277,10 +277,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   bool get _backdropPanelVisible {
-    return switch (_controller.status) {
-      AnimationStatus.forward || AnimationStatus.completed => true,
-      AnimationStatus.reverse || AnimationStatus.dismissed => false,
-    };
+    final AnimationStatus status = _controller.status;
+    return status == AnimationStatus.completed || status == AnimationStatus.forward;
   }
 
   void _toggleBackdropPanelVisibility() {

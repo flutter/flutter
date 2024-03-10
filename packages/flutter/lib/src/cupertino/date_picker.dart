@@ -1015,10 +1015,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     ];
 
     // Swap the hours and minutes if RTL to ensure they are in the correct position.
-    final List<_ColumnBuilder> pickerBuilders = switch (Directionality.of(context)) {
-      TextDirection.rtl => <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker],
-      TextDirection.ltr => <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker],
-    };
+    final List<_ColumnBuilder> pickerBuilders = Directionality.of(context) == TextDirection.rtl
+      ? <_ColumnBuilder>[_buildMinutePicker, _buildHourPicker]
+      : <_ColumnBuilder>[_buildHourPicker, _buildMinutePicker];
 
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {

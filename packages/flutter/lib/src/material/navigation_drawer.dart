@@ -692,10 +692,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
 /// Returns `true` if this animation is ticking forward, or has completed,
 /// based on [status].
 bool _isForwardOrCompleted(Animation<double> animation) {
-  return switch (animation.status) {
-    AnimationStatus.forward || AnimationStatus.completed => true,
-    AnimationStatus.reverse || AnimationStatus.dismissed => false,
-  };
+  return animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - NavigationDrawer

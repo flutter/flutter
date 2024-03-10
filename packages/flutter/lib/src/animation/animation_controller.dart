@@ -432,10 +432,9 @@ class AnimationController extends Animation<double>
     } else if (_value == upperBound) {
       _status = AnimationStatus.completed;
     } else {
-      _status = switch (_direction) {
-        _AnimationDirection.forward => AnimationStatus.forward,
-        _AnimationDirection.reverse => AnimationStatus.reverse,
-      };
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.forward :
+        AnimationStatus.reverse;
     }
   }
 
@@ -629,10 +628,9 @@ class AnimationController extends Animation<double>
         _value = clampDouble(target, lowerBound, upperBound);
         notifyListeners();
       }
-      _status = switch (_direction) {
-        _AnimationDirection.forward => AnimationStatus.completed,
-        _AnimationDirection.reverse => AnimationStatus.dismissed,
-      };
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.completed :
+        AnimationStatus.dismissed;
       _checkStatusChanged();
       return TickerFuture.complete();
     }
@@ -685,10 +683,9 @@ class AnimationController extends Animation<double>
 
   void _directionSetter(_AnimationDirection direction) {
     _direction = direction;
-    _status = switch (_direction) {
-      _AnimationDirection.forward => AnimationStatus.forward,
-      _AnimationDirection.reverse => AnimationStatus.reverse,
-    };
+    _status = (_direction == _AnimationDirection.forward) ?
+      AnimationStatus.forward :
+      AnimationStatus.reverse;
     _checkStatusChanged();
   }
 
@@ -769,10 +766,9 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = Duration.zero;
     _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
-    _status = switch (_direction) {
-      _AnimationDirection.forward => AnimationStatus.forward,
-      _AnimationDirection.reverse => AnimationStatus.reverse,
-    };
+    _status = (_direction == _AnimationDirection.forward) ?
+      AnimationStatus.forward :
+      AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
   }
@@ -852,10 +848,9 @@ class AnimationController extends Animation<double>
     assert(elapsedInSeconds >= 0.0);
     _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
-      _status = switch (_direction) {
-        _AnimationDirection.forward => AnimationStatus.completed,
-        _AnimationDirection.reverse => AnimationStatus.dismissed,
-      };
+      _status = (_direction == _AnimationDirection.forward) ?
+        AnimationStatus.completed :
+        AnimationStatus.dismissed;
       stop(canceled: false);
     }
     notifyListeners();

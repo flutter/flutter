@@ -78,12 +78,11 @@ class NextPage extends StatelessWidget {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.systemYellow,
-            border: Border(bottom: BorderSide(
-              color: switch (brightness) {
-                Brightness.light => CupertinoColors.black,
-                Brightness.dark  => CupertinoColors.white,
-              },
-            )),
+            border: Border(
+              bottom: BorderSide(
+                color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
+              ),
+            ),
             // The middle widget is visible in both collapsed and expanded states.
             middle: const Text('Contacts Group'),
             // When the "middle" parameter is implemented, the largest title is only visible

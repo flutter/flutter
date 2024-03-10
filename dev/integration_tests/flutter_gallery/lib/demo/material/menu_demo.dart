@@ -87,10 +87,9 @@ class MenuDemoState extends State<MenuDemo> {
         ],
       ),
       body: ListTileTheme(
-        iconColor: switch (Theme.of(context).brightness) {
-          Brightness.light => Colors.grey[600],
-          Brightness.dark  => Colors.grey[500],
-        },
+        iconColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.grey[600]
+            : Colors.grey[500],
         child: ListView(
           padding: kMaterialListPadding,
           children: <Widget>[

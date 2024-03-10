@@ -807,10 +807,9 @@ class _AppBarState extends State<AppBar> {
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(Brightness brightness, [Color? backgroundColor]) {
-    final SystemUiOverlayStyle style = switch (brightness) {
-      Brightness.light => SystemUiOverlayStyle.dark,
-      Brightness.dark => SystemUiOverlayStyle.light,
-    };
+    final SystemUiOverlayStyle style = brightness == Brightness.dark
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark;
     // For backward compatibility, create an overlay style without system navigation bar settings.
     return SystemUiOverlayStyle(
       statusBarColor: backgroundColor,

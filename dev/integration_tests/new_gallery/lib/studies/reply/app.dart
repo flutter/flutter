@@ -246,11 +246,10 @@ ChipThemeData _buildChipTheme(
     padding: const EdgeInsets.all(4),
     shape: const StadiumBorder(),
     labelStyle: GoogleFonts.workSansTextTheme().bodyMedium!.copyWith(
-      color: switch (brightness) {
-        Brightness.light => ReplyColors.black900,
-        Brightness.dark  => ReplyColors.white50,
-      },
-    ),
+          color: brightness == Brightness.dark
+              ? ReplyColors.white50
+              : ReplyColors.black900,
+        ),
     secondaryLabelStyle: GoogleFonts.workSansTextTheme().bodyMedium,
     brightness: brightness,
   );

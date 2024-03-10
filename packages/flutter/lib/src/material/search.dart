@@ -244,14 +244,13 @@ abstract class SearchDelegate<T> {
   ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final (SystemUiOverlayStyle overlayStyle, Color backgroundColor) = switch (theme.brightness) {
-      Brightness.light => (SystemUiOverlayStyle.dark, Colors.white),
-      Brightness.dark  => (SystemUiOverlayStyle.light, Colors.grey[900]),
-    };
+    final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
       appBarTheme: AppBarTheme(
-        systemOverlayStyle: overlayStyle,
-        backgroundColor: backgroundColor,
+        systemOverlayStyle: colorScheme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+        backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         titleTextStyle: theme.textTheme.titleLarge,
         toolbarTextStyle: theme.textTheme.bodyMedium,

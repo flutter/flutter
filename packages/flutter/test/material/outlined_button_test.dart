@@ -1457,10 +1457,9 @@ void main() {
 
             // Check the gap between the icon and the label
             if (icon != null) {
-              final double gapWidth = switch (textDirection) {
-                TextDirection.rtl => iconBounds!.left - labelBounds.right,
-                TextDirection.ltr => labelBounds.left - iconBounds!.right,
-              };
+              final double gapWidth = textDirection == TextDirection.ltr
+                ? labelBounds.left - iconBounds!.right
+                : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 

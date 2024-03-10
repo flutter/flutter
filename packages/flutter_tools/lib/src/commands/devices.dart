@@ -119,15 +119,13 @@ class DevicesCommandOutput {
   final Duration? deviceDiscoveryTimeout;
   final DeviceConnectionInterface? deviceConnectionInterface;
 
-  bool get _includeAttachedDevices => switch (deviceConnectionInterface) {
-    DeviceConnectionInterface.attached || null => true,
-    DeviceConnectionInterface.wireless => false,
-  };
+  bool get _includeAttachedDevices =>
+      deviceConnectionInterface == null ||
+      deviceConnectionInterface == DeviceConnectionInterface.attached;
 
-  bool get _includeWirelessDevices => switch (deviceConnectionInterface) {
-    DeviceConnectionInterface.wireless || null => true,
-    DeviceConnectionInterface.attached => false,
-  };
+  bool get _includeWirelessDevices =>
+      deviceConnectionInterface == null ||
+      deviceConnectionInterface == DeviceConnectionInterface.wireless;
 
   Future<List<Device>> _getAttachedDevices(DeviceManager deviceManager) async {
     if (!_includeAttachedDevices) {
