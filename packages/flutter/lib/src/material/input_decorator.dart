@@ -1728,14 +1728,17 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: labelIsFloating ? 1.0 : 0.0,
-        child: Semantics(
-          sortKey: semanticsSortKey,
-          tagForChildren: semanticsTag,
-          child: child ?? (text == null ? null : Text(text!, style: style)),
+      child: IgnorePointer(
+        ignoring: !labelIsFloating,
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          opacity: labelIsFloating ? 1.0 : 0.0,
+          child: Semantics(
+            sortKey: semanticsSortKey,
+            tagForChildren: semanticsTag,
+            child: child ?? (text == null ? null : Text(text!, style: style)),
+          ),
         ),
       ),
     );
