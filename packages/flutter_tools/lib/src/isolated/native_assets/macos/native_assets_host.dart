@@ -165,9 +165,6 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
 /// (A–Z, a–z, and 0–9), hyphens (-), and periods (.).
 /// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleidentifier
 ///
-/// This name can contain up to 15 characters.
-/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundlename
-///
 /// The [alreadyTakenNames] are used to ensure that the framework name does not
 /// conflict with previously chosen names.
 Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
@@ -185,13 +182,7 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
     fileName = fileName.replaceFirst('lib', '');
   }
   fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
-  if (fileName.length > 15) {
-    fileName = fileName.substring(0, 15);
-  }
   if (alreadyTakenNames.contains(fileName)) {
-    if (fileName.length > 12) {
-      fileName = fileName.substring(0, 12);
-    }
     final String prefixName = fileName;
     for (int i = 1; i < 1000; i++) {
       fileName = '$prefixName$i';

@@ -296,19 +296,13 @@ class MatrixTransition extends AnimatedWidget {
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
     // it has finished significantly hurts performance.
-    final bool useFilterQuality;
-    switch (animation.status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        useFilterQuality = false;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        useFilterQuality = true;
-    }
     return Transform(
       transform: onTransform(animation.value),
       alignment: alignment,
-      filterQuality: useFilterQuality ? filterQuality : null,
+      filterQuality: switch (animation.status) {
+        AnimationStatus.forward   || AnimationStatus.reverse   => filterQuality,
+        AnimationStatus.dismissed || AnimationStatus.completed => null,
+      },
       child: child,
     );
   }

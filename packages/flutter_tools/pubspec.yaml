@@ -18,6 +18,7 @@ dependencies:
   completion: 1.0.1
   coverage: 1.7.2
   crypto: 3.0.3
+  ffi: 2.1.2
   file: 7.0.0
   flutter_template_images: 4.2.0
   html: 0.15.4
@@ -51,11 +52,11 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 5.8.1
+  unified_analytics: 5.8.4
 
   cli_config: 0.1.2
   graphs: 2.3.1
-  native_assets_builder: 0.3.2
+  native_assets_builder: 0.5.0
   native_assets_cli: 0.4.2
 
   # We depend on very specific internal implementation details of the
@@ -64,7 +65,7 @@ dependencies:
   test_api: 0.7.0
   test_core: 0.6.0
 
-  vm_service: 14.0.0
+  vm_service: 14.1.0
 
   standard_message_codec: 0.0.1+4
 
@@ -118,4 +119,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 980d
+# PUBSPEC CHECKSUM: 4593

@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:crypto/src/digest_sink.dart';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
@@ -49,7 +49,7 @@ class ArchivePublisher {
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
-    final DigestSink digestSink = DigestSink();
+    final AccumulatorSink<Digest> digestSink = AccumulatorSink<Digest>();
     final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
 
     final Stream<List<int>> stream = archiveFile.openRead();
@@ -57,7 +57,7 @@ class ArchivePublisher {
       sink.add(chunk);
     });
     sink.close();
-    return digestSink.value.toString();
+    return digestSink.events.single.toString();
   }
 
   /// Publish the archive to Google Storage.

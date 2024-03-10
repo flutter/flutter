@@ -6,8 +6,16 @@ found in the LICENSE file. -->
 <head>
   <meta charset="UTF-8">
   <title>Web Benchmarks</title>
+  <script src="flutter.js"></script>
 </head>
 <body>
-  <script src="main.dart.js" type="application/javascript"></script>
+  <script>
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        canvasKitBaseUrl: '/canvaskit/',
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,13 +1,15 @@
 {
-  "version": "v0_158",
+  "version": "v0_206",
 
   "md.comp.search-bar.avatar.shape": "md.sys.shape.corner.full",
   "md.comp.search-bar.avatar.size": 30.0,
-  "md.comp.search-bar.container.color": "surface",
+  "md.comp.search-bar.container.color": "surfaceContainerHigh",
   "md.comp.search-bar.container.elevation": "md.sys.elevation.level3",
   "md.comp.search-bar.container.height": 56.0,
   "md.comp.search-bar.container.shape": "md.sys.shape.corner.full",
-  "md.comp.search-bar.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.search-bar.focus.indicator.color": "secondary",
+  "md.comp.search-bar.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.search-bar.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.search-bar.hover.state-layer.color": "onSurface",
   "md.comp.search-bar.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
   "md.comp.search-bar.hover.supporting-text.color": "onSurfaceVariant",

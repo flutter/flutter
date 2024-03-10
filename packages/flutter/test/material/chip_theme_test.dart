@@ -79,6 +79,8 @@ void main() {
     expect(themeData.elevation, null);
     expect(themeData.pressElevation, null);
     expect(themeData.iconTheme, null);
+    expect(themeData.avatarBoxConstraints, null);
+    expect(themeData.deleteIconBoxConstraints, null);
   });
 
   testWidgets('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -117,6 +119,8 @@ void main() {
       elevation: 5,
       pressElevation: 6,
       iconTheme: IconThemeData(color: Color(0xffffff10)),
+      avatarBoxConstraints: BoxConstraints.tightForFinite(),
+      deleteIconBoxConstraints: BoxConstraints.tightForFinite(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -145,7 +149,9 @@ void main() {
       'brightness: dark',
       'elevation: 5.0',
       'pressElevation: 6.0',
-      'iconTheme: IconThemeData#00000(color: Color(0xffffff10))'
+      'iconTheme: IconThemeData#00000(color: Color(0xffffff10))',
+      'avatarBoxConstraints: BoxConstraints(unconstrained)',
+      'deleteIconBoxConstraints: BoxConstraints(unconstrained)',
     ]));
   });
 
@@ -1313,6 +1319,86 @@ void main() {
 
     expect(getIconData(tester).size, 23.0);
     expect(getIconData(tester).color, const Color(0xff112233));
+  });
+
+  testWidgets('ChipThemeData.avatarBoxConstraints updates avatar size constraints', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(75, 75);
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(chipTheme: const ChipThemeData(
+        avatarBoxConstraints: BoxConstraints.tightForFinite(),
+      )),
+      home: Material(
+        child: Center(
+          child: RawChip(
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(127.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(93.0));
+
+    // Calculate the distance between avatar and chip edges.
+    final Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    final Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('ChipThemeData.deleteIconBoxConstraints updates delete icon size constraints', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(75, 75);
+
+    // Test custom delete layout constraints.
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(chipTheme: const ChipThemeData(
+        deleteIconBoxConstraints: BoxConstraints.tightForFinite(),
+      )),
+      home: Material(
+        child: Center(
+          child: RawChip(
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(127.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(93.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    final Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.cancel));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    final Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
   });
 }
 

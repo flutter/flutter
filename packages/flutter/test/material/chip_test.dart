@@ -144,6 +144,7 @@ Widget chipWithOptionalDeleteButton({
   TextDirection textDirection = TextDirection.ltr,
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
+  double? size,
   VoidCallback? onPressed = doNothing,
   ThemeData? themeData,
 }) {
@@ -156,7 +157,11 @@ Widget chipWithOptionalDeleteButton({
           tooltip: chipTooltip,
           onPressed: onPressed,
           onDeleted: deletable ? doNothing : null,
-          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          deleteIcon: Icon(
+            key: deleteButtonKey,
+            size: size,
+            Icons.close,
+          ),
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
@@ -1852,6 +1857,7 @@ void main() {
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -1957,6 +1963,7 @@ void main() {
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -5088,7 +5095,7 @@ void main() {
                       });
                     },
                     child: Text('${isEnabled ? 'Disable' : 'Enable'} Chip'),
-                  )
+                  ),
                 ],
               );
             },
@@ -5119,7 +5126,7 @@ void main() {
           isEnabled: false,
           label: const Text('Label'),
           onDeleted: () { },
-        )
+        ),
       ),
     );
 
@@ -5134,7 +5141,7 @@ void main() {
           isEnabled: enabled,
           label: const Text('Label'),
           onDeleted: () { },
-        )
+        ),
       );
     }
 
@@ -5155,6 +5162,290 @@ void main() {
 
     // Delete button tooltip should not be visible.
     expect(findTooltipContainer('Delete'), findsNothing);
+  });
+
+  testWidgets('Chip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: Chip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('RawChip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: RawChip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('Chip delete icon layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: Chip(
+            deleteIconBoxConstraints: deleteIconBoxConstraints,
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default delete icon layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.cancel));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (labelSize.width / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (labelSize.width / 2) - labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(
+      deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+    ));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('RawChip delete icon layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: RawChip(
+            deleteIconBoxConstraints: deleteIconBoxConstraints,
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default delete icon layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.cancel));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (labelSize.width / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (labelSize.width / 2) - labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(
+      deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+    ));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(RawChip )).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('Default delete button InkWell shape', (WidgetTester tester) async {
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+    ));
+
+    final InkWell deleteButtonInkWell = tester.widget<InkWell>(find.ancestor(
+      of: find.byIcon(Icons.cancel),
+      matching: find.byType(InkWell).last,
+    ));
+    expect(deleteButtonInkWell.customBorder, const CircleBorder());
+  });
+
+  testWidgets('Default delete button overlay', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+      theme: theme,
+    ));
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, isNot(paints..rect(color: theme.hoverColor)));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    // Hover over the delete icon.
+    final Offset centerOfDeleteButton = tester.getCenter(find.byType(Icon));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+
+    const Rect expectedClipRect = Rect.fromLTRB(124.7, 10.0, 142.7, 28.0);
+    final Path expectedClipPath = Path()..addRect(expectedClipRect);
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(48.0),
+        sampleSize: 100,
+      )),
+    );
   });
 
   group('Material 2', () {

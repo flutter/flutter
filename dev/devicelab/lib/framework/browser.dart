@@ -422,18 +422,6 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
 /// See also:
 ///  * https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 class BlinkTraceEvent {
-  BlinkTraceEvent._({
-    required this.args,
-    required this.cat,
-    required this.name,
-    required this.ph,
-    this.pid,
-    this.tid,
-    this.ts,
-    this.tts,
-    this.tdur,
-  });
-
   /// Parses an event from its JSON representation.
   ///
   /// Sample event encoded as JSON (the data is bogus, this just shows the format):
@@ -458,19 +446,16 @@ class BlinkTraceEvent {
   /// For detailed documentation of the format see:
   ///
   /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-  static BlinkTraceEvent fromJson(Map<String, dynamic> json) {
-    return BlinkTraceEvent._(
-      args: json['args'] as Map<String, dynamic>,
-      cat: json['cat'] as String,
-      name: json['name'] as String,
-      ph: json['ph'] as String,
-      pid: _readInt(json, 'pid'),
-      tid: _readInt(json, 'tid'),
-      ts: _readInt(json, 'ts'),
-      tts: _readInt(json, 'tts'),
-      tdur: _readInt(json, 'tdur'),
-    );
-  }
+  BlinkTraceEvent.fromJson(Map<String, dynamic> json)
+      : args = json['args'] as Map<String, dynamic>,
+        cat = json['cat'] as String,
+        name = json['name'] as String,
+        ph = json['ph'] as String,
+        pid = _readInt(json, 'pid'),
+        tid = _readInt(json, 'tid'),
+        ts = _readInt(json, 'ts'),
+        tts = _readInt(json, 'tts'),
+        tdur = _readInt(json, 'tdur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -572,12 +557,7 @@ class BlinkTraceEvent {
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
   final num? jsonValue = json[key] as num?;
-
-  if (jsonValue == null) {
-    return null;
-  }
-
-  return jsonValue.toInt();
+  return jsonValue?.toInt();
 }
 
 /// Used by [Chrome.launch] to detect a glibc bug and retry launching the
