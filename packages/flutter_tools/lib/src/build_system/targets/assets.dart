@@ -102,6 +102,7 @@ Future<Depfile> copyAssets(
     processManager: environment.processManager,
     fileSystem: environment.fileSystem,
     dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    buildMode: buildMode,
   );
 
   final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
