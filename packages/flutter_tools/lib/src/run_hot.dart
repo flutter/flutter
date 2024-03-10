@@ -22,7 +22,6 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
-import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -89,17 +88,18 @@ class HotRunner extends ResidentRunner {
     super.stayResident,
     bool super.ipv6 = false,
     super.machine,
-    this.multidexEnabled = false,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    NativeAssetsBuildRunner? buildRunner,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
-        _buildRunner = buildRunner,
+        _nativeAssetsBuilder = nativeAssetsBuilder,
+        _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
           hotMode: true,
@@ -113,7 +113,6 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File? applicationBinary;
   final bool hostIsIde;
-  final bool multidexEnabled;
 
   /// When performing a hot restart, the tool needs to upload a new main.dart.dill to
   /// each attached device's devfs. Replacing the existing file is not safe and does
@@ -133,13 +132,12 @@ class HotRunner extends ResidentRunner {
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
 
-  DateTime? firstBuildTime;
-
   String? _targetPlatform;
   String? _sdkName;
   bool? _emulator;
 
-  NativeAssetsBuildRunner? _buildRunner;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
+  final String? _nativeAssetsYamlFile;
 
   String? flavor;
 
@@ -267,10 +265,7 @@ class HotRunner extends ResidentRunner {
       await device!.initLogReader();
       device
         .developmentShaderCompiler
-        .configureCompiler(
-          device.targetPlatform,
-          impellerStatus: debuggingOptions.enableImpeller,
-        );
+        .configureCompiler(device.targetPlatform);
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -371,23 +366,22 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(
-      projectUri,
-      debuggingOptions.buildInfo.packageConfig,
-      fileSystem,
-      globals.logger,
-    );
-    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: _buildRunner!,
-      flutterDevices: flutterDevices,
-    );
+    final Uri? nativeAssetsYaml;
+    if (_nativeAssetsYamlFile != null) {
+      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
+    } else {
+      final Uri projectUri = Uri.directory(projectRootPath);
+      nativeAssetsYaml = await _nativeAssetsBuilder?.dryRun(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        flutterDevices: flutterDevices,
+        logger: logger,
+        packageConfig: debuggingOptions.buildInfo.packageConfig,
+      );
+    }
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
-    firstBuildTime = DateTime.now();
 
     Duration totalCompileTime = Duration.zero;
     Duration totalLaunchAppTime = Duration.zero;
@@ -535,11 +529,9 @@ class HotRunner extends ResidentRunner {
         mainUri: entrypointFile.absolute.uri,
         target: target,
         bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
         bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
-        projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart, swap: _swap),
         invalidatedFiles: invalidationResult.uris!,
         packageConfig: invalidationResult.packageConfig!,
@@ -1724,4 +1716,16 @@ class ReasonForCancelling {
   String toString() {
     return '$message.\nTry performing a hot restart instead.';
   }
+}
+
+/// An interface to enable overriding native assets build logic in other
+/// build systems.
+abstract class HotRunnerNativeAssetsBuilder {
+  Future<Uri?> dryRun({
+    required Uri projectUri,
+    required FileSystem fileSystem,
+    required List<FlutterDevice> flutterDevices,
+    required PackageConfig packageConfig,
+    required Logger logger,
+  });
 }

@@ -262,7 +262,8 @@ void main() {
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
   });
 
-  testWidgets('PageView restoration', (WidgetTester tester) async {
+  testWidgets('PageView restoration',
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView(

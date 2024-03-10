@@ -631,8 +631,8 @@ void main() {
   testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
-      Duration.zero,
-      EnginePhase.build,
+      duration: Duration.zero,
+      phase: EnginePhase.build,
     );
 
     final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');

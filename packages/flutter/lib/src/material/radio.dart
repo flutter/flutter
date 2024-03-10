@@ -260,10 +260,12 @@ class Radio<T> extends StatefulWidget {
   ///
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
-  /// If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ColorScheme.secondary] is used in the
-  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
-  /// default state.
+  /// If that is also null and [ThemeData.useMaterial3] is false, then
+  /// [ThemeData.disabledColor] is used in the disabled state, [ColorScheme.secondary]
+  /// is used in the selected state, and [ThemeData.unselectedWidgetColor] is used in the
+  /// default state; if [ThemeData.useMaterial3] is true, then [ColorScheme.onSurface]
+  /// is used in the disabled state, [ColorScheme.primary] is used in the
+  /// selected state and [ColorScheme.onSurfaceVariant] is used in the default state.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.radio.materialTapTargetSize}
@@ -330,9 +332,17 @@ class Radio<T> extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [RadioThemeData.overlayColor] is used. If that is also null,
-  /// then the value of [ColorScheme.secondary] with alpha
+  /// then in Material 2, the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
-  /// is used in the pressed, focused and hovered state.
+  /// is used in the pressed, focused and hovered state. In Material3, the default
+  /// values are:
+  ///   * selected
+  ///     * pressed - Theme.colorScheme.onSurface(0.1)
+  ///     * hovered - Theme.colorScheme.primary(0.08)
+  ///     * focused - Theme.colorScheme.primary(0.1)
+  ///   * pressed - Theme.colorScheme.primary(0.1)
+  ///   * hovered - Theme.colorScheme.onSurface(0.08)
+  ///   * focused - Theme.colorScheme.onSurface(0.1)
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.radio.splashRadius}
@@ -453,13 +463,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? radioTheme.visualDensity
       ?? defaults.visualDensity!;
-    Size size;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-    }
+    Size size = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
+    };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
@@ -675,24 +682,24 @@ class _RadioDefaultsM3 extends RadioThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;
     });

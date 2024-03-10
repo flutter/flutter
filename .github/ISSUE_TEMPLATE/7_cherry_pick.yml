@@ -3,6 +3,9 @@ description: As a contributor, you would like to request that a feature be cherr
 title: '[CP] <title>'
 labels: ['cp: review']
 body:
+  - type: markdown
+    attributes:
+      value: "### The current branches can be found under release-candidate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)"
   - type: input
     id: issue_link
     attributes:
@@ -26,7 +29,7 @@ body:
       label: PR Link
       description: >-
         Link to an open PR that cherrypick's this into the target release branch.
-        The current branches can be found under release-caniddate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
+        The current branches can be found under release-candidate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
     validations:
       required: true
   - type: textarea

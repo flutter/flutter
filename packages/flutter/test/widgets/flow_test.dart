@@ -65,6 +65,7 @@ void main() {
     final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
+    addTearDown(startOffset.dispose);
     final List<int> log = <int>[];
 
     Widget buildBox(int i) {

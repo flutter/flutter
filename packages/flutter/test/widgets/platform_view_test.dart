@@ -2212,7 +2212,7 @@ void main() {
         ),
       );
       // casting to dynamic is required since the state class is private.
-      // ignore: avoid_dynamic_calls, invalid_assignment
+      // ignore: invalid_assignment
       final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
       await tester.pumpWidget(
@@ -3149,7 +3149,7 @@ void main() {
         ),
       );
       // casting to dynamic is required since the state class is private.
-      // ignore: avoid_dynamic_calls, invalid_assignment
+      // ignore: invalid_assignment
       final FocusNode node = (tester.state(find.byType(AppKitView)) as dynamic).focusNode;
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
       await tester.pumpWidget(

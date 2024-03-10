@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+import '../impeller_test_helpers.dart';
 import 'widget_inspector_test_utils.dart';
 
 // Start of block of code where widget creation location line numbers and
@@ -400,7 +401,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -421,7 +421,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(log, equals(<String>['bottom']));
       log.clear();
       // Ensure the inspector selection has not changed to bottom.
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -437,7 +436,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
       expect(log, equals(<String>[]));
       log.clear();
-      // ignore: avoid_dynamic_calls
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -608,7 +606,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.longPress(find.byKey(clickTarget), warnIfMissed: false);
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
-      // ignore: avoid_dynamic_calls
       expect(
         WidgetInspectorService.instance.selection.current?.semanticBounds.width,
         equals(95.0),
@@ -616,7 +613,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
-      // ignore: avoid_dynamic_calls
       expect(
         WidgetInspectorService.instance.selection.candidates
             .whereType<RenderParagraph>()
@@ -3874,7 +3870,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3884,7 +3880,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3911,7 +3907,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3921,7 +3917,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4134,7 +4130,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         debugShowChangeCounter++;
       }
 
-      WidgetsApp.debugShowWidgetInspectorOverride = false;
+      WidgetsBinding.instance.debugShowWidgetInspectorOverride = false;
       valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
 
       service.rebuildCount = 0;
@@ -4159,7 +4155,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('true'),
       );
-      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(WidgetsBinding.instance.debugShowWidgetInspectorOverride, isTrue);
       expect(extensionChangedEvents.length, equals(1));
       expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(1));
@@ -4199,7 +4195,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(extensionChangedEvents.length, equals(3));
       expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
       expect(debugShowChangeCounter, equals(2));
-      expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
+      expect(WidgetsBinding.instance.debugShowWidgetInspectorOverride, isFalse);
     });
 
     testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
@@ -4556,7 +4552,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    });
+    }, skip: impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
 
     group('layout explorer', () {
       const String group = 'test-group';
@@ -4695,7 +4691,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(renderObject!['description'], contains('RenderView'));
 
         expect(result['parentRenderElement'], isNull);
-        expect(result['constraints'], isNull);
+
+        final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
+        expect(constraints, isNotNull);
+        expect(constraints!['type'], equals('BoxConstraints'));
+        expect(constraints['minWidth'], equals('800.0'));
+        expect(constraints['minHeight'], equals('600.0'));
+        expect(constraints['maxWidth'], equals('800.0'));
+        expect(constraints['maxHeight'], equals('600.0'));
         expect(result['isBox'], isNull);
 
         final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;

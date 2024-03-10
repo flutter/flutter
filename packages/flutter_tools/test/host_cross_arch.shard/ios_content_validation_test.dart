@@ -7,11 +7,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/convert.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
 
 void main() {
   group('iOS app validation', () {
@@ -157,9 +155,6 @@ void main() {
           ));
 
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
-
-          // Builds should not contain deprecated bitcode.
-          expect(_containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
         });
 
         testWithoutContext('Info.plist dart VM Service Bonjour service', () {
@@ -359,50 +354,110 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
+
+    testWithoutContext('archive', () {
+      final File appIconFile = fileSystem.file(fileSystem.path.join(
+        projectRoot,
+        'ios',
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+        'Icon-App-20x20@1x.png',
+      ));
+      // Resizes app icon to 123x456 (it is supposed to be 20x20).
+      appIconFile.writeAsBytesSync(appIconFile.readAsBytesSync()
+        ..buffer.asByteData().setInt32(16, 123)
+        ..buffer.asByteData().setInt32(20, 456));
+
+      final ProcessResult output = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'xcarchive',
+          '--verbose',
+        ],
+        workingDirectory: projectRoot,
+      );
+
+      // Note this isBot so usage won't actually be sent,
+      // this log line is printed whenever the app is archived.
+      expect(output.stdout, contains('Sending archive event if usage enabled'));
+
+      // The output contains extra time related prefix, so cannot use a single string.
+      const List<String> expectedValidationMessages = <String>[
+        '[!] App Settings Validation\n',
+        '    • Version Number: 1.0.0\n',
+        '    • Build Number: 1\n',
+        '    • Display Name: Hello\n',
+        '    • Deployment Target: 12.0\n',
+        '    • Bundle Identifier: com.example.hello\n',
+        '    ! Your application still contains the default "com.example" bundle identifier.\n',
+        '[!] App Icon and Launch Image Assets Validation\n',
+        '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
+        '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
+        '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
+        'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+      ];
+      expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
+
+      final Directory archivePath = fileSystem.directory(fileSystem.path.join(
+        projectRoot,
+        'build',
+        'ios',
+        'archive',
+        'Runner.xcarchive',
+      ));
+
+      final Directory products = archivePath.childDirectory('Products');
+      expect(products, exists);
+
+      final Directory dSYM = archivePath.childDirectory('dSYMs').childDirectory('Runner.app.dSYM');
+      expect(dSYM, exists);
+
+      final Directory applications = products.childDirectory('Applications');
+
+      final Directory appBundle = applications
+          .listSync()
+          .whereType<Directory>()
+          .singleWhere((Directory directory) => fileSystem.path.extension(directory.path) == '.app');
+
+      final String flutterFramework = fileSystem.path.join(
+        appBundle.path,
+        'Frameworks',
+        'Flutter.framework',
+        'Flutter',
+      );
+
+      // Exits 0 only if codesigned.
+      final ProcessResult flutterCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          flutterFramework,
+        ],
+      );
+      expect(flutterCodesign, const ProcessResultMatcher());
+
+      final String appFramework = fileSystem.path.join(
+        appBundle.path,
+        'Frameworks',
+        'App.framework',
+        'App',
+      );
+
+      final ProcessResult appCodesign = processManager.runSync(
+        <String>[
+          'xcrun',
+          'codesign',
+          '--verify',
+          appFramework,
+        ],
+      );
+      expect(appCodesign, const ProcessResultMatcher());
+    });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-     timeout: const Timeout(Duration(minutes: 7))
+     timeout: const Timeout(Duration(minutes: 10))
   );
-}
-
-bool _containsBitcode(String pathToBinary, ProcessManager processManager) {
-  // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
-  final ProcessResult result = processManager.runSync(<String>[
-    'otool',
-    '-l',
-    '-arch',
-    'arm64',
-    pathToBinary,
-  ]);
-  final String loadCommands = result.stdout as String;
-  if (!loadCommands.contains('__LLVM')) {
-    return false;
-  }
-  // Presence of the section may mean a bitcode marker was embedded (size=1), but there is no content.
-  if (!loadCommands.contains('size 0x0000000000000001')) {
-    return true;
-  }
-  // Check the false positives: size=1 wasn't referencing the __LLVM section.
-
-  bool emptyBitcodeMarkerFound = false;
-  //  Section
-  //  sectname __bundle
-  //  segname __LLVM
-  //  addr 0x003c4000
-  //  size 0x0042b633
-  //  offset 3932160
-  //  ...
-  final List<String> lines = LineSplitter.split(loadCommands).toList();
-  lines.asMap().forEach((int index, String line) {
-    if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      final bool bitcodeMarkerFound = lines
-          .skip(index - 1)
-          .take(4)
-          .any((String line) => line.contains(' size 0x0000000000000001'));
-      if (bitcodeMarkerFound) {
-        emptyBitcodeMarkerFound = true;
-        return;
-      }
-    }
-  });
-  return !emptyBitcodeMarkerFound;
 }

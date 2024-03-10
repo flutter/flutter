@@ -212,6 +212,119 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('NestedScrollView always scrolls outer scrollable first', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/136199
+    final Key innerKey = UniqueKey();
+    final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
+
+    final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
+
+    Widget build() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: NestedScrollView(
+            key: outerKey,
+            controller: outerController,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              SliverToBoxAdapter(
+                child: Container(color: Colors.green, height: 300),
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 64,
+                  ),
+                ),
+              ),
+            ],
+            body: SingleChildScrollView(
+              key: innerKey,
+              physics: const BouncingScrollPhysics(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <ui.Color>[Colors.black, Colors.blue],
+                    stops: <double>[0, 1],
+                  ),
+                ),
+                height: 800,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    final ScrollController outer = outerKey.currentState!.outerController;
+    final ScrollController inner = outerKey.currentState!.innerController;
+
+    // Assert the initial positions
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    outerController.addListener(() {
+      fail('Outer controller should not be scrolling'); // This should never be called
+    });
+
+    await tester.drag(find.byKey(innerKey), const Offset(0, 2000)); // Over-scroll the inner Scrollable to the bottom
+
+    // Using a precise value to make addition/subtraction possible later in the test
+    // Which better conveys the intent of the test
+    // The value is not equal to 2000 due to BouncingScrollPhysics of the inner Scrollable
+    const double endPosition = -1974.0862087158384;
+    const Duration nextFrame = Duration(microseconds: 16666);
+
+    // Assert positions after over-scrolling
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition);
+
+    await tester.fling(find.byKey(innerKey), const Offset(0, -600), 2000); // Fling the inner Scrollable to the top
+
+    // Assert positions after fling
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition + 600);
+
+    await tester.pump(nextFrame);
+
+    // Assert positions after pump
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition + 600);
+
+    double currentOffset = inner.offset;
+    int maxNumberOfSteps = 100;
+
+    while (inner.offset < 0) {
+      maxNumberOfSteps--;
+      if (maxNumberOfSteps <= 0) {
+        fail('Scrolling did not settle in an expected number of steps.');
+      }
+      await tester.pump(nextFrame);
+      expect(inner.offset, greaterThanOrEqualTo(currentOffset));
+      expect(outer.offset, 0.0);
+
+      currentOffset = inner.offset;
+    }
+
+    // Assert positions returned to/stayed at 0.0
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    await tester.pumpAndSettle();
+
+    // Assert values settle at 0.0
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+  });
+
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
@@ -2548,7 +2661,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(myApp, Duration.zero, EnginePhase.build);
+    await tester.pumpWidget(myApp, duration: Duration.zero, phase: EnginePhase.build);
     expect(isScrolled, false);
     expect(tester.takeException(), isNull);
   });

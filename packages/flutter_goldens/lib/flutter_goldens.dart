@@ -8,15 +8,19 @@ import 'dart:io' as io show OSError, SocketException;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_goldens_client/skia_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
-export 'package:flutter_goldens_client/skia_client.dart';
+import 'skia_client.dart';
+export 'skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+
+// If you are trying to debug this package, you may like to use the golden test
+// titled "Inconsequential golden test" in this file:
+//   /packages/flutter/test/widgets/basic_test.dart
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 final RegExp _kMainBranch = RegExp(r'master|main');
@@ -41,7 +45,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
   }
-
   await testMain();
 }
 
@@ -502,6 +505,13 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         baseDirectory.uri,
         goldens,
         'SocketException occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
+      );
+    } on FormatException catch (_) {
+      return FlutterSkippingFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'FormatException occurred, could not reach Gold. '
           'Switching to FlutterSkippingGoldenFileComparator.',
       );
     }

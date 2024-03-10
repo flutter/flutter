@@ -5,12 +5,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-    int _creations = 0;
-    int _disposals = 0;
+int _creations = 0;
+int _disposals = 0;
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  // LeakTesting is turned off because it adds subscriptions to
+  // [FlutterMemoryAllocations], that may interfere with the tests.
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   test('Publishers dispatch events in debug mode', () async {
     void listener(ObjectEvent event) {
@@ -131,7 +136,7 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   final _TestElement element = _TestElement(); result.creations++;
   final RenderObject renderObject = _TestRenderObject(); result.creations++;
 
-  element.makeInactive(); result.creations += 3; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode
+  element.makeInactive(); result.creations += 4; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode, 1 for the new _HighlightModeManager
   element.unmount(); result.disposals += 2; // 1 for the old BuildOwner, 1 for the element
   renderObject.dispose(); result.disposals += 1;
 

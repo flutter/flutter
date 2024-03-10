@@ -227,7 +227,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: testConfig.pingCommand,
-          onRun: () => pingCommandWasExecuted = true,
+          onRun: (_) => pingCommandWasExecuted = true,
           stdout: testConfigPingSuccessOutput
         ),
       ]),
@@ -318,7 +318,7 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
             FakeCommand(command: testConfig.uninstallCommand),
-            FakeCommand(command: testConfig.installCommand, onRun: () => bothCommandsWereExecuted = true),
+            FakeCommand(command: testConfig.installCommand, onRun: (_) => bothCommandsWereExecuted = true),
           ])
       );
 
@@ -522,7 +522,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 
@@ -548,7 +548,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: testConfig.screenshotCommand!,
-        onRun: () => screenshotCommandWasExecuted = true,
+        onRun: (_) => screenshotCommandWasExecuted = true,
       ),
     ]);
 

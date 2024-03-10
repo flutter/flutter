@@ -52,12 +52,10 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawRect, 1));
 
-    // ignore: avoid_dynamic_calls
     expect((material as dynamic).debugInkFeatures, hasLength(1));
 
     await tester.pumpAndSettle();
     // ink feature is disposed.
-    // ignore: avoid_dynamic_calls
     expect((material as dynamic).debugInkFeatures, isEmpty);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.

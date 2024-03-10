@@ -195,7 +195,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
 
   @override
   TestExtendedParentData parentDataOf(RenderBox child) {
-    return child.parentData! as TestExtendedParentData;
+    return super.parentDataOf(child) as TestExtendedParentData;
   }
 
   @override

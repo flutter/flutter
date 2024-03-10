@@ -33,7 +33,9 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// See also:
+///
 ///  * [SelectableRegion], which provides an overview of the selection system.
+///  * [SelectableText], which enables selection on a single run of text.
 class SelectionArea extends StatefulWidget {
   /// Creates a [SelectionArea].
   ///
@@ -48,15 +50,13 @@ class SelectionArea extends StatefulWidget {
     required this.child,
   });
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier in the selection region.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}

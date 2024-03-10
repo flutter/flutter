@@ -34,7 +34,7 @@ void main() {
     // Get the initial size of the ListView
     final Size listViewInitialSize = tester.getSize(listViewFinder);
 
-    // Drag the the sheet from anywhere inside the sheet to change the sheet position
+    // Drag the sheet from anywhere inside the sheet to change the sheet position
     await tester.drag(listViewFinder, const Offset(0.0, -100.0));
     await tester.pump();
 

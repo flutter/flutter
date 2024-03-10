@@ -14,6 +14,21 @@ import 'scheduler_tester.dart';
 class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
+  VoidCallback? additionalHandleBeginFrame;
+  VoidCallback? additionalHandleDrawFrame;
+
+  @override
+  void handleBeginFrame(Duration? rawTimeStamp) {
+    additionalHandleBeginFrame?.call();
+    super.handleBeginFrame(rawTimeStamp);
+  }
+
+  @override
+  void handleDrawFrame() {
+    additionalHandleDrawFrame?.call();
+    super.handleDrawFrame();
+  }
+
   @override
   void postEvent(String eventKind, Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
@@ -37,6 +52,11 @@ void main() {
 
   setUpAll(() {
     scheduler = TestSchedulerBinding();
+  });
+
+  tearDown(() {
+    scheduler.additionalHandleBeginFrame = null;
+    scheduler.additionalHandleDrawFrame = null;
   });
 
   test('Tasks are executed in the right order', () {
@@ -109,6 +129,25 @@ void main() {
     expect(scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks[0], equals(0));
+  });
+
+  test('scheduleWarmUpFrame should flush microtasks between callbacks', () async {
+    addTearDown(() => scheduler.handleEventLoopCallback());
+
+    bool microtaskDone = false;
+    final Completer<void> drawFrameDone = Completer<void>();
+    scheduler.additionalHandleBeginFrame = () {
+      expect(microtaskDone, false);
+      scheduleMicrotask(() {
+        microtaskDone = true;
+      });
+    };
+    scheduler.additionalHandleDrawFrame = () {
+      expect(microtaskDone, true);
+      drawFrameDone.complete();
+    };
+    scheduler.scheduleWarmUpFrame();
+    await drawFrameDone.future;
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {

@@ -146,9 +146,7 @@ RenderImage getRenderImage(WidgetTester tester, Key key) {
 }
 
 Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = Duration.zero;
-  const EnginePhase pumpPhase = EnginePhase.layout;
-  return tester.pumpWidget(widget, pumpDuration, pumpPhase);
+  return tester.pumpWidget(widget, duration: Duration.zero, phase: EnginePhase.layout);
 }
 
 void main() {

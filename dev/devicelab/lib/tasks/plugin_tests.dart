@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -35,6 +36,7 @@ class PluginTest {
     this.dartOnlyPlugin = false,
     this.sharedDarwinSource = false,
     this.template = 'plugin',
+    this.cocoapodsTransitiveFlutterDependency = false,
   });
 
   final String buildTarget;
@@ -44,6 +46,7 @@ class PluginTest {
   final bool dartOnlyPlugin;
   final bool sharedDarwinSource;
   final String template;
+  final bool cocoapodsTransitiveFlutterDependency;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -80,9 +83,20 @@ class PluginTest {
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        if (cocoapodsTransitiveFlutterDependency) {
+          section('Test app with Flutter as a transitive CocoaPods dependency');
+          await app.addCocoapodsTransitiveFlutterDependency();
+          await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        }
         if (runFlutterTest) {
           section('Test app');
           await app.runFlutterTest();
+        }
+        // Validate local engine handling. Currently only implemented for macOS.
+        if (!dartOnlyPlugin) {
+          section('Validate local engine configuration');
+          final String fakeEngineSourcePath = path.join(tempDir.path, 'engine');
+          await _testLocalEngineConfiguration(app, fakeEngineSourcePath);
         }
       } finally {
         await plugin.delete();
@@ -93,6 +107,28 @@ class PluginTest {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
+    }
+  }
+
+  Future<void> _testLocalEngineConfiguration(_FlutterProject app, String fakeEngineSourcePath) async {
+    // The tool requires that a directory that looks like an engine build
+    // actually exists when passing --local-engine, so create a fake skeleton.
+    final Directory buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
+    buildDir.createSync(recursive: true);
+    // Currently this test is only implemented for macOS; it can be extended to
+    // others as needed.
+    if (buildTarget == 'macos') {
+      // When using a local engine, podhelper.rb will search for a "macos-"
+      // directory within the FlutterMacOS.xcframework, so create a dummy one.
+      Directory(
+        path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'),
+      ).createSync(recursive: true);
+
+      // Clean before regenerating the config to ensure that the pod steps run.
+      await inDirectory(Directory(app.rootPath), () async {
+        await evalFlutter('clean');
+      });
+      await app.build(buildTarget, configOnly: true, localEngine: buildDir);
     }
   }
 }
@@ -299,8 +335,9 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'x64', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
+          path.join(rootPath, 'build', 'windows', arch, 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
           <String>[],
           canFail: true,
         ) != 0) {
@@ -339,6 +376,57 @@ public class $pluginClass: NSObject, FlutterPlugin {
     return project;
   }
 
+  /// Creates a Pod that uses a Flutter plugin as a dependency and therefore
+  /// Flutter as a transitive dependency.
+  Future<void> addCocoapodsTransitiveFlutterDependency() async {
+    final String iosDirectoryPath = path.join(rootPath, 'ios');
+
+    final File nativePod = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'NativePod.podspec',
+    ));
+    nativePod.createSync(recursive: true);
+    nativePod.writeAsStringSync('''
+Pod::Spec.new do |s|
+  s.name             = 'NativePod'
+  s.version          = '1.0.0'
+  s.summary          = 'A pod to test Flutter as a transitive dependency.'
+  s.homepage         = 'https://flutter.dev'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source           = { :path => '.' }
+  s.source_files = "Classes", "Classes/**/*.{h,m}"
+  s.dependency 'plugintest'
+end
+''');
+
+    final File nativePodClass = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'Classes',
+      'NativePodTest.m',
+    ));
+    nativePodClass.createSync(recursive: true);
+    nativePodClass.writeAsStringSync('''
+#import <Flutter/Flutter.h>
+
+@interface NativePodTest : NSObject
+
+@end
+
+@implementation NativePodTest
+
+@end
+''');
+
+    final File podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
+    final List<String> podfileContents = podfileFile.readAsLinesSync();
+    final int index = podfileContents.indexWhere((String line) => line.contains('flutter_install_all_ios_pods'));
+    podfileContents.insert(index, "pod 'NativePod', :path => 'NativePod'");
+    podfileFile.writeAsStringSync(podfileContents.join('\n'));
+  }
+
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
   void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
@@ -347,7 +435,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '11.0'"
+        ? "s.platform = :ios, '12.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
@@ -369,13 +457,28 @@ s.dependency 'AppAuth', '1.6.0'
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
+  Future<void> build(
+    String target, {
+    bool validateNativeBuildProject = true,
+    bool configOnly = false,
+    Directory? localEngine,
+  }) async {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[
         target,
         '-v',
         if (target == 'ios')
           '--no-codesign',
+        if (configOnly)
+          '--config-only',
+        if (localEngine != null)
+          // The engine directory is of the form <fake-source-path>/out/<fakename>,
+          // which has to be broken up into the component flags.
+          ...<String>[
+            '--local-engine-src-path=${localEngine.parent.parent.path}',
+            '--local-engine=${path.basename(localEngine.path)}',
+            '--local-engine-host=${path.basename(localEngine.path)}',
+          ]
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -420,6 +523,13 @@ s.dependency 'AppAuth', '1.6.0'
             // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
             if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
               throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+            }
+          }
+
+          if (localEngine != null) {
+            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
+            if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
+              throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
             }
           }
         }

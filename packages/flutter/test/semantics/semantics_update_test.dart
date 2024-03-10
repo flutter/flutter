@@ -18,8 +18,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -91,8 +90,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -158,7 +156,7 @@ void main() {
         'properties: SemanticsProperties, '
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]'// ignore: missing_whitespace_between_adjacent_strings
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 

@@ -232,7 +232,7 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
-testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
+  testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
 
@@ -285,7 +285,7 @@ testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) 
     expect(selectedSegment, 3);
   });
 
-testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -606,7 +606,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
@@ -646,10 +646,10 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
                 ButtonSegment<int>(value: 1, label: Text('1')),
                 ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
                 ButtonSegment<int>(
-                    value: 3,
-                    label: Text('3'),
-                    tooltip: 't3',
-                    enabled: false,
+                  value: 3,
+                  label: Text('3'),
+                  tooltip: 't3',
+                  enabled: false,
                 ),
               ],
               selected: const <int>{2},
@@ -664,4 +664,199 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
   });
+
+  testWidgets('SegmentedButton.styleFrom is applied to the SegmentedButton', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xfffffff0);
+    const Color backgroundColor =  Color(0xfffffff1);
+    const Color selectedBackgroundColor = Color(0xfffffff2);
+    const Color selectedForegroundColor = Color(0xfffffff3);
+    const Color disabledBackgroundColor = Color(0xfffffff4);
+    const Color disabledForegroundColor = Color(0xfffffff5);
+    const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
+    const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
+
+    final ButtonStyle styleFromStyle = SegmentedButton.styleFrom(
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      selectedForegroundColor: selectedForegroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      disabledForegroundColor: disabledForegroundColor,
+      disabledBackgroundColor: disabledBackgroundColor,
+      shadowColor: const Color(0xfffffff6),
+      surfaceTintColor: const Color(0xfffffff7),
+      elevation: 1,
+      textStyle: const TextStyle(color: Color(0xfffffff8)),
+      padding: const EdgeInsets.all(2),
+      side: const BorderSide(color: Color(0xfffffff9)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
+      enabledMouseCursor: enabledMouseCursor,
+      disabledMouseCursor: disabledMouseCursor,
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      animationDuration: const Duration(milliseconds: 100),
+      enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: NoSplash.splashFactory,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            style: styleFromStyle,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+              ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+            ],
+            selected: const <int>{2},
+            onSelectionChanged: (Set<int> selected) { },
+            selectedIcon: const Icon(Icons.alarm),
+          ),
+        ),
+      ),
+    ));
+
+    // Test provided button style is applied to the enabled button segment.
+    ButtonStyle? buttonStyle = tester.widget<TextButton>(find.byType(TextButton).first).style;
+    expect(buttonStyle?.foregroundColor?.resolve(enabled), foregroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(enabled), backgroundColor);
+    expect(buttonStyle?.overlayColor, styleFromStyle.overlayColor);
+    expect(buttonStyle?.surfaceTintColor, styleFromStyle.surfaceTintColor);
+    expect(buttonStyle?.elevation, styleFromStyle.elevation);
+    expect(buttonStyle?.textStyle, styleFromStyle.textStyle);
+    expect(buttonStyle?.padding, styleFromStyle.padding);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+    expect(buttonStyle?.visualDensity, styleFromStyle.visualDensity);
+    expect(buttonStyle?.tapTargetSize, styleFromStyle.tapTargetSize);
+    expect(buttonStyle?.animationDuration, styleFromStyle.animationDuration);
+    expect(buttonStyle?.enableFeedback, styleFromStyle.enableFeedback);
+    expect(buttonStyle?.alignment, styleFromStyle.alignment);
+    expect(buttonStyle?.splashFactory, styleFromStyle.splashFactory);
+
+    // Test provided button style is applied selected button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).at(1)).style;
+    expect(buttonStyle?.foregroundColor?.resolve(selected), selectedForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(selected), selectedBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
+
+    // Test provided button style is applied disabled button segment.
+    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).last).style;
+    expect(buttonStyle?.foregroundColor?.resolve(disabled), disabledForegroundColor);
+    expect(buttonStyle?.backgroundColor?.resolve(disabled), disabledBackgroundColor);
+    expect(buttonStyle?.mouseCursor?.resolve(disabled), disabledMouseCursor);
+
+    // Test provided button style is applied to the segmented button material.
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(SegmentedButton<int>),
+      matching: find.byType(Material),
+    ).first);
+    expect(material.elevation, styleFromStyle.elevation?.resolve(enabled));
+    expect(material.shadowColor, styleFromStyle.shadowColor?.resolve(enabled));
+    expect(material.surfaceTintColor, styleFromStyle.surfaceTintColor?.resolve(enabled));
+
+    // Test provided button style border is applied to the segmented button border.
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..line(color: styleFromStyle.side?.resolve(enabled)?.color),
+    );
+
+    // Test foreground color is applied to the overlay color.
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.down(tester.getCenter(find.text('1')));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: foregroundColor.withOpacity(0.08)));
+  });
+
+  testWidgets('Disabled SegmentedButton has correct states when rebuilding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  children: <Widget>[
+                    SegmentedButton<int>(
+                      segments: const <ButtonSegment<int>>[
+                        ButtonSegment<int>(value: 0, label: Text('foo')),
+                      ],
+                      selected: const <int>{0},
+                    ),
+                    ElevatedButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Trigger rebuild'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final Set<MaterialState> states = <MaterialState>{ MaterialState.selected, MaterialState.disabled };
+    // Check the initial states.
+    SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+    // Trigger a rebuild.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // Check the states after the rebuild.
+    state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers.values.first.value, states);
+  });
+
+  testWidgets('Min button hit target height is 48.0 and min (painted) button height is 40 '
+    'by default with standard density and MaterialTapTargetSize.padded', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              children: <Widget>[
+                SegmentedButton<int>(
+                  segments: const <ButtonSegment<int>>[
+                    ButtonSegment<int>(value: 0, label: Text('Day'), icon: Icon(Icons.calendar_view_day)),
+                    ButtonSegment<int>(value: 1, label: Text('Week'), icon: Icon(Icons.calendar_view_week)),
+                    ButtonSegment<int>(value: 2, label: Text('Month'), icon: Icon(Icons.calendar_view_month)),
+                    ButtonSegment<int>(value: 3, label: Text('Year'), icon: Icon(Icons.calendar_today)),
+                  ],
+                  selected: const <int>{0},
+                  onSelectionChanged: (Set<int> value) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(theme.visualDensity, VisualDensity.standard);
+    expect(theme.materialTapTargetSize, MaterialTapTargetSize.padded);
+
+    final Finder button = find.byType(SegmentedButton<int>);
+    expect(tester.getSize(button).height, 48.0);
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints..rrect(
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+        // Button border height is button.bottom(43.5) - button.top(4.5) + stoke width(1) = 40.
+        rrect: RRect.fromLTRBR(0.5, 4.5, 497.5, 43.5, const Radius.circular(19.5))
+      )
+    );
+  });
 }
+
+Set<MaterialState> enabled = const <MaterialState>{};
+Set<MaterialState> disabled = const <MaterialState>{ MaterialState.disabled };
+Set<MaterialState> selected = const <MaterialState>{ MaterialState.selected };

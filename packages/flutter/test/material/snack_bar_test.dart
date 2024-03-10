@@ -625,7 +625,6 @@ void main() {
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,
@@ -638,12 +637,9 @@ void main() {
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       secondaryHeaderColor: Colors.black,
-      backgroundColor: Colors.black,
       dialogBackgroundColor: Colors.black,
       indicatorColor: Colors.black,
       hintColor: Colors.black,
-      errorColor: Colors.black,
-      toggleableActiveColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
@@ -2797,6 +2793,7 @@ void main() {
 
   testWidgets('Material2 - SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: false),
       home: const Scaffold(
         bottomSheet: SizedBox(
@@ -2824,6 +2821,7 @@ void main() {
   testWidgets('Material3 - SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -2907,6 +2905,7 @@ void main() {
   testWidgets('Material2 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2940,6 +2939,7 @@ void main() {
   testWidgets('Material3 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -3142,6 +3142,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/98205
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -3175,6 +3176,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/98205
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -3207,6 +3209,7 @@ void main() {
   testWidgets('Floating snackbar can display optional icon', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3236,9 +3239,44 @@ void main() {
             'snack_bar.goldenTest.floatingWithActionWithIcon.png'));
   });
 
+  testWidgets('SnackBar has tooltip for Close Button', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/143793
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+      home: const Scaffold(
+        bottomSheet: SizedBox(
+          width: 200,
+          height: 50,
+          child: ColoredBox(
+            color: Colors.pink,
+          ),
+        ),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(
+      SnackBar(
+        content: const Text('Snackbar with close button'),
+        duration: const Duration(days: 365),
+        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+        behavior: SnackBarBehavior.floating,
+        showCloseIcon: true,
+      ),
+    );
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
+
+    expect(
+      find.byTooltip(MaterialLocalizations.of(scaffoldMessengerState.context).closeButtonLabel),
+      findsOneWidget
+    );
+  });
+
   testWidgets('Material2 - Fixed width snackbar can display optional icon', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3266,6 +3304,7 @@ void main() {
   testWidgets('Material3 - Fixed width snackbar can display optional icon', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3293,6 +3332,7 @@ void main() {
   testWidgets('Material2 - Fixed snackbar can display optional icon without action', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3321,6 +3361,7 @@ void main() {
   testWidgets('Material3 - Fixed snackbar can display optional icon without action', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3349,6 +3390,7 @@ void main() {
   testWidgets('Material2 - Floating width snackbar can display optional icon without action', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3375,6 +3417,7 @@ void main() {
   testWidgets('Material3 - Floating width snackbar can display optional icon without action', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3401,6 +3444,7 @@ void main() {
   testWidgets('Material2 - Floating multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3428,6 +3472,7 @@ void main() {
   testWidgets('Material3 - Floating multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3455,6 +3500,7 @@ void main() {
   testWidgets('Material2 - Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
@@ -3485,6 +3531,7 @@ void main() {
   testWidgets('Material3 - Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,

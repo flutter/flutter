@@ -24,7 +24,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=11.0',
+  '-miphoneos-version-min=12.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -95,7 +95,7 @@ void main() {
         fileSystem.path.absolute(fileSystem.path.join(
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
-        '-miphonesimulator-version-min=11.0',
+        '-miphonesimulator-version-min=12.0',
         '-Xlinker',
         '-rpath',
         '-Xlinker',
@@ -287,6 +287,7 @@ void main() {
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>[
         'HostArtifact.impellerc',
+        '--sksl',
         '--runtime-stage-metal',
         '--iplr',
         '--sl=/App.framework/flutter_assets/shader.glsl',
@@ -599,7 +600,7 @@ void main() {
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
           outputDir.path,
           ],
-          onRun: () => binary.createSync(recursive: true),
+          onRun: (_) => binary.createSync(recursive: true),
         ),
         lipoCommandNonFatResult,
         FakeCommand(command: <String>[
@@ -810,56 +811,6 @@ void main() {
       ]);
 
       await const DebugUnpackIOS().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
-    });
-
-    testWithoutContext('fails when bitcode strip fails', () async {
-      binary.createSync(recursive: true);
-
-      final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        defines: <String, String>{
-          kIosArchs: 'arm64',
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-        },
-      );
-
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
-          outputDir.path,
-        ]),
-        lipoCommandNonFatResult,
-        lipoVerifyArm64Command,
-        FakeCommand(command: <String>[
-          'xcrun',
-          'bitcode_strip',
-          binary.path,
-          '-r',
-          '-o',
-          binary.path,
-        ], exitCode: 1, stderr: 'bitcode_strip error'),
-      ]);
-
-      await expectLater(
-        const ReleaseUnpackIOS().build(environment),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
-        )),
-      );
-
       expect(processManager, hasNoRemainingExpectations);
     });
 
