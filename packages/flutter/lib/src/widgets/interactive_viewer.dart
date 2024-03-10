@@ -872,8 +872,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     switch (_gestureType) {
-      case _GestureType.rotate:
-        break;
       case _GestureType.pan:
         if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
           _currentAxis = null;
@@ -927,7 +925,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
         _scaleAnimation!.addListener(_onScaleAnimate);
         _scaleController.forward();
-      case null:
+      case _GestureType.rotate || null:
         break;
     }
   }
