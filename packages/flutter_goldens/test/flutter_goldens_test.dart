@@ -5,6 +5,7 @@
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:convert';
+import 'dart:ffi' show Abi;
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
@@ -431,12 +432,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
+        equals('1937c1c93610cc0122a86a83d5bd38a4'),
       );
 
       // Browser
@@ -458,12 +460,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('e9d5c296c48e7126808520e9cc191243'),
+        equals('bc44a50c01eb3bbaf72a80d76c1c2305'),
       );
 
       // Locally - should defer to luci traceID
@@ -480,12 +483,13 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+        equals('8821f4896801fcdd7cd6d30f5a8e4284'),
       );
     });
 
@@ -721,7 +725,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -737,7 +741,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -753,7 +757,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -769,7 +773,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -783,7 +787,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -799,7 +803,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -816,7 +820,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -889,7 +893,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -906,7 +910,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -923,7 +927,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -940,7 +944,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -953,7 +957,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -968,7 +972,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -983,7 +987,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -1000,7 +1004,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -1021,7 +1025,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1037,7 +1041,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1051,7 +1055,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1065,7 +1069,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -1078,7 +1082,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -1160,6 +1164,16 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
+        fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
+
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+          baseDirectory: fakeDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
         // reset property or it will carry on to other tests
         fakeSkiaClient.getExpectationForTestThrowable = null;
       });

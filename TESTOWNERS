@@ -176,11 +176,9 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf_ios_sksl_warmup__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/external_textures_integration_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test_ios.dart @jmagman @flutter/tool
-/dev/devicelab/bin/tasks/flavors_test_ios_xcode_debug.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__compile.dart @jmagman @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios__start_up.dart @vashworth @flutter/engine
-/dev/devicelab/bin/tasks/flutter_gallery_ios__start_up_xcode_debug.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery_ios_sksl_warmup__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_ios__e2e_summary.dart @vashworth @flutter/engine
@@ -189,7 +187,6 @@
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @jmagman @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @vashworth @flutter/tool
-/dev/devicelab/bin/tasks/integration_ui_ios_driver_xcode_debug.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @dnfield @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @vashworth @flutter/tool
@@ -200,7 +197,6 @@
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @vashworth @flutter/engine
-/dev/devicelab/bin/tasks/microbenchmarks_ios_xcode_debug.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/native_assets_android.dart @dacoharkes @flutter/android
 /dev/devicelab/bin/tasks/native_assets_ios.dart @dacoharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios

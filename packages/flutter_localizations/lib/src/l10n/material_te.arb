@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "వెతకండి",
   "searchWebButtonLabel": "వెబ్‌లో సెర్చ్ చేయండి",
   "shareButtonLabel": "షేర్ చేయండి...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

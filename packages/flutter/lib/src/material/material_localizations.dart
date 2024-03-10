@@ -182,6 +182,10 @@ abstract class MaterialLocalizations {
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
 
+  /// The semantics label to describe the selected date in the calendar picker
+  /// invoked using [showDatePicker].
+  String get selectedDateLabel;
+
   /// Label for the scrim rendered underneath a [BottomSheet].
   String get scrimLabel;
 
@@ -1107,6 +1111,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get currentDateLabel => 'Today';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String get scrimLabel => 'Scrim';

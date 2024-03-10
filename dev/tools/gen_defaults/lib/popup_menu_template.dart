@@ -38,7 +38,7 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   Color? get shadowColor => ${color("md.comp.menu.container.shadow-color")};
 
   @override
-  Color? get surfaceTintColor => ${color("md.comp.menu.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.menu.container.surface-tint-layer.color")};
 
   @override
   ShapeBorder? get shape => ${shape("md.comp.menu.container")};

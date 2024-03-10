@@ -810,6 +810,41 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     'GeneratedPluginRegistrant.swift',
   ));
 
+  section('Validate embed FlutterMacOS.framework with CocoaPods');
+
+  final File podspec = File(path.join(
+    cocoapodsOutputPath,
+    'Debug',
+    'FlutterMacOS.podspec',
+  ));
+
+  podspec.writeAsStringSync(
+    podspec.readAsStringSync().replaceFirst('null.null.0', '0.0.0'),
+  );
+
+  final Directory macosDirectory = Directory(path.join(projectDir.path, 'macos'));
+  final File podfile = File(path.join(macosDirectory.path, 'Podfile'));
+  final String currentPodfile = podfile.readAsStringSync();
+
+  // Temporarily test Add-to-App Cocoapods podspec for framework
+  podfile.writeAsStringSync('''
+target 'Runner' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  pod 'FlutterMacOS', :podspec => '${podspec.path}'
+end
+''');
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
+  // Change podfile back to original
+  podfile.writeAsStringSync(currentPodfile);
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
   section('Build frameworks without plugins');
   await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'macos');
 }

@@ -196,6 +196,8 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   // ignore: override_on_non_overriding_member
   String get lineTerminator => '\n';
+  @override
+  // ignore: override_on_non_overriding_member
   set lineTerminator(String value) {
     throw UnimplementedError('Setting the line terminator is not supported');
   }

@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "រកមើល",
   "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
   "shareButtonLabel": "ចែករំលែក...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

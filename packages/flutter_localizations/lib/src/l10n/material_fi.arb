@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Hae",
   "searchWebButtonLabel": "Hae verkosta",
   "shareButtonLabel": "Jaa…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }
