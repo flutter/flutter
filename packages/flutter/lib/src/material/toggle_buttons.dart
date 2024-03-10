@@ -1165,7 +1165,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
       Axis.vertical => childOffset + leadingBorderSide.width,
-    }.value;
+    }.offset;
   }
 
   @override

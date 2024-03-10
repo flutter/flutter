@@ -737,7 +737,7 @@ class RenderIndexedStack extends RenderStack {
     }
     final StackParentData childParentData = displayedChild.parentData! as StackParentData;
     final BaselineOffset offset = BaselineOffset(displayedChild.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
-    return offset.value;
+    return offset.offset;
   }
 
   @override

@@ -941,7 +941,7 @@ class BoxParentData extends ParentData {
 abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 /// A wrapper that represents the baseline location of a `RenderBox`.
-extension type const BaselineOffset(double? value) {
+extension type const BaselineOffset(double? offset) {
   /// A value that indicates that the associated `RenderBox` does not have any
   /// baselines.
   ///
@@ -954,7 +954,7 @@ extension type const BaselineOffset(double? value) {
   /// Returns a new baseline location that is `offset` pixels further away from
   /// the origin than `this`, or unchanged if `this` is [noBaseline].
   BaselineOffset operator +(double offset) {
-    final double? value = this.value;
+    final double? value = this.offset;
     return BaselineOffset(value == null ? null : value + offset);
   }
 
@@ -972,18 +972,6 @@ extension type const BaselineOffset(double? value) {
     };
   }
 }
-
-typedef _DryBaselineUnavailableInfo = ({RenderBox box, String reason});
-
-/// A type that represents the result of a [RenderBox.computeDryBaseline]
-/// calculation. This is a sealed type with two subtypes:
-///  * [DryBaselineAvailable] which indicates the computation was successful.
-///  * [DryBaselineUnavailable] which indicates the computation failed.
-typedef DryBaselineResult = Either<_DryBaselineUnavailableInfo, BaselineOffset>;
-/// A type that represents the result of a succussful [RenderBox.computeDryBaseline] calculation.
-typedef DryBaselineAvailable = Right<_DryBaselineUnavailableInfo, BaselineOffset>;
-/// A type that represents the dry baseline of the [RenderBox] cannot be computed.
-typedef DryBaselineUnavailable = Left<_DryBaselineUnavailableInfo, BaselineOffset>;
 
 /// An interface that represents a memoized layout computation run by a [RenderBox].
 ///
@@ -1006,7 +994,6 @@ typedef DryBaselineUnavailable = Left<_DryBaselineUnavailableInfo, BaselineOffse
 /// [BoxConstraints] is always an input of every layout computation.
 abstract class _CachedLayoutCalculation<Input extends Object, Output> {
   static const _DryLayout dryLayout = _DryLayout();
-  static const _DryBaseline dryBaseline = _DryBaseline();
   static const _Baseline baseline = _Baseline();
 
   Output memoize(_LayoutCacheStorage cacheStorage, Input input, Output Function(Input) computer);
@@ -1032,53 +1019,24 @@ final class _DryLayout implements _CachedLayoutCalculation<BoxConstraints, Size>
   String eventLabel(RenderBox renderBox) => '${renderBox.runtimeType}.getDryLayout';
 }
 
-final class _DryBaseline implements _CachedLayoutCalculation<(BoxConstraints, TextBaseline), DryBaselineResult> {
-  const _DryBaseline();
-
-  @override
-  DryBaselineResult memoize(_LayoutCacheStorage cacheStorage, (BoxConstraints, TextBaseline) input, DryBaselineResult Function((BoxConstraints, TextBaseline)) computer) {
-    return switch (input.$2) {
-      TextBaseline.alphabetic => cacheStorage._cachedAlphabeticBaseline ??= <BoxConstraints, DryBaselineResult>{},
-      TextBaseline.ideographic => cacheStorage._cachedIdeoBaseline ??= <BoxConstraints, DryBaselineResult>{},
-    }.putIfAbsent(input.$1, () => computer(input));
-  }
-
-  @override
-  Map<String, String> debugFillTimelineArguments(Map<String, String> timelineArguments, (BoxConstraints, TextBaseline) input) {
-    return timelineArguments
-      ..['baseline type'] = '${input.$2}'
-      ..['getDryBaseline constraints'] = '${input.$1}';
-  }
-
-  @override
-  String eventLabel(RenderBox renderBox) => '${renderBox.runtimeType}.getDryBaseline';
-}
-
 final class _Baseline implements _CachedLayoutCalculation<(BoxConstraints, TextBaseline), BaselineOffset> {
   const _Baseline();
 
   @override
   BaselineOffset memoize(_LayoutCacheStorage cacheStorage, (BoxConstraints, TextBaseline) input, BaselineOffset Function((BoxConstraints, TextBaseline)) computer) {
-    final Map<BoxConstraints, DryBaselineResult> cache = switch (input.$2) {
-      TextBaseline.alphabetic => cacheStorage._cachedAlphabeticBaseline ??= <BoxConstraints, DryBaselineResult>{},
-      TextBaseline.ideographic => cacheStorage._cachedIdeoBaseline ??= <BoxConstraints, DryBaselineResult>{},
+    final Map<BoxConstraints, BaselineOffset> cache = switch (input.$2) {
+      TextBaseline.alphabetic => cacheStorage._cachedAlphabeticBaseline ??= <BoxConstraints, BaselineOffset>{},
+      TextBaseline.ideographic => cacheStorage._cachedIdeoBaseline ??= <BoxConstraints, BaselineOffset>{},
     };
-    DryBaselineResult ifAbsent() => DryBaselineAvailable(computer(input));
-    switch (cache.putIfAbsent(input.$1, ifAbsent)) {
-      case DryBaselineAvailable(:final BaselineOffset value):
-        return value;
-      case DryBaselineUnavailable():
-        final BaselineOffset computedResult = computer(input);
-        cache[input.$1] = DryBaselineAvailable(computedResult);
-        return computedResult;
-    }
+    BaselineOffset ifAbsent() => computer(input);
+    return cache.putIfAbsent(input.$1, ifAbsent);
   }
 
   @override
   Map<String, String> debugFillTimelineArguments(Map<String, String> timelineArguments, (BoxConstraints, TextBaseline) input) {
     return timelineArguments
       ..['baseline type'] = '${input.$2}'
-      ..['getDistanceToBaseline constraints'] = '${input.$1}';
+      ..['constraints'] = '${input.$1}';
   }
 
   @override
@@ -1110,8 +1068,8 @@ enum _IntrinsicDimension implements _CachedLayoutCalculation<double, double> {
 final class _LayoutCacheStorage {
   Map<(_IntrinsicDimension, double), double>? _cachedIntrinsicDimensions;
   Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
-  Map<BoxConstraints, DryBaselineResult>? _cachedAlphabeticBaseline;
-  Map<BoxConstraints, DryBaselineResult>? _cachedIdeoBaseline;
+  Map<BoxConstraints, BaselineOffset>? _cachedAlphabeticBaseline;
+  Map<BoxConstraints, BaselineOffset>? _cachedIdeoBaseline;
 
   // Returns a boolean indicating whether the cache storage has cached
   // intrinsics / dry layout data in it.
@@ -1994,11 +1952,9 @@ abstract class RenderBox extends RenderObject {
     return _computeIntrinsics(_CachedLayoutCalculation.dryLayout, constraints, _computeDryLayout);
   }
 
-  /// Try to compute the distance from the top of the box to the first baseline
-  /// of the box's contents at the given `constraints`,
-  ///
-  /// This method returns `DryBaselineAvailable(Baseline.noBaseline)` if the
-  /// [RenderBox] does not have any baselines.
+  /// Returns the distance from the top of the box to the first baseline of the
+  /// box's contents at the given `constraints`, or `null` if this [RenderBox]
+  /// does not have any baselines.
   ///
   /// This method calls [computeDryBaseline] under the hood and caches the result.
   /// When implementing a new [RenderBox] subclass, this method is typically not
@@ -2025,8 +1981,8 @@ abstract class RenderBox extends RenderObject {
   /// expensive, as it can result in O(N^2) layout performance, where N is the
   /// number of render objects in the render subtree. Consider using
   /// [getDistanceToBaseline] when appropriate.
-  DryBaselineResult getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return _computeIntrinsics(_CachedLayoutCalculation.dryBaseline, (constraints, baseline), _computeDryBaseline);
+  double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
   }
 
   Size _computeDryLayout(BoxConstraints constraints) {
@@ -2044,13 +2000,13 @@ abstract class RenderBox extends RenderObject {
     return result;
   }
 
-  DryBaselineResult _computeDryBaseline((BoxConstraints, TextBaseline) pair) {
+  BaselineOffset _computeDryBaseline((BoxConstraints, TextBaseline) pair) {
     assert(() {
       assert(!_computingThisDryBaseline);
       _computingThisDryBaseline = true;
       return true;
     }());
-    final DryBaselineResult result = computeDryBaseline(pair.$1, pair.$2);
+    final BaselineOffset result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
     assert(() {
       assert(_computingThisDryBaseline);
       _computingThisDryBaseline = false;
@@ -2120,25 +2076,35 @@ abstract class RenderBox extends RenderObject {
   /// size of this [RenderBox] or a child [RenderBox] in this method's
   /// implementatin, use the [getDryLayout] method instead.
   ///
-  /// The implementation must return a [DryBaselineResult] that represents the
-  /// result of the computation. If the [RenderBox] does not support dry baseline
-  /// computation (for example, to compute the baseline of a [LayoutBuilder],
-  /// its `builder` may have to be called to update the widget tree, which
-  /// violates the "dry" contract), it must return a [DryBaselineResult.fail].
-  /// Otherwise, return a [DryBaselineResult.success] containing the distance
-  /// from the top of the box to the first baseline of the box's contents, or
-  /// [DryBaselineResult.noBaseline] if the box does not have any baselines.
+  /// The implementation must return a value that represents the distance from
+  /// the top of the box to the first baseline of the box's contents, at the
+  /// given `constraints`. It's the same exact value
+  /// [RenderBox.computeDistanceToActualBaseline] would return, when this
+  /// [RenderBox] was laid out at `constraints` in the same exact state.
+  ///
+  /// Not all [RenderBox]es support dry baseline computation. For example, to
+  /// compute the dry baseline of a [LayoutBuilder], its `builder` may have to
+  /// be called with different constraints, which may have side effects such as
+  /// updating the widget tree, violating the "dry" contract. In such cases the
+  /// [RenderBox] must call [debugCannotComputeDryLayout] in an assert, and
+  /// returns a fallback baseline offset value.
   @protected
-  DryBaselineResult computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return DryBaselineUnavailable((
-      reason: '${objectRuntimeType(this, "RenderBox")} does not support dry baseline calculation yet.',
-      box: this,
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    assert(debugCannotComputeDryLayout(
+      error: FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryBaseline".'),
+        ErrorHint(
+          'If you are not writing your own RenderBox subclass, then this is not\n'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+        ),
+      ]),
     ));
+    return null;
   }
 
   static bool _debugDryLayoutCalculationValid = true;
 
-  /// Called from [computeDryLayout] and [computeDryBaseline] within an assert if
+  /// Called from [computeDryLayout] or [computeDryBaseline] within an assert if
   /// the given [RenderBox] subclass does not support calculating a dry layout.
   ///
   /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
@@ -2407,7 +2373,7 @@ abstract class RenderBox extends RenderObject {
       _CachedLayoutCalculation.baseline,
       (constraints, baseline),
       ((BoxConstraints, TextBaseline) pair) => BaselineOffset(computeDistanceToActualBaseline(pair.$2)),
-    ).value;
+    ).offset;
   }
 
   /// Returns the distance from the y-coordinate of the position of the box to
@@ -2609,21 +2575,18 @@ abstract class RenderBox extends RenderObject {
       for (final TextBaseline baseline in TextBaseline.values) {
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        final DryBaselineResult dryBaselineResult;
-        final BaselineOffset realBaseline;
+        _debugDryLayoutCalculationValid = true;
+        final double? dryBaseline;
+        final double? realBaseline;
         try {
-          dryBaselineResult = getDryBaseline(constraints, baseline);
-          realBaseline = BaselineOffset(getDistanceToBaseline(baseline, onlyReal: true));
+          dryBaseline = getDryBaseline(constraints, baseline);
+          realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
         assert(!RenderObject.debugCheckingIntrinsics);
-        final BaselineOffset dryBaseline;
-        switch (dryBaselineResult) {
-          case Right<_DryBaselineUnavailableInfo, BaselineOffset>(:final BaselineOffset value) when value != realBaseline:
-            dryBaseline = value;
-          case Right<_DryBaselineUnavailableInfo, BaselineOffset>() || Left<_DryBaselineUnavailableInfo, BaselineOffset>():
-            continue;
+        if (!_debugDryLayoutCalculationValid || dryBaseline == realBaseline) {
+          continue;
         }
         if ((dryBaseline == null) != (realBaseline == null)) {
           final (String methodReturnedNull, String methodReturnedNonNull) = dryBaseline == null
@@ -3135,7 +3098,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
       minBaseline = minBaseline.minOf(candidate);
       child = childParentData.nextSibling;
     }
-    return minBaseline.value;
+    return minBaseline.offset;
   }
 
   /// Performs a hit test on each child by walking the child list backwards.
