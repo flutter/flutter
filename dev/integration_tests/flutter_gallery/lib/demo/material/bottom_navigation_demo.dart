@@ -39,6 +39,7 @@ class NavigationIconView {
   late Animation<double> _animation;
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
+    Color? iconColor;
     switch (type) {
       case BottomNavigationBarType.shifting:
         iconColor = _color;
