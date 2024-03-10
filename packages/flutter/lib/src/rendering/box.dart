@@ -1982,7 +1982,10 @@ abstract class RenderBox extends RenderObject {
   /// number of render objects in the render subtree. Consider using
   /// [getDistanceToBaseline] when appropriate.
   double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
+    final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
+    // This assert makes sure computeDryBaseline always gets called in debug mode, in case it asserts.
+    assert(baselineOffset == computeDryBaseline(constraints, baseline));
+    return baselineOffset;
   }
 
   Size _computeDryLayout(BoxConstraints constraints) {
@@ -2401,8 +2404,7 @@ abstract class RenderBox extends RenderObject {
   ///    [computeDistanceToActualBaseline], the internal implementation, and not
   ///    [getDistanceToBaseline], the public entry point for this API).
   ///
-  ///
-  /// Oftentimes the [computeDryBaseline] method also needs overriding if this
+  /// The [computeDryBaseline] method typically also needs overridding if this
   /// method is overridden.
   @protected
   double? computeDistanceToActualBaseline(TextBaseline baseline) {

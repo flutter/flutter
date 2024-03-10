@@ -184,15 +184,38 @@ void main() {
 
       // The baseline widget loosens the input constraints when passing on to child.
       expect(test.getDryBaseline(constraints.loosen(), TextBaseline.alphabetic), test.boxSize.height / 2);
-      expect(test.calls, 1);
+      // There's cache for the constraints so this should be 1, but we always evaluate
+      // computeDryBaseline in debug mode in case it asserts even if the baseline
+      // cache hits.
+      expect(test.calls, 2);
 
       const BoxConstraints newConstraints = BoxConstraints.tightFor(width: 10.0, height: 10.0);
       expect(test.getDryBaseline(newConstraints.loosen(), TextBaseline.alphabetic), 5.0);
-      expect(test.calls, 2);
+      // Should be 3 but there's an additional computeDryBaseline call in getDryBaseline,
+      // in an assert.
+      expect(test.calls, 4);
 
       root.additionalConstraints = newConstraints;
       pumpFrame();
-      expect(test.calls, 2);
+      expect(test.calls, 4);
+    });
+
+    test('Asserts when a RenderBox cannot compute dry baseline', () {
+      final RenderCannotComputeDryBaselineTestBox test = RenderCannotComputeDryBaselineTestBox();
+      layout(RenderBaseline(baseline: 0.0, baselineType: TextBaseline.alphabetic, child: test));
+
+      final BoxConstraints incomingConstraints = test.constraints;
+      assert(incomingConstraints != const BoxConstraints());
+      expect(
+        () => test.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic),
+        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+      );
+
+      // Still throws when there is cache.
+      expect(
+        () => test.getDryBaseline(incomingConstraints, TextBaseline.alphabetic),
+        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+      );
     });
 
     test('Cactches inconsistencies between computeDryBaseline and computeDistanceToActualBaseline', () {
