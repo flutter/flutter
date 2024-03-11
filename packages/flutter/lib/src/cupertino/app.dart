@@ -495,7 +495,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) => MultitouchDragStrategy.maxAllPointers;
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) => MultitouchDragStrategy.averageBoundaryPointers;
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {

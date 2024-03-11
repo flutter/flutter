@@ -111,12 +111,12 @@ class ScrollBehavior {
   ///
   /// By default, [MultitouchDragStrategy.latestPointer] is configured to
   /// create drag gestures for non-Apple platforms, and
-  /// [MultitouchDragStrategy.maxAllPointers] for Apple platforms.
+  /// [MultitouchDragStrategy.averageBoundaryPointers] for Apple platforms.
   MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
-        return MultitouchDragStrategy.maxAllPointers;
+        return MultitouchDragStrategy.averageBoundaryPointers;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.android:

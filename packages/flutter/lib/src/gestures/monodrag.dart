@@ -122,9 +122,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// will only track the latest active (accepted by this recognizer) pointer, which
   /// appears to be only one finger dragging.
   ///
-  /// If set to [MultitouchDragStrategy.maxAllPointers], all active pointers will
-  /// be tracked together and the scrolling offset is the max of the offsets of
-  /// all active pointers
+  /// If set to [MultitouchDragStrategy.averageBoundaryPointers], all active
+  /// pointers will be tracked, and the result is computed from the boundary pointers.
   ///
   /// If set to [MultitouchDragStrategy.sumAllPointers],
   /// all active pointers will be tracked together and the scrolling offset
@@ -330,6 +329,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
+
+  /// The axis (horizontal or vertical) corresponding to the primary drag direction.
+  ///
+  /// The [PanGestureRecognizer] returns null.
   _DragDirection? _getPrimaryDragAxis() => null;
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
   bool _hasDragThresholdBeenMet = false;
@@ -408,7 +411,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final bool result;
     switch (multitouchDragStrategy) {
       case MultitouchDragStrategy.sumAllPointers:
-      case MultitouchDragStrategy.maxAllPointers:
+      case MultitouchDragStrategy.averageBoundaryPointers:
         result = true;
       case MultitouchDragStrategy.latestPointer:
         result = _activePointer == null || pointer == _activePointer;
@@ -417,7 +420,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _recordMoveDeltaForMultitouch(int pointer, Offset localDelta) {
-    if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
+    if (multitouchDragStrategy != MultitouchDragStrategy.averageBoundaryPointers) {
       assert(_frameTimeStamp == null);
       assert(_moveDeltaBeforeFrame.isEmpty);
       return;
@@ -501,7 +504,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   Offset _resolveLocalDeltaForMultitouch(int pointer, Offset localDelta) {
-    if (multitouchDragStrategy != MultitouchDragStrategy.maxAllPointers) {
+    if (multitouchDragStrategy != MultitouchDragStrategy.averageBoundaryPointers) {
       if (_frameTimeStamp != null) {
         _moveDeltaBeforeFrame.clear();
         _frameTimeStamp = null;

@@ -201,7 +201,7 @@ void main() {
     await gesture2.moveBy(const Offset(0, -50));
     await tester.pump();
 
-    // The default multitouchDragStrategy is 'latestPointer' or 'maxAllPointers,
+    // The default multitouchDragStrategy is 'latestPointer' or 'averageBoundaryPointers,
     // the received delta should be 50.0.
     expect(controller.position.pixels, 50.0);
 
@@ -221,7 +221,7 @@ void main() {
   testWidgets('ScrollBehavior multitouchDragStrategy test (non-Apple platforms) - 2', (WidgetTester tester) async {
     const ScrollBehavior behavior1 = ScrollBehavior();
     final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
-        multitouchDragStrategy: MultitouchDragStrategy.maxAllPointers
+        multitouchDragStrategy: MultitouchDragStrategy.averageBoundaryPointers
     );
     final ScrollController controller = ScrollController();
     late BuildContext capturedContext;
@@ -277,7 +277,7 @@ void main() {
     expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.latestPointer);
     expect(controller.position.pixels, 40.0);
 
-    // Change to maxAllPointers.
+    // Change to averageBoundaryPointers.
     await tester.pumpWidget(buildFrame(behavior2));
 
     await gesture1.moveBy(const Offset(0, -70));
@@ -342,9 +342,9 @@ void main() {
     await gesture2.moveBy(const Offset(0, -50));
     await tester.pump();
 
-    // The default multitouchDragStrategy is maxAllPointers.
+    // The default multitouchDragStrategy is averageBoundaryPointers.
     final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
-    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.maxAllPointers);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.averageBoundaryPointers);
     expect(controller.position.pixels, 50.0);
 
     // Change to latestPointer.

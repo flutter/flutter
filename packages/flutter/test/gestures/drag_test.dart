@@ -764,10 +764,10 @@ void main() {
     ]);
   });
 
-  testGesture('Horizontal drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+  testGesture('Horizontal drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
     HorizontalDragGestureRecognizer()
-      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
 
     final List<String> log = <String>[];
     drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
@@ -924,10 +924,10 @@ void main() {
     ]);
   });
 
-  testGesture('Vertical drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+  testGesture('Vertical drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
     final VerticalDragGestureRecognizer drag =
     VerticalDragGestureRecognizer()
-      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
 
     final List<String> log = <String>[];
     drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
@@ -1084,10 +1084,10 @@ void main() {
     ]);
   });
 
-  testGesture('Pan drag with multiple pointers - maxAllPointers', (GestureTester tester) {
+  testGesture('Pan drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
     final PanGestureRecognizer drag =
     PanGestureRecognizer()
-      ..multitouchDragStrategy = MultitouchDragStrategy.maxAllPointers;
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
 
     final List<String> log = <String>[];
     drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -63,8 +64,10 @@ enum MultitouchDragStrategy {
   /// This is the behavior typically seen on Android.
   latestPointer,
 
-  /// All active pointers will be tracked together. The scrolling offset
-  /// is determined by the maximum deltas of both directions.
+  /// All active pointers will be tracked, and the result is computed from
+  /// the boundary pointers.
+  ///
+  /// The scrolling offset is determined by the maximum deltas of both directions.
   ///
   /// If the user is dragging with 3 pointers at the same time, each having
   /// \[+10, +20, +33\] pixels of offset, the recognizer will report a delta of 33 pixels.
@@ -73,8 +76,14 @@ enum MultitouchDragStrategy {
   /// \[+10, +20, +33, -1, -12\] pixels of offset, the recognizer will report a
   /// delta of (+33) + (-12) = 21 pixels.
   ///
+  /// The panning [PanGestureRecognizer] offset is the average of all pointers.
+  ///
+  /// If the user is dragging with 3 pointers at the same time, each having
+  /// \[+10, +50, -30\] pixels of offset in one direction (horizontal or vertical),
+  /// the recognizer will report a delta of (10 + 50 -30) / 3 = 10 pixels in this direction.
+  ///
   /// This is the behavior typically seen on iOS.
-  maxAllPointers,
+  averageBoundaryPointers,
 
   /// All active pointers will be tracked together. The scrolling offset
   /// is the sum of the offsets of all active pointers.
