@@ -354,7 +354,6 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
           : path.path.substring(0, path.path.length - 1);
       final String sanitizedImport = pathToImport(sanitizedPath);
       sanitizedPath = sanitizedPath.replaceAll('%20', ' ');
-      sanitizedPath = globals.platform.isWindows? '"$sanitizedPath"': sanitizedPath;
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
       final File? testConfigFile = findTestConfigFile(
