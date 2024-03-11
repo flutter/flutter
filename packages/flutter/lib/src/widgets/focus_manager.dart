@@ -1681,6 +1681,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       // It appears that some Android keyboard implementations can cause
       // app lifecycle state changes: adding this listener would cause the
       // text field to unfocus as the user is trying to type.
+      //
+      // Until this is resolved, we won't be adding the listener to Android apps.
+      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
