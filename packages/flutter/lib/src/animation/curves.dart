@@ -222,7 +222,7 @@ class Split extends Curve {
   ///
   /// When t is exactly `split`, the curve has the value `split`.
   ///
-  /// Must be greater than 0 and smaller than 1.0.
+  /// Must be between 0 and 1.0, inclusively.
   final double split;
 
   /// The curve to use before [split] is reached.
@@ -238,7 +238,7 @@ class Split extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    assert(split > 0.0 && split < 1.0);
+    assert(split >= 0.0 && split <= 1.0);
 
     if (t == 0.0 || t == 1.0) {
       return t;
