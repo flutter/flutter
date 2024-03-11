@@ -1410,18 +1410,22 @@ class _TabBarState extends State<TabBar> {
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
 
+    final oldPainter = _indicatorPainter;
+
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
       indicator: _getIndicator(indicatorSize),
       indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
-      old: _indicatorPainter,
+      old: oldPainter,
       labelPaddings: _labelPaddings,
       dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
       dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
       showDivider: theme.useMaterial3 && !widget.isScrollable,
     );
+
+    oldPainter?.dispose();
   }
 
   @override
