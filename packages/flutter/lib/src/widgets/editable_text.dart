@@ -820,6 +820,7 @@ class EditableText extends StatefulWidget {
     this.textScaler,
     this.maxLines = 1,
     this.minLines,
+    this.maxLength,
     this.expands = false,
     this.forceLine = true,
     this.textHeightBehavior,
@@ -882,6 +883,7 @@ class EditableText extends StatefulWidget {
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          "minLines can't be greater than maxLines",
        ),
+       assert(maxLines == null || maxLines > 0),
        assert(
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
@@ -1220,6 +1222,11 @@ class EditableText extends StatefulWidget {
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
   final int? maxLines;
+
+
+  /// The maximum number of characters that can be entered in the text field.
+  /// If `null`, there is no maximum limit.
+  final int? maxLength;
 
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy when the content spans fewer lines.
@@ -5305,6 +5312,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSpan buildTextSpan() {
 
     if (widget.obscureText) {
+      final int? maxLength = widget.maxLength;
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
@@ -5315,9 +5323,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       };
       final bool brieflyShowPassword = WidgetsBinding.instance.platformDispatcher.brieflyShowPassword
                                     && mobilePlatforms.contains(defaultTargetPlatform);
-      if (brieflyShowPassword) {
+      if (brieflyShowPassword && (maxLength == null || _value.text.length <= maxLength)) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-        if (o != null && o >= 0 && o < text.length) {
+        if (o != null && (maxLength == null ? o >= 0 : _value.text.length < maxLength ? o >= 0 : o == text.length - 1) && o < text.length) {
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
         }
       }

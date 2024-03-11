@@ -1486,6 +1486,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           enableSuggestions: widget.enableSuggestions,
           maxLines: widget.maxLines,
           minLines: widget.minLines,
+          maxLength: widget.maxLength,
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
           selectionColor: focusNode.hasFocus ? selectionColor : null,
