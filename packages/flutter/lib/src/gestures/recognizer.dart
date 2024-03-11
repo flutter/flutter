@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 
 import 'arena.dart';
 import 'binding.dart';
