@@ -261,7 +261,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: theme.colorScheme.surfaceVariant) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
 
@@ -284,7 +284,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: const Color(0xffff0000)) // Dial background color.
+        ..circle(color: theme.colorScheme.surfaceContainerHighest) // Dial background color.
         ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
     );
   });
@@ -1343,7 +1343,12 @@ void main() {
             label: 'Hour',
             value: '07',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isMultiline,
+            ],
           ),
         );
         expect(
@@ -1352,7 +1357,12 @@ void main() {
             label: 'Minute',
             value: '00',
             actions: <SemanticsAction>[SemanticsAction.tap],
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isMultiline],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isMultiline,
+            ],
           ),
         );
 

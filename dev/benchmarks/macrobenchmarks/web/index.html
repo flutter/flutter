@@ -11,7 +11,11 @@ found in the LICENSE file. -->
 <body>
   <script>
     {{flutter_build_config}}
-    _flutter.loader.load();
+    _flutter.loader.load({
+      config: {
+        canvasKitBaseUrl: '/canvaskit/',
+      }
+    });
   </script>
 </body>
 </html>

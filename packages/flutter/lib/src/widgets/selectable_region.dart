@@ -195,6 +195,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///
 ///  * [SelectionArea], which creates a [SelectableRegion] with
 ///    platform-adaptive selection controls.
+///  * [SelectableText], which enables selection on a single run of text.
 ///  * [SelectionHandler], which contains APIs to handle selection events from the
 ///    [SelectableRegion].
 ///  * [Selectable], which provides API to participate in the selection system.

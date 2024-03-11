@@ -321,12 +321,6 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// const constructors so that they can be used in const expressions.
   const MaterialStateBorderSide();
 
-  /// Returns a [BorderSide] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
-  /// widget or theme.
-  @override
-  BorderSide? resolve(Set<MaterialState> states);
-
   /// Creates a [MaterialStateBorderSide] from a
   /// [MaterialPropertyResolver<BorderSide?>] callback function.
   ///
@@ -364,8 +358,13 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///   }),
   /// ),
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
-      _MaterialStateBorderSide(callback);
+  const factory MaterialStateBorderSide.resolveWith(MaterialPropertyResolver<BorderSide?> callback) = _MaterialStateBorderSide;
+
+  /// Returns a [BorderSide] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  BorderSide? resolve(Set<MaterialState> states);
 }
 
 /// A [MaterialStateBorderSide] created from a
@@ -381,9 +380,7 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
   final MaterialPropertyResolver<BorderSide?> _resolve;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
-    return _resolve(states);
-  }
+  BorderSide? resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [MaterialState]s
@@ -637,8 +634,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateOutlineInputBorder(callback);
+  const factory MaterialStateOutlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateOutlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
@@ -700,8 +696,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateUnderlineInputBorder(callback);
+  const factory MaterialStateUnderlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateUnderlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
