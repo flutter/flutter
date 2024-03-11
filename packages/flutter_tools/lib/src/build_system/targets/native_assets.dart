@@ -314,8 +314,13 @@ class NativeAssets extends Target {
     );
     final int targetAndroidNdkApi =
         int.parse(environment.defines[kMinSdkVersion] ?? minSdkVersion);
+    final String? environmentBuildMode = environment.defines[kBuildMode];
+    if (environmentBuildMode == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     return buildNativeAssetsAndroid(
-      buildMode: BuildMode.debug,
+      buildMode: buildMode,
       projectUri: projectUri,
       yamlParentDirectory: environment.buildDir.uri,
       fileSystem: fileSystem,

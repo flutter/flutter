@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/src/interface/file_system.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -18,6 +18,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   FakeNativeAssetsBuildRunner({
     this.hasPackageConfigResult = true,
     this.packagesWithNativeAssetsResult = const <Package>[],
+    this.onBuild,
     this.dryRunResult = const FakeNativeAssetsBuilderResult(),
     this.buildResult = const FakeNativeAssetsBuilderResult(),
     CCompilerConfig? cCompilerConfigResult,
@@ -25,6 +26,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig(),
         ndkCCompilerConfigResult = ndkCCompilerConfigResult ?? CCompilerConfig();
 
+  final native_assets_builder.BuildResult Function(Target)? onBuild;
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
@@ -36,6 +38,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   int dryRunInvocations = 0;
   int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
+  BuildMode? lastBuildMode;
 
   @override
   Future<native_assets_builder.BuildResult> build({
@@ -49,7 +52,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     IOSSdk? targetIOSSdk,
   }) async {
     buildInvocations++;
-    return buildResult;
+    lastBuildMode = buildMode;
+    return onBuild?.call(target) ?? buildResult;
   }
 
   @override

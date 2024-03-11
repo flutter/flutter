@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "აიხედეთ ზემოთ",
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -203,7 +203,7 @@ class _ChipDemoState extends State<ChipDemo> {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
     final double hue = (360.0 * hash / (1 << 15)) % 360.0;
-    final double themeValue = HSVColor.fromColor(theme.colorScheme.background).value;
+    final double themeValue = HSVColor.fromColor(theme.colorScheme.surface).value;
     return HSVColor.fromAHSV(1.0, hue, 0.4, themeValue).toColor();
   }
 
