@@ -12,7 +12,6 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
-import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
@@ -23,18 +22,13 @@ final class AssetTransformer {
     required ProcessManager processManager,
     required FileSystem fileSystem,
     required String dartBinaryPath,
-    required BuildMode buildMode,
   })  : _processManager = processManager,
         _fileSystem = fileSystem,
-        _dartBinaryPath = dartBinaryPath,
-        _buildMode = buildMode;
-
-  static const String buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+        _dartBinaryPath = dartBinaryPath;
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
-  final BuildMode _buildMode;
 
   /// The [Source] inputs that targets using this should depend on.
   ///
@@ -121,9 +115,6 @@ final class AssetTransformer {
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
-      environment: <String, String>{
-        AssetTransformer.buildModeEnvVar: _buildMode.cliName,
-      }
     );
     final String stdout = result.stdout as String;
     final String stderr = result.stderr as String;
