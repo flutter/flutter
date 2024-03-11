@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
 import 'button_style.dart';
 import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -171,7 +174,7 @@ class SegmentedButton<T> extends StatefulWidget {
   /// If false, only one segment may be selected at a time. When a segment
   /// is selected, any previously selected segment will be unselected.
   ///
-  /// The default is false, so only a single segement may be selected at one
+  /// The default is false, so only a single segment may be selected at one
   /// time.
   final bool multiSelectionEnabled;
 
@@ -511,18 +514,33 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final BorderSide disabledSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side, disabledState) ?? BorderSide.none;
     final OutlinedBorder enabledBorder = resolvedEnabledBorder.copyWith(side: enabledSide);
     final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
+    final VisualDensity resolvedVisualDensity = segmentStyle.visualDensity ?? segmentThemeStyle.visualDensity ?? Theme.of(context).visualDensity;
+    final EdgeInsetsGeometry resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding, enabledState) ?? EdgeInsets.zero;
+    final MaterialTapTargetSize resolvedTapTargetSize = segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? Theme.of(context).materialTapTargetSize;
+    final double fontSize = resolve<TextStyle?>((ButtonStyle? style) => style?.textStyle, enabledState)?.fontSize ?? 20.0;
 
     final List<Widget> buttons = widget.segments.map(buttonFor).toList();
 
+    final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
+    const double textButtonMinHeight = 40.0;
+
+    final double adjustButtonMinHeight = textButtonMinHeight + densityAdjustment.dy;
+    final double effectiveVerticalPadding = resolvedPadding.vertical + densityAdjustment.dy * 2;
+    final double effectedButtonHeight = max(fontSize + effectiveVerticalPadding, adjustButtonMinHeight);
+    final double tapTargetVerticalPadding = switch (resolvedTapTargetSize) {
+      MaterialTapTargetSize.shrinkWrap => 0.0,
+      MaterialTapTargetSize.padded => max(0, kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight)
+    };
+
     return Material(
       type: MaterialType.transparency,
-      shape: enabledBorder.copyWith(side: BorderSide.none),
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
       surfaceTintColor: resolve<Color?>((ButtonStyle? style) => style?.surfaceTintColor),
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: _SegmentedButtonRenderWidget<T>(
+          tapTargetVerticalPadding: tapTargetVerticalPadding,
           segments: widget.segments,
           enabledBorder: _enabled ? enabledBorder : disabledBorder,
           disabledBorder: disabledBorder,
@@ -569,6 +587,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required this.enabledBorder,
     required this.disabledBorder,
     required this.direction,
+    required this.tapTargetVerticalPadding,
     required super.children,
   }) : assert(children.length == segments.length);
 
@@ -576,6 +595,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   final OutlinedBorder enabledBorder;
   final OutlinedBorder disabledBorder;
   final TextDirection direction;
+  final double tapTargetVerticalPadding;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -584,6 +604,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
       enabledBorder: enabledBorder,
       disabledBorder: disabledBorder,
       textDirection: direction,
+      tapTargetVerticalPadding: tapTargetVerticalPadding,
     );
   }
 
@@ -611,10 +632,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required OutlinedBorder enabledBorder,
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
+    required double tapTargetVerticalPadding,
   }) : _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
-       _textDirection = textDirection;
+       _textDirection = textDirection,
+       _tapTargetVerticalPadding = tapTargetVerticalPadding;
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -653,6 +676,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
       return;
     }
     _textDirection = value;
+    markNeedsLayout();
+  }
+
+  double get tapTargetVerticalPadding => _tapTargetVerticalPadding;
+  double _tapTargetVerticalPadding;
+  set tapTargetVerticalPadding(double value) {
+    if (value == _tapTargetVerticalPadding) {
+      return;
+    }
+    _tapTargetVerticalPadding = value;
     markNeedsLayout();
   }
 
@@ -799,7 +832,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Rect borderRect = offset & size;
+
+    final Rect borderRect = (offset + Offset(0, tapTargetVerticalPadding / 2)) & (Size(size.width, size.height - tapTargetVerticalPadding));
     final Path borderClipPath = enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
     RenderBox? child = firstChild;
     RenderBox? previousChild;
@@ -951,23 +985,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.12);
+            return _colors.onSecondaryContainer.withOpacity(0.1);
           }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSecondaryContainer.withOpacity(0.12);
+            return _colors.onSecondaryContainer.withOpacity(0.1);
           }
         } else {
           if (states.contains(MaterialState.pressed)) {
-            return _colors.onSurface.withOpacity(0.12);
+            return _colors.onSurface.withOpacity(0.1);
           }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.12);
+            return _colors.onSurface.withOpacity(0.1);
           }
         }
         return null;
@@ -992,23 +1026,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor?.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return selectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor?.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.1);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor?.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return unselectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor?.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.1);
         }
       }
       return Colors.transparent;

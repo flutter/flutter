@@ -352,8 +352,64 @@ void main() {
           false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Node is removed completely even if app is paused.', (WidgetTester tester) async {
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      focusNodeAttachment.detach();
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    });
   });
 
   group(FocusScopeNode, () {
@@ -473,16 +529,16 @@ void main() {
       // child1
       //   |
       // child2
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope2Attachment = scope1.attach(context);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
 
-      final FocusNode child1 = FocusNode(debugLabel: 'child2');
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child2Attachment = child1.attach(context);
 
-      final FocusNode child2 = FocusNode(debugLabel: 'child3');
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child3Attachment = child2.attach(context);
 
@@ -639,6 +695,26 @@ void main() {
       expect(child2.parent, equals(parent1));
       expect(parent1.children.first, equals(child2));
       expect(parent2.children.first, equals(child1));
+    });
+
+    test('FocusScopeNode.canRequestFocus affects descendantsAreFocusable', () {
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+
+      scope.descendantsAreFocusable = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.descendantsAreFocusable = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.canRequestFocus = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isFalse);
+
+      scope.canRequestFocus = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
     });
 
     testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
@@ -1270,7 +1346,6 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
@@ -1903,7 +1978,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
@@ -1983,7 +2057,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
@@ -2033,6 +2106,275 @@ void main() {
     notifyCount = 0;
 
     tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+
+  group('focusability listener', () {
+    int focusabilityChangeCount = 0;
+    void focusabilityCallback() {
+      focusabilityChangeCount += 1;
+    }
+
+    setUp(() { focusabilityChangeCount = 0; });
+
+    testWidgets('canRequestFocus affects focusability of the node', (WidgetTester tester) async {
+      int node2CallbackCounter = 0;
+      void node2Callback() { node2CallbackCounter += 1; }
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..focusabilityListenable.addListener(node2Callback);
+
+      addTearDown(node1.dispose);
+      addTearDown(node2.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node1,
+          child: Focus(
+            focusNode: node2,
+            child: const SizedBox(),
+          ),
+        ),
+      );
+
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
+
+      node1.canRequestFocus = false;
+      expect(node1.focusabilityListenable.value, isFalse);
+      expect(focusabilityChangeCount, 1);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
+
+      node1.canRequestFocus = true;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
+
+      node2.canRequestFocus = false;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isFalse);
+      expect(node2CallbackCounter, 1);
+
+      node2.canRequestFocus = true;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 2);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
+    });
+
+    testWidgets('descendantsAreFocusable affects focusability of the descendants', (WidgetTester tester) async {
+      int node2CallbackCounter = 0;
+      void node2Callback() { node2CallbackCounter += 1; }
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2', descendantsAreFocusable: false)..focusabilityListenable.addListener(node2Callback);
+
+      addTearDown(node1.dispose);
+      addTearDown(node2.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node1,
+          child: Focus(
+            focusNode: node2,
+            child: const SizedBox(),
+          ),
+        ),
+      );
+
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 0);
+
+      node1.descendantsAreFocusable = false;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isFalse);
+      expect(node2CallbackCounter, 1);
+
+      node1.descendantsAreFocusable = true;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
+
+      node2.descendantsAreFocusable = false;
+      expect(node1.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 0);
+      expect(node2.focusabilityListenable.value, isTrue);
+      expect(node2CallbackCounter, 2);
+    });
+
+    testWidgets('Reparenting affects focusability of the node', (WidgetTester tester) async {
+      int node3CallbackCounter = 0;
+      void node3Callback() { node3CallbackCounter += 1; }
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2', descendantsAreFocusable: false);
+      final FocusNode node3 = FocusNode(debugLabel: 'node 3')..focusabilityListenable.addListener(node3Callback);
+      final FocusNode node4 = FocusNode(debugLabel: 'node 4')..focusabilityListenable.addListener(focusabilityCallback);
+      addTearDown(node1.dispose);
+      addTearDown(node2.dispose);
+      addTearDown(node3.dispose);
+      addTearDown(node4.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node1,
+          child: Focus(
+            focusNode: node2,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node3, child: Container()),
+                Focus(focusNode: node4, child: Container()),
+              ],
+            )
+          ),
+        ),
+      );
+
+      // The listeners are notified on reparent.
+      expect(node4.focusabilityListenable.value, isFalse);
+      expect(focusabilityChangeCount, 1);
+      expect(node3.focusabilityListenable.value, isFalse);
+      expect(node3CallbackCounter, 1);
+
+      // Swap node 1 and node 3.
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node3,
+          child: Focus(
+            focusNode: node2,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node1, child: Container()),
+                Focus(focusNode: node4, child: Container()),
+              ],
+            )
+          ),
+        ),
+      );
+
+      expect(node4.focusabilityListenable.value, isFalse);
+      expect(focusabilityChangeCount, 1);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
+
+      // Swap node 1 and node 2.
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node3,
+          child: Focus(
+            focusNode: node1,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node2, child: Container()),
+                Focus(focusNode: node4, child: Container()),
+              ],
+            )
+          ),
+        ),
+      );
+
+      expect(node4.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 2);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
+
+      // Swap node 2 and node 4.
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node3,
+          child: Focus(
+            focusNode: node1,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node4, child: Container()),
+                Focus(focusNode: node2, child: Container()),
+              ],
+            )
+          ),
+        ),
+      );
+
+      expect(node4.focusabilityListenable.value, isTrue);
+      expect(focusabilityChangeCount, 2);
+      expect(node3.focusabilityListenable.value, isTrue);
+      expect(node3CallbackCounter, 2);
+
+      // Return to the initial state
+      await tester.pumpWidget(
+        Focus(
+          focusNode: node1,
+          child: Focus(
+            focusNode: node2,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node3, child: Container()),
+                Focus(focusNode: node4, child: Container()),
+              ],
+            )
+          ),
+        ),
+      );
+
+      expect(node4.focusabilityListenable.value, isFalse);
+      expect(focusabilityChangeCount, 3);
+      expect(node3.focusabilityListenable.value, isFalse);
+      expect(node3CallbackCounter, 3);
+    });
+
+    testWidgets('does not get called in dispose', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2')..focusabilityListenable.addListener(focusabilityCallback);
+
+      await tester.pumpWidget(
+        Focus(
+          descendantsAreFocusable: false,
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: node1, child: Container()),
+              Focus(focusNode: node2, child: Container()),
+            ],
+          ),
+        ),
+      );
+      expect(focusabilityChangeCount, 2);
+
+      await tester.pumpWidget(const SizedBox());
+      expect(focusabilityChangeCount, 2);
+    });
+
+    testWidgets('Adding removing listeners many times', (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
+
+      for (int i = 0; i < 100; i += 1) {
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+        node1.focusabilityListenable.addListener(focusabilityCallback);
+        node1.focusabilityListenable.removeListener(focusabilityCallback);
+      }
+      node1.focusabilityListenable.addListener(focusabilityCallback);
+      node1.focusabilityListenable.addListener(focusabilityCallback);
+      node2.focusabilityListenable.addListener(focusabilityCallback);
+      expect(focusabilityChangeCount, 0);
+
+      await tester.pumpWidget(
+        Focus(
+          descendantsAreFocusable: false,
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: node1, child: Container()),
+              Focus(focusNode: node2, child: Container()),
+            ],
+          ),
+        ),
+      );
+      expect(focusabilityChangeCount, 3);
+    });
   });
 
   testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {

@@ -552,9 +552,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Autocomplete<String>(
-              optionsViewOpenDirection: OptionsViewOpenDirection.up,
-              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+            body: Center(
+              child: Autocomplete<String>(
+                optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['aa'],
+              ),
             ),
           ),
         ),
@@ -562,6 +564,10 @@ void main() {
       final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
+
+      await tester.tap(find.byType(RawAutocomplete<String>));
+      await tester.enterText(find.byType(RawAutocomplete<String>), 'a');
+      expect(find.text('aa').hitTestable(), findsOneWidget);
     });
   });
 }

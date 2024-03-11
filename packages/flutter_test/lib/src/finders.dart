@@ -23,7 +23,7 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
-/// The `CandidateType` of finders that search for and filter subtrings,
+/// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
 final class TextRangeContext {
   const TextRangeContext._(this.view, this.renderObject, this.textRange);
@@ -36,7 +36,7 @@ final class TextRangeContext {
   /// The RenderObject that contains the static text.
   final RenderParagraph renderObject;
 
-  /// The [TextRange] of the subtring within [renderObject]'s text.
+  /// The [TextRange] of the substring within [renderObject]'s text.
   final TextRange textRange;
 
   @override
@@ -553,7 +553,7 @@ class CommonSemanticsFinders {
     return _PredicateSemanticsFinder(
       predicate,
       describeMatch,
-      _rootFromView(view),
+      view,
     );
   }
 
@@ -688,15 +688,6 @@ class CommonSemanticsFinders {
     } else {
       return pattern == target;
     }
-  }
-
-  SemanticsNode _rootFromView(FlutterView? view) {
-    view ??= TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView;
-    assert(view != null, 'The given view was not available. Ensure WidgetTester.view is available or pass in a specific view using WidgetTester.viewOf.');
-    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
-      .firstWhere((RenderView r) => r.flutterView == view);
-
-    return renderView.owner!.semanticsOwner!.rootSemanticsNode!;
   }
 }
 
@@ -1065,16 +1056,44 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
 
 /// A base class for creating finders that search the semantics tree.
 abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
-  /// Creates a new [SemanticsFinder] that will search starting at the given
-  /// `root`.
-  SemanticsFinder(this.root);
+  /// Creates a new [SemanticsFinder] that will search within the given [view] or
+  /// within all views if [view] is null.
+  SemanticsFinder(this.view);
 
-  /// The root of the semantics tree that this finder will search.
-  final SemanticsNode root;
+  /// The [FlutterView] whose semantics tree this finder will search.
+  ///
+  /// If null, the finder will search within all views.
+  final FlutterView? view;
+
+  /// Returns the root [SemanticsNode]s of all the semantics trees that this
+  /// finder will search.
+  Iterable<SemanticsNode> get roots {
+    if (view == null) {
+      return _allRoots;
+    }
+    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
+        .firstWhere((RenderView r) => r.flutterView == view);
+    return <SemanticsNode>[
+      renderView.owner!.semanticsOwner!.rootSemanticsNode!
+    ];
+  }
 
   @override
   Iterable<SemanticsNode> get allCandidates {
-    return collectAllSemanticsNodesFrom(root);
+    return roots.expand((SemanticsNode root) => collectAllSemanticsNodesFrom(root));
+  }
+
+  static Iterable<SemanticsNode> get _allRoots {
+    final List<SemanticsNode> roots = <SemanticsNode>[];
+    void collectSemanticsRoots(PipelineOwner owner) {
+      final SemanticsNode? root = owner.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        roots.add(root);
+      }
+      owner.visitChildren(collectSemanticsRoots);
+    }
+    collectSemanticsRoots(TestWidgetsFlutterBinding.instance.rootPipelineOwner);
+    return roots;
   }
 }
 
@@ -1539,7 +1558,7 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 
 class _PredicateSemanticsFinder extends SemanticsFinder
     with MatchFinderMixin<SemanticsNode> {
-  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.root)
+  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
     : _describeMatch = describeMatch;
 
   final SemanticsNodePredicate predicate;

@@ -287,8 +287,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 99,
+            maxScaleFactor: 99,
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(

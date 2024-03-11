@@ -147,8 +147,7 @@ class BottomSheet extends StatefulWidget {
   /// The bottom sheet drag handle's color.
   ///
   /// Defaults to [BottomSheetThemeData.dragHandleColor].
-  /// If that is also null, defaults to [ColorScheme.onSurfaceVariant]
-  /// with an opacity of 0.4.
+  /// If that is also null, defaults to [ColorScheme.onSurfaceVariant].
   final Color? dragHandleColor;
 
   /// Defaults to [BottomSheetThemeData.dragHandleSize].
@@ -1333,6 +1332,7 @@ PersistentBottomSheetController showBottomSheet({
   Clip? clipBehavior,
   BoxConstraints? constraints,
   bool? enableDrag,
+  bool? showDragHandle,
   AnimationController? transitionAnimationController,
 }) {
   assert(debugCheckHasScaffold(context));
@@ -1345,6 +1345,7 @@ PersistentBottomSheetController showBottomSheet({
     clipBehavior: clipBehavior,
     constraints: constraints,
     enableDrag: enableDrag,
+    showDragHandle: showDragHandle,
     transitionAnimationController: transitionAnimationController,
   );
 }
@@ -1403,16 +1404,16 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get dragHandleColor => _colors.onSurfaceVariant.withOpacity(0.4);
+  Color? get dragHandleColor => _colors.onSurfaceVariant;
 
   @override
   Size? get dragHandleSize => const Size(32, 4);

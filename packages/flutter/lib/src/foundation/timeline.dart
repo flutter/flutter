@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '_timeline_io.dart'
-  if (dart.library.js_util) '_timeline_web.dart' as impl;
+  if (dart.library.js_interop) '_timeline_web.dart' as impl;
 import 'constants.dart';
 
 /// Measures how long blocks of code take to run.
@@ -252,7 +252,7 @@ final class AggregatedTimedBlock {
   /// easily tell which part of code was measured.
   final String name;
 
-  /// The sum of [TimedBlock.duration] values of aggretaged blocks.
+  /// The sum of [TimedBlock.duration] values of aggregated blocks.
   final double duration;
 
   /// The number of [TimedBlock] objects aggregated.

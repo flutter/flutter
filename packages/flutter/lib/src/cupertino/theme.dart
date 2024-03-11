@@ -130,13 +130,18 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-class _InheritedCupertinoTheme extends InheritedWidget {
+class _InheritedCupertinoTheme extends InheritedTheme {
   const _InheritedCupertinoTheme({
     required this.theme,
     required super.child,
   });
 
   final CupertinoTheme theme;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return CupertinoTheme(data: theme.data, child: child);
+  }
 
   @override
   bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;

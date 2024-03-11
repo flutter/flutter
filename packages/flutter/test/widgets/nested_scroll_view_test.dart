@@ -218,6 +218,7 @@ void main() {
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 
     final ScrollController outerController = ScrollController();
+    addTearDown(outerController.dispose);
 
     Widget build() {
       return Directionality(
@@ -533,11 +534,7 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('Three NestedScrollViews with one ScrollController',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  // TODO(polina-c): Remove when PageView is fixed, https://github.com/flutter/flutter/issues/141119
-  (WidgetTester tester) async {
+  testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     addTearDown(controller.dispose);
     expect(controller.mostRecentlyUpdatedPosition, isNull);
@@ -2664,7 +2661,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(myApp, Duration.zero, EnginePhase.build);
+    await tester.pumpWidget(myApp, duration: Duration.zero, phase: EnginePhase.build);
     expect(isScrolled, false);
     expect(tester.takeException(), isNull);
   });

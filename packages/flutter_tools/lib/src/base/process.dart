@@ -25,12 +25,10 @@ typedef ShutdownHook = FutureOr<void> Function();
 // for more details.
 
 abstract class ShutdownHooks {
-  factory ShutdownHooks() => _DefaultShutdownHooks();
+  factory ShutdownHooks() = _DefaultShutdownHooks;
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
-  void addShutdownHook(
-    ShutdownHook shutdownHook
-  );
+  void addShutdownHook(ShutdownHook shutdownHook);
 
   @visibleForTesting
   List<ShutdownHook> get registeredHooks;
@@ -139,10 +137,7 @@ abstract class ProcessUtils {
   factory ProcessUtils({
     required ProcessManager processManager,
     required Logger logger,
-  }) => _DefaultProcessUtils(
-    processManager: processManager,
-    logger: logger,
-  );
+  }) = _DefaultProcessUtils;
 
   /// Spawns a child process to run the command [cmd].
   ///
@@ -623,7 +618,9 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
       messenger.shouldDisplayLicenseTerms();
 
   // Prints the welcome message if needed for legacy analytics.
-  globals.flutterUsage.printWelcome();
+  if (!(await globals.isRunningOnBot)) {
+    globals.flutterUsage.printWelcome();
+  }
 
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {

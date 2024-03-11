@@ -1368,7 +1368,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.surface;
   /// ```
   ///
   /// {@end-tool}
@@ -1451,7 +1451,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// visible.
   ///
   /// Setting [maintainState] to false does not guarantee that the route will be
-  /// discarded. For instance, it will not be descarded if it is still visible
+  /// discarded. For instance, it will not be discarded if it is still visible
   /// because the next above it is not opaque (e.g. it is a popup dialog).
   /// {@endtemplate}
   ///

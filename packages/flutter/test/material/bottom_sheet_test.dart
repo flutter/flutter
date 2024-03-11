@@ -944,7 +944,8 @@ void main() {
     final Material material = tester.widget<Material>(finder);
 
     expect(material.color, surfaceColor);
-    expect(material.surfaceTintColor, surfaceTintColor);
+    // Surface tint is no longer used by default.
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
     expect(tester.getSize(finder).width, 640);
@@ -1194,26 +1195,64 @@ void main() {
   });
 
   testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color defaultColor=Colors.blue;
     const Color hoveringColor=Colors.green;
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
-        bottomSheetTheme:  BottomSheetThemeData(
-          dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return hoveringColor;
-            }
-            return defaultColor;
-          }),
+    Future<void> checkDragHandleAndColors() async {
+      await tester.pump(); // bottom sheet show animation starts
+      await tester.pump(const Duration(seconds: 1)); // animation done
+
+      final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+      expect(
+        tester.getSize(dragHandle),
+        const Size(48, 48),
+      );
+      final Offset center = tester.getCenter(dragHandle);
+      final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
+
+      // Shows default drag handle color
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: edge);
+      await tester.pump();
+      BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
+        of: dragHandle,
+        matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+      )).decoration! as BoxDecoration;
+      expect(boxDecoration.color, defaultColor);
+
+      // Shows hovering drag handle color
+      await gesture.moveTo(center);
+      await tester.pump();
+      boxDecoration = tester.widget<Container>(find.descendant(
+        of: dragHandle,
+        matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+      )).decoration! as BoxDecoration;
+
+      expect(boxDecoration.color, hoveringColor);
+      await gesture.removePointer();
+    }
+
+    Widget buildScaffold(GlobalKey scaffoldKey) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          bottomSheetTheme:  BottomSheetThemeData(
+            dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return hoveringColor;
+              }
+              return defaultColor;
+            }),
+          ),
         ),
-      ),
-      home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
-      ),
-    ));
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      );
+    }
+
+    GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey));
 
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
@@ -1223,36 +1262,24 @@ void main() {
       },
     );
 
-    await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(const Duration(seconds: 1)); // animation done
+    await checkDragHandleAndColors();
 
-    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
-    expect(
-      tester.getSize(dragHandle),
-      const Size(48, 48),
-    );
-    final Offset center = tester.getCenter(dragHandle);
-    final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
+    await tester.pumpWidget(Container()); // Reset
+    scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(buildScaffold(scaffoldKey));
 
-    // Shows default drag handle color
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: edge);
-    await tester.pump();
-    BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
-      of: dragHandle,
-      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
-    )).decoration! as BoxDecoration;
-    expect(boxDecoration.color, defaultColor);
+    scaffoldKey.currentState!.showBottomSheet((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return const SizedBox(
+            height: 200.0,
+            child: Text('Bottom Sheet'),
+          );
+        },
+      );
+    }, showDragHandle: true);
 
-    // Shows hovering drag handle color
-    await gesture.moveTo(center);
-    await tester.pump();
-    boxDecoration = tester.widget<Container>(find.descendant(
-     of: dragHandle,
-     matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
-   )).decoration! as BoxDecoration;
-
-    expect(boxDecoration.color, hoveringColor);
+    await checkDragHandleAndColors();
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {

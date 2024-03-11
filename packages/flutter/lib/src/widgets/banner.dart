@@ -178,64 +178,32 @@ class BannerPainter extends CustomPainter {
   bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
-    switch (layoutDirection) {
-      case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return _kBottomOffset;
-          case BannerLocation.topEnd:
-            return 0.0;
-          case BannerLocation.bottomStart:
-            return width - _kBottomOffset;
-          case BannerLocation.topStart:
-            return width;
-        }
-      case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomEnd:
-            return width - _kBottomOffset;
-          case BannerLocation.topEnd:
-            return width;
-          case BannerLocation.bottomStart:
-            return _kBottomOffset;
-          case BannerLocation.topStart:
-            return 0.0;
-        }
-    }
+    return switch ((layoutDirection, location)) {
+      (TextDirection.rtl, BannerLocation.topStart)    => width,
+      (TextDirection.ltr, BannerLocation.topStart)    => 0.0,
+      (TextDirection.rtl, BannerLocation.topEnd)      => 0.0,
+      (TextDirection.ltr, BannerLocation.topEnd)      => width,
+      (TextDirection.rtl, BannerLocation.bottomStart) => width - _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomStart) => _kBottomOffset,
+      (TextDirection.rtl, BannerLocation.bottomEnd)   => _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomEnd)   => width - _kBottomOffset,
+    };
   }
 
   double _translationY(double height) {
-    switch (location) {
-      case BannerLocation.bottomStart:
-      case BannerLocation.bottomEnd:
-        return height - _kBottomOffset;
-      case BannerLocation.topStart:
-      case BannerLocation.topEnd:
-        return 0.0;
-    }
+    return switch (location) {
+      BannerLocation.bottomStart || BannerLocation.bottomEnd => height - _kBottomOffset,
+      BannerLocation.topStart    || BannerLocation.topEnd    => 0.0,
+    };
   }
 
   double get _rotation {
-    switch (layoutDirection) {
-      case TextDirection.rtl:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return -math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return math.pi / 4.0;
-        }
-      case TextDirection.ltr:
-        switch (location) {
-          case BannerLocation.bottomStart:
-          case BannerLocation.topEnd:
-            return math.pi / 4.0;
-          case BannerLocation.bottomEnd:
-          case BannerLocation.topStart:
-            return -math.pi / 4.0;
-        }
-    }
+    return math.pi / 4.0 * switch ((layoutDirection, location)) {
+      (TextDirection.rtl, BannerLocation.topStart || BannerLocation.bottomEnd) => 1,
+      (TextDirection.ltr, BannerLocation.topStart || BannerLocation.bottomEnd) => -1,
+      (TextDirection.rtl, BannerLocation.bottomStart || BannerLocation.topEnd) => -1,
+      (TextDirection.ltr, BannerLocation.bottomStart || BannerLocation.topEnd) => 1,
+    };
   }
 }
 

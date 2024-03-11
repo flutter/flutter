@@ -90,7 +90,7 @@ void main() {
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -110,7 +110,7 @@ void main() {
   FakeCommand ninjaCommand(String buildMode, {
     Map<String, String>? environment,
     String target = 'x64',
-    void Function()? onRun,
+    void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -279,7 +279,7 @@ void main() {
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         throw ArgumentError();
       }),
     ]);
@@ -694,7 +694,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release'),
-      ninjaCommand('release', onRun: () {
+      ninjaCommand('release', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -751,7 +751,7 @@ set(BINARY_NAME "fizz_bar")
     setUpMockProjectFilesForBuild();
     processManager.addCommands(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),
-      ninjaCommand('release', target: 'arm64', onRun: () {
+      ninjaCommand('release', target: 'arm64', onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.linux-arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''

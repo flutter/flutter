@@ -234,7 +234,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
@@ -259,7 +259,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
@@ -284,7 +284,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
@@ -309,7 +309,7 @@ void main() {
 
     expect(value, null); // hint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
@@ -347,7 +347,7 @@ void main() {
 
     expect(value, null);
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 24.0));
+    expect(hintEmptyLabel, const Offset(0.0, 20.0));
   });
 
   testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
@@ -386,7 +386,7 @@ void main() {
 
     expect(value, 1);
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/82910
@@ -575,8 +575,9 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Builder(
-          builder: (BuildContext context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          builder: (BuildContext context) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: Material(
               child: Center(
                 child: DropdownButtonFormField<String>(
@@ -602,7 +603,7 @@ void main() {
 
     final RenderBox box =
     tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
-    expect(box.size.height, 72.0);
+    expect(box.size.height, 64.0);
   });
 
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {

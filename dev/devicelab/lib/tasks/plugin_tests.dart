@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -35,6 +36,7 @@ class PluginTest {
     this.dartOnlyPlugin = false,
     this.sharedDarwinSource = false,
     this.template = 'plugin',
+    this.cocoapodsTransitiveFlutterDependency = false,
   });
 
   final String buildTarget;
@@ -44,6 +46,7 @@ class PluginTest {
   final bool dartOnlyPlugin;
   final bool sharedDarwinSource;
   final String template;
+  final bool cocoapodsTransitiveFlutterDependency;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -80,6 +83,11 @@ class PluginTest {
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        if (cocoapodsTransitiveFlutterDependency) {
+          section('Test app with Flutter as a transitive CocoaPods dependency');
+          await app.addCocoapodsTransitiveFlutterDependency();
+          await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        }
         if (runFlutterTest) {
           section('Test app');
           await app.runFlutterTest();
@@ -110,6 +118,12 @@ class PluginTest {
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
     if (buildTarget == 'macos') {
+      // When using a local engine, podhelper.rb will search for a "macos-"
+      // directory within the FlutterMacOS.xcframework, so create a dummy one.
+      Directory(
+        path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'),
+      ).createSync(recursive: true);
+
       // Clean before regenerating the config to ensure that the pod steps run.
       await inDirectory(Directory(app.rootPath), () async {
         await evalFlutter('clean');
@@ -321,8 +335,9 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'x64', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
+          path.join(rootPath, 'build', 'windows', arch, 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
           <String>[],
           canFail: true,
         ) != 0) {
@@ -361,6 +376,57 @@ public class $pluginClass: NSObject, FlutterPlugin {
     return project;
   }
 
+  /// Creates a Pod that uses a Flutter plugin as a dependency and therefore
+  /// Flutter as a transitive dependency.
+  Future<void> addCocoapodsTransitiveFlutterDependency() async {
+    final String iosDirectoryPath = path.join(rootPath, 'ios');
+
+    final File nativePod = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'NativePod.podspec',
+    ));
+    nativePod.createSync(recursive: true);
+    nativePod.writeAsStringSync('''
+Pod::Spec.new do |s|
+  s.name             = 'NativePod'
+  s.version          = '1.0.0'
+  s.summary          = 'A pod to test Flutter as a transitive dependency.'
+  s.homepage         = 'https://flutter.dev'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source           = { :path => '.' }
+  s.source_files = "Classes", "Classes/**/*.{h,m}"
+  s.dependency 'plugintest'
+end
+''');
+
+    final File nativePodClass = File(path.join(
+      iosDirectoryPath,
+      'NativePod',
+      'Classes',
+      'NativePodTest.m',
+    ));
+    nativePodClass.createSync(recursive: true);
+    nativePodClass.writeAsStringSync('''
+#import <Flutter/Flutter.h>
+
+@interface NativePodTest : NSObject
+
+@end
+
+@implementation NativePodTest
+
+@end
+''');
+
+    final File podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
+    final List<String> podfileContents = podfileFile.readAsLinesSync();
+    final int index = podfileContents.indexWhere((String line) => line.contains('flutter_install_all_ios_pods'));
+    podfileContents.insert(index, "pod 'NativePod', :path => 'NativePod'");
+    podfileFile.writeAsStringSync(podfileContents.join('\n'));
+  }
+
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
   void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
@@ -369,7 +435,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '11.0'"
+        ? "s.platform = :ios, '12.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {

@@ -99,6 +99,10 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Whether the title should be centered.
   ///
+  /// If the length of the title is greater than the available space, set
+  /// this property to false. This aligns the title to the start of the
+  /// flexible space bar and applies [titlePadding] to the title.
+  ///
   /// By default this property is true if the current target platform
   /// is [TargetPlatform.iOS] or [TargetPlatform.macOS], false otherwise.
   final bool? centerTitle;
@@ -120,9 +124,13 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// inset from the bottom-left and it is specified along with
   /// [centerTitle] false.
   ///
-  /// By default the value of this property is
-  /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
-  /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
+  /// If [centerTitle] is true, then the title is centered within the
+  /// flexible space bar with a bottom padding of 16.0 pixels.
+  ///
+  /// If [centerTitle] is false and [FlexibleSpaceBarSettings.hasLeading] is true,
+  /// then the title is aligned to the start of the flexible space bar with the
+  /// [titlePadding] applied. If [titlePadding] is null, then defaults to start
+  /// padding of 72.0 pixels and bottom padding of 16.0 pixels.
   final EdgeInsetsGeometry? titlePadding;
 
   /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
@@ -177,32 +185,20 @@ class FlexibleSpaceBar extends StatefulWidget {
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (widget.centerTitle != null) {
-      return widget.centerTitle!;
-    }
-    switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return true;
-    }
+    return widget.centerTitle ?? switch (theme.platform) {
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.windows => false,
+      TargetPlatform.iOS || TargetPlatform.macOS => true,
+    };
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
     if (effectiveCenterTitle) {
       return Alignment.bottomCenter;
     }
-    final TextDirection textDirection = Directionality.of(context);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return Alignment.bottomRight;
-      case TextDirection.ltr:
-        return Alignment.bottomLeft;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => Alignment.bottomRight,
+      TextDirection.ltr => Alignment.bottomLeft,
+    };
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
@@ -316,14 +312,15 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.titleLarge!;
+            TextStyle titleStyle = theme.useMaterial3 ? theme.textTheme.titleLarge! : theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(
               color: titleStyle.color!.withOpacity(opacity),
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
+            final double leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
             final EdgeInsetsGeometry padding = widget.titlePadding ??
               EdgeInsetsDirectional.only(
-                start: effectiveCenterTitle && !(settings.hasLeading ?? false) ? 0.0 : 72.0,
+                start: effectiveCenterTitle ? 0.0 : leadingPadding,
                 bottom: 16.0,
               );
             final double scaleValue = Tween<double>(begin: widget.expandedTitleScale, end: 1.0).transform(t);

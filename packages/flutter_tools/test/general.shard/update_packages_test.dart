@@ -77,6 +77,20 @@ dependencies:
     git:
 ''';
 
+const String kVersionJson = '''
+{
+  "frameworkVersion": "1.2.3",
+  "channel": "[user-branch]",
+  "repositoryUrl": "git@github.com:flutter/flutter.git",
+  "frameworkRevision": "1234567812345678123456781234567812345678",
+  "frameworkCommitDate": "2024-02-06 22:26:52 +0100",
+  "engineRevision": "abcdef01abcdef01abcdef01abcdef01abcdef01",
+  "dartSdkVersion": "1.2.3",
+  "devToolsVersion": "1.2.3",
+  "flutterVersion": "1.2.3"
+}
+''';
+
 void main() {
   late FileSystem fileSystem;
   late Directory flutterSdk;
@@ -88,6 +102,10 @@ void main() {
     flutterSdk = fileSystem.directory('flutter')..createSync();
     // Create version file
     flutterSdk.childFile('version').writeAsStringSync('1.2.3');
+    // Create version JSON file
+    flutterSdk.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(kVersionJson);
     // Create a pubspec file
     flutter = flutterSdk.childDirectory('packages').childDirectory('flutter')
       ..createSync(recursive: true);
@@ -144,6 +162,7 @@ void main() {
     // The version file exists.
     expect(result.childFile('version'), exists);
     expect(result.childFile('version').readAsStringSync(), '1.2.3');
+    expect(fileSystem.file(fileSystem.path.join(result.path, 'bin', 'cache', 'flutter.version.json')), exists);
 
     // The sky_engine package exists
     expect(fileSystem.directory('${result.path}/bin/cache/pkg/sky_engine'), exists);

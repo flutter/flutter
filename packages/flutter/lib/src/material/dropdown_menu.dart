@@ -21,6 +21,10 @@ import 'text_field.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late FocusNode myFocusNode;
+
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
 ///
@@ -155,10 +159,12 @@ class DropdownMenu<T> extends StatefulWidget {
     this.controller,
     this.initialSelection,
     this.onSelected,
+    this.focusNode,
     this.requestFocusOnTap,
     this.expandedInsets,
     this.searchCallback,
     required this.dropdownMenuEntries,
+    this.inputFormatters,
   });
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -276,17 +282,62 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null. If null, only the text field is updated.
   final ValueChanged<T?>? onSelected;
 
+  /// Defines the keyboard focus for this widget.
+  ///
+  /// The [focusNode] is a long-lived object that's typically managed by a
+  /// [StatefulWidget] parent. See [FocusNode] for more information.
+  ///
+  /// To give the keyboard focus to this widget, provide a [focusNode] and then
+  /// use the current [FocusScope] to request the focus:
+  ///
+  /// ```dart
+  /// FocusScope.of(context).requestFocus(myFocusNode);
+  /// ```
+  ///
+  /// This happens automatically when the widget is tapped.
+  ///
+  /// To be notified when the widget gains or loses the focus, add a listener
+  /// to the [focusNode]:
+  ///
+  /// ```dart
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// ```
+  ///
+  /// If null, this widget will create its own [FocusNode].
+  ///
+  /// ## Keyboard
+  ///
+  /// Requesting the focus will typically cause the keyboard to be shown
+  /// if it's not showing already.
+  ///
+  /// On Android, the user can hide the keyboard - without changing the focus -
+  /// with the system back button. They can restore the keyboard's visibility
+  /// by tapping on a text field. The user might hide the keyboard and
+  /// switch to a physical keyboard, or they might just need to get it
+  /// out of the way for a moment, to expose something it's
+  /// obscuring. In this case requesting the focus again will not
+  /// cause the focus to change, and will not make the keyboard visible.
+  ///
+  /// If this is non-null, the behaviour of [requestFocusOnTap] is overridden
+  /// by the [FocusNode.canRequestFocus] property.
+  final FocusNode? focusNode;
+
   /// Determine if the dropdown button requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
-  /// By default, on mobile platforms, tapping on the text field and opening
-  /// the menu will not cause a focus request and the virtual keyboard will not
-  /// appear. The default behavior for desktop platforms is for the dropdown to
-  /// take the focus.
+  /// Ignored if a [focusNode] is explicitly provided (in which case,
+  /// [FocusNode.canRequestFocus] controls the behavior).
   ///
-  /// Defaults to null. Setting this field to true or false, rather than allowing
-  /// the implementation to choose based on the platform, can be useful for
-  /// applications that want to override the default behavior.
+  /// Defaults to null, which enables platform-specific behavior:
+  ///
+  ///  * On mobile platforms, acts as if set to false; tapping on the text
+  ///    field and opening the menu will not cause a focus request and the
+  ///    virtual keyboard will not appear.
+  ///
+  ///  * On desktop platforms, acts as if set to true; the dropdown takes the
+  ///    focus when activated.
+  ///
+  /// Set this to true or false explicitly to override the default behavior.
   final bool? requestFocusOnTap;
 
   /// Descriptions of the menu items in the [DropdownMenu].
@@ -338,6 +389,20 @@ class DropdownMenu<T> extends StatefulWidget {
   /// the default function will return the index of the first matching result
   /// which contains the contents of the text input field.
   final SearchCallback<T>? searchCallback;
+
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the user changes the text
+  /// this widget contains. When this parameter changes, the new formatters will
+  /// not be applied until the next time the user inserts or deletes text.
+  /// Formatters don't run when the text is changed
+  /// programmatically via [controller].
+  ///
+  /// See also:
+  ///
+  ///  * [TextEditingController], which implements the [Listenable] interface
+  ///    and notifies its listeners on [TextEditingValue] changes.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -419,24 +484,18 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
-    if (widget.requestFocusOnTap != null) {
-      return widget.requestFocusOnTap!;
-    }
-
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return false;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return true;
-    }
+    return widget.focusNode?.canRequestFocus ?? widget.requestFocusOnTap
+      ?? switch (Theme.of(context).platform) {
+        TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
+        TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+      };
   }
 
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
@@ -494,17 +553,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       // paddings so its leading icon will be aligned with the leading icon of
       // the text field.
       final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
-      final ButtonStyle defaultStyle;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          defaultStyle = MenuItemButton.styleFrom(
-            padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-          );
-        case TextDirection.ltr:
-          defaultStyle = MenuItemButton.styleFrom(
-            padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-          );
-      }
+      final ButtonStyle defaultStyle = switch (textDirection) {
+        TextDirection.rtl => MenuItemButton.styleFrom(padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding)),
+        TextDirection.ltr => MenuItemButton.styleFrom(padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding)),
+      };
 
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
@@ -676,6 +728,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget textField = TextField(
             key: _anchorKey,
             mouseCursor: effectiveMouseCursor,
+            focusNode: widget.focusNode,
             canRequestFocus: canRequestFocus(),
             enableInteractiveSelection: canRequestFocus(),
             textAlignVertical: TextAlignVertical.center,
@@ -709,6 +762,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 _enableFilter = widget.enableFilter;
               });
             },
+            inputFormatters: widget.inputFormatters,
             decoration: InputDecoration(
               enabled: widget.enabled,
               label: widget.label,

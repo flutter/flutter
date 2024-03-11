@@ -15,16 +15,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
-    testWidgets('properties',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
 
       await tester.pumpWidget(
@@ -746,12 +742,13 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xABCDABCD),
+        color: const Color(0x20240125),
       ),
     ));
 

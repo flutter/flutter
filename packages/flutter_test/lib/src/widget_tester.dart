@@ -123,7 +123,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// during test execution.
 /// Otherwise [LeakTesting.settings] is used.
 /// Adjust [LeakTesting.settings] in flutter_test_config.dart
-/// (see https://github.com/flutter/flutter/blob/master/packages/flutter_test/lib/flutter_test.dart)
+/// (see https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
 /// for the entire package or folder, or in the test's main for a test file
 /// (don't use [setUp] or [setUpAll]).
 /// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
@@ -581,15 +581,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// ```
   /// {@end-tool}
   ///
+  /// By default, the provided `widget` is rendered into [WidgetTester.view],
+  /// whose properties tests can modify to simulate different scenarios (e.g.
+  /// running on a large/small screen). Tests that want to control the
+  /// [FlutterView] into which content is rendered can set `wrapWithView` to
+  /// false and use [View] widgets in the provided `widget` tree to specify the
+  /// desired [FlutterView]s.
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
-    Widget widget, [
+    Widget widget, {
     Duration? duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
+    bool wrapWithView = true,
+  }) {
     return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.attachRootWidget(wrapWithView ? binding.wrapWithDefaultView(widget) : widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
@@ -1075,7 +1083,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   int? _lastRecordedSemanticsHandles;
 
   // TODO(goderbauer): Only use binding.debugOutstandingSemanticsHandles when deprecated binding.pipelineOwner is removed.
-  // ignore: deprecated_member_use
   int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {

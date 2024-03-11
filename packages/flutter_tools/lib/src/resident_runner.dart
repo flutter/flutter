@@ -24,10 +24,8 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
-import 'build_system/targets/dart_plugin_registrant.dart';
-import 'build_system/targets/localizations.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -137,7 +135,7 @@ class FlutterDevice {
       }
 
       final String platformDillPath = globals.fs.path.join(
-        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
+        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
 
@@ -387,6 +385,8 @@ class FlutterDevice {
       osUtils: globals.os,
       fileSystem: globals.fs,
       logger: globals.logger,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts!,
     );
     return devFS!.create();
   }
@@ -455,9 +455,7 @@ class FlutterDevice {
     }
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{
-      'multidex': hotRunner.multidexEnabled,
-    };
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
     await startEchoingDeviceLog(hotRunner.debuggingOptions);
 
@@ -525,7 +523,6 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     platformArgs['trace-startup'] = coldRunner.traceStartup;
-    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog(coldRunner.debuggingOptions);
 
@@ -561,11 +558,9 @@ class FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String? projectRootPath,
     required String pathToReload,
     required String dillOutputPath,
     required List<Uri> invalidatedFiles,
@@ -580,13 +575,11 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
@@ -721,23 +714,30 @@ abstract class ResidentHandlers {
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
-        final Map<String, Object?>? rasterData =
-          await device.vmService!.renderFrameWithRasterStats(
-            viewId: view.id,
-            uiIsolateId: view.uiIsolate!.id,
-          );
-        if (rasterData != null) {
-          final File tempFile = globals.fsUtils.getUniqueFile(
-            globals.fs.currentDirectory,
-            'flutter_jank_metrics',
-            'json',
-          );
-          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
-        } else {
-          logger.printWarning('Unable to get jank metrics.');
+      try {
+        for (final FlutterView view in views) {
+          final Map<String, Object?>? rasterData =
+            await device.vmService!.renderFrameWithRasterStats(
+              viewId: view.id,
+              uiIsolateId: view.uiIsolate!.id,
+            );
+          if (rasterData != null) {
+            final File tempFile = globals.fsUtils.getUniqueFile(
+              globals.fs.currentDirectory,
+              'flutter_jank_metrics',
+              'json',
+            );
+            tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+            logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          } else {
+            logger.printWarning('Unable to get jank metrics.');
+          }
         }
+      } on vm_service.RPCError catch (err) {
+        if (err.code != RPCErrorCodes.kServerError || !err.message.contains('Raster status not supported on Impeller backend')) {
+          rethrow;
+        }
+        logger.printWarning('Unable to get jank metrics for Impeller renderer');
       }
     }
     return true;
@@ -1263,8 +1263,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
-      const GenerateLocalizationsTarget(),
-      const DartPluginRegistrantTarget(),
+      globals.buildTargets.generateLocalizationsTarget,
+      globals.buildTargets.dartPluginRegistrantTarget,
     ]);
 
     _lastBuild = await globals.buildSystem.buildIncremental(
@@ -1630,6 +1630,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       return null;
   }
 }
