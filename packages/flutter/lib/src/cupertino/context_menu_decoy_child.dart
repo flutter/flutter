@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/src/cupertino/context_menu.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,7 +35,6 @@ const List<BoxShadow> _endBoxShadow = <BoxShadow>[
 /// an Overlay allows the DecoyChild to appear on top of siblings of the
 /// original child.
 class DecoyChild extends StatefulWidget {
-
   /// Create a DecoyChild.
   const DecoyChild({
     super.key,
@@ -48,7 +51,7 @@ class DecoyChild extends StatefulWidget {
   /// The controller that drives the animation of the decoy child.
   final AnimationController controller;
 
-  /// The rect of the child at the moment that the CupertinoContextMenu opens.
+  /// The ending rectangle of the context menu decoy child.
   final Rect? endRect;
 
   /// The child widget that is being previewed.
@@ -62,9 +65,7 @@ class DecoyChild extends StatefulWidget {
   DecoyChildState createState() => DecoyChildState();
 }
 
-
-
-/// The state of the [DecoyChild]
+/// The state of the [DecoyChild].
 ///
 /// This class is responsible for animating the child widget when the
 /// CupertinoContextMenu is about to open.
@@ -72,7 +73,7 @@ class DecoyChildState extends State<DecoyChild> with TickerProviderStateMixin {
   /// The point at which the CupertinoContextMenu begins to animate
   /// into the open position.
   ///
-  /// A value between 0.0 and 1.0 corresponding to a point in [builder]'s
+  /// A value between 0.0 and 1.0 corresponding to a point in the [builder]'s
   /// animation. When passing in an animation to [builder] the range before
   /// [animationOpensAt] will correspond to the animation when the widget is
   /// pressed and held, and the range after is the animation as the menu is
