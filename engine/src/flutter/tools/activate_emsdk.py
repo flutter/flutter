@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 
-EMSDK_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'buildtools', 'emsdk'))
+EMSDK_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', 'prebuilts', 'emsdk'))
 
 EMSDK_PATH = os.path.join(EMSDK_ROOT, 'emsdk.py')
 
