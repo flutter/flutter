@@ -220,6 +220,103 @@ void main() {
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);
     });
+
+    testWidgets('successfully taps localized material back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            _CustomLocalizationsDelegate(),
+          ],
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(
+                            title: const Text('Page 2'),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byTooltip('Back'), findsNothing);
+      expect(find.byType(BackButton), findsOneWidget);
+      expect(find.byTooltip('Custom_Back'), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('successfully taps localized custom back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            _CustomLocalizationsDelegate(),
+          ],
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(
+                            leading: IconButton(
+                              icon: const Icon(Icons.arrow_back_ios),
+                              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                              onPressed: () => Navigator.maybePop(context),
+                            ),
+                            title: const Text('Page 2'),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byTooltip('Back'), findsNothing);
+      expect(find.byType(BackButton), findsNothing);
+      expect(find.byTooltip('Custom_Back'), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
   });
 
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
@@ -763,4 +860,24 @@ class _AlwaysRepaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
+}
+
+class _CustomLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _CustomLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) async =>
+      _CustomMaterialLocalizations();
+
+  @override
+  bool shouldReload(_CustomLocalizationsDelegate old) => false;
+}
+
+class _CustomMaterialLocalizations extends DefaultMaterialLocalizations {
+  @override
+  String get backButtonTooltip => 'Custom_Back';
 }

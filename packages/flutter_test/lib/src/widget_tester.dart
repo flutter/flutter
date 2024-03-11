@@ -5,7 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/material.dart' show BackButton, MaterialLocalizations, Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1165,7 +1165,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Will throw an error if there is no back button in the page.
   Future<void> pageBack() async {
     return TestAsyncUtils.guard<void>(() async {
-      Finder backButton = find.byTooltip('Back');
+      Finder backButton = find.byType(BackButton);
+      if (backButton.evaluate().isEmpty) {
+        backButton = find.byElementPredicate((Element element) {
+          if (element.widget case final Tooltip tooltip) {
+            final MaterialLocalizations localizations = MaterialLocalizations.of(element);
+            return tooltip.message == localizations.backButtonTooltip;
+          }
+          return false;
+        });
+      }
+
       if (backButton.evaluate().isEmpty) {
         backButton = find.byType(CupertinoNavigationBarBackButton);
       }
