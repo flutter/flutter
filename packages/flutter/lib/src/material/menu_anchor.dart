@@ -3359,6 +3359,12 @@ class _MenuPanelState extends State<_MenuPanel> {
   ScrollController scrollController = ScrollController();
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (widget.orientation) {
       Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),

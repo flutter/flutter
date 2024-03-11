@@ -8,9 +8,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
   void onPressed(TestMenu item) {}
 
   Finder findMenuPanels(Axis orientation) {
