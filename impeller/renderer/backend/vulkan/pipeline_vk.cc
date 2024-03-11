@@ -357,7 +357,8 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
   std::vector<vk::DescriptorSetLayoutBinding> set_bindings;
 
   vk::Sampler vk_immutable_sampler =
-      immutable_sampler ? immutable_sampler->GetSampler() : VK_NULL_HANDLE;
+      immutable_sampler ? immutable_sampler->GetSampler()
+                        : static_cast<vk::Sampler>(VK_NULL_HANDLE);
 
   for (auto layout : desc.GetVertexDescriptor()->GetDescriptorSetLayouts()) {
     vk::DescriptorSetLayoutBinding set_binding;

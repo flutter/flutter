@@ -30,7 +30,8 @@ bool YUVConversionVK::IsValid() const {
 }
 
 vk::SamplerYcbcrConversion YUVConversionVK::GetConversion() const {
-  return conversion_ ? conversion_.get() : VK_NULL_HANDLE;
+  return conversion_ ? conversion_.get()
+                     : static_cast<vk::SamplerYcbcrConversion>(VK_NULL_HANDLE);
 }
 
 const YUVConversionDescriptorVK& YUVConversionVK::GetDescriptor() const {
