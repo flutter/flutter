@@ -283,7 +283,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'e9df434539745202fa5f9b729fe5f82e5de3f025',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'b1fdfb2c98dfb6270c3ce83e67832e56d10865e6',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -789,16 +789,6 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/web_dependencies': {
-     'packages': [
-       {
-         'package': 'flutter/web/canvaskit_bundle',
-         'version': Var('canvaskit_cipd_instance')
-       }
-     ],
-     'dep_type': 'cipd',
-   },
-
   'src/third_party/java/openjdk': {
      'packages': [
        {
@@ -829,7 +819,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/emsdk': {
+  'src/flutter/prebuilts/emsdk': {
    'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + 'a896e3d066448b3530dbcaa48869fafefd738f57',
    'condition': 'download_emsdk',
   },
@@ -1055,7 +1045,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/third_party/google_fonts_for_unit_tests': {
+  'src/flutter/third_party/google_fonts_for_unit_tests': {
       'packages': [
         {
           'package': 'flutter/flutter_font_fallbacks',
