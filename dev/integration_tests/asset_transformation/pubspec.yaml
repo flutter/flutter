@@ -9,11 +9,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  vector_graphics: ^1.1.11+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  vector_graphics_compiler: 1.1.11+1
 
 flutter:
   uses-material-design: true
+  assets:
+    - path: assets/test.svg
+      transformers:
+        - package: vector_graphics_compiler
