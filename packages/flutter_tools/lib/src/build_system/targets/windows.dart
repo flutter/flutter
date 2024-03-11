@@ -142,7 +142,6 @@ abstract class BundleWindowsAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: targetPlatform,
-      buildMode: buildMode,
     );
     environment.depFileService.writeToFile(
       depfile,
