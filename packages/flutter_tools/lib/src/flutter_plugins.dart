@@ -1238,12 +1238,9 @@ bool hasPlugins(FlutterProject project) {
 ///  For more details, https://flutter.dev/go/federated-plugins.
 // TODO(stuartmorgan): Expand implementation to apply to all implementations,
 //  not just Dart-only, per the federated plugin spec.
-// TODO(gustl22): The flag [throwOnPluginPubspecError] is currently only used
-//  for testing dart plugins as the logic is not working correctly.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
-  List<Plugin> plugins, {
-  bool throwOnPluginPubspecError = true,
-}) {
+  List<Plugin> plugins
+) {
   const Iterable<String> platformKeys = <String>[
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
@@ -1259,47 +1256,19 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     return '$packageName:$platform';
   }
 
-  bool hasPubspecError = false;
   for (final String platformKey in platformKeys) {
     for (final Plugin plugin in plugins) {
-      if (plugin.platforms[platformKey] == null &&
-          plugin.defaultPackagePlatforms[platformKey] == null) {
+      final String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
+      if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
         // The plugin doesn't implement this platform.
         continue;
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
-        final String? defaultImplementation =
-            plugin.defaultPackagePlatforms[platformKey];
         final bool hasInlineDartImplementation =
             plugin.pluginDartClassPlatforms[platformKey] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
-          if (throwOnPluginPubspecError) {
-            globals.printError(
-              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
-              'it specify an implementation in pubspec.yaml.\n\n'
-              'To set an inline implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platformKey:\n'
-              '        $kDartPluginClass: <plugin-class>\n'
-              '\n'
-              'To set a default implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platformKey:\n'
-              '        $kDefaultPackage: <plugin-implementation>\n'
-              '\n'
-              'To implement an interface, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    implements: <plugin-interface>'
-              '\n',
-            );
-          }
-          hasPubspecError = true;
+          // Skip native inline PluginPlatform implementation
           continue;
         }
         final String defaultImplementationKey = getResolutionKey(platform: platformKey, packageName: plugin.name);
@@ -1347,9 +1316,6 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         platform: platformKey,
       ));
     }
-  }
-  if (hasPubspecError && throwOnPluginPubspecError) {
-    throwToolExit('Please resolve the pubspec errors');
   }
 
   // Now resolve all the possible resolutions to a single option for each
@@ -1417,21 +1383,16 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// A successful run will create a new generate_main.dart file or update the existing file.
 /// Throws [ToolExit] if unable to generate the file.
 ///
-/// This method also validates each plugin's pubspec.yaml, but errors are only
-/// reported if [throwOnPluginPubspecError] is [true].
-///
 /// For more details, see https://flutter.dev/go/federated-plugins.
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
-  File mainFile, {
-  bool throwOnPluginPubspecError = false,
-}) async {
+  File mainFile,
+) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
-    throwOnPluginPubspecError: throwOnPluginPubspecError,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
