@@ -146,19 +146,20 @@ class HotRunner extends ResidentRunner {
       return;
     }
 
-    if (flutterDevices.length == 1) {
-      final Device device = flutterDevices.first.device!;
-      _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
-      _sdkName = await device.sdkNameAndVersion;
-      _emulator = await device.isLocalEmulator;
-    } else if (flutterDevices.length > 1) {
-      _targetPlatform = 'multiple';
-      _sdkName = 'multiple';
-      _emulator = false;
-    } else {
-      _targetPlatform = 'unknown';
-      _sdkName = 'unknown';
-      _emulator = false;
+    switch (flutterDevices.length) {
+      case 1:
+        final Device device = flutterDevices.first.device!;
+        _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+        _sdkName = await device.sdkNameAndVersion;
+        _emulator = await device.isLocalEmulator;
+      case > 1:
+        _targetPlatform = 'multiple';
+        _sdkName = 'multiple';
+        _emulator = false;
+      default:
+        _targetPlatform = 'unknown';
+        _sdkName = 'unknown';
+        _emulator = false;
     }
   }
 

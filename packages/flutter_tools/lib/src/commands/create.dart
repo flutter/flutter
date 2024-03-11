@@ -866,10 +866,11 @@ void _printWarningDisabledPlatform(List<String> platforms) {
   final List<String> web = <String>[];
 
   for (final String platform in platforms) {
-    if (platform == 'web') {
-      web.add(platform);
-    } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
-      desktop.add(platform);
+    switch (platform) {
+      case 'web':
+        web.add(platform);
+      case 'macos' || 'windows' || 'linux':
+        desktop.add(platform);
     }
   }
 

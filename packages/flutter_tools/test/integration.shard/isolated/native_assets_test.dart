@@ -147,12 +147,13 @@ void main() {
           // shadow the exception we would have gotten.
           expect(stdout, isNot(contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY')));
 
-          if (device == 'macos') {
-            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-          } else if (device == 'linux') {
-            expectDylibIsBundledLinux(exampleDirectory, buildMode);
-          } else if (device == 'windows') {
-            expectDylibIsBundledWindows(exampleDirectory, buildMode);
+          switch (device) {
+            case 'macos':
+              expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+            case 'linux':
+              expectDylibIsBundledLinux(exampleDirectory, buildMode);
+            case 'windows':
+              expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
@@ -203,16 +204,17 @@ void main() {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
 
-          if (buildSubcommand == 'macos') {
-            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'ios') {
-            expectDylibIsBundledIos(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'linux') {
-            expectDylibIsBundledLinux(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'windows') {
-            expectDylibIsBundledWindows(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'apk') {
-            expectDylibIsBundledAndroid(exampleDirectory, buildMode);
+          switch (buildSubcommand) {
+            case 'macos':
+              expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+            case 'ios':
+              expectDylibIsBundledIos(exampleDirectory, buildMode);
+            case 'linux':
+              expectDylibIsBundledLinux(exampleDirectory, buildMode);
+            case 'windows':
+              expectDylibIsBundledWindows(exampleDirectory, buildMode);
+            case 'apk':
+              expectDylibIsBundledAndroid(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });

@@ -455,19 +455,35 @@ class ToggleButtons extends StatelessWidget {
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isFirstButton(int index, int length, TextDirection textDirection) {
-    return index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == length - 1,
+          TextDirection.ltr => index == 0,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == length - 1,
+          VerticalDirection.down => index == 0,
+        };
+    }
   }
 
   // Determines if this is the last child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isLastButton(int index, int length, TextDirection textDirection) {
-    return index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == 0,
+          TextDirection.ltr => index == length - 1,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == 0,
+          VerticalDirection.down => index == length - 1,
+        };
+    }
   }
 
   BorderRadius _getEdgeBorderRadius(

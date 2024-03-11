@@ -152,12 +152,13 @@ class AnalysisServer {
         }
 
         if (paramsMap != null) {
-          if (event == 'server.status') {
-            _handleStatus(paramsMap);
-          } else if (event == 'analysis.errors') {
-            _handleAnalysisIssues(paramsMap);
-          } else if (event == 'server.error') {
-            _handleServerError(paramsMap);
+          switch (event) {
+            case 'server.status':
+              _handleStatus(paramsMap);
+            case 'analysis.errors':
+              _handleAnalysisIssues(paramsMap);
+            case 'server.error':
+              _handleServerError(paramsMap);
           }
         }
       } else if (response['error'] != null) {

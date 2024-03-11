@@ -1795,29 +1795,30 @@ class TextInput {
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    if (method == 'TextInputClient.focusElement') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-      return;
-    } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
-      return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
-          return false;
-        }
-        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
-        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
-      }).map((String elementIdentifier) {
-        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
-        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
-      }).toList();
-    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
-      _scribbleInProgress = true;
-      return;
-    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
-      _scribbleInProgress = false;
-      return;
+    switch (methodCall.method) {
+      case 'TextInputClient.focusElement':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        return;
+      case 'TextInputClient.requestElementsInRect':
+        final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+        return _scribbleClients.keys.where((String elementIdentifier) {
+          final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+          if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
+            return false;
+          }
+          final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+          return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+        }).map((String elementIdentifier) {
+          final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
+          return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+        }).toList();
+      case 'TextInputClient.scribbleInteractionBegan':
+        _scribbleInProgress = true;
+        return;
+      case 'TextInputClient.scribbleInteractionFinished':
+        _scribbleInProgress = false;
+        return;
     }
     if (_currentConnection == null) {
       return;
