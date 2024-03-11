@@ -1052,6 +1052,16 @@ def run_impeller_golden_tests(build_dir: str):
       print(diff_result.stdout.decode())
       raise RuntimeError('impeller_golden_tests diff failure')
 
+    # On release builds and local builds, we typically do not have GOLDCTL set,
+    # which on other words means that this invoking the SkiaGoldClient would
+    # throw. Skip this step in those cases and log a notice.
+    if 'GOLDCTL' not in os.environ:
+      print_divider('<')
+      print(
+          'Skipping the SkiaGoldClient invocation as the GOLDCTL environment variable is not set.'
+      )
+      return
+
     with DirectoryChange(harvester_path):
       bin_path = Path('.').joinpath('bin').joinpath('golden_tests_harvester.dart')
       run_cmd([dart_bin, 'run', str(bin_path), temp_dir])
