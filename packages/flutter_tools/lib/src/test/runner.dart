@@ -342,19 +342,16 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
           .replaceAll(':', '_')
           .replaceAll('/', '_')
           .replaceAll(r'\', '_')
-          .replaceAll('%20', '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
     final Map<String, String> testImports = <String, String>{};
     final Set<String> seenTestConfigPaths = <String>{};
     for (final Uri path in paths) {
-      String sanitizedPath = !path.path.endsWith('?')
+      final String sanitizedPath = !path.path.endsWith('?')
           ? path.path
           : path.path.substring(0, path.path.length - 1);
       final String sanitizedImport = pathToImport(sanitizedPath);
-      sanitizedPath = sanitizedPath.replaceAll('%20', ' ');
-      sanitizedPath = globals.platform.isWindows? '"$sanitizedPath"': sanitizedPath;
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
       final File? testConfigFile = findTestConfigFile(
