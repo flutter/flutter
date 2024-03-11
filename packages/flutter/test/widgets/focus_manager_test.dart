@@ -356,7 +356,7 @@ void main() {
 
     testWidgets('FocusManager ignores app lifecycle changes on Android.', (WidgetTester tester) async {
       final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
-      if (!shouldRespond) {
+      if (shouldRespond) {
         return;
       }
 
