@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/cupertino/context_menu_decoy_child.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -75,10 +76,10 @@ void main() {
     );
   }
 
-  // Finds the child widget that is rendered inside of _DecoyChild.
+  // Finds the child widget that is rendered inside of DecoyChild.
   Finder findDecoyChild(Widget child) {
     return find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'),
       matching: find.byWidget(child),
     );
   }
@@ -145,20 +146,20 @@ void main() {
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      // The _DecoyChild is showing directly on top of the child.
+      // The DecoyChild is showing directly on top of the child.
       expect(findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate.
+      // After a small delay, the DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
@@ -210,20 +211,20 @@ void main() {
       ));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      // The _DecoyChild is showing directly on top of the child.
+      // The DecoyChild is showing directly on top of the child.
       expect(findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate.
+      // After a small delay, the DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
@@ -241,6 +242,75 @@ void main() {
       expect(findStatic(), findsOneWidget);
     });
 
+    testWidgets('DecoyChild preserves the child color', (WidgetTester tester) async {
+      Widget getChild() {
+        return Container(
+          width: 150.0,
+          height: 150.0,
+          decoration: BoxDecoration(
+            color: CupertinoColors.activeBlue,
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+        );
+      }
+      final Widget child = getChild();
+
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          backgroundColor: CupertinoColors.black,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800, 600)),
+            child: Center(
+              child: CupertinoContextMenu(
+                actions: const <CupertinoContextMenuAction>[
+                  CupertinoContextMenuAction(
+                    child: Text('CupertinoContextMenuAction'),
+                  ),
+                ],
+                child: child
+              ),
+            )
+          )
+        ),
+      ));
+
+      /// test the child's shape and color
+      final BoxDecoration? childDecoration = (tester.firstWidget(find.byWidget(child)) as Container).decoration as BoxDecoration?;
+      expect(childDecoration?.color, equals(CupertinoColors.activeBlue));
+
+      /// expect no DecoyChild to be present before the gesture
+      final Finder decoyChildBeforeGesture = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild');
+      expect(decoyChildBeforeGesture, findsNothing);
+
+
+      /// Start press gesture on the child
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+
+      /// find the [DecoyChild] and test its shape and color
+      final Finder decoyChildAfterGesture = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild');
+
+      decoyChildAfterGesture.evaluate().forEach((Element element) {
+        expect('${element.widget.runtimeType}', 'DecoyChild');
+        const List<Color?> expectedDecoyChildColors = <Color?>[null, Color(0x00000000)];
+        /// access [DecoyChildState] from _state and test its shape and color
+        final DecoyChildState decoyChildState = tester.state(find.byType(DecoyChild));
+
+        final bool result = expectedDecoyChildColors.any((Color? color) => decoyChildState.validateDecoyColor(color));
+        expect(result, true);
+      });
+
+      /// End the gesture
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      /// expect no DecoyChild to be present before the gesture
+      final Finder decoyChildAfterEnding = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild');
+      expect(decoyChildAfterEnding, findsNothing);
+    });
+
     testWidgets('CupertinoContextMenu with a basic builder opens and closes the same as when providing a child', (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getBuilderContextMenu(builder: (BuildContext context, Animation<double> animation) {
@@ -248,20 +318,20 @@ void main() {
       }));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      // The _DecoyChild is showing directly on top of the child.
+      // The DecoyChild is showing directly on top of the child.
       expect(findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate.
+      // After a small delay, the DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
@@ -293,7 +363,7 @@ void main() {
 
       final Widget child = find.descendant(of: find.byType(TickerMode), matching: find.byType(Container)).evaluate().single.widget;
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -301,7 +371,7 @@ void main() {
 
       Finder findBuilderDecoyChild() {
         return find.descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'),
           matching: find.byType(Container),
         );
       }
@@ -312,7 +382,7 @@ void main() {
 
       expect(findBuilderDecoyChild(), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate with a different border radius.
+      // After a small delay, the DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
       final Container decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
@@ -380,20 +450,20 @@ void main() {
       ));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      // The _DecoyChild is showing directly on top of the child.
+      // The DecoyChild is showing directly on top of the child.
       expect(findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate.
+      // After a small delay, the DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
@@ -595,20 +665,20 @@ void main() {
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsNothing);
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      // The _DecoyChild is showing directly on top of the child.
+      // The DecoyChild is showing directly on top of the child.
       expect(findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == 'DecoyChild'), findsOneWidget);
 
-      // After a small delay, the _DecoyChild has begun to animate.
+      // After a small delay, the DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));

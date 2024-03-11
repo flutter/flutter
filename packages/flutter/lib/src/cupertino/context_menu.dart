@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:flutter/src/cupertino/context_menu_decoy_child.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -562,7 +563,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return _DecoyChild(
+        return DecoyChild(
           beginRect: childRect,
           controller: _openController,
           endRect: _decoyChildEndRect,
@@ -601,122 +602,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 }
 
-// A floating copy of the CupertinoContextMenu's child.
-//
-// When the child is pressed, but before the CupertinoContextMenu opens, it does
-// an animation where it slowly grows. This is implemented by hiding the
-// original child and placing _DecoyChild on top of it in an Overlay. The use of
-// an Overlay allows the _DecoyChild to appear on top of siblings of the
-// original child.
-class _DecoyChild extends StatefulWidget {
-  const _DecoyChild({
-    this.beginRect,
-    required this.controller,
-    this.endRect,
-    this.child,
-    this.builder,
-  });
-
-  final Rect? beginRect;
-  final AnimationController controller;
-  final Rect? endRect;
-  final Widget? child;
-  final CupertinoContextMenuBuilder? builder;
-
-  @override
-  _DecoyChildState createState() => _DecoyChildState();
-}
-
-class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
-  late Animation<Rect?> _rect;
-  late Animation<Decoration> _boxDecoration;
-
-  @override
-  void initState() {
-    super.initState();
-
-    const double beginPause = 1.0;
-    const double openAnimationLength = 5.0;
-    const double totalOpenAnimationLength = beginPause + openAnimationLength;
-    final double endPause =
-      ((totalOpenAnimationLength * _animationDuration) / _previewLongPressTimeout.inMilliseconds) - totalOpenAnimationLength;
-
-    // The timing on the animation was eyeballed from the XCode iOS simulator
-    // running iOS 16.0.
-    // Because the animation no longer goes from 0.0 to 1.0, but to a number
-    // depending on the ratio between the press animation time and the opening
-    // animation time, a pause needs to be added to the end of the tween
-    // sequence that completes that ratio. This is to allow the animation to
-    // fully complete as expected without doing crazy math to the _kOpenScale
-    // value. This change was necessary from the inclusion of the builder and
-    // the complete animation value that it passes along.
-    _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
-      TweenSequenceItem<Rect?>(
-        tween: RectTween(
-          begin: widget.beginRect,
-          end: widget.beginRect,
-        ).chain(CurveTween(curve: Curves.linear)),
-        weight: beginPause,
-      ),
-      TweenSequenceItem<Rect?>(
-        tween: RectTween(
-          begin: widget.beginRect,
-          end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.easeOutSine)),
-        weight: openAnimationLength,
-      ),
-      TweenSequenceItem<Rect?>(
-        tween: RectTween(
-          begin: widget.endRect,
-          end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.linear)),
-        weight: endPause,
-      ),
-    ]).animate(widget.controller);
-
-    _boxDecoration = DecorationTween(
-      begin: const BoxDecoration(
-        boxShadow: <BoxShadow>[],
-      ),
-      end: const BoxDecoration(
-        boxShadow: _endBoxShadow,
-      ),
-    ).animate(CurvedAnimation(
-        parent: widget.controller,
-        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
-      ),
-    );
-  }
-
-  Widget _buildAnimation(BuildContext context, Widget? child) {
-    return Positioned.fromRect(
-      rect: _rect.value!,
-      child: Container(
-        decoration: _boxDecoration.value,
-        child: widget.child,
-      ),
-    );
-  }
-
-  Widget _buildBuilder(BuildContext context, Widget? child) {
-    return Positioned.fromRect(
-      rect: _rect.value!,
-      child: widget.builder!(context, widget.controller),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        AnimatedBuilder(
-          builder: widget.child != null ? _buildAnimation : _buildBuilder,
-          animation: widget.controller,
-        ),
-      ],
-    );
-  }
-}
 
 // The open CupertinoContextMenu modal.
 class _ContextMenuRoute<T> extends PopupRoute<T> {
