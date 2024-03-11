@@ -1528,6 +1528,9 @@ void main() {
     const double helperStartPadding = 12.0;
     const double counterEndPadding = 12.0;
 
+    // Actual size varies a little on web platforms.
+    final Matcher closeToFullHeight = closeTo(fullHeight, 0.1);
+
     group('for filled text field', () {
       group('when field is enabled', () {
         testWidgets('Helper and counter are correctly positioned', (WidgetTester tester) async {
@@ -1542,7 +1545,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1586,7 +1589,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1631,7 +1634,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1676,7 +1679,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1741,7 +1744,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
           expect(getErrorRect(tester).height, helperHeight);
@@ -1790,7 +1793,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1834,7 +1837,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1879,7 +1882,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1924,7 +1927,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
           expect(getHelperRect(tester).height, helperHeight);
@@ -1989,7 +1992,7 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, fullHeight);
+          expect(getDecoratorRect(tester).height, closeToFullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
           expect(getErrorRect(tester).height, helperHeight);
@@ -2039,8 +2042,8 @@ void main() {
         );
 
         final Rect errorRect = tester.getRect(find.text(threeLines));
-        expect(errorRect.height, errorHeight * maxLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + errorHeight * maxLines);
+        expect(errorRect.height, closeTo(errorHeight * maxLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25));
       });
 
       testWidgets('Error height is correct when errorMaxLines is restricted', (WidgetTester tester) async {
@@ -2057,8 +2060,8 @@ void main() {
         );
 
         final Rect errorRect = tester.getRect(find.text(threeLines));
-        expect(errorRect.height, errorHeight * maxLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + errorHeight * maxLines);
+        expect(errorRect.height, closeTo(errorHeight * maxLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25));
       });
 
       testWidgets('Error height is correct when errorMaxLines is bigger than the number of lines in errorText', (WidgetTester tester) async {
@@ -2076,8 +2079,8 @@ void main() {
         );
 
         final Rect errorRect = tester.getRect(find.text(twoLines));
-        expect(errorRect.height, errorHeight * numberOfLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + errorHeight * numberOfLines);
+        expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
@@ -2094,8 +2097,8 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(threeLines));
-        expect(helperRect.height, helperHeight * maxLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + helperHeight * maxLines);
+        expect(helperRect.height, closeTo(helperHeight * maxLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25));
       });
 
       testWidgets('Helper height is correct when maxLines is restricted', (WidgetTester tester) async {
@@ -2112,8 +2115,8 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(threeLines));
-        expect(helperRect.height, helperHeight * maxLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + helperHeight * maxLines);
+        expect(helperRect.height, closeTo(helperHeight * maxLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25));
       });
 
       testWidgets('Helper height is correct when helperMaxLines is bigger than the number of lines in helperText', (WidgetTester tester) async {
@@ -2131,8 +2134,8 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(twoLines));
-        expect(helperRect.height, helperHeight * numberOfLines);
-        expect(getDecoratorRect(tester).height, containerHeight + helperGap + helperHeight * numberOfLines);
+        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
       });
     });
 
