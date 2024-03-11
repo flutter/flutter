@@ -15,7 +15,10 @@ final ArgParser argParser = ArgParser()
   ..addOption('library-name')
   ..addOption('api-file')
   ..addMultiOption('source-file')
-  ..addOption('stamp');
+  ..addOption('stamp')
+  ..addOption('depfile')
+  ..addOption('exclude-pattern')
+  ..addOption('build-dir');
 
 final List<Replacer> uiPatterns = <Replacer>[
   AllReplacer(RegExp(r'library\s+ui;'), 'library dart.ui;'),
@@ -113,6 +116,10 @@ void main(List<String> arguments) {
   final ArgResults results = argParser.parse(arguments);
   final Directory directory = Directory(results['output-dir'] as String);
   final String inputDirectoryPath = results['input-dir'] as String;
+  final String? excludePattern = results['exclude-pattern'] as String?;
+  final String stampfilePath = results['stamp'] as String;
+  final String depfilePath = results['depfile'] as String;
+  final String buildDirPath = results['build-dir'] as String;
 
   String Function(String source)? preprocessor;
   List<Replacer> replacementPatterns;
@@ -130,13 +137,25 @@ void main(List<String> arguments) {
     preprocessor = (String source) => preprocessPartFile(source, libraryName!);
     replacementPatterns = generatePartsPatterns(libraryName, isPublic);
   }
-  for (final String inputFilePath in results['source-file'] as Iterable<String>) {
-    String pathSuffix = inputFilePath.substring(inputDirectoryPath.length);
+
+  final List<String> inputFiles = <String>[];
+  final List<FileSystemEntity> entries = Directory(inputDirectoryPath).listSync(
+    recursive: true, followLinks: false,
+  );
+  for (final File inputFile in entries.whereType<File>()) {
+    if (excludePattern != null && inputFile.path.startsWith(excludePattern)) {
+      continue;
+    }
+    if (!inputFile.path.endsWith('.dart') || inputFile.path.endsWith('_test.dart')) {
+      continue;
+    }
+    inputFiles.add(path.relative(inputFile.path, from: buildDirPath));
+    String pathSuffix = inputFile.path.substring(inputDirectoryPath.length);
     if (libraryName != null) {
       pathSuffix = path.join(libraryName, pathSuffix);
     }
     final String outputFilePath = path.join(directory.path, pathSuffix);
-    processFile(inputFilePath, outputFilePath, preprocessor, replacementPatterns);
+    processFile(inputFile.path, outputFilePath, preprocessor, replacementPatterns);
   }
 
   if (results['api-file'] != null) {
@@ -159,10 +178,15 @@ void main(List<String> arguments) {
     );
   }
 
+  File(stampfilePath).writeAsStringSync('stamp');
+  writeDepfile(depfilePath, stampfilePath, inputFiles);
+}
 
-  if (results['stamp'] != null) {
-    File(results['stamp'] as String).writeAsStringSync('stamp');
-  }
+void writeDepfile(String depfilePath, String stampfilePath, List<String> inputFiles) {
+  final StringBuffer outBuf = StringBuffer();
+  outBuf.write('$stampfilePath: ');
+  outBuf.write(inputFiles.join(' '));
+  File(depfilePath).writeAsStringSync(outBuf.toString());
 }
 
 List<String> getExtraImportsForLibrary(String libraryName) {
