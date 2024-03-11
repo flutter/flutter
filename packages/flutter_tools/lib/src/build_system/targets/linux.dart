@@ -137,7 +137,6 @@ abstract class BundleLinuxAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: targetPlatform,
-      buildMode: buildMode,
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
       },
