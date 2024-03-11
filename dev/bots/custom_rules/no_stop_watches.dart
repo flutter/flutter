@@ -41,14 +41,10 @@ class _NoStopwatches implements AnalyzeRule {
       return;
     }
 
-    String locationInFile(ResolvedUnitResult unit, AstNode node) {
-      return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
-    }
-
     foundError(<String>[
       for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
         for (final AstNode node in entry.value)
-          '${locationInFile(entry.key, node)}: ${node.parent}',
+          '${locationInFile(entry.key, node, workingDirectory)}: ${node.parent}',
       '\n${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
       'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.'
     ]);

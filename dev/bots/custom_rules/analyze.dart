@@ -11,6 +11,8 @@ import 'package:analyzer/dart/analysis/session.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
+import 'avoid_future_catcherror.dart';
+import 'no_stdin_write.dart';
 
 /// Analyzes the dart source files in the given `flutterRootDirectory` with the
 /// given [AnalyzeRule]s.
@@ -64,7 +66,8 @@ Future<void> analyzeWithRules(String flutterRootDirectory, List<AnalyzeRule> rul
   }
 }
 
-Future<void> analyzeToolWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
+Future<void> analyzeToolWithRules(String flutterRootDirectory) async {
+  final List<AnalyzeRule> rules = <AnalyzeRule>[AvoidFutureCatchError(), NoStdinWrite()];
   final String libPath = path.canonicalize('$flutterRootDirectory/packages/flutter_tools/lib');
   if (!Directory(libPath).existsSync()) {
     foundError(<String>['Analyzer error: the specified $libPath does not exist.']);
