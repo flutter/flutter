@@ -41,7 +41,7 @@ sdk_rewriter("web_ui_library_sources") {
   output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/"
 
   # exclude everything in the engine directory, it will be a separate internal library
-  exclude_patterns = [ rebase_path("//flutter/lib/web_ui/lib/src/*") ]
+  exclude_pattern = rebase_path("//flutter/lib/web_ui/lib/src")
 }
 
 web_ui_ui_web_with_output("web_ui_ui_web") {
@@ -55,8 +55,7 @@ sdk_rewriter("web_engine_library") {
   output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/"
 
   # exclude skwasm, it will be a separate internal library
-  exclude_patterns =
-      [ rebase_path("//flutter/lib/web_ui/lib/src/engine/skwasm/*") ]
+  exclude_pattern = rebase_path("//flutter/lib/web_ui/lib/src/engine/skwasm")
 }
 
 sdk_rewriter("skwasm_stub_library") {
