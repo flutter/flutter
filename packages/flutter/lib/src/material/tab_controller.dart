@@ -132,7 +132,11 @@ class TabController extends ChangeNotifier {
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
-       _animationDuration = animationDuration;
+       _animationDuration = animationDuration {
+      if (kFlutterMemoryAllocationsEnabled) {
+        ChangeNotifier.maybeDispatchObjectCreation(this);
+      }
+    }
 
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
