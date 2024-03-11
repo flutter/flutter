@@ -1541,7 +1541,6 @@
 ../../../flutter/third_party/glfw/src/CMakeLists.txt
 ../../../flutter/third_party/glfw/tests
 ../../../flutter/third_party/gn
-../../../flutter/third_party/google_fonts_for_unit_tests
 ../../../flutter/third_party/googletest
 ../../../flutter/third_party/gtest-parallel/.git
 ../../../flutter/third_party/gtest-parallel/.gitignore
@@ -3131,6 +3130,7 @@
 ../../../third_party/dart/utils/OWNERS
 ../../../third_party/dart/utils/compiler/.gitignore
 ../../../third_party/dart/utils/dartanalyzer/.gitignore
+../../../third_party/google_fonts_for_unit_tests
 ../../../third_party/gradle
 ../../../third_party/java
 ../../../third_party/libcxx/.clang-format
@@ -3310,6 +3310,7 @@
 ../../../third_party/perfetto/ui/src/plugins/dev.perfetto.AndroidPerf/OWNERS
 ../../../third_party/perfetto/ui/src/plugins/dev.perfetto.LargeScreensPerf/OWNERS
 ../../../third_party/perfetto/ui/src/test
+../../../third_party/web_dependencies/canvaskit
 ../../../third_party/zlib/.git
 ../../../third_party/zlib/CMakeLists.txt
 ../../../third_party/zlib/DIR_METADATA
