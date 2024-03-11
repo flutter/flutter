@@ -128,13 +128,13 @@ void main() {
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 8)'));
+      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 9)'));
 
       result = await runScript(
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-8 of 8)'));
+      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-9 of 9)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {
