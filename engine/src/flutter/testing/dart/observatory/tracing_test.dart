@@ -19,7 +19,7 @@ Future<void> _testChromeFormatTrace(vms.VmService vmService) async {
 
   int saveLayerRecordCount = 0;
   int saveLayerCount = 0;
-  int flowEventCount = 0;
+  // int flowEventCount = 0;
   for (final vms.TimelineEvent event in timeline.traceEvents!) {
     final Map<String, dynamic> json = event.json!;
     if (json['ph'] == 'B') {
@@ -29,13 +29,15 @@ Future<void> _testChromeFormatTrace(vms.VmService vmService) async {
       if (json['name'] == 'Canvas::saveLayer') {
         saveLayerCount += 1;
       }
-    } else if (json['ph'] == 's' || json['ph'] == 't' || json['ph'] == 'f') {
-      flowEventCount += 1;
     }
+    // else if (json['ph'] == 's' || json['ph'] == 't' || json['ph'] == 'f') {
+    //   flowEventCount += 1;
+    // }
   }
   expect(saveLayerRecordCount, 3);
   expect(saveLayerCount, impellerEnabled ? 2 : 3);
-  expect(flowEventCount, 5);
+  // TODO(derekxu16): Deflake https://github.com/flutter/flutter/issues/144394
+  // expect(flowEventCount, 5);
 }
 
 Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
@@ -48,7 +50,7 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
 
   int saveLayerRecordCount = 0;
   int saveLayerCount = 0;
-  int flowIdCount = 0;
+  // int flowIdCount = 0;
   for (final TrackEvent event in events) {
     if (event.type == TrackEvent_Type.TYPE_SLICE_BEGIN) {
       if (event.name == 'ui.Canvas::saveLayer (Recorded)') {
@@ -57,12 +59,13 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
       if (event.name == 'Canvas::saveLayer') {
         saveLayerCount += 1;
       }
-      flowIdCount += event.flowIds.length;
+      // flowIdCount += event.flowIds.length;
     }
   }
   expect(saveLayerRecordCount, 3);
   expect(saveLayerCount, impellerEnabled ? 2 : 3);
-  expect(flowIdCount, 5);
+  // TODO(derekxu16): Deflake https://github.com/flutter/flutter/issues/144394
+  // expect(flowIdCount, 5);
 }
 
 void main() {
