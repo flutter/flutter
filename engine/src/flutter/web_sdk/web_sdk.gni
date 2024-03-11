@@ -18,25 +18,13 @@ template("sdk_rewriter") {
   assert(defined(invoker.input_dir), "Must pass 'input_dir'")
   assert(defined(invoker.output_dir), "Must pass 'output_dir'")
 
-  source_dart_files = exec_script("$dart_src/tools/list_dart_files.py",
-                                  [
-                                    "absolute",
-                                    rebase_path(invoker.input_dir),
-                                  ],
-                                  "list lines")
-
-  if (defined(invoker.exclude_patterns)) {
-    filtered_files = filter_exclude(source_dart_files, invoker.exclude_patterns)
-    source_dart_files = []
-    source_dart_files = filtered_files
-  }
-
   prebuilt_dart_action(target_name) {
     packages = dart_sdk_package_config
     pool = "//flutter/build/dart:dart_pool"
 
     script = "//flutter/web_sdk/sdk_rewriter.dart"
-    inputs = source_dart_files + [ script ]
+
+    depfile = "$target_gen_dir/$target_name.d"
 
     stamp_location = "$target_gen_dir/$target_name.stamp"
     outputs = [
@@ -44,15 +32,26 @@ template("sdk_rewriter") {
       invoker.output_dir,
     ]
 
+    build_dir = rebase_path(root_out_dir)
     input_dir = rebase_path(invoker.input_dir)
     output_dir = rebase_path(invoker.output_dir)
 
     args = [
+      "--build-dir=$build_dir",
       "--output-dir=$output_dir",
       "--input-dir=$input_dir",
+      "--depfile",
+      rebase_path(depfile),
       "--stamp",
       rebase_path(stamp_location, root_build_dir),
     ]
+
+    if (defined(invoker.exclude_pattern)) {
+      args += [
+        "--exclude-pattern",
+        invoker.exclude_pattern,
+      ]
+    }
 
     if (defined(invoker.is_public) && invoker.is_public) {
       args += [ "--public" ]
@@ -67,11 +66,6 @@ template("sdk_rewriter") {
         "--library-name=$library_name",
         "--api-file=$api_file",
       ]
-    }
-
-    foreach(source_file, source_dart_files) {
-      path = rebase_path(source_file)
-      args += [ "--source-file=$path" ]
     }
   }
 }
