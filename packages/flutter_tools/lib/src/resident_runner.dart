@@ -387,6 +387,7 @@ class FlutterDevice {
       logger: globals.logger,
       processManager: globals.processManager,
       artifacts: globals.artifacts!,
+      buildMode: buildInfo.mode,
     );
     return devFS!.create();
   }
