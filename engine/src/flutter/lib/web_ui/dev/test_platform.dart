@@ -554,13 +554,21 @@ class BrowserPlatform extends PlatformPlugin {
         (CompileConfiguration config) => _makeBuildConfigString(scriptBase, config)
       ).join(',\n');
       final String bootstrapScript = '''
-<script src="/flutter_js/flutter.js"></script>
+<script>
+  // Define this before loading flutter.js to test PR flutter/engine#51294
+  if (!window._flutter) {
+    window._flutter = {};
+  }
+</script>
 <script>
   _flutter.buildConfig = {
     builds: [
       $buildConfigsString
     ]
   };
+</script>
+<script src="/flutter_js/flutter.js"></script>
+<script>
   _flutter.loader.load({
     config: {
       canvasKitBaseUrl: "/canvaskit/",
