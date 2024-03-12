@@ -2755,7 +2755,7 @@ class _HighlightPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final bool rtl = switch (textDirection) {
-      TextDirection.rtl => true,
+      TextDirection.rtl || null => true,
       TextDirection.ltr => false,
     };
 
