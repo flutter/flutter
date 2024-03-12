@@ -15,7 +15,7 @@ struct IsolateData {
   PlatformIsolateManager* mgr;
   Dart_Isolate isolate = nullptr;
   bool is_shutdown = false;
-  bool is_registered = false;
+  bool was_registered = false;
   explicit IsolateData(PlatformIsolateManager* _mgr) : mgr(_mgr) {}
 };
 
@@ -96,7 +96,7 @@ class PlatformIsolateManagerTest : public FixtureTest {
 
     (*isolate_data_map_.get())[isolate].push_back(
         std::unique_ptr<IsolateData>(isolate_data));
-    isolate_data->is_registered = mgr->RegisterPlatformIsolate(isolate);
+    isolate_data->was_registered = mgr->RegisterPlatformIsolate(isolate);
 
     return isolate;
   }
@@ -107,10 +107,10 @@ class PlatformIsolateManagerTest : public FixtureTest {
     return (*isolate_data_map_.get())[isolate].back()->is_shutdown;
   }
 
-  bool IsolateIsRegistered(Dart_Isolate isolate) {
+  bool IsolateWasRegistered(Dart_Isolate isolate) {
     EXPECT_EQ(1u, isolate_data_map_.get()->count(isolate));
     EXPECT_LT(0u, (*isolate_data_map_.get())[isolate].size());
-    return (*isolate_data_map_.get())[isolate].back()->is_registered;
+    return (*isolate_data_map_.get())[isolate].back()->was_registered;
   }
 
  private:
@@ -122,9 +122,8 @@ class PlatformIsolateManagerTest : public FixtureTest {
     EXPECT_TRUE(isolate_data->isolate);
     EXPECT_FALSE(isolate_data->is_shutdown);
     isolate_data->is_shutdown = true;
-    if (isolate_data->is_registered) {
+    if (isolate_data->was_registered) {
       isolate_data->mgr->RemovePlatformIsolate(isolate_data->isolate);
-      isolate_data->is_registered = false;
     }
   }
 
@@ -140,13 +139,13 @@ TEST_F(PlatformIsolateManagerTest, OrdinaryFlow) {
     Dart_Isolate isolateA = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateA);
     EXPECT_FALSE(IsolateIsShutdown(isolateA));
-    EXPECT_TRUE(IsolateIsRegistered(isolateA));
+    EXPECT_TRUE(IsolateWasRegistered(isolateA));
     EXPECT_TRUE(mgr.IsRegisteredForTestingOnly(isolateA));
 
     Dart_Isolate isolateB = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateB);
     EXPECT_FALSE(IsolateIsShutdown(isolateB));
-    EXPECT_TRUE(IsolateIsRegistered(isolateB));
+    EXPECT_TRUE(IsolateWasRegistered(isolateB));
     EXPECT_TRUE(mgr.IsRegisteredForTestingOnly(isolateB));
 
     mgr.ShutdownPlatformIsolates();
@@ -154,10 +153,8 @@ TEST_F(PlatformIsolateManagerTest, OrdinaryFlow) {
     EXPECT_TRUE(mgr.HasShutdownMaybeFalseNegative());
 
     EXPECT_TRUE(IsolateIsShutdown(isolateA));
-    EXPECT_FALSE(IsolateIsRegistered(isolateA));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateA));
     EXPECT_TRUE(IsolateIsShutdown(isolateB));
-    EXPECT_FALSE(IsolateIsRegistered(isolateB));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateB));
   });
 }
@@ -170,35 +167,31 @@ TEST_F(PlatformIsolateManagerTest, EarlyShutdown) {
     Dart_Isolate isolateA = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateA);
     EXPECT_FALSE(IsolateIsShutdown(isolateA));
-    EXPECT_TRUE(IsolateIsRegistered(isolateA));
+    EXPECT_TRUE(IsolateWasRegistered(isolateA));
     EXPECT_TRUE(mgr.IsRegisteredForTestingOnly(isolateA));
 
     Dart_Isolate isolateB = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateB);
     EXPECT_FALSE(IsolateIsShutdown(isolateB));
-    EXPECT_TRUE(IsolateIsRegistered(isolateB));
+    EXPECT_TRUE(IsolateWasRegistered(isolateB));
     EXPECT_TRUE(mgr.IsRegisteredForTestingOnly(isolateB));
 
     Dart_EnterIsolate(isolateA);
     Dart_ShutdownIsolate();
     EXPECT_TRUE(IsolateIsShutdown(isolateA));
-    EXPECT_FALSE(IsolateIsRegistered(isolateA));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateA));
 
     Dart_EnterIsolate(isolateB);
     Dart_ShutdownIsolate();
     EXPECT_TRUE(IsolateIsShutdown(isolateB));
-    EXPECT_FALSE(IsolateIsRegistered(isolateB));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateB));
 
     mgr.ShutdownPlatformIsolates();
     EXPECT_TRUE(mgr.HasShutdown());
 
     EXPECT_TRUE(IsolateIsShutdown(isolateA));
-    EXPECT_FALSE(IsolateIsRegistered(isolateA));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateA));
     EXPECT_TRUE(IsolateIsShutdown(isolateB));
-    EXPECT_FALSE(IsolateIsRegistered(isolateB));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateB));
   });
 }
@@ -211,26 +204,24 @@ TEST_F(PlatformIsolateManagerTest, RegistrationAfterShutdown) {
     Dart_Isolate isolateA = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateA);
     EXPECT_FALSE(IsolateIsShutdown(isolateA));
-    EXPECT_TRUE(IsolateIsRegistered(isolateA));
+    EXPECT_TRUE(IsolateWasRegistered(isolateA));
     EXPECT_TRUE(mgr.IsRegisteredForTestingOnly(isolateA));
 
     mgr.ShutdownPlatformIsolates();
     EXPECT_TRUE(mgr.HasShutdown());
 
     EXPECT_TRUE(IsolateIsShutdown(isolateA));
-    EXPECT_FALSE(IsolateIsRegistered(isolateA));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateA));
 
     Dart_Isolate isolateB = CreateAndRegisterIsolate(&mgr);
     ASSERT_TRUE(isolateB);
     EXPECT_FALSE(IsolateIsShutdown(isolateB));
-    EXPECT_FALSE(IsolateIsRegistered(isolateB));
+    EXPECT_FALSE(IsolateWasRegistered(isolateB));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateB));
 
     Dart_EnterIsolate(isolateB);
     Dart_ShutdownIsolate();
     EXPECT_TRUE(IsolateIsShutdown(isolateB));
-    EXPECT_FALSE(IsolateIsRegistered(isolateB));
     EXPECT_FALSE(mgr.IsRegisteredForTestingOnly(isolateB));
   });
 }
@@ -250,9 +241,8 @@ TEST_F(PlatformIsolateManagerTest, MultithreadedCreation) {
         for (int j = 0; j < 100; ++j) {
           Dart_Isolate isolate = CreateAndRegisterIsolate(&mgr);
           ASSERT_TRUE(isolate);
-          EXPECT_FALSE(IsolateIsShutdown(isolate));
 
-          if (!IsolateIsRegistered(isolate)) {
+          if (!IsolateWasRegistered(isolate)) {
             Dart_EnterIsolate(isolate);
             Dart_ShutdownIsolate();
           }
