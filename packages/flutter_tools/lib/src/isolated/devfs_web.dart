@@ -539,7 +539,7 @@ class WebAssetServer implements AssetReader {
         },
       ],
     };
-    return '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+    return 'if (!_flutter) _flutter = {}; _flutter.buildConfig = ${jsonEncode(buildConfig)};';
   }
 
   File get _flutterJsFile => globals.fs.file(globals.fs.path.join(
