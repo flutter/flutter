@@ -951,6 +951,7 @@ void main() {
         ),
       ),
     );
+
     final Finder buttonFinder = find.byKey(buttonKey);
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
