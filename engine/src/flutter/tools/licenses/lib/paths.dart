@@ -63,6 +63,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/glfw/deps', // Only used by examples and tests; not linked in build.
   r'flutter/third_party/glfw/docs',
   r'flutter/third_party/gn',
+  r'flutter/third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'flutter/third_party/harfbuzz/docs',
   r'flutter/third_party/harfbuzz/util', // utils are command line tools that do not end up in the binary
   r'flutter/third_party/icu/filters',
@@ -208,7 +209,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/third_party/pkg_tested',
   r'third_party/dart/third_party/requirejs', // only used by DDC
   r'third_party/dart/tools', // not shipped in binary
-  r'third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'third_party/gradle',
   r'third_party/java', // only used for Android builds
   r'third_party/libcxx/benchmarks',
