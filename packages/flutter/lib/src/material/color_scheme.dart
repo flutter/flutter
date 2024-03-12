@@ -325,8 +325,8 @@ class ColorScheme with Diagnosticable {
     final bool isDark = brightness == Brightness.dark;
     final DynamicScheme scheme;
     scheme = switch (variant) {
-      Variant.tonalSpot => SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0);
-      Variant.fidelity => SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0);
+      Variant.tonalSpot => SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0),
+      Variant.fidelity => SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0),
     };
 
     return ColorScheme(
