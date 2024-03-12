@@ -262,12 +262,12 @@ void main() {
         ),
       ));
 
-      // Expect no _DecoyChild to be present before the gesture
+      // Expect no _DecoyChild to be present before the gesture.
       final Finder decoyChild = find
           .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
       expect(decoyChild, findsNothing);
 
-      // Start press gesture on the child
+      // Start press gesture on the child.
       final Rect childRect = tester.getRect(find.byWidget(child));
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
@@ -290,7 +290,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // Expect no _DecoyChild to be present before the gesture.
+      // Expect no _DecoyChild to be present after ending the gesture.
       final Finder decoyChildAfterEnding = find
           .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
       expect(decoyChildAfterEnding, findsNothing);
