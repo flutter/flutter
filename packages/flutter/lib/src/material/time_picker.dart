@@ -1653,6 +1653,8 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
 
     int? newHour = int.tryParse(value);
     switch (newHour) {
+      case null:
+        break;
       case >= 0 && < 24 when MediaQuery.alwaysUse24HourFormatOf(context):
         return newHour;
       case > 0 && <= 12:
