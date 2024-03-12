@@ -148,8 +148,15 @@ Target _getNativeTarget(DarwinArch darwinArch) {
 Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
   final Map<KernelAssetPath, List<Asset>> result = <KernelAssetPath, List<Asset>>{};
+  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
   for (final Asset asset in nativeAssets) {
-    final KernelAssetPath path = _targetLocationIOS(asset, alreadyTakenNames).path;
+    // Use same target path for all assets with the same id.
+    final KernelAssetPath path = idToPath[asset.id] ??
+        _targetLocationIOS(
+          asset,
+          alreadyTakenNames,
+        ).path;
+    idToPath[asset.id] = path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }

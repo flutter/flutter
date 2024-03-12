@@ -1152,10 +1152,11 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   @override
   void openDetailPage(Object arguments) {
     _cachedDetailArguments = arguments;
-    if (_builtLayout == _LayoutMode.nested) {
-      _navigatorKey.currentState!.pushNamed(_navDetail, arguments: arguments);
-    } else {
-      focus = _Focus.detail;
+    switch (_builtLayout) {
+      case _LayoutMode.nested:
+        _navigatorKey.currentState!.pushNamed(_navDetail, arguments: arguments);
+      case _LayoutMode.lateral || null:
+        focus = _Focus.detail;
     }
   }
 
