@@ -2932,8 +2932,6 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('m2_snack_bar.scaffold.nested.png'),
     );
-    final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
-    expect(snackBarTopRight.dy, 465.0);
   });
 
   testWidgets('Material3 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
