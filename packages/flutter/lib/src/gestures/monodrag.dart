@@ -627,6 +627,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
       final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
       _finalPosition = OffsetPair(local: localPosition, global: position);
+      final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
       switch (_state) {
         case _DragState.ready || _DragState.possible:
           _pendingDragOffset += OffsetPair(local: localDelta, global: delta);
@@ -648,7 +649,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             }
           }
         case _DragState.accepted:
-          final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
           _checkUpdate(
             sourceTimeStamp: event.timeStamp,
             delta: _getDeltaForDetails(resolvedDelta),
