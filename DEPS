@@ -333,7 +333,7 @@ deps = {
   'src/flutter/third_party/boringssl/src':
    'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
-  'src/third_party/perfetto':
+  'src/flutter/third_party/perfetto':
    Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
 
   'src/flutter/third_party/protobuf':

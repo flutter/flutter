@@ -93,6 +93,16 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/libwebp/webp_js',
   r'flutter/third_party/ninja', // build system
   r'flutter/third_party/ocmock', // only used for tests
+  r'flutter/third_party/perfetto/debian', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/infra', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/protos', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/python/perfetto/trace_processor', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/ipc', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/profiling/memory', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/tools', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/trace_processor', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
   r'flutter/third_party/pkg/archive', // contains nothing that ends up in the binary executable
   r'flutter/third_party/pkg/equatable',
   r'flutter/third_party/pkg/flutter_packages',
@@ -207,16 +217,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/libcxx/utils',
   r'third_party/libcxxabi/www',
   r'third_party/libxml', // dependency of the testing system that we don't actually use
-  r'third_party/perfetto/debian', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/infra', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/protos', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/python/perfetto/trace_processor', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/ipc', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/profiling/memory', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/tools', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/trace_processor', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
-  r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
   r'third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'third_party/zlib/contrib/minizip/minizip.c', // sample file
