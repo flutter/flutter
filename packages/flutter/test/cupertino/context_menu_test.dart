@@ -245,18 +245,21 @@ void main() {
       final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
-            backgroundColor: CupertinoColors.black,
+          backgroundColor: CupertinoColors.black,
             child: MediaQuery(
-                data: const MediaQueryData(size: Size(800, 600)),
+              data: const MediaQueryData(size: Size(800, 600)),
                 child: Center(
                   child: CupertinoContextMenu(
-                      actions: const <CupertinoContextMenuAction>[
-                        CupertinoContextMenuAction(
-                          child: Text('CupertinoContextMenuAction'),
-                        ),
-                      ],
-                      child: child),
-                ))),
+                  actions: const <CupertinoContextMenuAction>[
+                    CupertinoContextMenuAction(
+                      child: Text('CupertinoContextMenuAction'),
+                    ),
+                  ],
+                child: child
+              ),
+            )
+          )
+        ),
       ));
 
       // Expect no _DecoyChild to be present before the gesture
@@ -269,21 +272,19 @@ void main() {
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
-      final Finder decoyChildDescendant = find.descendant(
-          of: decoyChild,
-          matching: find.byType(Container));
-
       // Find the _DecoyChild by runtimeType,
       // find the Container descendant with the BoxDecoration,
       // then read the boxDecoration property.
+      final Finder decoyChildDescendant = find.descendant(
+          of: decoyChild,
+          matching: find.byType(Container));
       final BoxDecoration? boxDecoration = (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
       const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
 
-      // Expect the _DecoyChild to have the same color as the child.
-      final bool decoyChildColorMatchesAny = expectedColors
-          .any((Color? testColor) => testColor == boxDecoration?.color);
-
-      expect(decoyChildColorMatchesAny, isTrue);
+      // `Color(0x00000000)` -> Is `Colors.transparent`.
+      // `null`              -> Default when no color argument is given in `BoxDecoration`.
+      // Any other color won't preserve the child's property.
+      expect(expectedColors, contains(boxDecoration?.color));
 
       // End the gesture.
       await gesture.up();

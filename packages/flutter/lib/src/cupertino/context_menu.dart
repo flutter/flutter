@@ -172,11 +172,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -279,11 +277,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
