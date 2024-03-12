@@ -1651,7 +1651,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return null;
     }
 
-    int? newHour = int.tryParse(value);
+    final int? newHour = int.tryParse(value);
     switch (newHour) {
       case null:
         break;
