@@ -261,9 +261,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     switch (widget.setup) {
       case Setup.canvasSaveLayer:
-        _loadImage().then((ui.Image? value) => setState(() => _image = value));
+        _loadImage().then((ui.Image? value) => setState(() { _image = value; }));
       case Setup.drawnImage:
-        _drawImage().then((ui.Image? value) => setState(() => _image = value));
+        _drawImage().then((ui.Image? value) => setState(() { _image = value; }));
       case Setup.image || Setup.blur || Setup.none:
         break;
     }
