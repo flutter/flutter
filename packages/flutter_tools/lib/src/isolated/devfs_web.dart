@@ -891,7 +891,7 @@ class WebDevFS implements DevFS {
   @override
   final Directory rootDirectory;
 
-  void _validateTemplateFile(String filename) async {
+  Future<void> _validateTemplateFile(String filename) async {
     final File file =
         globals.fs.currentDirectory.childDirectory('web').childFile(filename);
     if (!await file.exists()) {
@@ -996,8 +996,8 @@ class WebDevFS implements DevFS {
         );
       }
     }
-    _validateTemplateFile('index.html');
-    _validateTemplateFile('flutter_bootstrap.js');
+    await _validateTemplateFile('index.html');
+    await _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
       generator.reset();
