@@ -43,7 +43,7 @@ void main() {
   expect(checkboxWithError.value, isNull);
   expect(checkboxDisabled.value, isNull);
 
-  /// Tap the second Checkbox and verify the state change.
+  // Tap the second Checkbox and verify the state change.
   await tester.tap(find.byType(Checkbox).at(1));
   await tester.pump();
 
