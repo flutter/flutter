@@ -19,17 +19,18 @@ class ColorSchemeExample extends StatefulWidget {
 
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
+  bool useColorFidelity = false;
 
   @override
   Widget build(BuildContext context) {
-    final Color? colorSeed = selectedColor == ColorSeed.baseColor.color ? null : selectedColor;
-    final ThemeData lightTheme = ThemeData(
-      colorSchemeSeed: colorSeed,
-      brightness: Brightness.light,
+    final ColorScheme lightTheme = ColorScheme.fromSeed(
+      seedColor: selectedColor,
+      variant: useColorFidelity ? Variant.fidelity : Variant.tonalSpot,
     );
-    final ThemeData darkTheme = ThemeData(
-      colorSchemeSeed: colorSeed,
+    final ColorScheme darkTheme = ColorScheme.fromSeed(
+      seedColor: selectedColor,
       brightness: Brightness.dark,
+      variant: useColorFidelity ? Variant.fidelity : Variant.tonalSpot,
     );
 
     Widget schemeLabel(String brightness) {
@@ -42,53 +43,79 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
       );
     }
 
-    Widget schemeView(ThemeData theme) {
+    Widget schemeView(ColorScheme colorScheme) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: ColorSchemeView(colorScheme: theme.colorScheme),
+        child: ColorSchemeView(colorScheme: colorScheme),
       );
     }
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: selectedColor),
       home: Builder(
         builder: (BuildContext context) => Scaffold(
           appBar: AppBar(
             title: const Text('ColorScheme'),
-            leading: MenuAnchor(
-              builder: (BuildContext context, MenuController controller, Widget? widget) {
-                return IconButton(
-                  icon: Icon(Icons.circle, color: selectedColor),
-                  onPressed: () {
-                    setState(() {
-                      if (!controller.isOpen) {
-                        controller.open();
-                      }
-                    });
-                  },
-                );
-              },
-              menuChildren: List<Widget>.generate(ColorSeed.values.length, (int index) {
-                final Color itemColor = ColorSeed.values[index].color;
-                return MenuItemButton(
-                  leadingIcon: selectedColor == ColorSeed.values[index].color
-                    ? Icon(Icons.circle, color: itemColor)
-                    : Icon(Icons.circle_outlined, color: itemColor),
-                  onPressed: () {
-                    setState(() {
-                      selectedColor = itemColor;
-                    });
-                  },
-                  child: Text(ColorSeed.values[index].label),
-                );
-              }),
-            ),
+            actions: <Widget>[
+              Row(
+                children: <Widget>[
+                  const Text('Color Seed'),
+                  MenuAnchor(
+                    builder: (BuildContext context, MenuController controller, Widget? widget) {
+                      return IconButton(
+                        icon: Icon(Icons.circle, color: selectedColor),
+                        onPressed: () {
+                          setState(() {
+                            if (!controller.isOpen) {
+                              controller.open();
+                            }
+                          });
+                        },
+                      );
+                    },
+                    menuChildren: List<Widget>.generate(ColorSeed.values.length, (int index) {
+                      final Color itemColor = ColorSeed.values[index].color;
+                      return MenuItemButton(
+                        leadingIcon: selectedColor == ColorSeed.values[index].color
+                          ? Icon(Icons.circle, color: itemColor)
+                          : Icon(Icons.circle_outlined, color: itemColor),
+                        onPressed: () {
+                          setState(() {
+                            selectedColor = itemColor;
+                          });
+                        },
+                        child: Text(ColorSeed.values[index].label),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(top: 5),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: <Widget>[
+                        const Text('Use Color Fidelity'),
+                        const SizedBox(width: 20),
+                        Switch(
+                          value: useColorFidelity,
+                          onChanged: (bool value) {
+                            setState(() {
+                              useColorFidelity = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -301,7 +328,10 @@ enum ColorSeed {
   yellow('Yellow', Colors.yellow),
   orange('Orange', Colors.orange),
   deepOrange('Deep Orange', Colors.deepOrange),
-  pink('Pink', Colors.pink);
+  pink('Pink', Colors.pink),
+  brightBlue('Bright Blue',  Color(0xFF0000FF)),
+  brightGreen('Bright Green',  Color(0xFF00FF00)),
+  brightRed('Bright Red',  Color(0xFFFF0000));
 
   const ColorSeed(this.label, this.color);
   final String label;
