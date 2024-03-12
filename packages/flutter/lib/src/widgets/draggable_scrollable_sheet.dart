@@ -1039,10 +1039,7 @@ class DraggableScrollableActuator extends StatefulWidget {
   /// otherwise.
   static bool reset(BuildContext context) {
     final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
-    if (notifier == null) {
-      return false;
-    }
-    return notifier._sendReset();
+    return notifier?._sendReset() ?? false;
   }
 
   @override

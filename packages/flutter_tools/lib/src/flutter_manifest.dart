@@ -835,10 +835,11 @@ class AssetsEntry {
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
     Object.hashAllUnordered(flavors),
+    Object.hashAll(transformers),
   ]);
 
   @override
-  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors)';
+  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors, transformers: $transformers)';
 }
 
 

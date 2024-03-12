@@ -346,7 +346,26 @@ Future<void> _runTestHarnessTests() async {
           : 'Failed to find the stack trace for the pending Timer.\n\n'
             'stdout:\n${result.flattenedStdout}\n\n'
             'stderr:\n${result.flattenedStderr}';
-    }),
+      },
+    ),
+    () => _runFlutterTest(
+      automatedTests,
+      script: path.join('test_smoke_test', 'fail_test_on_exception_after_test.dart'),
+      expectFailure: true,
+      printOutput: false,
+      outputChecker: (CommandResult result) {
+        const String expectedError = '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\n'
+            'The following StateError was thrown running a test (but after the test had completed):\n'
+            'Bad state: Exception thrown after test completed.';
+        if (result.flattenedStdout!.contains(expectedError)) {
+          return null;
+        }
+        return 'Failed to find expected output on stdout.\n\n'
+          'Expected output:\n$expectedError\n\n'
+          'Actual stdout:\n${result.flattenedStdout}\n\n'
+          'Actual stderr:\n${result.flattenedStderr}';
+      },
+    ),
     () => _runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'crash1_test.dart'),
@@ -1728,9 +1747,9 @@ List<String> binariesWithEntitlements(String flutterRoot) {
 /// cache.
 List<String> binariesWithoutEntitlements(String flutterRoot) {
   return <String>[
-    'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',
     'artifacts/engine/darwin-x64/impellerc',
     'artifacts/engine/darwin-x64/libpath_ops.dylib',
@@ -1764,6 +1783,9 @@ List<String> signedXcframeworks(String flutterRoot) {
     'artifacts/engine/ios-release/extension_safe/Flutter.xcframework',
     'artifacts/engine/ios/Flutter.xcframework',
     'artifacts/engine/ios/extension_safe/Flutter.xcframework',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
+    'artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
   ]
   .map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }

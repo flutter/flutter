@@ -190,10 +190,7 @@ class ScrollPhysics {
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
-    if (parent == null) {
-      return offset;
-    }
-    return parent!.applyPhysicsToUserOffset(position, offset);
+    return parent?.applyPhysicsToUserOffset(position, offset) ?? offset;
   }
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
@@ -297,10 +294,7 @@ class ScrollPhysics {
   /// scrolling back from being overscrolled, if for some reason the position
   /// ends up overscrolled.
   double applyBoundaryConditions(ScrollMetrics position, double value) {
-    if (parent == null) {
-      return 0.0;
-    }
-    return parent!.applyBoundaryConditions(position, value);
+    return parent?.applyBoundaryConditions(position, value) ?? 0.0;
   }
 
   /// Describes what the scroll position should be given new viewport dimensions.
@@ -394,10 +388,7 @@ class ScrollPhysics {
   //     https://github.com/flutter/flutter/issues/120340
   //     https://github.com/flutter/flutter/issues/109675
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    if (parent == null) {
-      return null;
-    }
-    return parent!.createBallisticSimulation(position, velocity);
+    return parent?.createBallisticSimulation(position, velocity);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -467,10 +458,7 @@ class ScrollPhysics {
   ///
   /// By default, physics for platforms other than iOS doesn't carry momentum.
   double carriedMomentum(double existingVelocity) {
-    if (parent == null) {
-      return 0.0;
-    }
-    return parent!.carriedMomentum(existingVelocity);
+    return parent?.carriedMomentum(existingVelocity) ?? 0.0;
   }
 
   /// The minimum amount of pixel distance drags must move by to start motion

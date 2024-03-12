@@ -902,11 +902,11 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   late AnimationController avatarDrawerController;
   late AnimationController deleteDrawerController;
   late AnimationController enableController;
-  late Animation<double> checkmarkAnimation;
-  late Animation<double> avatarDrawerAnimation;
-  late Animation<double> deleteDrawerAnimation;
-  late Animation<double> enableAnimation;
-  late Animation<double> selectionFade;
+  late CurvedAnimation checkmarkAnimation;
+  late CurvedAnimation avatarDrawerAnimation;
+  late CurvedAnimation deleteDrawerAnimation;
+  late CurvedAnimation enableAnimation;
+  late CurvedAnimation selectionFade;
 
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
@@ -993,6 +993,11 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     avatarDrawerController.dispose();
     deleteDrawerController.dispose();
     enableController.dispose();
+    checkmarkAnimation.dispose();
+    avatarDrawerAnimation.dispose();
+    deleteDrawerAnimation.dispose();
+    enableAnimation.dispose();
+    selectionFade.dispose();
     super.dispose();
   }
 
@@ -1186,6 +1191,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           radius: (_kChipHeight + (widget.padding?.vertical ?? 0.0)) * .45,
           // Keeps the splash from being constrained to the icon alone.
           splashFactory: _UnconstrainedInkSplashFactory(Theme.of(context).splashFactory),
+          customBorder: const CircleBorder(),
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
