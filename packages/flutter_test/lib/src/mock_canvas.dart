@@ -527,7 +527,8 @@ bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
       function(canvas);
     case final Finder finder:
       TestAsyncUtils.guardSync();
-      object = finder.evaluate().single.renderObject;
+      final RenderObject? result = finder.evaluate().single.renderObject;
+      return (result..paint(context, Offset.zero)) != null;
     case final RenderObject renderObject:
       renderObject.paint(context, Offset.zero);
     default:
