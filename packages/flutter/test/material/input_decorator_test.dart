@@ -1519,6 +1519,7 @@ void main() {
     const double bottomPadding = 8.0;
     // TODO(bleroux): make the InputDecorator implementation compliant with M3 spec by changing
     // the helperGap to 4.0 instead of 8.0.
+    // See https://github.com/flutter/flutter/issues/144984.
     const double helperGap = 8.0;
     const double helperHeight = 16.0;
     const double containerHeight = topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
