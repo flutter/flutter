@@ -2700,7 +2700,7 @@ TEST_F(EmbedderTest, CanSendPointer) {
       CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
         auto message = tonic::DartConverter<std::string>::FromDart(
             Dart_GetNativeArgument(args, 0));
-        ASSERT_EQ("PointerData(x: 123.0, y: 456.0)", message);
+        ASSERT_EQ("PointerData(viewId: 0, x: 123.0, y: 456.0)", message);
         message_latch.Signal();
       }));
 
@@ -2715,6 +2715,7 @@ TEST_F(EmbedderTest, CanSendPointer) {
   pointer_event.x = 123;
   pointer_event.y = 456;
   pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
 
   FlutterEngineResult result =
       FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
