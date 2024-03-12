@@ -350,7 +350,12 @@ class WebReleaseBundle extends Target {
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': buildDescriptions,
     };
-    return 'if (!_flutter) _flutter = {}; _flutter.buildConfig = ${jsonEncode(buildConfig)};';
+    return '''
+if (!window._flutter) {
+  window._flutter = {};
+}
+_flutter.buildConfig = ${jsonEncode(buildConfig)};
+''';
   }
 
   final List<Dart2WebTarget> compileTargets;
