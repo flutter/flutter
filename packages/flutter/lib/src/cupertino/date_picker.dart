@@ -1021,25 +1021,29 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {
-      if (localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.date_time_dayPeriod
-        || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.time_dayPeriod_date) {
-        pickerBuilders.add(_buildAmPmPicker);
-        columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
-      } else {
-        pickerBuilders.insert(0, _buildAmPmPicker);
-        columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
+      switch (localizations.datePickerDateTimeOrder) {
+        case DatePickerDateTimeOrder.date_time_dayPeriod:
+        case DatePickerDateTimeOrder.time_dayPeriod_date:
+          pickerBuilders.add(_buildAmPmPicker);
+          columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
+        case DatePickerDateTimeOrder.date_dayPeriod_time:
+        case DatePickerDateTimeOrder.dayPeriod_time_date:
+          pickerBuilders.insert(0, _buildAmPmPicker);
+          columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
       }
     }
 
     // Adds medium date column if the picker's mode is date and time.
     if (widget.mode == CupertinoDatePickerMode.dateAndTime) {
-      if (localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.time_dayPeriod_date
-          || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.dayPeriod_time_date) {
-        pickerBuilders.add(_buildMediumDatePicker);
-        columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.date));
-      } else {
-        pickerBuilders.insert(0, _buildMediumDatePicker);
-        columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.date));
+      switch (localizations.datePickerDateTimeOrder) {
+        case DatePickerDateTimeOrder.time_dayPeriod_date:
+        case DatePickerDateTimeOrder.dayPeriod_time_date:
+          pickerBuilders.add(_buildMediumDatePicker);
+          columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.date));
+        case DatePickerDateTimeOrder.date_time_dayPeriod:
+        case DatePickerDateTimeOrder.date_dayPeriod_time:
+          pickerBuilders.insert(0, _buildMediumDatePicker);
+          columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.date));
       }
     }
 
