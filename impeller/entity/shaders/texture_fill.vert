@@ -21,6 +21,7 @@ IMPELLER_MAYBE_FLAT out float16_t v_alpha;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position /= gl_Position.w;
   gl_Position.z = frame_info.depth;
   v_alpha = frame_info.alpha;
   v_texture_coords =

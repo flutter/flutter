@@ -14,5 +14,6 @@ in vec2 position;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
+  gl_Position /= gl_Position.w;
   gl_Position.z = frame_info.depth;
 }
