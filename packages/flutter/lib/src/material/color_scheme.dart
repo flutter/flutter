@@ -14,7 +14,7 @@ import 'theme_data.dart';
 
 /// The algorithm used to construct [ColorScheme] in [ColorScheme.fromSeed].
 ///
-/// The `tonalSpot` build default Material scheme colors. These colors are
+/// The `tonalSpot` builds default Material scheme colors. These colors are
 /// mapped to tones (lightness or darkness) to achieve visually accessible color
 /// pairings with sufficient contrast between foreground and background elements.
 ///
@@ -97,8 +97,8 @@ enum Variant {
 class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance from the given colors.
   ///
-  /// [ColorScheme.fromSeed] can be used as a simpler way to create a full color
-  /// scheme derived from a single seed color.
+  /// [ColorScheme.fromSeed] can be used as a simpler way to create a full
+  /// color scheme derived from a single seed color.
   ///
   /// For the color parameters that are nullable, it is still recommended
   /// that applications provide values for them. They are only nullable due
@@ -108,8 +108,8 @@ class ColorScheme with Diagnosticable {
   /// colors will be used for it (e.g. [primaryContainer] will default
   /// to [primary]). Material Design 3 makes use of these colors for many
   /// component defaults, so for the best results the application should
-  /// supply colors for all the parameters. An easy way to ensure this is to use
-  /// [ColorScheme.fromSeed] to generate a full set of colors.
+  /// supply colors for all the parameters. An easy way to ensure this is to
+  /// use [ColorScheme.fromSeed] to generate a full set of colors.
   ///
   /// During the migration to Material Design 3, if an app's
   /// [ThemeData.useMaterial3] is false, then components will only

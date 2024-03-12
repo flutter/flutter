@@ -52,7 +52,7 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: selectedColor),
+      theme: ThemeData(colorScheme: lightTheme),
       home: Builder(
         builder: (BuildContext context) => Scaffold(
           appBar: AppBar(
@@ -100,7 +100,7 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Row(
                       children: <Widget>[
                         const Text('Use Color Fidelity'),
