@@ -232,6 +232,7 @@ class Dart2JSTarget extends Dart2WebTarget {
   @override
   List<String> get buildFiles => <String>[
     'main.dart.js',
+    if (compilerConfig.sourceMaps) 'main.dart.js.map',
   ];
 }
 
@@ -259,6 +260,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       decodeDartDefines(environment.defines, kDartDefines),
     );
 
+    assert(buildMode == BuildMode.release || buildMode == BuildMode.profile);
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
@@ -266,6 +268,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
       '--packages=.dart_tool/package_config.json',
       '--extra-compiler-option=--dart-sdk=$dartSdkPath',
       '--extra-compiler-option=--platform=$platformFilePath',
+      '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+      '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
       if (compilerConfig.renderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',

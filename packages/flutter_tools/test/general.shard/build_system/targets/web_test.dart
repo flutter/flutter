@@ -36,6 +36,8 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   '--packages=.dart_tool/package_config.json',
   '--extra-compiler-option=--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
+  '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+  '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
 ];
 
 void main() {
@@ -167,6 +169,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
+    environment.buildDir.childFile('main.dart.js.map').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig()
@@ -175,6 +178,8 @@ void main() {
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
     expect(environment.outputDir.childFile('main.dart.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js.map')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.bin.json').existsSync(), true);
