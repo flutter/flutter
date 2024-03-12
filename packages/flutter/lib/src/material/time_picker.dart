@@ -1672,7 +1672,11 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     }
 
     final int? newMinute = int.tryParse(value);
-    if (newMinute case >= 0 && < 60) {
+    if (newMinute == null) {
+      return null;
+    }
+
+    if (newMinute >= 0 && newMinute < 60) {
       return newMinute;
     }
     return null;
