@@ -55,7 +55,7 @@ void main() {
   expect(checkboxWithError.value, isFalse);
   expect(checkboxDisabled.value, isFalse);
 
-  /// Tap the third Checkbox and verify that should remain unchanged.
+  // Tap the third Checkbox and verify that should remain unchanged.
   await tester.tap(find.byType(Checkbox).last);
   await tester.pump();
 
