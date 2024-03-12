@@ -426,7 +426,6 @@ class PackagesGetCommand extends FlutterCommand {
     return CustomDimensions(
       commandPackagesNumberPlugins: numberPlugins,
       commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
 
