@@ -525,11 +525,11 @@ bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
       function(context, Offset.zero);
     case final _CanvasPainterFunction function:
       function(canvas);
-    case Finder():
+    case final Finder finder:
       TestAsyncUtils.guardSync();
-      object = object.evaluate().single.renderObject;
-    case RenderObject():
-      object.paint(context, Offset.zero);
+      object = finder.evaluate().single.renderObject;
+    case final RenderObject renderObject:
+      renderObject.paint(context, Offset.zero);
     default:
       return false;
   }
