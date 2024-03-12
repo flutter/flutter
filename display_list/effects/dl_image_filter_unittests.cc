@@ -734,6 +734,36 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
   std::vector<SkMatrix> bounds_matrices{SkMatrix::Translate(5.0, 10.0),
                                         SkMatrix::Scale(2.0, 2.0)};
 
+  for (unsigned j = 0; j < matrices.size(); j++) {
+    DlLocalMatrixImageFilter filter(matrices[j], nullptr);
+    {
+      const auto input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
+      SkRect output_bounds;
+      EXPECT_EQ(filter.map_local_bounds(input_bounds, output_bounds),
+                &output_bounds);
+      EXPECT_EQ(input_bounds, output_bounds);
+    }
+    for (unsigned k = 0; k < bounds_matrices.size(); k++) {
+      auto& bounds_matrix = bounds_matrices[k];
+      {
+        const auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
+        SkIRect output_bounds;
+        EXPECT_EQ(filter.map_device_bounds(input_bounds, bounds_matrix,
+                                           output_bounds),
+                  &output_bounds);
+        EXPECT_EQ(input_bounds, output_bounds);
+      }
+      {
+        const auto output_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
+        SkIRect input_bounds;
+        EXPECT_EQ(filter.get_input_device_bounds(output_bounds, bounds_matrix,
+                                                 input_bounds),
+                  &input_bounds);
+        EXPECT_EQ(input_bounds, output_bounds);
+      }
+    }
+  }
+
   for (unsigned i = 0; i < sk_filters.size(); i++) {
     for (unsigned j = 0; j < matrices.size(); j++) {
       for (unsigned k = 0; k < bounds_matrices.size(); k++) {
