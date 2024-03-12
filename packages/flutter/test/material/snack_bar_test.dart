@@ -2905,7 +2905,6 @@ void main() {
   testWidgets('Material2 - ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
-      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
