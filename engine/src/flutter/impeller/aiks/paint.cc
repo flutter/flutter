@@ -170,7 +170,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   /// 2. Blur the mask.
 
   auto blurred_mask = FilterContents::MakeGaussianBlur(
-      FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal, style);
+      FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal, style,
+      color_source_contents->GetGeometry());
 
   /// 3. Replace the geometry of the original color source with a rectangle that
   ///    covers the full region of the blurred mask. Note that geometry is in
