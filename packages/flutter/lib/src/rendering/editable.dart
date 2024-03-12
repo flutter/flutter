@@ -531,8 +531,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.textHeightBehavior = value;
-    _textIntrinsicsCache?.textHeightBehavior = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -542,8 +541,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.textWidthBasis = value;
-    _textIntrinsicsCache?.textWidthBasis = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The pixel ratio of the current device.
@@ -556,7 +554,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _devicePixelRatio = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// Character used for obscuring text if [obscureText] is true.
@@ -751,20 +749,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _backgroundRenderObject?.markNeedsPaint();
   }
 
-  /// Marks the render object as needing to be laid out again and have its text
-  /// metrics recomputed.
-  ///
-  /// Implies [markNeedsLayout].
-  @protected
-  void _markNeedsTextLayout() {
-    markNeedsLayout();
-  }
-
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
     _textPainter.markNeedsLayout();
-    _textIntrinsicsCache?.markNeedsLayout();
   }
 
   /// Returns a plain text version of the text in [TextPainter].
@@ -787,28 +775,26 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     _cachedLineBreakCount = null;
     _textPainter.text = value;
-    _textIntrinsicsCache?.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
     _canComputeIntrinsicsCached = null;
-    _markNeedsTextLayout();
+    markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
 
   TextPainter? _textIntrinsicsCache;
   TextPainter get _textIntrinsics {
-    return _textIntrinsicsCache ??= TextPainter(
-      text: _textPainter.text,
-      textAlign: _textPainter.textAlign,
-      textDirection: _textPainter.textDirection,
-      textScaler: _textPainter.textScaler,
-      maxLines: _textPainter.maxLines,
-      ellipsis: _textPainter.ellipsis,
-      locale: _textPainter.locale,
-      strutStyle: _textPainter.strutStyle,
-      textWidthBasis: _textPainter.textWidthBasis,
-      textHeightBehavior: _textPainter.textHeightBehavior,
-    );
+    return (_textIntrinsicsCache ??= TextPainter())
+      ..text = _textPainter.text
+      ..textAlign = _textPainter.textAlign
+      ..textDirection = _textPainter.textDirection
+      ..textScaler = _textPainter.textScaler
+      ..maxLines = _textPainter.maxLines
+      ..ellipsis = _textPainter.ellipsis
+      ..locale = _textPainter.locale
+      ..strutStyle = _textPainter.strutStyle
+      ..textWidthBasis = _textPainter.textWidthBasis
+      ..textHeightBehavior = _textPainter.textHeightBehavior;
   }
 
   /// How the text should be aligned horizontally.
@@ -818,8 +804,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.textAlign = value;
-    _textIntrinsicsCache?.textAlign = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The directionality of the text.
@@ -842,8 +827,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.textDirection = value;
-    _textIntrinsicsCache?.textDirection = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
 
@@ -863,8 +847,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.locale = value;
-    _textIntrinsicsCache?.locale = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The [StrutStyle] used by the renderer's internal [TextPainter] to
@@ -875,8 +858,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.strutStyle = value;
-    _textIntrinsicsCache?.strutStyle = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The color to use when painting the cursor.
@@ -985,8 +967,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // height of the first line in case there are hard line breaks in the text.
     // See the `_preferredHeight` method.
     _textPainter.maxLines = value == 1 ? 1 : null;
-    _textIntrinsicsCache?.maxLines = _textPainter.maxLines;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// {@macro flutter.widgets.editableText.minLines}
@@ -999,7 +980,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _minLines = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// {@macro flutter.widgets.editableText.expands}
@@ -1010,7 +991,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _expands = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The color to use when painting the selection.
@@ -1048,8 +1029,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _textPainter.textScaler = value;
-    _textIntrinsicsCache?.textScaler = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The region of text that is selected, if any.
@@ -1225,7 +1205,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     }
     _enableInteractiveSelection = value;
-    _markNeedsTextLayout();
+    markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
 

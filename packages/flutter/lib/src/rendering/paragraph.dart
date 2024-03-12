@@ -314,18 +314,17 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   //  non-destructive operation.
   TextPainter? _textIntrinsicsCache;
   TextPainter get _textIntrinsics {
-    return _textIntrinsicsCache ??= TextPainter(
-      text: _textPainter.text,
-      textAlign: _textPainter.textAlign,
-      textDirection: _textPainter.textDirection,
-      textScaler: _textPainter.textScaler,
-      maxLines: _textPainter.maxLines,
-      ellipsis: _textPainter.ellipsis,
-      locale: _textPainter.locale,
-      strutStyle: _textPainter.strutStyle,
-      textWidthBasis: _textPainter.textWidthBasis,
-      textHeightBehavior: _textPainter.textHeightBehavior,
-    );
+    return (_textIntrinsicsCache ??= TextPainter())
+      ..text = _textPainter.text
+      ..textAlign = _textPainter.textAlign
+      ..textDirection = _textPainter.textDirection
+      ..textScaler = _textPainter.textScaler
+      ..maxLines = _textPainter.maxLines
+      ..ellipsis = _textPainter.ellipsis
+      ..locale = _textPainter.locale
+      ..strutStyle = _textPainter.strutStyle
+      ..textWidthBasis = _textPainter.textWidthBasis
+      ..textHeightBehavior = _textPainter.textHeightBehavior;
   }
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -340,12 +339,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         return;
       case RenderComparison.metadata:
         _textPainter.text = value;
-        _textIntrinsicsCache?.text = value;
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
       case RenderComparison.paint:
         _textPainter.text = value;
-        _textIntrinsicsCache?.text = value;
         _cachedAttributedLabels = null;
         _canComputeIntrinsicsCached = null;
         _cachedCombinedSemanticsInfos = null;
@@ -353,7 +350,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         markNeedsSemanticsUpdate();
       case RenderComparison.layout:
         _textPainter.text = value;
-        _textIntrinsicsCache?.text = value;
         _overflowShader = null;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
@@ -484,7 +480,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textAlign = value;
-    _textIntrinsicsCache?.textAlign = value;
     markNeedsPaint();
   }
 
@@ -505,7 +500,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textDirection = value;
-    _textIntrinsicsCache?.textDirection = value;
     markNeedsLayout();
   }
 
@@ -535,7 +529,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
-    _textIntrinsicsCache?.ellipsis = _textPainter.ellipsis;
     markNeedsLayout();
   }
 
@@ -568,7 +561,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textScaler = value;
-    _textIntrinsicsCache?.textScaler = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -585,7 +577,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.maxLines = value;
-    _textIntrinsicsCache?.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -604,7 +595,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.locale = value;
-    _textIntrinsicsCache?.locale = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -617,7 +607,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.strutStyle = value;
-    _textIntrinsicsCache?.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -629,7 +618,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textWidthBasis = value;
-    _textIntrinsicsCache?.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -641,7 +629,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textHeightBehavior = value;
-    _textIntrinsicsCache?.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -797,7 +784,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   void systemFontsDidChange() {
     super.systemFontsDidChange();
     _textPainter.markNeedsLayout();
-    _textIntrinsicsCache?.markNeedsLayout();
   }
 
   // Placeholder dimensions representing the sizes of child inline widgets.
