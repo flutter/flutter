@@ -188,7 +188,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * [AlertDialog], a Material Design alert dialog.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
 class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
   const CupertinoAlertDialog({
@@ -400,7 +400,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 ///
 ///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
 ///    actions.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
 class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({

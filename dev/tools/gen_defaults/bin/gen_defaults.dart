@@ -86,9 +86,7 @@ Future<void> main(List<String> args) async {
     final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
     final String version = tokenFileTokens['version'] as String;
     tokenFileTokens.remove('version');
-    if (versionMap[version] == null) {
-      versionMap[version] = List<String>.empty(growable: true);
-    }
+    versionMap[version] ??= <String>[];
     versionMap[version]!.add(tokenFile.uri.pathSegments.last);
 
     tokens.addAll(tokenFileTokens);

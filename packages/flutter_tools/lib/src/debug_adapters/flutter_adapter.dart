@@ -420,6 +420,19 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     );
   }
 
+  /// Handles any app.progress event from Flutter.
+  void _handleAppProgress(Map<String, Object?> params) {
+    // If this is a new progress starting (and we're still launching), update
+    // the progress notification.
+    //
+    // We ignore finished status because we have a limited API - the next
+    // item will replace it (or the launch progress will be completed by
+    // _handleAppStarted).
+    if (params case {'message': final String message, 'finished': false}) {
+      launchProgress?.update(message: message);
+    }
+  }
+
   /// Handles the app.started event from Flutter.
   Future<void> _handleAppStarted() async {
     launchProgress?.end();
@@ -481,6 +494,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         _handleDebugPort(params);
       case 'app.start':
         _handleAppStart(params);
+      case 'app.progress':
+        _handleAppProgress(params);
       case 'app.started':
         _handleAppStarted();
     }

@@ -865,6 +865,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       field: 'showTrackOnHover'
@@ -876,6 +877,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -888,6 +890,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       method: 'copyWith'
