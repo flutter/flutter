@@ -30,7 +30,7 @@ void main() {
         )
       );
     }
-    expect(coloredBox().color, const Color(0xFF6750A4));
+    expect(coloredBox().color, const Color(0xff65558f));
     await tester.tap(find.byType(MenuAnchor));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(MenuItemButton, 'Yellow'));
