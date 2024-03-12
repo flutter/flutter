@@ -371,8 +371,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/app_bar/sliver_app_bar.3_test.dart',
   'examples/api/test/material/banner/material_banner.1_test.dart',
   'examples/api/test/material/banner/material_banner.0_test.dart',
-  'examples/api/test/material/checkbox/checkbox.1_test.dart',
-  'examples/api/test/material/checkbox/checkbox.0_test.dart',
   'examples/api/test/material/navigation_rail/navigation_rail.extended_animation.0_test.dart',
   'examples/api/test/rendering/growth_direction/growth_direction.0_test.dart',
   'examples/api/test/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.0_test.dart',
