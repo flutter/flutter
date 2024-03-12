@@ -2995,14 +2995,11 @@ TEST_P(AiksTest, SolidColorApplyColorFilter) {
 
 TEST_P(AiksTest, DrawScaledTextWithPerspectiveNoSaveLayer) {
   Canvas canvas;
-  // clang-format off
-  canvas.Transform(Matrix(
-       2.000000,       0.000000,   0.000000,  0.000000,
-       1.445767,       2.637070,  -0.507928,  0.001524,
-      -2.451887,      -0.534662,   0.861399, -0.002584,
-    1063.481934,    1025.951416, -48.300270,  1.144901
-  ));
-  // clang-format on
+  canvas.Transform(Matrix(1.0, 0.0, 0.0, 0.0,    //
+                          0.0, 1.0, 0.0, 0.0,    //
+                          0.0, 0.0, 1.0, 0.01,   //
+                          0.0, 0.0, 0.0, 1.0) *  //
+                   Matrix::MakeRotationY({Degrees{10}}));
 
   ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas, "Hello world",
                                      "Roboto-Regular.ttf"));
@@ -3014,14 +3011,11 @@ TEST_P(AiksTest, DrawScaledTextWithPerspectiveSaveLayer) {
   Canvas canvas;
   Paint save_paint;
   canvas.SaveLayer(save_paint);
-  // clang-format off
-  canvas.Transform(Matrix(
-       2.000000,       0.000000,   0.000000,  0.000000,
-       1.445767,       2.637070,  -0.507928,  0.001524,
-      -2.451887,      -0.534662,   0.861399, -0.002584,
-    1063.481934,    1025.951416, -48.300270,  1.144901
-  ));
-  // clang-format on
+  canvas.Transform(Matrix(1.0, 0.0, 0.0, 0.0,    //
+                          0.0, 1.0, 0.0, 0.0,    //
+                          0.0, 0.0, 1.0, 0.01,   //
+                          0.0, 0.0, 0.0, 1.0) *  //
+                   Matrix::MakeRotationY({Degrees{10}}));
 
   ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas, "Hello world",
                                      "Roboto-Regular.ttf"));
