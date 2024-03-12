@@ -947,7 +947,7 @@ void main() {
             const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
           ],
           child: const Text('Show Menu'),
-        ),
+          ),
         ),
       ),
     );
