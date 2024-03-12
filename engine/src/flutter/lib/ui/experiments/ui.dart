@@ -49,5 +49,4 @@ part 'setup_hooks.dart';
 part '../text.dart';
 part '../window.dart';
 
-part 'gpu.dart';
 part 'scene.dart';
