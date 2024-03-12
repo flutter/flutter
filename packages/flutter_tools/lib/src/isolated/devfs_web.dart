@@ -891,6 +891,21 @@ class WebDevFS implements DevFS {
   @override
   final Directory rootDirectory;
 
+  void _validateTemplateFile(String filename) async {
+    final File file =
+        globals.fs.currentDirectory.childDirectory('web').childFile(filename);
+    if (!await file.exists()) {
+      return;
+    }
+
+    final WebTemplate template = WebTemplate(await file.readAsString());
+    for (final WebTemplateWarning warning in template.getWarnings()) {
+      globals.logger.printWarning(
+        'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}'
+      );
+    }
+  }
+
   @override
   Future<UpdateFSReport> update({
     required Uri mainUri,
@@ -981,6 +996,8 @@ class WebDevFS implements DevFS {
         );
       }
     }
+    _validateTemplateFile('index.html');
+    _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
       generator.reset();
