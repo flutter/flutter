@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/base/mask.h"
 #include "impeller/base/promise.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/thread.h"
@@ -248,6 +249,199 @@ TEST(BaseTest, NoExceptionPromiseEmpty) {
   // Destroy the empty promise with the future still pending. Verify that the
   // process does not abort while destructing the promise.
   wrapper.reset();
+}
+
+enum class MyMaskBits : uint32_t {
+  kFoo = 0,
+  kBar = 1 << 0,
+  kBaz = 1 << 1,
+  kBang = 1 << 2,
+};
+
+using MyMask = Mask<MyMaskBits>;
+
+TEST(BaseTest, CanUseTypedMasks) {
+  {
+    MyMask mask;
+    ASSERT_EQ(static_cast<uint32_t>(mask), 0u);
+    ASSERT_FALSE(mask);
+  }
+
+  {
+    MyMask mask(MyMaskBits::kBar);
+    ASSERT_EQ(static_cast<uint32_t>(mask), 1u);
+    ASSERT_TRUE(mask);
+  }
+
+  {
+    MyMask mask2(MyMaskBits::kBar);
+    MyMask mask(mask2);
+    ASSERT_EQ(static_cast<uint32_t>(mask), 1u);
+    ASSERT_TRUE(mask);
+  }
+
+  {
+    MyMask mask2(MyMaskBits::kBar);
+    MyMask mask(std::move(mask2));  // NOLINT
+    ASSERT_EQ(static_cast<uint32_t>(mask), 1u);
+    ASSERT_TRUE(mask);
+  }
+
+  ASSERT_LT(MyMaskBits::kBar, MyMaskBits::kBaz);
+  ASSERT_LE(MyMaskBits::kBar, MyMaskBits::kBaz);
+  ASSERT_GT(MyMaskBits::kBaz, MyMaskBits::kBar);
+  ASSERT_GE(MyMaskBits::kBaz, MyMaskBits::kBar);
+  ASSERT_EQ(MyMaskBits::kBaz, MyMaskBits::kBaz);
+  ASSERT_NE(MyMaskBits::kBaz, MyMaskBits::kBang);
+
+  {
+    MyMask m1(MyMaskBits::kBar);
+    MyMask m2(MyMaskBits::kBaz);
+    ASSERT_EQ(static_cast<uint32_t>(m1 & m2), 0u);
+    ASSERT_FALSE(m1 & m2);
+  }
+
+  {
+    MyMask m1(MyMaskBits::kBar);
+    MyMask m2(MyMaskBits::kBaz);
+    ASSERT_EQ(static_cast<uint32_t>(m1 | m2), ((1u << 0u) | (1u << 1u)));
+    ASSERT_TRUE(m1 | m2);
+  }
+
+  {
+    MyMask m1(MyMaskBits::kBar);
+    MyMask m2(MyMaskBits::kBaz);
+    ASSERT_EQ(static_cast<uint32_t>(m1 ^ m2), ((1u << 0u) ^ (1u << 1u)));
+    ASSERT_TRUE(m1 ^ m2);
+  }
+
+  {
+    MyMask m1(MyMaskBits::kBar);
+    ASSERT_EQ(static_cast<uint32_t>(~m1), (~(1u << 0u)));
+    ASSERT_TRUE(m1);
+  }
+
+  {
+    MyMask m1 = MyMaskBits::kBar;
+    MyMask m2 = MyMaskBits::kBaz;
+    m2 = m1;
+    ASSERT_EQ(m2, MyMaskBits::kBar);
+  }
+
+  {
+    MyMask m = MyMaskBits::kBar | MyMaskBits::kBaz;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask m = MyMaskBits::kBar & MyMaskBits::kBaz;
+    ASSERT_FALSE(m);
+  }
+
+  {
+    MyMask m = MyMaskBits::kBar ^ MyMaskBits::kBaz;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask m = ~MyMaskBits::kBar;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask m1 = MyMaskBits::kBar;
+    MyMask m2 = MyMaskBits::kBaz;
+    m2 |= m1;
+    ASSERT_EQ(m1, MyMaskBits::kBar);
+    MyMask pred = MyMaskBits::kBar | MyMaskBits::kBaz;
+    ASSERT_EQ(m2, pred);
+  }
+
+  {
+    MyMask m1 = MyMaskBits::kBar;
+    MyMask m2 = MyMaskBits::kBaz;
+    m2 &= m1;
+    ASSERT_EQ(m1, MyMaskBits::kBar);
+    MyMask pred = MyMaskBits::kBar & MyMaskBits::kBaz;
+    ASSERT_EQ(m2, pred);
+  }
+
+  {
+    MyMask m1 = MyMaskBits::kBar;
+    MyMask m2 = MyMaskBits::kBaz;
+    m2 ^= m1;
+    ASSERT_EQ(m1, MyMaskBits::kBar);
+    MyMask pred = MyMaskBits::kBar ^ MyMaskBits::kBaz;
+    ASSERT_EQ(m2, pred);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = x | MyMaskBits::kBaz;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz | x;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = x & MyMaskBits::kBaz;
+    ASSERT_FALSE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz & x;
+    ASSERT_FALSE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = x ^ MyMaskBits::kBaz;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz ^ x;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMask x = MyMaskBits::kBar;
+    MyMask m = ~x;
+    ASSERT_TRUE(m);
+  }
+
+  {
+    MyMaskBits x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz;
+    ASSERT_TRUE(x < m);
+    ASSERT_TRUE(x <= m);
+  }
+
+  {
+    MyMaskBits x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz;
+    ASSERT_FALSE(x == m);
+  }
+
+  {
+    MyMaskBits x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz;
+    ASSERT_TRUE(x != m);
+  }
+
+  {
+    MyMaskBits x = MyMaskBits::kBar;
+    MyMask m = MyMaskBits::kBaz;
+    ASSERT_FALSE(x > m);
+    ASSERT_FALSE(x >= m);
+  }
 }
 
 }  // namespace testing
