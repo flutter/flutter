@@ -562,7 +562,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return DecoyChild(
+        return _DecoyChild(
           beginRect: childRect,
           controller: _openController,
           endRect: _decoyChildEndRect,
@@ -601,18 +601,15 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 }
 
-
-/// A floating copy of the CupertinoContextMenu's child.
-///
-/// When the child is pressed, but before the CupertinoContextMenu opens, it does
-/// an animation where it slowly grows. This is implemented by hiding the
-/// original child and placing DecoyChild on top of it in an Overlay. The use of
-/// an Overlay allows the DecoyChild to appear on top of siblings of the
-/// original child.
-class DecoyChild extends StatefulWidget {
-  /// Create a DecoyChild.
-  const DecoyChild({
-    super.key,
+// A floating copy of the CupertinoContextMenu's child.
+//
+// When the child is pressed, but before the CupertinoContextMenu opens, it does
+// an animation where it slowly grows. This is implemented by hiding the
+// original child and placing _DecoyChild on top of it in an Overlay. The use of
+// an Overlay allows the _DecoyChild to appear on top of siblings of the
+// original child.
+class _DecoyChild extends StatefulWidget {
+  const _DecoyChild({
     this.beginRect,
     required this.controller,
     this.endRect,
@@ -620,60 +617,19 @@ class DecoyChild extends StatefulWidget {
     this.builder,
   });
 
-  /// The rect of the child at the moment that the CupertinoContextMenu opens.
   final Rect? beginRect;
-
-  /// The controller that drives the animation of the decoy child.
   final AnimationController controller;
-
-  /// The ending rectangle of the context menu decoy child.
   final Rect? endRect;
-
-  /// The child widget that is being previewed.
   final Widget? child;
-
-  /// A function that builds the child and handles the transition between the
-  /// default child and the preview when the CupertinoContextMenu is open.
   final CupertinoContextMenuBuilder? builder;
 
   @override
-  DecoyChildState createState() => DecoyChildState();
+  _DecoyChildState createState() => _DecoyChildState();
 }
 
-/// The state of the [DecoyChild].
-///
-/// This class is responsible for animating the child widget when the
-/// CupertinoContextMenu is about to open.
-class DecoyChildState extends State<DecoyChild> with TickerProviderStateMixin {
-  /// The point at which the CupertinoContextMenu begins to animate
-  /// into the open position.
-  ///
-  /// A value between 0.0 and 1.0 corresponding to a point in the [builder]'s
-  /// animation. When passing in an animation to [builder] the range before
-  /// [animationOpensAt] will correspond to the animation when the widget is
-  /// pressed and held, and the range after is the animation as the menu is
-  /// fully opening. For an example, see the documentation for [builder].
-  static final double animationOpensAt =
-      _previewLongPressTimeout.inMilliseconds / _animationDuration;
-
+class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
   late Animation<Rect?> _rect;
-
   late Animation<Decoration> _boxDecoration;
-
-  /// Reference to the [widget]'s [builder].
-  ///
-  /// A function that builds the child and handles the transition between the
-  /// default child and the preview when the CupertinoContextMenu is open.
-  CupertinoContextMenuBuilder? get builder => widget.builder;
-
-  /// External state validation.
-  ///
-  /// used to validate current color of the decoy child
-  /// against the expected [BoxDecoration]
-  bool validateDecoyColor(Color? color) {
-    final BoxDecoration? boxDecoration = _boxDecoration.value as BoxDecoration?;
-    return boxDecoration?.color == color;
-  }
 
   @override
   void initState() {
@@ -727,7 +683,7 @@ class DecoyChildState extends State<DecoyChild> with TickerProviderStateMixin {
       ),
     ).animate(CurvedAnimation(
         parent: widget.controller,
-        curve: Interval(0.0, animationOpensAt),
+        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
       ),
     );
   }
@@ -745,7 +701,7 @@ class DecoyChildState extends State<DecoyChild> with TickerProviderStateMixin {
   Widget _buildBuilder(BuildContext context, Widget? child) {
     return Positioned.fromRect(
       rect: _rect.value!,
-      child: builder!(context, widget.controller),
+      child: widget.builder!(context, widget.controller),
     );
   }
 
