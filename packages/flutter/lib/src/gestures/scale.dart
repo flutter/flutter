@@ -697,41 +697,43 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted, PointerEvent event) {
-    switch (_state) {
-      case _ScaleState.ready || _ScaleState.possible:
-        _state = _ScaleState.possible;
-        final double spanDelta = (_currentSpan - _initialSpan).abs();
-        final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-        if (spanDelta > computeScaleSlop(event.kind) ||
-            focalPointDelta > computePanSlop(event.kind, gestureSettings) ||
-            math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
-          resolve(GestureDisposition.accepted);
-        }
-      case _ScaleState.accepted when !shouldStartIfAccepted:
+    if (_state == _ScaleState.ready) {
+      _state = _ScaleState.possible;
+    }
+
+    if (_state == _ScaleState.possible) {
+      final double spanDelta = (_currentSpan - _initialSpan).abs();
+      final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
+      if (spanDelta > computeScaleSlop(event.kind) || focalPointDelta > computePanSlop(event.kind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
         resolve(GestureDisposition.accepted);
-      case _ScaleState.accepted || _ScaleState.started:
-        resolve(GestureDisposition.accepted);
-        if (_state == _ScaleState.accepted) {
-          _initialEventTimestamp = event.timeStamp;
-          _state = _ScaleState.started;
-          _dispatchOnStartCallbackIfNeeded();
-        }
-        _scaleVelocityTracker?.addPosition(event.timeStamp, Offset(_scaleFactor, 0));
-        if (onUpdate != null) {
-          invokeCallback<void>('onUpdate', () => onUpdate!(
-            ScaleUpdateDetails(
-              scale: _scaleFactor,
-              horizontalScale: _horizontalScaleFactor,
-              verticalScale: _verticalScaleFactor,
-              focalPoint: _currentFocalPoint!,
-              localFocalPoint: _localFocalPoint,
-              rotation: _computeRotationFactor(),
-              pointerCount: pointerCount,
-              focalPointDelta: _delta,
-              sourceTimeStamp: event.timeStamp,
-            ),
+      }
+    } else if (_state.index >= _ScaleState.accepted.index) {
+      resolve(GestureDisposition.accepted);
+    }
+
+    if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
+      _initialEventTimestamp = event.timeStamp;
+      _state = _ScaleState.started;
+      _dispatchOnStartCallbackIfNeeded();
+    }
+
+    if (_state == _ScaleState.started) {
+      _scaleVelocityTracker?.addPosition(event.timeStamp, Offset(_scaleFactor, 0));
+      if (onUpdate != null) {
+        invokeCallback<void>('onUpdate', () {
+          onUpdate!(ScaleUpdateDetails(
+            scale: _scaleFactor,
+            horizontalScale: _horizontalScaleFactor,
+            verticalScale: _verticalScaleFactor,
+            focalPoint: _currentFocalPoint!,
+            localFocalPoint: _localFocalPoint,
+            rotation: _computeRotationFactor(),
+            pointerCount: pointerCount,
+            focalPointDelta: _delta,
+            sourceTimeStamp: event.timeStamp
           ));
-        }
+        });
+      }
     }
   }
 
