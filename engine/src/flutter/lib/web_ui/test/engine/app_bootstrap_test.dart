@@ -28,6 +28,8 @@ void testMain() {
   });
 
   Future<void> mockInit ([JsFlutterConfiguration? configuration]) async {
+    debugOverrideJsConfiguration(configuration);
+    addTearDown(() => debugOverrideJsConfiguration(null));
     initCalled = callOrder++;
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
@@ -127,6 +129,42 @@ void testMain() {
       expect(maybeApp, isA<FlutterApp>());
       expect(getJsProperty<dynamic>(maybeApp, 'addView'), isA<Function>());
       expect(getJsProperty<dynamic>(maybeApp, 'removeView'), isA<Function>());
+    });
+    test('addView/removeView respectively adds/removes view', () async {
+      final AppBootstrap bootstrap = AppBootstrap(
+        initializeEngine: mockInit,
+        runApp: mockRunApp,
+      );
+
+      final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
+
+      final Object appInitializer = await promiseToFuture<Object>(callMethod<Object>(
+        engineInitializer,
+        'initializeEngine',
+        <dynamic>[jsify(<String, Object?>{
+          'multiViewEnabled': true,
+        })]
+      ));
+      final Object maybeApp = await promiseToFuture<Object>(callMethod<Object>(
+        appInitializer,
+        'runApp',
+        <Object?>[]
+      ));
+      final int viewId = callMethod<num>(
+        maybeApp,
+        'addView',
+        <dynamic>[jsify(<String, Object?>{
+          'hostElement': createDomElement('div'),
+        })]
+      ).toInt();
+      expect(bootstrap.viewManager[viewId], isNotNull);
+
+      callMethod<Object>(
+        maybeApp,
+        'removeView',
+        <Object>[viewId]
+      );
+      expect(bootstrap.viewManager[viewId], isNull);
     });
   });
 }

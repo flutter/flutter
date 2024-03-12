@@ -67,10 +67,8 @@ abstract class FlutterApp {
     required RemoveFlutterViewFn removeView,
   }) =>
       FlutterApp._(
-        addView: ((JsFlutterViewOptions options) =>
-            futureToPromise(addView(options) as Future<JSAny>)).toJS,
-        removeView: ((int id) =>
-            futureToPromise(removeView(id) as Future<JSObject?>)).toJS,
+        addView: addView.toJS,
+        removeView: ((JSNumber id) => removeView(id.toDartInt)).toJS,
       );
   external factory FlutterApp._({
     required JSFunction addView,
@@ -81,9 +79,9 @@ abstract class FlutterApp {
 /// Typedef for the function that adds a new view to the app.
 ///
 /// Returns the ID of the newly created view.
-typedef AddFlutterViewFn = Future<int> Function(JsFlutterViewOptions);
+typedef AddFlutterViewFn = int Function(JsFlutterViewOptions);
 
 /// Typedef for the function that removes a view from the app.
 ///
 /// Returns the configuration used to create the view.
-typedef RemoveFlutterViewFn = Future<JsFlutterViewOptions?> Function(int);
+typedef RemoveFlutterViewFn = JsFlutterViewOptions? Function(int);
