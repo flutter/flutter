@@ -962,6 +962,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final Offset focalPointScene = _transformationController!.toScene(
           event.localPosition,
         );
+
         final Offset newFocalPointScene = _transformationController!.toScene(
           event.localPosition - localDelta,
         );
