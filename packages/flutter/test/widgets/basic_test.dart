@@ -748,7 +748,7 @@ void main() {
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0x20240125),
+        color: const Color(0xFFF40125),
       ),
     ));
 
