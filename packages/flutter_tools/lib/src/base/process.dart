@@ -466,14 +466,22 @@ class _DefaultProcessUtils implements ProcessUtils {
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
     ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
+    void Function(Object, StackTrace)? stdinWriteErrorHandler,
+  }) async {
     _traceCommand(cmd, workingDirectory: workingDirectory);
-    return _processManager.start(
+    final Process process = await _processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
       mode: mode,
     );
+    stdinWriteErrorHandler ??= (Object _, StackTrace __) {
+      throw 'oops';
+    }
+    unawaited(
+      process.stdin.done.then<void>((_) {}, onError: stdinWriteErrorHandler),
+    );
+    return process;
   }
 
   @override

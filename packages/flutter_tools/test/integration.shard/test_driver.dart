@@ -9,6 +9,8 @@ import 'dart:io' as io; // flutter_ignore: dart_io_import
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -103,8 +105,11 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    const ProcessManager processManager = LocalProcessManager();
-    _process = await processManager.start(
+    final ProcessUtils processUtils = ProcessUtils(
+      processManager: const LocalProcessManager(),
+      logger: BufferLogger.test(),
+    );
+    _process = await processUtils.start(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),
