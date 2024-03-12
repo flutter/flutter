@@ -10,8 +10,11 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-final Widget intrinsicTextHeight = IntrinsicHeight(
-  child: Text('A' * 100),
+// Use an Align to loosen the constraints.
+final Widget intrinsicTextHeight = Align(
+  child: IntrinsicHeight(
+    child: Text('A' * 100),
+  ),
 );
 
 Future<void> main() async {
