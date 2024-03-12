@@ -5131,7 +5131,7 @@ void main() {
     );
 
     // Delete button should be visible.
-    expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
+    await expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
   });
 
   testWidgets('Delete button tooltip is not shown on disabled RawChip', (WidgetTester tester) async {
