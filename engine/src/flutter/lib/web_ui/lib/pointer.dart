@@ -111,7 +111,7 @@ class PointerData {
   final double rotation;
 
   @override
-  String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
+  String toString() => 'PointerData(viewId: $viewId, x: $physicalX, y: $physicalY)';
   String toStringFull() {
     return '$runtimeType('
            'embedderId: $embedderId, '
