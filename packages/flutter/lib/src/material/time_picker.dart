@@ -1652,22 +1652,14 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     }
 
     int? newHour = int.tryParse(value);
-    if (newHour == null) {
-      return null;
-    }
-
-    if (MediaQuery.alwaysUse24HourFormatOf(context)) {
-      if (newHour >= 0 && newHour < 24) {
+    switch (newHour) {
+      case >= 0 && < 24 when MediaQuery.alwaysUse24HourFormatOf(context):
         return newHour;
-      }
-    } else {
-      if (newHour > 0 && newHour < 13) {
-        if ((_selectedTime.value.period == DayPeriod.pm && newHour != 12) ||
-            (_selectedTime.value.period == DayPeriod.am && newHour == 12)) {
-          newHour = (newHour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
+      case > 0 && <= 12:
+        if ((newHour, _selectedTime.value.period) case (12, DayPeriod.pm) || (< 12, DayPeriod.am)) {
+          return (newHour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
         }
         return newHour;
-      }
     }
     return null;
   }
@@ -1678,11 +1670,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     }
 
     final int? newMinute = int.tryParse(value);
-    if (newMinute == null) {
-      return null;
-    }
-
-    if (newMinute >= 0 && newMinute < 60) {
+    if (newMinute case >= 0 && < 60) {
       return newMinute;
     }
     return null;

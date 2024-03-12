@@ -933,8 +933,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle mousewheel and web trackpad scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
-    if (event is PointerScrollEvent) {
-      if (event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale) {
+    switch (event) {
+      case PointerScrollEvent() when event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale:
         // Trackpad scroll, so treat it as a pan.
         widget.onInteractionStart?.call(
           ScaleStartDetails(
@@ -962,7 +962,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final Offset focalPointScene = _transformationController!.toScene(
           event.localPosition,
         );
-
         final Offset newFocalPointScene = _transformationController!.toScene(
           event.localPosition - localDelta,
         );
@@ -979,18 +978,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
-      }
-      // Ignore left and right mouse wheel scroll.
-      if (event.scrollDelta.dy == 0.0) {
+      case PointerScrollEvent() when event.scrollDelta.dy != 0.0:
+        // Ignore left and right mouse wheel scroll.
+        scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
+      case PointerScaleEvent():
+        scaleChange = event.scale;
+      default:
         return;
-      }
-      scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
-    }
-    else if (event is PointerScaleEvent) {
-      scaleChange = event.scale;
-    }
-    else {
-      return;
     }
     widget.onInteractionStart?.call(
       ScaleStartDetails(
