@@ -435,7 +435,7 @@ void main() {
         return Future<dynamic>.value();
       });
       bool lostFocus = false;
-      await PlatformViewsService.initWindowsView(id: 123, viewType: 'viewType', onLoseFocus: (int reason) {
+      await PlatformViewsService.initWindowsView(id: 123, viewType: 'viewType', onLoseFocus: (NavigationReason reason) {
         lostFocus = true;
       });
       final ByteData message =

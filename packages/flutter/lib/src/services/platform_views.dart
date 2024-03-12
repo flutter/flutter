@@ -61,12 +61,24 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+/// Indicates the reason for a request to move keyboard navigation out of a platform view back into the widget tree.
+enum NavigationReason {
+  /// Non-directional
+  kProgrammatic,
+
+  /// Forward, e.g. Tab
+  kForward,
+
+  /// Backward, e.g. Shift + Tab
+  kBackward,
+}
+
 /// Callback signature for when the engine notifies the framework that keyboard
 /// focus has attempted to move out of a platform view back into the widget
 /// tree.
 ///
 /// The 'reason' parameter indicates the direction of navigation.
-typedef LoseFocusCallback = void Function(int reason);
+typedef LoseFocusCallback = void Function(NavigationReason reason);
 
 /// Provides access to the platform views service.
 ///
@@ -90,7 +102,7 @@ class PlatformViewsService {
         final int id = args['id'] as int;
         final int reason = args['reason'] as int;
         if (_loseFocusCallbacks.containsKey(id)) {
-          _loseFocusCallbacks[id]!(reason);
+          _loseFocusCallbacks[id]!(NavigationReason.values[reason]);
         }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
@@ -103,6 +115,10 @@ class PlatformViewsService {
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
 
+
+  /// Maps platform view IDs to focus loss callbacks.
+  ///
+  /// The callbacks are invoked when the platform view asks for keyboard focus to be returned to the widget tree.
   final Map<int, LoseFocusCallback> _loseFocusCallbacks = <int, LoseFocusCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
