@@ -322,23 +322,13 @@ class ColorScheme with Diagnosticable {
     )
     Color? surfaceVariant,
   }) {
+    final bool isDark = brightness == Brightness.dark;
     final DynamicScheme scheme;
-    switch (variant) {
-      case (Variant.tonalSpot):
-        switch (brightness) {
-          case Brightness.light:
-            scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: false, contrastLevel: 0.0);
-          case Brightness.dark:
-            scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: true, contrastLevel: 0.0);
-        }
-      case (Variant.fidelity):
-        switch (brightness) {
-          case Brightness.light:
-            scheme = SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: false, contrastLevel: 0.0);
-          case Brightness.dark:
-            scheme = SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: true, contrastLevel: 0.0);
-        }
-    }
+    scheme = switch (variant) {
+      Variant.tonalSpot => SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0);
+      Variant.fidelity => SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0);
+    };
+
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
       onPrimary: onPrimary ?? Color(MaterialDynamicColors.onPrimary.getArgb(scheme)),
