@@ -2,34 +2,75 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../dom.dart';
 import 'semantics.dart';
+
+/// The method used to represend a label of a leaf node in the DOM.
+///
+/// This is required by some screen readers and web crawlers.
+///
+/// Container nodes only use `aria-label`, even if [domText] is chosen. This is
+/// because screen readers treat container nodes as "groups" of other nodes, and
+/// respect the `aria-label` without a [DomText] node. Crawlers typically do not
+/// need this information, as they primarily scan visible text, which is
+/// communicated in semantics as leaf text and heading nodes.
+enum LeafLabelRepresentation {
+  /// Represents the label as an `aria-label` attribute.
+  ariaLabel,
+
+  /// Represents the label as a [DomText] node.
+  domText,
+}
 
 /// Renders [SemanticsObject.label] and/or [SemanticsObject.value] to the semantics DOM.
 ///
-/// VoiceOver supports "aria-label" but only in conjunction with an ARIA role.
-/// Setting "aria-label" on an empty element without a role causes VoiceOver to
-/// treat element as if it does not exist. VoiceOver supports role "text", which
-/// is a proprietary role not supported by other browsers. Flutter Web still
-/// uses it because it provides the best user experience for plain text nodes.
-///
-/// TalkBack supports standalone "aria-label" attribute, but does not support
-/// role "text". This leads to TalkBack reading "group" or "empty group" on
-/// plain text elements, but that's still better than other alternatives
-/// considered.
-///
 /// The value is not always rendered. Some semantics nodes correspond to
-/// interactive controls, such as an `<input>` element. In such case the value
-/// is reported via that element's `value` attribute rather than rendering it
-/// separately.
-///
-/// This role manager does not manage images and text fields. See
-/// [ImageRoleManager] and [TextField].
+/// interactive controls. In such case the value is reported via that element's
+/// `value` attribute rather than rendering it separately.
 class LabelAndValue extends RoleManager {
-  LabelAndValue(SemanticsObject semanticsObject, PrimaryRoleManager owner)
+  LabelAndValue(SemanticsObject semanticsObject, PrimaryRoleManager owner, { required this.labelRepresentation })
       : super(Role.labelAndValue, semanticsObject, owner);
+
+  /// Configures the representation of the label in the DOM.
+  final LeafLabelRepresentation labelRepresentation;
 
   @override
   void update() {
+    final String? computedLabel = _computeLabel();
+
+    if (computedLabel == null) {
+      _oldLabel = null;
+      _cleanUpDom();
+      return;
+    }
+
+    _updateLabel(computedLabel);
+  }
+
+  DomText? _domText;
+  String? _oldLabel;
+
+  void _updateLabel(String label) {
+    if (label == _oldLabel) {
+      return;
+    }
+    _oldLabel = label;
+
+    final bool needsDomText = labelRepresentation == LeafLabelRepresentation.domText && !semanticsObject.hasChildren;
+
+    _domText?.remove();
+    if (needsDomText) {
+      owner.removeAttribute('aria-label');
+      final DomText domText = domDocument.createTextNode(label);
+      _domText = domText;
+      semanticsObject.element.appendChild(domText);
+    } else {
+      owner.setAttribute('aria-label', label);
+      _domText = null;
+    }
+  }
+
+  String? _computeLabel() {
     final bool hasValue = semanticsObject.hasValue;
     final bool hasLabel = semanticsObject.hasLabel;
     final bool hasTooltip = semanticsObject.hasTooltip;
@@ -39,8 +80,7 @@ class LabelAndValue extends RoleManager {
     final bool shouldDisplayValue = hasValue && !semanticsObject.isIncrementable;
 
     if (!hasLabel && !shouldDisplayValue && !hasTooltip) {
-      _cleanUpDom();
-      return;
+      return null;
     }
 
     final StringBuffer combinedValue = StringBuffer();
@@ -61,11 +101,12 @@ class LabelAndValue extends RoleManager {
       combinedValue.write(semanticsObject.value);
     }
 
-    owner.setAttribute('aria-label', combinedValue.toString());
+    return combinedValue.toString();
   }
 
   void _cleanUpDom() {
     owner.removeAttribute('aria-label');
+    _domText?.remove();
   }
 
   @override

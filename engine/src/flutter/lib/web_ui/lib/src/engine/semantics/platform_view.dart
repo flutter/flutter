@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../platform_views/slots.dart';
+import 'label_and_value.dart';
 import 'semantics.dart';
 
 /// Manages the semantic element corresponding to a platform view.
@@ -21,7 +22,11 @@ import 'semantics.dart';
 ///   * https://bugs.webkit.org/show_bug.cgi?id=223798
 class PlatformViewRoleManager extends PrimaryRoleManager {
   PlatformViewRoleManager(SemanticsObject semanticsObject)
-      : super.withBasics(PrimaryRole.platformView, semanticsObject);
+      : super.withBasics(
+          PrimaryRole.platformView,
+          semanticsObject,
+          labelRepresentation: LeafLabelRepresentation.ariaLabel,
+        );
 
   @override
   void update() {

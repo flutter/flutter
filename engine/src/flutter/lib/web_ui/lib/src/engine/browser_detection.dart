@@ -28,6 +28,19 @@ enum BrowserEngine {
   firefox,
 }
 
+/// The signature of [getUserAgent].
+typedef UserAgentGetter = String Function();
+
+/// Returns the current user agent string.
+///
+/// This function is read-writable, so it can be overridden in tests.
+UserAgentGetter getUserAgent = defaultGetUserAgent;
+
+/// The default implementation of [getUserAgent].
+String defaultGetUserAgent() {
+  return domWindow.navigator.userAgent;
+}
+
 /// html webgl version qualifier constants.
 abstract class WebGLVersion {
   /// WebGL 1.0 is based on OpenGL ES 2.0 / GLSL 1.00
@@ -133,11 +146,10 @@ OperatingSystem? debugOperatingSystemOverride;
 @visibleForTesting
 OperatingSystem detectOperatingSystem({
   String? overridePlatform,
-  String? overrideUserAgent,
   int? overrideMaxTouchPoints,
 }) {
   final String platform = overridePlatform ?? domWindow.navigator.platform!;
-  final String userAgent = overrideUserAgent ?? domWindow.navigator.userAgent;
+  final String userAgent = getUserAgent();
 
   if (platform.startsWith('Mac')) {
     // iDevices requesting a "desktop site" spoof their UA so it looks like a Mac.

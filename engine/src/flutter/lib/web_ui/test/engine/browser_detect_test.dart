@@ -49,13 +49,18 @@ void testMain() {
       String ua = 'any',
       int touchPoints = 0,
     }) {
-      expect(
+      try {
+        getUserAgent = () => ua;
+        expect(
           detectOperatingSystem(
             overridePlatform: platform,
-            overrideUserAgent: ua,
             overrideMaxTouchPoints: touchPoints,
           ),
-          expectedOs);
+          expectedOs,
+        );
+      } finally {
+        getUserAgent = defaultGetUserAgent;
+      }
     }
 
     test('Determine unknown for weird values of platform/ua', () {
