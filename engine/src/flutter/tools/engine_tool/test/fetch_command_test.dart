@@ -31,7 +31,9 @@ void main() {
       Environment(
         abi: ffi.Abi.linuxX64,
         engine: engine,
-        platform: FakePlatform(operatingSystem: Platform.linux),
+        platform: FakePlatform(
+            operatingSystem: Platform.linux,
+            resolvedExecutable: io.Platform.resolvedExecutable),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
             runHistory.add(command);
@@ -54,8 +56,7 @@ void main() {
       environment: env,
       configs: configs,
     );
-    final int result =
-        await runner.run(<String>['fetch']);
+    final int result = await runner.run(<String>['fetch']);
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(1));
     expect(
@@ -71,8 +72,7 @@ void main() {
       environment: env,
       configs: configs,
     );
-    final int result =
-        await runner.run(<String>['sync']);
+    final int result = await runner.run(<String>['sync']);
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(1));
     expect(

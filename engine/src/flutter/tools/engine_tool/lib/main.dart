@@ -65,6 +65,13 @@ void main(List<String> args) async {
     configs: configs,
   );
 
-  io.exitCode = await runner.run(args);
+  try {
+    io.exitCode = await runner.run(args);
+  } on FatalError catch (e, st) {
+    environment.logger.error('FatalError caught in main. Please file a bug\n'
+        'error: $e\n'
+        'stack: $st');
+    io.exitCode = 1;
+  }
   return;
 }
