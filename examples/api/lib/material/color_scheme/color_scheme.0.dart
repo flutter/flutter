@@ -19,44 +19,19 @@ class ColorSchemeExample extends StatefulWidget {
 
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
-  bool useColorFidelity = false;
+  Brightness selectedBrightness = Brightness.light;
+  List<DynamicSchemeVariant> schemeVariants = DynamicSchemeVariant.values;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme lightTheme = ColorScheme.fromSeed(
-      seedColor: selectedColor,
-      dynamicSchemeVariant: useColorFidelity
-        ? DynamicSchemeVariant.fidelity
-        : DynamicSchemeVariant.tonalSpot,
-    );
-    final ColorScheme darkTheme = ColorScheme.fromSeed(
-      seedColor: selectedColor,
-      brightness: Brightness.dark,
-      dynamicSchemeVariant: useColorFidelity
-        ? DynamicSchemeVariant.fidelity
-        : DynamicSchemeVariant.tonalSpot,
-    );
-
-    Widget schemeLabel(String brightness) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        child: Text(
-          brightness,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    Widget schemeView(ColorScheme colorScheme) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: ColorSchemeView(colorScheme: colorScheme),
-      );
-    }
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: lightTheme),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: selectedColor,
+          brightness: selectedBrightness,
+        )
+      ),
       home: Builder(
         builder: (BuildContext context) => Scaffold(
           appBar: AppBar(
@@ -107,38 +82,30 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Row(
                       children: <Widget>[
-                        const Text('Use Color Fidelity'),
-                        const SizedBox(width: 20),
+                        const Text('Brightness'),
+                        const SizedBox(width: 10),
                         Switch(
-                          value: useColorFidelity,
+                          value: selectedBrightness == Brightness.light,
                           onChanged: (bool value) {
                             setState(() {
-                              useColorFidelity = value;
+                              selectedBrightness = value ? Brightness.light : Brightness.dark;
                             });
                           },
                         ),
                       ],
                     ),
                   ),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            schemeLabel('Light ColorScheme'),
-                            schemeView(lightTheme),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            schemeLabel('Dark ColorScheme'),
-                            schemeView(darkTheme),
-                          ],
-                        ),
-                      ),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List<Widget>.generate(schemeVariants.length, (int index) {
+                        return ColorSchemeVariantColumn(
+                          selectedColor: selectedColor,
+                          brightness: selectedBrightness,
+                          schemeVariant: schemeVariants[index],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ],
               ),
@@ -146,6 +113,47 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ColorSchemeVariantColumn extends StatelessWidget {
+  const ColorSchemeVariantColumn({
+    super.key,
+    this.schemeVariant = DynamicSchemeVariant.tonalSpot,
+    this.brightness = Brightness.light,
+    required this.selectedColor,
+  });
+
+  final DynamicSchemeVariant schemeVariant;
+  final Brightness brightness;
+  final Color selectedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints.tightFor(width: 250),
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: Text(
+              schemeVariant.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ColorSchemeView(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: selectedColor,
+                brightness: brightness,
+                dynamicSchemeVariant: schemeVariant,
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
