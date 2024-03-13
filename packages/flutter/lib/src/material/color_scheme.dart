@@ -329,13 +329,7 @@ class ColorScheme with Diagnosticable {
     )
     Color? surfaceVariant,
   }) {
-    final bool isDark = brightness == Brightness.dark;
-    final Hct sourceColor =  Hct.fromInt(seedColor.value);
-    final DynamicScheme scheme;
-    scheme = switch (dynamicSchemeVariant) {
-      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
-      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
-    };
+    final DynamicScheme scheme = _buildDynamicScheme(brightness, seedColor, dynamicSchemeVariant);
 
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
@@ -1718,13 +1712,7 @@ class ColorScheme with Diagnosticable {
     final List<int> scoredResults = Score.score(colorToCount, desired: 1);
     final ui.Color baseColor = Color(scoredResults.first);
 
-    final bool isDark = brightness == Brightness.dark;
-    final Hct sourceColor =  Hct.fromInt(baseColor.value);
-    final DynamicScheme scheme;
-    scheme = switch (dynamicSchemeVariant) {
-      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
-      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
-    };
+    final DynamicScheme scheme = _buildDynamicScheme(brightness, baseColor, dynamicSchemeVariant);
 
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
@@ -1859,5 +1847,14 @@ class ColorScheme with Diagnosticable {
     final int r = (abgr & onlyRMask) >> 16;
     final int b = abgr & onlyBMask;
     return (abgr & exceptRMask & exceptBMask) | (b << 16) | r;
+  }
+
+  static DynamicScheme _buildDynamicScheme(Brightness brightness, Color seedColor, DynamicSchemeVariant schemeVariant) {
+    final bool isDark = brightness == Brightness.dark;
+    final Hct sourceColor =  Hct.fromInt(seedColor.value);
+    return switch (schemeVariant) {
+      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+    };
   }
 }
