@@ -12,21 +12,22 @@ import 'package:material_color_utilities/material_color_utilities.dart';
 import 'colors.dart';
 import 'theme_data.dart';
 
-/// The algorithm used to construct [ColorScheme] in [ColorScheme.fromSeed].
+/// The algorithm used to construct a [ColorScheme] in [ColorScheme.fromSeed].
 ///
-/// The `tonalSpot` builds default Material scheme colors. These colors are
-/// mapped to tones (lightness or darkness) to achieve visually accessible color
+/// The `tonalSpot` variant builds default Material scheme colors. These colors are
+/// mapped to light or dark tones to achieve visually accessible color
 /// pairings with sufficient contrast between foreground and background elements.
 ///
-/// In some cases, these tones can prevent colors from appearing as intended,
-/// such as when a color is too light to appear vibrant. Color fidelity (`Variant.fidelity`)
-/// is a feature that adjusts tones in these cases to produce the intended visual
-/// results without harming visual contrast.
-enum Variant {
-  /// Default for Material theme colors. Build pastel palettes with a low chorma.
+/// In some cases, the tones can prevent colors from appearing as intended,
+/// such as when a color is too light to offer enough contrast for accessibility.
+/// Color fidelity (`DynamicSchemeVariant.fidelity`) is a feature that adjusts
+/// tones in these cases to produce the intended visual results without harming
+/// visual contrast.
+enum DynamicSchemeVariant {
+  /// Default for Material theme colors. Builds pastel palettes with a low chroma.
   tonalSpot,
 
-  /// The resulting color palettes match source color, even if the input color
+  /// The resulting color palettes match seed color, even if the seed color
   /// is very bright (high chroma).
   fidelity,
 }
@@ -234,10 +235,11 @@ class ColorScheme with Diagnosticable {
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
-  /// Using the seedColor as a starting point, a set of tonal palettes are
-  /// constructed. These tonal palettes are based on the Material 3 Color system
-  /// and provide all the needed colors for a [ColorScheme]. These colors are
-  /// designed to work well together and meet contrast requirements for accessibility.
+  /// Using the `seedColor` as a starting point, a set of tonal palettes are
+  /// constructed. By default, the tonal palettes are based on the Material 3
+  /// Color system and provide all of the [ColorScheme] colors. These colors are
+  /// designed to work well together and meet contrast requirements for
+  /// accessibility.
   ///
   /// If any of the optional color parameters are non-null they will be
   /// used in place of the generated colors for that field in the resulting
@@ -247,8 +249,13 @@ class ColorScheme with Diagnosticable {
   /// Given the nature of the algorithm, the `seedColor` may not wind up as
   /// one of the ColorScheme colors.
   ///
-  /// If the resulting color scheme is too dark, consider setting `variant` to
-  /// [Variant.fidelity], whose palettes match source color.
+  /// The `dynamicSchemeVariant` parameter is to create different types of
+  /// [DynamicScheme], which is used to generate different styles of [ColorScheme].
+  /// By default, `dynamicSchemeVariant` is set to `tonalSpot`. A [ColorScheme]
+  /// constructed by `dynamicSchemeVariant.tonalSpot` has patel palettes and
+  /// won't be too "colorful" even if the `seedColor` has a high chroma value.
+  /// If the resulting color scheme is too dark, consider setting `dynamicSchemeVariant`
+  /// to [DynamicSchemeVariant.fidelity], whose palettes match source color.
   ///
   /// See also:
   ///
@@ -259,7 +266,7 @@ class ColorScheme with Diagnosticable {
   factory ColorScheme.fromSeed({
     required Color seedColor,
     Brightness brightness = Brightness.light,
-    Variant variant = Variant.tonalSpot,
+    DynamicSchemeVariant dynamicSchemeVariant = DynamicSchemeVariant.tonalSpot,
     Color? primary,
     Color? onPrimary,
     Color? primaryContainer,
@@ -323,10 +330,11 @@ class ColorScheme with Diagnosticable {
     Color? surfaceVariant,
   }) {
     final bool isDark = brightness == Brightness.dark;
+    final Hct sourceColor =  Hct.fromInt(seedColor.value);
     final DynamicScheme scheme;
-    scheme = switch (variant) {
-      Variant.tonalSpot => SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0),
-      Variant.fidelity => SchemeFidelity(sourceColorHct: Hct.fromInt(seedColor.value), isDark: isDark, contrastLevel: 0.0),
+    scheme = switch (dynamicSchemeVariant) {
+      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
     };
 
     return ColorScheme(
@@ -1636,7 +1644,7 @@ class ColorScheme with Diagnosticable {
   static Future<ColorScheme> fromImageProvider({
     required ImageProvider provider,
     Brightness brightness = Brightness.light,
-    Variant variant = Variant.tonalSpot,
+    DynamicSchemeVariant dynamicSchemeVariant = DynamicSchemeVariant.tonalSpot,
     Color? primary,
     Color? onPrimary,
     Color? primaryContainer,
@@ -1711,10 +1719,11 @@ class ColorScheme with Diagnosticable {
     final ui.Color baseColor = Color(scoredResults.first);
 
     final bool isDark = brightness == Brightness.dark;
+    final Hct sourceColor =  Hct.fromInt(baseColor.value);
     final DynamicScheme scheme;
-    scheme = switch (variant) {
-      Variant.tonalSpot => SchemeTonalSpot(sourceColorHct: Hct.fromInt(baseColor.value), isDark: isDark, contrastLevel: 0.0),
-      Variant.fidelity => SchemeFidelity(sourceColorHct: Hct.fromInt(baseColor.value), isDark: isDark, contrastLevel: 0.0),
+    scheme = switch (dynamicSchemeVariant) {
+      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
     };
 
     return ColorScheme(
