@@ -694,10 +694,38 @@ void main() {
     await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)), const Color(0xFF006874));
 
     // Variant.fidelity.
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF000000), variant: Variant.fidelity), const Color(0xFF000000));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00), variant: Variant.fidelity), const Color(0xFF026E00));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF6559F5), variant: Variant.fidelity), const Color(0xFF3F2CD0));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF), variant: Variant.fidelity), const Color(0xFF5D5F5F));
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF000000),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF000000)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF00FF00),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF026E00)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF6559F5),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF3F2CD0)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFFFFFFFF),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF5D5F5F)
+    );
   });
 }
 

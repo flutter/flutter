@@ -25,12 +25,16 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Widget build(BuildContext context) {
     final ColorScheme lightTheme = ColorScheme.fromSeed(
       seedColor: selectedColor,
-      variant: useColorFidelity ? Variant.fidelity : Variant.tonalSpot,
+      dynamicSchemeVariant: useColorFidelity
+        ? DynamicSchemeVariant.fidelity
+        : DynamicSchemeVariant.tonalSpot,
     );
     final ColorScheme darkTheme = ColorScheme.fromSeed(
       seedColor: selectedColor,
       brightness: Brightness.dark,
-      variant: useColorFidelity ? Variant.fidelity : Variant.tonalSpot,
+      dynamicSchemeVariant: useColorFidelity
+        ? DynamicSchemeVariant.fidelity
+        : DynamicSchemeVariant.tonalSpot,
     );
 
     Widget schemeLabel(String brightness) {
