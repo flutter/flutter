@@ -13,6 +13,25 @@
 namespace impeller {
 namespace testing {
 
+TEST(AllocatorVKTest, ToVKImageUsageFlags) {
+  EXPECT_EQ(AllocatorVK::ToVKImageUsageFlags(
+                PixelFormat::kR8G8B8A8UNormInt,
+                static_cast<TextureUsageMask>(TextureUsage::kRenderTarget),
+                StorageMode::kDeviceTransient,
+                /*supports_memoryless_textures=*/true),
+            vk::ImageUsageFlagBits::eInputAttachment |
+                vk::ImageUsageFlagBits::eColorAttachment |
+                vk::ImageUsageFlagBits::eTransientAttachment);
+
+  EXPECT_EQ(AllocatorVK::ToVKImageUsageFlags(
+                PixelFormat::kD24UnormS8Uint,
+                static_cast<TextureUsageMask>(TextureUsage::kRenderTarget),
+                StorageMode::kDeviceTransient,
+                /*supports_memoryless_textures=*/true),
+            vk::ImageUsageFlagBits::eDepthStencilAttachment |
+                vk::ImageUsageFlagBits::eTransientAttachment);
+}
+
 TEST(AllocatorVKTest, MemoryTypeSelectionSingleHeap) {
   vk::PhysicalDeviceMemoryProperties properties;
   properties.memoryTypeCount = 1;
