@@ -5,15 +5,12 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ALLOCATOR_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ALLOCATOR_VK_H_
 
-#include "flutter/fml/macros.h"
-#include "flutter/fml/memory/ref_ptr.h"
 #include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
-#include <array>
 #include <cstdint>
 #include <memory>
 
@@ -26,6 +23,14 @@ class AllocatorVK final : public Allocator {
 
   // Visible for testing
   size_t DebugGetHeapUsage() const;
+
+  /// @brief Select a matching memory type for the given
+  ///        [memory_type_bits_requirement], or -1 if none is found.
+  ///
+  ///        This only returns memory types with deviceLocal allocations.
+  static int32_t FindMemoryTypeIndex(
+      uint32_t memory_type_bits_requirement,
+      vk::PhysicalDeviceMemoryProperties& memory_properties);
 
  private:
   friend class ContextVK;
