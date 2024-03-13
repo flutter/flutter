@@ -58,10 +58,10 @@ class AHBTextureSourceVK final : public TextureSourceVK {
   std::shared_ptr<YUVConversionVK> GetYUVConversion() const override;
 
  private:
-  vk::UniqueDeviceMemory device_memory_;
-  vk::UniqueImage image_;
-  vk::UniqueImageView image_view_;
-  std::shared_ptr<YUVConversionVK> yuv_conversion_;
+  vk::UniqueDeviceMemory device_memory_ = {};
+  vk::UniqueImage image_ = {};
+  vk::UniqueImageView image_view_ = {};
+  std::shared_ptr<YUVConversionVK> yuv_conversion_ = {};
   bool needs_yuv_conversion_ = false;
   bool is_valid_ = false;
 

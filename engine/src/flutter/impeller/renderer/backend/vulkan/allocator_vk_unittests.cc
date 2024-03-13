@@ -13,6 +13,44 @@
 namespace impeller {
 namespace testing {
 
+TEST(AllocatorVKTest, MemoryTypeSelectionSingleHeap) {
+  vk::PhysicalDeviceMemoryProperties properties;
+  properties.memoryTypeCount = 1;
+  properties.memoryHeapCount = 1;
+  properties.memoryTypes[0].heapIndex = 0;
+  properties.memoryTypes[0].propertyFlags =
+      vk::MemoryPropertyFlagBits::eDeviceLocal;
+  properties.memoryHeaps[0].size = 1024 * 1024 * 1024;
+  properties.memoryHeaps[0].flags = vk::MemoryHeapFlagBits::eDeviceLocal;
+
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(1, properties), 0);
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(2, properties), -1);
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(3, properties), 0);
+}
+
+TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
+  vk::PhysicalDeviceMemoryProperties properties;
+  properties.memoryTypeCount = 2;
+  properties.memoryHeapCount = 2;
+  properties.memoryTypes[0].heapIndex = 0;
+  properties.memoryTypes[0].propertyFlags =
+      vk::MemoryPropertyFlagBits::eHostVisible;
+  properties.memoryHeaps[0].size = 1024 * 1024 * 1024;
+  properties.memoryHeaps[0].flags = vk::MemoryHeapFlagBits::eDeviceLocal;
+
+  properties.memoryTypes[1].heapIndex = 1;
+  properties.memoryTypes[1].propertyFlags =
+      vk::MemoryPropertyFlagBits::eDeviceLocal;
+  properties.memoryHeaps[1].size = 1024 * 1024 * 1024;
+  properties.memoryHeaps[1].flags = vk::MemoryHeapFlagBits::eDeviceLocal;
+
+  // First fails because this only looks for eDeviceLocal.
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(1, properties), -1);
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(2, properties), 1);
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(3, properties), 1);
+  EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
+}
+
 #ifdef IMPELLER_DEBUG
 
 TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {

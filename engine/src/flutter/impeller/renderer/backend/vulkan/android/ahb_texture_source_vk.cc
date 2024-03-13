@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 
+#include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
@@ -88,27 +89,16 @@ static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
   return std::move(image.value);
 }
 
-// Returns -1 if not found.
-static int FindMemoryTypeIndex(
-    const vk::AndroidHardwareBufferPropertiesANDROID& props) {
-  uint32_t memory_type_bits = props.memoryTypeBits;
-  int32_t type_index = -1;
-  for (uint32_t i = 0; memory_type_bits;
-       memory_type_bits = memory_type_bits >> 0x1, ++i) {
-    if (memory_type_bits & 0x1) {
-      type_index = i;
-      break;
-    }
-  }
-  return type_index;
-}
-
 static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
     const vk::Device& device,
+    const vk::PhysicalDevice& physical_device,
     const vk::Image& image,
     struct AHardwareBuffer* hardware_buffer,
     const AHBProperties& ahb_props) {
-  const int memory_type_index = FindMemoryTypeIndex(ahb_props.get());
+  vk::PhysicalDeviceMemoryProperties memory_properties;
+  physical_device.getMemoryProperties(&memory_properties);
+  int memory_type_index = AllocatorVK::FindMemoryTypeIndex(
+      ahb_props.get().memoryTypeBits, memory_properties);
   if (memory_type_index < 0) {
     VALIDATION_LOG << "Could not find memory type of external image.";
     return {};
@@ -300,6 +290,7 @@ AHBTextureSourceVK::AHBTextureSourceVK(
   }
 
   const auto& device = context->GetDevice();
+  const auto& physical_device = context->GetPhysicalDevice();
 
   AHBProperties ahb_props;
 
@@ -322,7 +313,7 @@ AHBTextureSourceVK::AHBTextureSourceVK(
 
   // Create a device memory allocation to refer to our external image.
   auto device_memory = ImportVKDeviceMemoryFromAndroidHarwareBuffer(
-      device, image.get(), ahb, ahb_props);
+      device, physical_device, image.get(), ahb, ahb_props);
   if (!device_memory) {
     return;
   }
