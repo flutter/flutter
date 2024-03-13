@@ -95,16 +95,16 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   mtl_desc.height = desc.size.height;
   mtl_desc.mipmapLevelCount = desc.mip_count;
   mtl_desc.usage = MTLTextureUsageUnknown;
-  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kUnknown)) {
+  if (desc.usage & TextureUsage::kUnknown) {
     mtl_desc.usage |= MTLTextureUsageUnknown;
   }
-  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+  if (desc.usage & TextureUsage::kShaderRead) {
     mtl_desc.usage |= MTLTextureUsageShaderRead;
   }
-  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+  if (desc.usage & TextureUsage::kShaderWrite) {
     mtl_desc.usage |= MTLTextureUsageShaderWrite;
   }
-  if (desc.usage & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+  if (desc.usage & TextureUsage::kRenderTarget) {
     mtl_desc.usage |= MTLTextureUsageRenderTarget;
   }
   return mtl_desc;

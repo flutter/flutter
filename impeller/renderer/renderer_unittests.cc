@@ -336,8 +336,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
     texture_descriptor.storage_mode = StorageMode::kHostVisible;
     texture_descriptor.size = {400, 400};
     texture_descriptor.mip_count = 1u;
-    texture_descriptor.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    texture_descriptor.usage = TextureUsage::kRenderTarget;
 
     color0.texture =
         context->GetResourceAllocator()->CreateTexture(texture_descriptor);
@@ -353,8 +352,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
     stencil_texture_desc.storage_mode = StorageMode::kDeviceTransient;
     stencil_texture_desc.size = texture_descriptor.size;
     stencil_texture_desc.format = PixelFormat::kS8UInt;
-    stencil_texture_desc.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    stencil_texture_desc.usage = TextureUsage::kRenderTarget;
     stencil0.texture =
         context->GetResourceAllocator()->CreateTexture(stencil_texture_desc);
 
@@ -477,9 +475,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_desc.size = {800, 600};
   texture_desc.mip_count = 1u;
-  texture_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) |
-      static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  texture_desc.usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
   auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
   ASSERT_TRUE(texture);
 
@@ -601,10 +597,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
   texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_desc.size = bridge->GetTextureDescriptor().size;
   texture_desc.mip_count = 1u;
-  texture_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) |
-      static_cast<TextureUsageMask>(TextureUsage::kShaderWrite) |
-      static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  texture_desc.usage = TextureUsage::kRenderTarget |
+                       TextureUsage::kShaderWrite | TextureUsage::kShaderRead;
   DeviceBufferDescriptor device_buffer_desc;
   device_buffer_desc.storage_mode = StorageMode::kHostVisible;
   device_buffer_desc.size =

@@ -76,25 +76,22 @@ constexpr vk::BlendOp ToVKBlendOp(BlendOperation op) {
   FML_UNREACHABLE();
 }
 
-constexpr vk::ColorComponentFlags ToVKColorComponentFlags(
-    std::underlying_type_t<ColorWriteMask> type) {
-  using UnderlyingType = decltype(type);
-
+constexpr vk::ColorComponentFlags ToVKColorComponentFlags(ColorWriteMask type) {
   vk::ColorComponentFlags mask;
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kRed)) {
+  if (type & ColorWriteMaskBits::kRed) {
     mask |= vk::ColorComponentFlagBits::eR;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kGreen)) {
+  if (type & ColorWriteMaskBits::kGreen) {
     mask |= vk::ColorComponentFlagBits::eG;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kBlue)) {
+  if (type & ColorWriteMaskBits::kBlue) {
     mask |= vk::ColorComponentFlagBits::eB;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kAlpha)) {
+  if (type & ColorWriteMaskBits::kAlpha) {
     mask |= vk::ColorComponentFlagBits::eA;
   }
 

@@ -633,7 +633,7 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   const std::shared_ptr<Texture>& result_texture =
       resolve_image_vk_ ? resolve_image_vk_ : color_image_vk_;
   if (result_texture->GetTextureDescriptor().usage &
-      static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+      TextureUsage::kShaderRead) {
     BarrierVK barrier;
     barrier.cmd_buffer = command_buffer_vk_;
     barrier.src_access = vk::AccessFlagBits::eColorAttachmentWrite |

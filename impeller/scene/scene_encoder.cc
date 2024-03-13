@@ -54,8 +54,7 @@ std::shared_ptr<CommandBuffer> SceneEncoder::BuildSceneCommandBuffer(
     ds_texture.type = TextureType::kTexture2DMultisample;
     ds_texture.format = PixelFormat::kD32FloatS8UInt;
     ds_texture.size = render_target.GetRenderTargetSize();
-    ds_texture.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    ds_texture.usage = TextureUsage::kRenderTarget;
     ds_texture.sample_count = SampleCount::kCount4;
     ds_texture.storage_mode = StorageMode::kDeviceTransient;
     auto texture =

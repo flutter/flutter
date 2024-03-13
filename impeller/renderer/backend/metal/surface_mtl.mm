@@ -67,8 +67,8 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
   TextureDescriptor resolve_tex_desc;
   resolve_tex_desc.format = FromMTLPixelFormat(texture.pixelFormat);
   resolve_tex_desc.size = root_size;
-  resolve_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-                           static_cast<uint64_t>(TextureUsage::kShaderRead);
+  resolve_tex_desc.usage =
+      TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
   resolve_tex_desc.sample_count = SampleCount::kCount1;
   resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 
@@ -98,7 +98,7 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
   msaa_tex_desc.sample_count = SampleCount::kCount4;
   msaa_tex_desc.format = resolve_tex->GetTextureDescriptor().format;
   msaa_tex_desc.size = resolve_tex->GetSize();
-  msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  msaa_tex_desc.usage = TextureUsage::kRenderTarget;
 
   auto msaa_tex = allocator.CreateTexture(msaa_tex_desc);
   if (!msaa_tex) {
