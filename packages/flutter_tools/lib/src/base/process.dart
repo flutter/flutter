@@ -477,7 +477,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     );
     stdinWriteErrorHandler ??= (Object _, StackTrace __) {
       throw 'oops';
-    }
+    };
     unawaited(
       process.stdin.done.then<void>((_) {}, onError: stdinWriteErrorHandler),
     );
