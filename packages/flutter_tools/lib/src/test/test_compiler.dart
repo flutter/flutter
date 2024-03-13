@@ -146,7 +146,7 @@ class TestCompiler {
     }
     while (compilationQueue.isNotEmpty) {
       final CompilationRequest request = compilationQueue.first;
-      globals.printTrace('Compiling ${request.mainUri.path.replaceAll("%20", " ")}');
+      globals.printTrace('Compiling ${request.mainUri}');
       final Stopwatch compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       bool firstCompile = false;
@@ -163,8 +163,8 @@ class TestCompiler {
         await generateMainDartWithPluginRegistrant(
           flutterProject!,
           buildInfo.packageConfig,
-          mainUriString.replaceAll('%20', ''),
-          globals.fs.file(request.mainUri.path.replaceAll('%20', ' ')),
+          mainUriString,
+          globals.fs.file(request.mainUri),
         );
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
@@ -192,7 +192,7 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows).replaceAll('%20', '');
+          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
           final File testCache = globals.fs.file(testFilePath);
@@ -212,7 +212,7 @@ class TestCompiler {
         compiler!.accept();
         compiler!.reset();
       }
-      globals.printTrace('Compiling ${request.mainUri.path.replaceAll('%20', '')} took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
