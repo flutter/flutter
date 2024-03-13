@@ -140,7 +140,7 @@ void _testRoleManagerLifecycle() {
       );
       tester.apply();
 
-      tester.expectSemantics('<sem aria-label="a label" role="button" style="$rootSemanticStyle"></sem>');
+      tester.expectSemantics('<sem role="button" style="$rootSemanticStyle">a label</sem>');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
       expect(node.primaryRole?.role, PrimaryRole.button);
@@ -319,7 +319,7 @@ void _testEngineSemanticsOwner() {
     renderSemantics(label: label);
   }
 
-  test('produces an aria-label', () async {
+  test('produces a label', () async {
     semantics().semanticsEnabled = true;
 
     // Create
@@ -335,7 +335,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="Hello"></sem>
+    <sem role="text">Hello</sem>
   </sem-c>
 </sem>''');
 
@@ -345,7 +345,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="World"></sem>
+    <sem role="text">World</sem>
   </sem-c>
 </sem>''');
 
@@ -378,7 +378,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="Hello" role="text"></sem>
+    <sem role="text">Hello</sem>
   </sem-c>
 </sem>''');
 
@@ -393,7 +393,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <a aria-label="Hello" style="display: block;"></a>
+    <a style="display: block;">Hello</a>
   </sem-c>
 </sem>''');
     expect(existingParent, tree[1]!.element.parent);
@@ -417,7 +417,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem aria-label="tooltip"></sem>
+    <sem>tooltip</sem>
   </sem-c>
 </sem>''');
 
@@ -427,7 +427,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="tooltip\nHello"></sem>
+    <sem role="text">tooltip\nHello</sem>
   </sem-c>
 </sem>''');
 
@@ -630,7 +630,7 @@ void _testHeader() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem role="heading" aria-label="Header of the page" style="$rootSemanticStyle"></sem>
+<sem role="heading" style="$rootSemanticStyle">Header of the page</sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -2780,7 +2780,7 @@ void _testDialog() {
           <sem-c>
             <sem>
               <sem-c>
-                <sem role="text" aria-label="$label"></sem>
+                <sem role="text">$label</sem>
               </sem-c>
             </sem>
           </sem-c>
@@ -2869,7 +2869,7 @@ void _testDialog() {
         <sem-c>
           <sem>
             <sem-c>
-              <sem role="text" aria-label="Hello"></sem>
+              <sem role="text">Hello</sem>
             </sem-c>
           </sem>
         </sem-c>
@@ -3228,7 +3228,7 @@ void _testFocusable() {
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="focusable text"></sem>
+    <sem role="text">focusable text</sem>
   </sem-c>
 </sem>
 ''');
