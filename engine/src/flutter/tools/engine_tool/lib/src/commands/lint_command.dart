@@ -63,6 +63,11 @@ final class LintCommand extends CommandBase {
         Linter.python,
         environment.engine.flutterDir,
         <String>[p.join(engineFlutterPath, 'ci', 'pylint.sh')]);
+    argParser.addFlag(
+      quietFlag,
+      abbr: 'q',
+      help: 'Prints minimal output',
+    );
   }
 
   final Map<Linter, _LinterDescription> _linters =
@@ -79,7 +84,7 @@ final class LintCommand extends CommandBase {
     // TODO(loic-sharma): Relax this restriction.
     if (environment.platform.isWindows) {
       environment.logger
-          .error('lint command is not supported on Windows (for now).');
+          .fatal('lint command is not supported on Windows (for now).');
       return 1;
     }
     final WorkerPool wp =
@@ -92,16 +97,17 @@ final class LintCommand extends CommandBase {
     }
     final bool r = await wp.run(tasks);
 
-    final bool verbose = globalResults![verboseFlag] as bool;
-    if (verbose) {
+    final bool quiet = argResults![quietFlag] as bool;
+    if (!quiet) {
       environment.logger.status('\nDumping failure logs\n');
       for (final ProcessTask pt in tasks) {
         final ProcessArtifacts pa = pt.processArtifacts;
         if (pa.exitCode == 0) {
           continue;
         }
-        environment.logger.status(pa.stdout);
-        environment.logger.status(pa.stderr);
+        environment.logger.status('Linter ${pt.name} found issues:');
+        environment.logger.status('${pa.stdout}\n');
+        environment.logger.status('${pa.stderr}\n');
       }
     }
     return r ? 0 : 1;
