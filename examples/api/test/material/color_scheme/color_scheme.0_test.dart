@@ -11,10 +11,9 @@ void main() {
     await tester.pumpWidget(
       const example.ColorSchemeExample(),
     );
-    expect(find.text('Light ColorScheme'), findsOneWidget);
-    expect(find.text('Dark ColorScheme'), findsOneWidget);
+    expect(find.text('tonalSpot (Default)'), findsOneWidget);
 
-    expect(find.byType(example.ColorChip), findsNWidgets(86));
+    expect(find.byType(example.ColorChip), findsNWidgets(43 * 9));
   });
 
   testWidgets('Change color seed', (WidgetTester tester) async {
