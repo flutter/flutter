@@ -30,7 +30,16 @@ function follow_links() (
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 FLUTTER_DIR="$SRC_DIR/flutter"
+
+# This shell script takes one optional argument, the path to a dart-sdk/bin
+# directory. If not specified, we default to the build output for
+# host_debug_unopt.
+if [[ $# -eq 0 ]] ; then
 DART_BIN="$SRC_DIR/out/host_debug_unopt/dart-sdk/bin"
+else
+DART_BIN="$1"
+fi
+
 DART="$DART_BIN/dart"
 
 if [[ ! -f "$DART" ]]; then
