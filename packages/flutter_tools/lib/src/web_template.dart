@@ -6,9 +6,19 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'base/common.dart';
+import 'base/file_system.dart';
 
 /// Placeholder for base href
 const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+
+class WebTemplateWarning {
+  WebTemplateWarning(
+    this.warningText,
+    this.lineNumber,
+  );
+  final String warningText;
+  final int lineNumber;
+}
 
 /// Utility class for parsing and performing operations on the contents of the
 /// index.html file.
@@ -21,8 +31,8 @@ const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 ///   return indexHtml.getBaseHref();
 /// }
 /// ```
-class IndexHtml {
-  IndexHtml(this._content);
+class WebTemplate {
+  WebTemplate(this._content);
 
   String get content => _content;
   String _content;
@@ -58,11 +68,42 @@ class IndexHtml {
     return stripLeadingSlash(stripTrailingSlash(baseHref));
   }
 
+  List<WebTemplateWarning> getWarnings() {
+    return <WebTemplateWarning>[
+      ..._getWarningsForPattern(
+        RegExp('(const|var) serviceWorkerVersion = null'),
+        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead.',
+      ),
+      ..._getWarningsForPattern(
+        "navigator.serviceWorker.register('flutter_service_worker.js')",
+        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead.',
+      ),
+      ..._getWarningsForPattern(
+        '_flutter.loader.loadEntrypoint(',
+        '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead.',
+      ),
+    ];
+  }
+
+  List<WebTemplateWarning> _getWarningsForPattern(Pattern pattern, String warningText) {
+    return <WebTemplateWarning>[
+      for (final Match match in pattern.allMatches(_content))
+        _getWarningForMatch(match, warningText)
+    ];
+  }
+
+  WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
+    final int lineCount = RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    return WebTemplateWarning(warningText, lineCount + 1);
+  }
+
   /// Applies substitutions to the content of the index.html file.
   void applySubstitutions({
     required String baseHref,
     required String? serviceWorkerVersion,
+    required File flutterJsFile,
     String? buildConfig,
+    String? flutterBootstrapJs,
   }) {
     if (_content.contains(kBaseHrefPlaceholder)) {
       _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);
@@ -82,10 +123,28 @@ class IndexHtml {
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
           );
     }
+    _content = _content.replaceAll(
+      '{{flutter_service_worker_version}}',
+      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+    );
     if (buildConfig != null) {
-      _content = _content.replaceFirst(
+      _content = _content.replaceAll(
         '{{flutter_build_config}}',
         buildConfig,
+      );
+    }
+
+    if (_content.contains('{{flutter_js}}')) {
+      _content = _content.replaceAll(
+        '{{flutter_js}}',
+        flutterJsFile.readAsStringSync(),
+      );
+    }
+
+    if (flutterBootstrapJs != null) {
+      _content = _content.replaceAll(
+        '{{flutter_bootstrap_js}}',
+        flutterBootstrapJs,
       );
     }
   }
