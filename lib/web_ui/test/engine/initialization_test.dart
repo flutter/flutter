@@ -77,6 +77,7 @@ void testMain() {
     expect(pluginsRegistered, isTrue, reason: 'Plugins should be immediately registered in autoStart mode.');
     expect(appRan, isTrue, reason: 'App should run immediately in autoStart mode');
   });
+
   // We cannot test anymore, because by now the engine has registered some stuff that can't be rewound back.
   // Like the `ext.flutter.disassemble` developer extension.
 }

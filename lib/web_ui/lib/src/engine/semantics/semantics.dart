@@ -430,12 +430,15 @@ enum Role {
 abstract class PrimaryRoleManager {
   /// Initializes a role for a [semanticsObject] that includes basic
   /// functionality for focus, labels, live regions, and route names.
-  PrimaryRoleManager.withBasics(this.role, this.semanticsObject) {
+  ///
+  /// If `labelRepresentation` is true, configures the [LabelAndValue] role with
+  /// [LabelAndValue.labelRepresentation] set to true.
+  PrimaryRoleManager.withBasics(this.role, this.semanticsObject, { required LeafLabelRepresentation labelRepresentation }) {
     element = _initElement(createElement(), semanticsObject);
     addFocusManagement();
     addLiveRegion();
     addRouteName();
-    addLabelAndValue();
+    addLabelAndValue(labelRepresentation: labelRepresentation);
     addTappable();
   }
 
@@ -539,8 +542,8 @@ abstract class PrimaryRoleManager {
   }
 
   /// Adds generic label features.
-  void addLabelAndValue() {
-    addSecondaryRole(LabelAndValue(semanticsObject, this));
+  void addLabelAndValue({ required LeafLabelRepresentation labelRepresentation }) {
+    addSecondaryRole(LabelAndValue(semanticsObject, this, labelRepresentation: labelRepresentation));
   }
 
   /// Adds generic functionality for handling taps and clicks.
@@ -618,7 +621,11 @@ abstract class PrimaryRoleManager {
 
 /// A role used when a more specific role couldn't be assigned to the node.
 final class GenericRole extends PrimaryRoleManager {
-  GenericRole(SemanticsObject semanticsObject) : super.withBasics(PrimaryRole.generic, semanticsObject);
+  GenericRole(SemanticsObject semanticsObject) : super.withBasics(
+    PrimaryRole.generic,
+    semanticsObject,
+    labelRepresentation: LeafLabelRepresentation.domText,
+  );
 
   @override
   void update() {
