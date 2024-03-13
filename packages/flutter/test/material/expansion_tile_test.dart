@@ -686,12 +686,17 @@ void main() {
   });
 
   testWidgets('ExpansionTile respects hoverColor', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Center(
             child: ExpansionTile(
-              hoverColor: Color(0xff00ff00),
-              title: SizedBox.shrink(),
+              overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> state){
+                if(state.contains(MaterialState.hovered)){
+                  return const Color(0xff00ff00);
+                }
+                return null;
+              }),
+              title: const SizedBox.shrink(),
             ),
           ),
         ),

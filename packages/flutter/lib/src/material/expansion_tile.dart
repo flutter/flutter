@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -248,7 +249,7 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedShape,
     this.clipBehavior,
     this.controlAffinity,
-    this.hoverColor,
+    this.overlayColor,
     this.controller,
     this.dense,
     this.visualDensity,
@@ -490,8 +491,8 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
-  /// {@macro flutter.material.inkwell.hoverColor}
-  final Color? hoverColor;
+  /// {@macro flutter.material.inkwell.overlayColor}
+  final MaterialStateProperty<Color?>? overlayColor;
   
   /// If provided, the controller can be used to expand and collapse tiles.
   ///
@@ -698,7 +699,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 title: widget.title,
                 subtitle: widget.subtitle,
                 trailing: widget.trailing ?? _buildTrailingIcon(context),
-                hoverColor: widget.hoverColor,
+                hoverColor: widget.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+                focusColor: widget.overlayColor?.resolve(<MaterialState>{MaterialState.focused}),
+                selectedColor: widget.overlayColor?.resolve(<MaterialState>{MaterialState.selected}),
               ),
             ),
           ),
