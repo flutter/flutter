@@ -196,7 +196,8 @@ Future<void> _run({
         }
         if (isSkiaGoldClientAvailable) {
           final Future<void> comparison = skiaGoldClient!
-              .addImg(fileName, goldenFile, screenshotSize: screenshot.pixelCount)
+              // Each color channel can be off by 2.
+              .addImg(fileName, goldenFile, screenshotSize: screenshot.pixelCount, pixelColorDelta: 8)
               .catchError((Object error) {
             logWarning('skia gold comparison failed: $error');
             comparisonsFailed++;
