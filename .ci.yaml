@@ -3697,7 +3697,6 @@ targets:
   - name: Mac_arm64_ios module_test_ios # Must be run on devicelab bot for codesigning https://github.com/flutter/flutter/issues/112033
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # dependency issue: https://github.com/flutter/flutter/issues/144860
     timeout: 60
     properties:
       tags: >
