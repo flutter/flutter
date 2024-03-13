@@ -101,19 +101,18 @@ class DaemonInputStreamConverter {
 
     int start = 0;
     while (start < chunk.length) {
-      if (state == _InputStreamParseState.json) {
-        start += _processChunkInJsonMode(chunk, start);
-      } else if (state == _InputStreamParseState.binary) {
-        final int bytesSent = _addBinaryChunk(chunk, start, remainingBinaryLength);
-        start += bytesSent;
-        remainingBinaryLength -= bytesSent;
-
-        if (remainingBinaryLength <= 0) {
-          assert(remainingBinaryLength == 0);
-
-          unawaited(currentBinaryStream.close());
-          state = _InputStreamParseState.json;
-        }
+      switch (state) {
+        case _InputStreamParseState.json:
+          start += _processChunkInJsonMode(chunk, start);
+        case _InputStreamParseState.binary:
+          final int bytesSent = _addBinaryChunk(chunk, start, remainingBinaryLength);
+          start += bytesSent;
+          remainingBinaryLength -= bytesSent;
+          if (remainingBinaryLength <= 0) {
+            assert(remainingBinaryLength == 0);
+            unawaited(currentBinaryStream.close());
+            state = _InputStreamParseState.json;
+          }
       }
     }
   }

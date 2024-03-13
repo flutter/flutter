@@ -240,17 +240,13 @@ void main() {
           painter.paint(testCanvas, size);
           final Rect rect = captureRect();
 
-          switch (direction) {
-            case AxisDirection.up:
-            case AxisDirection.down:
-              expect(
-                margin,
-                textDirection == TextDirection.ltr
-                  ? size.width - rect.right
-                  : rect.left,
-              );
-            case AxisDirection.left:
-            case AxisDirection.right:
+          switch (axisDirectionToAxis(direction)) {
+            case Axis.vertical:
+              expect(margin, switch (textDirection) {
+                TextDirection.ltr => size.width - rect.right,
+                TextDirection.rtl => rect.left,
+              });
+            case Axis.horizontal:
               expect(margin, size.height - rect.bottom);
           }
         }
