@@ -34,6 +34,8 @@
   // FLTEnableSurfaceDebugInfo value in main bundle Info.plist.
   NSNumber* _enableSurfaceDebugInfo;
   CATextLayer* _infoLayer;
+
+  CFTimeInterval _lastPresentationTime;
 }
 
 /**
@@ -213,21 +215,51 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
   return size;
 }
 
-- (void)present:(NSArray<FlutterSurfacePresentInfo*>*)surfaces notify:(dispatch_block_t)notify {
+- (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
+                 atTime:(CFTimeInterval)presentationTime
+                 notify:(dispatch_block_t)notify {
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
   [commandBuffer commit];
   [commandBuffer waitUntilScheduled];
 
-  // Get the actual dimensions of the frame (relevant for thread synchronizer).
-  CGSize size = GetRequiredFrameSize(surfaces);
+  dispatch_block_t presentBlock = ^{
+    // Get the actual dimensions of the frame (relevant for thread synchronizer).
+    CGSize size = GetRequiredFrameSize(surfaces);
+    [_delegate onPresent:size
+               withBlock:^{
+                 _lastPresentationTime = presentationTime;
+                 [self commit:surfaces];
+                 if (notify != nil) {
+                   notify();
+                 }
+               }];
+  };
 
-  [_delegate onPresent:size
-             withBlock:^{
-               [self commit:surfaces];
-               if (notify != nil) {
-                 notify();
-               }
-             }];
+  if (presentationTime > 0) {
+    // Enforce frame pacing. It seems that the target timestamp of CVDisplayLink does not
+    // exactly correspond to core animation deadline. Especially with 120hz, setting the frame
+    // contents too close after previous target timestamp will result in uneven frame pacing.
+    // Empirically setting the content in the second half of frame interval seems to work
+    // well for both 60hz and 120hz.
+    //
+    // This schedules a timer on current (raster) thread runloop. Raster thread at
+    // this point should be idle (the next frame vsync has not been signalled yet).
+    //
+    // Alternative could be simply blocking the raster thread, but that would show
+    // as a average_frame_rasterizer_time_millis regresson.
+    CFTimeInterval minPresentationTime = (presentationTime + _lastPresentationTime) / 2.0;
+    CFTimeInterval now = CACurrentMediaTime();
+    if (now < minPresentationTime) {
+      NSTimer* timer = [NSTimer timerWithTimeInterval:minPresentationTime - now
+                                              repeats:NO
+                                                block:^(NSTimer* timer) {
+                                                  presentBlock();
+                                                }];
+      [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+      return;
+    }
+  }
+  presentBlock();
 }
 
 @end

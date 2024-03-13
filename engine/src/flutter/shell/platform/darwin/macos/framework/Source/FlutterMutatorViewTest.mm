@@ -21,26 +21,12 @@ namespace {
 void ApplyFlutterLayer(FlutterMutatorView* view,
                        FlutterSize size,
                        const std::vector<FlutterPlatformViewMutation>& mutations) {
-  FlutterLayer layer;
-  layer.struct_size = sizeof(FlutterLayer);
-  layer.type = kFlutterLayerContentTypePlatformView;
-  // Offset is ignored by mutator view, the bounding rect is determined by
-  // width and transform.
-  layer.offset = FlutterPoint{0, 0};
-  layer.size = size;
-
-  FlutterPlatformView flutterPlatformView;
-  flutterPlatformView.struct_size = sizeof(FlutterPlatformView);
-  flutterPlatformView.identifier = 0;
-
-  std::vector<const FlutterPlatformViewMutation*> mutationPointers;
-  mutationPointers.reserve(mutations.size());
-  for (auto& mutation : mutations) {
-    mutationPointers.push_back(&mutation);
-  }
-  flutterPlatformView.mutations = mutationPointers.data();
-  flutterPlatformView.mutations_count = mutationPointers.size();
-  layer.platform_view = &flutterPlatformView;
+  flutter::PlatformViewLayer layer(0,  // identifier
+                                   mutations,
+                                   // Offset is ignored by mutator view, the bounding rect is
+                                   // determined by width and transform.
+                                   FlutterPoint{0, 0},  // offset
+                                   size);
 
   [view applyFlutterLayer:&layer];
 }

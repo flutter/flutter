@@ -7,12 +7,6 @@
 #import "flutter/fml/synchronization/waitable_event.h"
 #import "flutter/testing/testing.h"
 
-namespace flutter::testing {
-
-namespace {}  // namespace
-
-}  // namespace flutter::testing
-
 @interface FlutterThreadSynchronizerTestScaffold : NSObject
 
 @property(nonatomic, readonly, nonnull) FlutterThreadSynchronizer* synchronizer;
