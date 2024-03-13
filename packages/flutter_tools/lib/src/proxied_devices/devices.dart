@@ -102,6 +102,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   @visibleForTesting
   ProxiedDevice deviceFromDaemonResult(Map<String, Object?> device) {
     final Map<String, Object?> capabilities = _cast<Map<String, Object?>>(device['capabilities']);
+    final String? connectionInterfaceName = _cast<String?>(device['connectionInterface']);
+    final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null ? getDeviceConnectionInterfaceForName(connectionInterfaceName) : null;
     return ProxiedDevice(
       connection, _cast<String>(device['id']),
       deltaFileTransfer: _deltaFileTransfer,
@@ -110,6 +112,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
       targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
       ephemeral: _cast<bool>(device['ephemeral']),
+      isConnected: _cast<bool?>(device['isConnected']) ?? true,
+      connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
       name: 'Proxied ${device['name']}',
       isLocalEmulator: _cast<bool>(device['emulator']),
       emulatorId: _cast<String?>(device['emulatorId']),
@@ -123,6 +127,21 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       logger: _logger,
       fileTransfer: _fileTransfer,
     );
+  }
+
+  @override
+  Future<List<String>> getDiagnostics() async {
+    try {
+      final List<String> diagnostics = _cast<List<dynamic>>(await connection.sendRequest('device.getDiagnostics')).cast<String>();
+      return diagnostics;
+    } on String catch (e) { // Daemon actually does throw string types.
+      if (e.contains('command not understood')) {
+        _logger.printTrace('The daemon is on an older version that does not support `device.getDiagnostics`.');
+        // Silently ignore.
+        return <String>[];
+      }
+      rethrow;
+    }
   }
 }
 
@@ -143,6 +162,8 @@ class ProxiedDevice extends Device {
     required PlatformType? platformType,
     required TargetPlatform targetPlatform,
     required bool ephemeral,
+    required this.isConnected,
+    required this.connectionInterface,
     required this.name,
     required bool isLocalEmulator,
     required String? emulatorId,
@@ -179,6 +200,12 @@ class ProxiedDevice extends Device {
   final bool _enableDdsProxy;
 
   final FileTransfer _fileTransfer;
+
+  @override
+  final bool isConnected;
+
+  @override
+  final DeviceConnectionInterface connectionInterface;
 
   @override
   final String name;

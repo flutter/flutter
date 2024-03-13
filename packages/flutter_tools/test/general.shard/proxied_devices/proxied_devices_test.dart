@@ -562,6 +562,44 @@ void main() {
       expect(devicesAdded[0].id, fakeDevice['id']);
       expect(devicesAdded[1].id, fakeDevice2['id']);
     });
+
+    testWithoutContext('handles getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <String>['1', '2']);
+
+      final List<String> result = await resultFuture;
+      expect(result, <String>['1', '2']);
+    });
+
+    testWithoutContext('returns empty result when daemon does not understand getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendErrorResponse(message.data['id']!, 'command not understood: device.getDiagnostics', StackTrace.current);
+
+      final List<String> result = await resultFuture;
+      expect(result, isEmpty);
+    });
   });
 
   group('ProxiedDartDevelopmentService', () {

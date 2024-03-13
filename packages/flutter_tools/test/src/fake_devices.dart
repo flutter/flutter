@@ -269,6 +269,11 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   List<String> wellKnownIds = <String>[];
+
+  List<String> diagnostics = <String>[];
+
+  @override
+  Future<List<String>> getDiagnostics() => Future<List<String>>.value(diagnostics);
 }
 
 /// A fake implementation of the [DeviceLogReader].
