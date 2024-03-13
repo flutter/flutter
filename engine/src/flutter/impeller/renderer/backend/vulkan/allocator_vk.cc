@@ -170,6 +170,32 @@ ISize AllocatorVK::GetMaxTextureSizeSupported() const {
   return max_texture_size_;
 }
 
+int32_t AllocatorVK::FindMemoryTypeIndex(
+    uint32_t memory_type_bits_requirement,
+    vk::PhysicalDeviceMemoryProperties& memory_properties) {
+  int32_t type_index = -1;
+  vk::MemoryPropertyFlagBits required_properties =
+      vk::MemoryPropertyFlagBits::eDeviceLocal;
+
+  const uint32_t memory_count = memory_properties.memoryTypeCount;
+  for (uint32_t memory_index = 0; memory_index < memory_count; ++memory_index) {
+    const uint32_t memory_type_bits = (1 << memory_index);
+    const bool is_required_memory_type =
+        memory_type_bits_requirement & memory_type_bits;
+
+    const auto properties =
+        memory_properties.memoryTypes[memory_index].propertyFlags;
+    const bool has_required_properties =
+        (properties & required_properties) == required_properties;
+
+    if (is_required_memory_type && has_required_properties) {
+      return static_cast<int32_t>(memory_index);
+    }
+  }
+
+  return type_index;
+}
+
 static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
     PixelFormat format,
     TextureUsageMask usage,
