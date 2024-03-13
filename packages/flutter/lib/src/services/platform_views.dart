@@ -72,6 +72,9 @@ enum NavigationReason {
   /// Backward, e.g. Shift + Tab
   kBackward;
 
+  /// Map from the integer argument passed through the method channel to the enum values.
+  /// Any future changes to this enum must be reflected in this factory.
+  /// The argument passed from the engine to the framework in the `navigatedOut` method call must match this mapping.
   factory NavigationReason.fromInt(int index) {
     return switch (index) {
       0 => kProgrammatic,
