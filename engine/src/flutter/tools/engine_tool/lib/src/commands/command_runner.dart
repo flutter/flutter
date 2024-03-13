@@ -10,6 +10,7 @@ import 'build_command.dart';
 import 'fetch_command.dart';
 import 'flags.dart';
 import 'format_command.dart';
+import 'lint_command.dart';
 import 'query_command.dart';
 import 'run_command.dart';
 
@@ -29,6 +30,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
       QueryCommand(environment: environment, configs: configs),
       BuildCommand(environment: environment, configs: configs),
       RunCommand(environment: environment, configs: configs),
+      LintCommand(environment: environment),
     ];
     commands.forEach(addCommand);
 
