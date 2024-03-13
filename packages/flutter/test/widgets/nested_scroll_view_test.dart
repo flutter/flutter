@@ -3070,6 +3070,7 @@ void main() {
       await tester.drag(
         find.byType(CustomScrollView),
         const Offset(0.0, -20.0),
+        pointer: 1,
       );
       await tester.pumpAndSettle();
       final NestedScrollViewState nestedScrollView = tester.state<NestedScrollViewState>(

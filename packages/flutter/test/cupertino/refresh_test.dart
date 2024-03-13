@@ -705,7 +705,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), pointer: 1, touchSlopY: 0.0);
         await tester.pump();
         expect(mockHelper.invocations, contains(const RefreshTaskInvocation()));
 
@@ -748,7 +748,7 @@ void main() {
 
         // Start another drag by an amount that would have been enough to
         // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0, warnIfMissed: false);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false);
         await tester.pump();
 
         // Instead, it's still in the done state because the sliver never
@@ -779,7 +779,7 @@ void main() {
         );
 
         // Start another drag. It's now in drag mode.
-        await tester.drag(find.text('0'), const Offset(0.0, 40.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 40.0), pointer: 1, touchSlopY: 0.0);
         await tester.pump();
         expect(mockHelper.invocations, contains(matchesBuilder(
           refreshState: RefreshIndicatorMode.drag,

@@ -416,7 +416,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0), pointer: 1, touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -438,7 +438,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0), pointer: 1, touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -1246,14 +1246,14 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump();
       expect(
         date,
         DateTime(2018, 2, 28),
       );
 
-      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump(); // Once to trigger the post frame animate call.
 
       // Callback doesn't transiently go into invalid dates.
