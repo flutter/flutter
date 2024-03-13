@@ -138,7 +138,7 @@ class ColorSchemeVariantColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
             child: Text(
-              schemeVariant.name,
+              schemeVariant.name == 'tonalSpot' ? '${schemeVariant.name} (Default)' : schemeVariant.name,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
