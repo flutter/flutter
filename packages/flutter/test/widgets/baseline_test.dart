@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Baseline - control test', (WidgetTester tester) async {
+  testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: DefaultTextStyle(
@@ -21,7 +20,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('Baseline - position test', (WidgetTester tester) async {
+  testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -44,7 +43,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Chip caches baseline', (WidgetTester tester) async {
+  testWidgets('Chip caches baseline', (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -69,7 +68,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgetsWithLeakTracking('ListTile caches baseline', (WidgetTester tester) async {
+  testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -94,7 +93,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgetsWithLeakTracking("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
+  testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

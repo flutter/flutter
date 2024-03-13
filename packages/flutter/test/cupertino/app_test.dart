@@ -4,13 +4,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Heroes work', (WidgetTester tester) async {
+  testWidgets('Heroes work', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: ListView(children: <Widget>[
         const Hero(tag: 'a', child: Text('foo')),
@@ -40,7 +40,7 @@ void main() {
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Has default cupertino localizations', (WidgetTester tester) async {
+  testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -62,7 +62,7 @@ void main() {
     expect(find.text('Thu Oct 4 '), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can use dynamic color', (WidgetTester tester) async {
+  testWidgets('Can use dynamic color', (WidgetTester tester) async {
     const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
@@ -84,7 +84,7 @@ void main() {
     expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000001);
   });
 
-  testWidgetsWithLeakTracking('Can customize initial routes', (WidgetTester tester) async {
+  testWidgets('Can customize initial routes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
@@ -131,7 +131,7 @@ void main() {
     expect(find.text('regular page two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(CupertinoApp(
       navigatorKey: key1,
@@ -147,7 +147,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router works', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -180,7 +180,53 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router works with onNavigationNotification', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/139903.
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+
+    int navigationCount = 0;
+
+    await tester.pumpWidget(CupertinoApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      onNavigationNotification: (NavigationNotification? notification) {
+        navigationCount += 1;
+        return true;
+      },
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(0));
+    final int navigationCountAfterBuild = navigationCount;
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(navigationCountAfterBuild));
+  });
+
+  testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -206,7 +252,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -233,7 +279,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -255,7 +301,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router router config works', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate delegate;
     addTearDown(() => delegate.dispose());
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
@@ -292,7 +338,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
+  testWidgets('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -307,7 +353,25 @@ void main() {
     expect(ScrollConfiguration.of(capturedContext).runtimeType, CupertinoScrollBehavior);
   });
 
-  testWidgetsWithLeakTracking('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
+  testWidgets('CupertinoApp has correct default multitouchDragStrategy', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
+    expect(scrollBehavior.runtimeType, CupertinoScrollBehavior);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.averageBoundaryPointers);
+  });
+
+  testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -325,7 +389,7 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgetsWithLeakTracking('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -345,7 +409,7 @@ void main() {
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 
-  testWidgetsWithLeakTracking('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+  testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
     debugBrightnessOverride = Brightness.dark;
 
     await tester.pumpWidget(
@@ -384,7 +448,7 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgetsWithLeakTracking('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+  testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
     debugBrightnessOverride = Brightness.dark;
 
     RenderEditable findRenderEditable(WidgetTester tester) {
@@ -441,7 +505,7 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgetsWithLeakTracking('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
     late BuildContext capturedContext;
 
@@ -490,7 +554,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
@@ -44,7 +43,7 @@ void main() {
       expect(identical(MenuStyle.lerp(data, data, 0.5), data), true);
     });
 
-    testWidgetsWithLeakTracking('fixedSize affects geometry', (WidgetTester tester) async {
+    testWidgets('fixedSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -89,7 +88,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('maximumSize affects geometry', (WidgetTester tester) async {
+    testWidgets('maximumSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -132,7 +131,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
-    testWidgetsWithLeakTracking('minimumSize affects geometry', (WidgetTester tester) async {
+    testWidgets('minimumSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -175,7 +174,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(300.0, 300.0)));
     });
 
-    testWidgetsWithLeakTracking('Material parameters are honored', (WidgetTester tester) async {
+    testWidgets('Material parameters are honored', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -241,7 +240,7 @@ void main() {
       expect(panelPadding.padding, equals(const EdgeInsets.all(20)));
     });
 
-    testWidgetsWithLeakTracking('visual density', (WidgetTester tester) async {
+    testWidgets('visual density', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),

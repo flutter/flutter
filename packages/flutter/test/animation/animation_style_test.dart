@@ -5,7 +5,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -13,7 +12,7 @@ void main() {
     expect(AnimationStyle().hashCode, AnimationStyle().copyWith().hashCode);
   });
 
-  testWidgetsWithLeakTracking('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
+  testWidgets('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
     final AnimationStyle original = AnimationStyle(
       curve: Curves.ease,
       duration: const Duration(seconds: 1),
@@ -38,7 +37,7 @@ void main() {
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
     final AnimationStyle a = AnimationStyle(
       curve: Curves.ease,
       duration: const Duration(seconds: 1),
@@ -57,7 +56,7 @@ void main() {
     expect(AnimationStyle.lerp(a, b, 1.0), b);
   });
 
-  testWidgetsWithLeakTracking('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     AnimationStyle().debugFillProperties(builder);
@@ -69,7 +68,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     AnimationStyle(

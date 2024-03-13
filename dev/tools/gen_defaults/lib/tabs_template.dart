@@ -21,11 +21,13 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
   final bool isScrollable;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.color' token.
   @override
-  Color? get dividerColor => ${componentColor("md.comp.primary-navigation-tab.divider")};
+  Color? get dividerColor => ${componentColor("md.comp.divider")};
 
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.height' token.
   @override
-  double? get dividerHeight => ${getToken('md.comp.primary-navigation-tab.divider.height')};
+  double? get dividerHeight => ${getToken("md.comp.divider.thickness")};
 
   @override
   Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};
@@ -77,6 +79,11 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
   static double indicatorWeight = ${getToken('md.comp.primary-navigation-tab.active-indicator.height')};
+
+  // TODO(davidmartos96): This value doesn't currently exist in
+  // https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
@@ -88,11 +95,13 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
   final bool isScrollable;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.color' token.
   @override
-  Color? get dividerColor => ${componentColor("md.comp.secondary-navigation-tab.divider")};
+  Color? get dividerColor => ${componentColor("md.comp.divider")};
 
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.height' token.
   @override
-  double? get dividerHeight => ${getToken('md.comp.secondary-navigation-tab.divider.height')};
+  double? get dividerHeight => ${getToken("md.comp.divider.thickness")};
 
   @override
   Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};

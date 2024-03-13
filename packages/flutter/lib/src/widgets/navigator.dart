@@ -138,14 +138,14 @@ enum RoutePopDisposition {
 /// The type argument `T` is the route's return type, as used by
 /// [currentResult], [popped], and [didPop]. The type `void` may be used if the
 /// route does not return a value.
-abstract class Route<T> {
+abstract class Route<T> extends _RoutePlaceholder {
   /// Initialize the [Route].
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
   Route({ RouteSettings? settings }) : _settings = settings ?? const RouteSettings() {
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$Route<$T>',
         object: this,
@@ -518,7 +518,7 @@ abstract class Route<T> {
     _restorationScopeId.dispose();
     _disposeCompleter.complete();
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
   }
 
@@ -578,10 +578,7 @@ abstract class Route<T> {
   /// rendered. It is even possible for the route to be active but for the stateful
   /// widgets within the route to not be instantiated. See [ModalRoute.maintainState].
   bool get isActive {
-    if (_navigator == null) {
-      return false;
-    }
-    return _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
+    return _navigator?._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
   }
 }
 
@@ -2899,10 +2896,9 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-class _NotAnnounced extends Route<void> {
-  // A placeholder for the lastAnnouncedPreviousRoute, the
-  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
-  // change has been announced.
+/// Placeholder for a route.
+class _RoutePlaceholder {
+  const _RoutePlaceholder();
 }
 
 class _RouteEntry extends RouteTransitionRecord {
@@ -2919,11 +2915,11 @@ class _RouteEntry extends RouteTransitionRecord {
            initialState == _RouteLifecycle.pushReplace ||
            initialState == _RouteLifecycle.replace,
          ),
-        currentState = initialState {
+         currentState = initialState {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
         library: 'package:flutter/widgets.dart',
         className: '$_RouteEntry',
         object: this,
@@ -2940,12 +2936,12 @@ class _RouteEntry extends RouteTransitionRecord {
   /// remove as a result of a page update.
   static const int kDebugPopAttemptLimit = 100;
 
-  static final Route<dynamic> notAnnounced = _NotAnnounced();
+  static const _RoutePlaceholder notAnnounced = _RoutePlaceholder();
 
   _RouteLifecycle currentState;
-  Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
-  WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
-  Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
+  _RoutePlaceholder? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  WeakReference<_RoutePlaceholder> lastAnnouncedPoppedNextRoute = WeakReference<_RoutePlaceholder>(notAnnounced); // last argument to Route.didPopNext
+  _RoutePlaceholder? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
   int? lastFocusNode; // The last focused semantic node for the route entry.
 
   /// Restoration ID to be used for the encapsulating route when restoration is
@@ -3163,7 +3159,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
     currentState = _RouteLifecycle.disposed;
     route.dispose();
@@ -5286,6 +5282,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         assert(entry.route._popCompleter.isCompleted);
         entry.currentState = _RouteLifecycle.pop;
       }
+      entry.route.onPopInvoked(true);
     } else {
       entry.pop<T>(result);
       assert (entry.currentState == _RouteLifecycle.pop);
@@ -5650,14 +5647,12 @@ class _NamedRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : super(_RouteRestorationType.named);
 
-  factory _NamedRestorationInformation.fromSerializableData(List<Object?> data) {
-    assert(data.length >= 2);
-    return _NamedRestorationInformation(
-      restorationScopeId: data[0]! as int,
-      name: data[1]! as String,
-      arguments: data.length > 2 ? data[2] : null,
-    );
-  }
+  _NamedRestorationInformation.fromSerializableData(List<Object?> data)
+      : assert(data.length > 1),
+        restorationScopeId = data[0]! as int,
+        name = data[1]! as String,
+        arguments = data.elementAtOrNull(2),
+        super(_RouteRestorationType.named);
 
   @override
   List<Object> computeSerializableData() {
@@ -5688,15 +5683,12 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     required this.restorationScopeId,
   }) : super(_RouteRestorationType.anonymous);
 
-  factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
-    assert(data.length > 1);
-    final RestorableRouteBuilder<Object?> routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
-    return _AnonymousRestorationInformation(
-      restorationScopeId: data[0]! as int,
-      routeBuilder: routeBuilder,
-      arguments: data.length > 2 ? data[2] : null,
-    );
-  }
+  _AnonymousRestorationInformation.fromSerializableData(List<Object?> data)
+      : assert(data.length > 1),
+        restorationScopeId = data[0]! as int,
+        routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder,
+        arguments = data.elementAtOrNull(2),
+        super(_RouteRestorationType.anonymous);
 
   @override
   // TODO(goderbauer): remove the kIsWeb check when https://github.com/flutter/flutter/issues/33615 is resolved.

@@ -83,7 +83,7 @@ void main() {
 
     testWithoutContext('Flutter web wasm only enable on master', () {
       expect(flutterWebWasm.getSettingForChannel('master').enabledByDefault, isTrue);
-      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isFalse);
+      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isTrue);
       expect(flutterWebWasm.getSettingForChannel('stable').enabledByDefault, isFalse);
     });
 

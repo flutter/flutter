@@ -26,5 +26,6 @@
   "menuDismissLabel": "Мәзірді жабу",
   "lookUpButtonLabel": "Іздеу",
   "searchWebButtonLabel": "Интернеттен іздеу",
-  "shareButtonLabel": "Бөлісу…"
+  "shareButtonLabel": "Бөлісу…",
+  "clearButtonLabel": "Clear"
 }

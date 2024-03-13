@@ -879,7 +879,7 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0 || angle.isNaN) {
       return;
     }
 
@@ -908,10 +908,10 @@ class RenderListWheelViewport
   // differently if it intersects with the magnifier.
   //
   // `center` controls how items that partially intersect the center magnifier
-  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // are rendered. If `center` is false, items are only painted cylindrically.
   // If `center` is true, only the clipped magnifier items are painted.
   // If `center` is null, partially intersecting items are painted both as the
-  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // magnifier and cylindrical item, while non-intersecting items are painted
   // only cylindrically.
   //
   // This property is used to lift the opacity that would be applied to each

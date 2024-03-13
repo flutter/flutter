@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 /// features are enabled, consider the [FakeAccessibilityFeatures.allOn]
 /// constant.
 @immutable
-// ignore: avoid_implementing_value_types
 class FakeAccessibilityFeatures implements AccessibilityFeatures {
   /// Creates a test instance of [AccessibilityFeatures].
   ///
@@ -612,9 +611,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   void updateSemantics(SemanticsUpdate update) {
-    // Using the deprecated method to maintain backwards compatibility during
-    // the multi-view transition window.
-    // ignore: deprecated_member_use
     _platformDispatcher.updateSemantics(update);
   }
 

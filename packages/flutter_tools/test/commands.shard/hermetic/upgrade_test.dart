@@ -46,7 +46,7 @@ void main() {
     const String upstreamHeadRevision = 'deadbeef';
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> command) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }
@@ -128,7 +128,7 @@ void main() {
   testUsingContext('can push people from master to beta', () async {
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> args) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }
@@ -207,7 +207,7 @@ void main() {
   testUsingContext('do not push people from beta to anything else', () async {
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> command) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }

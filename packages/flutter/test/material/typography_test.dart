@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('Typography is defined for all target platforms', () {
@@ -35,7 +34,7 @@ void main() {
     expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
   });
 
-  // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
+  // Ref: https://developer.apple.com/design/human-interface-guidelines/typography/
   final Matcher isSanFranciscoDisplayFont = predicate((TextStyle s) {
     return s.fontFamily == 'CupertinoSystemDisplay';
   }, 'Uses SF Display font');
@@ -90,7 +89,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,

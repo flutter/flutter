@@ -335,7 +335,7 @@ void main() {
     });
 
     group('in release mode', () {
-      testUsingContext('suceeds when install and launch succeed', () async {
+      testUsingContext('succeeds when install and launch succeed', () async {
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
@@ -869,6 +869,7 @@ IOSDevice setUpIOSDevice({
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
+    isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
   );

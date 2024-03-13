@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
 
@@ -40,7 +39,7 @@ void main() {
 
   group('SliverFillRemaining', () {
     group('hasScrollBody: true, default', () {
-      testWidgetsWithLeakTracking('no siblings', (WidgetTester tester) async {
+      testWidgets('no siblings', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -81,7 +80,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('one sibling', (WidgetTester tester) async {
+      testWidgets('one sibling', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -123,7 +122,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('scrolls beyond viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('scrolls beyond viewportMainAxisExtent', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
@@ -140,10 +139,136 @@ void main() {
         expect(controller.offset, 150.0);
         expect(find.byType(Container), findsOneWidget);
       });
+
+      group('has correct semantics when', () {
+        testWidgets('within viewport', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight - 100,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is within viewport
+                  const SliverFillRemaining(
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is within the viewport, semantic nodes for
+          // it are created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsOne);
+          expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+          handle.dispose();
+        });
+
+        testWidgets('outside of viewport but within cache extent', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  // This sliver takes up entire viewport and leaves 250 remaining cacheExtent
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is not within viewport but is within remaining cacheExtent
+                  const SliverFillRemaining(
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is not in viewport, but is within
+          // cacheExtent, hidden semantic nodes for it are created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsOne);
+          expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+          handle.dispose();
+        });
+
+        testWidgets('outside of viewport and not within cache extent', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  // This sliver takes up entire viewport and leaves 0 remaining cacheExtent
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight + cacheExtent,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is not within viewport and not within remaining cacheExtent
+                  const SliverFillRemaining(
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is not in viewport and not within
+          // cacheExtent, semantic nodes are not created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsNothing);
+          handle.dispose();
+        });
+      });
+
     });
 
     group('hasScrollBody: false', () {
-      testWidgetsWithLeakTracking('does not extend past viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('does not extend past viewportMainAxisExtent', (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         addTearDown(controller.dispose);
         final List<Widget> slivers = <Widget>[
@@ -163,7 +288,7 @@ void main() {
         expect(find.byType(Container), findsNWidgets(2));
       });
 
-      testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
+      testWidgets('child without size is sized by extent', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
@@ -184,7 +309,7 @@ void main() {
         expect(box.size.width, equals(650));
       });
 
-      testWidgetsWithLeakTracking('child with smaller size is sized by extent', (WidgetTester tester) async {
+      testWidgets('child with smaller size is sized by extent', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           sliverBox,
@@ -225,7 +350,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('extent is overridden by child with larger size', (WidgetTester tester) async {
+      testWidgets('extent is overridden by child with larger size', (WidgetTester tester) async {
         final List<Widget> slivers = <Widget>[
           sliverBox,
           SliverFillRemaining(
@@ -249,7 +374,7 @@ void main() {
         expect(box.size.width, equals(1000));
       });
 
-      testWidgetsWithLeakTracking('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+      testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           SliverFixedExtentList(
@@ -290,7 +415,7 @@ void main() {
         expect(tester.getCenter(button).dx, equals(400.0));
       });
 
-      testWidgetsWithLeakTracking('alignment with a flexible works', (WidgetTester tester) async {
+      testWidgets('alignment with a flexible works', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           sliverBox,
@@ -358,8 +483,137 @@ void main() {
         expect(tester.getCenter(button).dx, equals(400.0));
       }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
+      group('has correct semantics when', () {
+        testWidgets('within viewport', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight - 100,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is within viewport
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is within the viewport, semantic nodes for
+          // it are created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsOne);
+          expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+          handle.dispose();
+        });
+
+        testWidgets('outside of viewport but within cache extent', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  // This sliver takes up entire viewport and leaves 250 remaining cacheExtent
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is not within viewport but is within remaining cacheExtent
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is not in viewport, but is within
+          // cacheExtent, hidden semantic nodes for it are created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsOne);
+          expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+          handle.dispose();
+        });
+
+        testWidgets('outside of viewport and not within cache extent', (WidgetTester tester) async {
+          // Viewport is 800x600
+          const double viewportHeight = 600;
+          const double cacheExtent = 250;
+          final SemanticsHandle handle = tester.ensureSemantics();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                cacheExtent: cacheExtent,
+                slivers: <Widget>[
+                  // This sliver takes up entire viewport and leaves 0 remaining cacheExtent
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Colors.amber,
+                      height: viewportHeight + cacheExtent,
+                      width: 150,
+                    ),
+                  ),
+                  // This sliver is not within viewport and not within remaining cacheExtent
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Text in SliverFillRemaining'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          // When SliverFillRemaining is not in viewport and not within
+          // cacheExtent, semantic nodes are not created.
+          final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+            'Text in SliverFillRemaining',
+          );
+          expect(textInSliverFillRemaining, findsNothing);
+          handle.dispose();
+        });
+      });
+
+
       group('fillOverscroll: true, relevant platforms', () {
-        testWidgetsWithLeakTracking('child without size is sized by extent and overscroll', (WidgetTester tester) async {
+        testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
             SliverFillRemaining(
@@ -386,7 +640,7 @@ void main() {
           expect(box3.size.height, equals(450));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
+        testWidgets('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -433,7 +687,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -498,7 +752,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -561,7 +815,7 @@ void main() {
           );
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgetsWithLeakTracking('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
+        testWidgets('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -651,11 +905,142 @@ void main() {
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
         }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        group('has correct semantics when', () {
+          testWidgets('within viewport', (WidgetTester tester) async {
+            // Viewport is 800x600
+            const double viewportHeight = 600;
+            const double cacheExtent = 250;
+            final SemanticsHandle handle = tester.ensureSemantics();
+
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: CustomScrollView(
+                  cacheExtent: cacheExtent,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        color: Colors.amber,
+                        height: viewportHeight - 100,
+                        width: 150,
+                      ),
+                    ),
+                    // This sliver is within viewport
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: SizedBox(
+                        height: 100,
+                        child: Text('Text in SliverFillRemaining'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+            // When SliverFillRemaining is within the viewport, semantic nodes for
+            // it are created.
+            final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+              'Text in SliverFillRemaining',
+            );
+            expect(textInSliverFillRemaining, findsOne);
+            expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+            handle.dispose();
+          }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          testWidgets('outside of viewport but within cache extent', (WidgetTester tester) async {
+            // Viewport is 800x600
+            const double viewportHeight = 600;
+            const double cacheExtent = 250;
+            final SemanticsHandle handle = tester.ensureSemantics();
+
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: CustomScrollView(
+                  cacheExtent: cacheExtent,
+                  slivers: <Widget>[
+                    // This sliver takes up entire viewport and leaves 250 remaining cacheExtent
+                    SliverToBoxAdapter(
+                      child: Container(
+                        color: Colors.amber,
+                        height: viewportHeight,
+                        width: 150,
+                      ),
+                    ),
+                    // This sliver is not within viewport but is within remaining cacheExtent
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: SizedBox(
+                        height: 100,
+                        child: Text('Text in SliverFillRemaining'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+            // When SliverFillRemaining is not in viewport, but is within
+            // cacheExtent, hidden semantic nodes for it are created.
+            final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+              'Text in SliverFillRemaining',
+            );
+            expect(textInSliverFillRemaining, findsOne);
+            expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+            handle.dispose();
+          }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          testWidgets('outside of viewport and not within cache extent', (WidgetTester tester) async {
+            // Viewport is 800x600
+            const double viewportHeight = 600;
+            const double cacheExtent = 250;
+            final SemanticsHandle handle = tester.ensureSemantics();
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: CustomScrollView(
+                  cacheExtent: cacheExtent,
+                  slivers: <Widget>[
+                    // This sliver takes up entire viewport and leaves 0 remaining cacheExtent
+                    SliverToBoxAdapter(
+                      child: Container(
+                        color: Colors.amber,
+                        height: viewportHeight + cacheExtent,
+                        width: 150,
+                      ),
+                    ),
+                    // This sliver is not within viewport and not within remaining cacheExtent
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: SizedBox(
+                        height: 100,
+                        child: Text('Text in SliverFillRemaining'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+
+            // When SliverFillRemaining is not in viewport and not within
+            // cacheExtent, semantic nodes are not created.
+            final SemanticsFinder textInSliverFillRemaining = find.semantics.byLabel(
+              'Text in SliverFillRemaining',
+            );
+            expect(textInSliverFillRemaining, findsNothing);
+            handle.dispose();
+          }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        });
       });
 
       group('fillOverscroll: true, is ignored on irrelevant platforms', () {
         // Android/Other scroll physics when hasScrollBody: false, ignores fillOverscroll: true
-        testWidgetsWithLeakTracking('child without size is sized by extent', (WidgetTester tester) async {
+        testWidgets('child without size is sized by extent', (WidgetTester tester) async {
           final List<Widget> slivers = <Widget>[
             sliverBox,
             SliverFillRemaining(
@@ -674,7 +1059,7 @@ void main() {
           expect(box2.size.height, equals(450));
         });
 
-        testWidgetsWithLeakTracking('child with size is overridden and sized by extent', (WidgetTester tester) async {
+        testWidgets('child with size is overridden and sized by extent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -713,7 +1098,7 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgetsWithLeakTracking('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);
@@ -771,7 +1156,7 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgetsWithLeakTracking('child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+        testWidgets('child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           addTearDown(controller.dispose);

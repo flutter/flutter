@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:file/src/interface/file_system.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -384,9 +384,6 @@ WebDriverService setUpDriverService() {
   );
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   final PlatformType platformType = PlatformType.web;

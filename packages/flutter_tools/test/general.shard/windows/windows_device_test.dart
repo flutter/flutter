@@ -130,5 +130,5 @@ WindowsDevice setUpWindowsDevice({
 
 class FakeWindowsApp extends Fake implements WindowsApp {
   @override
-  String executable(BuildMode buildMode) => '${buildMode.cliName}/executable';
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform) => '${buildMode.cliName}/executable';
 }

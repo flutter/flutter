@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
@@ -24,7 +23,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver appbars - pinned', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -60,7 +59,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0), true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
     final TestDelegateThatCanThrow delegateThatCanThrow = TestDelegateThatCanThrow();
     GlobalKey key;
     await tester.pumpWidget(
@@ -89,10 +88,10 @@ void main() {
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-        ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-        ' │   cacheOrigin: 0.0)\n'
+        ' │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+        ' │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+        ' │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+        ' │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
         ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │   200.0)\n'
@@ -122,7 +121,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -215,7 +214,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 550.0), true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
     const double bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -251,7 +250,7 @@ void main() {
     verifyPaintPosition(key5, Offset.zero, true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

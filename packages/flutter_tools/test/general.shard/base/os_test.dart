@@ -160,7 +160,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Windows', () async {
+    testWithoutContext('Windows default', () async {
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
@@ -670,7 +670,7 @@ void main() {
             '-d',
             tempDirectory.path,
           ],
-          onRun: () {
+          onRun: (_) {
             expect(tempDirectory, exists);
             tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
             tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);

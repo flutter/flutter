@@ -11,7 +11,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_border.dart' show TestBorder;
 
@@ -59,7 +58,7 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
+  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
@@ -78,7 +77,7 @@ void main() {
     expect(find.byType(FittedBox), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRect());
 
     final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
@@ -100,7 +99,7 @@ void main() {
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
 
-  testWidgetsWithLeakTracking('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRRect());
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
@@ -116,7 +115,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgetsWithLeakTracking('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipOval());
 
     final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
@@ -132,7 +131,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgetsWithLeakTracking('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipPath());
 
     final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
@@ -148,7 +147,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgetsWithLeakTracking('ClipPath', (WidgetTester tester) async {
+  testWidgets('ClipPath', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipPath(
         clipper: PathClipper(),
@@ -169,7 +168,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('ClipOval', (WidgetTester tester) async {
+  testWidgets('ClipOval', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipOval(
         child: GestureDetector(
@@ -189,7 +188,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('Transparent ClipOval hit test', (WidgetTester tester) async {
+  testWidgets('Transparent ClipOval hit test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Opacity(
         opacity: 0.0,
@@ -212,7 +211,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('ClipRect', (WidgetTester tester) async {
+  testWidgets('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
@@ -335,7 +334,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('debugPaintSizeEnabled', (WidgetTester tester) async {
+  testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
         child: Placeholder(),
@@ -357,7 +356,7 @@ void main() {
     debugPaintSizeEnabled = false;
   });
 
-  testWidgetsWithLeakTracking('ClipRect painting', (WidgetTester tester) async {
+  testWidgets('ClipRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -400,7 +399,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: Stack(
@@ -439,7 +438,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRRect painting', (WidgetTester tester) async {
+  testWidgets('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -488,7 +487,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipOval painting', (WidgetTester tester) async {
+  testWidgets('ClipOval painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -531,7 +530,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipPath painting', (WidgetTester tester) async {
+  testWidgets('ClipPath painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -616,7 +615,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -624,7 +623,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -634,7 +633,7 @@ void main() {
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -642,7 +641,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default PhysicalModel painting', (WidgetTester tester) async {
+  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -725,7 +724,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -733,7 +732,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -741,7 +740,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -749,7 +748,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -795,7 +794,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipPath.shape', (WidgetTester tester) async {
+  testWidgets('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
     Widget buildClipPath() {
@@ -852,7 +851,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('CustomClipper reclips when notified', (WidgetTester tester) async {
+  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
     final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
     addTearDown(clip.dispose);
 
@@ -886,7 +885,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
+  testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
 
@@ -913,7 +912,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('ClipRRect is direction-aware', (WidgetTester tester) async {
+  testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;

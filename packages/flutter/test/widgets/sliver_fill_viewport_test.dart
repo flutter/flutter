@@ -5,10 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SliverFillViewport control test', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
       return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
     });
@@ -71,10 +70,10 @@ void main() {
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-        ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-        ' │   cacheOrigin: 0.0)\n'
+        ' │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+        ' │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+        ' │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+        ' │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true,\n'
         ' │   cacheExtent: 850.0)\n'
@@ -84,10 +83,10 @@ void main() {
         '   │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         '   │ constraints: SliverConstraints(AxisDirection.down,\n'
         '   │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-        '   │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-        '   │   crossAxisDirection: AxisDirection.right,\n'
-        '   │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-        '   │   cacheOrigin: 0.0)\n'
+        '   │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+        '   │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+        '   │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+        '   │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
         '   │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         '   │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true,\n'
         '   │   cacheExtent: 850.0)\n'
@@ -159,7 +158,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SliverFillViewport padding test', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(
       <Widget>[
         const Text('0'),

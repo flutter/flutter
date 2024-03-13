@@ -26,5 +26,6 @@
   "menuDismissLabel": "மெனுவை மூடும்",
   "lookUpButtonLabel": "தேடு",
   "searchWebButtonLabel": "இணையத்தில் தேடு",
-  "shareButtonLabel": "பகிர்..."
+  "shareButtonLabel": "பகிர்...",
+  "clearButtonLabel": "Clear"
 }

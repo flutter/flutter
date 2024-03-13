@@ -401,6 +401,7 @@ class Context {
       '-dTargetPlatform=ios',
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
+      if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
       '-dIosArchs=${environment['ARCHS'] ?? ''}',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',

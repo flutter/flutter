@@ -26,5 +26,6 @@
   "menuDismissLabel": "Stäng menyn",
   "lookUpButtonLabel": "Titta upp",
   "searchWebButtonLabel": "Sök på webben",
-  "shareButtonLabel": "Dela …"
+  "shareButtonLabel": "Dela …",
+  "clearButtonLabel": "Clear"
 }

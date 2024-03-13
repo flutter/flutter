@@ -771,8 +771,10 @@ class PageTransitionsTheme with Diagnosticable {
       platform = TargetPlatform.iOS;
     }
 
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const ZoomPageTransitionsBuilder();
+    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? switch (platform) {
+      TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+    };
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
@@ -866,14 +868,10 @@ mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
   }
 
   void onAnimationStatusChange(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        controller.allowSnapshotting = false;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        controller.allowSnapshotting = useSnapshot;
-    }
+    controller.allowSnapshotting = switch (status) {
+      AnimationStatus.dismissed || AnimationStatus.completed => false,
+      AnimationStatus.forward   || AnimationStatus.reverse   => useSnapshot,
+    };
   }
 
   @override

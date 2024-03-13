@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 
@@ -100,7 +99,7 @@ void main() {
 
   group('InputDatePickerFormField', () {
 
-    testWidgetsWithLeakTracking('Initial date is the default', (WidgetTester tester) async {
+    testWidgets('Initial date is the default', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       DateTime? inputDate;
@@ -114,7 +113,7 @@ void main() {
       expect(inputDate, equals(initialDate));
     });
 
-    testWidgetsWithLeakTracking('Changing initial date is reflected in text value', (WidgetTester tester) async {
+    testWidgets('Changing initial date is reflected in text value', (WidgetTester tester) async {
       final DateTime initialDate = DateTime(2016, DateTime.february, 21);
       final DateTime updatedInitialDate = DateTime(2016, DateTime.february, 23);
       await tester.pumpWidget(inputDatePickerField(
@@ -129,7 +128,7 @@ void main() {
       expect(textFieldController(tester).value.text, equals('02/23/2016'));
     });
 
-    testWidgetsWithLeakTracking('Valid date entry', (WidgetTester tester) async {
+    testWidgets('Valid date entry', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(inputDatePickerField(
@@ -142,7 +141,7 @@ void main() {
       expect(inputDate, equals(DateTime(2016, DateTime.february, 21)));
     });
 
-    testWidgetsWithLeakTracking('Invalid text entry shows errorFormat text', (WidgetTester tester) async {
+    testWidgets('Invalid text entry shows errorFormat text', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(inputDatePickerField(
@@ -169,7 +168,7 @@ void main() {
       expect(find.text('That is not a date.'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('Valid text entry, but date outside first or last date shows bounds shows errorInvalid text', (WidgetTester tester) async {
+    testWidgets('Valid text entry, but date outside first or last date shows bounds shows errorInvalid text', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(inputDatePickerField(
@@ -204,7 +203,7 @@ void main() {
       expect(find.text('Not in given range.'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('selectableDatePredicate will be used to show errorInvalid if date is not selectable', (WidgetTester tester) async {
+    testWidgets('selectableDatePredicate will be used to show errorInvalid if date is not selectable', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       DateTime? inputDate;
       await tester.pumpWidget(inputDatePickerField(
@@ -230,7 +229,7 @@ void main() {
       expect(find.text('Out of range.'), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('Empty field shows hint text when focused', (WidgetTester tester) async {
+    testWidgets('Empty field shows hint text when focused', (WidgetTester tester) async {
       await tester.pumpWidget(inputDatePickerField());
       // Focus on it
       await tester.tap(find.byType(TextField));
@@ -253,7 +252,7 @@ void main() {
       expect(textOpacity(tester, 'Enter some date'), equals(0.0));
     });
 
-    testWidgetsWithLeakTracking('Label text', (WidgetTester tester) async {
+    testWidgets('Label text', (WidgetTester tester) async {
       await tester.pumpWidget(inputDatePickerField());
       // Default label
       expect(find.text('Enter Date'), findsOneWidget);
@@ -265,7 +264,7 @@ void main() {
       expect(find.text('Give me a date!'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('Semantics', (WidgetTester tester) async {
+    testWidgets('Semantics', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
 
       // Fill the clipboard so that the Paste option is available in the text
@@ -280,6 +279,8 @@ void main() {
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
         label: 'Enter Date',
         isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
         isFocused: true,
         value: '01/15/2016',
         hasTapAction: true,
@@ -294,7 +295,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(inputDatePickerField(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
@@ -328,7 +329,7 @@ void main() {
       expect(containerColor, equals(Colors.transparent));
     });
 
-    testWidgetsWithLeakTracking('Date text localization', (WidgetTester tester) async {
+    testWidgets('Date text localization', (WidgetTester tester) async {
       final Iterable<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
         TestMaterialLocalizationsDelegate(),
         DefaultWidgetsLocalizations.delegate,
@@ -351,7 +352,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('when an empty date is entered and acceptEmptyDate is true, then errorFormatText is not shown', (WidgetTester tester) async {
+    testWidgets('when an empty date is entered and acceptEmptyDate is true, then errorFormatText is not shown', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       const String errorFormatText = 'That is not a date.';
       await tester.pumpWidget(inputDatePickerField(
@@ -366,7 +367,7 @@ void main() {
       expect(find.text(errorFormatText), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('when an empty date is entered and acceptEmptyDate is false, then errorFormatText is shown', (WidgetTester tester) async {
+    testWidgets('when an empty date is entered and acceptEmptyDate is false, then errorFormatText is shown', (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       const String errorFormatText = 'That is not a date.';
       await tester.pumpWidget(inputDatePickerField(
@@ -381,7 +382,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('FocusNode can request focus', (WidgetTester tester) async {
+  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(inputDatePickerField(

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'two_dimensional_utils.dart';
 
@@ -20,7 +19,7 @@ Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
 
 void main() {
   group('TwoDimensionalScrollView',() {
-    testWidgetsWithLeakTracking('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
+    testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
       final List<Object> exceptions = <Object>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -67,7 +66,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('ScrollableDetails.controller can set initial scroll positions, modify within bounds', (WidgetTester tester) async {
+    testWidgets('ScrollableDetails.controller can set initial scroll positions, modify within bounds', (WidgetTester tester) async {
       final ScrollController verticalController = ScrollController(initialScrollOffset: 100);
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController(initialScrollOffset: 50);
@@ -110,7 +109,7 @@ void main() {
       expect(horizontalController.position.pixels, 19200);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Properly assigns the PrimaryScrollController to the main axis on the correct platform', (WidgetTester tester) async {
+    testWidgets('Properly assigns the PrimaryScrollController to the main axis on the correct platform', (WidgetTester tester) async {
       late ScrollController controller;
       Widget buildForPrimaryScrollController({
         bool? explicitPrimary,
@@ -308,7 +307,7 @@ void main() {
       FlutterError.onError = oldHandler;
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('TwoDimensionalScrollable receives the correct details from TwoDimensionalScrollView', (WidgetTester tester) async {
+    testWidgets('TwoDimensionalScrollable receives the correct details from TwoDimensionalScrollView', (WidgetTester tester) async {
       late BuildContext capturedContext;
       // Default
       late final TwoDimensionalChildBuilderDelegate delegate1;
@@ -358,7 +357,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
       final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -499,7 +500,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
       final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
+      addTearDown(horizontalController.dispose);
 
       await tester.pumpWidget(
         Directionality(

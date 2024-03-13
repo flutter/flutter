@@ -14,10 +14,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
+  testWidgets('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
     int mutatedIndex = -1;
     final Widget widget = _buildWidget(
       NavigationBar(
@@ -49,7 +48,7 @@ void main() {
     expect(mutatedIndex, 0);
   });
 
-  testWidgetsWithLeakTracking('NavigationBar can update background color', (WidgetTester tester) async {
+  testWidgets('NavigationBar can update background color', (WidgetTester tester) async {
     const Color color = Colors.yellow;
 
     await tester.pumpWidget(
@@ -74,7 +73,7 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgetsWithLeakTracking('NavigationBar can update elevation', (WidgetTester tester) async {
+  testWidgets('NavigationBar can update elevation', (WidgetTester tester) async {
     const double elevation = 42.0;
 
     await tester.pumpWidget(
@@ -99,7 +98,7 @@ void main() {
     expect(_getMaterial(tester).elevation, equals(elevation));
   });
 
-  testWidgetsWithLeakTracking('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
+  testWidgets('NavigationBar adds bottom padding to height', (WidgetTester tester) async {
     const double bottomPadding = 40.0;
 
     await tester.pumpWidget(
@@ -148,7 +147,7 @@ void main() {
     expect(tester.getSize(find.byType(NavigationBar)).height, expectedHeight);
   });
 
-  testWidgetsWithLeakTracking('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+  testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
     const double safeAreaPadding = 40.0;
     Widget navigationBar() {
       return NavigationBar(
@@ -246,7 +245,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
+  testWidgets('Material2 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // M2 settings that were hand coded.
     await tester.pumpWidget(
       _buildWidget(
@@ -275,7 +274,7 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
   });
 
-  testWidgetsWithLeakTracking('Material3 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
+  testWidgets('Material3 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // M3 settings from the token database.
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
@@ -297,20 +296,20 @@ void main() {
       ),
     );
 
-    expect(_getMaterial(tester).color, theme.colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(_getMaterial(tester).color, theme.colorScheme.surfaceContainer);
+    expect(_getMaterial(tester).surfaceTintColor, Colors.transparent);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
-  testWidgetsWithLeakTracking('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
+  testWidgets('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -347,7 +346,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
@@ -358,18 +357,18 @@ void main() {
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
   });
 
-  testWidgetsWithLeakTracking('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
+  testWidgets('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
-    Widget buildApp({ required double textScaleFactor }) {
+    Widget buildApp({ required TextScaler textScaler }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: textScaler),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -406,7 +405,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
@@ -417,7 +416,7 @@ void main() {
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4.0)));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
@@ -426,7 +425,72 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
+    testWidgets('Material3 - NavigationBar label can scale and has maxScaleFactor', (WidgetTester tester) async {
+    const String label = 'A';
+
+    Widget buildApp({ required TextScaler textScaler }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: MaterialApp(
+            home: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: NavigationBar(
+                        destinations: const <NavigationDestination>[
+                          NavigationDestination(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                          ),
+                          NavigationDestination(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
+    expect(find.text(label), findsOneWidget);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
+    await tester.pumpAndSettle();
+
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.3)));
+
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
+  });
+
+  testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -466,7 +530,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Navigation bar semantics', (WidgetTester tester) async {
+  testWidgets('Navigation bar semantics', (WidgetTester tester) async {
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
@@ -530,7 +594,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
+  testWidgets('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
@@ -595,13 +659,13 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
+  testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
-    Widget widget({double textScaleFactor = 1}) {
+    Widget widget({ TextScaler textScaler = TextScaler.noScaling }) {
       return _buildWidget(
         MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: textScaler),
           child: NavigationBar(
             animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
@@ -622,13 +686,13 @@ void main() {
     await tester.pumpWidget(widget());
     final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
 
-    await tester.pumpWidget(widget(textScaleFactor: 2));
+    await tester.pumpWidget(widget(textScaler: const TextScaler.linear(2)));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));
   });
 
-  testWidgetsWithLeakTracking('Material3 - Navigation indicator renders ripple', (WidgetTester tester) async {
+  testWidgets('Material3 - Navigation indicator renders ripple', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/116751.
     int selectedIndex = 0;
 
@@ -829,7 +893,7 @@ void main() {
     );
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgetsWithLeakTracking('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
+  testWidgets('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.
 
     Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
@@ -886,7 +950,7 @@ void main() {
     await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m3.png'));
   });
 
-  testWidgetsWithLeakTracking('Navigation indicator scale transform', (WidgetTester tester) async {
+  testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
 
     Widget buildNavigationBar() {
@@ -937,7 +1001,7 @@ void main() {
     expect(transform.getColumn(0)[0], 1.0);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+  testWidgets('Material3 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
@@ -991,7 +1055,7 @@ void main() {
     await expectLater(find.byType(NavigationBar), matchesGoldenFile('m3.navigation_bar.custom.indicator.inkwell.shape.png'));
   });
 
-  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+  testWidgets('Destinations respect their disabled state', (WidgetTester tester) async {
     int selectedIndex = 0;
 
     await tester.pumpWidget(
@@ -1028,7 +1092,7 @@ void main() {
     expect(selectedIndex, 1);
   });
 
-  testWidgetsWithLeakTracking('NavigationBar respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgets('NavigationBar respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoverColor = Color(0xff0000ff);
     const Color focusColor = Color(0xff00ffff);
@@ -1113,7 +1177,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Material2 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    testWidgets('Material2 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       const Color color = Color(0xff0000ff);
       const ShapeBorder shape = RoundedRectangleBorder();
@@ -1157,7 +1221,7 @@ void main() {
       expect(_getIndicatorDecoration(tester)?.shape, shape);
     });
 
-    testWidgetsWithLeakTracking('Material2 - Navigation indicator renders ripple', (WidgetTester tester) async {
+    testWidgets('Material2 - Navigation indicator renders ripple', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/116751.
       int selectedIndex = 0;
 
@@ -1358,7 +1422,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Material2 - Navigation indicator ripple golden test', (WidgetTester tester) async {
+    testWidgets('Material2 - Navigation indicator ripple golden test', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/117420.
 
       Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
@@ -1415,7 +1479,7 @@ void main() {
       await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m2.png'));
     });
 
-    testWidgetsWithLeakTracking('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
+    testWidgets('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/122811.
 
       Widget buildNavigationBar() {
@@ -1499,4 +1563,9 @@ class IconWithRandomColor extends StatelessWidget {
     final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     return Icon(icon, color: randomColor);
   }
+}
+
+
+bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
+  return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
 }

@@ -4,10 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('IconTheme.of works', (WidgetTester tester) async {
+  testWidgets('IconTheme.of works', (WidgetTester tester) async {
     const IconThemeData data = IconThemeData(
       size: 16.0,
       fill: 0.0,

@@ -6,13 +6,11 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
-    expect(ServicesBinding.instance.lifecycleState, isNull);
+  testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
     final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.resetLifecycleState();
+    binding.resetInternalState();
     // Use paused as the initial state.
     binding.platformDispatcher.initialLifecycleStateTestValue = 'AppLifecycleState.paused';
     binding.readTestInitialLifecycleStateFromNativeWindow(); // Re-attempt the initialization.
@@ -21,10 +19,10 @@ void main() {
     // even though no lifecycle event was fired from the platform.
     expect(binding.lifecycleState.toString(), equals('AppLifecycleState.paused'));
   });
-  testWidgetsWithLeakTracking('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
+  testWidgets('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
     final TestWidgetsFlutterBinding binding = tester.binding;
     for (final AppLifecycleState state in AppLifecycleState.values) {
-      binding.resetLifecycleState();
+      binding.resetInternalState();
       binding.platformDispatcher.initialLifecycleStateTestValue = state.toString();
       binding.readTestInitialLifecycleStateFromNativeWindow();
       expect(ServicesBinding.instance.lifecycleState.toString(), equals(state.toString()));

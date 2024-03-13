@@ -4,10 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'default search field has a border radius',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -34,7 +33,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'decoration overrides default background color',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -63,7 +62,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'decoration overrides default border radius',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -92,7 +91,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'text entries are padded by default',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'initial');
@@ -115,7 +114,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('can change keyboard type', (WidgetTester tester) async {
+  testWidgets('can change keyboard type', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -131,7 +130,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'can control text content via controller',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
@@ -159,7 +158,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('placeholder color', (WidgetTester tester) async {
+  testWidgets('placeholder color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
@@ -187,7 +186,7 @@ void main() {
     expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     "placeholderStyle modifies placeholder's style and doesn't affect text's style",
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -221,7 +220,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'input');
@@ -251,7 +250,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'suffix widget is after the text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Hi');
@@ -283,7 +282,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('prefix widget visibility', (WidgetTester tester) async {
+  testWidgets('prefix widget visibility', (WidgetTester tester) async {
       const Key prefixIcon = Key('prefix');
 
       await tester.pumpWidget(
@@ -312,7 +311,7 @@ void main() {
       expect(find.byKey(prefixIcon), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'suffix widget respects visibility mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -335,7 +334,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'clear button shows with right visibility mode',
     (WidgetTester tester) async {
       TextEditingController controller = TextEditingController();
@@ -381,7 +380,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'clear button removes text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
@@ -409,7 +408,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'tapping clear button also calls onChanged when text not empty',
     (WidgetTester tester) async {
       String value = 'text entry';
@@ -439,7 +438,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'RTL puts attachments to the right places',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -467,7 +466,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Can modify prefix and suffix insets',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -494,7 +493,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Text');
@@ -520,7 +519,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
     int onTapCallCount = 0;
 
     // onTap can be null.
@@ -550,7 +549,7 @@ void main() {
     expect(onTapCallCount, 1);
   });
 
-  testWidgetsWithLeakTracking('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -565,7 +564,7 @@ void main() {
     expect(textField.autocorrect, false);
   });
 
-  testWidgetsWithLeakTracking('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -580,7 +579,7 @@ void main() {
     expect(textField.enabled, false);
   });
 
-  testWidgetsWithLeakTracking('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
+  testWidgets('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -593,7 +592,7 @@ void main() {
     expect(textField.textInputAction, TextInputAction.search);
   });
 
-  testWidgetsWithLeakTracking('autofocus:true gives focus to the widget', (WidgetTester tester) async {
+  testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
@@ -610,7 +609,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -625,7 +624,7 @@ void main() {
     expect(textField.smartQuotesType, SmartQuotesType.disabled);
   });
 
-  testWidgetsWithLeakTracking('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -640,7 +639,7 @@ void main() {
     expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
       'enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(

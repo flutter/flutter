@@ -23,6 +23,7 @@
   "cutButtonLabel": "Izreži",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",

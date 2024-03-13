@@ -126,7 +126,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                         divider,
                         Expanded(
                           child: ColoredBox(
-                            color: colorScheme.background,
+                            color: colorScheme.surface,
                             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                               if (constraints.maxWidth < narrowScreenWidthThreshold) {
                                 return SingleChildScrollView(
@@ -188,6 +188,9 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
   Future<void> _updateImage(ImageProvider provider) async {
     final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
         provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
+    if (!mounted) {
+      return;
+    }
     setState(() {
       selectedImage = widget.images.indexOf(provider);
       currentColorScheme = newColorScheme;
@@ -226,7 +229,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                 child: Card(
                   color: widget.images.indexOf(image) == selectedImage
                       ? colorScheme.primaryContainer
-                      : colorScheme.background,
+                      : colorScheme.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ConstrainedBox(
@@ -307,19 +310,10 @@ class ColorSchemeView extends StatelessWidget {
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(label: 'background', color: colorScheme.background, onColor: colorScheme.onBackground),
-            ColorChip(label: 'onBackground', color: colorScheme.onBackground, onColor: colorScheme.background),
-          ],
-        ),
-        divider,
-        ColorGroup(
-          children: <ColorChip>[
             ColorChip(label: 'surface', color: colorScheme.surface, onColor: colorScheme.onSurface),
             ColorChip(label: 'onSurface', color: colorScheme.onSurface, onColor: colorScheme.surface),
             ColorChip(
-                label: 'surfaceVariant', color: colorScheme.surfaceVariant, onColor: colorScheme.onSurfaceVariant),
-            ColorChip(
-                label: 'onSurfaceVariant', color: colorScheme.onSurfaceVariant, onColor: colorScheme.surfaceVariant),
+                label: 'onSurfaceVariant', color: colorScheme.onSurfaceVariant, onColor: colorScheme.surfaceContainerHighest),
           ],
         ),
         divider,
@@ -366,12 +360,10 @@ class ColorChip extends StatelessWidget {
 
   static Color contrastColor(Color color) {
     final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
-    switch (brightness) {
-      case Brightness.dark:
-        return Colors.white;
-      case Brightness.light:
-        return Colors.black;
-    }
+    return switch (brightness) {
+      Brightness.dark  => Colors.white,
+      Brightness.light => Colors.black,
+    };
   }
 
   @override

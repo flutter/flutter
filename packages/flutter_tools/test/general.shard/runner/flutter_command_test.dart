@@ -27,7 +27,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -1164,7 +1164,12 @@ void main() {
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.packages').createSync();
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);
@@ -1190,7 +1195,12 @@ void main() {
         fileSystem.file('.packages').createSync();
         fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
-        final FakeDevice device = FakeDevice('name', 'id');
+        final FakeDevice device = FakeDevice(
+          'name',
+          'id',
+          type: PlatformType.android,
+          supportsFlavors: true,
+        );
         testDeviceManager.devices = <Device>[device];
         final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
         final CommandRunner<void> runner =  createTestCommandRunner(command);

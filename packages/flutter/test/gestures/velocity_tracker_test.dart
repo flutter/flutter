@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
@@ -35,7 +34,7 @@ void main() {
     Offset(-71.51939428321249, 3716.7385187526947),
   ];
 
-  testWidgetsWithLeakTracking('Velocity tracker gives expected results', (WidgetTester tester) async {
+  testWidgets('Velocity tracker gives expected results', (WidgetTester tester) async {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
@@ -49,7 +48,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Velocity control test', (WidgetTester tester) async {
+  testWidgets('Velocity control test', (WidgetTester tester) async {
     const Velocity velocity1 = Velocity(pixelsPerSecond: Offset(7.0, 0.0));
     const Velocity velocity2 = Velocity(pixelsPerSecond: Offset(12.0, 0.0));
     expect(velocity1, equals(const Velocity(pixelsPerSecond: Offset(7.0, 0.0))));
@@ -61,7 +60,7 @@ void main() {
     expect(velocity1, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('Interrupted velocity estimation', (WidgetTester tester) async {
+  testWidgets('Interrupted velocity estimation', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/7510
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
@@ -74,12 +73,12 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('No data velocity estimation', (WidgetTester tester) async {
+  testWidgets('No data velocity estimation', (WidgetTester tester) async {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 
-  testWidgetsWithLeakTracking('FreeScrollStartVelocityTracker.getVelocity throws when no points', (WidgetTester tester) async {
+  testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when no points', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
     try {
@@ -91,7 +90,7 @@ void main() {
     expect(exception?.toString(), contains('at least 1 point'));
   });
 
-  testWidgetsWithLeakTracking('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', (WidgetTester tester) async {
+  testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
 
@@ -106,7 +105,7 @@ void main() {
     expect(exception?.toString(), contains('has a smaller timestamp'));
   });
 
-  testWidgetsWithLeakTracking('Estimate does not throw when there are more than 1 point', (WidgetTester tester) async {
+  testWidgets('Estimate does not throw when there are more than 1 point', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -128,7 +127,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Makes consistent velocity estimates with consistent velocity', (WidgetTester tester) async {
+  testWidgets('Makes consistent velocity estimates with consistent velocity', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -146,7 +145,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - base VelocityTracker', (WidgetTester tester) async {
+  testWidgets('Assume zero velocity when there are no recent samples - base VelocityTracker', (WidgetTester tester) async {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -163,7 +162,7 @@ void main() {
     expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
   });
 
-  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - IOS', (WidgetTester tester) async {
+  testWidgets('Assume zero velocity when there are no recent samples - IOS', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -180,7 +179,7 @@ void main() {
     expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
   });
 
-  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - MacOS', (WidgetTester tester) async {
+  testWidgets('Assume zero velocity when there are no recent samples - MacOS', (WidgetTester tester) async {
     final MacOSScrollViewFlingVelocityTracker tracker = MacOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;

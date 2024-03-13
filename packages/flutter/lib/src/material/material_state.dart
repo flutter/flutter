@@ -168,6 +168,9 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// specified state.
   @override
   Color resolve(Set<MaterialState> states);
+
+  /// A constant whose value is [Colors.transparent] for all states.
+  static const MaterialStateColor transparent = _MaterialStateColorTransparent();
 }
 
 /// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
@@ -187,6 +190,13 @@ class _MaterialStateColor extends MaterialStateColor {
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+class _MaterialStateColorTransparent extends MaterialStateColor {
+  const _MaterialStateColorTransparent() : super(0x00000000);
+
+  @override
+  Color resolve(Set<MaterialState> states) => const Color(0x00000000);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
@@ -311,12 +321,6 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// const constructors so that they can be used in const expressions.
   const MaterialStateBorderSide();
 
-  /// Returns a [BorderSide] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
-  /// widget or theme.
-  @override
-  BorderSide? resolve(Set<MaterialState> states);
-
   /// Creates a [MaterialStateBorderSide] from a
   /// [MaterialPropertyResolver<BorderSide?>] callback function.
   ///
@@ -354,8 +358,13 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///   }),
   /// ),
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
-      _MaterialStateBorderSide(callback);
+  const factory MaterialStateBorderSide.resolveWith(MaterialPropertyResolver<BorderSide?> callback) = _MaterialStateBorderSide;
+
+  /// Returns a [BorderSide] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  BorderSide? resolve(Set<MaterialState> states);
 }
 
 /// A [MaterialStateBorderSide] created from a
@@ -371,9 +380,7 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
   final MaterialPropertyResolver<BorderSide?> _resolve;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
-    return _resolve(states);
-  }
+  BorderSide? resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [MaterialState]s
@@ -447,8 +454,7 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
-      _MaterialStateTextStyle(callback);
+  const factory MaterialStateTextStyle.resolveWith(MaterialPropertyResolver<TextStyle> callback) = _MaterialStateTextStyle;
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
@@ -510,8 +516,7 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateOutlineInputBorder(callback);
+  const factory MaterialStateOutlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateOutlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
@@ -573,8 +578,7 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
-      _MaterialStateUnderlineInputBorder(callback);
+  const factory MaterialStateUnderlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateUnderlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
@@ -750,6 +754,14 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// [MaterialState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
+///
+/// When calling `setState` in a [MaterialStatesController] listener, use the
+/// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
+/// the frame has been rendered. It's generally prudent to use the
+/// [SchedulerBinding.addPostFrameCallback] because some of the widgets that
+/// depend on [MaterialStatesController] may call [update] in their build method.
+/// In such cases, listener's that call `setState` - during the build phase - will cause
+/// an error.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
