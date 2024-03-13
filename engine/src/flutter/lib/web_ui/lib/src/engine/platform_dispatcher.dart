@@ -257,7 +257,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     required ui.ViewFocusState state,
     required ui.ViewFocusDirection direction,
   }) {
-    // TODO(tugorez): implement this method. At the moment will be a no op call.
+    _viewFocusBinding.changeViewFocus(viewId, state);
   }
 
   /// A set of views which have rendered in the current `onBeginFrame` or

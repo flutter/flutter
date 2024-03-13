@@ -164,6 +164,108 @@ void testMain() {
       expect(dispatchedViewFocusEvents[2].state, ui.ViewFocusState.unfocused);
       expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
     });
+
+    test('requestViewFocusChange focuses the view', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+
+      expect(domDocument.activeElement, view.dom.rootElement);
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+    });
+
+    test('requestViewFocusChange blurs the view', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.unfocused,
+        direction: ui.ViewFocusDirection.undefined,
+      );
+
+      expect(domDocument.activeElement, isNot(view.dom.rootElement));
+
+      expect(dispatchedViewFocusEvents, hasLength(2));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('requestViewFocusChange does nothing if the view does not exist', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      dispatcher.requestViewFocusChange(
+        viewId: 5094555,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+
+      expect(domDocument.activeElement, isNot(view.dom.rootElement));
+      expect(dispatchedViewFocusEvents, isEmpty);
+    });
+
+    test('requestViewFocusChange does nothing if the view is already focused', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+    });
+
+    test('requestViewFocusChange does not move the focus to the view', () {
+      final DomElement input = createDomElement('input');
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      view.dom.rootElement.append(input);
+      input.focus();
+
+      dispatcher.requestViewFocusChange(
+        viewId: view.viewId,
+        state: ui.ViewFocusState.focused,
+        direction: ui.ViewFocusDirection.forward,
+      );
+
+      expect(domDocument.activeElement, input);
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+    });
   });
 }
 
