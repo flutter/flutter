@@ -30,6 +30,34 @@ enum DynamicSchemeVariant {
   /// The resulting color palettes match seed color, even if the seed color
   /// is very bright (high chroma).
   fidelity,
+
+  /// All colors are grayscale, no chroma.
+  monochrome,
+
+  /// Close to grayscale, a hint of chroma.
+  neutral,
+
+  /// Pastel colors, high chroma palettes. (max). The primary palette's chroma
+  /// is at maximum. Use Fidelity instead if tokens should alter their tone to
+  /// match the palette vibrancy.
+  vibrant,
+
+  /// Pastel colors, medium chroma palettes. The primary palette's hue is
+  /// different from source color, for variety.
+  expressive,
+
+  /// Almost identical to Fidelity. Tokens and palettes match source color.
+  /// Primary Container is source color, adjusted to ensure contrast with surfaces.
+  /// Tertiary palette is analogue of source color. Found by dividing color
+  /// wheel by 6, then finding the 2 colors adjacent to source. The one that
+  /// increases hue is used.
+  content,
+
+  /// A playful theme - the source color's hue does not appear in the theme.
+  rainbow,
+
+  /// A playful theme - the source color's hue does not appear in the theme.
+  fruitSalad,
 }
 
 /// {@template flutter.material.color_scheme.ColorScheme}
