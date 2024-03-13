@@ -32,6 +32,13 @@ class AllocatorVK final : public Allocator {
       uint32_t memory_type_bits_requirement,
       vk::PhysicalDeviceMemoryProperties& memory_properties);
 
+  // Visible for testing.
+  static vk::ImageUsageFlags ToVKImageUsageFlags(
+      PixelFormat format,
+      TextureUsageMask usage,
+      StorageMode mode,
+      bool supports_memoryless_textures);
+
  private:
   friend class ContextVK;
 
