@@ -222,8 +222,7 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
   }
 
   TextureDescriptor texture_desc;
-  texture_desc.usage =
-      static_cast<decltype(texture_desc.usage)>(TextureUsage::kRenderTarget);
+  texture_desc.usage = TextureUsage::kRenderTarget;
   texture_desc.storage_mode = StorageMode::kDevicePrivate;
   texture_desc.format = ToPixelFormat(swapchain_info.imageFormat);
   texture_desc.size = ISize::MakeWH(swapchain_info.imageExtent.width,
@@ -237,7 +236,7 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
   msaa_desc.sample_count = SampleCount::kCount4;
   msaa_desc.format = texture_desc.format;
   msaa_desc.size = texture_desc.size;
-  msaa_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  msaa_desc.usage = TextureUsage::kRenderTarget;
 
   // The depth+stencil configuration matches the configuration used by
   // RenderTarget::SetupDepthStencilAttachments and matching the swapchain
@@ -254,7 +253,7 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
   depth_stencil_desc.format =
       context->GetCapabilities()->GetDefaultDepthStencilFormat();
   depth_stencil_desc.size = texture_desc.size;
-  depth_stencil_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  depth_stencil_desc.usage = TextureUsage::kRenderTarget;
 
   std::shared_ptr<Texture> msaa_texture;
   if (enable_msaa) {

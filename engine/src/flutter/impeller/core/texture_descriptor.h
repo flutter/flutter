@@ -40,8 +40,7 @@ struct TextureDescriptor {
   PixelFormat format = PixelFormat::kUnknown;
   ISize size;
   size_t mip_count = 1u;  // Size::MipCount is usually appropriate.
-  TextureUsageMask usage =
-      static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  TextureUsageMask usage = TextureUsage::kShaderRead;
   SampleCount sample_count = SampleCount::kCount1;
   CompressionType compression_type = CompressionType::kLossless;
 

@@ -80,13 +80,13 @@ bool Attachment::IsValid() const {
 
 std::string TextureUsageMaskToString(TextureUsageMask mask) {
   std::vector<TextureUsage> usages;
-  if (mask & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+  if (mask & TextureUsage::kShaderRead) {
     usages.push_back(TextureUsage::kShaderRead);
   }
-  if (mask & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+  if (mask & TextureUsage::kShaderWrite) {
     usages.push_back(TextureUsage::kShaderWrite);
   }
-  if (mask & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+  if (mask & TextureUsage::kRenderTarget) {
     usages.push_back(TextureUsage::kRenderTarget);
   }
   std::stringstream stream;

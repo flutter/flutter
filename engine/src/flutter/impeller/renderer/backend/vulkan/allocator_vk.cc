@@ -188,7 +188,7 @@ static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
       break;
   }
 
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+  if (usage & TextureUsage::kRenderTarget) {
     if (PixelFormatIsDepthStencil(format)) {
       vk_usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
     } else {
@@ -197,7 +197,7 @@ static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
     vk_usage |= vk::ImageUsageFlagBits::eInputAttachment;
   }
 
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+  if (usage & TextureUsage::kShaderRead) {
     vk_usage |= vk::ImageUsageFlagBits::eSampled;
     // Device transient images can only be used as attachments. The caller
     // specified incorrect usage flags and is attempting to read a device
@@ -208,7 +208,7 @@ static constexpr vk::ImageUsageFlags ToVKImageUsageFlags(
     }
   }
 
-  if (usage & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+  if (usage & TextureUsage::kShaderWrite) {
     vk_usage |= vk::ImageUsageFlagBits::eStorage;
     // Device transient images can only be used as attachments. The caller
     // specified incorrect usage flags and is attempting to read a device

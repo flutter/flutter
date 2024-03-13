@@ -458,8 +458,7 @@ ContentContext::ContentContext(
   auto clip_color_attachments =
       clip_pipeline_descriptor->GetColorAttachmentDescriptors();
   for (auto& color_attachment : clip_color_attachments) {
-    color_attachment.second.write_mask =
-        static_cast<uint64_t>(ColorWriteMask::kNone);
+    color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
   }
   clip_pipeline_descriptor->SetColorAttachmentDescriptors(
       std::move(clip_color_attachments));

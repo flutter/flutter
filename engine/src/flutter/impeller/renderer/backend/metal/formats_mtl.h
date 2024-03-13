@@ -207,25 +207,22 @@ constexpr MTLBlendOperation ToMTLBlendOperation(BlendOperation type) {
   return MTLBlendOperationAdd;
 };
 
-constexpr MTLColorWriteMask ToMTLColorWriteMask(
-    std::underlying_type_t<ColorWriteMask> type) {
-  using UnderlyingType = decltype(type);
-
+constexpr MTLColorWriteMask ToMTLColorWriteMask(ColorWriteMask type) {
   MTLColorWriteMask mask = MTLColorWriteMaskNone;
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kRed)) {
+  if (type & ColorWriteMaskBits::kRed) {
     mask |= MTLColorWriteMaskRed;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kGreen)) {
+  if (type & ColorWriteMaskBits::kGreen) {
     mask |= MTLColorWriteMaskGreen;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kBlue)) {
+  if (type & ColorWriteMaskBits::kBlue) {
     mask |= MTLColorWriteMaskBlue;
   }
 
-  if (type & static_cast<UnderlyingType>(ColorWriteMask::kAlpha)) {
+  if (type & ColorWriteMaskBits::kAlpha) {
     mask |= MTLColorWriteMaskAlpha;
   }
 

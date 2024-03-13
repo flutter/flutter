@@ -29,7 +29,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   color0_tex.type = TextureType::kTexture2D;
   color0_tex.format = color_format;
   color0_tex.size = fbo_size;
-  color0_tex.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  color0_tex.usage = TextureUsage::kRenderTarget;
   color0_tex.sample_count = SampleCount::kCount1;
   color0_tex.storage_mode = StorageMode::kDevicePrivate;
 
@@ -44,8 +44,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   depth_stencil_texture_desc.type = TextureType::kTexture2D;
   depth_stencil_texture_desc.format = color_format;
   depth_stencil_texture_desc.size = fbo_size;
-  depth_stencil_texture_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  depth_stencil_texture_desc.usage = TextureUsage::kRenderTarget;
   depth_stencil_texture_desc.sample_count = SampleCount::kCount1;
 
   auto depth_stencil_tex = std::make_shared<TextureGLES>(

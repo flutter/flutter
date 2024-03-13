@@ -45,8 +45,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
 static TextureGLES::Type GetTextureTypeFromDescriptor(
     const TextureDescriptor& desc) {
   const auto usage = static_cast<TextureUsageMask>(desc.usage);
-  const auto render_target =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  const auto render_target = TextureUsage::kRenderTarget;
   const auto is_msaa = desc.sample_count == SampleCount::kCount4;
   if (usage == render_target && IsDepthStencilFormat(desc.format)) {
     return is_msaa ? TextureGLES::Type::kRenderBufferMultisampled

@@ -9,6 +9,18 @@
 #include "impeller/base/thread.h"
 
 namespace impeller {
+
+enum class MyMaskBits : uint32_t {
+  kFoo = 0,
+  kBar = 1 << 0,
+  kBaz = 1 << 1,
+  kBang = 1 << 2,
+};
+
+using MyMask = Mask<MyMaskBits>;
+
+IMPELLER_ENUM_IS_MASK(MyMaskBits);
+
 namespace testing {
 
 struct Foo {
@@ -250,15 +262,6 @@ TEST(BaseTest, NoExceptionPromiseEmpty) {
   // process does not abort while destructing the promise.
   wrapper.reset();
 }
-
-enum class MyMaskBits : uint32_t {
-  kFoo = 0,
-  kBar = 1 << 0,
-  kBaz = 1 << 1,
-  kBang = 1 << 2,
-};
-
-using MyMask = Mask<MyMaskBits>;
 
 TEST(BaseTest, CanUseTypedMasks) {
   {
