@@ -79,6 +79,19 @@ void main() {
     expect(stringsFromLogs(logger.testLogs), equals(<String>['info']));
   });
 
+  test('fatal throws exception', () {
+    final Logger logger = Logger.test();
+    logger.level = Logger.infoLevel;
+    bool caught = false;
+    try {
+      logger.fatal('test', newline: false);
+    } on FatalError catch (_) {
+      caught = true;
+    }
+    expect(caught, equals(true));
+    expect(stringsFromLogs(logger.testLogs), equals(<String>['test']));
+  });
+
   test('fitToWidth', () {
     expect(Logger.fitToWidth('hello', 0), equals(''));
     expect(Logger.fitToWidth('hello', 1), equals('.'));
@@ -117,7 +130,9 @@ void main() {
     final Logger logger = Logger.test();
     bool called = false;
     final Spinner spinner = logger.startSpinner(
-      onFinish: () { called = true; },
+      onFinish: () {
+        called = true;
+      },
     );
     spinner.finish();
     expect(called, isTrue);

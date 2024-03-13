@@ -58,7 +58,9 @@ void main() {
     return Environment(
       abi: ffi.Abi.linuxX64,
       engine: engine,
-      platform: FakePlatform(operatingSystem: Platform.linux),
+      platform: FakePlatform(
+          operatingSystem: Platform.linux,
+          resolvedExecutable: io.Platform.resolvedExecutable),
       processRunner: ProcessRunner(
         processManager: FakeProcessManager(),
       ),

@@ -50,7 +50,7 @@ final class ProcessArtifacts {
     data['stderr'] = stderr;
     data['cwd'] = cwd.absolute.path;
     data['commandLine'] = commandLine;
-    file.writeAsStringSync(jsonEncode(data));
+    file.writeAsStringSync(jsonEncodePretty(data));
   }
 
   /// Creates a temporary file and saves the artifacts into it.

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 void _appendTypeError(
   Map<String, Object?> map,
   String field,
@@ -77,3 +79,8 @@ int? intOfJson(
   }
   return map[field]! as int;
 }
+
+const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('    ');
+
+/// Same as [jsonEncode] but is formatted to be human readable.
+String jsonEncodePretty(Object? object) => _jsonEncoder.convert(object);

@@ -3,10 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Timer, runZoned;
-import 'dart:io' as io show
-  IOSink,
-  stderr,
-  stdout;
+import 'dart:io' as io show IOSink, stderr, stdout;
 
 import 'package:logging/logging.dart' as log;
 import 'package:meta/meta.dart';
@@ -29,7 +26,9 @@ import 'package:meta/meta.dart';
 /// which can be inspected by unit tetss.
 class Logger {
   /// Constructs a logger for use in the tool.
-  Logger() : _logger = log.Logger.detached('et'), _test = false {
+  Logger()
+      : _logger = log.Logger.detached('et'),
+        _test = false {
     _logger.level = statusLevel;
     _logger.onRecord.listen(_handler);
     _setupIoSink(io.stderr);
@@ -38,7 +37,9 @@ class Logger {
 
   /// A logger for tests.
   @visibleForTesting
-  Logger.test() : _logger = log.Logger.detached('et'), _test = true {
+  Logger.test()
+      : _logger = log.Logger.detached('et'),
+        _test = true {
     _logger.level = statusLevel;
     _logger.onRecord.listen((log.LogRecord r) => _testLogs.add(r));
   }
@@ -57,9 +58,8 @@ class Logger {
 
   static void _handler(log.LogRecord r) {
     final io.IOSink sink = r.level >= warningLevel ? io.stderr : io.stdout;
-    final String prefix = r.level >= warningLevel
-      ? '[${r.time}] ${r.level}: '
-      : '';
+    final String prefix =
+        r.level >= warningLevel ? '[${r.time}] ${r.level}: ' : '';
     _ioSinkWrite(sink, '$prefix${r.message}');
   }
 
@@ -77,7 +77,7 @@ class Logger {
     runZoned<void>(() {
       try {
         sink.write(message);
-      } catch (_) { // ignore: avoid_catches_without_on_clauses
+      } catch (_) {
         _stdioDone = true;
       }
     }, onError: (Object e, StackTrace s) {
@@ -87,8 +87,12 @@ class Logger {
 
   static void _setupIoSink(io.IOSink sink) {
     sink.done.then(
-      (void _) { _stdioDone = true; },
-      onError: (Object err, StackTrace st) { _stdioDone = true; },
+      (void _) {
+        _stdioDone = true;
+      },
+      onError: (Object err, StackTrace st) {
+        _stdioDone = true;
+      },
     );
   }
 
@@ -104,6 +108,19 @@ class Logger {
   /// Set the current logging level.
   set level(log.Level l) {
     _logger.level = l;
+  }
+
+  /// Record a log message level [Logger.error] and throw a FatalError.
+  /// This should only be called when the program has entered an impossible
+  /// to recover from state or when something isn't implemented yet.
+  void fatal(
+    Object? message, {
+    int indent = 0,
+    bool newline = true,
+    bool fit = false,
+  }) {
+    _emitLog(errorLevel, message, indent, newline, fit);
+    throw FatalError(_formatMessage(message, indent, newline, fit));
   }
 
   /// Record a log message at level [Logger.error].
@@ -165,9 +182,10 @@ class Logger {
       onFinish?.call();
       _status = null;
     }
+
     _status = io.stdout.hasTerminal && !_test
-      ? FlutterSpinner(onFinish: finishCallback)
-      : Spinner(onFinish: finishCallback);
+        ? FlutterSpinner(onFinish: finishCallback)
+        : Spinner(onFinish: finishCallback);
     _status!.start();
     return _status!;
   }
@@ -184,6 +202,14 @@ class Logger {
     _ioSinkWrite(io.stdout, '$backspaces$spaces$backspaces');
   }
 
+  String _formatMessage(Object? message, int indent, bool newline, bool fit) {
+    String m = '${' ' * indent}$message${newline ? '\n' : ''}';
+    if (fit && io.stdout.hasTerminal) {
+      m = fitToWidth(m, io.stdout.terminalColumns);
+    }
+    return m;
+  }
+
   void _emitLog(
     log.Level level,
     Object? message,
@@ -191,10 +217,7 @@ class Logger {
     bool newline,
     bool fit,
   ) {
-    String m = '${' ' * indent}$message${newline ? '\n' : ''}';
-    if (fit && io.stdout.hasTerminal) {
-      m = fitToWidth(m, io.stdout.terminalColumns);
-    }
+    final String m = _formatMessage(message, indent, newline, fit);
     _status?.pause();
     _logger.log(level, m);
     _status?.resume();
@@ -244,7 +267,6 @@ class Logger {
   List<log.LogRecord> get testLogs => _testLogs;
 }
 
-
 /// A base class for progress spinners, and a no-op implementation that prints
 /// nothing.
 class Spinner {
@@ -280,12 +302,10 @@ class FlutterSpinner extends Spinner {
     super.onFinish,
   });
 
-  @visibleForTesting
   /// The frames of the animation.
   static const String frames = '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀';
 
-  static final List<String> _flutterAnimation = frames
-      .runes
+  static final List<String> _flutterAnimation = frames.runes
       .map<String>((int scalar) => String.fromCharCode(scalar))
       .toList();
 
@@ -337,4 +357,15 @@ class FlutterSpinner extends Spinner {
       onFinish!();
     }
   }
+}
+
+/// FatalErrors are thrown when a fatal error has occurred.
+class FatalError extends Error {
+  /// Constructs a FatalError with a message.
+  FatalError(this._message);
+
+  final String _message;
+
+  @override
+  String toString() => _message;
 }
