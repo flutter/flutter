@@ -2,91 +2,76 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:golden_tests_harvester/golden_tests_harvester.dart';
-import 'package:path/path.dart' as p;
-import 'package:process/src/interface/process_manager.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
 
-const String _kLuciEnvName = 'LUCI_CONTEXT';
+final bool _isLocalEnvWithoutSkiaGold =
+    !SkiaGoldClient.isAvailable(environment: io.Platform.environment) ||
+    !SkiaGoldClient.isLuciEnv(environment: io.Platform.environment);
 
-bool get isLuciEnv => Platform.environment.containsKey(_kLuciEnvName);
+final ArgParser _argParser = ArgParser()
+  ..addFlag(
+    'help',
+    abbr: 'h',
+    negatable: false,
+    help: 'Prints this usage information.',
+  )
+  ..addFlag(
+    'dry-run',
+    defaultsTo: _isLocalEnvWithoutSkiaGold,
+    help: 'Do not upload images to Skia Gold.',
+  );
 
-/// Fake SkiaGoldClient that is used if the harvester is run outside of Luci.
-class FakeSkiaGoldClient implements SkiaGoldClient {
-  FakeSkiaGoldClient(this._workingDirectory, {this.dimensions, this.verbose = false});
-
-  final Directory _workingDirectory;
-
-  @override
-  final Map<String, String>? dimensions;
-
-  @override
-  final bool verbose;
-
-  @override
-  Future<void> addImg(String testName, File goldenFile,
-      {double differentPixelsRate = 0.01,
-      int pixelColorDelta = 0,
-      required int screenshotSize}) async {
-    Logger.instance.log(
-        'addImg testName:$testName goldenFile:${goldenFile.path} screenshotSize:$screenshotSize differentPixelsRate:$differentPixelsRate pixelColorDelta:$pixelColorDelta');
-  }
-
-  @override
-  Future<void> auth() async {
-    Logger.instance.log('auth dimensions:${dimensions ?? 'null'}');
-  }
-
-  @override
-  Future<String?> getExpectationForTest(String testName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  String getTraceID(String testName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  HttpClient get httpClient => throw UnimplementedError();
-
-  @override
-  ProcessManager get process => throw UnimplementedError();
-
-  @override
-  Directory get workDirectory => _workingDirectory;
-}
-
-void _printUsage() {
-  Logger.instance
-      .log('dart run ./bin/golden_tests_harvester.dart <working_dir>');
-}
-
-Future<void> main(List<String> arguments) async {
-  if (arguments.length != 1) {
-    return _printUsage();
-  }
-
-  final Directory workDirectory = Directory(arguments[0]);
-
-  final File digest = File(p.join(workDirectory.path, 'digest.json'));
-  if (!digest.existsSync()) {
-    Logger.instance
-        .log('Error: digest.json does not exist in ${workDirectory.path}.');
+Future<void> main(List<String> args) async {
+  final ArgResults results = _argParser.parse(args);
+  if (results['help'] as bool) {
+    io.stdout.writeln(_argParser.usage);
     return;
   }
-  final Object? decoded = jsonDecode(digest.readAsStringSync());
-  final Map<String?, Object?> data = (decoded as Map<String?, Object?>?)!;
-  final Map<String, String> dimensions =
-      (data['dimensions'] as Map<String, Object?>?)!.cast<String, String>();
-  final List<Object?> entries = (data['entries'] as List<Object?>?)!;
 
-  final SkiaGoldClient skiaGoldClient = isLuciEnv
-      ? SkiaGoldClient(workDirectory, dimensions: dimensions)
-      : FakeSkiaGoldClient(workDirectory, dimensions: dimensions);
+  final List<String> rest = results.rest;
+  if (rest.length != 1) {
+    io.stderr.writeln('Error: Must provide exactly one argument.');
+    io.stderr.writeln(_argParser.usage);
+    io.exitCode = 1;
+    return;
+  }
 
-  await harvest(skiaGoldClient, workDirectory, entries);
+  final io.Directory workDirectory = io.Directory(rest.single);
+  final AddImageToSkiaGold addImg;
+  final bool dryRun = results['dry-run'] as bool;
+  if (dryRun) {
+    io.stderr.writeln('=== DRY RUN. Results not submitted to Skia Gold. ===');
+    addImg = _dryRunAddImg;
+  } else {
+    // If GOLDCTL is not configured (i.e. on CI), this will throw.
+    final SkiaGoldClient client = SkiaGoldClient(workDirectory);
+    await client.auth();
+    addImg = client.addImg;
+  }
+
+  await harvest(
+    workDirectory: workDirectory,
+    addImg: addImg,
+    stderr: io.stderr,
+  );
+}
+
+Future<void> _dryRunAddImg(
+  String testName,
+  io.File goldenFile, {
+  required int screenshotSize,
+  double differentPixelsRate = 0.01,
+  int pixelColorDelta = 0,
+}) async {
+  io.stderr.writeln('addImg '
+    'testName:$testName '
+    'goldenFile:${goldenFile.path} '
+    'screenshotSize:$screenshotSize '
+    'differentPixelsRate:$differentPixelsRate '
+    'pixelColorDelta:$pixelColorDelta',
+  );
 }

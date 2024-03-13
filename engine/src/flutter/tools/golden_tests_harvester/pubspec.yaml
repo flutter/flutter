@@ -15,19 +15,30 @@ environment:
 # check the .packages and .package_config to make sure all the paths are
 # relative to this directory into //third_party/dart, or //third_party/pkg
 dependencies:
-  crypto: any
+  args: any
+  meta: any
   path: any
-  process: any
   skia_gold_client:
     path: ../../testing/skia_gold_client
 
+dev_dependencies:
+  litetest: any
+
 dependency_overrides:
+  args:
+    path: ../../../third_party/dart/third_party/pkg/args
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
   collection:
     path: ../../../third_party/dart/third_party/pkg/collection
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
+  expect:
+    path: ../../../third_party/dart/pkg/expect
   file:
     path: ../../../third_party/dart/third_party/pkg/file/packages/file
+  litetest:
+    path: ../../testing/litetest
   meta:
     path: ../../../third_party/dart/pkg/meta
   engine_repo_tools:
@@ -38,5 +49,7 @@ dependency_overrides:
     path: ../../third_party/pkg/platform
   process:
     path: ../../third_party/pkg/process
+  smith:
+    path: ../../../third_party/dart/pkg/smith
   typed_data:
     path: ../../../third_party/dart/third_party/pkg/typed_data
