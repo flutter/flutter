@@ -800,9 +800,11 @@ class _WindowsViewState extends State<Win32View> {
       viewType: widget.viewType,
       onFocus: () {
         // TODO(schectman): Move widget focus to platform view focus node
+        // https://github.com/flutter/flutter/issues/143375
       },
       onLoseFocus: (int reason) {
         // TODO(schectman): Move widget focus to previous or next widget in tree
+        // https://github.com/flutter/flutter/issues/143375
       });
       setState(() {
         _controller = controller;
@@ -816,6 +818,7 @@ class _WindowsViewState extends State<Win32View> {
       return const SizedBox.expand();
     }
     // TODO(schectman): Surround with Focus widgets to pick up keyboard focus
+    // https://github.com/flutter/flutter/issues/143375
     return Semantics(
       child: _Win32PlatformView(controller: controller),
     );

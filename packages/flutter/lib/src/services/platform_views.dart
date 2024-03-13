@@ -64,7 +64,7 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 /// Callback for keyboard navigation moving out of a platform view.
 ///
 /// The 'reason' parameter represents the direction in which focus moves.
-typedef LoseFocusCallback = void Function(int reason);
+typedef LoseKeyboardFocusCallback = void Function(int reason);
 
 /// Provides access to the platform views service.
 ///
@@ -101,8 +101,8 @@ class PlatformViewsService {
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
 
-  /// Maps platform view IDs to focus loss callbacks.
-  final Map<int, LoseFocusCallback> _loseFocusCallbacks = <int, LoseFocusCallback>{};
+  /// Maps platform view IDs to keyboard focus loss callbacks.
+  final Map<int, LoseKeyboardFocusCallback> _loseFocusCallbacks = <int, LoseKeyboardFocusCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -313,7 +313,7 @@ class PlatformViewsService {
     required int id,
     required String viewType,
     VoidCallback? onFocus,
-    LoseFocusCallback? onLoseFocus,
+    LoseKeyboardFocusCallback? onLoseFocus,
   }) async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
@@ -1516,12 +1516,13 @@ class AppKitViewController extends DarwinPlatformViewController {
 class Win32ViewController {
   Win32ViewController._(this.id);
 
-  /// Integer identifier of this platform view instance.
+  /// Unique identifier of this platform view instance.
   final int id;
 
   /// Invoke setting the keyboard focus to the platform view.
   Future<void> focus(bool focus, int dir) async {
     // TODO(schectman): invoke platform service
+    // https://github.com/flutter/flutter/issues/143375
   }
 }
 
