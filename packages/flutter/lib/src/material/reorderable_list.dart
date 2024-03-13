@@ -393,38 +393,18 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     // If there is a header or footer we can't just apply the padding to the list,
     // so we break it up into padding for the header, footer and padding for the list.
     final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
-    late final EdgeInsets headerPadding;
-    late final EdgeInsets footerPadding;
-    late final EdgeInsets listPadding;
+    final double? header = widget.header == null ? null : 0.0;
+    final double? footer = widget.footer == null ? null : 0.0;
 
-    if (widget.header == null && widget.footer == null) {
-      headerPadding = EdgeInsets.zero;
-      footerPadding = EdgeInsets.zero;
-      listPadding = padding;
-    } else if (widget.header != null || widget.footer != null) {
-      switch (widget.scrollDirection) {
-        case Axis.horizontal:
-          if (widget.reverse) {
-            headerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(widget.footer != null ? 0 : padding.left, padding.top, widget.header != null ? 0 : padding.right, padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-          } else {
-            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(widget.header != null ? 0 : padding.left, padding.top, widget.footer != null ? 0 : padding.right, padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-          }
-        case Axis.vertical:
-          if (widget.reverse) {
-            headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-            listPadding = EdgeInsets.fromLTRB(padding.left, widget.footer != null ? 0 : padding.top, padding.right, widget.header != null ? 0 : padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-          } else {
-            headerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-            listPadding = EdgeInsets.fromLTRB(padding.left, widget.header != null ? 0 : padding.top, padding.right, widget.footer != null ? 0 : padding.bottom);
-            footerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-          }
-      }
-    }
+    final EdgeInsets startPadding, endPadding, listPadding;
+    (startPadding, endPadding, listPadding) = switch (widget.scrollDirection) {
+      Axis.horizontal || Axis.vertical when (header ?? footer) == null => (EdgeInsets.zero, EdgeInsets.zero, padding),
+      Axis.horizontal => (padding.copyWith(left: 0), padding.copyWith(right: 0), padding.copyWith(left: header, right: footer)),
+      Axis.vertical   => (padding.copyWith(top: 0), padding.copyWith(bottom: 0), padding.copyWith(top: header, bottom: footer)),
+    };
+    final (EdgeInsets headerPadding, EdgeInsets footerPadding) = widget.reverse
+        ? (startPadding, endPadding)
+        : (endPadding, startPadding);
 
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
