@@ -3019,6 +3019,7 @@ TEST_P(AiksTest, DrawScaledTextWithPerspectiveSaveLayer) {
 
   ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas, "Hello world",
                                      "Roboto-Regular.ttf"));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_P(AiksTest, PipelineBlendSingleParameter) {
