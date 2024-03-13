@@ -61,8 +61,7 @@ class DartComponentController
   bool SetUpFromAppSnapshot();
 
   bool CreateIsolate(const uint8_t* isolate_snapshot_data,
-                     const uint8_t* isolate_snapshot_instructions,
-                     Dart_IsolateFlags* isolate_flags);
+                     const uint8_t* isolate_snapshot_instructions);
 
   // |Echo|
   void EchoString(fidl::StringPtr value, EchoStringCallback callback) override;

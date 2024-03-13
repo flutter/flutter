@@ -135,9 +135,6 @@ template("_convert_kernel_manifest") {
 #    Whether the kernel compiler should link the current platform.dill into
 #    the build. If false, the --no-link-platform flag will be passed to the
 #    compiler. Defaults to false.
-#
-#  sound_null_safety (optional)
-#    Whether to generate sound null safe kernel.
 template("dart_kernel") {
   assert(defined(invoker.platform_name), "dart_kernel() requires platform_name")
   assert(defined(invoker.packages_path),
@@ -278,11 +275,8 @@ template("dart_kernel") {
       rebase_path(depfile, root_build_dir),
       "--output",
       rebase_path(_kernel_path, root_build_dir),
+      "--sound-null-safety",
     ]
-
-    if (!defined(invoker.sound_null_safety) || !invoker.sound_null_safety) {
-      args += [ "--no-sound-null-safety" ]
-    }
 
     # TODO(richkadel): It should be possible to remove all of the build rules
     # related to `generate_manifest`. Without the following two flags, the
