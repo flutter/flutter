@@ -5327,7 +5327,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    test_timeout_secs: "900"
     properties:
       dependencies: >-
         [
@@ -5336,6 +5335,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       task_name: plugin_test_windows
+      test_timeout_secs: "900"
     runIf:
       - dev/**
       - packages/flutter_tools/**
