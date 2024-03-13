@@ -2796,6 +2796,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.arm.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.devicetree/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.google.platform/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.gpio/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.platform/meta.json
