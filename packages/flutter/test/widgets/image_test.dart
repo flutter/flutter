@@ -798,8 +798,6 @@ void main() {
   });
 
   testWidgets('Precache',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final _TestImageProvider provider = _TestImageProvider();
     late Future<void> precache;
@@ -818,7 +816,10 @@ void main() {
     // Check that a second resolve of the same image is synchronous.
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
     late bool isSync;
-    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) { isSync = sync; }));
+    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) {
+      image.dispose();
+      isSync = sync;
+    }));
     expect(isSync, isTrue);
   });
 
@@ -1565,8 +1566,6 @@ void main() {
   });
 
   testWidgets('precacheImage does not hold weak ref for more than a frame',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final _TestImageProvider provider = _TestImageProvider();
@@ -1597,7 +1596,10 @@ void main() {
     expect(provider._lastResolvedConfiguration, isNotNull);
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
     late bool isSync;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) {
+      image.dispose();
+      isSync = syncCall;
+    });
 
     // Still have live ref because frame has not pumped yet.
     await tester.pump();
@@ -2062,6 +2064,61 @@ void main() {
         // AOT supports file access, expect constructor to succeed
         : isNot(throwsA(anything)),
     );
+  });
+
+  testWidgets('Animated GIFs do not require layout for subsequent frames', (WidgetTester tester) async {
+    final ui.Codec codec = (await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    }))!;
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+      return frameInfo.image;
+    }
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+    int? lastFrame;
+
+    await tester.pumpWidget(
+      Center(
+        child: Image(
+          image: imageProvider,
+          frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+            lastFrame = frame;
+            return child;
+          },
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isFalse);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    // We only complete the build phase and expect that it does not mark the
+    // RenderImage for layout because the new frame has the same dimensions as
+    // the old one. We only need to repaint.
+    await tester.pump(null, EnginePhase.build);
+    expect(lastFrame, 1);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isTrue);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 2);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsLayout, isFalse);
+    expect(tester.allRenderObjects.whereType<RenderImage>().single.debugNeedsPaint, isFalse);
+    expect(tester.getSize(find.byType(Image)), const Size(1, 1));
+
+    codec.dispose();
   });
 }
 

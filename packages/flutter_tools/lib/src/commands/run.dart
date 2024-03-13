@@ -334,7 +334,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
+  RunCommand({
+    bool verboseHelp = false,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : _nativeAssetsBuilder = nativeAssetsBuilder,
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -417,6 +421,8 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
       );
   }
+
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'run';
@@ -634,7 +640,11 @@ class RunCommand extends RunCommandBase {
     final bool flavorsSupportedOnEveryDevice = devices!
       .every((Device device) => device.supportsFlavors);
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
-      throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+      globals.printWarning(
+        '--flavor is only supported for Android, macOS, and iOS devices. '
+        'Flavor-related features may not function properly and could '
+        'behave differently in a future release.'
+      );
     }
   }
 
@@ -660,6 +670,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6 ?? false,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        nativeAssetsBuilder: _nativeAssetsBuilder,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -733,6 +744,7 @@ class RunCommand extends RunCommandBase {
           ipv6: ipv6 ?? false,
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

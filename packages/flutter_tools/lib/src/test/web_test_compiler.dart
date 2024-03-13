@@ -17,6 +17,7 @@ import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
+import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
@@ -48,6 +49,7 @@ class WebTestCompiler {
     required String testOutputDir,
     required List<String> testFiles,
     required BuildInfo buildInfo,
+    required WebRendererMode webRenderer,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     late final String platformDillName;
@@ -55,17 +57,18 @@ class WebTestCompiler {
     // TODO(zanderso): to support autodetect this would need to partition the source code into
     // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillName = 'ddc_outline.dill';
-      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-        extraFrontEndOptions.add('--no-sound-null-safety');
-      }
-    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-      platformDillName = 'ddc_outline_sound.dill';
-      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-        extraFrontEndOptions.add('--sound-null-safety');
-      }
+    switch (buildInfo.nullSafetyMode) {
+      case NullSafetyMode.unsound || NullSafetyMode.autodetect:
+        platformDillName = 'ddc_outline.dill';
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      case NullSafetyMode.sound:
+        languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+        platformDillName = 'ddc_outline_sound.dill';
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
     }
 
     final String platformDillPath = _fileSystem.path.join(
@@ -109,6 +112,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
+    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       buildMode: buildInfo.mode,
@@ -124,7 +128,7 @@ class WebTestCompiler {
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
       platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
-      dartDefines: buildInfo.dartDefines,
+      dartDefines: dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
       artifacts: _artifacts,

@@ -151,15 +151,17 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           ),
         );
       }
-    } else {
+    } else if (widget.resizeToAvoidBottomInset) {
       // If there is no navigation bar, still may need to add padding in order
       // to support resizeToAvoidBottomInset.
-      final double bottomPadding = widget.resizeToAvoidBottomInset
-          ? existingMediaQuery.viewInsets.bottom
-          : 0.0;
-      paddedContent = Padding(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: paddedContent,
+      paddedContent = MediaQuery(
+        data: existingMediaQuery.copyWith(
+          viewInsets: existingMediaQuery.viewInsets.copyWith(bottom: 0)
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
+          child: paddedContent,
+        ),
       );
     }
 

@@ -224,7 +224,13 @@ void main() {
     ]);
 
     observer.accumulatedStates.clear();
-    await expectLater(() async => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
+    await setAppLifeCycleState(AppLifecycleState.detached);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.detached,
+    ]);
     WidgetsBinding.instance.removeObserver(observer);
   });
 

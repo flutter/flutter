@@ -66,7 +66,6 @@ void main() {
       equals(<LogicalKeyboardKey>{}));
     expect(HardwareKeyboard.instance.lockModesEnabled,
       equals(<KeyboardLockMode>{}));
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('KeyEvent can tell which keys are pressed', (WidgetTester tester) async {
@@ -101,7 +100,6 @@ void main() {
     await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isFalse);
     expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isFalse);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
@@ -229,7 +227,6 @@ void main() {
       true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/99196 .
@@ -279,7 +276,6 @@ void main() {
     expect(ServicesBinding.instance.keyboard.physicalKeysPressed, equals(<PhysicalKeyboardKey>{
       PhysicalKeyboardKey.keyA,
     }));
-  // ignore: deprecated_member_use
   }, variant: const KeySimulatorTransitModeVariant(<KeyDataTransitMode>{
     KeyDataTransitMode.rawKeyData,
   }));
@@ -315,7 +311,6 @@ void main() {
     )), false);
     expect(logs, <int>[2, 1]);
     logs.clear();
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
@@ -370,7 +365,6 @@ void main() {
 
     expect(logs, <String>['RawKeyDownEvent', 'KeyDownEvent', 'KeyUpEvent']);
     logs.clear();
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   // The first key data received from the engine might be an empty key data.
@@ -510,7 +504,6 @@ void main() {
     // If the previous state (key down) wasn't recorded, this key up event will
     // trigger assertions.
     expect(record, isNull);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {

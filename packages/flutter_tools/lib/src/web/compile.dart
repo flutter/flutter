@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -27,6 +26,15 @@ import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
+
+/// Whether the application has web plugins.
+const String kHasWebPlugins = 'HasWebPlugins';
+
+/// Base href to set in index.html in flutter build command
+const String kBaseHref = 'baseHref';
+
+/// The caching strategy to use for service worker generation.
+const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 class WebBuilder {
   WebBuilder({
@@ -81,7 +89,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-          WebServiceWorker(_fileSystem, compilerConfigs),
+          globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
           Environment(
             projectDir: _fileSystem.currentDirectory,
             outputDir: outputDirectory,
@@ -199,37 +207,81 @@ enum WebRendererMode implements CliEnum {
             'FLUTTER_WEB_USE_SKWASM=true',
           ]
       };
+
+  List<String> updateDartDefines(List<String> inputDefines) {
+    final Set<String> dartDefinesSet = inputDefines.toSet();
+    if (!inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    }
+    dartDefinesSet.addAll(dartDefines);
+    return dartDefinesSet.toList();
+  }
 }
 
-/// The correct precompiled artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+/// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
   WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
   },
   WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdk,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitSdk,
   },
   WebRendererMode.html: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdk,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdk,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdSdk,
   },
 };
 
-/// The correct source map artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+/// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kAmdDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
   WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
   },
   WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdkSourcemaps,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdCanvaskitSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
   },
   WebRendererMode.html: <NullSafetyMode, HostArtifact> {
-    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdkSourcemaps,
-    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
+    NullSafetyMode.sound: HostArtifact.webPrecompiledAmdSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledAmdSdkSourcemaps,
+  },
+};
+
+/// The correct precompiled artifact to use for each build and render mode for DDC with DDC modules.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDdcDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcCanvaskitSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcCanvaskitSdk,
+  },
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcSdk,
+  },
+};
+
+/// The correct source map artifact to use for each build and render mode for DDC with DDC modules.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDdcDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdkSourcemaps,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcCanvaskitSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps,
+  },
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledDdcSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledDdcSdkSourcemaps,
   },
 };
 

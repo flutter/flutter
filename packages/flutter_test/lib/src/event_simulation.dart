@@ -309,7 +309,6 @@ abstract final class KeyEventSimulator {
 
   static int _getAndroidModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -317,51 +316,39 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-    // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierRightShift | RawKeyEventDataAndroid.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierLeftMeta | RawKeyEventDataAndroid.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierRightMeta | RawKeyEventDataAndroid.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierLeftControl | RawKeyEventDataAndroid.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierRightControl | RawKeyEventDataAndroid.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierLeftAlt | RawKeyEventDataAndroid.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierRightAlt | RawKeyEventDataAndroid.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.fn)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierFunction;
     }
     if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierScrollLock;
     }
     if (pressed.contains(LogicalKeyboardKey.numLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierNumLock;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataAndroid.modifierCapsLock;
     }
     return result;
@@ -369,7 +356,6 @@ abstract final class KeyEventSimulator {
 
   static int _getGlfwModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -377,23 +363,18 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= GLFWKeyHelper.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= GLFWKeyHelper.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= GLFWKeyHelper.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= GLFWKeyHelper.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= GLFWKeyHelper.modifierCapsLock;
     }
     return result;
@@ -401,7 +382,6 @@ abstract final class KeyEventSimulator {
 
   static int _getWindowsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -409,59 +389,45 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shift)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierLeftShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierRightShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierLeftMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierRightMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.control)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierLeftControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierRightControl;
     }
     if (pressed.contains(LogicalKeyboardKey.alt)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierLeftAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierRightAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierCaps;
     }
     if (pressed.contains(LogicalKeyboardKey.numLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierNumLock;
     }
     if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWindows.modifierScrollLock;
     }
     return result;
@@ -469,7 +435,6 @@ abstract final class KeyEventSimulator {
 
   static int _getFuchsiaModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -477,39 +442,30 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierLeftShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierRightShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierLeftMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierRightMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierLeftControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierRightControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierLeftAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierRightAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataFuchsia.modifierCapsLock;
     }
     return result;
@@ -517,7 +473,6 @@ abstract final class KeyEventSimulator {
 
   static int _getWebModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -525,47 +480,36 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierCapsLock;
     }
     if (pressed.contains(LogicalKeyboardKey.numLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierNumLock;
     }
     if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataWeb.modifierScrollLock;
     }
     return result;
@@ -573,7 +517,6 @@ abstract final class KeyEventSimulator {
 
   static int _getMacOsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-      // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -581,35 +524,27 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierRightShift | RawKeyEventDataMacOs.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierLeftCommand | RawKeyEventDataMacOs.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierRightCommand | RawKeyEventDataMacOs.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierLeftControl | RawKeyEventDataMacOs.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierRightControl | RawKeyEventDataMacOs.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierLeftOption | RawKeyEventDataMacOs.modifierOption;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierRightOption | RawKeyEventDataMacOs.modifierOption;
     }
     final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
@@ -636,15 +571,12 @@ abstract final class KeyEventSimulator {
       LogicalKeyboardKey.f21,
     };
     if (pressed.intersection(functionKeys).isNotEmpty) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierFunction;
     }
     if (pressed.intersection(kMacOsNumPadMap.values.toSet()).isNotEmpty) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierNumericPad;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataMacOs.modifierCapsLock;
     }
     return result;
@@ -652,7 +584,6 @@ abstract final class KeyEventSimulator {
 
   static int _getIOSModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
-    // ignore: deprecated_member_use
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
       pressed.add(newKey);
@@ -660,35 +591,27 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierLeftShift | RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierRightShift | RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierLeftCommand | RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierRightCommand | RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierLeftControl | RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierRightControl | RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierLeftOption | RawKeyEventDataIos.modifierOption;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierRightOption | RawKeyEventDataIos.modifierOption;
     }
     final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
@@ -715,15 +638,12 @@ abstract final class KeyEventSimulator {
       LogicalKeyboardKey.f21,
     };
     if (pressed.intersection(functionKeys).isNotEmpty) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierFunction;
     }
     if (pressed.intersection(kMacOsNumPadMap.values.toSet()).isNotEmpty) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierNumericPad;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
-      // ignore: deprecated_member_use
       result |= RawKeyEventDataIos.modifierCapsLock;
     }
     return result;
@@ -764,8 +684,7 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  // ignore: deprecated_member_use
-  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.rawKeyData;
+  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.keyDataThenRawKeyData;
 
   // The simulation transit mode for [simulateKeyDownEvent], [simulateKeyUpEvent],
   // and [simulateKeyRepeatEvent].
@@ -774,22 +693,25 @@ abstract final class KeyEventSimulator {
   // and delivered. For detailed introduction, see [KeyDataTransitMode] and
   // its values.
   //
-  // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
-  // overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
+  // The `_transitMode` defaults to [KeyDataTransitMode.keyDataThenRawKeyData], and can
+  // be overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
   // is often set with [KeySimulationModeVariant].
-  // ignore: deprecated_member_use
   static KeyDataTransitMode get _transitMode {
-    // ignore: deprecated_member_use
     KeyDataTransitMode? result;
     assert(() {
-      // ignore: deprecated_member_use
       result = debugKeyEventSimulatorTransitModeOverride;
       return true;
     }());
     return result ?? _defaultTransitMode;
   }
 
-  static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
+  /// Returns the transit mode that simulated key events are constructed
+  /// and delivered. For detailed introduction, see [KeyDataTransitMode]
+  /// and its values.
+  @visibleForTesting
+  static KeyDataTransitMode get transitMode => _transitMode;
+
+  static String get _defaultPlatform => kIsWeb ? 'web' : defaultTargetPlatform.name.toLowerCase();
 
   /// Simulates sending a hardware key down event.
   ///
@@ -798,7 +720,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -820,13 +743,10 @@ abstract final class KeyEventSimulator {
       });
     }
     switch (_transitMode) {
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        // ignore: deprecated_member_use
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.down,
@@ -848,7 +768,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -867,13 +788,10 @@ abstract final class KeyEventSimulator {
       });
     }
     switch (_transitMode) {
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        // ignore: deprecated_member_use
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.up,
@@ -895,7 +813,8 @@ abstract final class KeyEventSimulator {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to the operating system that the test is running on.
+  /// system. Defaults to "web" on web, and the operating system name based on
+  /// [defaultTargetPlatform] everywhere else.
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -915,13 +834,10 @@ abstract final class KeyEventSimulator {
       });
     }
     switch (_transitMode) {
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
-      // ignore: deprecated_member_use
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        // ignore: deprecated_member_use
         final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.repeat,
@@ -947,7 +863,8 @@ abstract final class KeyEventSimulator {
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
@@ -981,7 +898,8 @@ Future<bool> simulateKeyDownEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -1009,7 +927,8 @@ Future<bool> simulateKeyUpEvent(
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to the operating system that the test is running on.
+/// system. Defaults to "web" on web, and the operating system name based on
+/// [defaultTargetPlatform] everywhere else.
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -1057,6 +976,15 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   )
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
     : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
+
+  /// Creates a [KeySimulatorTransitModeVariant] that only contains
+  /// [KeyDataTransitMode.rawKeyData].
+  @Deprecated(
+    'No longer supported. Transit mode is always key data only. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
+  KeySimulatorTransitModeVariant.rawKeyData()
+    : this(<KeyDataTransitMode>{KeyDataTransitMode.rawKeyData});
 
   @override
   final Set<KeyDataTransitMode> values;

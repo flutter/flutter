@@ -407,6 +407,40 @@ A problem occurred configuring root project 'android'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    testUsingContext('retries if connection times out', () async {
+      const String errorMessage = r'''
+Exception in thread "main" java.net.ConnectException: Connection timed out
+java.base/sun.nio.ch.Net.connect0(Native Method)
+  at java.base/sun.nio.ch.Net.connect(Net.java:579)
+  at java.base/sun.nio.ch.Net.connect(Net.java:568)
+  at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:588)
+  at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+  at java.base/java.net.Socket.connect(Socket.java:633)
+  at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:299)
+  at java.base/sun.security.ssl.BaseSSLSocketImpl.connect(BaseSSLSocketImpl.java:174)
+  at java.base/sun.net.NetworkClient.doConnect(NetworkClient.java:183)
+  at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:498)
+  at java.base/sun.net.www.http.HttpClient.openServer(HttpClient.java:603)
+  at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:266)
+  at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:380)''';
+
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(await networkErrorHandler.handler(
+        line: '',
+        project: FakeFlutterProject(),
+        usesAndroidX: true,
+      ), equals(GradleBuildStatus.retry));
+
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 
   group('permission errors', () {

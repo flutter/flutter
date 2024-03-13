@@ -130,12 +130,45 @@ void main() {
     );
   });
 
+  testWithoutContext('flutter test should run a test when its name matches a regexp when --experimental-faster-testing is set',
+      () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>[
+        '--experimental-faster-testing',
+        '--name=inc.*de',
+      ],
+    );
+    expect(
+      result,
+      ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')),
+    );
+  });
+
   testWithoutContext('flutter test should run a test when its name contains a string', () async {
     final ProcessResult result = await _runFlutterTest(
       'filtering',
       automatedTestsDirectory,
       flutterTestDirectory,
       extraArguments: const <String>['--plain-name', 'include'],
+    );
+    expect(
+      result,
+      ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')),
+    );
+  });
+
+  testWithoutContext('flutter test should run a test when its name contains a string when --experimental-faster-testing is set', () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>[
+        '--experimental-faster-testing',
+        '--plain-name=include',
+      ],
     );
     expect(
       result,
@@ -156,6 +189,23 @@ void main() {
     );
   });
 
+  testWithoutContext('flutter test should run a test with a given tag when --experimental-faster-testing is set', () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>[
+        '--experimental-faster-testing',
+        '--tags=include-tag',
+      ],
+    );
+    expect(
+      result,
+      ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')),
+    );
+  });
+
+
   testWithoutContext('flutter test should not run a test with excluded tag', () async {
     final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--exclude-tags', 'exclude-tag']);
@@ -172,6 +222,22 @@ void main() {
       ProcessResultMatcher(
         exitCode: 1,
         stdoutPattern: RegExp(r'\+\d+ -1: Some tests failed\.'),
+      ),
+    );
+  });
+
+  testWithoutContext('flutter test should run all tests when tags are unspecified when --experimental-faster-testing is set', () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--experimental-faster-testing'],
+    );
+    expect(
+      result,
+      ProcessResultMatcher(
+        exitCode: 1,
+        stdoutPattern: RegExp(r'\+\d+ -\d+: Some tests failed\.'),
       ),
     );
   });
@@ -232,6 +298,75 @@ void main() {
     expect(stdout, contains('test 0: deleting temporary directory'));
     expect(stdout, contains('test 0: finished'));
     expect(stdout, contains('test package returned with exit code 0'));
+    if ((result.stderr as String).isNotEmpty) {
+      fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+    }
+    expect(result, const ProcessResultMatcher());
+  });
+
+  testWithoutContext('flutter test should test runs to completion when --experimental-faster-testing is set', () async {
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      '$flutterTestDirectory/child_directory',
+      extraArguments: const <String>[
+        '--experimental-faster-testing',
+        '--verbose',
+      ],
+    );
+    final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    expect(stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
+    expect(stdout, contains('Starting flutter_tester process with command'));
+    if ((result.stderr as String).isNotEmpty) {
+      fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+    }
+    expect(result, const ProcessResultMatcher());
+  });
+
+  testWithoutContext('flutter test should ignore --experimental-faster-testing when only a single test file is specified', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'trivial',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>[
+        '--experimental-faster-testing',
+        '--verbose'
+      ],
+    );
+    final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    expect(
+      stdout,
+      contains('--experimental-faster-testing was parsed but will be ignored. '
+          'This option should not be used when running a single test file.'),
+    );
+    expect(stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
+    expect(stdout, contains('test 0: Starting flutter_tester process with command'));
+    expect(stdout, contains('test 0: deleting temporary directory'));
+    expect(stdout, contains('test 0: finished'));
+    expect(stdout, contains('test package returned with exit code 0'));
+    if ((result.stderr as String).isNotEmpty) {
+      fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+    }
+    expect(result, const ProcessResultMatcher());
+  });
+
+   testWithoutContext('flutter test should ignore --experimental-faster-testing when running integration tests', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'trivial_widget',
+      automatedTestsDirectory,
+      integrationTestDirectory,
+      extraArguments: <String>[
+        ...integrationTestExtraArgs,
+        '--experimental-faster-testing',
+      ],
+    );
+    final String stdout = (result.stdout as String).replaceAll('\r', '\n');
+    expect(
+      stdout,
+      contains('--experimental-faster-testing was parsed but will be ignored. '
+          'This option is not supported when running integration tests or web '
+          'tests.'),
+    );
     if ((result.stderr as String).isNotEmpty) {
       fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
     }

@@ -10,7 +10,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   late FakeBuilder mockHelper;
@@ -35,10 +34,7 @@ void main() {
   }
 
   void uiTestGroup() {
-    testWidgets("doesn't invoke anything without user interaction",
-    // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -709,7 +705,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), pointer: 1, touchSlopY: 0.0);
         await tester.pump();
         expect(mockHelper.invocations, contains(const RefreshTaskInvocation()));
 
@@ -752,7 +748,7 @@ void main() {
 
         // Start another drag by an amount that would have been enough to
         // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0, warnIfMissed: false);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false);
         await tester.pump();
 
         // Instead, it's still in the done state because the sliver never
@@ -783,7 +779,7 @@ void main() {
         );
 
         // Start another drag. It's now in drag mode.
-        await tester.drag(find.text('0'), const Offset(0.0, 40.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 40.0), pointer: 1, touchSlopY: 0.0);
         await tester.pump();
         expect(mockHelper.invocations, contains(matchesBuilder(
           refreshState: RefreshIndicatorMode.drag,

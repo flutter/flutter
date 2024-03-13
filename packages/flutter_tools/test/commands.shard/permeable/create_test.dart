@@ -2849,7 +2849,7 @@ void main() {
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
 
-  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+  testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     Cache.flutterRoot = '../..';
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot!,
@@ -2882,7 +2882,7 @@ void main() {
 
     for (final String templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '12.0'"));
     }
 
     final CreateCommand command = CreateCommand();
@@ -2892,7 +2892,7 @@ void main() {
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
         exists);
     final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '12.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -2907,10 +2907,10 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
-    expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
-    expect(buildContent.contains('minSdk flutter.minSdkVersion'), true);
-    expect(buildContent.contains('targetSdk flutter.targetSdkVersion'), true);
+    expect(buildContent.contains('compileSdk = flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('ndkVersion = flutter.ndkVersion'), true);
+    expect(buildContent.contains('minSdk = flutter.minSdkVersion'), true);
+    expect(buildContent.contains('targetSdk = flutter.targetSdkVersion'), true);
   });
 
   testUsingContext('Android Java plugin contains namespace', () async {
@@ -2932,7 +2932,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2955,7 +2955,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -2979,7 +2979,7 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
@@ -3002,10 +3002,10 @@ void main() {
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
     // Each build file should contain the expected namespace.
-    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    const String expectedNameSpace = 'namespace = "com.bar.foo.flutter_project"';
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
-    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    const String expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
     expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.

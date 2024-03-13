@@ -329,10 +329,7 @@ class IosProject extends XcodeBasedProject {
 
   Future<String?> _getTeamIdentifier(XcodeProjectBuildContext buildContext) async {
     final Map<String, String>? buildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
-    if (buildSettings != null) {
-      return buildSettings[kTeamIdKey];
-    }
-    return null;
+    return buildSettings?[kTeamIdKey];
   }
 
   Future<List<String>> _getAssociatedDomains(XcodeProjectBuildContext buildContext) async {
