@@ -86,18 +86,15 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
   desc.format = flutter::gpu::ToImpellerPixelFormat(format);
-  desc.usage = 0;
+  desc.usage = {};
   if (enable_render_target_usage) {
-    desc.usage |= static_cast<impeller::TextureUsageMask>(
-        impeller::TextureUsage::kRenderTarget);
+    desc.usage |= impeller::TextureUsage::kRenderTarget;
   }
   if (enable_shader_read_usage) {
-    desc.usage |= static_cast<impeller::TextureUsageMask>(
-        impeller::TextureUsage::kShaderRead);
+    desc.usage |= impeller::TextureUsage::kShaderRead;
   }
   if (enable_shader_write_usage) {
-    desc.usage |= static_cast<impeller::TextureUsageMask>(
-        impeller::TextureUsage::kShaderWrite);
+    desc.usage |= impeller::TextureUsage::kShaderWrite;
   }
   switch (sample_count) {
     case 1:

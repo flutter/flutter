@@ -71,7 +71,7 @@ TEST_P(EntityPassTargetTest, SwapWithMSAAImplicitResolve) {
     color0_tex_desc.sample_count = SampleCount::kCount4;
     color0_tex_desc.format = pixel_format;
     color0_tex_desc.size = ISize{100, 100};
-    color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+    color0_tex_desc.usage = TextureUsage::kRenderTarget;
 
     auto color0_msaa_tex = allocator.CreateTexture(color0_tex_desc);
 

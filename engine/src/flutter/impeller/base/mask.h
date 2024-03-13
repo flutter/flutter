@@ -9,6 +9,21 @@
 
 namespace impeller {
 
+template <typename EnumType_>
+struct MaskTraits {
+  static constexpr bool kIsMask = false;
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Declare this in the "impeller" namespace to make the enum
+///             maskable.
+///
+#define IMPELLER_ENUM_IS_MASK(enum_name)  \
+  template <>                             \
+  struct MaskTraits<enum_name> {          \
+    static constexpr bool kIsMask = true; \
+  };
+
 //------------------------------------------------------------------------------
 /// @brief      A mask of typed enums.
 ///
@@ -110,42 +125,56 @@ struct Mask {
 
 // Construction from Enum Types
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator|(const EnumType& lhs,
                                           const EnumType& rhs) {
   return Mask<EnumType>{lhs} | rhs;
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator&(const EnumType& lhs,
                                           const EnumType& rhs) {
   return Mask<EnumType>{lhs} & rhs;
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator^(const EnumType& lhs,
                                           const EnumType& rhs) {
   return Mask<EnumType>{lhs} ^ rhs;
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator~(const EnumType& other) {
   return ~Mask<EnumType>{other};
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator|(const EnumType& lhs,
                                           const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} | rhs;
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator&(const EnumType& lhs,
                                           const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} & rhs;
 }
 
-template <typename EnumType>
+template <
+    typename EnumType,
+    typename std::enable_if<MaskTraits<EnumType>::kIsMask, bool>::type = true>
 inline constexpr Mask<EnumType> operator^(const EnumType& lhs,
                                           const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} ^ rhs;
@@ -154,37 +183,43 @@ inline constexpr Mask<EnumType> operator^(const EnumType& lhs,
 // Relational operators with EnumType promotion. These can be replaced by a
 // defaulted spaceship operator post C++20.
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator<(const EnumType& lhs,
                                 const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} < rhs;
 }
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator>(const EnumType& lhs,
                                 const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} > rhs;
 }
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator<=(const EnumType& lhs,
                                  const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} <= rhs;
 }
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator>=(const EnumType& lhs,
                                  const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} >= rhs;
 }
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator==(const EnumType& lhs,
                                  const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} == rhs;
 }
 
-template <typename EnumType>
+template <typename EnumType,
+          typename std::enable_if_t<MaskTraits<EnumType>::kIsMask, bool> = true>
 inline constexpr bool operator!=(const EnumType& lhs,
                                  const Mask<EnumType>& rhs) {
   return Mask<EnumType>{lhs} != rhs;

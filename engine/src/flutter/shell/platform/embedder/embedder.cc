@@ -1048,9 +1048,8 @@ MakeRenderTargetFromBackingStoreImpeller(
   resolve_tex_desc.size = size;
   resolve_tex_desc.sample_count = impeller::SampleCount::kCount1;
   resolve_tex_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-  resolve_tex_desc.usage =
-      static_cast<uint64_t>(impeller::TextureUsage::kRenderTarget) |
-      static_cast<uint64_t>(impeller::TextureUsage::kShaderRead);
+  resolve_tex_desc.usage = impeller::TextureUsage::kRenderTarget |
+                           impeller::TextureUsage::kShaderRead;
 
   auto resolve_tex = impeller::WrapTextureMTL(
       resolve_tex_desc, metal->texture.texture,
@@ -1068,8 +1067,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   msaa_tex_desc.sample_count = impeller::SampleCount::kCount4;
   msaa_tex_desc.format = resolve_tex->GetTextureDescriptor().format;
   msaa_tex_desc.size = size;
-  msaa_tex_desc.usage =
-      static_cast<uint64_t>(impeller::TextureUsage::kRenderTarget);
+  msaa_tex_desc.usage = impeller::TextureUsage::kRenderTarget;
 
   auto msaa_tex =
       aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(

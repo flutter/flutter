@@ -28,7 +28,7 @@ std::unique_ptr<KHRSurfaceVK> KHRSurfaceVK::WrapSwapchainImage(
     msaa_tex_desc.sample_count = SampleCount::kCount4;
     msaa_tex_desc.format = swapchain_image->GetPixelFormat();
     msaa_tex_desc.size = swapchain_image->GetSize();
-    msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+    msaa_tex_desc.usage = TextureUsage::kRenderTarget;
 
     if (!swapchain_image->GetMSAATexture()) {
       msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
@@ -46,8 +46,7 @@ std::unique_ptr<KHRSurfaceVK> KHRSurfaceVK::WrapSwapchainImage(
   resolve_tex_desc.type = TextureType::kTexture2D;
   resolve_tex_desc.format = swapchain_image->GetPixelFormat();
   resolve_tex_desc.size = swapchain_image->GetSize();
-  resolve_tex_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  resolve_tex_desc.usage = TextureUsage::kRenderTarget;
   resolve_tex_desc.sample_count = SampleCount::kCount1;
   resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 

@@ -282,8 +282,8 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
     color0_tex_desc.format = pixel_format;
     color0_tex_desc.size = size;
     color0_tex_desc.mip_count = mip_count;
-    color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-                            static_cast<uint64_t>(TextureUsage::kShaderRead);
+    color0_tex_desc.usage =
+        TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
     color0_tex = allocator_->CreateTexture(color0_tex_desc);
     if (!color0_tex) {
       return {};
@@ -338,7 +338,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     color0_tex_desc.sample_count = SampleCount::kCount4;
     color0_tex_desc.format = pixel_format;
     color0_tex_desc.size = size;
-    color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+    color0_tex_desc.usage = TextureUsage::kRenderTarget;
     if (context.GetCapabilities()->SupportsImplicitResolvingMSAA()) {
       // See below ("SupportsImplicitResolvingMSAA") for more details.
       color0_tex_desc.storage_mode = StorageMode::kDevicePrivate;
@@ -364,8 +364,7 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     color0_resolve_tex_desc.size = size;
     color0_resolve_tex_desc.compression_type = CompressionType::kLossy;
     color0_resolve_tex_desc.usage =
-        static_cast<uint64_t>(TextureUsage::kRenderTarget) |
-        static_cast<uint64_t>(TextureUsage::kShaderRead);
+        TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
     color0_resolve_tex_desc.mip_count = mip_count;
     color0_resolve_tex = allocator_->CreateTexture(color0_resolve_tex_desc);
     if (!color0_resolve_tex) {
@@ -433,8 +432,7 @@ void RenderTarget::SetupDepthStencilAttachments(
     depth_stencil_texture_desc.format =
         context.GetCapabilities()->GetDefaultDepthStencilFormat();
     depth_stencil_texture_desc.size = size;
-    depth_stencil_texture_desc.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    depth_stencil_texture_desc.usage = TextureUsage::kRenderTarget;
     depth_stencil_texture = allocator.CreateTexture(depth_stencil_texture_desc);
     if (!depth_stencil_texture) {
       return;  // Error messages are handled by `Allocator::CreateTexture`.

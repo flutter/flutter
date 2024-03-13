@@ -59,18 +59,16 @@ void ConfigureBlending(const ProcTableGLES& gl,
   }
 
   {
-    const auto is_set = [](std::underlying_type_t<ColorWriteMask> mask,
+    const auto is_set = [](ColorWriteMask mask,
                            ColorWriteMask check) -> GLboolean {
-      using RawType = decltype(mask);
-      return (static_cast<RawType>(mask) & static_cast<RawType>(check))
-                 ? GL_TRUE
-                 : GL_FALSE;
+      return (mask & check) ? GL_TRUE : GL_FALSE;
     };
 
-    gl.ColorMask(is_set(color->write_mask, ColorWriteMask::kRed),    // red
-                 is_set(color->write_mask, ColorWriteMask::kGreen),  // green
-                 is_set(color->write_mask, ColorWriteMask::kBlue),   // blue
-                 is_set(color->write_mask, ColorWriteMask::kAlpha)   // alpha
+    gl.ColorMask(
+        is_set(color->write_mask, ColorWriteMaskBits::kRed),    // red
+        is_set(color->write_mask, ColorWriteMaskBits::kGreen),  // green
+        is_set(color->write_mask, ColorWriteMaskBits::kBlue),   // blue
+        is_set(color->write_mask, ColorWriteMaskBits::kAlpha)   // alpha
     );
   }
 }
