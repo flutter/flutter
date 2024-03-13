@@ -70,7 +70,16 @@ enum NavigationReason {
   kForward,
 
   /// Backward, e.g. Shift + Tab
-  kBackward,
+  kBackward;
+
+  factory NavigationReason.fromInt(int index) {
+    return switch (index) {
+      0 => kProgrammatic,
+      1 => kForward,
+      2 => kBackward,
+      _ => throw ArgumentError('index', 'Argument index must be in [0, 2]. Was $index')
+    };
+  }
 }
 
 /// Callback signature for when the engine notifies the framework that keyboard
@@ -100,9 +109,9 @@ class PlatformViewsService {
       case 'navigatedOut':
         final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
         final int id = args['id'] as int;
-        final int reason = args['reason'] as int;
+        final NavigationReason reason = NavigationReason.fromInt(args['reason'] as int);
         if (_loseFocusCallbacks.containsKey(id)) {
-          _loseFocusCallbacks[id]!(NavigationReason.values[reason]);
+          _loseFocusCallbacks[id]!(reason);
         }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
