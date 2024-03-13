@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_PLAYGROUND_BACKEND_VULKAN_PLAYGROUND_IMPL_VK_H_
 #define FLUTTER_IMPELLER_PLAYGROUND_BACKEND_VULKAN_PLAYGROUND_IMPL_VK_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/playground/playground_impl.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -13,6 +12,8 @@ namespace impeller {
 
 class PlaygroundImplVK final : public PlaygroundImpl {
  public:
+  static bool IsVulkanDriverPresent();
+
   explicit PlaygroundImplVK(PlaygroundSwitches switches);
 
   ~PlaygroundImplVK();

@@ -135,7 +135,8 @@
                "arm64",
                "--rbe",
                "--no-goma",
-               "--xcode-symlinks"
+               "--xcode-symlinks",
+               "--use-glfw-swiftshader"
             ],
             "name": "host_debug_unopt_arm64",
             "ninja": {
@@ -157,7 +158,7 @@
                         "--variant",
                         "host_debug_unopt_arm64",
                         "--type",
-                        "dart,dart-host,engine",
+                        "dart,dart-host,engine,impeller-golden",
                         "--engine-capture-core-dump"
                     ]
                 }

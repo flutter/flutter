@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/playground/playground_impl.h"
+#include "flutter/testing/testing.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -18,6 +19,29 @@
 #if IMPELLER_ENABLE_VULKAN
 #include "impeller/playground/backend/vulkan/playground_impl_vk.h"
 #endif  // IMPELLER_ENABLE_VULKAN
+
+namespace {
+
+std::string GetTestName() {
+  std::string suite_name =
+      ::testing::UnitTest::GetInstance()->current_test_suite()->name();
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  std::stringstream ss;
+  ss << "impeller_" << suite_name << "_" << test_name;
+  std::string result = ss.str();
+  // Make sure there are no slashes in the test name.
+  std::replace(result.begin(), result.end(), '/', '_');
+  return result;
+}
+
+bool ShouldTestHaveVulkanValidations() {
+  std::string test_name = GetTestName();
+  return std::find(impeller::kVulkanDenyValidationTests.begin(),
+                   impeller::kVulkanDenyValidationTests.end(),
+                   test_name) == impeller::kVulkanDenyValidationTests.end();
+}
+}  // namespace
 
 namespace impeller {
 
@@ -35,6 +59,12 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
+      if (!PlaygroundImplVK::IsVulkanDriverPresent()) {
+        FML_CHECK(false) << "Attempted to create playground with backend that "
+                            "isn't available or was disabled on this platform: "
+                         << PlaygroundBackendToString(backend);
+      }
+      switches.enable_vulkan_validation = ShouldTestHaveVulkanValidations();
       return std::make_unique<PlaygroundImplVK>(switches);
 #endif  // IMPELLER_ENABLE_VULKAN
     default:
