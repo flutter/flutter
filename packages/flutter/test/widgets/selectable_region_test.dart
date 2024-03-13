@@ -1074,7 +1074,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph2, 2));
       // Should clear the selection on paragraph 1 and return to the origin paragraph.
       expect(paragraph1.selections.isEmpty, true);
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 15));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 15, extentOffset: 0));
 
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
       // Should select line 1 of text widget 3.
