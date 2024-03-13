@@ -121,7 +121,8 @@
                 "--target-dir",
                 "host_debug_unopt_impeller_tests",
                 "--rbe",
-                "--no-goma"
+                "--no-goma",
+                "--use-glfw-swiftshader"
             ],
             "name": "host_debug_unopt_impeller_tests",
             "ninja": {

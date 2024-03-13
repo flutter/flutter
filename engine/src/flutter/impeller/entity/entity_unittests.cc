@@ -2167,7 +2167,6 @@ TEST_P(EntityTest, RuntimeEffect) {
 
     auto contents = std::make_shared<RuntimeEffectContents>();
     contents->SetGeometry(Geometry::MakeCover());
-
     contents->SetRuntimeStage(runtime_stage);
 
     struct FragUniforms {
@@ -2643,13 +2642,15 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
-  auto content_context =
-      ContentContext(GetContext(), TypographerContextSkia::Make());
+  auto content_context = GetContentContext();
 
-  auto default_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_depth_stencil_attachments = false});
-  auto alt_color_burn = content_context.GetBlendColorBurnPipeline(
-      {.has_depth_stencil_attachments = true});
+  auto default_color_burn = content_context->GetBlendColorBurnPipeline({
+      .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
+      .has_depth_stencil_attachments = false,
+  });
+  auto alt_color_burn = content_context->GetBlendColorBurnPipeline(
+      {.color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
+       .has_depth_stencil_attachments = true});
 
   ASSERT_NE(default_color_burn, alt_color_burn);
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
@@ -2663,10 +2664,10 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
 }
 
 TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
-  auto content_context =
-      ContentContext(GetContext(), TypographerContextSkia::Make());
-
-  auto default_color_burn = content_context.GetMorphologyFilterPipeline({});
+  auto content_context = GetContentContext();
+  auto default_color_burn = content_context->GetMorphologyFilterPipeline({
+      .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
+  });
 
   auto decal_supported = static_cast<Scalar>(
       GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());

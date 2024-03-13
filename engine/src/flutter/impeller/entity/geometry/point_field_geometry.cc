@@ -4,6 +4,7 @@
 
 #include "impeller/entity/geometry/point_field_geometry.h"
 
+#include "impeller/geometry/color.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
@@ -157,7 +158,8 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
                           DefaultUniformAlignment());
 
   BufferView geometry_buffer =
-      host_buffer.Emplace(nullptr, total * sizeof(Point), alignof(Point));
+      host_buffer.Emplace(nullptr, total * sizeof(Point),
+                          std::max(DefaultUniformAlignment(), alignof(Point)));
 
   BufferView output;
   {
@@ -185,8 +187,9 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   }
 
   if (texture_coverage.has_value() && effect_transform.has_value()) {
-    BufferView geometry_uv_buffer =
-        host_buffer.Emplace(nullptr, total * sizeof(Vector4), alignof(Vector4));
+    BufferView geometry_uv_buffer = host_buffer.Emplace(
+        nullptr, total * sizeof(Vector4),
+        std::max(DefaultUniformAlignment(), alignof(Vector4)));
 
     using UV = UvComputeShader;
 

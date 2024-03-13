@@ -69,8 +69,6 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CanRenderClippedRuntimeEffects_Vulkan",
 };
 
-static const std::vector<std::string> kVulkanDenyValidationTests = {};
-
 namespace {
 std::string GetTestName() {
   std::string suite_name =
