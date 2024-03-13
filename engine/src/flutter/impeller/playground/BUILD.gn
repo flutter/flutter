@@ -53,6 +53,7 @@ impeller_component("playground") {
     "image:image_skia_backend",
     "imgui:imgui_impeller_backend",
     "//flutter/fml",
+    "//flutter/testing:testing_lib",
     "//flutter/third_party/glfw",
     "//flutter/third_party/imgui:imgui_glfw",
   ]

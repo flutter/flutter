@@ -60,18 +60,7 @@ void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
 
 PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
     : PlaygroundImpl(switches), handle_(nullptr, &DestroyWindowHandle) {
-  if (!::glfwVulkanSupported()) {
-#ifdef TARGET_OS_MAC
-    VALIDATION_LOG << "Attempted to initialize a Vulkan playground on macOS "
-                      "where Vulkan cannot be found. It can be installed via "
-                      "MoltenVK and make sure to install it globally so "
-                      "dlopen can find it.";
-#else
-    VALIDATION_LOG << "Attempted to initialize a Vulkan playground on a system "
-                      "that does not support Vulkan.";
-#endif
-    return;
-  }
+  FML_CHECK(IsVulkanDriverPresent());
 
   InitGlobalVulkanInstance();
 
@@ -222,6 +211,22 @@ fml::Status PlaygroundImplVK::SetCapabilities(
   return fml::Status(
       fml::StatusCode::kUnimplemented,
       "PlaygroundImplVK doesn't support setting the capabilities.");
+}
+
+bool PlaygroundImplVK::IsVulkanDriverPresent() {
+  if (::glfwVulkanSupported()) {
+    return true;
+  }
+#ifdef TARGET_OS_MAC
+  FML_LOG(ERROR) << "Attempting to initialize a Vulkan playground on macOS "
+                    "where Vulkan cannot be found. It can be installed via "
+                    "MoltenVK and make sure to install it globally so "
+                    "dlopen can find it.";
+#else   // TARGET_OS_MAC
+  FML_LOG(ERROR) << "Attempting to initialize a Vulkan playground on a system "
+                    "that does not support Vulkan.";
+#endif  // TARGET_OS_MAC
+  return false;
 }
 
 }  // namespace impeller
