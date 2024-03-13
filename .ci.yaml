@@ -453,6 +453,8 @@ targets:
       firebase_project: main-docs-flutter-prod
       release_ref: refs/heads/master
       release_build: "true"
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_test
     recipe: flutter/flutter_drone
@@ -5976,6 +5978,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    drone_dimensions:
+      - os=Linux
 
   - name: Mac flutter_packaging
     recipe: packaging/packaging
@@ -5988,6 +5992,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    drone_dimensions:
+      - os=Mac
+      - cpu=x86
 
 
   - name: Mac_arm64 flutter_packaging
@@ -6001,6 +6008,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    drone_dimensions:
+      - os=Mac
+      - cpu=arm64
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging
@@ -6014,6 +6024,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    drone_dimensions:
+      - os=Windows
 
 
   - name: Linux docs_deploy_beta
@@ -6036,6 +6048,8 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_deploy_stable
     recipe: flutter/docs
@@ -6057,3 +6071,5 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
+    drone_dimensions:
+      - os=Linux
