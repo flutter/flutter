@@ -4,14 +4,18 @@
 
 import 'package:pool/pool.dart';
 
+import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../flutter_manifest.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../tools/asset_transformer.dart';
 import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
@@ -93,19 +97,29 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final AssetTransformer assetTransformer = AssetTransformer(
+    processManager: environment.processManager,
+    fileSystem: environment.fileSystem,
+    dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
+  );
 
   final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
     ...assetBundle.entries,
     ...additionalContent.map((String key, DevFSContent value) {
       return MapEntry<String, AssetBundleEntry>(
         key,
-        AssetBundleEntry(value, kind: AssetKind.regular),
+        AssetBundleEntry(
+          value,
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
+        ),
       );
     }),
     if (skslBundle != null)
       kSkSLShaderBundlePath: AssetBundleEntry(
         skslBundle,
         kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
       ),
   };
 
@@ -128,7 +142,18 @@ Future<Depfile> copyAssets(
           bool doCopy = true;
           switch (entry.value.kind) {
             case AssetKind.regular:
-              break;
+              if (entry.value.transformers.isNotEmpty) {
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                  asset: content.file as File,
+                  outputPath: file.path,
+                  workingDirectory: environment.projectDir.path,
+                  transformerEntries: entry.value.transformers,
+                );
+                doCopy = false;
+                if (failure != null) {
+                  throwToolExit(failure.message);
+                }
+              }
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
                 input: content.file as File,

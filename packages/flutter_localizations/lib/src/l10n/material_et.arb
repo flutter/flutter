@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jaga …",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

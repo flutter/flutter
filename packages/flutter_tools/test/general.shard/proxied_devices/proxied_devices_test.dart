@@ -431,7 +431,7 @@ void main() {
       testWithoutContext('transfers file to the daemon with delta turned on, file exists on remote', () async {
         bufferLogger = BufferLogger.test();
         final FakeFileTransfer fileTransfer = FakeFileTransfer();
-        final BlockHashes blockHashes = BlockHashes(
+        const BlockHashes blockHashes = BlockHashes(
           blockSize: 10,
           totalSize: 30,
           adler32: <int>[1, 2, 3],
@@ -562,6 +562,44 @@ void main() {
       expect(devicesAdded[0].id, fakeDevice['id']);
       expect(devicesAdded[1].id, fakeDevice2['id']);
     });
+
+    testWithoutContext('handles getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <String>['1', '2']);
+
+      final List<String> result = await resultFuture;
+      expect(result, <String>['1', '2']);
+    });
+
+    testWithoutContext('returns empty result when daemon does not understand getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendErrorResponse(message.data['id']!, 'command not understood: device.getDiagnostics', StackTrace.current);
+
+      final List<String> result = await resultFuture;
+      expect(result, isEmpty);
+    });
   });
 
   group('ProxiedDartDevelopmentService', () {
@@ -615,6 +653,9 @@ void main() {
       final DaemonMessage shutdownMessage = await broadcastOutput.first;
       expect(shutdownMessage.data['id'], isNotNull);
       expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+      expect(shutdownMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+      });
     });
 
     testWithoutContext('starts a local dds if the VM service port is not a forwarded port', () async {

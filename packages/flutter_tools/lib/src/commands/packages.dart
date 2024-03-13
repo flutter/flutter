@@ -399,14 +399,7 @@ class PackagesGetCommand extends FlutterCommand {
     return findPlugins(rootProject, throwOnError: false);
   })();
 
-  late final String? _androidEmbeddingVersion = (() {
-    final FlutterProject? rootProject = _rootProject;
-    if (rootProject == null) {
-      return null;
-    }
-
-    return rootProject.android.getEmbeddingVersion().toString().split('.').last;
-  })();
+  late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.

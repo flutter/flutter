@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../impeller_test_helpers.dart';
+
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
 const bool skipPerspectiveTextGoldens = isBrowser;
 
@@ -414,7 +416,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0), pointer: 1, touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -436,7 +438,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0), pointer: 1, touchSlopY: 0, warnIfMissed: false); // see top of file
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -1244,14 +1246,14 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump();
       expect(
         date,
         DateTime(2018, 2, 28),
       );
 
-      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // see top of file
       await tester.pump(); // Once to trigger the post frame animate call.
 
       // Callback doesn't transiently go into invalid dates.
@@ -1607,7 +1609,7 @@ void main() {
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
         );
       }
-    });
+    }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1752,7 +1754,7 @@ void main() {
         matchesGoldenFile('timer_picker_test.datetime.drag.png'),
       );
     }
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
     Duration? duration;

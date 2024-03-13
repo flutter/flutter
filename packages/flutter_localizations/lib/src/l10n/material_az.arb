@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Axtarın",
   "searchWebButtonLabel": "Vebdə axtarın",
   "shareButtonLabel": "Paylaşın...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -181,9 +181,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 
   late AnimationController _controller;
   late AnimationController _hoverColorController;
-  late Animation<double> _borderAnimation;
+  late CurvedAnimation _borderAnimation;
   late _InputBorderTween _border;
-  late Animation<double> _hoverAnimation;
+  late CurvedAnimation _hoverAnimation;
   late ColorTween _hoverColorTween;
 
   @override
@@ -218,6 +218,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   void dispose() {
     _controller.dispose();
     _hoverColorController.dispose();
+    _borderAnimation.dispose();
+    _hoverAnimation.dispose();
     super.dispose();
   }
 
@@ -724,7 +726,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _expands = expands,
        _material3 = material3;
 
-  static const double subtextGap = 8.0;
+  // TODO(bleroux): consider defining this value as a Material token and making it
+  // configurable by InputDecorationTheme.
+  double get subtextGap => material3 ? 4.0 : 8.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -1728,14 +1732,17 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: AnimatedOpacity(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        opacity: labelIsFloating ? 1.0 : 0.0,
-        child: Semantics(
-          sortKey: semanticsSortKey,
-          tagForChildren: semanticsTag,
-          child: child ?? (text == null ? null : Text(text!, style: style)),
+      child: IgnorePointer(
+        ignoring: !labelIsFloating,
+        child: AnimatedOpacity(
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          opacity: labelIsFloating ? 1.0 : 0.0,
+          child: Semantics(
+            sortKey: semanticsSortKey,
+            tagForChildren: semanticsTag,
+            child: child ?? (text == null ? null : Text(text!, style: style)),
+          ),
         ),
       ),
     );
@@ -1899,7 +1906,7 @@ class InputDecorator extends StatefulWidget {
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   late final AnimationController _floatingLabelController;
-  late final Animation<double> _floatingLabelAnimation;
+  late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
   static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
@@ -1943,6 +1950,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void dispose() {
     _floatingLabelController.dispose();
+    _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
     super.dispose();
@@ -2968,9 +2976,26 @@ class InputDecoration {
   ///
   /// If [isCollapsed] is true then [contentPadding] is [EdgeInsets.zero].
   ///
+  /// ### Material 3 default content padding
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is true then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(12, 4, 12, 4)` when [isDense]
+  /// is true and `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is false then
+  /// [contentPadding] is `EdgeInsets.fromLTRB(0, 4, 0, 4)` when [isDense] is
+  /// true and `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is false.
+  ///
+  /// If `isOutline` property of [border] is true then [contentPadding] is
+  /// `EdgeInsets.fromLTRB(12, 16, 12, 8)` when [isDense] is true
+  /// and `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is false.
+  ///
+  /// ### Material 2 default content padding
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
   /// [contentPadding] is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
+  ///
   /// If `isOutline` property of [border] is false and if [filled] is false then
   /// [contentPadding] is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
@@ -4633,7 +4658,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
-    return _colors.surfaceVariant;
+    return _colors.surfaceContainerHighest;
   });
 
   @override

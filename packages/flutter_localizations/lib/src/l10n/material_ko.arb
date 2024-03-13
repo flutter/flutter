@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "찾기",
   "searchWebButtonLabel": "웹 검색",
   "shareButtonLabel": "공유...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -156,5 +156,6 @@
   "lookUpButtonLabel": "Chwilio",
   "searchWebButtonLabel": "Chwilio'r We",
   "shareButtonLabel": "Rhannu...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

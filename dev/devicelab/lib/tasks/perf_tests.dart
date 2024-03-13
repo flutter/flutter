@@ -1185,6 +1185,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1204,6 +1205,7 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.createPlatforms = const <String>[],
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1274,6 +1276,10 @@ class PerfTest {
   /// Additional flags for `--dart-define` to control the test
   final String dartDefine;
 
+  /// Additional platforms to create with `flutter create` before running
+  /// the test.
+  final List<String> createPlatforms;
+
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -1284,16 +1290,21 @@ class PerfTest {
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
-      if (device != null) {
-        selectedDevice = device!;
-      } else {
-        selectedDevice = await devices.workingDevice;
-      }
+      selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+      if (createPlatforms.isNotEmpty) {
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
 
       bool changedPlist = false;
       bool changedManifest = false;
@@ -1440,10 +1451,16 @@ class PerfTest {
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
           if (recordGPU) ...<String>[
+            // GPU Frame Time.
             if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
             if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
             if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
             if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+            // GPU Memory.
+            if (data['average_gpu_memory_mb'] != null) 'average_gpu_memory_mb',
+            if (data['90th_percentile_gpu_memory_mb'] != null) '90th_percentile_gpu_memory_mb',
+            if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
+            if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
           ]
         ],
       );
