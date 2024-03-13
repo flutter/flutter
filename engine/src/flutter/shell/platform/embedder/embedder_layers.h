@@ -20,7 +20,8 @@ class EmbedderLayers {
  public:
   EmbedderLayers(SkISize frame_size,
                  double device_pixel_ratio,
-                 SkMatrix root_surface_transformation);
+                 SkMatrix root_surface_transformation,
+                 uint64_t presentation_time);
 
   ~EmbedderLayers();
 
@@ -48,6 +49,7 @@ class EmbedderLayers {
   std::vector<std::unique_ptr<FlutterRegion>> regions_referenced_;
   std::vector<std::unique_ptr<std::vector<FlutterRect>>> rects_referenced_;
   std::vector<FlutterLayer> presented_layers_;
+  uint64_t presentation_time_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderLayers);
 };

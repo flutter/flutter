@@ -88,9 +88,9 @@
 
 - (void)blockUntilFrameAvailable {
   std::unique_lock<std::mutex> lock(_mutex);
+  [self drain];
 
   _beginResizeWaiting = YES;
-
   while (![self someViewsHaveFrame] && !_shuttingDown) {
     _condBlockBeginResize.wait(lock);
     [self drain];
@@ -162,6 +162,19 @@
     }
   }
   event.Wait();
+}
+
+- (void)performOnPlatformThread:(nonnull dispatch_block_t)block {
+  std::unique_lock<std::mutex> lock(_mutex);
+  _scheduledBlocks.push_back(block);
+  if (_beginResizeWaiting) {
+    _condBlockBeginResize.notify_all();
+  } else {
+    dispatch_async(_mainQueue, ^{
+      std::unique_lock<std::mutex> lock(_mutex);
+      [self drain];
+    });
+  }
 }
 
 - (void)registerView:(int64_t)viewId {

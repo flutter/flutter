@@ -42,6 +42,13 @@
                       notify:(nonnull dispatch_block_t)notify;
 
 /**
+ * Schedules the given block to be performed on the platform thread.
+ * The block will be performed even if the platform thread is blocked waiting
+ * for a commit.
+ */
+- (void)performOnPlatformThread:(nonnull dispatch_block_t)block;
+
+/**
  * Requests the synchronizer to track another view.
  *
  * A view must be registered before calling begineResizeForView: or
