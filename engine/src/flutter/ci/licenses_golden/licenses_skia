@@ -1,4 +1,4 @@
-Signature: d548d1f61d568095d04ee2d8369bac1e
+Signature: e7589dacd552d6e02831703726d8b1b6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -399,6 +399,7 @@ FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/FilterColorDeprecated.md
 FILE: ../../../flutter/third_party/skia/relnotes/PerlinNoise.md
+FILE: ../../../flutter/third_party/skia/relnotes/WrapImageGenMipmaps.md
 FILE: ../../../flutter/third_party/skia/relnotes/skcodec_deferred.md
 FILE: ../../../flutter/third_party/skia/relnotes/skshaper.md
 FILE: ../../../flutter/third_party/skia/relnotes/skstream.md
