@@ -120,18 +120,22 @@ class FlutterDevice {
       // TODO(zanderso): consistently provide these flags across platforms.
       final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillName = 'ddc_outline.dill';
-        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillName = 'ddc_outline_sound.dill';
-        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-          extraFrontEndOptions.add('--sound-null-safety');
-        }
-      } else {
-        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
+      switch (buildInfo.nullSafetyMode) {
+        case NullSafetyMode.unsound:
+          platformDillName = 'ddc_outline.dill';
+          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+            extraFrontEndOptions.add('--no-sound-null-safety');
+          }
+        case NullSafetyMode.sound:
+          platformDillName = 'ddc_outline_sound.dill';
+          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+            extraFrontEndOptions.add('--sound-null-safety');
+          }
+        case NullSafetyMode.autodetect:
+          throw StateError(
+            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
+            'got NullSafetyMode.autodetect',
+          );
       }
 
       final String platformDillPath = globals.fs.path.join(
@@ -385,6 +389,8 @@ class FlutterDevice {
       osUtils: globals.os,
       fileSystem: globals.fs,
       logger: globals.logger,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts!,
     );
     return devFS!.create();
   }
@@ -556,7 +562,6 @@ class FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -574,7 +579,6 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
@@ -714,23 +718,30 @@ abstract class ResidentHandlers {
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
-        final Map<String, Object?>? rasterData =
-          await device.vmService!.renderFrameWithRasterStats(
-            viewId: view.id,
-            uiIsolateId: view.uiIsolate!.id,
-          );
-        if (rasterData != null) {
-          final File tempFile = globals.fsUtils.getUniqueFile(
-            globals.fs.currentDirectory,
-            'flutter_jank_metrics',
-            'json',
-          );
-          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
-        } else {
-          logger.printWarning('Unable to get jank metrics.');
+      try {
+        for (final FlutterView view in views) {
+          final Map<String, Object?>? rasterData =
+            await device.vmService!.renderFrameWithRasterStats(
+              viewId: view.id,
+              uiIsolateId: view.uiIsolate!.id,
+            );
+          if (rasterData != null) {
+            final File tempFile = globals.fsUtils.getUniqueFile(
+              globals.fs.currentDirectory,
+              'flutter_jank_metrics',
+              'json',
+            );
+            tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+            logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          } else {
+            logger.printWarning('Unable to get jank metrics.');
+          }
         }
+      } on vm_service.RPCError catch (err) {
+        if (err.code != RPCErrorCodes.kServerError || !err.message.contains('Raster status not supported on Impeller backend')) {
+          rethrow;
+        }
+        logger.printWarning('Unable to get jank metrics for Impeller renderer');
       }
     }
     return true;

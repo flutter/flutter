@@ -195,6 +195,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
     platformDispatcher: PlatformDispatcher.instance,
   ) {
+    platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -246,6 +247,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void reset() {
     _restorationManager?.dispose();
     _restorationManager = null;
+    platformDispatcher.defaultRouteNameTestValue = '/';
     resetGestureBinding();
     testTextInput.reset();
     if (registerTestTextInput) {
@@ -364,10 +366,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return binding.ensureInitialized(environment);
+    return _instance ?? binding.ensureInitialized(environment);
   }
 
   @override
@@ -911,15 +910,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // Ideally, once the test has failed we would stop getting errors from the test.
         // However, if someone tries hard enough they could get in a state where this happens.
         // If we silently dropped these errors on the ground, nobody would ever know. So instead
-        // we report them to the console. They don't cause test failures, but hopefully someone
-        // will see them in the logs at some point.
+        // we raise them and fail the test after it has already completed.
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-        FlutterError.dumpErrorToConsole(FlutterErrorDetails(
+        reportTestException(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
-        ), forceReport: true);
+        ), description);
         return;
       }
       // This is where test failures, e.g. those in expect(), will end up.
@@ -1175,6 +1173,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
+
+    assert(ServicesBinding.instance == WidgetsBinding.instance);
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
   }

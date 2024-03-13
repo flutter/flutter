@@ -57,17 +57,18 @@ class WebTestCompiler {
     // TODO(zanderso): to support autodetect this would need to partition the source code into
     // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillName = 'ddc_outline.dill';
-      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-        extraFrontEndOptions.add('--no-sound-null-safety');
-      }
-    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-      platformDillName = 'ddc_outline_sound.dill';
-      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-        extraFrontEndOptions.add('--sound-null-safety');
-      }
+    switch (buildInfo.nullSafetyMode) {
+      case NullSafetyMode.unsound || NullSafetyMode.autodetect:
+        platformDillName = 'ddc_outline.dill';
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      case NullSafetyMode.sound:
+        languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+        platformDillName = 'ddc_outline_sound.dill';
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
     }
 
     final String platformDillPath = _fileSystem.path.join(

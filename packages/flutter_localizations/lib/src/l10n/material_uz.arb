@@ -145,5 +145,6 @@
   "lookUpButtonLabel": "Tepaga qarang",
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish…",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -39,13 +39,13 @@ _Comparator _testRecommendations({
     },
     operatingSystem: os,
   );
-  if (FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform)) {
+  if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
     return _Comparator.post;
   }
-  if (FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform)) {
+  if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
     return _Comparator.pre;
   }
-  if (FlutterSkippingFileComparator.isAvailableForEnvironment(platform)) {
+  if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
     return _Comparator.skip;
   }
   return _Comparator.local;
@@ -164,5 +164,12 @@ void main() {
     // On Cirrus (with Gold and not on Luci), we skip regardless.
     expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true), _Comparator.local); // TODO(ianh): this should be skip
     expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
+  });
+
+  test('Branch names', () {
+    expect(_testRecommendations(hasLuci: true, hasGold: true, hasFlutterRoot: true), _Comparator.post);
+    expect(_testRecommendations(branch: 'master', hasLuci: true, hasGold: true, hasFlutterRoot: true), _Comparator.post);
+    expect(_testRecommendations(branch: 'the_master_of_justice', hasLuci: true, hasGold: true, hasFlutterRoot: true), _Comparator.skip);
+    expect(_testRecommendations(branch: 'maintain_accuracy', hasLuci: true, hasGold: true, hasFlutterRoot: true), _Comparator.skip);
   });
 }

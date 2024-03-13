@@ -746,7 +746,7 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                        flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,
@@ -1890,7 +1890,12 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocused,
+            ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter,
@@ -5223,6 +5228,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
         TestSemantics.rootChild(
@@ -6564,7 +6571,7 @@ void main() {
         ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled]));
 
     semantics.dispose();
   });
@@ -6978,7 +6985,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
       maxValueLength: 10,
       currentValueLength: 0,
     ));
@@ -6993,7 +7000,12 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
+      flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocused,
+      ],
       maxValueLength: 10,
       currentValueLength: 3,
     ));
@@ -7019,7 +7031,12 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly]),
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isReadOnly,
+      ]),
     );
 
     semantics.dispose();
@@ -8045,6 +8062,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8064,6 +8083,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8089,6 +8110,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8117,6 +8140,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8144,6 +8169,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8169,6 +8196,8 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8184,6 +8213,8 @@ void main() {
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
           SemanticsFlag.isObscured,
         ],
       )
@@ -8199,6 +8230,8 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           value: 'Hello',
         )
@@ -8241,6 +8274,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8276,6 +8311,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -8302,6 +8339,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8332,6 +8371,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8381,6 +8422,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8429,6 +8472,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
         ),
@@ -8465,7 +8510,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
             actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
@@ -8485,6 +8530,8 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
@@ -8538,7 +8585,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             id: inputFieldId,
-            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
             actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
@@ -8558,6 +8605,8 @@ void main() {
             id: inputFieldId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
@@ -8738,6 +8787,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8773,6 +8824,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
             SemanticsFlag.isFocused,
           ],
           children: <TestSemantics>[
@@ -8830,6 +8883,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -8877,6 +8932,8 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
           children: <TestSemantics>[
             TestSemantics(
@@ -15184,6 +15241,8 @@ void main() {
     bool isWide = false;
     const double wideWidth = 300.0;
     const double narrowWidth = 200.0;
+    const TextStyle style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
+    const double caretWidth = 2.0;
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       boilerplate(
@@ -15196,6 +15255,7 @@ void main() {
                 key: textFieldKey,
                 controller: controller,
                 textDirection: TextDirection.rtl,
+                style: style,
               ),
             );
           },
@@ -15212,15 +15272,17 @@ void main() {
     expect(inputWidth, narrowWidth);
     expect(cursorRight, inputWidth - kCaretGap);
 
-    // After entering some text, the cursor remains on the right of the input.
-    await tester.enterText(find.byType(TextField), '12345');
+    const String text = '12345';
+    // After entering some text, the cursor is placed to the left of the text
+    // because the paragraph's writing direction is RTL.
+    await tester.enterText(find.byType(TextField), text);
     await tester.pump();
     editable = findRenderEditable(tester);
     cursorRight = editable.getLocalRectForCaret(
       TextPosition(offset: controller.value.text.length),
     ).topRight.dx;
     inputWidth = editable.size.width;
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
 
     // Since increasing the width of the input moves its right edge further to
     // the right, the cursor has followed this change and still appears on the
@@ -15235,7 +15297,7 @@ void main() {
     ).topRight.dx;
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
-    expect(cursorRight, inputWidth - kCaretGap);
+    expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
   });
 
   testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {
@@ -15833,14 +15895,12 @@ void main() {
     expect(controller.selection.extentOffset, 20);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 23));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
     expect(controller.selection.extentOffset, 23);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 4));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);

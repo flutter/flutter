@@ -152,9 +152,7 @@ class SettingsFile {
     }
   }
 
-  factory SettingsFile.parseFromFile(File file) {
-    return SettingsFile.parse(file.readAsStringSync());
-  }
+  SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
   final Map<String, String> values = <String, String>{};
 
@@ -493,6 +491,22 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
   }
   for (final T value in a) {
     if (!b.contains(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// Tests for shallow equality on two lists.
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
       return false;
     }
   }

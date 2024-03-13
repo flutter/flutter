@@ -8,13 +8,13 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../html_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
+import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
@@ -149,7 +149,7 @@ class BuildWebCommand extends BuildSubCommand {
     final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
       if (!featureFlags.isFlutterWebWasmEnabled) {
-        throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+        throwToolExit('Compiling to WebAssembly (wasm) is only available on the beta and master channels.');
       }
       if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');

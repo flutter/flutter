@@ -515,8 +515,11 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,],
                         textDirection: TextDirection.ltr,
@@ -6820,7 +6823,7 @@ void main() {
       // the arrow should not point exactly to the caret because the caret is
       // too close to the right.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       await tester.pumpWidget(
         CupertinoApp(
           debugShowCheckedModeBanner: false,
@@ -6881,7 +6884,7 @@ void main() {
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -8399,14 +8402,12 @@ void main() {
     expect(controller.selection.extentOffset, 20);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 23));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
     expect(controller.selection.extentOffset, 23);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 4));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);

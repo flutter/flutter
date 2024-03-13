@@ -283,19 +283,22 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The color to use for filling the button when the button has input focus.
   ///
-  /// Defaults to [ThemeData.focusColor] for the current theme.
+  /// In Material3, defaults to [ColorScheme.onPrimaryContainer] with opacity 0.1.
+  /// In Material 2, it defaults to [ThemeData.focusColor] for the current theme.
   final Color? focusColor;
 
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
   ///
-  /// Defaults to [ThemeData.hoverColor] for the current theme.
+  /// Defaults to [ThemeData.hoverColor] for the current theme in Material 2. In
+  /// Material 3, defaults to [ColorScheme.onPrimaryContainer] with opacity 0.08.
   final Color? hoverColor;
 
   /// The splash color for this [FloatingActionButton]'s [InkWell].
   ///
   /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
-  /// null, [ThemeData.splashColor] is used.
+  /// null, [ThemeData.splashColor] is used in Material 2; [ColorScheme.onPrimaryContainer]
+  /// with opacity 0.1 is used in Material 3.
   final Color? splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -808,8 +811,8 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
 
   @override Color? get foregroundColor => _colors.onPrimaryContainer;
   @override Color? get backgroundColor => _colors.primaryContainer;
-  @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.12);
-  @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.12);
+  @override Color? get splashColor => _colors.onPrimaryContainer.withOpacity(0.1);
+  @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.1);
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
 
   @override
