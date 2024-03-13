@@ -11,7 +11,6 @@ import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 dart_library("lib") {
   testonly = true
   package_name = "dart_echo_server"
-  null_safe = true
 
   source_dir = "."
   sources = [ "main.dart" ]
@@ -20,7 +19,6 @@ dart_library("lib") {
 # Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
 dart_component("aot_component") {
   testonly = true
-  null_safe = true
 
   main_package = "dart_echo_server"
   manifest = "meta/dart-aot-echo-server.cml"
@@ -32,7 +30,6 @@ dart_component("aot_component") {
 # Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
 dart_component("jit_component") {
   testonly = true
-  null_safe = true
 
   main_package = "dart_echo_server"
   manifest = "meta/dart-jit-echo-server.cml"

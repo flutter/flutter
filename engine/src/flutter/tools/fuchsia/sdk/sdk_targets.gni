@@ -17,11 +17,7 @@ template("_fuchsia_dart_library") {
   _sources = []
   _deps = []
 
-  if (defined(meta.dart_library_null_safe) && meta.dart_library_null_safe) {
-    _dart_language_version = "2.12"
-  } else {
-    _dart_language_version = "2.0"
-  }
+  _dart_language_version = "2.12"
 
   foreach(source, meta.sources) {
     _sources += [ string_replace("$source", "${meta.root}/lib/", "") ]

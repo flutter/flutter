@@ -76,9 +76,6 @@ import("//flutter/tools/fuchsia/dart/toolchain.gni")
 #   disable_metadata_entry (optional)
 #     Prevents metedata entry from being written to the dart_packag_config json file.
 #
-#   null_safe (optional)
-#     A flag that enables null safety check in dart libraries.
-#
 # Example of usage:
 #
 #   dart_library("baz") {
@@ -183,10 +180,10 @@ if (current_toolchain == dart_toolchain) {
           name = package_name
           if (defined(invoker.language_version)) {
             language_version = invoker.language_version
-          } else if (defined(invoker.null_safe) && invoker.null_safe) {
-            language_version = "2.12"
           } else if (defined(invoker.pubspec)) {
             pubspec_path = rebase_path(invoker.pubspec, root_build_dir)
+          } else {
+            language_version = "2.12"
           }
           root_uri = rebase_path(package_root, root_build_dir)
           if (defined(invoker.source_dir)) {

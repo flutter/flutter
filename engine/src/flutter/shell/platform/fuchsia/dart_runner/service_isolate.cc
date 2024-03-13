@@ -122,19 +122,9 @@ Dart_Isolate CreateServiceIsolate(
   }
 #endif
 
-  bool is_null_safe =
-      Dart_DetectNullSafety(nullptr,         // script_uri
-                            nullptr,         // package_config
-                            nullptr,         // original_working_directory
-                            vmservice_data,  // snapshot_data
-                            vmservice_instructions,  // snapshot_instructions
-                            nullptr,                 // kernel_buffer
-                            0u                       // kernel_buffer_size
-      );
-
   Dart_IsolateFlags flags;
   Dart_IsolateFlagsInitialize(&flags);
-  flags.null_safety = is_null_safe;
+  flags.null_safety = true;
 
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
   Dart_Isolate isolate = Dart_CreateIsolateGroup(

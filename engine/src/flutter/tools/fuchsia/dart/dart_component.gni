@@ -81,9 +81,6 @@ import("//flutter/tools/fuchsia/flutter/internal/flutter_dart_component.gni")
 #     Specifies the parameters for building the component.
 #     See //build/dart/dart_build_config.gni for predefined configs.
 #
-#   null_safe (optional)
-#    If true, this component will be compiled with --sound-null-safety
-#
 #  deps
 #  testonly
 #  visibility
@@ -123,7 +120,6 @@ template("dart_component") {
                              "build_cfg",
                              "deps",
                              "main_dart",
-                             "null_safe",
                            ])
     main_package = _main_package
     deps = _component_deps
