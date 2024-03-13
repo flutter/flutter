@@ -163,7 +163,7 @@ class TestCompiler {
         await generateMainDartWithPluginRegistrant(
           flutterProject!,
           buildInfo.packageConfig,
-          mainUriString,
+          mainUriString.replaceAll('%20', ''),
           globals.fs.file(request.mainUri.path.replaceAll('%20', ' ')),
         );
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
