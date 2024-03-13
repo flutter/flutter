@@ -204,6 +204,18 @@ if (enable_unittests) {
       "//flutter/testing:testing_lib",
     ]
   }
+
+  executable("display_list_transform_benchmarks") {
+    testonly = true
+
+    sources = [ "benchmarking/dl_transform_benchmarks.cc" ]
+
+    deps = [
+      ":display_list_fixtures",
+      "//flutter/benchmarking",
+      "//flutter/testing:testing_lib",
+    ]
+  }
 }
 
 source_set("display_list_benchmarks_source") {
