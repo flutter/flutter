@@ -78,16 +78,28 @@ struct RasterCacheUtil {
    * @return SkMatrix the snapped transformation matrix.
    */
   static SkMatrix GetIntegralTransCTM(const SkMatrix& ctm) {
-    // Avoid integral snapping if the matrix has complex transformation to avoid
-    // the artifact observed in https://github.com/flutter/flutter/issues/41654.
-    if (!ctm.isScaleTranslate()) {
-      return ctm;
-    }
-    SkMatrix result = ctm;
-    result[SkMatrix::kMTransX] = SkScalarRoundToScalar(ctm.getTranslateX());
-    result[SkMatrix::kMTransY] = SkScalarRoundToScalar(ctm.getTranslateY());
-    return result;
+    SkMatrix integral;
+    return ComputeIntegralTransCTM(ctm, &integral) ? integral : ctm;
   }
+
+  /**
+   * @brief Snap the translation components of the |in| matrix to integers
+   *        and store the snapped matrix in |out|.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * The |out| matrix will not be modified if this method returns false.
+   *
+   * @param in the current transformation matrix.
+   * @param out the storage for the snapped matrix.
+   * @return true if the integral modification was needed, false otherwise.
+   */
+  static bool ComputeIntegralTransCTM(const SkMatrix& in, SkMatrix* out);
 
   /**
    * @brief Snap the translation components of the matrix to integers.
@@ -103,31 +115,28 @@ struct RasterCacheUtil {
    * @return SkM44 the snapped transformation matrix.
    */
   static SkM44 GetIntegralTransCTM(const SkM44& ctm) {
-    // Avoid integral snapping if the matrix has complex transformation to avoid
-    // the artifact observed in https://github.com/flutter/flutter/issues/41654.
-    if (ctm.rc(0, 1) != 0 || ctm.rc(0, 2) != 0) {
-      // X multiplied by either Y or Z
-      return ctm;
-    }
-    if (ctm.rc(1, 0) != 0 || ctm.rc(1, 2) != 0) {
-      // Y multiplied by either X or Z
-      return ctm;
-    }
-    // We do not need to worry about the Z row unless the W row
-    // has perspective entries...
-    if (ctm.rc(3, 0) != 0 || ctm.rc(3, 1) != 0 || ctm.rc(3, 2) != 0 ||
-        ctm.rc(3, 3) != 1) {
-      // W not identity row, therefore perspective is applied
-      return ctm;
-    }
-
-    SkM44 result = ctm;
-    result.setRC(0, 3, SkScalarRoundToScalar(ctm.rc(0, 3)));
-    result.setRC(1, 3, SkScalarRoundToScalar(ctm.rc(1, 3)));
-    // No need to worry about Z translation because it has no effect
-    // without perspective entries...
-    return result;
+    SkM44 integral;
+    return ComputeIntegralTransCTM(ctm, &integral) ? integral : ctm;
   }
+
+  /**
+   * @brief Snap the translation components of the |in| matrix to integers
+   *        and store the snapped matrix in |out|.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * The |out| matrix will not be modified if this method returns false.
+   *
+   * @param in the current transformation matrix.
+   * @param out the storage for the snapped matrix.
+   * @return true if the integral modification was needed, false otherwise.
+   */
+  static bool ComputeIntegralTransCTM(const SkM44& in, SkM44* out);
 };
 
 }  // namespace flutter

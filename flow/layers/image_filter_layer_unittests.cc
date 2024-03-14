@@ -454,9 +454,8 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
     expected_builder.Save();
     {
       expected_builder.Translate(offset.fX, offset.fY);
-      // snap translation components to pixels due to using raster cache
-      expected_builder.TransformReset();
-      expected_builder.Transform(snapped_matrix);
+      // translation components already snapped to pixels, intent to
+      // use raster cache won't change them
       DlPaint dl_paint;
       dl_paint.setImageFilter(transformed_filter.get());
       raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
