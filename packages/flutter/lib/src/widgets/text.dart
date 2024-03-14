@@ -736,8 +736,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
   @override
-  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    final SelectionResult result = _handleSelectParagraph(event);
+  SelectionResult handleSelectLine(SelectLineSelectionEvent event) {
+    final SelectionEvent synthesizedAbsorbingEvent = SelectLineSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event, synthesizedAbsorbingEvent);
     if (currentSelectionStartIndex != -1) {
       _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
@@ -748,11 +749,36 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return result;
   }
 
-  SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    if (event.absorb) {
-      final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+  @override
+  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    final SelectionEvent synthesizedAbsorbingEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
+    final SelectionResult result = _handleSelectMultiSelectableBoundary(event, synthesizedAbsorbingEvent);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  SelectionResult _handleSelectMultiSelectableBoundary(SelectionEvent event, SelectionEvent synthesizedAbsorbingEvent) {
+    assert(event is SelectParagraphSelectionEvent || event is SelectLineSelectionEvent, 'This method should only be given selection events that select boundaries that span multiple selectables.');
+    assert(synthesizedAbsorbingEvent is SelectParagraphSelectionEvent || synthesizedAbsorbingEvent is SelectLineSelectionEvent, 'This method should only be given selection events that select boundaries that span multiple selectables.');
+    assert(event.type == synthesizedAbsorbingEvent.type, 'This method is only given selection events whos types are the same.');
+    late final Offset effectiveGlobalPosition;
+    late final bool effectiveAbsorb;
+    if (event.type == SelectionEventType.selectParagraph) {
+      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
+      effectiveAbsorb = event.absorb;
+    } else if (event.type == SelectionEventType.selectLine) {
+      effectiveGlobalPosition = (event as SelectLineSelectionEvent).globalPosition;
+      effectiveAbsorb = event.absorb;
+    }
+    if (effectiveAbsorb) {
       for (int index = 0; index < selectables.length; index += 1) {
-        dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
+        dispatchSelectionEventToChild(selectables[index], synthesizedAbsorbingEvent);
       }
       currentSelectionStartIndex = 0;
       currentSelectionEndIndex = selectables.length - 1;
@@ -766,7 +792,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       if (selectableIsPlaceholder && selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
-          if (globalRect.contains(event.globalPosition)) {
+          if (globalRect.contains(effectiveGlobalPosition)) {
             currentSelectionStartIndex = currentSelectionEndIndex = index;
             return dispatchSelectionEventToChild(selectables[index], event);
           }
@@ -780,8 +806,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     for (int index = 0; index < selectables.length; index += 1) {
       if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index])) {
         if (foundStart) {
-          final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
+          final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedAbsorbingEvent);
           if (selectables.length - 1 == index) {
             currentSelectionEndIndex = index;
             _flushInactiveSelections();
@@ -815,8 +840,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
             startIndex = lastNextIndex == null && selectionAtStartOfSelectable ? 0 : index;
           }
           for (int i = startIndex; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+            dispatchSelectionEventToChild(selectables[i], synthesizedAbsorbingEvent);
           }
           currentSelectionStartIndex = startIndex;
           foundStart = true;
@@ -830,8 +854,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         if (!foundStart && lastNextIndex == null) {
           currentSelectionStartIndex = 0;
           for (int i = 0; i < index; i += 1) {
-            final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
-            dispatchSelectionEventToChild(selectables[i], synthesizedEvent);
+            dispatchSelectionEventToChild(selectables[i], synthesizedAbsorbingEvent);
           }
         }
         currentSelectionEndIndex = index;
@@ -1208,6 +1231,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectLine:
       case SelectionEventType.selectParagraph:
         break;
       case SelectionEventType.granularlyExtendSelection:
