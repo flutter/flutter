@@ -32,8 +32,10 @@ class EmbedderLayers {
                              const EmbeddedViewParams& params);
 
   using PresentCallback =
-      std::function<bool(const std::vector<const FlutterLayer*>& layers)>;
-  void InvokePresentCallback(const PresentCallback& callback) const;
+      std::function<bool(FlutterViewId view_id,
+                         const std::vector<const FlutterLayer*>& layers)>;
+  void InvokePresentCallback(FlutterViewId view_id,
+                             const PresentCallback& callback) const;
 
  private:
   const SkISize frame_size_;

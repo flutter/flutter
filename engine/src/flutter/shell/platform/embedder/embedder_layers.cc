@@ -234,13 +234,14 @@ void EmbedderLayers::PushPlatformViewLayer(
 }
 
 void EmbedderLayers::InvokePresentCallback(
+    FlutterViewId view_id,
     const PresentCallback& callback) const {
   std::vector<const FlutterLayer*> presented_layers_pointers;
   presented_layers_pointers.reserve(presented_layers_.size());
   for (const auto& layer : presented_layers_) {
     presented_layers_pointers.push_back(&layer);
   }
-  callback(presented_layers_pointers);
+  callback(view_id, presented_layers_pointers);
 }
 
 }  // namespace flutter

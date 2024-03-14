@@ -35,7 +35,8 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
           const std::shared_ptr<impeller::AiksContext>& aiks_context,
           const FlutterBackingStoreConfig& config)>;
   using PresentCallback =
-      std::function<bool(const std::vector<const FlutterLayer*>& layers)>;
+      std::function<bool(FlutterViewId view_id,
+                         const std::vector<const FlutterLayer*>& layers)>;
   using SurfaceTransformationCallback = std::function<SkMatrix(void)>;
 
   //----------------------------------------------------------------------------

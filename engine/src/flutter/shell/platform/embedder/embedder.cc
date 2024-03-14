@@ -1288,12 +1288,21 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
       SAFE_ACCESS(compositor, collect_backing_store_callback, nullptr);
   auto c_present_callback =
       SAFE_ACCESS(compositor, present_layers_callback, nullptr);
+  auto c_present_view_callback =
+      SAFE_ACCESS(compositor, present_view_callback, nullptr);
   bool avoid_backing_store_cache =
       SAFE_ACCESS(compositor, avoid_backing_store_cache, false);
 
   // Make sure the required callbacks are present
-  if (!c_create_callback || !c_collect_callback || !c_present_callback) {
+  if (!c_create_callback || !c_collect_callback) {
     FML_LOG(ERROR) << "Required compositor callbacks absent.";
+    return {nullptr, true};
+  }
+  // Either the present view or the present layers callback must be provided.
+  if ((!c_present_view_callback && !c_present_callback) ||
+      (c_present_view_callback && c_present_callback)) {
+    FML_LOG(ERROR) << "Either present_layers_callback or present_view_callback "
+                      "must be provided but not both.";
     return {nullptr, true};
   }
 
@@ -1310,14 +1319,32 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
                                               enable_impeller);
           };
 
-  flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback =
-      [c_present_callback,
-       user_data = compositor->user_data](const auto& layers) {
-        TRACE_EVENT0("flutter", "FlutterCompositorPresentLayers");
-        return c_present_callback(
-            const_cast<const FlutterLayer**>(layers.data()), layers.size(),
-            user_data);
+  flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback;
+  if (c_present_callback) {
+    present_callback = [c_present_callback, user_data = compositor->user_data](
+                           FlutterViewId view_id, const auto& layers) {
+      TRACE_EVENT0("flutter", "FlutterCompositorPresentLayers");
+      return c_present_callback(const_cast<const FlutterLayer**>(layers.data()),
+                                layers.size(), user_data);
+    };
+  } else {
+    FML_DCHECK(c_present_view_callback != nullptr);
+    present_callback = [c_present_view_callback,
+                        user_data = compositor->user_data](
+                           FlutterViewId view_id, const auto& layers) {
+      TRACE_EVENT0("flutter", "FlutterCompositorPresentLayers");
+
+      FlutterPresentViewInfo info = {
+          .struct_size = sizeof(FlutterPresentViewInfo),
+          .view_id = view_id,
+          .layers = const_cast<const FlutterLayer**>(layers.data()),
+          .layers_count = layers.size(),
+          .user_data = user_data,
       };
+
+      return c_present_view_callback(&info);
+    };
+  }
 
   return {std::make_unique<flutter::EmbedderExternalViewEmbedder>(
               avoid_backing_store_cache, create_render_target_callback,

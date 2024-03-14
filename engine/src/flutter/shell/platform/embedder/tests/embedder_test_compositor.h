@@ -21,8 +21,9 @@ class EmbedderTestCompositor {
   using PlatformViewRendererCallback =
       std::function<sk_sp<SkImage>(const FlutterLayer& layer,
                                    GrDirectContext* context)>;
-  using PresentCallback =
-      std::function<void(const FlutterLayer** layers, size_t layers_count)>;
+  using PresentCallback = std::function<void(FlutterViewId view_id,
+                                             const FlutterLayer** layers,
+                                             size_t layers_count)>;
 
   EmbedderTestCompositor(SkISize surface_size, sk_sp<GrDirectContext> context);
 
@@ -36,7 +37,9 @@ class EmbedderTestCompositor {
 
   bool CollectBackingStore(const FlutterBackingStore* backing_store);
 
-  bool Present(const FlutterLayer** layers, size_t layers_count);
+  bool Present(FlutterViewId view_id,
+               const FlutterLayer** layers,
+               size_t layers_count);
 
   void SetPlatformViewRendererCallback(
       const PlatformViewRendererCallback& callback);

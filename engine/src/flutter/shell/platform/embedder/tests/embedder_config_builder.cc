@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "tests/embedder_test_context.h"
@@ -354,7 +355,8 @@ void EmbedderConfigBuilder::SetPlatformMessageCallback(
   context_.SetPlatformMessageCallback(callback);
 }
 
-void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache) {
+void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache,
+                                          bool use_present_layers_callback) {
   context_.SetupCompositor();
   auto& compositor = context_.GetCompositor();
   compositor_.struct_size = sizeof(compositor_);
@@ -374,16 +376,25 @@ void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache) {
         return reinterpret_cast<EmbedderTestCompositor*>(user_data)
             ->CollectBackingStore(backing_store);
       };
-  compositor_.present_layers_callback = [](const FlutterLayer** layers,  //
-                                           size_t layers_count,          //
-                                           void* user_data               //
-                                        ) {
-    return reinterpret_cast<EmbedderTestCompositor*>(user_data)->Present(
-        layers,       //
-        layers_count  //
+  if (use_present_layers_callback) {
+    compositor_.present_view_callback = [](const FlutterPresentViewInfo* info) {
+      auto compositor =
+          reinterpret_cast<EmbedderTestCompositor*>(info->user_data);
 
-    );
-  };
+      return compositor->Present(info->view_id, info->layers,
+                                 info->layers_count);
+    };
+  } else {
+    compositor_.present_layers_callback = [](const FlutterLayer** layers,
+                                             size_t layers_count,
+                                             void* user_data) {
+      auto compositor = reinterpret_cast<EmbedderTestCompositor*>(user_data);
+
+      // The present layers callback is incompatible with multiple views;
+      // it can only be used to render the implicit view.
+      return compositor->Present(kFlutterImplicitViewId, layers, layers_count);
+    };
+  }
   compositor_.avoid_backing_store_cache = avoid_backing_store_cache;
   project_args_.compositor = &compositor_;
 }

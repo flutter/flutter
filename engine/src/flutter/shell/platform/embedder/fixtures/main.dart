@@ -815,6 +815,26 @@ Future<void> key_data_late_echo() async {
 }
 
 @pragma('vm:entry-point')
+void render_implicit_view() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final Size size = Size(800.0, 600.0);
+    final Color red = Color.fromARGB(127, 255, 0, 0);
+
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0.0, 0.0);
+
+    builder.addPicture(
+        Offset(0.0, 0.0), CreateColoredBox(red, size));
+
+    builder.pop();
+
+    PlatformDispatcher.instance.implicitView?.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
 void render_gradient() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final Size size = Size(800.0, 600.0);
