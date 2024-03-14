@@ -12,7 +12,7 @@ The web UI is available on https://flutter-engine-gold.skia.org/.
 1. In `.ci.yaml`, ensure that the task has a dependency on `goldctl`:
 
 ```yaml
-  dependencies: [{"dependency": "goldctl"}]
+dependencies: [{ "dependency": "goldctl" }]
 ```
 
 2. In the builder `.json` file, ensure the drone has a dependency on `goldctl`:
@@ -50,7 +50,7 @@ Future<void> main() {
     );
 
     try {
-        if (isSkiaGoldClientAvailable) {
+        if (SkiaGoldClient.isAvailable()) {
             await client.auth();
 
             await client.addImg(
