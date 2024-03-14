@@ -1259,12 +1259,10 @@ void main() {
       }
 
       final RenderBox renderBox = renderObject as RenderBox;
-      switch (axis) {
-        case Axis.horizontal:
-          return renderBox.size.width;
-        case Axis.vertical:
-          return renderBox.size.height;
-      }
+      return switch (axis) {
+        Axis.horizontal => renderBox.size.width,
+        Axis.vertical   => renderBox.size.height,
+      };
     }
 
     group('animated: $animated, scrollDirection: $axis', () {

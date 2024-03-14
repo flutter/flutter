@@ -1119,17 +1119,10 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    late final bool isMobile;
-    switch (themeData.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        isMobile = true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isMobile = false;
-    }
+    final bool isMobile = switch (themeData.platform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => true,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
+    };
     int expectedCount = isMobile ? 0 : 1;
 
     // Test onSelected on key press
