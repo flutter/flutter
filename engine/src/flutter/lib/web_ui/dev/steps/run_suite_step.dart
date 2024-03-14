@@ -217,7 +217,7 @@ class RunSuiteStep implements PipelineStep {
   Future<bool> _checkSkiaClient(SkiaGoldClient skiaClient) async {
     // Now let's check whether Skia Gold is reachable or not.
     if (isLuci) {
-      if (isSkiaGoldClientAvailable) {
+      if (SkiaGoldClient.isAvailable()) {
         try {
           await skiaClient.auth();
           return true;

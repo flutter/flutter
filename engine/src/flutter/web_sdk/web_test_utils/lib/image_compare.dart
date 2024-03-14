@@ -34,7 +34,7 @@ Future<String> compareImage(
   await screenshotFile.create(recursive: true);
   await screenshotFile.writeAsBytes(encodePng(screenshot), flush: true);
 
-  if (isLuciEnv) {
+  if (SkiaGoldClient.isLuciEnv()) {
     // This is temporary to get started by uploading existing screenshots to
     // Skia Gold. The next step would be to actually use Skia Gold for
     // comparison.
