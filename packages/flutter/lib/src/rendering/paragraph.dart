@@ -761,8 +761,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  ValueListenable<TextLayout?> get textLayout => _textLayout;
-  late final ValueNotifier<TextLayout?> _textLayout = ValueNotifier<TextLayout?>(null);
+  ValueListenable<TextLayout?> get textLayout => _textPainter.textLayout;
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;

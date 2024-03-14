@@ -307,6 +307,11 @@ class _UntilTextBoundary extends TextBoundary {
   }
 }
 
+// This is a wrapper class around ui.Paragraph. Despite having immutable
+// semantics, we can't define it as an extension type because the ui.Paragraph
+// class is mutable, and the equality of a TextLayout only depends on the paint
+// offset and the layoutEqualityId.
+
 /// An immutable class that represents the result of calling [TextPainter.layout].
 ///
 /// This class discribes the text layout in a 2D coordinate system where the text
@@ -324,7 +329,6 @@ class TextLayout {
       assert(_paintOffset.dx != double.negativeInfinity),
       assert(!_paintOffset.dx.isNaN),
       assert(_paintOffset.dy.isFinite),
-      assert(!_paintOffset.dy.isNaN),
       _layoutEqualityId = layoutEqualityId ?? _currentId++;
 
   static int _currentId = 0;
@@ -349,7 +353,7 @@ class TextLayout {
 
   bool _invalidated = false;
   // Called when the underlying _paragraph's text layout changes.
-  void _invalidate() {
+  void _debugInvalidate() {
     assert(debugIsValid);
     _invalidated = true;
   }
@@ -576,9 +580,6 @@ class TextLayout {
 
   @override
   int get hashCode => Object.hash(_paintOffset, _layoutEqualityId);
-
-  //@override
-  //String toString() => 'TextLayout @ $_paintOffset';
 }
 
 // This class stores the current text layout and cached text metrics values that
@@ -612,6 +613,8 @@ class _TextPainterLayoutCache {
     };
   }
 
+  final String rawString;
+  final TextDirection writingDirection;
   TextLayout textLayout;
 
   // The input width used to lay out the paragraph. The value should typically
@@ -621,9 +624,6 @@ class _TextPainterLayoutCache {
 
   // The content width the text painter should report in TextPainter.width.
   double contentWidth;
-
-  final TextDirection writingDirection;
-  final String rawString;
 
   // The effective text alignment in the TextPainter's canvas. The value is
   // within the [0, 1] interval: 0 for left aligned and 1 for right aligned.
@@ -942,7 +942,9 @@ class TextPainter {
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
   bool _debugNeedsRelayout = true;
-  // The result of the most recent `layout` call.
+
+  // The result of the most recent `layout` call, and some cached values that
+  // should be invalidated when the text layout changes.
   _TextPainterLayoutCache? _layoutCache;
 
   // Whether _layoutCache contains outdated paint information and needs to be
@@ -981,6 +983,7 @@ class TextPainter {
       }
       return true;
     }());
+    _textLayout.value = null;
     _layoutCache?.paragraph.dispose();
     _layoutCache = null;
   }
@@ -1398,6 +1401,13 @@ class TextPainter {
     return builder.build();
   }
 
+  /// A [ValueListenable] that notifies its listeners when the text layout of
+  /// this [TextPainter] changes.
+  ///
+  /// The value null indicates the [TextPainter] does not have a valid layout,
+  ValueListenable<TextLayout?> get textLayout => _textLayout;
+  final ValueNotifier<TextLayout?> _textLayout = ValueNotifier<TextLayout?>(null);
+
   /// Computes the visual position of the glyphs for painting the text.
   ///
   /// The text will layout with a width that's as close to its max intrinsic
@@ -1418,10 +1428,10 @@ class TextPainter {
 
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
     if (cachedLayout != null && cachedLayout._resizeToFit(minWidth, maxWidth, textWidthBasis)) {
-      return cachedLayout.textLayout;
+      return _textLayout.value = cachedLayout.textLayout;
     }
     // Invalidate the current layout if this is more than a paint offset change.
-    cachedLayout?.textLayout._invalidate();
+    cachedLayout?.textLayout._debugInvalidate();
 
     final InlineSpan? text = this.text;
     if (text == null) {
@@ -1471,7 +1481,7 @@ class TextPainter {
       plainText,
       textDirection,
     );
-    return layoutCache.textLayout;
+    return _textLayout.value = layoutCache.textLayout;
   }
 
   /// Paints the text onto the given canvas at the given offset.
@@ -1889,6 +1899,7 @@ class TextPainter {
     }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
+    _textLayout.dispose();
     _layoutCache?.paragraph.dispose();
     _layoutCache = null;
     _text = null;
