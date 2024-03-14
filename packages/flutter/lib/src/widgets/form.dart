@@ -361,12 +361,12 @@ class FormState extends State<Form> {
 
     if (errorMessage.isNotEmpty) {
       final TextDirection directionality = Directionality.of(context);
-       if (defaultTargetPlatform == TargetPlatform.iOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {
          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
         }));
-       } else {
+      } else {
         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
       }
     }
