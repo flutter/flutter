@@ -1003,6 +1003,10 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       }
       currentSelectionEndIndex = newIndex;
     } else {
+      final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+      if (forward != null && ((!forwardSelection && !forward && newIndex <= currentSelectionEndIndex) || (forwardSelection && forward && newIndex >= currentSelectionEndIndex))) {
+        currentSelectionEndIndex = currentSelectionStartIndex;
+      }
       currentSelectionStartIndex = newIndex;
     }
     _flushInactiveSelections();
