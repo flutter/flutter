@@ -10,6 +10,7 @@
 
 #include "embedder.h"
 #include "embedder_engine.h"
+#include "flutter/common/constants.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -640,6 +641,71 @@ TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, CanRenderImplicitView) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("render_implicit_view");
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
+
+  fml::AutoResetWaitableEvent latch;
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        ASSERT_EQ(view_id, kFlutterImplicitViewId);
+        latch.Signal();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 300;
+  event.height = 200;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest, CanRenderImplicitViewUsingPresentLayersCallback) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor(/* avoid_backing_store_cache = */ false,
+                        /* use_present_layers_callback = */ true);
+  builder.SetDartEntrypoint("render_implicit_view");
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
+
+  fml::AutoResetWaitableEvent latch;
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        ASSERT_EQ(view_id, kFlutterImplicitViewId);
+        latch.Signal();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 300;
+  event.height = 200;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+}
+
 //------------------------------------------------------------------------------
 /// Test the layer structure and pixels rendered when using a custom software
 /// compositor.
@@ -668,7 +734,8 @@ TEST_F(EmbedderTest,
   auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
         ASSERT_EQ(layers_count, 5u);
 
         // Layer Root
@@ -886,7 +953,8 @@ TEST_F(EmbedderTest, NoLayerCreatedForTransparentOverlayOnTopOfPlatformLayer) {
   auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
         ASSERT_EQ(layers_count, 2u);
 
         // Layer Root
@@ -1022,7 +1090,8 @@ TEST_F(EmbedderTest, NoLayerCreatedForNoOverlayOnTopOfPlatformLayer) {
   auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
         ASSERT_EQ(layers_count, 2u);
 
         // Layer Root
@@ -1303,7 +1372,8 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
 
   fml::CountDownLatch latch(1);
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
         ASSERT_EQ(layers_count, 2u);
 
         // Layer 0 (Root)
@@ -1935,7 +2005,8 @@ static void expectSoftwareRenderingOutputMatches(
   ASSERT_TRUE(engine.is_valid());
 
   context.GetCompositor().SetNextPresentCallback(
-      [&matches, &bytes, &latch](const FlutterLayer** layers,
+      [&matches, &bytes, &latch](FlutterViewId view_id,
+                                 const FlutterLayer** layers,
                                  size_t layers_count) {
         ASSERT_EQ(layers[0]->type, kFlutterLayerContentTypeBackingStore);
         ASSERT_EQ(layers[0]->backing_store->type,
