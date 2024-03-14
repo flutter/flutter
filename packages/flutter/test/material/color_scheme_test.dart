@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -686,7 +687,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('ColorScheme.fromSeed] with different variants spot checks', (WidgetTester tester) async {
+  testWidgets('ColorScheme.fromSeed with different variants spot checks', (WidgetTester tester) async {
     // Default (Variant.tonalSpot).
     await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF000000)), const Color(0xFF8C4A60));
     await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00)), const Color(0xFF406836));
@@ -726,7 +727,7 @@ void main() {
       ),
       const Color(0xFF5D5F5F)
     );
-  });
+  }, skip: isBrowser);
 }
 
 Color _getPixel(ByteData bytes, ui.Image image, double x, double y) {
@@ -745,7 +746,7 @@ Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Col
   await tester.pumpWidget(
     MaterialApp(
       key: key,
-      theme: ThemeData.from(
+      theme: ThemeData(
         colorScheme: scheme,
       ),
       home: FilledButton(
