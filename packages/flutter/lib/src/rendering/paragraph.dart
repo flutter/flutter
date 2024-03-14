@@ -1737,6 +1737,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
+  // This method handles updating the start edge by a text boundary that may
+  // not be contained within this selectable fragment. It is possible
+  // that a boundary spans multiple selectable fragments when the text contains
+  // [WidgetSpan]s.
+  //
+  // This method differs from [_updateSelectionStartEdgeByTextBoundary] in that
+  // to pivot offset used to swap selection edges and maintain the origin
+  // text boundary selected may be located outside of this selectable fragment.
+  //
+  // See [_updateSelectionEndEdgeByMultiSelectableTextBoundary] for the method
+  // that handles updating the end edge.
   SelectionResult? _updateSelectionStartEdgeByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     bool paragraphContainsPosition,
@@ -1856,6 +1867,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
+  // This method handles updating the end edge by a text boundary that may
+  // not be contained within this selectable fragment. It is possible
+  // that a boundary spans multiple selectable fragments when the text contains
+  // [WidgetSpan]s.
+  //
+  // This method differs from [_updateSelectionEndEdgeByTextBoundary] in that
+  // to pivot offset used to swap selection edges and maintain the origin
+  // text boundary selected may be located outside of this selectable fragment.
+  //
+  // See [_updateSelectionStartEdgeByMultiSelectableTextBoundary] for the method
+  // that handles updating the end edge.
   SelectionResult? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     bool paragraphContainsPosition,
@@ -1975,8 +1997,20 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
-  final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
-  final int _placeholderLength = 1;
+  static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+  static final int _placeholderLength = _placeholderCharacter.length;
+  // This method handles updating the start edge by a text boundary that may
+  // not be contained within this selectable fragment. It is possible
+  // that a boundary spans multiple selectable fragments when the text contains
+  // [WidgetSpan]s.
+  //
+  // This method differs from [_updateSelectionStartEdgeByMultiSelectableBoundary]
+  // in that to mantain the origin text boundary selected at a placeholder,
+  // this selectable fragment must be aware of the [RenderParagraph] that closely
+  // encompasses the complete origin text boundary.
+  //
+  // See [_updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary] for the method
+  // that handles updating the end edge.
   SelectionResult? _updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     Offset globalPosition,
@@ -1998,7 +2032,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       final TextPosition positionRelativeToOriginParagraph = originParagraph.getPositionForOffset(originParagraphLocalPosition);
       if (positionWithinOriginParagraph) {
         // When the selection is inverted by the new position it is necessary to
-        // swap the end edge (moving edge) with the start edge (static edge) to
+        // swap the start edge (moving edge) with the end edge (static edge) to
         // maintain the origin text boundary within the selection.
         final String originText = originParagraph.text.toPlainText(includeSemanticsLabels: false);
         final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(positionRelativeToOriginParagraph, originText);
@@ -2128,6 +2162,18 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
+  // This method handles updating the end edge by a text boundary that may
+  // not be contained within this selectable fragment. It is possible
+  // that a boundary spans multiple selectable fragments when the text contains
+  // [WidgetSpan]s.
+  //
+  // This method differs from [_updateSelectionEndEdgeByMultiSelectableBoundary]
+  // in that to mantain the origin text boundary selected at a placeholder, this
+  // selectable fragment must be aware of the [RenderParagraph] that closely
+  // encompasses the complete origin text boundary.
+  //
+  // See [_updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary]
+  // for the method that handles updating the start edge.
   SelectionResult? _updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     Offset globalPosition,
