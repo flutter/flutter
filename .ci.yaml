@@ -5335,6 +5335,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       task_name: plugin_test_windows
+      test_timeout_secs: "900" # 15 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
