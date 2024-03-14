@@ -457,10 +457,12 @@ String generateTestEntrypoint({
     }
     final EntryPointRunner? entryPointRunner = testConfigMap[dartTestSelector];
     ui_web.debugEmulateFlutterTesterEnvironment = true;
-    await ui_web.bootstrapEngine();
+    final Completer<void> completer = Completer<void>();
+    await ui_web.bootstrapEngine(runApp: () => completer.complete());
+    await completer.future;
     webGoldenComparator = DefaultWebGoldenComparator(Uri.file(jsTestSelector.toDart));
     ui_web.debugOverrideDevicePixelRatio(3.0);
-    //ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
     internalBootstrapBrowserTest(() {
       return entryPointRunner != null ? () => entryPointRunner(entryPoint) : entryPoint;

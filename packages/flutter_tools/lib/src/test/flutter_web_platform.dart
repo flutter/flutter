@@ -752,10 +752,6 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    if (!headless) {
-      print('Browser loaded. Press enter to start tests...');
-      stdin.readLineSync();
-    }
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     unawaited(chrome.onExit.then<Object?>(

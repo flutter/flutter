@@ -156,10 +156,6 @@ class WebTestCompiler {
     final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
     final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
 
-    print('printing output directory:');
-    for (final FileSystemEntity entity in outputDirectory.listSync()) {
-      print('${entity.path}');
-    }
     return WebMemoryFS()
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
