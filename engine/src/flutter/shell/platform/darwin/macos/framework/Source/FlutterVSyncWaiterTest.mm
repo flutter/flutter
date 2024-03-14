@@ -140,7 +140,14 @@ TEST(FlutterVSyncWaiterTest, VSyncWorks) {
                       CFRunLoopStop(CFRunLoopGetCurrent());
                     }];
 
+  __block CFTimeInterval expectedStartUntil;
+  // Warm up tick is scheduled immediately in a scheduled block. Schedule another
+  // block here to determine the maximum time when the warm up tick should be
+  // scheduled.
   [waiter waitForVSync:kWarmUpBaton];
+  [[NSRunLoop currentRunLoop] performBlock:^{
+    expectedStartUntil = CACurrentMediaTime();
+  }];
 
   // Reference vsync to setup phase.
   CFTimeInterval now = CACurrentMediaTime();
@@ -166,15 +173,22 @@ TEST(FlutterVSyncWaiterTest, VSyncWorks) {
   // Vsync without baton should pause the display link.
   [displayLink tickWithTimestamp:now + 3.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 5 * displayLink.nominalOutputRefreshPeriod];
-  // Make sure to run the timer scheduled in display link callback.
-  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.02, NO);
+
+  CFTimeInterval start = CACurrentMediaTime();
+  while (!displayLink.paused) {
+    // Make sure to run the timer scheduled in display link callback.
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.02, NO);
+    if (CACurrentMediaTime() - start > 1.0) {
+      break;
+    }
+  }
   ASSERT_TRUE(displayLink.paused);
 
   EXPECT_EQ(entries.size(), size_t(4));
 
   // Warm up frame should be presented as soon as possible.
-  EXPECT_TRUE(fabs(entries[0].timestamp - now) < 0.005);
-  EXPECT_TRUE(fabs(entries[0].targetTimestamp - now) < 0.005);
+  EXPECT_TRUE(entries[0].timestamp <= expectedStartUntil);
+  EXPECT_TRUE(entries[0].targetTimestamp <= expectedStartUntil);
   EXPECT_EQ(entries[0].baton, kWarmUpBaton);
 
   EXPECT_DOUBLE_EQ(entries[1].timestamp, now + displayLink.nominalOutputRefreshPeriod);
