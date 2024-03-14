@@ -859,6 +859,8 @@ typedef struct {
   double physical_view_inset_left;
   /// The identifier of the display the view is rendering on.
   FlutterEngineDisplayId display_id;
+  /// The view that this event is describing.
+  int64_t view_id;
 } FlutterWindowMetricsEvent;
 
 /// The phase of the pointer event.

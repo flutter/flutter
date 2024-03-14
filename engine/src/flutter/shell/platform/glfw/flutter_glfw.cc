@@ -297,6 +297,9 @@ static void SendWindowMetrics(FlutterDesktopWindowControllerState* controller,
   } else {
     event.pixel_ratio = controller->window_wrapper->pixel_ratio_override;
   }
+  // The GLFW embedder doesn't support multiple views. We assume all pointer
+  // events come from the only view, the implicit view.
+  event.view_id = flutter::kFlutterImplicitViewId;
   FlutterEngineSendWindowMetricsEvent(controller->engine->flutter_engine,
                                       &event);
 }
