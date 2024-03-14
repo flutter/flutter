@@ -157,6 +157,14 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     // return !(nextRoute is CupertinoRouteTransitionMixin && nextRoute.fullscreenDialog);
   }
 
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    if (previousRoute is ModalRoute<T> && this.navigator != null) {
+      this.navigator!.delegateTransitionBuilder = (previousRoute as ModalRoute<T>).delegatedTransition;
+    }
+    return previousRoute is ModalRoute || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+  }
+
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
   /// This just checks the route's [NavigatorState.userGestureInProgress].
