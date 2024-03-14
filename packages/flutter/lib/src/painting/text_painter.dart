@@ -782,6 +782,11 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 ///    objects that are only used ephemerally, it is safe to immediately dispose
 ///    them after the last call to methods or properties on the object.
 ///
+/// Moreover, calling [markNeedsLayout] (or changing properties that affect text
+/// layout, for example [textDirection]) destroys the current text layout. Once
+/// [markNeedsLayout] is called, [layout] must be called again before the
+/// [TextPainter] can be used to paint the paragraph.
+///
 /// If the width of the area into which the text is being painted
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
@@ -1404,7 +1409,13 @@ class TextPainter {
   /// A [ValueListenable] that notifies its listeners when the text layout of
   /// this [TextPainter] changes.
   ///
-  /// The value null indicates the [TextPainter] does not have a valid layout,
+  /// The value of this [ValueListenable] becomes null when [markNeedsLayout] is
+  /// called, which invalidates the current text layout, and becomes non-null
+  /// when [layout] is called, with which this [TextPainter] establishes a new
+  /// text layout.
+  ///
+  /// When the value of the [ValueListenable] changes, the old [TextLayout]
+  /// values becomes invalid and must not be used.
   ValueListenable<TextLayout?> get textLayout => _textLayout;
   final ValueNotifier<TextLayout?> _textLayout = ValueNotifier<TextLayout?>(null);
 

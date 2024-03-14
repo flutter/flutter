@@ -1648,6 +1648,46 @@ void main() {
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 
+  test('Listenable layout', () {
+    const double fontSize = 10;
+    const String text = '12345';
+    int callbackCalled = 0;
+    void onLayoutChanged() {
+      callbackCalled += 1;
+    }
+
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+    )..textLayout.addListener(onLayoutChanged);
+
+    expect(callbackCalled, 0);
+    expect(painter.textLayout.value, isNull);
+
+    painter.markNeedsLayout();
+    expect(callbackCalled, 0);
+    expect(painter.textLayout.value, isNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 1);
+    expect(painter.textLayout.value, isNotNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 1);
+
+    painter.textDirection = TextDirection.rtl;
+    expect(callbackCalled, 2);
+    expect(painter.textLayout.value, isNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 3);
+
+    expect(painter.layout(maxWidth: 9999), painter.textLayout.value);
+    expect(callbackCalled, 3);
+
+    painter.dispose();
+  });
+
   group('TextLayout', () {
     test('+ operator basic test', () {
       const double fontSize = 10;

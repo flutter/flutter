@@ -23,6 +23,50 @@ typedef _WordBoundaryRecord = ({TextPosition wordStart, TextPosition wordEnd});
 
 const String _kEllipsis = '\u2026';
 
+class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
+  _TextLayoutValueNotifier(this.paragraph) : super(paragraph._textPainter.textLayout.value);
+
+  final RenderParagraph paragraph;
+
+  /// Whether the [RenderParagraph] should never defer the text layout process to
+  /// [RenderParagraph.paint], and instead always perform text layout in
+  /// [RenderParagraph.performLayout] if the _textPainter has pending layout
+  /// changes.
+  ///
+  /// [RenderParagraph.textAlign] does not affect the size of the text so the
+  /// setter typically only needs to [markNeedsPaint] when the value changes.
+  ///
+  /// However if a [TextLayout] listener is present (which can be, as is common,
+  /// tied to another RenderObject's paint process), to allow that RenderObject
+  /// make use of the [TextLayout] regardless of the paint order, the [TextLayout]
+  /// must be computed before [PipelineOwner.flushPaint].
+  bool get eagerTextLayout => hasListeners;
+
+  @override
+  TextLayout? get value => paragraph._textPainter.textLayout.value;
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      paragraph._textPainter.textLayout.addListener(notifyListeners);
+      // Tell the [RenderParagraph] to call performLayout if we don't have a
+      // valid text layout yet.
+      if (paragraph._textPainter.textLayout.value == null) {
+        paragraph.markNeedsLayout();
+      }
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners) {
+      paragraph._textPainter.textLayout.removeListener(notifyListeners);
+    }
+  }
+}
+
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
 ///
@@ -448,6 +492,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _removeSelectionRegistrarSubscription();
     _disposeSelectableFragments();
     _textPainter.dispose();
+    _textLayout.dispose();
     super.dispose();
   }
 
@@ -458,7 +503,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    // If another RenderObject's paint algorithm depends on the text layout,
+    // eagerly compute the text layout during [performLayout].
+    if (_textLayout.eagerTextLayout) {
+      markNeedsLayout();
+    } else {
+      markNeedsPaint();
+    }
   }
 
   /// The directionality of the text.
@@ -761,7 +812,23 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  ValueListenable<TextLayout?> get textLayout => _textPainter.textLayout;
+  /// A [ValueListenable] that reflects current layout of the [RenderParagraph].
+  ///
+  /// This [ValueListenable] can **not** be used to drive the layout process of
+  /// a [RenderObject], when that [RenderObject] is ready to do layout, it
+  /// typically is not guaranteed that the [RenderParagraph] have computed the
+  /// text layout. But it can be used to drive the painting process of a
+  /// [CustomPainter] that depends on the text layout of this [RenderParagraph].
+  /// The [CustomPainter] must paint before the
+  ///
+  /// For text layout APIs that can be potentially computationally intensive,
+  /// such as [TextLayout.getBoxesForSelection], the [ValueListenable] can be
+  /// used for cache invalidation: if the previous [TextLayout] is the same as
+  /// the new [TextLayout], or only the paint offset is different, then the
+  /// cached [TextBox]es can be reused instead of having to call
+  /// [TextLayout.getBoxesForSelection] again.
+  ValueListenable<TextLayout?> get textLayout => _textLayout;
+  late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
@@ -888,6 +955,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     //
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
+    assert(_textLayout.value != null || !_textLayout.eagerTextLayout);
     _layoutTextWithConstraints(constraints);
 
     assert(() {
