@@ -1504,20 +1504,23 @@ void main() {
   });
 
   group('Material3 - InputDecoration helper/counter/error', () {
-    // Overall height for InputDecorator (filled or outlined) is 76dp on mobile:
+    // Overall height for InputDecorator (filled or outlined) is 80dp on mobile:
     //    8 - top padding
     //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
     //    4 - gap between label and input
     //   24 - input text (font size = 16, line height = 1.5)
     //    8 - bottom padding
-    //    4 - gap above helper/error/counter
+    //    8 - gap above supporting text
     //   16 - helper/counter (font size = 12, line height is 1.5)
     const double topPadding = 8.0;
     const double floatingLabelHeight = 12.0;
     const double labelInputGap = 4.0;
     const double inputHeight = 24.0;
     const double bottomPadding = 8.0;
-    const double helperGap = 4.0;
+    // TODO(bleroux): make the InputDecorator implementation compliant with M3 spec by changing
+    // the helperGap to 4.0 instead of 8.0.
+    // See https://github.com/flutter/flutter/issues/144984.
+    const double helperGap = 8.0;
     const double helperHeight = 16.0;
     const double containerHeight = topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
     const double fullHeight = containerHeight + helperGap + helperHeight; // 80.0 (should be 76.0 based on M3 spec)
