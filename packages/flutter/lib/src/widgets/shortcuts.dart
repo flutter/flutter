@@ -142,13 +142,13 @@ class KeySet<T extends KeyboardKey> {
   }
 }
 
-/// Determines how the state of the NumLock key is used to accept a shortcut.
-enum NumLockPolicy {
-  /// The NumLock key state is not used to determine [SingleActivator.accepts] result.
+/// Determines how the state of a lock key is used to accept a shortcut.
+enum LockState {
+  /// The lock key state is not used to determine [SingleActivator.accepts] result.
   ignored,
-  /// The NumLock key must be locked to trigger the shortcut.
+  /// The lock key must be locked to trigger the shortcut.
   locked,
-  /// The NumLock key must be unlocked to trigger the shortcut.
+  /// The lock key must be unlocked to trigger the shortcut.
   unlocked,
 }
 
@@ -440,7 +440,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
     this.shift = false,
     this.alt = false,
     this.meta = false,
-    this.numLockPolicy = NumLockPolicy.ignored,
+    this.numLock = LockState.ignored,
     this.includeRepeats = true,
   }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
@@ -519,15 +519,15 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether the NumLock key state should be checked for [trigger] to activate
   /// the shortcut.
   ///
-  /// It defaults to [NumLockPolicy.ignored], meaning the NumLock state is ignored
+  /// It defaults to [LockState.ignored], meaning the NumLock state is ignored
   /// when the event is received in order to activate the shortcut.
-  /// If it's [NumLockPolicy.locked], then the NumLock key must be locked.
-  /// If it's [NumLockPolicy.unlocked], then the NumLock key must be unlocked.
+  /// If it's [LockState.locked], then the NumLock key must be locked.
+  /// If it's [LockState.unlocked], then the NumLock key must be unlocked.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.numLock].
-  final NumLockPolicy numLockPolicy;
+  final LockState numLock;
 
   /// Whether this activator accepts repeat events of the [trigger] key.
   ///
@@ -550,10 +550,10 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   }
 
   bool _shouldAcceptNumLock(HardwareKeyboard state) {
-    return switch (numLockPolicy) {
-      NumLockPolicy.ignored => true,
-      NumLockPolicy.locked => state.lockModesEnabled.contains(KeyboardLockMode.numLock),
-      NumLockPolicy.unlocked => !state.lockModesEnabled.contains(KeyboardLockMode.numLock),
+    return switch (numLock) {
+      LockState.ignored => true,
+      LockState.locked => state.lockModesEnabled.contains(KeyboardLockMode.numLock),
+      LockState.unlocked => !state.lockModesEnabled.contains(KeyboardLockMode.numLock),
     };
   }
 

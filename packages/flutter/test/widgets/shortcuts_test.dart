@@ -497,7 +497,7 @@ void main() {
       expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
     });
 
-    testWidgets('NumLockPolicy.locked works as expected', (WidgetTester tester) async {
+    testWidgets('numLock works as expected when set to LockState.locked', (WidgetTester tester) async {
       // Collect some key events to use for testing.
       final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
@@ -511,7 +511,7 @@ void main() {
         ),
       );
 
-      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLockPolicy: NumLockPolicy.locked);
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLock: LockState.locked);
 
       // Lock NumLock.
       await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
@@ -532,7 +532,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
     });
 
-    testWidgets('NumLockPolicy.unlocked works as expected', (WidgetTester tester) async {
+    testWidgets('numLock works as expected when set to LockState.unlocked', (WidgetTester tester) async {
       // Collect some key events to use for testing.
       final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
@@ -546,7 +546,7 @@ void main() {
         ),
       );
 
-      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLockPolicy: NumLockPolicy.unlocked);
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLock: LockState.unlocked);
 
       // Lock NumLock.
       await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
@@ -567,7 +567,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
     });
 
-    testWidgets('NumLockPolicy.ignored works as expected', (WidgetTester tester) async {
+    testWidgets('numLock works as expected when set to LockState.ignored', (WidgetTester tester) async {
       // Collect some key events to use for testing.
       final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
