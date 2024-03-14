@@ -70,6 +70,17 @@ String testConfig(String os) => '''
         "config": "android_debug_arm64",
         "targets": ["ninja_target"]
       }
+    },
+    {
+      "drone_dimensions": [
+        "os=$os"
+      ],
+      "gn": ["--gn-arg", "--lto", "--no-goma", "--rbe"],
+      "name": "android_debug_rbe_arm64",
+      "ninja": {
+        "config": "android_debug_rbe_arm64",
+        "targets": ["ninja_target"]
+      }
     }
   ],
   "generators": {
