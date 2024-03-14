@@ -21,12 +21,11 @@ config("skia_public") {
     "SK_CODEC_DECODES_BMP",
     "SK_CODEC_DECODES_WBMP",
   ]
+  defines += flutter_defines
+
   cflags_objcc = []
   if (is_fuchsia || is_linux) {
     defines += [ "SK_R32_SHIFT=16" ]
-  }
-  if (skia_enable_flutter_defines) {
-    defines += flutter_defines
   }
 
   # TODO(zra): Try using this.
