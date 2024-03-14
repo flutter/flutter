@@ -3,10 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -55,7 +52,9 @@ class _CarouselExampleState extends State<CarouselExample> {
     super.initState();
     itemKeys = List<GlobalKey>.generate(6, (int index) => GlobalKey());
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      pageController.addListener(() { setState(() { }); });
+      pageController.addListener(() {
+        setState(() {});
+      });
     });
   }
 
@@ -68,7 +67,9 @@ class _CarouselExampleState extends State<CarouselExample> {
       viewportFraction: 1 / (screenWidth / maxItemWidth),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      pageController.addListener(() { setState(() { }); });
+      pageController.addListener(() {
+        setState(() {});
+      });
     });
 
     super.didChangeDependencies();
@@ -86,7 +87,9 @@ class _CarouselExampleState extends State<CarouselExample> {
   }
 
   Widget buildCarouselItem(
-      { required int index, required double itemWidth, AlignmentDirectional? alignment }) {
+      {required int index,
+      required double itemWidth,
+      AlignmentDirectional? alignment}) {
     return Align(
       key: itemKeys[index],
       alignment: alignment ?? Alignment.center,
@@ -97,7 +100,8 @@ class _CarouselExampleState extends State<CarouselExample> {
         child: Material(
           clipBehavior: Clip.antiAlias,
           color: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           child: Image(
             fit: BoxFit.cover,
             image: images[index],
@@ -107,74 +111,108 @@ class _CarouselExampleState extends State<CarouselExample> {
     );
   }
 
+  final List<int> data = List.generate(20, (index) => index);
+  final ScrollController controller = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       home: Scaffold(
-          body: Center(
-            child: PageView.builder(
-              padEnds: false,
-              controller: pageController,
-              itemCount: images.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Rect? boxRect = getRect(index);
-                if (boxRect != null && boxRect.left < 0) {
-                  print('first item: ${boxRect.left}');
-                  final double firstItemWidth = clampDouble(boxRect.right, minItemWidth, maxItemWidth);
-                  return CarouselItem(
-                    itemKey: itemKeys[index],
-                    itemWidth: firstItemWidth,
-                    image: images[index],
-                    alignment: AlignmentDirectional.centerEnd,
+        body: CustomScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          slivers: <Widget>[
+            SliverCarousel(
+              maxChildExtent: 200,
+              minChildExtent: 0,
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                      color:
+                        Colors.primaries[index % Colors.primaries.length],
+                      child: Center(
+                        child: Text(
+                          'Item ${data[index]}',
+                          style: const TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    ),
                   );
-                }
-
-                // current index is second last item
-                // double bufferForNext = 0;
-                // if (index + 1 < images.length) {
-                //   final Rect? lastBoxRect = getRect(index + 1);
-                //   if (lastBoxRect != null && screenWidth - lastBoxRect.left < minItemWidth) {
-                //     print('$index th box');
-                //     bufferForNext = minItemWidth - screenWidth + lastBoxRect.left;
-                //     double secondLastItemWidth = clampDouble(maxItemWidth - bufferForNext, midItemWidth, maxItemWidth);
-                //     print('$secondLastItemWidth ${getRect(index)?.right} ${getRect(index + 1)?.left}');
-                //     return CarouselItem(
-                //       itemKey: itemKeys[index],
-                //       itemWidth: secondLastItemWidth,
-                //       image: images[index],
-                //       alignment: AlignmentDirectional.centerStart
-                //     );
-                //   }
-                // }
-
-                double lastItemWidth = minItemWidth;
-                if (boxRect != null && boxRect.right >= screenWidth) {
-                  // print('last visible index: $index $boxRect');
-                  lastItemWidth = clampDouble(screenWidth - boxRect.left, minItemWidth, maxItemWidth);
-                  return CarouselItem(
-                    itemKey: itemKeys[index],
-                    itemWidth: lastItemWidth,
-                    image: images[index],
-                    alignment: AlignmentDirectional.centerStart,
-                  );
-                }
-                return CarouselItem(
-                  itemKey: itemKeys[index],
-                  itemWidth: maxItemWidth,
-                  image: images[index],
-                  alignment: AlignmentDirectional.centerStart,
-                );
-              },
+                },
+                childCount: data.length,
+              ),
             ),
-          )
+          ]),
+        //     body: PageView.builder(
+        //       padEnds: false,
+        //       controller: pageController,
+        //       itemCount: images.length,
+        //       itemBuilder: (BuildContext context, int index) {
+        //         final Rect? boxRect = getRect(index);
+        //         if (boxRect != null && boxRect.left < 0) {
+        //           print('first item: ${boxRect.left}');
+        //           final double firstItemWidth = clampDouble(boxRect.right, minItemWidth, maxItemWidth);
+        //           return CarouselItem(
+        //             itemKey: itemKeys[index],
+        //             itemWidth: firstItemWidth,
+        //             image: images[index],
+        //             alignment: AlignmentDirectional.centerEnd,
+        //           );
+        //         }
+
+        //         // current index is second last item
+        //         // double bufferForNext = 0;
+        //         // if (index + 1 < images.length) {
+        //         //   final Rect? lastBoxRect = getRect(index + 1);
+        //         //   if (lastBoxRect != null && screenWidth - lastBoxRect.left < minItemWidth) {
+        //         //     print('$index th box');
+        //         //     bufferForNext = minItemWidth - screenWidth + lastBoxRect.left;
+        //         //     double secondLastItemWidth = clampDouble(maxItemWidth - bufferForNext, midItemWidth, maxItemWidth);
+        //         //     print('$secondLastItemWidth ${getRect(index)?.right} ${getRect(index + 1)?.left}');
+        //         //     return CarouselItem(
+        //         //       itemKey: itemKeys[index],
+        //         //       itemWidth: secondLastItemWidth,
+        //         //       image: images[index],
+        //         //       alignment: AlignmentDirectional.centerStart
+        //         //     );
+        //         //   }
+        //         // }
+
+        //         double lastItemWidth = minItemWidth;
+        //         if (boxRect != null && boxRect.right >= screenWidth) {
+        //           // print('last visible index: $index $boxRect');
+        //           lastItemWidth = clampDouble(screenWidth - boxRect.left, minItemWidth, maxItemWidth);
+        //           return CarouselItem(
+        //             itemKey: itemKeys[index],
+        //             itemWidth: lastItemWidth,
+        //             image: images[index],
+        //             alignment: AlignmentDirectional.centerStart,
+        //           );
+        //         }
+        //         return CarouselItem(
+        //           itemKey: itemKeys[index],
+        //           itemWidth: maxItemWidth,
+        //           image: images[index],
+        //           alignment: AlignmentDirectional.centerStart,
+        //         );
+        //       },
+        //     )
       ),
     );
   }
 }
 
 class CarouselItem extends StatefulWidget {
-  const CarouselItem({super.key, required this.itemKey, required this.itemWidth, required this.image, this.alignment });
+  const CarouselItem(
+      {super.key,
+      required this.itemKey,
+      required this.itemWidth,
+      required this.image,
+      this.alignment});
 
   final GlobalKey itemKey;
   final double itemWidth;
@@ -199,7 +237,8 @@ class _CarouselItemState extends State<CarouselItem> {
         child: Material(
           clipBehavior: Clip.antiAlias,
           color: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           child: Image(
             fit: BoxFit.cover,
             image: widget.image,
