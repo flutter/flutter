@@ -2370,4 +2370,85 @@ void main() {
     );
     errors.clear();
   });
+
+  testWidgets('RenderViewport maxLayoutCycles depends on the number of children',
+      (WidgetTester tester) async {
+    Future<void> expectFlutterError({
+      required Widget widget,
+      required WidgetTester tester,
+    }) async {
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+      try {
+        await tester.pumpWidget(widget);
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isFlutterError);
+    }
+
+    Widget buildWidget({required int sliverCount, required int correctionsCount}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: List<Widget>.generate(
+              sliverCount,
+              (_) => _ScrollOffsetCorrectionSliver(correctionsCount: correctionsCount)),
+        ),
+      );
+    }
+
+    // 5 correction per child will pass.
+    await tester.pumpWidget(buildWidget(sliverCount: 30, correctionsCount: 5));
+
+    // 15 correction per child will throw exception.
+    await expectFlutterError(
+      widget: buildWidget(sliverCount: 1, correctionsCount: 15),
+      tester: tester,
+    );
+  });
+}
+
+// Simple sliver that applies N scroll offset corrections.
+class _RenderScrollOffsetCorrectionSliver extends RenderSliver {
+  int _correctionCount = 0;
+  @override
+  void performLayout() {
+    if (_correctionCount > 0) {
+      --_correctionCount;
+      geometry = const SliverGeometry(scrollOffsetCorrection: 1.0);
+      return;
+    }
+    const double extent = 5;
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
+
+    geometry = SliverGeometry(
+      scrollExtent: extent,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: extent,
+      cacheExtent: cacheExtent
+    );
+  }
+}
+
+class _ScrollOffsetCorrectionSliver extends SingleChildRenderObjectWidget {
+  const _ScrollOffsetCorrectionSliver({required this.correctionsCount});
+  final int correctionsCount;
+
+  @override
+  _RenderScrollOffsetCorrectionSliver createRenderObject(BuildContext context) {
+    final _RenderScrollOffsetCorrectionSliver sliver = _RenderScrollOffsetCorrectionSliver();
+    sliver._correctionCount = correctionsCount;
+    return sliver;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderScrollOffsetCorrectionSliver renderObject) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.markNeedsLayout();
+    renderObject._correctionCount = correctionsCount;
+  }
 }

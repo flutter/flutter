@@ -1020,7 +1020,12 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
           ),
         ),
         home: const SingleChildScrollView(
@@ -1160,7 +1165,7 @@ void main() {
     }),
   );
 
-  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('ScrollbarThemeData.trackVisibility', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1228,14 +1233,19 @@ void main() {
     }),
   );
 
-  testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('Scrollbar trackVisibility on hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
           ),
         ),
         home: const SingleChildScrollView(

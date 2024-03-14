@@ -726,7 +726,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _expands = expands,
        _material3 = material3;
 
-  static const double subtextGap = 8.0;
+  // TODO(bleroux): consider defining this value as a Material token and making it
+  // configurable by InputDecorationTheme.
+  double get subtextGap => material3 ? 4.0 : 8.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
