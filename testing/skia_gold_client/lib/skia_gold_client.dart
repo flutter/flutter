@@ -11,6 +11,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
+import 'src/errors.dart';
+
+export 'src/errors.dart' show SkiaGoldProcessError;
+
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kPresubmitEnvName = 'GOLD_TRYJOB';
 const String _kLuciEnvName = 'LUCI_CONTEXT';
@@ -154,11 +158,13 @@ interface class SkiaGoldClient {
         ..writeln('Skia Gold authorization failed.')
         ..writeln('Luci environments authenticate using the file provided '
           'by LUCI_CONTEXT. There may be an error with this file or Gold '
-          'authentication.')
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+          'authentication.');
+      throw SkiaGoldProcessError(
+        command: authCommand,
+        stdout: result.stdout.toString(),
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     } else if (verbose) {
       _stderr.writeln('stdout:\n${result.stdout}');
       _stderr.writeln('stderr:\n${result.stderr}');
@@ -193,27 +199,19 @@ interface class SkiaGoldClient {
       '--passfail',
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold imgtest init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw Exception(buf.toString());
-    }
-
     final io.ProcessResult result = await _runCommand(imgtestInitCommand);
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occurred when initializing golden file test with ')
-        ..writeln('goldctl.')
-        ..writeln()
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+        ..writeln('goldctl.');
+      throw SkiaGoldProcessError(
+        command: imgtestInitCommand,
+        stdout: result.stdout.toString(),
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     } else if (verbose) {
       _stderr.writeln('stdout:\n${result.stdout}');
       _stderr.writeln('stderr:\n${result.stderr}');
@@ -308,12 +306,13 @@ interface class SkiaGoldClient {
         ..writeln('Visit https://flutter-engine-gold.skia.org/ to view and approve ')
         ..writeln('the image(s), or revert the associated change. For more ')
         ..writeln('information, visit the wiki: ')
-        ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter')
-        ..writeln()
-        ..writeln('Debug information for Gold --------------------------------')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+        ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
+      throw SkiaGoldProcessError(
+        command: imgtestCommand,
+        stdout: result.stdout.toString(),
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     } else if (verbose) {
       _stderr.writeln('stdout:\n${result.stdout}');
       _stderr.writeln('stderr:\n${result.stderr}');
@@ -347,27 +346,19 @@ interface class SkiaGoldClient {
       ..._getCIArguments(),
     ];
 
-    if (tryjobInitCommand.contains(null)) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold tryjob init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      tryjobInitCommand.forEach(buf.writeln);
-      throw Exception(buf.toString());
-    }
-
     final io.ProcessResult result = await _runCommand(tryjobInitCommand);
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occurred when initializing golden file tryjob with ')
-        ..writeln('goldctl.')
-        ..writeln()
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
+        ..writeln('goldctl.');
+      throw SkiaGoldProcessError(
+        command: tryjobInitCommand,
+        stdout: result.stdout.toString(),
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     } else if (verbose) {
       _stderr.writeln('stdout:\n${result.stdout}');
       _stderr.writeln('stderr:\n${result.stderr}');
@@ -414,13 +405,13 @@ interface class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Unexpected Gold tryjobAdd failure.')
         ..writeln('Tryjob execution for golden file test $testName failed for')
-        ..writeln('a reason unrelated to pixel comparison.')
-        ..writeln()
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}')
-        ..writeln();
-      throw Exception(buf.toString());
+        ..writeln('a reason unrelated to pixel comparison.');
+      throw SkiaGoldProcessError(
+        command: tryjobCommand,
+        stdout: resultStdout,
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     } else if (verbose) {
       _stderr.writeln('stdout:\n${result.stdout}');
       _stderr.writeln('stderr:\n${result.stderr}');
@@ -489,7 +480,7 @@ interface class SkiaGoldClient {
       workingDirectory: engineCheckout,
     );
     if (revParse.exitCode != 0) {
-      throw Exception('Current commit of the engine can not be found from path $engineCheckout.');
+      throw StateError('Current commit of the engine can not be found from path $engineCheckout.');
     }
     return (revParse.stdout as String).trim();
   }
