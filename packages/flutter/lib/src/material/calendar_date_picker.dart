@@ -1057,21 +1057,21 @@ class _DayState extends State<_Day> {
     final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) => effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
-    final BoxDecoration decoration = widget.isToday
-      ? BoxDecoration(
+    final OutlinedBorder dayShape = resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states)!;
+    final ShapeDecoration decoration = widget.isToday
+      ? ShapeDecoration(
           color: dayBackgroundColor,
-          border: Border.fromBorderSide(
-            (datePickerTheme.todayBorder ?? defaults.todayBorder!)
-              .copyWith(color: dayForegroundColor)
+          shape: dayShape.copyWith(
+            side: (datePickerTheme.todayBorder ?? defaults.todayBorder!)
+              .copyWith(color: dayForegroundColor),
           ),
-          shape: BoxShape.circle,
         )
-      : BoxDecoration(
+      : ShapeDecoration(
           color: dayBackgroundColor,
-          shape: BoxShape.circle,
+          shape: dayShape,
         );
 
-    Widget dayWidget = Container(
+    Widget dayWidget = DecoratedBox(
       decoration: decoration,
       child: Center(
         child: Text(localizations.formatDecimal(widget.day.day), style: dayStyle?.apply(color: dayForegroundColor)),
@@ -1086,9 +1086,10 @@ class _DayState extends State<_Day> {
       dayWidget = InkResponse(
         focusNode: widget.focusNode,
         onTap: () => widget.onChanged(widget.day),
-        radius: _dayPickerRowHeight / 2 + 4,
         statesController: _statesController,
         overlayColor: dayOverlayColor,
+        customBorder: dayShape,
+        containedInkWell: true,
         child: Semantics(
           // We want the day of month to be spoken first irrespective of the
           // locale-specific preferences or TextDirection. This is because

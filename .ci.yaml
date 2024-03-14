@@ -453,6 +453,8 @@ targets:
       firebase_project: main-docs-flutter-prod
       release_ref: refs/heads/master
       release_build: "true"
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_test
     recipe: flutter/flutter_drone
@@ -501,7 +503,6 @@ targets:
   - name: Linux firebase_abstract_method_smoke_test
     presubmit: false
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -534,7 +535,6 @@ targets:
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -566,7 +566,6 @@ targets:
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/144183
     timeout: 60
     properties:
       dependencies: >-
@@ -2641,7 +2640,6 @@ targets:
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3661,6 +3659,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_x64 module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/144680
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5336,6 +5335,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       task_name: plugin_test_windows
+      test_timeout_secs: "900" # 15 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5978,6 +5978,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    drone_dimensions:
+      - os=Linux
 
   - name: Mac flutter_packaging
     recipe: packaging/packaging
@@ -5990,6 +5992,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    drone_dimensions:
+      - os=Mac
+      - cpu=x86
 
 
   - name: Mac_arm64 flutter_packaging
@@ -6003,6 +6008,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    drone_dimensions:
+      - os=Mac
+      - cpu=arm64
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging
@@ -6016,6 +6024,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    drone_dimensions:
+      - os=Windows
 
 
   - name: Linux docs_deploy_beta
@@ -6038,6 +6048,8 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_deploy_stable
     recipe: flutter/docs
@@ -6059,3 +6071,5 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
+    drone_dimensions:
+      - os=Linux

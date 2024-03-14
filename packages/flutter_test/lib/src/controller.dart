@@ -22,8 +22,6 @@ import 'window.dart';
 /// This value must be greater than [kTouchSlop].
 const double kDragSlopDefault = 20.0;
 
-const String _defaultPlatform = kIsWeb ? 'web' : 'android';
-
 // Finds the end index (exclusive) of the span at `startIndex`, or `endIndex` if
 // there are no other spans between `startIndex` and `endIndex`.
 // The InlineSpan protocol doesn't expose the length of the span so we'll
@@ -1957,8 +1955,8 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else.
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1982,7 +1980,7 @@ abstract class WidgetController {
   ///  - [sendKeyUpEvent] to simulate only a key up event.
   Future<bool> sendKeyEvent(
     LogicalKeyboardKey key, {
-    String platform = _defaultPlatform,
+    String? platform,
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
@@ -1999,8 +1997,8 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else.
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2021,7 +2019,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyDownEvent(
     LogicalKeyboardKey key, {
-    String platform = _defaultPlatform,
+    String? platform,
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
@@ -2036,8 +2034,8 @@ abstract class WidgetController {
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. May not be null.
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2052,7 +2050,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyUpEvent(
       LogicalKeyboardKey key, {
-        String platform = _defaultPlatform,
+        String? platform,
         PhysicalKeyboardKey? physicalKey
       }) async {
     // Internally wrapped in async guard.
@@ -2065,9 +2063,9 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null.
+  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// that type of system. If not specified, defaults to "web" on web, and the
+  /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2088,7 +2086,7 @@ abstract class WidgetController {
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyRepeatEvent(
       LogicalKeyboardKey key, {
-        String platform = _defaultPlatform,
+        String? platform,
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {
