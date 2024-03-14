@@ -443,10 +443,10 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCacheLayerNotCached) {
   /* (ShaderMask)layer::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.TransformReset();
-      // The layer will perform this Identity transform operation by default,
-      // but it should be ignored both here and in the layer paint
-      expected_builder.Transform(SkMatrix());
+      // The layer will notice that the CTM is already an integer matrix
+      // and will not perform an Integral CTM operation.
+      // expected_builder.TransformReset();
+      // expected_builder.Transform(SkMatrix());
       expected_builder.SaveLayer(&child_bounds);
       {
         /* mock_layer::Paint */ {

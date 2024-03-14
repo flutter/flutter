@@ -114,8 +114,10 @@ class DlCanvasDelegate : public LayerStateStack::Delegate {
     canvas_->Transform(matrix);
   }
   void integralTransform() override {
-    SkM44 matrix = RasterCacheUtil::GetIntegralTransCTM(matrix_4x4());
-    canvas_->SetTransform(matrix);
+    SkM44 integral;
+    if (RasterCacheUtil::ComputeIntegralTransCTM(matrix_4x4(), &integral)) {
+      canvas_->SetTransform(integral);
+    }
   }
 
   void clipRect(const SkRect& rect, ClipOp op, bool is_aa) override {
@@ -168,11 +170,17 @@ class PrerollDelegate : public LayerStateStack::Delegate {
   }
   void integralTransform() override {
     if (tracker_.using_4x4_matrix()) {
-      tracker_.setTransform(
-          RasterCacheUtil::GetIntegralTransCTM(tracker_.matrix_4x4()));
+      SkM44 integral;
+      if (RasterCacheUtil::ComputeIntegralTransCTM(tracker_.matrix_4x4(),
+                                                   &integral)) {
+        tracker_.setTransform(integral);
+      }
     } else {
-      tracker_.setTransform(
-          RasterCacheUtil::GetIntegralTransCTM(tracker_.matrix_3x3()));
+      SkMatrix integral;
+      if (RasterCacheUtil::ComputeIntegralTransCTM(tracker_.matrix_3x3(),
+                                                   &integral)) {
+        tracker_.setTransform(integral);
+      }
     }
   }
 
