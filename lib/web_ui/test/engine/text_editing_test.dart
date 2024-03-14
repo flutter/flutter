@@ -513,6 +513,64 @@ Future<void> testMain() async {
       expect(editingStrategy!.domElement!.style.width, '13px');
       expect(editingStrategy!.domElement!.style.height, '12px');
     });
+
+    test('updateElementPlacement() should not call placeElement() when in mid-composition', () {
+      final HybridTextEditing testTextEditing = HybridTextEditing();
+      final GlobalTextEditingStrategySpy editingStrategy = GlobalTextEditingStrategySpy(testTextEditing);
+      testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
+      testTextEditing.configuration = singlelineConfig;
+
+      editingStrategy.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(editingStrategy.isEnabled, isTrue);
+
+      // placeElement() called from enable()
+      expect(editingStrategy.placeElementCount, 1);
+
+      // No geometry should be set until setEditableSizeAndTransform is called.
+      expect(editingStrategy.domElement!.style.transform, '');
+      expect(editingStrategy.domElement!.style.width, '');
+      expect(editingStrategy.domElement!.style.height, '');
+
+      // set some composing text.
+      editingStrategy.composingText = '뮤';
+
+      testTextEditing.acceptCommand(TextInputSetEditableSizeAndTransform(geometry: EditableTextGeometry(
+        width: 13,
+        height: 12,
+        globalTransform: Matrix4.translationValues(14, 15, 0).storage,
+      )), () {});
+
+      // placeElement() should not be called again.
+      expect(editingStrategy.placeElementCount, 1);
+
+      // geometry should be applied.
+      expect(editingStrategy.domElement!.style.transform,
+          'matrix(1, 0, 0, 1, 14, 15)');
+      expect(editingStrategy.domElement!.style.width, '13px');
+      expect(editingStrategy.domElement!.style.height, '12px');
+
+      // set composing text to null.
+      editingStrategy.composingText = null;
+
+      testTextEditing.acceptCommand(TextInputSetEditableSizeAndTransform(geometry: EditableTextGeometry(
+        width: 10,
+        height: 10,
+        globalTransform: Matrix4.translationValues(11, 12, 0).storage,
+      )), () {});
+
+      // placeElement() should be called again.
+      expect(editingStrategy.placeElementCount, 2);
+
+      // geometry should be updated.
+      expect(editingStrategy.domElement!.style.transform,
+          'matrix(1, 0, 0, 1, 11, 12)');
+      expect(editingStrategy.domElement!.style.width, '10px');
+      expect(editingStrategy.domElement!.style.height, '10px');
+    });
   });
 
   group('$HybridTextEditing', () {
@@ -3406,5 +3464,17 @@ void clearForms() {
 Future<void> waitForDesktopSafariFocus() async {
   if (textEditing.strategy is SafariDesktopTextEditingStrategy) {
     await Future<void>.delayed(Duration.zero);
+  }
+}
+
+class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy {
+  GlobalTextEditingStrategySpy(super.owner);
+
+  int placeElementCount = 0;
+
+  @override
+  void placeElement() {
+    placeElementCount++;
+    super.placeElement();
   }
 }
