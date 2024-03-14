@@ -1429,6 +1429,12 @@ void main() {
     expect(painter.debugDisposed, true);
   });
 
+  test('TextPainter - asserts if disposed more than once', () {
+    final TextPainter painter = TextPainter()..dispose();
+    expect(painter.debugDisposed, isTrue);
+    expect(painter.dispose, throwsAssertionError);
+  });
+
   test('TextPainter computeWidth', () {
     const InlineSpan text = TextSpan(text: 'foobar');
     final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
