@@ -1058,6 +1058,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   /// Collapses the selection at the given `offset` location.
   ///
+  /// The `offset` is in global coordinates.
+  ///
   /// See also:
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
@@ -1072,6 +1074,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   /// Selects a whole word at the `offset` location.
+  ///
+  /// The `offset` is in global coordinates.
   ///
   /// If the whole word is already in the current selection, selection won't
   /// change. One call [_clearSelection] first if the selection needs to be
@@ -1095,6 +1099,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   /// Selects the entire paragraph at the `offset` location.
+  ///
+  /// The `offset` is in global coordinates.
   ///
   /// If the paragraph is already in the current selection, selection won't
   /// change. One call [_clearSelection] first if the selection needs to be
