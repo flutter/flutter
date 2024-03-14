@@ -1737,7 +1737,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
-  SelectionResult? _updateSelectionEdgeAtRootByMultiSelectableTextBoundary(
+  SelectionResult? _updateSelectionStartEdgeByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     bool paragraphContainsPosition,
     bool isEnd,
@@ -1856,9 +1856,128 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
+  SelectionResult? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
+    _TextBoundaryAtPositionInText getTextBoundary,
+    bool paragraphContainsPosition,
+    bool isEnd,
+    TextPosition position,
+    TextPosition? existingSelectionStart,
+    TextPosition? existingSelectionEnd,
+  ) {
+    if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
+      // If this selectable contains the origin boundary, maintain the existing
+      // selection.
+      final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
+      if (paragraphContainsPosition) {
+        // When the position is within the root paragraph, swap the start and end
+        // edges when the selection is inverted.
+        final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(position, fullText);
+        final _TextBoundaryRecord originTextBoundary = getTextBoundary(forwardSelection ? existingSelectionStart : existingSelectionEnd, fullText);
+        final TextPosition targetPosition;
+        final int pivotOffset = forwardSelection ? originTextBoundary.boundaryStart.offset : originTextBoundary.boundaryEnd.offset;
+        final bool shouldSwapEdges = !forwardSelection != (position.offset < pivotOffset);
+        if (position.offset < pivotOffset) {
+          targetPosition = boundaryAtPosition.boundaryStart;
+        } else if (position.offset > pivotOffset) {
+          targetPosition = boundaryAtPosition.boundaryEnd;
+        } else {
+          // Keep the origin text boundary in bounds when position is at the static edge.
+          targetPosition = existingSelectionEnd;
+        }
+        if (shouldSwapEdges) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+        }
+        _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
+        final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
+        if (boundaryAtPosition.boundaryStart.offset > range.end && boundaryAtPosition.boundaryEnd.offset > range.end) {
+          return SelectionResult.next;
+        }
+        if (boundaryAtPosition.boundaryStart.offset < range.start && boundaryAtPosition.boundaryEnd.offset < range.start) {
+          return SelectionResult.previous;
+        }
+        if (finalSelectionIsForward) {
+          if (boundaryAtPosition.boundaryEnd.offset <= originTextBoundary.boundaryEnd.offset) {
+            return SelectionResult.end;
+          }
+          if (boundaryAtPosition.boundaryEnd.offset > originTextBoundary.boundaryEnd.offset) {
+            return SelectionResult.next;
+          }
+        } else {
+          if (boundaryAtPosition.boundaryStart.offset >= originTextBoundary.boundaryStart.offset) {
+            return SelectionResult.end;
+          }
+          if (boundaryAtPosition.boundaryStart.offset < originTextBoundary.boundaryStart.offset) {
+            return SelectionResult.previous;
+          }
+        }
+      } else {
+        // When the drag position is not contained within the root paragraph,
+        // swap the edges when the selection changes direction.
+        final TextPosition clampedPosition = _clampTextPosition(position);
+        if (forwardSelection && clampedPosition.offset == range.start) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(clampedPosition, isEnd: isEnd);
+          return SelectionResult.previous;
+        }
+        if (!forwardSelection && clampedPosition.offset == range.end) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(clampedPosition, isEnd: isEnd);
+          return SelectionResult.next;
+        }
+        if (forwardSelection && clampedPosition.offset == range.end) {
+          _setSelectionPosition(clampedPosition, isEnd: isEnd);
+          return SelectionResult.next;
+        }
+        if (!forwardSelection && clampedPosition.offset == range.start) {
+          _setSelectionPosition(clampedPosition, isEnd: isEnd);
+          return SelectionResult.previous;
+        }
+      }
+    } else {
+      // A paragraph boundary may not be completely contained within this root
+      // selectable fragment. Keep searching until we find the end of the
+      // boundary. Do not search when the current drag position is on a placeholder
+      // to allow traversal to reach that placeholder.
+      final bool positionOnPlaceholder = paragraph.getWordBoundary(position).textInside(fullText) == _placeholderCharacter;
+      if (existingSelectionStart != null && paragraphContainsPosition && !positionOnPlaceholder) {
+        final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(position, fullText);
+        final bool backwardSelection = existingSelectionEnd == null && existingSelectionStart.offset == range.end
+            || existingSelectionStart == existingSelectionEnd && existingSelectionStart.offset == range.end
+            || existingSelectionEnd != null && existingSelectionStart.offset > existingSelectionEnd.offset;
+        if (boundaryAtPosition.boundaryStart.offset < range.start && boundaryAtPosition.boundaryEnd.offset < range.start) {
+          _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+          return SelectionResult.previous;
+        }
+        if (boundaryAtPosition.boundaryStart.offset > range.end && boundaryAtPosition.boundaryEnd.offset > range.end) {
+          _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+          return SelectionResult.next;
+        }
+        if (backwardSelection) {
+          _setSelectionPosition(_clampTextPosition(boundaryAtPosition.boundaryStart), isEnd: isEnd);
+          if (boundaryAtPosition.boundaryStart.offset < range.start) {
+            return SelectionResult.previous;
+          }
+          if (boundaryAtPosition.boundaryStart.offset >= range.start) {
+            return SelectionResult.end;
+          }
+        } else {
+          if (boundaryAtPosition.boundaryEnd.offset <= range.end) {
+            _setSelectionPosition(_clampTextPosition(boundaryAtPosition.boundaryEnd), isEnd: isEnd);
+            return SelectionResult.end;
+          }
+          if (boundaryAtPosition.boundaryEnd.offset > range.end) {
+            _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+            return SelectionResult.next;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final int _placeholderLength = 1;
-  SelectionResult? _updateSelectionEdgeAtPlaceholderByMultiSelectableTextBoundary(
+  SelectionResult? _updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     Offset globalPosition,
     bool paragraphContainsPosition,
@@ -1900,15 +2019,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
         final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
-
-        /// is this needed.
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(originParagraph);
         final TextRange originParagraphPlaceholderRange = TextRange(start: originParagraphPlaceholderTextPosition.offset, end: originParagraphPlaceholderTextPosition.offset + _placeholderLength);
-        /// is this needed.
-        if (boundaryAtPosition.boundaryStart.offset > range.end && boundaryAtPosition.boundaryEnd.offset > range.end) {
+        if (boundaryAtPosition.boundaryStart.offset > originParagraphPlaceholderRange.end && boundaryAtPosition.boundaryEnd.offset > originParagraphPlaceholderRange.end) {
           return SelectionResult.next;
         }
-        if (boundaryAtPosition.boundaryStart.offset < range.start && boundaryAtPosition.boundaryEnd.offset < range.start) {
+        if (boundaryAtPosition.boundaryStart.offset < originParagraphPlaceholderRange.start && boundaryAtPosition.boundaryEnd.offset < originParagraphPlaceholderRange.start) {
           return SelectionResult.previous;
         }
         if (finalSelectionIsForward) {
@@ -2012,6 +2128,157 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
+  SelectionResult? _updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary(
+    _TextBoundaryAtPositionInText getTextBoundary,
+    Offset globalPosition,
+    bool paragraphContainsPosition,
+    bool isEnd,
+    TextPosition position,
+    TextPosition? existingSelectionStart,
+    TextPosition? existingSelectionEnd,
+  ) {
+    if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
+      // If this selectable contains the origin boundary, maintain the existing
+      // selection.
+      final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
+      final RenderParagraph originParagraph = _getOriginParagraph();
+      final Matrix4 originTransform = originParagraph.getTransformTo(null);
+      originTransform.invert();
+      final Offset originParagraphLocalPosition = MatrixUtils.transformPoint(originTransform, globalPosition);
+      final bool positionWithinOriginParagraph = originParagraph.paintBounds.contains(originParagraphLocalPosition);
+      final TextPosition positionRelativeToOriginParagraph = originParagraph.getPositionForOffset(originParagraphLocalPosition);
+      if (positionWithinOriginParagraph) {
+        // When the selection is inverted by the new position it is necessary to
+        // swap the end edge (moving edge) with the start edge (static edge) to
+        // maintain the origin text boundary within the selection.
+        final String originText = originParagraph.text.toPlainText(includeSemanticsLabels: false);
+        final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(positionRelativeToOriginParagraph, originText);
+        final _TextBoundaryRecord originTextBoundary = getTextBoundary(_getPositionInParagraph(originParagraph), originText);
+        final TextPosition targetPosition;
+        final int pivotOffset = forwardSelection ? originTextBoundary.boundaryStart.offset : originTextBoundary.boundaryEnd.offset;
+        final bool shouldSwapEdges = !forwardSelection != (positionRelativeToOriginParagraph.offset < pivotOffset);
+        if (positionRelativeToOriginParagraph.offset < pivotOffset) {
+          targetPosition = boundaryAtPosition.boundaryStart;
+        } else if (positionRelativeToOriginParagraph.offset > pivotOffset) {
+          targetPosition = boundaryAtPosition.boundaryEnd;
+        } else {
+          // Keep the origin text boundary in bounds when position is at the static edge.
+          targetPosition = existingSelectionEnd;
+        }
+        if (shouldSwapEdges) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+        }
+        _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
+        final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
+        final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(originParagraph);
+        final TextRange originParagraphPlaceholderRange = TextRange(start: originParagraphPlaceholderTextPosition.offset, end: originParagraphPlaceholderTextPosition.offset + _placeholderLength);
+        if (boundaryAtPosition.boundaryStart.offset > originParagraphPlaceholderRange.end && boundaryAtPosition.boundaryEnd.offset > originParagraphPlaceholderRange.end) {
+          return SelectionResult.next;
+        }
+        if (boundaryAtPosition.boundaryStart.offset < originParagraphPlaceholderRange.start && boundaryAtPosition.boundaryEnd.offset < originParagraphPlaceholderRange.start) {
+          return SelectionResult.previous;
+        }
+        if (finalSelectionIsForward) {
+          if (boundaryAtPosition.boundaryEnd.offset <= originTextBoundary.boundaryEnd.offset) {
+            return SelectionResult.end;
+          }
+          if (boundaryAtPosition.boundaryEnd.offset > originTextBoundary.boundaryEnd.offset) {
+            return SelectionResult.next;
+          }
+        } else {
+          if (boundaryAtPosition.boundaryStart.offset >= originTextBoundary.boundaryStart.offset) {
+            return SelectionResult.end;
+          }
+          if (boundaryAtPosition.boundaryStart.offset < originTextBoundary.boundaryStart.offset) {
+            return SelectionResult.previous;
+          }
+        }
+      } else {
+        // When the drag position is not contained within the origin paragraph,
+        // swap the edges when the selection changes direction.
+        //
+        // [SelectionUtils.adjustDragOffset] will adjust the given [Offset] to the
+        // beginning or end of the provided [Rect] based on whether the [Offset]
+        // is located within the given [Rect].
+        final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+          originParagraph.paintBounds,
+          originParagraphLocalPosition,
+          direction: paragraph.textDirection,
+        );
+        final TextPosition adjustedPositionRelativeToOriginParagraph = originParagraph.getPositionForOffset(adjustedOffset);
+        final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(originParagraph);
+        final TextRange originParagraphPlaceholderRange = TextRange(start: originParagraphPlaceholderTextPosition.offset, end: originParagraphPlaceholderTextPosition.offset + _placeholderLength);
+        if (forwardSelection && adjustedPositionRelativeToOriginParagraph.offset <= originParagraphPlaceholderRange.start) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+          return SelectionResult.previous;
+        }
+        if (!forwardSelection && adjustedPositionRelativeToOriginParagraph.offset >= originParagraphPlaceholderRange.end) {
+          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+          return SelectionResult.next;
+        }
+        if (forwardSelection && adjustedPositionRelativeToOriginParagraph.offset >= originParagraphPlaceholderRange.end) {
+          _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+          return SelectionResult.next;
+        }
+        if (!forwardSelection && adjustedPositionRelativeToOriginParagraph.offset <= originParagraphPlaceholderRange.start) {
+          _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+          return SelectionResult.previous;
+        }
+      }
+    } else {
+      // When the drag position is somewhere on the root text and not a placeholder,
+      // traverse the selectable fragments relative to the root paragraph.
+      if (existingSelectionStart != null && !paragraphContainsPosition) {
+        final RenderParagraph rootParagraph = _getEncompassingParagraph()!;
+        final Matrix4 rootTransform = rootParagraph.getTransformTo(null);
+        rootTransform.invert();
+        final Offset rootParagraphLocalPosition = MatrixUtils.transformPoint(rootTransform, globalPosition);
+        final bool positionWithinRootParagraph = rootParagraph.paintBounds.contains(rootParagraphLocalPosition);
+        final TextPosition positionRelativeToRootParagraph = rootParagraph.getPositionForOffset(rootParagraphLocalPosition);
+        final String rootText = rootParagraph.text.toPlainText(includeSemanticsLabels: false);
+        final bool positionOnPlaceholder = rootParagraph.getWordBoundary(positionRelativeToRootParagraph).textInside(rootText) == _placeholderCharacter;
+        if (!positionOnPlaceholder && positionWithinRootParagraph) {
+          final bool backwardSelection = existingSelectionEnd == null && existingSelectionStart.offset == range.end
+              || existingSelectionStart == existingSelectionEnd && existingSelectionStart.offset == range.end
+              || existingSelectionEnd != null && existingSelectionStart.offset > existingSelectionEnd.offset;
+          final _TextBoundaryRecord boundaryAtPositionRelativeToRootParagraph = getTextBoundary(positionRelativeToRootParagraph, rootText);
+          final TextPosition rootParagraphPlaceholderTextPosition = _getPositionInParagraph(rootParagraph);
+          final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
+          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
+            _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+            return SelectionResult.previous;
+          }
+          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset > rootParagraphPlaceholderRange.end && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+            _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+            return SelectionResult.next;
+          }
+          if (backwardSelection) {
+            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset >= rootParagraphPlaceholderRange.start) {
+              _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+              return SelectionResult.end;
+            }
+            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start) {
+              _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
+              return SelectionResult.previous;
+            }
+          } else {
+            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset <= rootParagraphPlaceholderRange.end) {
+              _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+              return SelectionResult.end;
+            }
+            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+              _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
+              return SelectionResult.next;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   SelectionResult _updateSelectionEdgeByMultiSelectableTextBoundary(Offset globalPosition, {required bool isEnd, required _TextBoundaryAtPositionInText getTextBoundary}) {
     // When the start/end edges are swapped, i.e. the start is after the end, and
     // the scrollable synthesizes an event for the opposite edge, this will potentially
@@ -2042,24 +2309,43 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
     final SelectionResult? result;
     if (_isPlaceholder()) {
-      result = _updateSelectionEdgeAtPlaceholderByMultiSelectableTextBoundary(
-        getTextBoundary,
-        globalPosition,
-        paragraph.paintBounds.contains(localPosition),
-        isEnd,
-        position,
-        existingSelectionStart,
-        existingSelectionEnd,
-      );
+      result = isEnd 
+          ? _updateSelectionEndEdgeAtPlaceholderByMultiSelectableTextBoundary(
+              getTextBoundary,
+              globalPosition,
+              paragraph.paintBounds.contains(localPosition),
+              isEnd,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            ) 
+          : _updateSelectionStartEdgeAtPlaceholderByMultiSelectableTextBoundary(
+              getTextBoundary,
+              globalPosition,
+              paragraph.paintBounds.contains(localPosition),
+              isEnd,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            );
     } else {
-      result = _updateSelectionEdgeAtRootByMultiSelectableTextBoundary(
-        getTextBoundary,
-        paragraph.paintBounds.contains(localPosition),
-        isEnd,
-        positionInFullText,
-        existingSelectionStart,
-        existingSelectionEnd,
-      );
+      result = isEnd 
+          ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
+              getTextBoundary,
+              paragraph.paintBounds.contains(localPosition),
+              isEnd,
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            ) 
+          : _updateSelectionStartEdgeByMultiSelectableTextBoundary(
+              getTextBoundary,
+              paragraph.paintBounds.contains(localPosition),
+              isEnd,
+              positionInFullText,
+              existingSelectionStart,
+              existingSelectionEnd,
+            );
     }
     if (result != null) {
       return result;
