@@ -25,6 +25,9 @@ class PlatformViewApp extends StatefulWidget {
 class PlatformViewAppState extends State<PlatformViewApp> {
 
   AdWidget _getBannerWidget() {
+    // Test IDs from Admob:
+    // https://developers.google.com/admob/ios/test-ads
+    // https://developers.google.com/admob/android/test-ads
     final String bannerId = Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/6300978111'
         : 'ca-app-pub-3940256099942544/2934735716';
@@ -53,7 +56,9 @@ class PlatformViewAppState extends State<PlatformViewApp> {
               // Use 320x50 Admob standard banner size.
               ? Container(width: 320, height: 50, child: _getBannerWidget())
               // Adjust the height to control number of platform views on screen.
-              : Container(height: 50, color: Colors.yellow);
+              // TODO: Having more than 5 banners on screen causes an unknown crash.
+              // See: https://github.com/flutter/flutter/issues/144339
+              : const SizedBox(height: 150, child: ColoredBox(color: Colors.red));
           },
         ),
       ),
