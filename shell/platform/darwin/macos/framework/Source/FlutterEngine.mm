@@ -962,12 +962,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 
 - (void)updateWindowMetricsForViewController:(FlutterViewController*)viewController {
-  if (viewController.viewId != kFlutterImplicitViewId) {
-    // TODO(dkwingsmt): The embedder API only supports single-view for now. As
-    // embedder APIs are converted to multi-view, this method should support any
-    // views.
-    return;
-  }
   if (!_engine || !viewController || !viewController.viewLoaded) {
     return;
   }
@@ -986,6 +980,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       .left = static_cast<size_t>(scaledBounds.origin.x),
       .top = static_cast<size_t>(scaledBounds.origin.y),
       .display_id = static_cast<uint64_t>(displayId),
+      .view_id = viewController.viewId,
   };
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }

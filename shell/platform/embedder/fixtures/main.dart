@@ -1334,6 +1334,42 @@ void pointer_data_packet_view_id() {
   signalNativeTest();
 }
 
+Map<int, Size> _getAllViewSizes() {
+  final Map<int, Size> result = <int, Size>{};
+  for (final FlutterView view in PlatformDispatcher.instance.views) {
+    result[view.viewId] = view.physicalSize;
+  }
+  return result;
+}
+
+List<int> _findDifferences(Map<int, Size> a, Map<int, Size> b) {
+  final Set<int> result = <int>{};
+  a.forEach((int viewId, Size sizeA) {
+    if (!b.containsKey(viewId) || b[viewId] != sizeA) {
+      result.add(viewId);
+    }
+  });
+  b.forEach((int viewId, Size sizeB) {
+    if (!a.containsKey(viewId)) {
+      result.add(viewId);
+    }
+  });
+  return result.toList()..sort();
+}
+
+@pragma('vm:entry-point')
+void window_metrics_event_view_id() {
+  Map<int, Size> sizes = _getAllViewSizes();
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    final Map<int, Size> newSizes = _getAllViewSizes();
+    final List<int> differences = _findDifferences(sizes, newSizes);
+    sizes = newSizes;
+    signalNativeMessage('Changed: $differences');
+  };
+
+  signalNativeTest();
+}
+
 @pragma('vm:entry-point')
 Future<void> channel_listener_response() async {
   channelBuffers.setListener('test/listen',
