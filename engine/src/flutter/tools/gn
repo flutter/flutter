@@ -489,7 +489,6 @@ def to_gn_args(args):
     gn_args['enable_unittests'] = False
 
   # Skia GN args.
-  gn_args['skia_enable_flutter_defines'] = True  # Enable Flutter API guards in Skia.
   gn_args['skia_use_dng_sdk'] = False  # RAW image handling.
   gn_args['skia_use_sfntly'] = False  # PDF handling dependency.
   gn_args['skia_enable_pdf'] = False  # PDF handling.
@@ -851,7 +850,6 @@ def to_gn_args(args):
 # build are unused. This method is used instead.
 def to_gn_wasm_args(args, gn_args):
   gn_args['is_official_build'] = True
-  gn_args['skia_enable_flutter_defines'] = True
   gn_args['is_component_build'] = False
   gn_args['use_clang_static_analyzer'] = False
   gn_args['is_clang'] = True
