@@ -262,8 +262,11 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 - (void)invalidate {
   @synchronized(self) {
     FML_DCHECK([NSThread isMainThread]);
-    [_view removeFromSuperview];
+    // Unregister observer before removing the view to ensure
+    // that the viewDidChangeWindow notification is not received
+    // while in @synchronized block.
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_view removeFromSuperview];
     _view = nil;
     _delegate = nil;
   }
