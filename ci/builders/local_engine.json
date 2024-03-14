@@ -11,7 +11,6 @@
         "--android",
         "--android-cpu=arm64",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "android_debug_arm64",
@@ -31,7 +30,6 @@
         "--android",
         "--android-cpu=arm64",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "android_profile_arm64",
@@ -51,7 +49,6 @@
         "--android",
         "--android-cpu=arm64",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "android_release_arm64",
@@ -69,7 +66,6 @@
         "--runtime-mode",
         "debug",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "host_debug",
@@ -87,7 +83,6 @@
         "--runtime-mode",
         "profile",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "host_profile",
@@ -105,7 +100,6 @@
         "--runtime-mode",
         "release",
         "--no-stripped",
-        "--enable-impeller-vulkan",
         "--no-lto"
       ],
       "name": "host_release",

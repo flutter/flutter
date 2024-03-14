@@ -9,7 +9,6 @@ Example:
 ```sh
 flutter/tools/gn \
   --runtime-mode=debug \
-  --enable-impeller-vulkan \
   --enable-vulkan-validation-layers \
   --no-lto \
   --unoptimized \
