@@ -32,7 +32,6 @@ class _MainWidget extends StatelessWidget {
         children: <Widget>[
           const TextField(
             key: Key('enabled text field'),
-            autofocus: true,
             decoration: InputDecoration(
               labelText: 'Email',
               suffixText: '@gmail.com',

@@ -29,7 +29,6 @@ class _MainWidget extends StatelessWidget {
       ),
       body: Center(
         child: TextButton(
-          autofocus: true,
           onPressed: () => showDialog<String>(
             context: context,
             builder: (BuildContext context) => Dialog(
@@ -44,14 +43,12 @@ class _MainWidget extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         TextButton(
-                          autofocus: true,
                           onPressed: () {
                             Navigator.pop(context);
                           },
                           child: const Text('OK'),
                         ),
                         TextButton(
-                          autofocus: true,
                           onPressed: () {
                             Navigator.pop(context);
                           },
