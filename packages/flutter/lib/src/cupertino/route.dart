@@ -158,6 +158,87 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    if (previousRoute is ModalRoute<T> && this.navigator != null) {
+      this.navigator!.delegateTransitionBuilder = (previousRoute as ModalRoute<T>).delegatedTransition;
+    }
+    return previousRoute is ModalRoute || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+  }
+
+  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
+  ///
+  /// This just checks the route's [NavigatorState.userGestureInProgress].
+  ///
+  /// See also:
+  ///
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
+    return route.navigator!.userGestureInProgress;
+  }
+
+  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
+  ///
+  /// See also:
+  ///
+  ///  * [isPopGestureInProgress], which returns true if a Cupertino pop gesture
+  ///    is currently underway for specific route.
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  bool get popGestureInProgress => isPopGestureInProgress(this);
+
+  /// Whether a pop gesture can be started by the user.
+  ///
+  /// Returns true if the user can edge-swipe to a previous route.
+  ///
+  /// Returns false once [isPopGestureInProgress] is true, but
+  /// [isPopGestureInProgress] can only become true if [popGestureEnabled] was
+  /// true first.
+  ///
+  /// This should only be used between frames, not during build.
+  bool get popGestureEnabled => _isPopGestureEnabled(this);
+
+  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
+    // If there's nothing to go back to, then obviously we don't support
+    // the back gesture.
+    if (route.isFirst) {
+      return false;
+    }
+    // If the route wouldn't actually pop if we popped it, then the gesture
+    // would be really confusing (or would skip internal routes), so disallow it.
+    if (route.willHandlePopInternally) {
+      return false;
+    }
+    // If attempts to dismiss this route might be vetoed such as in a page
+    // with forms, then do not allow the user to dismiss the route with a swipe.
+    if (route.hasScopedWillPopCallback
+        || route.popDisposition == RoutePopDisposition.doNotPop) {
+      return false;
+    }
+    // Fullscreen dialogs aren't dismissible by back swipe.
+    if (route.fullscreenDialog) {
+      return false;
+    }
+    // If we're in an animation already, we cannot be manually swiped.
+    if (route.animation!.status != AnimationStatus.completed) {
+      return false;
+    }
+    // If we're being popped into, we also cannot be swiped until the pop above
+    // it completes. This translates to our secondary animation being
+    // dismissed.
+    if (route.secondaryAnimation!.status != AnimationStatus.dismissed) {
+      return false;
+    }
+    // If we're in a gesture already, we cannot start another.
+    if (isPopGestureInProgress(route)) {
+      return false;
+    }
+
+    // Looks like a back gesture would be welcome!
+    return true;
+  }
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
     return Semantics(
