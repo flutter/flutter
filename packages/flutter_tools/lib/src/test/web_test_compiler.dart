@@ -21,6 +21,11 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
+typedef WebTestInfo = ({
+  String entryPoint,
+  String? configFile,
+});
+
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
@@ -78,32 +83,25 @@ class WebTestCompiler {
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
-    final List<File> generatedFiles = <File>[];
-    for (final String testFilePath in testFiles) {
-      final List<String> relativeTestSegments = _fileSystem.path.split(
-        _fileSystem.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
-      final File generatedFile = _fileSystem.file(
-        _fileSystem.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
-      generatedFile
-        ..createSync(recursive: true)
-        ..writeAsStringSync(generateTestEntrypoint(
-            relativeTestPath: relativeTestSegments.join('/'),
-            absolutePath: testFilePath,
-            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
-            languageVersion: languageVersion,
-        ));
-      generatedFiles.add(generatedFile);
-    }
-    // Generate a fake main file that imports all tests to be executed. This will force
-    // each of them to be compiled.
-    final StringBuffer buffer = StringBuffer('// @dart=${languageVersion.major}.${languageVersion.minor}\n');
-    for (final File generatedFile in generatedFiles) {
-      buffer.writeln('import "${_fileSystem.path.basename(generatedFile.path)}";');
-    }
-    buffer.writeln('void main() {}');
+    final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
+        final List<String> relativeTestSegments = _fileSystem.path.split(
+          _fileSystem.path.relative(
+            testFilePath,
+            from: projectDirectory.childDirectory('test').path
+          )
+        );
+        return (
+          entryPoint: relativeTestSegments.join('/'),
+          configFile: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
+        );
+    }).toList();
     _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))
-      ..createSync()
-      ..writeAsStringSync(buffer.toString());
+      ..createSync(recursive: true)
+      ..writeAsStringSync(generateTestEntrypoint(
+        testInfos: testInfos,
+        languageVersion: languageVersion
+      )
+    );
 
     final String cachedKernelPath = getDefaultCachedKernelPath(
       trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -157,6 +155,11 @@ class WebTestCompiler {
     final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
     final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
     final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
+
+    print('printing output directory:');
+    for (final FileSystemEntity entity in outputDirectory.listSync()) {
+      print('${entity.path}');
+    }
     return WebMemoryFS()
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }

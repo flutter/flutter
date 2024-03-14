@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
@@ -254,6 +255,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     'dart_stack_trace_mapper.js',
   ));
 
+  File get _flutterJs => _fileSystem.file(_fileSystem.path.join(
+    _artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
+  ));
+
   File get _dartSdk {
     final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
@@ -280,13 +286,16 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.endsWith('.dart.browser_test.dart.js')) {
       final String leadingPath = request.url.path.split('.browser_test.dart.js')[0];
       final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.bootstrap.js';
-      return shelf.Response.ok(generateTestBootstrapFileContents('/$generatedFile', 'require.js', 'dart_stack_trace_mapper.js'), headers: <String, String>{
-        HttpHeaders.contentTypeHeader: 'text/javascript',
-      });
+      return shelf.Response.ok(generateTestBootstrapFileContents(
+        '/$generatedFile', 'require.js', 'dart_stack_trace_mapper.js'),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'text/javascript',
+        }
+      );
     }
     if (request.url.path.endsWith('.dart.bootstrap.js')) {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
-      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
+      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
@@ -347,6 +356,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     } else if (request.requestedUri.path.contains('host.dart.js')) {
       return shelf.Response.ok(
         _testHostDartJs.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('flutter.js')) {
+      return shelf.Response.ok(
+        _flutterJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else {
@@ -466,19 +480,21 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (path.endsWith('.html')) {
       final String test = '${_fileSystem.path.withoutExtension(path)}.dart';
       final String scriptBase = htmlEscape.convert(_fileSystem.path.basename(test));
-      final String link = '<link rel="x-dart-test" href="$scriptBase">';
       return shelf.Response.ok('''
         <!DOCTYPE html>
         <html>
         <head>
           <title>${htmlEscape.convert(test)} Test</title>
+          <script src="flutter.js"></script>
           <script>
-            window.flutterConfiguration = {
-              canvasKitBaseUrl: "/canvaskit/"
-            };
+            _flutter.buildConfig = {"engineRevision":"7e8fefe4a0842b58f1d79ac6fe3587758c0847ce","builds":[{"compileTarget":"dartdevc","renderer":"auto","mainJsPath":"main.dart.browser_test.dart.js"}]};
+            window.testSelector = "$scriptBase";
+            _flutter.loader.load({
+              config: {
+                canvasKitBaseUrl: "/canvaskit/",
+              }
+            });
           </script>
-          $link
-          <script src="static/dart.js"></script>
         </head>
         </html>
       ''', headers: <String, String>{'Content-Type': 'text/html'});
@@ -736,6 +752,10 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
+    if (!headless) {
+      print('Browser loaded. Press enter to start tests...');
+      stdin.readLineSync();
+    }
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     unawaited(chrome.onExit.then<Object?>(

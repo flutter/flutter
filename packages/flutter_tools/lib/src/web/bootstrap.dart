@@ -4,6 +4,8 @@
 
 import 'package:package_config/package_config.dart';
 
+import '../test/web_test_compiler.dart';
+
 String generateDDCBootstrapScript({
   required String entrypoint,
   required String ddcModuleLoaderUrl,
@@ -391,32 +393,77 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 ///
 /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
 String generateTestEntrypoint({
-  required String relativeTestPath,
-  required String absolutePath,
-  required String? testConfigPath,
+  required List<WebTestInfo> testInfos,
   required LanguageVersion languageVersion,
 }) {
+  final List<String> importMainStatements = <String>[];
+  final List<String> importTestConfigStatements = <String>[];
+  final List<String> entryPointPairs = <String>[];
+  final List<String> testConfigPairs = <String>[];
+
+  for (int index = 0; index < testInfos.length; index++) {
+    final WebTestInfo testInfo = testInfos[index];
+    final String entryPointPath = testInfo.entryPoint;
+    importMainStatements.add("import '${Uri.file(entryPointPath)}' as test_$index show main;");
+    entryPointPairs.add("  '$entryPointPath': test_$index.main,");
+
+    final String? testConfigPath = testInfo.configFile;
+    if (testConfigPath != null) {
+      importTestConfigStatements.add(
+        "import '${Uri.file(testConfigPath)}' as test_config_$index show testExecutable"
+      );
+      testConfigPairs.add("  '$testConfigPath': test_config_$index.testExecutable,");
+    }
+  }
   return '''
   // @dart = ${languageVersion.major}.${languageVersion.minor}
-  import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
   import 'dart:ui_web' as ui_web;
+  import 'dart:async';
   import 'dart:html';
-  import 'dart:js';
-  ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
+  import 'dart:js_interop';
+
+  ${importMainStatements.join('\n')}
+
+  ${importTestConfigStatements.join('\n')}
+
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
   import 'package:test_api/backend.dart';
 
+  typedef EntryPoint = FutureOr<void> Function();
+  typedef EntryPointRunner = Future<void> Function(EntryPoint);
+
+  Map<String, EntryPoint> entryPointMap = <String, EntryPoint>{
+    ${entryPointPairs.join('\n')}
+  };
+
+  Map<String, EntryPointRunner> testConfigMap = <String, EntryPointRunner>{
+    ${testConfigPairs.join('\n')}
+  };
+
+  @JS('window.testSelector')
+  external JSString? get testSelector;
+
   Future<void> main() async {
+    final JSString? jsTestSelector = testSelector;
+    if (jsTestSelector == null) {
+      throw Exception('Test selector not set');
+    }
+    final String dartTestSelector = jsTestSelector.toDart;
+    final EntryPoint? entryPoint = entryPointMap[dartTestSelector];
+    if (entryPoint == null) {
+      throw Exception('Test entrypoint for \${dartTestSelector} not found');
+    }
+    final EntryPointRunner? entryPointRunner = testConfigMap[dartTestSelector];
     ui_web.debugEmulateFlutterTesterEnvironment = true;
     await ui_web.bootstrapEngine();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.file(jsTestSelector.toDart));
     ui_web.debugOverrideDevicePixelRatio(3.0);
-    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    //ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
     internalBootstrapBrowserTest(() {
-      return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
+      return entryPointRunner != null ? () => entryPointRunner(entryPoint) : entryPoint;
     });
   }
 
