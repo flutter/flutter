@@ -1552,7 +1552,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       } else {
         if (existingSelectionEnd != null) {
           // If the end edge exists and the start edge is being moved, then the
-          // start edge is moved to encompass the entire word at the new position.
+          // start edge is moved to encompass the entire text boundary at the new position.
           if (position.offset < existingSelectionEnd.offset) {
             targetPosition = textBoundary.boundaryStart;
           } else {
@@ -1624,7 +1624,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       } else {
         if (existingSelectionStart != null) {
           // If the start edge exists and the end edge is being moved, then the
-          // end edge is moved to encompass the entire word at the new position.
+          // end edge is moved to encompass the entire text boundary at the new position.
           if (position.offset < existingSelectionStart.offset) {
             targetPosition = textBoundary.boundaryStart;
           } else {
