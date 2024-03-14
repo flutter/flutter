@@ -961,6 +961,59 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
+    testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Text.rich(
+              WidgetSpan(
+                child: Column(
+                  children: <Widget>[
+                    Text('Text widget A.'),
+                    Text('Text widget B.'),
+                    Text('Text widget C.'),
+                    Text('Text widget D.'),
+                    Text('Text widget E.'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraphC = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget C.'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraphC, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraphC, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraphC, 2));
+      await tester.pumpAndSettle();
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      await gesture.moveTo(textOffsetToPosition(paragraphC, 7));
+      await tester.pump();
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      final RenderParagraph paragraphE = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget E.'), matching: find.byType(RichText)));
+      final RenderParagraph paragraphD = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Text widget D.'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraphE, 5));
+      // Should select line C-E.
+      expect(paragraphC.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraphD.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraphE.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+
+      await gesture.up();
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
     testWidgets('mouse can select multiple widgets on triple click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
