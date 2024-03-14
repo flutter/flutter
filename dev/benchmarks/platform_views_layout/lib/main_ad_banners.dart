@@ -35,7 +35,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       adUnitId: bannerId,
       request: const AdRequest(),
       size: AdSize.banner,
-      listener: BannerAdListener(),
+      listener: const BannerAdListener(),
     );
     bannerAd.load();
     return AdWidget(ad: bannerAd);
@@ -54,9 +54,9 @@ class PlatformViewAppState extends State<PlatformViewApp> {
           itemBuilder: (BuildContext context, int index) {
             return index.isEven
               // Use 320x50 Admob standard banner size.
-              ? Container(width: 320, height: 50, child: _getBannerWidget())
+              ? SizedBox(width: 320, height: 50, child: _getBannerWidget())
               // Adjust the height to control number of platform views on screen.
-              // TODO: Having more than 5 banners on screen causes an unknown crash.
+              // TODO(hellohuanlin): Having more than 5 banners on screen causes an unknown crash.
               // See: https://github.com/flutter/flutter/issues/144339
               : const SizedBox(height: 150, child: ColoredBox(color: Colors.yellow));
           },
