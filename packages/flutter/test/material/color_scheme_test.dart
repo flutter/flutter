@@ -803,7 +803,6 @@ void main() {
 }
 
 Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Color expectation) async {
-  final TestWidgetsFlutterBinding binding = tester.binding;
   final GlobalKey key = GlobalKey();
   await tester.pumpWidget(Container()); // reset
   await tester.pumpWidget(
