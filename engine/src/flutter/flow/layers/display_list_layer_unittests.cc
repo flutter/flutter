@@ -249,7 +249,7 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
                               &paint_context(), false);
 
   int opacity_alpha = 0x7F;
-  SkPoint opacity_offset = SkPoint::Make(10, 10);
+  SkPoint opacity_offset = SkPoint::Make(10.2, 10.2);
   auto opacity_layer =
       std::make_shared<OpacityLayer>(opacity_alpha, opacity_offset);
   opacity_layer->Add(display_list_layer);
