@@ -44063,7 +44063,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => '在网络上搜索';
+  String get searchWebButtonLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
@@ -44093,7 +44093,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => '分享…';
+  String get shareButtonLabel => '共享…';
 
   @override
   String get showAccountsLabel => '显示账号';
@@ -44476,7 +44476,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchFieldLabel => '搜尋';
 
   @override
-  String get searchWebButtonLabel => '搜尋網頁';
+  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get selectAllButtonLabel => '全部選取';
@@ -44489,6 +44489,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 
   @override
   String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
+
+  @override
+  String get shareButtonLabel => '分享…';
 
   @override
   String get showAccountsLabel => '顯示帳戶';
@@ -44563,9 +44566,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get searchWebButtonLabel => '在網路上搜尋';
 
   @override
   String get scanTextButtonLabel => '掃描文字';

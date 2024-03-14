@@ -25,7 +25,7 @@
   "noSpellCheckReplacementsLabel": "找不到替换文字",
   "menuDismissLabel": "关闭菜单",
   "lookUpButtonLabel": "查询",
-  "searchWebButtonLabel": "在网络上搜索",
-  "shareButtonLabel": "分享…",
+  "searchWebButtonLabel": "搜索",
+  "shareButtonLabel": "共享…",
   "clearButtonLabel": "Clear"
 }
