@@ -655,8 +655,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus|| widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
-        canRequestFocus: true,
-        descendantsAreTraversable: true,
+        canRequestFocus: false,
+        skipTraversal: true,
         onFocusChange: (bool value) {
           if (!value) {
             setState(() {
