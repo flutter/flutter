@@ -138,7 +138,7 @@ TEST_F(EmbedderTest, MetalCompositorMustBeAbleToRenderPlatformViews) {
 
   fml::CountDownLatch latch(3);
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers, size_t layers_count) {
         ASSERT_EQ(layers_count, 3u);
 
         {
@@ -326,7 +326,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneMetal) {
   auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
-      [&](const FlutterLayer** layers, size_t layers_count) {
+      [&](FlutterViewId view_id, const FlutterLayer** layers, size_t layers_count) {
         ASSERT_EQ(layers_count, 5u);
 
         // Layer Root

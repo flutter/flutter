@@ -494,7 +494,10 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
 
     builder.PushLayers(presented_layers);
 
-    presented_layers.InvokePresentCallback(present_callback_);
+    // TODO(loic-sharma): Currently only supports a single view.
+    // See https://github.com/flutter/flutter/issues/135530.
+    presented_layers.InvokePresentCallback(kFlutterImplicitViewId,
+                                           present_callback_);
   }
 
   // See why this is necessary in the comment where this collection in
