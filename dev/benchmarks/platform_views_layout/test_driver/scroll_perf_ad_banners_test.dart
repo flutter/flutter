@@ -26,8 +26,6 @@ void main() {
       // See: https://github.com/flutter/flutter/issues/19434
       await Future<void>.delayed(const Duration(milliseconds: 250));
 
-      await driver.forceGC();
-
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);
@@ -54,7 +52,7 @@ void main() {
     test('platform_views_scroll_perf', () async {
       // Disable frame sync, since there are ongoing animations.
       await driver.runUnsynchronized(() async {
-        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf_non_intersecting');
+        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf_ad_banners');
       });
     }, timeout: Timeout.none);
   });
