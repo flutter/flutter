@@ -8,7 +8,7 @@
 ```bash
 # In your $ENGINE_SRC folder, do:
 
-./flutter/tools/gn --unopt --enable-impeller-vulkan
+./flutter/tools/gn --unopt
 ninja -C out/host_debug_unopt/
 ```
 
@@ -17,9 +17,10 @@ ninja -C out/host_debug_unopt/
 ![Launch App](assets/renderdoc_frame_capture/launch-app.png)
 
 4. Fill out the following parameters, and click launch:
-  - executable: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
-  - args: `--gtest_filter="*CanDrawRect/Vulkan*" --enable_playground`
-  - working dir: `$ENGINE_SRC` (expand `ENGINE_SRC`)
+
+- executable: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
+- args: `--gtest_filter="*CanDrawRect/Vulkan*" --enable_playground`
+- working dir: `$ENGINE_SRC` (expand `ENGINE_SRC`)
 
 5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state.
 

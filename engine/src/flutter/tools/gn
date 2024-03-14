@@ -1238,20 +1238,6 @@ def parse_args(args):
 
   # Impeller flags.
   parser.add_argument(
-      '--enable-impeller-vulkan',
-      default=True,
-      action='store_true',
-      help='Enable the Impeller Vulkan backend.'
-  )
-
-  parser.add_argument(
-      '--enable-impeller-opengles',
-      default=True,
-      action='store_true',
-      help='Enable the Impeller OpenGL ES backend.'
-  )
-
-  parser.add_argument(
       '--prebuilt-impellerc',
       default=None,
       type=str,
