@@ -18,6 +18,17 @@ import 'layout_helper.dart';
 import 'object.dart';
 import 'selection.dart';
 
+// Examples can assume:
+// late TextSpan textSpan;
+// class MyTextCustomPainter extends CustomPainter {
+//   MyTextCustomPainter({ super.repaint });
+//
+//  @override
+//  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+//  @override
+//  void paint(Canvas canvas, Size size) {}
+// }
+
 /// The start and end positions for a word.
 typedef _WordBoundaryRecord = ({TextPosition wordStart, TextPosition wordEnd});
 
@@ -815,14 +826,24 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// A [ValueListenable] that reflects current layout of the [RenderParagraph].
   ///
   /// This [ValueListenable] can **not** be used to drive the layout process of
-  /// a [RenderObject], when that [RenderObject] is ready to do layout, it
-  /// typically is not guaranteed that the [RenderParagraph] have computed the
+  /// a [RenderObject], because when that [RenderObject] is ready to do layout,
+  /// it typically is not guaranteed that the [RenderParagraph] have computed the
   /// text layout. But it can be used to drive the painting process of a
-  /// [CustomPainter] that depends on the text layout of this [RenderParagraph].
-  /// The [CustomPainter] must paint before the
+  /// [CustomPainter] that depends on the text layout of this [RenderParagraph]:
+  /// ```dart
+  /// final RenderParagraph paragraph = RenderParagraph(textSpan);
+  /// final CustomPainter foreground = MyTextCustomPainter(repaint: paragraph.textLayout);
+  /// final CustomPainter background = MyTextCustomPainter(repaint: paragraph.textLayout);
+  /// final RenderCustomPaint renderCustomPaint = RenderCustomPaint(
+  ///   foregroundPainter: foreground,
+  ///   painter: background,
+  ///   child: paragraph,
+  /// );
+  /// ```
   ///
-  /// For text layout APIs that can be potentially computationally intensive,
-  /// such as [TextLayout.getBoxesForSelection], the [ValueListenable] can be
+  /// For text layout APIs that can be potentially computationally intensive
+  /// (notably, [TextLayout.getBoxesForSelection], when the method returns a
+  /// large number of boxes), the [TextLayout] value of [ValueListenable] can be
   /// used for cache invalidation: if the previous [TextLayout] is the same as
   /// the new [TextLayout], or only the paint offset is different, then the
   /// cached [TextBox]es can be reused instead of having to call
