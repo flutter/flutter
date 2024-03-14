@@ -58,7 +58,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
               // Adjust the height to control number of platform views on screen.
               // TODO: Having more than 5 banners on screen causes an unknown crash.
               // See: https://github.com/flutter/flutter/issues/144339
-              : const SizedBox(height: 150, child: ColoredBox(color: Colors.red));
+              : const SizedBox(height: 150, child: ColoredBox(color: Colors.yellow));
           },
         ),
       ),
