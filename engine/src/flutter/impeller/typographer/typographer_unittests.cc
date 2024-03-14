@@ -338,7 +338,8 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
   ASSERT_EQ(packer->percentFull(), 0);
 }
 
-TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledWhenContentsAreRecreated) {
+TEST_P(TypographerTest,
+       GlyphAtlasTextureIsRecycledWhenContentsAreNotRecreated) {
   auto context = TypographerContextSkia::Make();
   auto atlas_context = context->CreateGlyphAtlasContext();
   ASSERT_TRUE(context && context->IsValid());
@@ -370,7 +371,7 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledWhenContentsAreRecreated) {
 
   auto new_packer = atlas_context->GetRectPacker();
 
-  ASSERT_EQ(second_texture, first_texture);
+  ASSERT_NE(second_texture, first_texture);
   ASSERT_NE(old_packer, new_packer);
 }
 
