@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io show Directory;
+
 import 'package:engine_build_configs/engine_build_configs.dart';
+import 'package:path/path.dart' as p;
 
 import 'environment.dart';
 import 'logger.dart';
@@ -63,13 +66,30 @@ void debugCheckBuilds(List<Build> builds) {
 }
 
 /// Build the build target in the environment.
-Future<int> runBuild(Environment environment, Build build) async {
+Future<int> runBuild(
+  Environment environment,
+  Build build, {
+  List<String> extraGnArgs = const <String>[],
+}) async {
+  // If RBE config files aren't in the tree, then disable RBE.
+  final String rbeConfigPath = p.join(
+    environment.engine.srcDir.path,
+    'flutter',
+    'build',
+    'rbe',
+  );
+  final List<String> gnArgs = <String>[
+    ...extraGnArgs,
+    if (!io.Directory(rbeConfigPath).existsSync()) '--no-rbe',
+  ];
+
   final BuildRunner buildRunner = BuildRunner(
     platform: environment.platform,
     processRunner: environment.processRunner,
     abi: environment.abi,
     engineSrcDir: environment.engine.srcDir,
     build: build,
+    extraGnArgs: gnArgs,
     runTests: false,
   );
 

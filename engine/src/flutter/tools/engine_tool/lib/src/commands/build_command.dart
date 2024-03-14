@@ -31,6 +31,12 @@ final class BuildCommand extends CommandBase {
           config.name: config.gn.join(' '),
       },
     );
+    argParser.addFlag(
+      rbeFlag,
+      defaultsTo: true,
+      help: 'RBE is enabled by default when available. Use --no-rbe to '
+            'disable it.',
+    );
   }
 
   /// List of compatible builds.
@@ -45,6 +51,7 @@ final class BuildCommand extends CommandBase {
   @override
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
+    final bool useRbe = argResults![rbeFlag] as bool;
     final Build? build =
         builds.where((Build build) => build.name == configName).firstOrNull;
     if (build == null) {
@@ -52,7 +59,11 @@ final class BuildCommand extends CommandBase {
       return 1;
     }
 
+    final List<String> extraGnArgs = <String>[
+      if (!useRbe) '--no-rbe',
+    ];
+
     // TODO(loic-sharma): Fetch dependencies if needed.
-    return runBuild(environment, build);
+    return runBuild(environment, build, extraGnArgs: extraGnArgs);
   }
 }

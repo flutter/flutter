@@ -37,6 +37,12 @@ final class RunCommand extends CommandBase {
           build.name: build.gn.join(' '),
       },
     );
+    argParser.addFlag(
+      rbeFlag,
+      defaultsTo: true,
+      help: 'RBE is enabled by default when available. Use --no-rbe to '
+            'disable it.',
+    );
   }
 
   /// List of compatible builds.
@@ -142,15 +148,20 @@ final class RunCommand extends CommandBase {
       return 1;
     }
 
+    final bool useRbe = argResults![rbeFlag] as bool;
+    final List<String> extraGnArgs = <String>[
+      if (!useRbe) '--no-rbe',
+    ];
+
     // First build the host.
-    int r = await runBuild(environment, hostBuild);
+    int r = await runBuild(environment, hostBuild, extraGnArgs: extraGnArgs);
     if (r != 0) {
       return r;
     }
 
     // Now build the target if it isn't the same.
     if (hostBuild.name != build.name) {
-      r = await runBuild(environment, build);
+      r = await runBuild(environment, build, extraGnArgs: extraGnArgs);
       if (r != 0) {
         return r;
       }
