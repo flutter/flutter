@@ -2426,11 +2426,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       super.invoke(intent);
       return;
     }
-
+    final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
     final Axis? parentOrientation = anchor._parent?._orientation;
     final Axis orientation = (buttonIsFocused ? parentOrientation : null) ?? anchor._orientation;
     final bool differentParent = orientation != parentOrientation;
-    final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
     final bool firstItemIsFocused = anchor._firstItemFocusNode?.hasPrimaryFocus ?? false;
     final bool rtl = switch (Directionality.of(context)) {
       TextDirection.rtl => true,
