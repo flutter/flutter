@@ -507,6 +507,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.topRight);
     assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomLeft);
     assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomRight);
+    final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
     Radius animated({required bool isStart}) {
       final MergeableMaterialItem? neighbor = index > 0
           ? _children.elementAtOrNull(isStart ? index - 1 : index + 1)
@@ -519,7 +520,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       return Radius.zero;
     }
 
-    final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
     final Radius startRadius = start ? cardRadius : animated(isStart: true);
     final Radius endRadius = end ? cardRadius : animated(isStart: false);
 
