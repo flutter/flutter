@@ -475,12 +475,14 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: _environment(allowReentrantFlutter, environment),
       mode: mode,
     );
-    stdinWriteErrorHandler ??= (Object _, StackTrace __) {
-      throw 'oops';
-    };
-    unawaited(
-      process.stdin.done.then<void>((_) {}, onError: stdinWriteErrorHandler),
-    );
+    if (mode == ProcessStartMode.normal) {
+      stdinWriteErrorHandler ??= (Object _, StackTrace __) {
+        throw 'oops'; // TODO
+      };
+      unawaited(
+        process.stdin.done.then<void>((_) {}, onError: stdinWriteErrorHandler),
+      );
+    }
     return process;
   }
 
