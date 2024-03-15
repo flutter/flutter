@@ -2446,14 +2446,14 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       (TraversalDirection.down, Axis.horizontal) => _moveToSubmenu,
       (TraversalDirection.down, Axis.vertical) => _moveToNext,
       (TraversalDirection.left, Axis.horizontal) when rtl => _moveToNext,
-      (TraversalDirection.left, Axis.horizontal) => _moveToPrevious,
-      (TraversalDirection.left, Axis.vertical) when rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
-      (TraversalDirection.left, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
-      (TraversalDirection.left, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
       (TraversalDirection.right, Axis.horizontal) when !rtl => _moveToNext,
+      (TraversalDirection.left, Axis.horizontal) => _moveToPrevious,
       (TraversalDirection.right, Axis.horizontal) => _moveToPrevious,
+      (TraversalDirection.left, Axis.vertical) when rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
       (TraversalDirection.right, Axis.vertical) when !rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
       (TraversalDirection.right, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
       (TraversalDirection.right, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
     };
     if (!traversal(anchor)) {
