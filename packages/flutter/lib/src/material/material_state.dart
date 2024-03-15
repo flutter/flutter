@@ -17,7 +17,7 @@ import 'input_border.dart';
 /// Some Material widgets track their current state in a `Set<MaterialState>`.
 ///
 /// See also:
-///
+///  [MaterialState.selected] dart doc test
 ///  * [WidgetState], a general non-Material version that can be used
 ///    interchangebly with `MaterialState`. They functionally work the same,
 ///    except [WidgetState] can be used outside of Material.
