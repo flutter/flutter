@@ -1,4 +1,4 @@
-Signature: 78046ebe63e8eff799412e649879f7c4
+Signature: e8c38da822e79caec69e28fb4edcb8ab
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12614,6 +12614,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/session.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/sensor.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot_reason.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/temperature.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/format_modifier.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/consumer_control.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/device_ids.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12655,6 +12656,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/factory_reset.fidl + ..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/input.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/light.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/constraints.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/results.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/usages.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12899,6 +12903,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/session.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/sensor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot_reason.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/temperature.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/format_modifier.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/consumer_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/device_ids.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
@@ -12940,6 +12945,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/factory_reset.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/input.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/light.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/constraints.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/results.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/usages.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
@@ -13574,6 +13582,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/overview.fidl +
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/platform-device.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/image_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13612,6 +13621,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/overview.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/allocator.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/collection.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/consumer.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13905,6 +13917,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/platform-device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/image_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/overview.fidl
@@ -13943,6 +13956,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/allocator.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/collection.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/consumer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/overview.fidl
@@ -14232,6 +14248,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_forma
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.trippoint/trippoint.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/math.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/framebuffer-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14326,6 +14343,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.trippoint/trippoint.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/framebuffer-resource.fidl
@@ -14429,16 +14447,20 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/coding_format.fidl + .
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/introspector.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/iso.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/coding_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/introspector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 The Fuchsia Authors. All rights reserved.
 
