@@ -101,6 +101,7 @@
 ../../../flutter/fml/message_loop_task_queues_unittests.cc
 ../../../flutter/fml/message_loop_unittests.cc
 ../../../flutter/fml/paths_unittests.cc
+../../../flutter/fml/platform/android/ndk_helpers_unittests.cc
 ../../../flutter/fml/platform/darwin/cf_utils_unittests.mm
 ../../../flutter/fml/platform/darwin/scoped_nsobject_arc_unittests.mm
 ../../../flutter/fml/platform/darwin/scoped_nsobject_unittests.mm
@@ -199,8 +200,6 @@
 ../../../flutter/impeller/tessellator/dart/pubspec.lock
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml
 ../../../flutter/impeller/tessellator/tessellator_unittests.cc
-../../../flutter/impeller/toolkit/android/README.md
-../../../flutter/impeller/toolkit/android/toolkit_android_unittests.cc
 ../../../flutter/impeller/tools/build_metal_library.py
 ../../../flutter/impeller/tools/check_licenses.py
 ../../../flutter/impeller/tools/malioc_cores.py

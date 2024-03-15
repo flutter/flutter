@@ -29,6 +29,9 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
   void AwaitVSync() override;
 
   static void OnVsyncFromNDK(int64_t frame_nanos, void* data);
+  // This needs to match a deprecated NDK interface.
+  static void OnVsyncFromNDK32(long frame_nanos,  // NOLINT
+                               void* data);
 
   static void OnVsyncFromJava(JNIEnv* env,
                               jclass jcaller,

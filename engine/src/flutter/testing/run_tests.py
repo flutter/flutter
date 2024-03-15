@@ -729,20 +729,15 @@ def run_java_tests(executable_filter, android_variant='android_debug_unopt'):
   run_cmd(command, cwd=test_runner_dir, env=env)
 
 
-def run_android_unittest(test_runner_name, android_variant, adb_path):
+def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
+  test_runner_name = 'flutter_shell_native_unittests'
   tests_path = os.path.join(OUT_DIR, android_variant, test_runner_name)
   remote_path = '/data/local/tmp'
   remote_tests_path = os.path.join(remote_path, test_runner_name)
-  run_cmd([adb_path, 'push', tests_path, remote_path], cwd=BUILDROOT_DIR)
-  run_cmd([adb_path, 'shell', remote_tests_path])
-
-
-def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
   if adb_path is None:
     adb_path = 'adb'
-
-  run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
-  run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
+  run_cmd([adb_path, 'push', tests_path, remote_path], cwd=BUILDROOT_DIR)
+  run_cmd([adb_path, 'shell', remote_tests_path])
 
   systrace_test = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'android_systrace_test.py')
   scenario_apk = os.path.join(OUT_DIR, android_variant, 'firebase_apks', 'scenario_app.apk')

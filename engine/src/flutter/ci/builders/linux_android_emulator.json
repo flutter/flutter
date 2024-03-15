@@ -29,7 +29,6 @@
             "ninja": {
                 "config": "android_emulator_debug_x64",
                 "targets": [
-                    "flutter/impeller/toolkit/android:unittests",
                     "flutter/shell/platform/android:flutter_shell_native_unittests",
                     "flutter/testing/scenario_app"
                 ]
@@ -121,7 +120,6 @@
             "ninja": {
                 "config": "android_emulator_debug_x86",
                 "targets": [
-                    "flutter/impeller/toolkit/android:unittests",
                     "flutter/shell/platform/android:flutter_shell_native_unittests",
                     "flutter/testing/scenario_app"
                 ]

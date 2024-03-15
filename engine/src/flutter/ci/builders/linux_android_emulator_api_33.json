@@ -29,7 +29,6 @@
             "ninja": {
                 "config": "android_debug_api33_x64",
                 "targets": [
-                    "flutter/impeller/toolkit/android:unittests",
                     "flutter/shell/platform/android:flutter_shell_native_unittests",
                     "flutter/testing/scenario_app"
                 ]
