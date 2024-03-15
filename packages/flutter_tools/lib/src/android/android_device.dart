@@ -1039,25 +1039,25 @@ class AdbLogReader extends DeviceLogReader {
     // Some devices (notably LG) will only output logcat via shell
     // https://github.com/flutter/flutter/issues/51853
     final List<String> args = <String>[
-      'shell',
-      '-x',
+      'shell', // starts remote shell console
+      '-x', // something with not differentiating stderr, stdout
       'logcat',
-      '-v',
+      '-v', // formatting the logs with time
       'time',
     ];
 
     // If past logs are included then filter for 'flutter' logs only.
-    if (includePastLogs) {
-      args.addAll(<String>['-s', 'flutter']);
-    } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
-      // Otherwise, filter for logs appearing past the present.
-      // '-T 0` means the timestamp of the logcat command invocation.
-      final String? lastLogcatTimestamp = await device.lastLogcatTimestamp();
-      args.addAll(<String>[
-        '-T',
-        if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
-      ]);
-    }
+    // if (includePastLogs) {
+    //   args.addAll(<String>['-s', 'flutter']);
+    // } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
+    //   // Otherwise, filter for logs appearing past the present.
+    //   // '-T 0` means the timestamp of the logcat command invocation.
+    //   final String? lastLogcatTimestamp = await device.lastLogcatTimestamp();
+    //   args.addAll(<String>[
+    //     '-T',
+    //     if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
+    //   ]);
+    // }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
     return AdbLogReader._(process, device.name);
   }
