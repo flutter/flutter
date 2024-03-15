@@ -358,9 +358,12 @@ class AppKitView extends _DarwinView {
   State<AppKitView> createState() => _AppKitViewState();
 }
 
-/// Callback signature for when the platform view's DOM element was created.
+/// Function that gets called when the platform view's DOM element is created.
 ///
 /// [element] is the DOM element that was created.
+///
+/// This callback is called before [element] is injected into the DOM, so it can
+/// be modified as needed by the Flutter Web application.
 ///
 /// Also see [HtmlElementView.fromTagName] that uses this callback
 /// signature.
@@ -375,17 +378,241 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// Flutter equivalent is possible.
 ///
 /// The embedded HTML is painted just like any other Flutter widget and
-/// transformations apply to it as well. This widget should only be used in
-/// Flutter Web.
+/// transformations apply to it as well.
 ///
 /// {@macro flutter.widgets.AndroidView.layout}
 ///
-/// Due to security restrictions with cross-origin `<iframe>` elements, Flutter
-/// cannot dispatch pointer events to an HTML view. If an `<iframe>` is the
-/// target of an event, the window containing the `<iframe>` is not notified
-/// of the event. In particular, this means that any pointer events which land
-/// on an `<iframe>` will not be seen by Flutter, and so the HTML view cannot
-/// participate in gesture detection with other widgets.
+/// **Usage**
+/// 
+/// There's two ways to use the `HtmlElementView` widget:
+/// 
+/// **`HtmlElementView.fromTagName`**
+/// 
+/// The simplest is just to use the [HtmlElementView.fromTagName] constructor,
+/// that makes it super easy to inject any HTML Element tag that can be easily
+/// customized, or passed around later:
+/// 
+/// ```dart
+/// // In a `build` method...
+/// HtmlElementView.fromTagName(
+///   tagName: 'div',
+///   onElementCreated: onElementCreated,
+/// );
+/// ```
+///
+/// Which creates a `div` HTML element, then calls the `onElementCreated`
+/// callback with the created `element`, so it can be customized before it is
+/// injected into the DOM.
+///
+/// (See more details about `onElementCreated` in the "Lifecycle" section below.)
+///
+/// **Using the `PlatformViewRegistry`**
+///
+/// The "classic" way to create HTML Elements in Flutter web is still available.
+/// It has two steps.
+///
+/// **1. `registerViewFactory`**
+///
+/// First, a `viewFactory` function needs to be registered for a given `viewType`.
+/// Flutter web will call this factory function to create the `element` that will
+/// be injected later:
+/// 
+/// ```dart
+/// // import dart:ui_web
+/// ui_web.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
+///   // Create and return an HTML Element from here
+///   // import package:web as web
+///   final web.HTMLDivElement myDiv = web.HTMLDivElement()
+///       ..id = 'some_id_$viewId'
+///       ..style.backgroundColor = 'red'
+///       ..style.width = '100%'
+///       ..style.height = '100%';
+///   return myDiv;
+/// });
+/// ```
+///
+/// **Important:** `registerViewFactory` must be called outside of `build`
+/// methods, so the factory functions are available when `build` happens.
+///
+/// See:
+/// 
+/// * https://api.flutter.dev/flutter/dart-ui_web/PlatformViewFactory.html
+/// * https://api.flutter.dev/flutter/dart-ui_web/ParameterizedPlatformViewFactory.html
+///
+/// **2. `HtmlElementView` widget**
+///
+/// Once the factory is registered, an `HtmlElementView` widget of `viewType`
+/// can be added to the widget tree, like so:
+/// 
+/// ```dart
+/// // In a `build` method...
+/// HtmlElementView(
+///   viewType: 'my-view-type',
+///   onPlatformViewCreated: onElementCreated,
+///   creationParams: <String, Object?>{
+///     'key': 'someValue',
+///   },
+/// );
+/// ```
+///
+/// `viewType` can be any string, but **must match** the value used to
+/// `registerViewFactory` before.
+///
+/// `creationParams` (optional) will be passed to your `viewFactory` function,
+/// if it accepts them.
+///
+/// `onPlatformViewCreated` will be called when the `viewFactory` function has
+/// returned an `element`, but before it gets injected into the page. (The same
+/// as `onElementCreated` in [HtmlElementView.fromTagName]).
+///
+/// (See more details about `onPlatformViewCreated` in the "Lifecycle" section
+/// below.)
+///
+/// **Lifecycle**
+///
+/// `HtmlElementView` will behave like any other Flutter stateless widget, but
+/// with an additional lifecycle method: [onPlatformViewCreated]/`onElementCreated`.
+///
+/// Both methods are functionally identical, and will be called with the created
+/// `element`, either returned from a `viewFactory` for [viewType], or by the
+/// default factory that creates elements from their `tagName` in the
+/// [HtmlElementView.fromTagName] constructor.
+/// 
+/// [onPlatformViewCreated] will be called *before* the incoming `element` is
+/// injected into the DOM.
+///
+/// **HTML Lifecycle**
+///
+/// The Browser DOM APIs provide hooks so additional HTML lifecycle callbacks
+/// can be observed in the root `element` of an `HtmlElementView`.
+/// 
+/// **The Element Has Been Injected Into The DOM**
+/// 
+/// It is common for JS code to locate the DOM elements they use by a selector,
+/// rather than accepting DOM elements directly. In those cases, the `element`
+/// must be injected into the DOM for the selector to work.
+///
+/// Here's an example on how to create an `onElementInjected` method that gets
+/// called only when the `element` is injected into the DOM, and can be accessed
+/// through selectors:
+///
+/// ```dart
+/// // Called after `element` is injected into the DOM.
+/// void onElementInjected(web.HTMLDivElement element) {
+///   final web.Element? located = web.document.querySelector('#someIdThatICanFindLater');
+///   assert(located == element, 'Wrong `element` located!');
+///   // Do things with `element` or `located`, or call your code now...
+///   element.style.backgroundColor = 'green';
+/// }
+/// ```
+/// 
+/// With a `ResizeObserver` through `package:web` in the [onPlatformViewCreated]
+/// method:
+///
+/// ```dart
+/// void onPlatformViewCreated(Object element) {
+///   element as web.HTMLDivElement; // import package:web
+///   element.style.backgroundColor = 'red';
+///   element.id = 'someIdThatICanFindLater';
+///
+///   // Create the observer
+///   final web.ResizeObserver observer = web.ResizeObserver((
+///     JSArray<ResizeObserverEntry> entries,
+///     web.ResizeObserver observer,
+///   ) {
+///     if (element.isConnected) {
+///       // The observer is done, disconnect it.
+///       observer.disconnect();
+///       // Call our callback.
+///       onElementInjected(element);
+///     }
+///   }.toJS); // import dart:js_interop
+///
+///   // Connect the observer.
+///   observer.observe(element);
+/// }
+/// ```
+///
+/// Read more about `ResizeObserver` in the MDN:
+/// 
+/// * https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API
+///
+/// **Other Observers**
+///
+/// The method above uses a `ResizeObserver` because it can be applied to the
+/// `element` that is about to be injected, however, the most correct observer
+/// to do this would be a `MutationObserver`.
+///
+/// The `MutationObserver` requires the "parent" element in which the
+/// `HtmlElementView` is going to be inserted. A safe way to retrieve a "parent"
+/// element for the platform views is to retrieve the `hostElement` of the 
+/// [FlutterView] where the `HtmlElementView` is being rendered.
+///
+/// The `hostElement` can be retrieved through:
+/// 
+/// ```dart
+///   final int flutterViewId = View.of(context).viewId;
+///   // import dart:ui_web
+///   final JSAny? hostElement = ui_web.views.getHostElement(flutterViewId);
+/// ```
+///
+/// **Important**: If your flutter App uses `platformViewRegistry.registerViewFactory`
+/// to register a factory function that creates your `HtmlElementView` widget,
+/// take into account that that the `viewId` parameter passed to your factory
+/// **is not the same** as the `flutterViewId` obtained above:
+/// 
+/// * `flutterViewId` (from `View.of(context)`) represents the [FlutterView]
+///   where the web app is currently rendering.
+/// * `viewId` (passed to the `viewFactory` function) represents a unique ID
+///   for the `HtmlElementView` instance that is being injected into the app.
+/// 
+/// Read more about `MutationObserver` in the MDN:
+/// 
+/// * https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+/// 
+/// And [FlutterView] on Flutter's API docs:
+/// 
+/// * https://api.flutter.dev/flutter/widgets/View/of.html
+/// * https://main-api.flutter.dev/flutter/dart-ui_web/FlutterViewManagerProxy/getHostElement.html
+///
+/// **Pointer events**
+///
+/// `HtmlElementView` will interfere with Flutter's normal gesture detection. In
+/// order for the `HtmlElementView` contents to be interactive, they're allowed
+/// to handle `pointer-events`. This may result in Flutter missing some events
+/// because they've been handled by the `HtmlElementView`, and never seen by
+/// Flutter.
+///
+/// `package:pointer_interceptor` may help in some cases where Flutter content
+/// needs to be overlaid on top of an `HtmlElementView`. Alternatively, the
+/// `pointer-events: none` property can be set [onPlatformViewCreated], but that
+/// will prevent **ALL** interactions with the underlying HTML content.
+///
+/// If the `HtmlElementView` is an `iframe` element, Flutter will not be able
+/// to see any pointer events that land in the `iframe` (click/tap, drag,
+/// drop...). In those cases, the HTML View will seem like it's "swallowing"
+/// the events and not participating in Flutter's gesture detection.
+///
+/// `package:flutter_webview` for the web is implemented as an `HtmlElementView`
+/// backed by an `iframe` element.
+///
+/// **Visibility**
+///
+/// The `HtmlElementView` objects have an `isVisible` that can be passed when
+/// registering the factory function, or calling `fromTagName`. In this case,
+/// the "visibility" refers to whether the `HtmlElementView` will paint pixels
+/// or not.
+///
+/// Correctly defining this value helps the Flutter web rendering engine optimize
+/// the amount of "overlays" it'll need to render a particular scene; some browsers
+/// can only have a limited number of overlays on a single page at a given time.
+///
+/// In general, `isVisible` should be left to its default value of `true`, but
+/// in some `HtmlElementView`s (like the `pointer_interceptor` or `Link` widget),
+/// it can be set to `false`, so the engine doesn't "waste" an overlay to render
+/// Flutter content on top of views that don't paint any pixels.
+///
+/// **Accessibility**
 ///
 /// The way we enable accessibility on Flutter for web is to have a full-page
 /// button which waits for a double tap. Placing this full-page button in front
@@ -419,6 +646,7 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// [onElementCreated] is called when the DOM element is created. It can be
   /// used by the app to customize the element by adding attributes and styles.
+  /// This method is called *before* the element is injected into the DOM.
   factory HtmlElementView.fromTagName({
     Key? key,
     required String tagName,
@@ -438,6 +666,8 @@ class HtmlElementView extends StatelessWidget {
   final String viewType;
 
   /// Callback to invoke after the platform view has been created.
+  ///
+  /// This method is called *before* the platform view is injected into the DOM.
   ///
   /// May be null.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
