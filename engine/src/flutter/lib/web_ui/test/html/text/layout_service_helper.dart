@@ -107,6 +107,13 @@ void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
             'line #$i had a different `left` value: "${line.left}" vs. "${expectedLine.left}"',
       );
     }
+    if (expectedLine.baseline != null) {
+      expect(
+        line.baseline,
+        expectedLine.baseline,
+        reason: 'line #$i had a different `baseline` value: "${line.baseline}" vs. "${expectedLine.baseline}"',
+      );
+    }
   }
 }
 
