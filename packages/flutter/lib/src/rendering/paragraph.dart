@@ -361,6 +361,27 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   final TextPainter _textPainter;
 
+  // Currently, computing min/max intrinsic width/height will destroy state
+  // inside the painter. Instead of calling _layout again to get back the correct
+  // state, use a separate TextPainter for intrinsics calculation.
+  //
+  // TODO(abarth): Make computing the min/max intrinsic width/height a
+  //  non-destructive operation.
+  TextPainter? _textIntrinsicsCache;
+  TextPainter get _textIntrinsics {
+    return (_textIntrinsicsCache ??= TextPainter())
+      ..text = _textPainter.text
+      ..textAlign = _textPainter.textAlign
+      ..textDirection = _textPainter.textDirection
+      ..textScaler = _textPainter.textScaler
+      ..maxLines = _textPainter.maxLines
+      ..ellipsis = _textPainter.ellipsis
+      ..locale = _textPainter.locale
+      ..strutStyle = _textPainter.strutStyle
+      ..textWidthBasis = _textPainter.textWidthBasis
+      ..textHeightBehavior = _textPainter.textHeightBehavior;
+  }
+
   List<AttributedString>? _cachedAttributedLabels;
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -504,6 +525,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _disposeSelectableFragments();
     _textPainter.dispose();
     _textLayout.dispose();
+    _textIntrinsicsCache?.dispose();
     super.dispose();
   }
 
@@ -692,21 +714,17 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position) ?? 0.0);
   }
 
-  List<ui.LineMetrics> _computeLineMetrics() {
-    return _textPainter.computeLineMetrics();
-  }
-
   @override
   double computeMinIntrinsicWidth(double height) {
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
       double.infinity,
       (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
-    ));
-    _layoutText(); // layout with infinite width.
-    return _textPainter.minIntrinsicWidth;
+    );
+    return (_textIntrinsics..setPlaceholderDimensions(placeholderDimensions)..layout())
+      .minIntrinsicWidth;
   }
 
   @override
@@ -714,23 +732,24 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
       double.infinity,
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
       (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
-    ));
-    _layoutText(); // layout with infinite width.
-    return _textPainter.maxIntrinsicWidth;
+    );
+    return (_textIntrinsics..setPlaceholderDimensions(placeholderDimensions)..layout())
+      .maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
-    _layoutText(minWidth: width, maxWidth: width);
-    return _textPainter.height;
+    return (_textIntrinsics
+      ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild))
+      ..layout(minWidth: width, maxWidth: _adjustMaxWidth(width)))
+      .height;
   }
 
   @override
@@ -862,14 +881,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   ValueListenable<TextLayout?> get textLayout => _textLayout;
   late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
-  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
-    final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(
-      minWidth: minWidth,
-      maxWidth: widthMatters ? maxWidth : double.infinity,
-    );
-  }
-
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
@@ -883,9 +894,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   // restored to the original values before final layout and painting.
   List<PlaceholderDimensions>? _placeholderDimensions;
 
+  double _adjustMaxWidth(double maxWidth) {
+    return softWrap || overflow == TextOverflow.ellipsis ? maxWidth : double.infinity;
+  }
   void _layoutTextWithConstraints(BoxConstraints constraints) {
-    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _textPainter
+      ..setPlaceholderDimensions(_placeholderDimensions)
+      ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
   }
 
   @override
@@ -897,9 +912,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    return constraints.constrain(_textPainter.size);
+    final Size size = (_textIntrinsics
+     ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild))
+     ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth)))
+     .size;
+    return constraints.constrain(size);
   }
 
   @override
@@ -977,19 +994,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Ideally we could compute the min/max intrinsic width/height with a
-    // non-destructive operation. However, currently, computing these values
-    // will destroy state inside the painter. If that happens, we need to get
-    // back the correct state by calling _layout again.
-    //
-    // TODO(abarth): Make computing the min/max intrinsic width/height a
-    //  non-destructive operation.
-    //
-    // If you remove this call, make sure that changing the textAlign still
-    // works properly.
     assert(_textLayout.value != null || !_textLayout.eagerTextLayout);
+    // Text alignment only triggers repaint so it's possible the text layout has
+    // been invalidated but performLayout wasn't called at this point. Make sure
+    // the TextPainter has a valid layout.
     _layoutTextWithConstraints(constraints);
-
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
@@ -2021,7 +2030,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {
-    final List<ui.LineMetrics> lines = paragraph._computeLineMetrics();
+    final List<ui.LineMetrics> lines = paragraph._textPainter.computeLineMetrics();
     final Offset offset = paragraph.getOffsetForCaret(position, Rect.zero);
     int currentLine = lines.length - 1;
     for (final ui.LineMetrics lineMetrics in lines) {
