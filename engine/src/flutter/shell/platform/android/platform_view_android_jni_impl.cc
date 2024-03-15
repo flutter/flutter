@@ -12,7 +12,6 @@
 #include <sstream>
 #include <utility>
 
-#include "flutter/fml/platform/android/ndk_helpers.h"
 #include "include/android/SkImageAndroid.h"
 #include "unicode/uchar.h"
 
