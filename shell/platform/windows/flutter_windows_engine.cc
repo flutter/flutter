@@ -414,12 +414,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     return host->compositor_->CollectBackingStore(backing_store);
   };
 
-  compositor.present_layers_callback = [](const FlutterLayer** layers,
-                                          size_t layers_count,
-                                          void* user_data) -> bool {
-    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+  compositor.present_view_callback =
+      [](const FlutterPresentViewInfo* info) -> bool {
+    auto host = static_cast<FlutterWindowsEngine*>(info->user_data);
 
-    return host->compositor_->Present(layers, layers_count);
+    return host->compositor_->Present(info->view_id, info->layers,
+                                      info->layers_count);
   };
   args.compositor = &compositor;
 
