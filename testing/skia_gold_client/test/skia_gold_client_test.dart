@@ -327,6 +327,10 @@ void main() {
         io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
         screenshotSize: 1000,
       );
+
+      // Expect a stderr log message.
+      final String log = fixture.outputSink.toString();
+      expect(log, contains('Untriaged image detected'));
     } finally {
       fixture.dispose();
     }
