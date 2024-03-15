@@ -89,7 +89,7 @@ void main() {
               child: const Text('dummy'),
             );
           },
-        )
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -141,7 +141,7 @@ void main() {
                 child: const Text('dummy'),
               );
             },
-          )
+          ),
       ),
     );
     await tester.pump();
