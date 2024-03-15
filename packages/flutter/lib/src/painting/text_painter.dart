@@ -315,14 +315,16 @@ class _UntilTextBoundary extends TextBoundary {
 /// An immutable class that represents the result of calling [TextPainter.layout].
 ///
 /// This class discribes the text layout in a 2D coordinate system where the text
-/// is axis-aligned. The [+] operator can be used to change the origin of the
+/// is axis-aligned. The [shift] method can be used to change the origin of the
 /// coordinate system.
+///
+/// The immutability allows different [TextLayout] objects to be compared for
+/// equality: a cached value computed from an outdated [TextLayout] may need to
+/// be discarded. See the [-] operator for more details.
 ///
 /// Unlike many other immutable classes, each [TextLayout] has a limited lifespan.
 /// A [TextLayout] is typically invalidated when the text it represents changes
-/// layout, or no longer exists. This allows different [TextLayout] objects to be
-/// compared for equality: a cached value computed from an outdated [TextLayout]
-/// may need to be discarded. See the [-] operator for more details.
+/// layout, or no longer exists.
 class TextLayout {
   TextLayout._(this._paragraph, this._paintOffset, [int? layoutEqualityId])
     : assert(!_paragraph.debugDisposed),
@@ -384,7 +386,7 @@ class TextLayout {
   /// the rightmost glyph in the paragraph.
   ///
   /// The value typically does not take trailing spaces into account, unless the
-  /// longest line has zero width otherwise.
+  /// longest line has zero width without the trailing spaces.
   double get longestLine {
     assert(debugIsValid);
     return _paragraph.longestLine;
@@ -430,9 +432,9 @@ class TextLayout {
   /// paragraph coordinate system, or null if the text is empty, or is entirely
   /// clipped or ellipsized away.
   ///
-  /// This method does not compare Euclidean distances. It first finds the line
-  /// closest to `offset.dy`, and then returns the glyph with the closest x
-  /// offset to `offset.dx` within that line.
+  /// This "closeness" is not measured using Euclidean distances. It first finds
+  /// the line closest to `offset.dy`, and then returns the glyph with the
+  /// closest x offset to `offset.dx` within that line.
   ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
     assert(debugIsValid);
     final ui.GlyphInfo? glyphInfo = _paragraph.getClosestGlyphInfoForOffset(offset - _paintOffset);
@@ -537,7 +539,7 @@ class TextLayout {
   /// layout the text, and the text is set to be right-aligned. When this is
   /// true, [TextPainter] may skip performing text layout, in which case this
   /// [TextLayout] object behaves as if the text was empty.
-  //bool get hasInfinitePaintOffset => _paintOffset.isFinite;
+  bool get hasInfinitePaintOffset => _paintOffset.isFinite;
 
   /// Creates a [TextLayout] with the same text layout, but shifts the paint
   /// offset away from the origin by `offset` logical pixels.
