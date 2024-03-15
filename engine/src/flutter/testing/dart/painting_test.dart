@@ -7,6 +7,8 @@ import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
 
+typedef CanvasCallback = void Function(Canvas canvas);
+
 void main() {
   test('Vertices checks', () {
     try {
@@ -59,5 +61,46 @@ void main() {
       Float32List.fromList(const <double>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
       indices: Uint16List.fromList(const <int>[0, 2, 1, 2, 0, 1, 2, 0]),
     ).dispose();
+  });
+
+  test('BackdropFilter with multiple clips', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/144211
+    Picture makePicture(CanvasCallback callback) {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      callback(canvas);
+      return recorder.endRecording();
+    }
+    final SceneBuilder sceneBuilder = SceneBuilder();
+
+    final Picture redClippedPicture = makePicture((Canvas canvas) {
+      canvas.clipRect(const Rect.fromLTRB(10, 10, 200, 200));
+      canvas.clipRect(const Rect.fromLTRB(11, 10, 300, 200));
+      canvas.drawPaint(Paint()..color = const Color(0xFFFF0000));
+    });
+    sceneBuilder.addPicture(Offset.zero, redClippedPicture);
+
+    final Float64List matrix = Float64List(16);
+    sceneBuilder.pushBackdropFilter(ImageFilter.matrix(matrix));
+
+    final Picture whitePicture = makePicture((Canvas canvas) {
+      canvas.drawPaint(Paint()..color = const Color(0xFFFFFFFF));
+    });
+    sceneBuilder.addPicture(Offset.zero, whitePicture);
+
+    final Scene scene = sceneBuilder.build();
+    final Image image = scene.toImageSync(20, 20);
+
+    final ByteData data = (await image.toByteData())!;
+    expect(data.buffer.asUint32List().length, 20 * 20);
+    // If clipping went wrong as in the linked issue, there will be red pixels.
+    for (final int color in  data.buffer.asUint32List()) {
+      expect(color, 0xFFFFFFFF);
+    }
+
+    scene.dispose();
+    image.dispose();
+    whitePicture.dispose();
+    redClippedPicture.dispose();
   });
 }
