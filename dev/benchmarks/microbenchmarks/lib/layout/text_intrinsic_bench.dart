@@ -11,9 +11,12 @@ import '../common.dart';
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
 // Use an Align to loosen the constraints.
-final Widget intrinsicTextHeight = Align(
-  child: IntrinsicHeight(
-    child: Text('A' * 100),
+final Widget intrinsicTextHeight = Directionality(
+  textDirection: TextDirection.ltr,
+  child: Align(
+    child: IntrinsicHeight(
+      child: Text('A' * 100),
+    ),
   ),
 );
 
@@ -29,6 +32,8 @@ Future<void> main() async {
 
   await benchmarkWidgets((WidgetTester tester) async {
     runApp(intrinsicTextHeight);
+    // Wait for the UI to stabilize.
+    await tester.pump(const Duration(seconds: 1));
 
     final TestViewConfiguration big = TestViewConfiguration.fromView(
       size: const Size(360.0, 640.0),

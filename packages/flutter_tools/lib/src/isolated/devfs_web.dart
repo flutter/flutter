@@ -34,13 +34,13 @@ import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../html_utils.dart';
 import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web_template.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
@@ -120,7 +120,7 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
-  }) : basePath = _getIndexHtml().getBaseHref();
+  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -386,7 +386,11 @@ class WebAssetServer implements AssetReader {
 
     // If the response is `/`, then we are requesting the index file.
     if (requestPath == '/' || requestPath.isEmpty) {
-      return _serveIndex();
+      return _serveIndexHtml();
+    }
+
+    if (requestPath == 'flutter_bootstrap.js') {
+      return _serveFlutterBootstrapJs();
     }
 
     final Map<String, String> headers = <String, String>{};
@@ -478,7 +482,7 @@ class WebAssetServer implements AssetReader {
           requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
-      return _serveIndex();
+      return _serveIndexHtml();
     }
 
     // For real files, use a serialized file stat plus path as a revision.
@@ -524,8 +528,7 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
-  shelf.Response _serveIndex() {
-    final IndexHtml indexHtml = _getIndexHtml();
+  String get _buildConfigString {
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': <dynamic>[
@@ -536,19 +539,52 @@ class WebAssetServer implements AssetReader {
         },
       ],
     };
-    final String buildConfigString = '_flutter.buildConfig = ${jsonEncode(buildConfig)};';
+    return '''
+if (!window._flutter) {
+  window._flutter = {};
+}
+_flutter.buildConfig = ${jsonEncode(buildConfig)};
+''';
+  }
 
+  File get _flutterJsFile => globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
+  ));
+
+  String get _flutterBootstrapJsContent {
+    final WebTemplate bootstrapTemplate = _getWebTemplate(
+      'flutter_bootstrap.js',
+      generateDefaultFlutterBootstrapScript()
+    );
+    bootstrapTemplate.applySubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      buildConfig: _buildConfigString,
+      flutterJsFile: _flutterJsFile,
+    );
+    return bootstrapTemplate.content;
+  }
+
+  shelf.Response _serveFlutterBootstrapJs() {
+    return shelf.Response.ok(_flutterBootstrapJsContent, headers: <String, String>{
+      HttpHeaders.contentTypeHeader: 'text/javascript',
+    });
+  }
+
+  shelf.Response _serveIndexHtml() {
+    final WebTemplate indexHtml = _getWebTemplate('index.html', _kDefaultIndex);
     indexHtml.applySubstitutions(
       // Currently, we don't support --base-href for the "run" command.
       baseHref: '/',
       serviceWorkerVersion: null,
-      buildConfig: buildConfigString,
+      buildConfig: _buildConfigString,
+      flutterJsFile: _flutterJsFile,
+      flutterBootstrapJs: _flutterBootstrapJsContent,
     );
-
-    final Map<String, String> headers = <String, String>{
+    return shelf.Response.ok(indexHtml.content, headers: <String, String>{
       HttpHeaders.contentTypeHeader: 'text/html',
-    };
-    return shelf.Response.ok(indexHtml.content, headers: headers);
+    });
   }
 
   // Attempt to resolve `path` to a dart file.
@@ -860,6 +896,21 @@ class WebDevFS implements DevFS {
   @override
   final Directory rootDirectory;
 
+  Future<void> _validateTemplateFile(String filename) async {
+    final File file =
+        globals.fs.currentDirectory.childDirectory('web').childFile(filename);
+    if (!await file.exists()) {
+      return;
+    }
+
+    final WebTemplate template = WebTemplate(await file.readAsString());
+    for (final WebTemplateWarning warning in template.getWarnings()) {
+      globals.logger.printWarning(
+        'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}'
+      );
+    }
+  }
+
   @override
   Future<UpdateFSReport> update({
     required Uri mainUri,
@@ -950,6 +1001,8 @@ class WebDevFS implements DevFS {
         );
       }
     }
+    await _validateTemplateFile('index.html');
+    await _validateTemplateFile('flutter_bootstrap.js');
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
       generator.reset();
@@ -1173,10 +1226,10 @@ String? _stripBasePath(String path, String basePath) {
   return stripLeadingSlash(path);
 }
 
-IndexHtml _getIndexHtml() {
-  final File indexHtml =
-      globals.fs.currentDirectory.childDirectory('web').childFile('index.html');
+WebTemplate _getWebTemplate(String filename, String fallbackContent) {
+  final File template =
+      globals.fs.currentDirectory.childDirectory('web').childFile(filename);
   final String htmlContent =
-      indexHtml.existsSync() ? indexHtml.readAsStringSync() : _kDefaultIndex;
-  return IndexHtml(htmlContent);
+      template.existsSync() ? template.readAsStringSync() : fallbackContent;
+  return WebTemplate(htmlContent);
 }
