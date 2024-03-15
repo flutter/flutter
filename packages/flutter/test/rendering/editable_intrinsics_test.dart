@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,7 +111,7 @@ void main() {
 
     editable.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 100);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // [intended] strut spport for HTML renderer https://github.com/flutter/flutter/issues/32243.
 }
 
 class _FakeEditableTextState with TextSelectionDelegate {
