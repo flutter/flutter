@@ -508,19 +508,6 @@ class AndroidBackGestureTransition extends StatelessWidget {
   final ValueGetter<bool> getIsCurrent;
   final Widget child;
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: secondaryAnimation,
-      builder: _secondaryAnimatedBuilder,
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: _primaryAnimatedBuilder,
-        child: child,
-      ),
-    );
-  }
-
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
     final double screenWidth = size.width;
@@ -594,6 +581,19 @@ class AndroidBackGestureTransition extends StatelessWidget {
           opacity: fadeTween.animate(animation).value,
           child: child,
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: secondaryAnimation,
+      builder: _secondaryAnimatedBuilder,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: _primaryAnimatedBuilder,
+        child: child,
       ),
     );
   }
