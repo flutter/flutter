@@ -32,7 +32,6 @@ class _MainWidget extends StatelessWidget {
         children: const <Widget>[
           TextField(
             key: Key('enabled password'),
-            autofocus: true,
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
