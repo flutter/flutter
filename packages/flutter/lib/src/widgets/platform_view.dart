@@ -383,15 +383,15 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// {@macro flutter.widgets.AndroidView.layout}
 ///
 /// **Usage**
-/// 
+///
 /// There's two ways to use the `HtmlElementView` widget:
-/// 
+///
 /// **`HtmlElementView.fromTagName`**
-/// 
+///
 /// The simplest is just to use the [HtmlElementView.fromTagName] constructor,
 /// that makes it super easy to inject any HTML Element tag that can be easily
 /// customized, or passed around later:
-/// 
+///
 /// ```dart
 /// // In a `build` method...
 /// HtmlElementView.fromTagName(
@@ -416,7 +416,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// First, a `viewFactory` function needs to be registered for a given `viewType`.
 /// Flutter web will call this factory function to create the `element` that will
 /// be injected later:
-/// 
+///
 /// ```dart
 /// // import dart:ui_web
 /// ui_web.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
@@ -435,7 +435,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// methods, so the factory functions are available when `build` happens.
 ///
 /// See:
-/// 
+///
 /// * https://api.flutter.dev/flutter/dart-ui_web/PlatformViewFactory.html
 /// * https://api.flutter.dev/flutter/dart-ui_web/ParameterizedPlatformViewFactory.html
 ///
@@ -443,7 +443,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// Once the factory is registered, an `HtmlElementView` widget of `viewType`
 /// can be added to the widget tree, like so:
-/// 
+///
 /// ```dart
 /// // In a `build` method...
 /// HtmlElementView(
@@ -477,7 +477,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// `element`, either returned from a `viewFactory` for [viewType], or by the
 /// default factory that creates elements from their `tagName` in the
 /// [HtmlElementView.fromTagName] constructor.
-/// 
+///
 /// [onPlatformViewCreated] will be called *before* the incoming `element` is
 /// injected into the DOM.
 ///
@@ -485,9 +485,9 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// The Browser DOM APIs provide hooks so additional HTML lifecycle callbacks
 /// can be observed in the root `element` of an `HtmlElementView`.
-/// 
+///
 /// **The Element Has Been Injected Into The DOM**
-/// 
+///
 /// It is common for JS code to locate the DOM elements they use by a selector,
 /// rather than accepting DOM elements directly. In those cases, the `element`
 /// must be injected into the DOM for the selector to work.
@@ -505,7 +505,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///   element.style.backgroundColor = 'green';
 /// }
 /// ```
-/// 
+///
 /// With a `ResizeObserver` through `package:web` in the [onPlatformViewCreated]
 /// method:
 ///
@@ -534,7 +534,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// ```
 ///
 /// Read more about `ResizeObserver` in the MDN:
-/// 
+///
 /// * https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API
 ///
 /// **Other Observers**
@@ -545,11 +545,11 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// The `MutationObserver` requires the "parent" element in which the
 /// `HtmlElementView` is going to be inserted. A safe way to retrieve a "parent"
-/// element for the platform views is to retrieve the `hostElement` of the 
+/// element for the platform views is to retrieve the `hostElement` of the
 /// [FlutterView] where the `HtmlElementView` is being rendered.
 ///
 /// The `hostElement` can be retrieved through:
-/// 
+///
 /// ```dart
 ///   final int flutterViewId = View.of(context).viewId;
 ///   // import dart:ui_web
@@ -560,18 +560,18 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// to register a factory function that creates your `HtmlElementView` widget,
 /// take into account that that the `viewId` parameter passed to your factory
 /// **is not the same** as the `flutterViewId` obtained above:
-/// 
+///
 /// * `flutterViewId` (from `View.of(context)`) represents the [FlutterView]
 ///   where the web app is currently rendering.
 /// * `viewId` (passed to the `viewFactory` function) represents a unique ID
 ///   for the `HtmlElementView` instance that is being injected into the app.
-/// 
+///
 /// Read more about `MutationObserver` in the MDN:
-/// 
+///
 /// * https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-/// 
+///
 /// And [FlutterView] on Flutter's API docs:
-/// 
+///
 /// * https://api.flutter.dev/flutter/widgets/View/of.html
 /// * https://main-api.flutter.dev/flutter/dart-ui_web/FlutterViewManagerProxy/getHostElement.html
 ///
