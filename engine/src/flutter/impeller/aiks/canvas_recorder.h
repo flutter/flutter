@@ -116,9 +116,10 @@ class CanvasRecorder {
   void SaveLayer(
       const Paint& paint,
       std::optional<Rect> bounds = std::nullopt,
-      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr) {
+      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
+      ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(SaveLayer), paint,
-                               bounds, backdrop_filter);
+                               bounds, backdrop_filter, bounds_promise);
   }
 
   bool Restore() {

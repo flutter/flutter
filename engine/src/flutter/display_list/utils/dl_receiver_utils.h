@@ -78,7 +78,7 @@ class IgnoreTransformDispatchHelper : public virtual DlOpReceiver {
 class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
  public:
   void save() override {}
-  void saveLayer(const SkRect* bounds,
+  void saveLayer(const SkRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {}
   void restore() override {}

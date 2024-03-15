@@ -29,7 +29,7 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
 
   void save() override;
   void restore() override;
-  void saveLayer(const SkRect* bounds,
+  void saveLayer(const SkRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override;
 

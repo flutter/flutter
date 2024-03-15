@@ -85,7 +85,9 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   storage_.realloc(bytes);
   layer_stack_.pop_back();
   layer_stack_.emplace_back();
+  current_layer_ = &layer_stack_.back();
   tracker_.reset();
+  layer_tracker_.reset();
   current_ = DlPaint();
 
   return sk_sp<DisplayList>(new DisplayList(
@@ -389,62 +391,107 @@ void DisplayListBuilder::checkForDeferredSave() {
 }
 
 void DisplayListBuilder::Save() {
-  bool is_nop = current_layer_->is_nop_;
   layer_stack_.emplace_back();
   current_layer_ = &layer_stack_.back();
+
+  FML_DCHECK(layer_stack_.size() >= 2u);
+  // Note we can't use the previous value of current_layer_ because
+  // the emplace_back() may have moved the storage locations, so we
+  // recompute the location of the penultimate layer info here.
+  auto parent_layer = &layer_stack_.end()[-2];
+
   current_layer_->has_deferred_save_op_ = true;
-  current_layer_->is_nop_ = is_nop;
+  current_layer_->is_nop_ = parent_layer->is_nop_;
+
+  if (parent_layer->layer_accumulator_) {
+    FML_DCHECK(layer_tracker_);
+    // If the previous layer was using an accumulator, we need to keep
+    // filling it with content bounds. We reuse the previous accumulator
+    // for this layer, but clone the associated transform so that new
+    // transform mutations are restricted to this save/restore context.
+    current_layer_->layer_accumulator_ = parent_layer->layer_accumulator_;
+    layer_tracker_->save();
+  } else {
+    FML_DCHECK(!layer_tracker_);
+  }
+
   tracker_.save();
   accumulator()->save();
 }
 
 void DisplayListBuilder::Restore() {
-  if (layer_stack_.size() > 1) {
-    SaveOpBase* op = reinterpret_cast<SaveOpBase*>(
-        storage_.get() + current_layer_->save_offset());
-    if (!current_layer_->has_deferred_save_op_) {
-      op->restore_index = op_index_;
-      Push<RestoreOp>(0, 1);
-    }
-    // Grab the current layer info before we push the restore
-    // on the stack.
-    LayerInfo layer_info = layer_stack_.back();
+  if (layer_stack_.size() <= 1) {
+    return;
+  }
 
-    tracker_.restore();
-    layer_stack_.pop_back();
-    current_layer_ = &layer_stack_.back();
-    bool is_unbounded = layer_info.is_unbounded();
+  SaveOpBase* op = reinterpret_cast<SaveOpBase*>(storage_.get() +
+                                                 current_layer_->save_offset());
 
-    // Before we pop_back we will get the current layer bounds from the
-    // current accumulator and adjust it as required based on the filter.
-    std::shared_ptr<const DlImageFilter> filter = layer_info.filter();
-    if (filter) {
-      const SkRect clip = tracker_.device_cull_rect();
-      if (!accumulator()->restore(
-              [filter = filter, matrix = GetTransform()](const SkRect& input,
-                                                         SkRect& output) {
-                SkIRect output_bounds;
-                bool ret = filter->map_device_bounds(input.roundOut(), matrix,
-                                                     output_bounds);
-                output.set(output_bounds);
-                return ret;
-              },
-              &clip)) {
-        is_unbounded = true;
-      }
-    } else {
-      accumulator()->restore();
-    }
+  if (!current_layer_->has_deferred_save_op_) {
+    op->restore_index = op_index_;
+    Push<RestoreOp>(0, 1);
+  }
 
-    if (is_unbounded) {
-      AccumulateUnbounded();
-    }
+  std::shared_ptr<const DlImageFilter> filter = current_layer_->filter();
+  {
+    // We should not pop the stack until we are done synching up the current
+    // and parent layers.
+    auto parent_layer = &layer_stack_.end()[-2];
 
-    if (layer_info.has_layer()) {
+    if (current_layer_->is_save_layer()) {
       // Layers are never deferred for now, we need to update the
       // following code if we ever do saveLayer culling...
-      FML_DCHECK(!layer_info.has_deferred_save_op_);
-      if (layer_info.is_group_opacity_compatible()) {
+      FML_DCHECK(!current_layer_->has_deferred_save_op_);
+      FML_DCHECK(current_layer_->layer_accumulator_);
+
+      SkRect content_bounds = current_layer_->layer_accumulator_->bounds();
+
+      switch (op->type) {
+        case DisplayListOpType::kSaveLayer:
+        case DisplayListOpType::kSaveLayerBackdrop: {
+          SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(op);
+          if (op->options.bounds_from_caller()) {
+            if (!content_bounds.isEmpty() &&
+                !layer_op->rect.contains(content_bounds)) {
+              op->options = op->options.with_content_is_clipped();
+              content_bounds.intersect(layer_op->rect);
+            }
+          }
+          layer_op->rect = content_bounds;
+          break;
+        }
+        default:
+          FML_UNREACHABLE();
+      }
+
+      if (layer_tracker_->getSaveCount() > 1) {
+        layer_tracker_->restore();
+      } else {
+        // If this was the last layer in the tracker, then there should
+        // be no parent saveLayer.
+        FML_DCHECK(!parent_layer->layer_accumulator_);
+        layer_tracker_.reset();
+      }
+
+      if (parent_layer->layer_accumulator_) {
+        SkRect bounds_for_parent = content_bounds;
+        if (filter) {
+          if (!filter->map_local_bounds(bounds_for_parent, bounds_for_parent)) {
+            parent_layer->set_unbounded();
+          }
+        }
+        // The content_bounds were accumulated in the base coordinate system
+        // of the current layer, and have been adjusted there according to
+        // its image filter.
+        // The content bounds accumulation of the parent layer is relative
+        // to the parent's base coordinate system, so we need to adjust
+        // bounds_for_parent to that coordinate space.
+        FML_DCHECK(layer_tracker_);
+        layer_tracker_->mapRect(&bounds_for_parent);
+        parent_layer->layer_accumulator_->accumulate(bounds_for_parent);
+      }
+
+      if (current_layer_->is_group_opacity_compatible()) {
         // We are now going to go back and modify the matching saveLayer
         // call to add the option indicating it can distribute an opacity
         // value to its children.
@@ -460,14 +507,52 @@ void DisplayListBuilder::Restore() {
         op->options = op->options.with_can_distribute_opacity();
       }
     } else {
+      if (layer_tracker_) {
+        FML_DCHECK(layer_tracker_->getSaveCount() > 1);
+        layer_tracker_->restore();
+      }
       // For regular save() ops there was no protecting layer so we have to
-      // accumulate the values into the enclosing layer.
-      if (layer_info.cannot_inherit_opacity()) {
-        current_layer_->mark_incompatible();
-      } else if (layer_info.has_compatible_op()) {
-        current_layer_->add_compatible_op();
+      // accumulate the inheritance properties into the enclosing layer.
+      if (current_layer_->cannot_inherit_opacity()) {
+        parent_layer->mark_incompatible();
+      } else if (current_layer_->has_compatible_op()) {
+        parent_layer->add_compatible_op();
       }
     }
+  }
+
+  // Remember whether the outgoing layer was unbounded so we can adjust
+  // for it below after we apply the outgoing layer's filter to the bounds.
+  bool popped_was_unbounded = current_layer_->is_unbounded();
+
+  // parent_layer is no longer in scope, time to pop the layer.
+  layer_stack_.pop_back();
+  tracker_.restore();
+  current_layer_ = &layer_stack_.back();
+
+  // As we pop the accumulator, use the filter that was applied to the
+  // outgoing layer (saved above, if any) to adjust the bounds that
+  // were accumulated while that layer was active.
+  if (filter) {
+    const SkRect clip = tracker_.device_cull_rect();
+    if (!accumulator()->restore(
+            [filter = filter, matrix = GetTransform()](const SkRect& input,
+                                                       SkRect& output) {
+              SkIRect output_bounds;
+              bool ret = filter->map_device_bounds(input.roundOut(), matrix,
+                                                   output_bounds);
+              output.set(output_bounds);
+              return ret;
+            },
+            &clip)) {
+      popped_was_unbounded = true;
+    }
+  } else {
+    accumulator()->restore();
+  }
+
+  if (popped_was_unbounded) {
+    AccumulateUnbounded();
   }
 }
 void DisplayListBuilder::RestoreToCount(int restore_count) {
@@ -476,7 +561,7 @@ void DisplayListBuilder::RestoreToCount(int restore_count) {
     restore();
   }
 }
-void DisplayListBuilder::saveLayer(const SkRect* bounds,
+void DisplayListBuilder::saveLayer(const SkRect& bounds,
                                    const SaveLayerOptions in_options,
                                    const DlImageFilter* backdrop) {
   SaveLayerOptions options = in_options.without_optimizations();
@@ -489,7 +574,9 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     current_layer_->is_nop_ = true;
     return;
   }
+
   size_t save_layer_offset = used_;
+
   if (options.renders_with_attributes()) {
     // The actual flood of the outer layer clip will occur after the
     // (eventual) corresponding restore is called, but rather than
@@ -508,16 +595,39 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
       FML_DCHECK(unclipped);
     }
     CheckLayerOpacityCompatibility(true);
-    layer_stack_.emplace_back(save_layer_offset, true,
-                              current_.getImageFilter());
+    layer_stack_.emplace_back(save_layer_offset);
+    layer_stack_.back().filter_ = current_.getImageFilter();
   } else {
     CheckLayerOpacityCompatibility(false);
-    layer_stack_.emplace_back(save_layer_offset, true, nullptr);
+    layer_stack_.emplace_back(save_layer_offset);
   }
   current_layer_ = &layer_stack_.back();
+  current_layer_->is_save_layer_ = true;
 
   tracker_.save();
   accumulator()->save();
+
+  SkRect record_bounds;
+  if (in_options.bounds_from_caller()) {
+    options = options.with_bounds_from_caller();
+    record_bounds = bounds;
+  } else {
+    FML_DCHECK(record_bounds.isEmpty());
+  }
+  current_layer_->layer_accumulator_.reset(new RectBoundsAccumulator());
+  if (layer_tracker_) {
+    layer_tracker_->save();
+    layer_tracker_->setTransform(SkMatrix::I());
+  } else {
+    SkRect cull_rect;
+    if (in_options.bounds_from_caller()) {
+      cull_rect = bounds;
+    } else {
+      cull_rect = tracker_.local_cull_rect();
+    }
+    layer_tracker_.reset(
+        new DisplayListMatrixClipTracker(cull_rect, SkMatrix::I()));
+  }
 
   if (backdrop) {
     // A backdrop will affect up to the entire surface, bounded by the clip
@@ -526,13 +636,9 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     // when we tested the PaintResult.
     [[maybe_unused]] bool unclipped = AccumulateUnbounded();
     FML_DCHECK(unclipped);
-    bounds  //
-        ? Push<SaveLayerBackdropBoundsOp>(0, 1, options, *bounds, backdrop)
-        : Push<SaveLayerBackdropOp>(0, 1, options, backdrop);
+    Push<SaveLayerBackdropOp>(0, 1, options, record_bounds, backdrop);
   } else {
-    bounds  //
-        ? Push<SaveLayerBoundsOp>(0, 1, options, *bounds)
-        : Push<SaveLayerOp>(0, 1, options);
+    Push<SaveLayerOp>(0, 1, options, record_bounds);
   }
 
   if (options.renders_with_attributes()) {
@@ -558,24 +664,31 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     // The filtered bounds will be clipped to the existing clip rect when
     // this layer is restored.
     // If bounds is null then the original cull_rect will be used.
-    tracker_.resetCullRect(bounds);
-  } else if (bounds) {
+    tracker_.resetCullRect(in_options.bounds_from_caller() ? &bounds : nullptr);
+  } else if (in_options.bounds_from_caller()) {
     // Even though Skia claims that the bounds are only a hint, they actually
     // use them as the temporary layer bounds during rendering the layer, so
     // we set them as if a clip operation were performed.
-    tracker_.clipRect(*bounds, ClipOp::kIntersect, false);
+    tracker_.clipRect(bounds, ClipOp::kIntersect, false);
   }
 }
 void DisplayListBuilder::SaveLayer(const SkRect* bounds,
                                    const DlPaint* paint,
                                    const DlImageFilter* backdrop) {
+  SaveLayerOptions options;
+  SkRect temp_bounds;
+  if (bounds) {
+    options = options.with_bounds_from_caller();
+    temp_bounds = *bounds;
+  } else {
+    temp_bounds.setEmpty();
+  }
   if (paint != nullptr) {
+    options = options.with_renders_with_attributes();
     SetAttributesFromPaint(*paint,
                            DisplayListOpFlags::kSaveLayerWithPaintFlags);
-    saveLayer(bounds, SaveLayerOptions::kWithAttributes, backdrop);
-  } else {
-    saveLayer(bounds, SaveLayerOptions::kNoAttributes, backdrop);
   }
+  saveLayer(temp_bounds, options, backdrop);
 }
 
 void DisplayListBuilder::Translate(SkScalar tx, SkScalar ty) {
@@ -584,6 +697,9 @@ void DisplayListBuilder::Translate(SkScalar tx, SkScalar ty) {
     checkForDeferredSave();
     Push<TranslateOp>(0, 1, tx, ty);
     tracker_.translate(tx, ty);
+    if (layer_tracker_) {
+      layer_tracker_->translate(tx, ty);
+    }
   }
 }
 void DisplayListBuilder::Scale(SkScalar sx, SkScalar sy) {
@@ -592,6 +708,9 @@ void DisplayListBuilder::Scale(SkScalar sx, SkScalar sy) {
     checkForDeferredSave();
     Push<ScaleOp>(0, 1, sx, sy);
     tracker_.scale(sx, sy);
+    if (layer_tracker_) {
+      layer_tracker_->scale(sx, sy);
+    }
   }
 }
 void DisplayListBuilder::Rotate(SkScalar degrees) {
@@ -599,6 +718,9 @@ void DisplayListBuilder::Rotate(SkScalar degrees) {
     checkForDeferredSave();
     Push<RotateOp>(0, 1, degrees);
     tracker_.rotate(degrees);
+    if (layer_tracker_) {
+      layer_tracker_->rotate(degrees);
+    }
   }
 }
 void DisplayListBuilder::Skew(SkScalar sx, SkScalar sy) {
@@ -607,6 +729,9 @@ void DisplayListBuilder::Skew(SkScalar sx, SkScalar sy) {
     checkForDeferredSave();
     Push<SkewOp>(0, 1, sx, sy);
     tracker_.skew(sx, sy);
+    if (layer_tracker_) {
+      layer_tracker_->skew(sx, sy);
+    }
   }
 }
 
@@ -629,6 +754,10 @@ void DisplayListBuilder::Transform2DAffine(
                                 myx, myy, myt);
       tracker_.transform2DAffine(mxx, mxy, mxt,
                                  myx, myy, myt);
+      if (layer_tracker_) {
+        layer_tracker_->transform2DAffine(mxx, mxy, mxt,
+                                          myx, myy, myt);
+      }
     }
   }
 }
@@ -658,12 +787,39 @@ void DisplayListBuilder::TransformFullPerspective(
                                       myx, myy, myz, myt,
                                       mzx, mzy, mzz, mzt,
                                       mwx, mwy, mwz, mwt);
+    if (layer_tracker_) {
+      layer_tracker_->transformFullPerspective(mxx, mxy, mxz, mxt,
+                                               myx, myy, myz, myt,
+                                               mzx, mzy, mzz, mzt,
+                                               mwx, mwy, mwz, mwt);
+    }
   }
 }
 // clang-format on
 void DisplayListBuilder::TransformReset() {
   checkForDeferredSave();
   Push<TransformResetOp>(0, 0);
+  if (layer_tracker_) {
+    // The matrices in layer_tracker_ and tracker_ are similar, but
+    // start at a different base transform. The tracker_ potentially
+    // has some number of transform operations on it that prefix the
+    // operations accumulated in layer_tracker_. So we can't set them both
+    // to identity in parallel as they would no longer maintain their
+    // relationship to each other.
+    // Instead we reinterpret this operation as transforming by the
+    // inverse of the current transform. Doing so to tracker_ sets it
+    // to identity so we can avoid the math there, but we must do the
+    // math the long way for layer_tracker_. This becomes:
+    //   layer_tracker_.transform(tracker_.inverse());
+    if (!layer_tracker_->inverseTransform(tracker_)) {
+      // If the inverse operation failed then that means that either
+      // the matrix above the current layer was singular, or the matrix
+      // became singular while we were accumulating the current layer.
+      // In either case, we should no longer be accumulating any
+      // contents so we set the layer tracking transform to a singular one.
+      layer_tracker_->setTransform(SkMatrix::Scale(0.0f, 0.0f));
+    }
+  }
   tracker_.setIdentity();
 }
 void DisplayListBuilder::Transform(const SkMatrix* matrix) {
@@ -1360,16 +1516,6 @@ void DisplayListBuilder::DrawShadow(const SkPath& path,
   }
 }
 
-bool DisplayListBuilder::ComputeFilteredBounds(SkRect& bounds,
-                                               const DlImageFilter* filter) {
-  if (filter) {
-    if (!filter->map_local_bounds(bounds, bounds)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
                                               DisplayListAttributeFlags flags) {
   if (flags.ignores_paint()) {
@@ -1420,8 +1566,16 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
     }
   }
 
+  // Color filter does not modify bounds even if it affects transparent
+  // black because it is clipped by the "mask" of the primitive. That
+  // property only comes into play when it is applied to something like
+  // a layer.
+
   if (flags.applies_image_filter()) {
-    return ComputeFilteredBounds(bounds, current_.getImageFilter().get());
+    auto filter = current_.getImageFilterPtr();
+    if (filter && !filter->map_local_bounds(bounds, bounds)) {
+      return false;
+    }
   }
 
   return true;
@@ -1433,6 +1587,11 @@ bool DisplayListBuilder::AccumulateUnbounded() {
     return false;
   }
   accumulator()->accumulate(clip, op_index_);
+  if (current_layer_->layer_accumulator_) {
+    FML_DCHECK(layer_tracker_);
+    current_layer_->layer_accumulator_->accumulate(
+        layer_tracker_->device_cull_rect());
+  }
   return true;
 }
 
@@ -1446,9 +1605,16 @@ bool DisplayListBuilder::AccumulateOpBounds(SkRect& bounds,
 }
 bool DisplayListBuilder::AccumulateBounds(SkRect& bounds) {
   if (!bounds.isEmpty()) {
-    tracker_.mapRect(&bounds);
-    if (bounds.intersect(tracker_.device_cull_rect())) {
-      accumulator()->accumulate(bounds, op_index_);
+    SkRect device_bounds;
+    tracker_.mapRect(bounds, &device_bounds);
+    if (device_bounds.intersect(tracker_.device_cull_rect())) {
+      accumulator()->accumulate(device_bounds, op_index_);
+      if (current_layer_->layer_accumulator_) {
+        FML_DCHECK(layer_tracker_);
+        SkRect layer_bounds;
+        layer_tracker_->mapRect(bounds, &layer_bounds);
+        current_layer_->layer_accumulator_->accumulate(layer_bounds);
+      }
       return true;
     }
   }

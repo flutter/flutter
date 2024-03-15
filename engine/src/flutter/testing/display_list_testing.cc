@@ -628,7 +628,7 @@ void DisplayListStreamDispatcher::save() {
   startl() << "{" << std::endl;
   indent();
 }
-void DisplayListStreamDispatcher::saveLayer(const SkRect* bounds,
+void DisplayListStreamDispatcher::saveLayer(const SkRect& bounds,
                                             const SaveLayerOptions options,
                                             const DlImageFilter* backdrop) {
   startl() << "saveLayer(" << bounds << ", " << options;

@@ -623,12 +623,15 @@ void DlDispatcher::save() {
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcher::saveLayer(const SkRect* bounds,
+void DlDispatcher::saveLayer(const SkRect& bounds,
                              const flutter::SaveLayerOptions options,
                              const flutter::DlImageFilter* backdrop) {
   auto paint = options.renders_with_attributes() ? paint_ : Paint{};
+  auto promise = options.content_is_clipped()
+                     ? ContentBoundsPromise::kMayClipContents
+                     : ContentBoundsPromise::kContainsContents;
   canvas_.SaveLayer(paint, skia_conversions::ToRect(bounds),
-                    ToImageFilter(backdrop));
+                    ToImageFilter(backdrop), promise);
 }
 
 // |flutter::DlOpReceiver|

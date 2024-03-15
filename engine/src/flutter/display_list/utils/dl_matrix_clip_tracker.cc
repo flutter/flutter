@@ -224,6 +224,24 @@ void DisplayListMatrixClipTracker::setTransform(const SkM44& m44) {
   current_->setTransform(m44);
 }
 
+bool DisplayListMatrixClipTracker::inverseTransform(
+    const DisplayListMatrixClipTracker& tracker_) {
+  if (tracker_.using_4x4_matrix()) {
+    SkM44 inverse;
+    if (tracker_.matrix_4x4().invert(&inverse)) {
+      transform(inverse);
+      return true;
+    }
+  } else {
+    SkMatrix inverse;
+    if (tracker_.matrix_3x3().invert(&inverse)) {
+      transform(inverse);
+      return true;
+    }
+  }
+  return false;
+}
+
 void DisplayListMatrixClipTracker::clipRRect(const SkRRect& rrect,
                                              ClipOp op,
                                              bool is_aa) {

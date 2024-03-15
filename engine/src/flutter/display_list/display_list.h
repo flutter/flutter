@@ -88,9 +88,7 @@ namespace flutter {
                                     \
   V(Save)                           \
   V(SaveLayer)                      \
-  V(SaveLayerBounds)                \
   V(SaveLayerBackdrop)              \
-  V(SaveLayerBackdropBounds)        \
   V(Restore)                        \
                                     \
   V(Translate)                      \
@@ -165,6 +163,7 @@ class SaveLayerOptions {
   SaveLayerOptions without_optimizations() const {
     SaveLayerOptions options;
     options.fRendersWithAttributes = fRendersWithAttributes;
+    options.fBoundsFromCaller = fBoundsFromCaller;
     return options;
   }
 
@@ -179,6 +178,33 @@ class SaveLayerOptions {
   SaveLayerOptions with_can_distribute_opacity() const {
     SaveLayerOptions options(this);
     options.fCanDistributeOpacity = true;
+    return options;
+  }
+
+  // Returns true iff the bounds for the saveLayer operation were provided
+  // by the caller, otherwise the bounds will have been computed by the
+  // DisplayListBuilder and provided for reference.
+  bool bounds_from_caller() const { return fBoundsFromCaller; }
+  SaveLayerOptions with_bounds_from_caller() const {
+    SaveLayerOptions options(this);
+    options.fBoundsFromCaller = true;
+    return options;
+  }
+  SaveLayerOptions without_bounds_from_caller() const {
+    SaveLayerOptions options(this);
+    options.fBoundsFromCaller = false;
+    return options;
+  }
+  bool bounds_were_calculated() const { return !fBoundsFromCaller; }
+
+  // Returns true iff the bounds for the saveLayer do not fully cover the
+  // contained rendering operations. This will only occur if the original
+  // caller supplied bounds and those bounds were not a strict superset
+  // of the content bounds computed by the DisplayListBuilder.
+  bool content_is_clipped() const { return fContentIsClipped; }
+  SaveLayerOptions with_content_is_clipped() const {
+    SaveLayerOptions options(this);
+    options.fContentIsClipped = true;
     return options;
   }
 
@@ -198,6 +224,8 @@ class SaveLayerOptions {
     struct {
       unsigned fRendersWithAttributes : 1;
       unsigned fCanDistributeOpacity : 1;
+      unsigned fBoundsFromCaller : 1;
+      unsigned fContentIsClipped : 1;
     };
     uint32_t flags_;
   };

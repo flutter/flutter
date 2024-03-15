@@ -63,7 +63,7 @@ DisplayListMetalComplexityCalculator::MetalHelper::BatchedComplexity() {
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::saveLayer(
-    const SkRect* bounds,
+    const SkRect& bounds,
     const SaveLayerOptions options,
     const DlImageFilter* backdrop) {
   if (IsComplex()) {
@@ -559,7 +559,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
   }
   MetalHelper helper(Ceiling() - CurrentComplexityScore());
   if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
-    helper.saveLayer(nullptr, SaveLayerOptions::kWithAttributes, nullptr);
+    auto bounds = display_list->bounds();
+    helper.saveLayer(bounds, SaveLayerOptions::kWithAttributes, nullptr);
   }
   display_list->Dispatch(helper);
   AccumulateComplexity(helper.ComplexityScore());
