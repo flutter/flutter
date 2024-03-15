@@ -817,7 +817,9 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     return AndroidBackGestureDetector(
       backGestureController:
           TransitionRoute.createDefaultGestureTransitionController(route),
-      enabledCallback: () => route.popGestureEnabled,
+      enabledCallback: () {
+        return route.isCurrent && route.popGestureEnabled;
+      },
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
         final bool linearTransition = PageRoute.isPopGestureInProgress(route);

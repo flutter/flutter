@@ -187,8 +187,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   static GestureTransitionController createDefaultGestureTransitionController(
       TransitionRoute<dynamic> route) {
     return _AndroidBackGestureTransitionController(
-      navigator: route.navigator!,
-      controller: route.controller!, // protected access
+      route: route,
     );
   }
 
@@ -517,65 +516,73 @@ abstract class GestureTransitionController {
 class _AndroidBackGestureTransitionController
     extends GestureTransitionController {
   _AndroidBackGestureTransitionController({
-    required this.controller,
-    required this.navigator,
+    required this.route,
   });
 
-  final NavigatorState navigator;
-  final AnimationController controller;
+  final TransitionRoute<dynamic> route;
+
+  NavigatorState get _navigator => route.navigator!;
+  AnimationController get _controller => route.controller!;
 
   @override
   void dragStart({double progress = 0}) {
-    controller.value = progress;
-    navigator.didStartUserGesture();
+    _controller.value = progress;
+    _navigator.didStartUserGesture();
   }
 
   @override
   void dragUpdate({required double progress}) {
-    controller.value = progress;
+    // If some other navigation happened during this gesture, don't mess with
+    // the transition anymore.
+    if (!route.isCurrent) {
+      return;
+    }
+    _controller.value = progress;
   }
 
   @override
   void dragEnd({required bool animateForward}) {
-    if (animateForward) {
-      // The closer the panel is to dismissing, the shorter the animation is.
-      // We want to cap the animation time, but we want to use a linear curve
-      // to determine it.
-      final int droppedPageForwardAnimationTime = min(
-        lerpDouble(800, 0, controller.value)!.floor(),
-        300,
-      );
-      controller.animateTo(
-        1.0,
-        duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-        curve: Curves.fastLinearToSlowEaseIn,
-      );
-    } else {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      navigator.pop();
+    if (route.isCurrent) {
+      if (animateForward) {
+        // The closer the panel is to dismissing, the shorter the animation is.
+        // We want to cap the animation time, but we want to use a linear curve
+        // to determine it.
+        final int droppedPageForwardAnimationTime = min(
+          lerpDouble(800, 0, _controller.value)!.floor(),
+          300,
+        );
+        _controller.animateTo(
+          1.0,
+          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+          curve: Curves.fastLinearToSlowEaseIn,
+        );
+      } else {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        _navigator.pop();
 
-      // The popping may have finished inline if already at the target destination.
-      if (controller.isAnimating) {
-        // Otherwise, use a custom popping animation duration and curve.
-        final int droppedPageBackAnimationTime =
-            lerpDouble(0, 800, controller.value)!.floor();
-        controller.animateBack(0.0,
-            duration: Duration(milliseconds: droppedPageBackAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn);
+        // The popping may have finished inline if already at the target destination.
+        if (_controller.isAnimating) {
+          // Otherwise, use a custom popping animation duration and curve.
+          final int droppedPageBackAnimationTime =
+              lerpDouble(0, 800, _controller.value)!.floor();
+          _controller.animateBack(0.0,
+              duration: Duration(milliseconds: droppedPageBackAnimationTime),
+              curve: Curves.fastLinearToSlowEaseIn);
+        }
       }
     }
 
-    if (controller.isAnimating) {
+    if (_controller.isAnimating) {
       // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
       // depends on userGestureInProgress
       late AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
-        navigator.didStopUserGesture();
-        controller.removeStatusListener(animationStatusCallback);
+        _navigator.didStopUserGesture();
+        _controller.removeStatusListener(animationStatusCallback);
       };
-      controller.addStatusListener(animationStatusCallback);
+      _controller.addStatusListener(animationStatusCallback);
     } else {
-      navigator.didStopUserGesture();
+      _navigator.didStopUserGesture();
     }
   }
 }
