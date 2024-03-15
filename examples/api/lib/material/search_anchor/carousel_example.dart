@@ -111,7 +111,7 @@ class _CarouselExampleState extends State<CarouselExample> {
     );
   }
 
-  final List<int> data = List.generate(20, (index) => index);
+  final List<int> data = List<int>.generate(20, (int index) => index);
   final ScrollController controller = ScrollController();
 
   @override
@@ -124,7 +124,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           slivers: <Widget>[
             SliverCarousel(
               maxChildExtent: 200,
-              minChildExtent: 0,
+              minChildExtent: 10,
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Padding(
@@ -138,6 +138,8 @@ class _CarouselExampleState extends State<CarouselExample> {
                         child: Text(
                           'Item ${data[index]}',
                           style: const TextStyle(color: Colors.white, fontSize: 20),
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
                         ),
                       ),
                     ),

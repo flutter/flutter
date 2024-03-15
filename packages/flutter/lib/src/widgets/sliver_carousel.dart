@@ -69,9 +69,21 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double extent;
     if (_firstVisibleItemIndex == index) {
       extent = _firstVisibleItemExtent;
-    } else {
+    } else if (_lastVisibleItenIndex == index) {
+      final double availableExtentForCurrent = constraints.scrollOffset + constraints.remainingPaintExtent - maxChildExtent * math.max(index, 0);
+      print('>>>>>>>>>>>> index: $index, scrolloffset: ${constraints.scrollOffset}, remaining: ${constraints.remainingPaintExtent}, available room: $availableExtentForCurrent');
+      if (availableExtentForCurrent <= minChildExtent) {
+        extent = minChildExtent;
+      } else if (_lastVisibleItenIndex - 1 == index) {
+        extent = 100;
+      } else {
+        extent = math.min(maxChildExtent, availableExtentForCurrent);
+      }
+    }
+    else {
       extent = maxChildExtent;
     }
+
     return constraints.asBoxConstraints(
       minExtent: extent,
       maxExtent: extent,
@@ -82,6 +94,8 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
   int get _firstVisibleItemIndex => (constraints.scrollOffset / maxChildExtent).floor();
   double get _gapBetweenCurrentAndPrev => constraints.scrollOffset % maxChildExtent;
   double get _firstVisibleItemExtent => math.max(maxChildExtent - _gapBetweenCurrentAndPrev, minChildExtent);
+
+  int get _lastVisibleItenIndex => ((constraints.scrollOffset + constraints.viewportMainAxisExtent) / maxChildExtent).ceil() - 1;
 
   /// The layout offset for the child with the given index.
   ///
@@ -102,8 +116,13 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     int index,
   ) {
     assert(itemExtentBuilder == null);
-      print('first visible index: $_firstVisibleItemIndex');
-  print('hhh ${getMinChildIndexForScrollOffset(constraints.scrollOffset + constraints.cacheOrigin, 0)}');
+      // print('first visible index: $_firstVisibleItemIndex');
+  // print('getMinChildIndexForScrollOffset: ${getMinChildIndexForScrollOffset(constraints.scrollOffset + constraints.cacheOrigin, 0)}');
+  // print('remaining paint extent: ${constraints.remainingPaintExtent}');
+  // print('viewportMainAxisExtent: ${constraints.viewportMainAxisExtent}');
+  // print('scrolloffset: ${constraints.scrollOffset}');
+  // print('getMaxChildIndexForScrollOffset: ${getMaxChildIndexForScrollOffset(constraints.scrollOffset + constraints.remainingPaintExtent, 0)}');
+  // print('last visible index $_lastVisibleItenIndex');
     if (_firstVisibleItemIndex == index && maxChildExtent - _gapBetweenCurrentAndPrev > minChildExtent) {
       return constraints.scrollOffset;
     } else if (_firstVisibleItemIndex == index) {
