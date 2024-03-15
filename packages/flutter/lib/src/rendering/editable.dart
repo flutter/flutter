@@ -1098,6 +1098,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _offset.addListener(markNeedsPaint);
       _offset.addListener(_textLayout.updateTextLayoutIfNeeded);
     }
+    _textLayout.updateTextLayoutIfNeeded();
     markNeedsLayout();
   }
 
