@@ -48,10 +48,10 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   private static final int SURFACE_WIDTH = 192;
   private static final int SURFACE_HEIGHT = 256;
 
-  private SurfaceRenderer surfaceViewRenderer, flutterRenderer;
+  private SurfaceRenderer flutterRenderer;
 
   // Latch used to ensure both SurfaceRenderers produce a frame before taking a screenshot.
-  private final CountDownLatch firstFrameLatch = new CountDownLatch(2);
+  private final CountDownLatch firstFrameLatch = new CountDownLatch(1);
 
   private long textureId = 0;
   private TextureRegistry.SurfaceProducer surfaceProducer;
@@ -62,7 +62,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
     String surfaceRenderer = getIntent().getStringExtra("surface_renderer");
     assert surfaceRenderer != null;
-    surfaceViewRenderer = selectSurfaceRenderer(surfaceRenderer, getIntent().getExtras());
     flutterRenderer = selectSurfaceRenderer(surfaceRenderer, getIntent().getExtras());
 
     // Create and place a SurfaceView above the Flutter content.
@@ -86,7 +85,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
     SurfaceHolder surfaceHolder = surfaceView.getHolder();
     surfaceHolder.setFixedSize(SURFACE_WIDTH, SURFACE_HEIGHT);
-    surfaceHolder.addCallback(new SurfaceRendererCallback(surfaceViewRenderer, firstFrameLatch));
   }
 
   @Override
@@ -137,7 +135,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
   @Override
   public void onPause() {
-    surfaceViewRenderer.destroy();
     flutterRenderer.destroy();
     surfaceProducer.release();
     super.onPause();
@@ -460,28 +457,5 @@ public class ExternalTextureFlutterActivity extends TestActivity {
       Log.i(TAG, "ImageReader destroyed");
       handlerThread.quitSafely();
     }
-  }
-
-  private static class SurfaceRendererCallback implements SurfaceHolder.Callback {
-    final SurfaceRenderer surfaceRenderer;
-    final CountDownLatch onFirstFrame;
-
-    public SurfaceRendererCallback(SurfaceRenderer surfaceRenderer, CountDownLatch onFirstFrame) {
-      this.surfaceRenderer = surfaceRenderer;
-      this.onFirstFrame = onFirstFrame;
-    }
-
-    @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder) {
-      surfaceRenderer.attach(holder.getSurface(), onFirstFrame);
-    }
-
-    @Override
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-      surfaceRenderer.repaint();
-    }
-
-    @Override
-    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {}
   }
 }
