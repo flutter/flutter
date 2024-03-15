@@ -8,7 +8,9 @@ if (current_cpu == "arm") {
   import("//build/config/arm.gni")
 }
 
-import("//build/fuchsia/sdk.gni")
+if (is_fuchsia) {
+  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+}
 
 if ((current_cpu == "x86" || current_cpu == "x64") && is_fuchsia &&
     !using_fuchsia_sdk) {

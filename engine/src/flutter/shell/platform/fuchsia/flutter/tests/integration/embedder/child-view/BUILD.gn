@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
 import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
 dart_library("lib") {

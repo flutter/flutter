@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
 import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
 config("zircon_config") {
@@ -29,12 +29,12 @@ source_set("zircon") {
   ]
 
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.io",
-    "$fuchsia_sdk_root/pkg:async-cpp",
-    "$fuchsia_sdk_root/pkg:async-default",
-    "$fuchsia_sdk_root/pkg:async-loop-cpp",
-    "$fuchsia_sdk_root/pkg:fdio",
-    "$fuchsia_sdk_root/pkg:zx",
+    "${fuchsia_sdk}/fidl/fuchsia.io",
+    "${fuchsia_sdk}/pkg/async-cpp",
+    "${fuchsia_sdk}/pkg/async-default",
+    "${fuchsia_sdk}/pkg/async-loop-cpp",
+    "${fuchsia_sdk}/pkg/fdio",
+    "${fuchsia_sdk}/pkg/zx",
     "//flutter/fml",
     "//flutter/third_party/tonic",
   ]

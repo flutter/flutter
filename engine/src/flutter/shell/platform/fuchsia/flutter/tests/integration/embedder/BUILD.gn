@@ -4,8 +4,8 @@
 
 assert(is_fuchsia)
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
 group("tests") {
   testonly = true
@@ -21,23 +21,23 @@ executable("flutter-embedder-test-bin") {
 
   # This is needed for //flutter/third_party/googletest for linking zircon
   # symbols.
-  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.inspect",
-    "$fuchsia_sdk_root/fidl:fuchsia.logger",
-    "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.display.singleton",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
-    "$fuchsia_sdk_root/pkg:async",
-    "$fuchsia_sdk_root/pkg:async-loop-testing",
-    "$fuchsia_sdk_root/pkg:fidl_cpp",
-    "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
-    "$fuchsia_sdk_root/pkg:zx",
+    "${fuchsia_sdk}/fidl/fuchsia.inspect",
+    "${fuchsia_sdk}/fidl/fuchsia.logger",
+    "${fuchsia_sdk}/fidl/fuchsia.tracing.provider",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.app",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.composition",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.display.singleton",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.observation.geometry",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.test.input",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.test.scene",
+    "${fuchsia_sdk}/pkg/async",
+    "${fuchsia_sdk}/pkg/async-loop-testing",
+    "${fuchsia_sdk}/pkg/fidl_cpp",
+    "${fuchsia_sdk}/pkg/sys_component_cpp_testing",
+    "${fuchsia_sdk}/pkg/zx",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:check_view",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:screenshot",

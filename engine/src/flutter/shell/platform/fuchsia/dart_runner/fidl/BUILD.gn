@@ -2,11 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
-import("//flutter/tools/fuchsia/fidl/fidl.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/fidl_library.gni")
 
-fidl("dart_test") {
-  name = "dart.test"
-  meta = "meta.json"
+fidl_library("dart_test") {
+  library_name = "dart.test"
   sources = [ "echo.fidl" ]
 }

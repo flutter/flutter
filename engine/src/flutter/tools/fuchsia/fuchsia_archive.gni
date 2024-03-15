@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/config.gni")
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/cmc.gni")

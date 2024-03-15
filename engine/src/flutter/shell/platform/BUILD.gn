@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/shell/platform/config.gni")
 
 group("platform") {
@@ -21,6 +20,7 @@ group("platform") {
       deps += [ "windows" ]
     }
   } else if (is_fuchsia) {
+    import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
     deps = [ "fuchsia" ]
   } else {
     assert(false, "Unknown/Unsupported platform.")

@@ -2,11 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
-
 import("//flutter/tools/fuchsia/dart/dart_component.gni")
-import("//flutter/tools/fuchsia/fidl/fidl.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
 group("tests") {
   testonly = true
@@ -22,16 +20,16 @@ executable("dart-jit-runner-integration-test-bin") {
 
   # This is needed for //flutter/third_party/googletest for linking zircon
   # symbols.
-  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.logger",
-    "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
-    "$fuchsia_sdk_root/pkg:async",
-    "$fuchsia_sdk_root/pkg:async-loop-testing",
-    "$fuchsia_sdk_root/pkg:fidl_cpp",
-    "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
-    "$fuchsia_sdk_root/pkg:zx",
+    "${fuchsia_sdk}/fidl/fuchsia.logger",
+    "${fuchsia_sdk}/fidl/fuchsia.tracing.provider",
+    "${fuchsia_sdk}/pkg/async",
+    "${fuchsia_sdk}/pkg/async-loop-testing",
+    "${fuchsia_sdk}/pkg/fidl_cpp",
+    "${fuchsia_sdk}/pkg/sys_component_cpp_testing",
+    "${fuchsia_sdk}/pkg/zx",
     "../dart_echo_server:jit_echo_package",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/dart_runner/fidl:dart_test",
