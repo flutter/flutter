@@ -474,7 +474,7 @@ const Color lerpToColor = Colors.red;
 const BorderSide lerpToBorder = BorderSide(width: 5, color: lerpToColor);
 
 ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to = true}) {
-  final OutlinedBorder targetBorder = switch ((to, target)) {
+  final OutlinedBorder targetBorder = switch (target) {
     LerpTarget.circle  => const CircleBorder(side: lerpToBorder, eccentricity: 0.5),
     LerpTarget.rect    => const RoundedRectangleBorder(side: lerpToBorder),
     LerpTarget.stadium => const StadiumBorder(side: lerpToBorder),
