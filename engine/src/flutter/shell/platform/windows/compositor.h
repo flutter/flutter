@@ -31,7 +31,9 @@ class Compositor {
   virtual bool CollectBackingStore(const FlutterBackingStore* store) = 0;
 
   // Present Flutter content and platform views onto the view.
-  virtual bool Present(const FlutterLayer** layers, size_t layers_count) = 0;
+  virtual bool Present(FlutterViewId view_id,
+                       const FlutterLayer** layers,
+                       size_t layers_count) = 0;
 };
 
 }  // namespace flutter

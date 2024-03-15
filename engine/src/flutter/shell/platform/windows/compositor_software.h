@@ -24,7 +24,9 @@ class CompositorSoftware : public Compositor {
   bool CollectBackingStore(const FlutterBackingStore* store) override;
 
   /// |Compositor|
-  bool Present(const FlutterLayer** layers, size_t layers_count) override;
+  bool Present(FlutterViewId view_id,
+               const FlutterLayer** layers,
+               size_t layers_count) override;
 
  private:
   FlutterWindowsEngine* engine_;
