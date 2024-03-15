@@ -398,23 +398,38 @@ interface class SkiaGoldClient {
     ];
 
     final io.ProcessResult result = await _runCommand(tryjobCommand);
-
     final String resultStdout = result.stdout.toString();
-    if (result.exitCode != 0 &&
-      !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Unexpected Gold tryjobAdd failure.')
-        ..writeln('Tryjob execution for golden file test $testName failed for')
-        ..writeln('a reason unrelated to pixel comparison.');
-      throw SkiaGoldProcessError(
-        command: tryjobCommand,
-        stdout: resultStdout,
-        stderr: result.stderr.toString(),
-        message: buf.toString(),
-      );
-    } else if (verbose) {
-      _stderr.writeln('stdout:\n${result.stdout}');
-      _stderr.writeln('stderr:\n${result.stderr}');
+    if (result.exitCode == 0) {
+      // In "verbose" (debugging) mode, print the output of the tryjob anyway.
+      if (verbose) {
+        _stderr.writeln('stdout:\n${result.stdout}');
+        _stderr.writeln('stderr:\n${result.stderr}');
+      }
+    } else {
+      // Neither of these conditions are considered failures during tryjobs.
+      final bool isUntriaged = resultStdout.contains('Untriaged');
+      final bool isNegative = resultStdout.contains('negative image');
+      if (!isUntriaged && !isNegative) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Unexpected Gold tryjobAdd failure.')
+          ..writeln('Tryjob execution for golden file test $testName failed for')
+          ..writeln('a reason unrelated to pixel comparison.');
+        throw SkiaGoldProcessError(
+          command: tryjobCommand,
+          stdout: resultStdout,
+          stderr: result.stderr.toString(),
+          message: buf.toString(),
+        );
+      }
+      // ... but we want to know about them anyway.
+      // See https://github.com/flutter/flutter/issues/145219.
+      // TODO(matanlurey): Update the documentation to reflect the new behavior.
+      if (isUntriaged) {
+        _stderr
+          ..writeln('NOTE: Untriaged image detected in tryjob.')
+          ..writeln('Triage should be required by the "Flutter Gold" check')
+          ..writeln('stdout:\n$resultStdout');
+      }
     }
   }
 
