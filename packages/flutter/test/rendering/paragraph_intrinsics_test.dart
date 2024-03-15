@@ -66,4 +66,49 @@ void main() {
     expect(testBlock.getMinIntrinsicHeight(0.0), equals(manyLinesTextHeight));
     expect(testBlock.getMaxIntrinsicHeight(0.0), equals(manyLinesTextHeight));
   });
+
+  test('textScaler affects intrinsics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        style: TextStyle(fontSize: 10),
+        text: 'Hello World',
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    expect(paragraph.getMaxIntrinsicWidth(double.infinity), 110);
+
+    paragraph.textScaler = const TextScaler.linear(2);
+    expect(paragraph.getMaxIntrinsicWidth(double.infinity), 220);
+  });
+
+  test('maxLines affects intrinsics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(
+        style: const TextStyle(fontSize: 10),
+        text: List<String>.filled(5, 'A').join('\n'),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 50);
+
+    paragraph.maxLines = 1;
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 10);
+  });
+
+  test('strutStyle affects intrinsics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        style: TextStyle(fontSize: 10),
+        text: 'Hello World',
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 10);
+
+    paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
+  });
 }

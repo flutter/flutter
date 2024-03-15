@@ -384,7 +384,7 @@ void main() {
 
     Rect getRectForA() => paragraph.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).single.toRect();
 
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
 
@@ -393,7 +393,7 @@ void main() {
     expect(paragraph.debugNeedsPaint, isTrue);
 
     paragraph.paint(MockPaintingContext(), Offset.zero);
-    expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
+    expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
   });
 
   group('didExceedMaxLines', () {
