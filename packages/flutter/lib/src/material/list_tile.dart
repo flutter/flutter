@@ -364,6 +364,7 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
+    this.minTileHeight,
     this.titleAlignment,
   }) : assert(!isThreeLine || subtitle != null);
 
@@ -669,6 +670,11 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
+  /// The minimum height allocated for the [ListTile] widget.
+  ///
+  /// If null, then the value is caculated in _defaultTileHeight function.
+  final double? minTileHeight;
+
   /// Defines how [ListTile.leading] and [ListTile.trailing] are
   /// vertically aligned relative to the [ListTile]'s titles
   /// ([ListTile.title] and [ListTile.subtitle]).
@@ -884,6 +890,7 @@ class ListTile extends StatelessWidget {
                   horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
                   minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
                   minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  minTileHeight: minTileHeight,
                   titleAlignment: effectiveTitleAlignment,
                 ),
               ),
@@ -978,6 +985,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
     required this.horizontalTitleGap,
     required this.minVerticalPadding,
     required this.minLeadingWidth,
+    this.minTileHeight,
     this.subtitleBaselineType,
     required this.titleAlignment,
   });
@@ -995,6 +1003,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
   final double horizontalTitleGap;
   final double minVerticalPadding;
   final double minLeadingWidth;
+  final double? minTileHeight;
   final ListTileTitleAlignment titleAlignment;
 
   @override
@@ -1022,6 +1031,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
       horizontalTitleGap: horizontalTitleGap,
       minVerticalPadding: minVerticalPadding,
       minLeadingWidth: minLeadingWidth,
+      minTileHeight: minTileHeight,
       titleAlignment: titleAlignment,
     );
   }
@@ -1037,6 +1047,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
       ..subtitleBaselineType = subtitleBaselineType
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
+      ..minTileHeight = minTileHeight
       ..minVerticalPadding = minVerticalPadding
       ..titleAlignment = titleAlignment;
   }
@@ -1053,7 +1064,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-    required ListTileTitleAlignment titleAlignment,
+    double? minTileHeight,
+    required ListTileTitleAlignment titleAlignment
   }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
@@ -1063,6 +1075,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
+       _minTileHeight = minTileHeight,
        _titleAlignment = titleAlignment;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
@@ -1179,6 +1192,16 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     markNeedsLayout();
   }
 
+  double? _minTileHeight;
+  double? get minTileHeight => _minTileHeight;
+  set minTileHeight(double? value) {
+    if (_minTileHeight == value) {
+      return;
+    }
+    _minTileHeight = value;
+    markNeedsLayout();
+  }
+
   ListTileTitleAlignment get titleAlignment => _titleAlignment;
   ListTileTitleAlignment _titleAlignment;
   set titleAlignment(ListTileTitleAlignment value) {
@@ -1238,7 +1261,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   double computeMinIntrinsicHeight(double width) {
     return math.max(
-      _defaultTileHeight,
+      minTileHeight ?? _defaultTileHeight,
       title!.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
     );
   }
@@ -1345,19 +1368,17 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       assert(isOneLine);
     }
 
-    final double defaultTileHeight = _defaultTileHeight;
-
     double tileHeight;
     double titleY;
     double? subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(minTileHeight?? _defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline! - _boxBaseline(title!, titleBaselineType)!;
       subtitleY = subtitleBaseline! - _boxBaseline(subtitle!, subtitleBaselineType!)! + visualDensity.vertical * 2.0;
-      tileHeight = defaultTileHeight;
+      tileHeight = minTileHeight?? _defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
       // the overlap and the subtitle down by the same amount, and adjust
