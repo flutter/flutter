@@ -1722,7 +1722,7 @@ void main() {
 
       // Hit Testing
       expect(
-        layout.getClosestGlyphForOffset(additionalOffset + const Offset(5, 5)),
+        layout.getClosestGlyphInfoForOffset(additionalOffset + const Offset(5, 5)),
         GlyphInfo(
           const Rect.fromLTWH(0, 0, fontSize, fontSize).shift(additionalOffset),
           const TextRange(start: 0, end: 1),

@@ -20,14 +20,7 @@ import 'selection.dart';
 
 // Examples can assume:
 // late TextSpan textSpan;
-// class MyTextCustomPainter extends CustomPainter {
-//   MyTextCustomPainter({ super.repaint });
-//
-//  @override
-//  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-//  @override
-//  void paint(Canvas canvas, Size size) {}
-// }
+// class MyTextCustomPainter extends CustomPainter { MyTextCustomPainter({ super.repaint }); @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true; @override void paint(Canvas canvas, Size size) {} }
 
 /// The start and end positions for a word.
 typedef _WordBoundaryRecord = ({TextPosition wordStart, TextPosition wordEnd});
@@ -63,6 +56,7 @@ class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
       // Tell the [RenderParagraph] to call performLayout if we don't have a
       // valid text layout yet.
       if (paragraph._textPainter.textLayout.value == null) {
+        assert(paragraph.owner == null || !paragraph.owner!.debugDoingPaint);
         paragraph.markNeedsLayout();
       }
     }
@@ -851,7 +845,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// text layout. But it can be used to drive the painting process of a
   /// [CustomPainter] that depends on the text layout of this [RenderParagraph]:
   /// ```dart
-  /// final RenderParagraph paragraph = RenderParagraph(textSpan);
+  /// final RenderParagraph paragraph = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
   /// final CustomPainter foreground = MyTextCustomPainter(repaint: paragraph.textLayout);
   /// final CustomPainter background = MyTextCustomPainter(repaint: paragraph.textLayout);
   /// final RenderCustomPaint renderCustomPaint = RenderCustomPaint(

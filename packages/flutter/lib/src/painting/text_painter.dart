@@ -430,7 +430,7 @@ class TextLayout {
   /// This "closeness" is not measured using Euclidean distances. It first finds
   /// the line closest to `offset.dy`, and then returns the glyph with the
   /// closest x offset to `offset.dx` within that line.
-  ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
+  ui.GlyphInfo? getClosestGlyphInfoForOffset(Offset offset) {
     assert(debugIsValid);
     final ui.GlyphInfo? glyphInfo = _paragraph.getClosestGlyphInfoForOffset(offset - _paintOffset);
     return glyphInfo == null || _paintOffset == Offset.zero ? glyphInfo : _shiftGlyphInfo(glyphInfo, _paintOffset);
@@ -1813,7 +1813,7 @@ class TextPainter {
    ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
-    return _layoutCache!.textLayout.getClosestGlyphForOffset(offset);
+    return _layoutCache!.textLayout.getClosestGlyphInfoForOffset(offset);
   }
 
   /// Returns the closest position within the text for the given pixel offset.
