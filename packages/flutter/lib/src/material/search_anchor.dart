@@ -1397,6 +1397,9 @@ class _SearchBarState extends State<SearchBar> {
                           autofocus: widget.autoFocus,
                           onTap: widget.onTap,
                           onTapAlwaysCalled: true,
+                          onTapOutside: (PointerDownEvent event){
+                            _focusNode.unfocus();
+                          },
                           focusNode: _focusNode,
                           onChanged: widget.onChanged,
                           onSubmitted: widget.onSubmitted,
