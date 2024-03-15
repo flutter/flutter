@@ -823,7 +823,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  /// A [ValueListenable] that reflects current layout of the [RenderParagraph].
+  /// A [ValueListenable] that reflects current layout of the [RenderParagraph],
+  /// in this [RenderParagraph]'s coordinates.
   ///
   /// This [ValueListenable] can **not** be used to drive the layout process of
   /// a [RenderObject], because when that [RenderObject] is ready to do layout,
@@ -841,6 +842,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// );
   /// ```
   ///
+  /// {@template flutter.rendering.renderParagraph.textLayout}
   /// For text layout APIs that can be potentially computationally intensive
   /// (notably, [TextLayout.getBoxesForSelection], when the method returns a
   /// large number of boxes), the [TextLayout] value of [ValueListenable] can be
@@ -848,6 +850,15 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// the new [TextLayout], or only the paint offset is different, then the
   /// cached [TextBox]es can be reused instead of having to call
   /// [TextLayout.getBoxesForSelection] again.
+  ///
+  /// When the `value` of the [ValueListenable] changes, the old [TextLayout]
+  /// values becomes invalid and must not be used. The [ValueListenable] usually
+  /// reports a non-null [TextLayout] when accessend in paint methods (such as
+  /// [RenderObject.paint] or [CustomPainter.paint]), however the `value` can
+  /// be null if this [RenderObject] is not laid out due to invisibility. In such
+  /// cases painting can generally be skipped because the text isn't visible on
+  /// screen.
+  /// {@endtemplate}
   ValueListenable<TextLayout?> get textLayout => _textLayout;
   late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 

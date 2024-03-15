@@ -37,6 +37,32 @@ const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 // This behavior is consistent with the one observed in iOS UITextField.
 const double _kShortestDistanceSquaredWithFloatingAndRegularCursors = 15.0 * 15.0;
 
+class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
+  _TextLayoutValueNotifier(this.renderEditable) : super(renderEditable._textPainter.textLayout.value?.shift(renderEditable._paintOffset));
+
+  final RenderEditable renderEditable;
+
+  void updateTextLayoutIfNeeded() {
+    value = renderEditable._textPainter.textLayout.value?.shift(renderEditable._paintOffset);
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      renderEditable._textPainter.textLayout.addListener(updateTextLayoutIfNeeded);
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners) {
+      renderEditable._textPainter.textLayout.removeListener(updateTextLayoutIfNeeded);
+    }
+  }
+}
+
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -409,6 +435,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _autocorrectHighlightPainter.dispose();
     _selectionPainter.dispose();
     _caretPainter.dispose();
+    _textLayout.dispose();
     _textPainter.dispose();
     if (_disposeShowCursor) {
       _showCursor.dispose();
@@ -977,6 +1004,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // height of the first line in case there are hard line breaks in the text.
     // See the `_preferredHeight` method.
     _textPainter.maxLines = value == 1 ? 1 : null;
+    _textLayout.updateTextLayoutIfNeeded();
     markNeedsTextLayout();
   }
 
@@ -1073,10 +1101,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (attached) {
       _offset.removeListener(markNeedsPaint);
+      _offset.removeListener(_textLayout.updateTextLayoutIfNeeded);
     }
     _offset = value;
     if (attached) {
       _offset.addListener(markNeedsPaint);
+      _offset.addListener(_textLayout.updateTextLayoutIfNeeded);
     }
     markNeedsLayout();
   }
@@ -1637,6 +1667,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _handleLongPress;
     _offset.addListener(markNeedsPaint);
+    _offset.addListener(_textLayout.updateTextLayoutIfNeeded);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
   }
@@ -1646,6 +1677,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _tap.dispose();
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
+    _offset.removeListener(_textLayout.updateTextLayoutIfNeeded);
     _showCursor.removeListener(_showHideCursor);
     super.detach();
     _foregroundRenderObject?.detach();
@@ -2328,6 +2360,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         .constrainWidth(_textPainter.size.width + _caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
+
+  /// A [ValueListenable] that reflects current layout of the [RenderEditable],
+  /// in this [RenderEditable]'s coordinates.
+  ///
+  /// This [ValueListenable] can **not** be used to drive the layout process of
+  /// a [RenderObject], because when that [RenderObject] is ready to do layout,
+  /// it typically is not guaranteed that the [RenderEditable] have computed the
+  /// text layout. But it can be used to drive the painting process of a
+  /// [CustomPainter] that depends on the text layout of this [RenderEditable].
+  ///
+  /// {@macro flutter.rendering.renderParagraph.textLayout}
+  ValueListenable<TextLayout?> get textLayout => _textLayout;
+  late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
   @override
   void performLayout() {

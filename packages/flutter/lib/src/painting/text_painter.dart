@@ -539,8 +539,9 @@ class TextLayout {
   /// [TextLayout] object behaves as if the text was empty.
   //bool get hasInfinitePaintOffset => _paintOffset.isFinite;
 
-  /// Creates a [TextLayout] with a [_paintOffset] of `this.paintOffset + offset`.
-  TextLayout operator +(Offset offset) {
+  /// Creates a [TextLayout] with the same text layout, but shifts the paint
+  /// offset away from the origin by `offset` logical pixels.
+  TextLayout shift(Offset offset) {
     assert(debugIsValid);
     assert(offset.isFinite);
     if (offset == Offset.zero) {
@@ -553,9 +554,9 @@ class TextLayout {
   /// Returns the paint offset difference between this [TextLayout] and `other`,
   /// or returns null if they are completely different [TextLayout]s.
   ///
-  /// This is the inverse of the [+] operation. It's typically used to determine
-  /// if a cached value that's computed from the previous [TextLayout] needs to
-  /// be discarded and recomputed from the latest [TextLayout], or
+  /// This is the inverse of the [shift] operation. It's typically used to
+  /// determine if a cached value that's computed from the previous [TextLayout]
+  /// needs to be discarded and recomputed from the latest [TextLayout], or
   Offset? operator -(TextLayout other) {
     if (other._layoutEqualityId != _layoutEqualityId) {
       return null;

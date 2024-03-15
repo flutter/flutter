@@ -1696,7 +1696,7 @@ void main() {
       final TextLayout layout = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
-      ).layout() + additionalOffset;
+      ).layout().shift(additionalOffset);
 
       // The offset applies to offsets in all kinds of metrics.
       expect(layout.getDistanceToBaseline(TextBaseline.alphabetic), additionalOffset.dy + 7.5);
@@ -1732,7 +1732,7 @@ void main() {
       expect(layout.getPositionForOffset(additionalOffset + const Offset(3, 5)), const TextPosition(offset: 0));
     });
 
-    test('+ operator throws if given an infinite offset', () {
+    test('shift operator throws if given an infinite offset', () {
       const double fontSize = 10;
       const String text = '12345';
       final TextLayout layout = TextPainter(
@@ -1740,9 +1740,9 @@ void main() {
         text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
       ).layout();
 
-      expect(() => layout + Offset.infinite, throwsAssertionError);
-      expect(() => layout + const Offset(double.nan, 0), throwsAssertionError);
-      expect(() => layout + const Offset(0, double.nan), throwsAssertionError);
+      expect(() => layout.shift(Offset.infinite), throwsAssertionError);
+      expect(() => layout.shift(const Offset(double.nan, 0)), throwsAssertionError);
+      expect(() => layout.shift(const Offset(0, double.nan)), throwsAssertionError);
     });
 
     test('- / = operators basic test', () {
