@@ -8,7 +8,7 @@ dependencies:
     sdk: flutter
   collection: 1.18.0
   device_info: 2.0.3
-  intl: 0.18.1
+  intl: 0.19.0
   connectivity: 3.0.6
   string_scanner: 1.2.0
   url_launcher: 6.2.5
@@ -277,4 +277,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-# PUBSPEC CHECKSUM: c693
+# PUBSPEC CHECKSUM: ca93
