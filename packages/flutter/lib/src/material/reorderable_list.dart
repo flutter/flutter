@@ -393,14 +393,17 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     // If there is a header or footer we can't just apply the padding to the list,
     // so we break it up into padding for the header, footer and padding for the list.
     final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
-    final double? header = widget.header == null ? null : 0.0;
-    final double? footer = widget.footer == null ? null : 0.0;
+    double? start = widget.header == null ? null : 0.0;
+    double? end = widget.footer == null ? null : 0.0;
+    if (widget.reverse) {
+      (start, end) = (end, start);
+    }
 
     final EdgeInsets startPadding, endPadding, listPadding;
     (startPadding, endPadding, listPadding) = switch (widget.scrollDirection) {
-      Axis.horizontal || Axis.vertical when (header ?? footer) == null => (EdgeInsets.zero, EdgeInsets.zero, padding),
-      Axis.horizontal => (padding.copyWith(left: 0), padding.copyWith(right: 0), padding.copyWith(left: header, right: footer)),
-      Axis.vertical   => (padding.copyWith(top: 0), padding.copyWith(bottom: 0), padding.copyWith(top: header, bottom: footer)),
+      Axis.horizontal || Axis.vertical when (start ?? end) == null => (EdgeInsets.zero, EdgeInsets.zero, padding),
+      Axis.horizontal => (padding.copyWith(left: 0), padding.copyWith(right: 0), padding.copyWith(left: start, right: end)),
+      Axis.vertical   => (padding.copyWith(top: 0), padding.copyWith(bottom: 0), padding.copyWith(top: start, bottom: end)),
     };
     final (EdgeInsets headerPadding, EdgeInsets footerPadding) = widget.reverse
         ? (startPadding, endPadding)
