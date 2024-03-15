@@ -380,8 +380,7 @@ class TextLayout {
   /// The distance from the left edge of the leftmost glyph to the right edge of
   /// the rightmost glyph in the paragraph.
   ///
-  /// The value typically does not take trailing spaces into account, unless the
-  /// longest line has zero width without the trailing spaces.
+  /// The value typically does not take trailing spaces into account.
   double get longestLine {
     assert(debugIsValid);
     return _paragraph.longestLine;

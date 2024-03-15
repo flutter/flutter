@@ -987,13 +987,6 @@ void main() {
     painter.text = TextSpan(text: 'X${" " * 10}', style: style);
     // Trailing spaces are ignored in most cases.
     expect(painter.layout().longestLine, 10);
-
-    // ... unless the line is otherwise zero-width.
-    painter.text = TextSpan(text: ' ' * 10, style: style);
-    expect(painter.layout().longestLine, 100);
-
-    painter.text = TextSpan(text: '${"\u200B"}${" " * 10}', style: style);
-    expect(painter.layout().longestLine, 100);
   });
 
   test('TextPainter widget span', () {
@@ -1689,7 +1682,7 @@ void main() {
   });
 
   group('TextLayout', () {
-    test('+ operator basic test', () {
+    test('shift paint offset', () {
       const double fontSize = 10;
       const String text = '12345';
       const Offset additionalOffset = Offset(100, 1000);
@@ -1730,9 +1723,9 @@ void main() {
         ),
       );
       expect(layout.getPositionForOffset(additionalOffset + const Offset(3, 5)), const TextPosition(offset: 0));
-    });
+    }, skip: kIsWeb && !isCanvasKit); // [intended] https://github.com/flutter/flutter/issues/122066
 
-    test('shift operator throws if given an infinite offset', () {
+    test('shift operation throws if given an infinite offset', () {
       const double fontSize = 10;
       const String text = '12345';
       final TextLayout layout = TextPainter(
