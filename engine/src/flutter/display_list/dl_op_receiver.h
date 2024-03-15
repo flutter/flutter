@@ -122,6 +122,11 @@ class DlOpReceiver {
   // attributes will be applied to the save layer surface while rendering
   // it back to the current surface. If the flag is false then this method
   // is equivalent to |SkCanvas::saveLayer| with a null paint object.
+  //
+  // The |options| parameter can also specify whether the bounds came from
+  // the caller who recorded the operation, or whether they were calculated
+  // by the DisplayListBuilder.
+  //
   // The |options| parameter may contain other options that indicate some
   // specific optimizations may be made by the underlying implementation
   // to avoid creating a temporary layer, these optimization options will
@@ -129,10 +134,36 @@ class DlOpReceiver {
   // specified in calling a |DisplayListBuilder| as they will be ignored.
   // The |backdrop| filter, if not null, is used to initialize the new
   // layer before further rendering happens.
-  virtual void saveLayer(const SkRect* bounds,
+  virtual void saveLayer(const SkRect& bounds,
                          const SaveLayerOptions options,
                          const DlImageFilter* backdrop = nullptr) = 0;
   virtual void restore() = 0;
+
+  // ---------------------------------------------------------------------
+  // Legacy helper method for older callers that use the null-ness of
+  // the bounds to indicate if they should be recorded or computed.
+  // This method will not be called on a |DlOpReceiver| that is passed
+  // to the |DisplayList::Dispatch()| method, so client receivers should
+  // ignore it for their implementation purposes.
+  //
+  // DlOpReceiver methods are generally meant to ONLY be output from a
+  // previously recorded DisplayList so this method is really only used
+  // from testing methods that bypass the public builder APIs for legacy
+  // convenience or for internal white-box testing of the DisplayList
+  // internals. Such methods should eventually be converted to using the
+  // public DisplayListBuilder/DlCanvas public interfaces where possible,
+  // as tracked in:
+  // https://github.com/flutter/flutter/issues/144070
+  virtual void saveLayer(const SkRect* bounds,
+                         const SaveLayerOptions options,
+                         const DlImageFilter* backdrop = nullptr) final {
+    if (bounds) {
+      saveLayer(*bounds, options.with_bounds_from_caller(), backdrop);
+    } else {
+      saveLayer(SkRect(), options.without_bounds_from_caller(), backdrop);
+    }
+  }
+  // ---------------------------------------------------------------------
 
   virtual void translate(SkScalar tx, SkScalar ty) = 0;
   virtual void scale(SkScalar sx, SkScalar sy) = 0;

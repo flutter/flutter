@@ -356,7 +356,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // other flags will be ignored and calculated anew as the DisplayList is
   // built. Alternatively, use the |saveLayer(SkRect, bool)| method.
   // |DlOpReceiver|
-  void saveLayer(const SkRect* bounds,
+  void saveLayer(const SkRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override;
   // |DlOpReceiver|
@@ -508,25 +508,19 @@ class DisplayListBuilder final : public virtual DlCanvas,
     return SkScalarIsFinite(sigma) && sigma > 0.0;
   }
 
-  class LayerInfo {
+  class SaveInfo {
    public:
-    explicit LayerInfo(
-        size_t save_offset = 0,
-        bool has_layer = false,
-        const std::shared_ptr<const DlImageFilter>& filter = nullptr)
-        : save_offset_(save_offset),
-          has_layer_(has_layer),
-          filter_(filter) {}
+    explicit SaveInfo(size_t save_offset = 0) : save_offset_(save_offset) {}
 
-    // The offset into the memory buffer where the saveLayer DLOp record
-    // for this saveLayer() call is placed. This may be needed if the
+    // The offset into the memory buffer where the save DLOp record
+    // for this save() call is placed. This may be needed if the
     // eventual restore() call has discovered important information about
     // the records inside the saveLayer that may impact how the saveLayer
     // is handled (e.g., |cannot_inherit_opacity| == false).
     // This offset is only valid if |has_layer| is true.
     size_t save_offset() const { return save_offset_; }
 
-    bool has_layer() const { return has_layer_; }
+    bool is_save_layer() const { return is_save_layer_; }
     bool cannot_inherit_opacity() const { return cannot_inherit_opacity_; }
     bool has_compatible_op() const { return has_compatible_op_; }
     bool affects_transparent_layer() const {
@@ -593,7 +587,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
    private:
     size_t save_offset_;
-    bool has_layer_;
+    bool is_save_layer_ = false;
     bool cannot_inherit_opacity_ = false;
     bool has_compatible_op_ = false;
     std::shared_ptr<const DlImageFilter> filter_;
@@ -601,13 +595,15 @@ class DisplayListBuilder final : public virtual DlCanvas,
     bool has_deferred_save_op_ = false;
     bool is_nop_ = false;
     bool affects_transparent_layer_ = false;
+    std::shared_ptr<BoundsAccumulator> layer_accumulator_;
 
     friend class DisplayListBuilder;
   };
 
-  std::vector<LayerInfo> layer_stack_;
-  LayerInfo* current_layer_;
+  std::vector<SaveInfo> layer_stack_;
+  SaveInfo* current_layer_;
   DisplayListMatrixClipTracker tracker_;
+  std::unique_ptr<DisplayListMatrixClipTracker> layer_tracker_;
   std::unique_ptr<BoundsAccumulator> accumulator_;
   BoundsAccumulator* accumulator() { return accumulator_.get(); }
 
@@ -743,12 +739,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   static_assert(!kAnyColor.isTransparent());
   static DlColor GetEffectiveColor(const DlPaint& paint,
                                    DisplayListAttributeFlags flags);
-
-  // Computes the bounds of an operation adjusted for a given ImageFilter
-  // and returns whether the computation was possible. If the method
-  // returns false then the caller should assume the worst about the bounds.
-  static bool ComputeFilteredBounds(SkRect& bounds,
-                                    const DlImageFilter* filter);
 
   // Adjusts the indicated bounds for the given flags and returns true if
   // the calculation was possible, or false if it could not be estimated.

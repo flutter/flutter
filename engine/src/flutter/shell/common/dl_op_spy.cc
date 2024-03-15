@@ -29,7 +29,7 @@ void DlOpSpy::setColorSource(const DlColorSource* source) {
   will_draw_ = true;
 }
 void DlOpSpy::save() {}
-void DlOpSpy::saveLayer(const SkRect* bounds,
+void DlOpSpy::saveLayer(const SkRect& bounds,
                         const SaveLayerOptions options,
                         const DlImageFilter* backdrop) {}
 void DlOpSpy::restore() {}

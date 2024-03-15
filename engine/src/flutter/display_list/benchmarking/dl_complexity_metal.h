@@ -35,7 +35,7 @@ class DisplayListMetalComplexityCalculator
     explicit MetalHelper(unsigned int ceiling)
         : ComplexityCalculatorHelper(ceiling) {}
 
-    void saveLayer(const SkRect* bounds,
+    void saveLayer(const SkRect& bounds,
                    const SaveLayerOptions options,
                    const DlImageFilter* backdrop) override;
 

@@ -60,6 +60,8 @@ class TraceSerializer {
 
   void Write(const SourceRectConstraint& src_rect_constraint);
 
+  void Write(const ContentBoundsPromise& promise);
+
  private:
   std::stringstream buffer_;
 };
