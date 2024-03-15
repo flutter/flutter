@@ -240,7 +240,7 @@ List<Plugin> _filterPluginsByPlatform(
   final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
     return p.platforms.containsKey(platformKey);
   });
-  return _resolvePluginsByPlatform(
+  return _resolvePluginImplementationByPlatform(
     platformPlugins,
     platformKey,
   ).toList();
@@ -1278,7 +1278,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
   for (final String platformKey in platformKeys) {
     try {
-      final Iterable<PluginInterfaceResolution> platformPluginResolution = _resolvePluginsByPlatform(
+      final Iterable<PluginInterfaceResolution> platformPluginResolutions = _resolvePluginImplementationByPlatform(
         plugins,
         platformKey,
         selectDartPluginsOnly: selectDartPluginsOnly,
@@ -1287,7 +1287,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       });
 
       // Add final plugin resolutions to the result array
-      pluginResolutions.addAll(platformPluginResolution);
+      pluginResolutions.addAll(platformPluginResolutions);
     } on ToolExit catch (e) {
       if (e.message != null) {
         globals.printError(e.message!);
@@ -1315,7 +1315,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
 ///
-Iterable<Plugin> _resolvePluginsByPlatform(
+Iterable<Plugin> _resolvePluginImplementationByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
   bool selectDartPluginsOnly = false,
