@@ -6,14 +6,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart' show fileSystem;
 
-const ProcessManager processManager = LocalProcessManager();
+final ProcessUtils processUtils = ProcessUtils(
+  processManager: const LocalProcessManager(),
+  logger: BufferLogger.test(),
+);
 final String flutterRoot = getFlutterRoot();
 final String flutterBin = fileSystem.path.join(flutterRoot, 'bin', 'flutter');
 
@@ -180,7 +185,7 @@ Future<ProcessTestResult> runFlutter(
 }) async {
   const LocalPlatform platform = LocalPlatform();
   final Stopwatch clock = Stopwatch()..start();
-  final Process process = await processManager.start(
+  final Process process = await processUtils.start(
     <String>[
       // In a container with no X display, use the virtual framebuffer.
       if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) '/usr/bin/xvfb-run',

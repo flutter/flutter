@@ -57,30 +57,14 @@ Future<void> main() async {
 }
 
 Future<String> runDartBatch() async {
-  String output = '';
-  final Process process = await processManager.start(
-    <String>[
-      dartBatch.path
-    ],
-  );
-  final Future<Object?> stdoutFuture = process.stdout
-    .transform<String>(utf8.decoder)
-    .forEach((String str) {
-      output += str;
-    });
-  final Future<Object?> stderrFuture = process.stderr
-    .transform<String>(utf8.decoder)
-    .forEach((String str) {
-      output += str;
-    });
+  final ProcessResult result = await processManager.run(<String>[dartBatch.path]);
+  final String output = (result.stdout as String) + (result.stderr as String);
 
-  // Wait for the output to complete
-  await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
   // Ensure child exited successfully
   expect(
-    await process.exitCode,
+    result.exitCode,
     0,
-    reason: 'child process exited with code ${await process.exitCode}, and '
+    reason: 'child process exited with code ${result.exitCode}, and '
     'output:\n$output',
   );
 

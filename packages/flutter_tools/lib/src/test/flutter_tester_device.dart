@@ -15,6 +15,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -31,7 +32,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.id,
     required this.platform,
     required this.fileSystem,
-    required this.processManager,
+    required ProcessManager processManager,
     required this.logger,
     required this.shellPath,
     required this.debuggingOptions,
@@ -46,13 +47,13 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.uriConverter,
   })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
-            ? Completer<Uri?>() : (Completer<Uri?>()..complete());
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete()),
+        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
   final Platform platform;
   final FileSystem fileSystem;
-  final ProcessManager processManager;
   final Logger logger;
   final String shellPath;
   final DebuggingOptions debuggingOptions;
@@ -65,6 +66,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
   final UriConverter? uriConverter;
+  final ProcessUtils _processUtils;
 
   final Completer<Uri?> _gotProcessVmServiceUri;
   final Completer<int> _exitCode = Completer<int>();
@@ -150,7 +152,7 @@ class FlutterTesterTestDevice extends TestDevice {
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
-    _process = await processManager.start(command, environment: environment);
+    _process = await _processUtils.start(command, environment: environment);
 
     // Unawaited to update state.
     unawaited(_process!.exitCode.then((int exitCode) {

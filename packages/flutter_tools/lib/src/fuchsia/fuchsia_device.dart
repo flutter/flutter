@@ -863,7 +863,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       device.id, // Device's IP address.
       'true',
     ];
-    final Process process = await globals.processManager.start(command);
+    final Process process = await globals.processUtils.start(command);
     unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
