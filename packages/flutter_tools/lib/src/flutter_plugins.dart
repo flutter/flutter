@@ -240,11 +240,10 @@ List<Plugin> _filterPluginsByPlatform(
   final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
     return p.platforms.containsKey(platformKey);
   });
-  final Iterable<Plugin> finalPluginResolution = _finalPluginResolution(
+  return _resolvePluginsByPlatform(
     platformPlugins,
     platformKey,
-  );
-  return finalPluginResolution.toList();
+  ).toList();
 }
 
 List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
@@ -1274,12 +1273,12 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
+  final List<PluginInterfaceResolution> pluginResolutions = <PluginInterfaceResolution>[];
   bool hasResolutionError = false;
 
   for (final String platformKey in platformKeys) {
     try {
-      final Iterable<PluginInterfaceResolution> finalPluginResolution = _finalPluginResolution(
+      final Iterable<PluginInterfaceResolution> platformPluginResolution = _resolvePluginsByPlatform(
         plugins,
         platformKey,
         selectDartPluginsOnly: selectDartPluginsOnly,
@@ -1288,7 +1287,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       });
 
       // Add final plugin resolutions to the result array
-      finalResolution.addAll(finalPluginResolution);
+      pluginResolutions.addAll(platformPluginResolution);
     } on ToolExit catch (e) {
       if (e.message != null) {
         globals.printError(e.message!);
@@ -1299,7 +1298,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   if (hasResolutionError) {
     throwToolExit('Please resolve the plugin implementation selection errors');
   }
-  return finalResolution;
+  return pluginResolutions;
 }
 
 /// Resolves the plugins for the given [platformKey] (dart-only and/or native
@@ -1316,17 +1315,17 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
 ///
-Iterable<Plugin> _finalPluginResolution(
+Iterable<Plugin> _resolvePluginsByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
   bool selectDartPluginsOnly = false,
 }) {
-  final Map<String, List<Plugin>> possibleResolutions = <String, List<Plugin>>{};
+  final Map<String, List<Plugin>> pluginImplCandidates = <String, List<Plugin>>{};
   final Map<String, String> defaultImplementations = <String, String>{};
-  final Map<String, Plugin> finalPluginResolution = <String, Plugin>{};
+  final Map<String, Plugin> pluginResolution = <String, Plugin>{};
 
   for (final Plugin plugin in plugins) {
-    final (String? resolutionPluginName, String? defaultImplementation) = _getPossiblePluginResolutions(
+    final (String? resolutionPluginName, String? defaultImplementation) = _getPluginImplementationCandidate(
       plugin,
       platformKey,
       selectDartPluginsOnly: selectDartPluginsOnly,
@@ -1335,25 +1334,24 @@ Iterable<Plugin> _finalPluginResolution(
       defaultImplementations[plugin.name] = defaultImplementation;
     }
     if (resolutionPluginName != null) {
-      possibleResolutions.putIfAbsent(resolutionPluginName, () => <Plugin>[]);
-      possibleResolutions[resolutionPluginName]!.add(plugin);
+      pluginImplCandidates.putIfAbsent(resolutionPluginName, () => <Plugin>[]);
+      pluginImplCandidates[resolutionPluginName]!.add(plugin);
     }
   }
 
   bool hasResolutionError = false;
   // Now resolve all the possible resolutions to a single option for each
   // plugin, or throw if that's not possible.
-  for (final MapEntry<String, List<Plugin>> possiblePluginResolutions
-      in possibleResolutions.entries) {
+  for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
     try {
-      final Plugin? resolution = _resolvePluginResolution(
+      final Plugin? resolution = _resolveImplementationOfPlugin(
         platformKey,
-        possiblePluginResolutions,
+        implCandidatesEntry,
         defaultPackageName:
-            defaultImplementations[possiblePluginResolutions.key],
+            defaultImplementations[implCandidatesEntry.key],
       );
       if (resolution != null) {
-        finalPluginResolution[possiblePluginResolutions.key] = resolution;
+        pluginResolution[implCandidatesEntry.key] = resolution;
       }
     } on ToolExit catch (e) {
       if (e.message != null) {
@@ -1365,10 +1363,10 @@ Iterable<Plugin> _finalPluginResolution(
   if (hasResolutionError) {
     throwToolExit('Cannot resolve the plugin implementation for $platformKey.\n');
   }
-  return finalPluginResolution.values;
+  return pluginResolution.values;
 }
 
-(String?, String?) _getPossiblePluginResolutions(
+(String?, String?) _getPluginImplementationCandidate(
   Plugin plugin,
   String platformKey, {
   bool selectDartPluginsOnly = false,
@@ -1437,12 +1435,12 @@ Iterable<Plugin> _finalPluginResolution(
   return (implementsPackage, defaultImplementation);
 }
 
-Plugin? _resolvePluginResolution(
+Plugin? _resolveImplementationOfPlugin(
   String platformKey,
-  MapEntry<String, List<Plugin>> possiblePluginResolutions, {
+  MapEntry<String, List<Plugin>> implCandidatesEntry, {
   String? defaultPackageName,
 }) {
-  final List<Plugin> candidates = possiblePluginResolutions.value;
+  final List<Plugin> candidates = implCandidatesEntry.value;
   // If there's only one candidate, use it.
   if (candidates.length == 1) {
     return candidates.first;
@@ -1454,7 +1452,7 @@ Plugin? _resolvePluginResolution(
   if (directDependencies.isNotEmpty) {
     if (directDependencies.length > 1) {
       throwToolExit(
-          'Plugin ${possiblePluginResolutions.key}:$platformKey has conflicting direct dependency implementations:\n'
+          'Plugin ${implCandidatesEntry.key}:$platformKey has conflicting direct dependency implementations:\n'
           '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
           'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n');
     } else {
@@ -1471,7 +1469,7 @@ Plugin? _resolvePluginResolution(
   }
   // Otherwise, require an explicit choice.
   if (candidates.length > 1) {
-    throwToolExit('Plugin ${possiblePluginResolutions.key}:$platformKey has multiple possible implementations:\n'
+    throwToolExit('Plugin ${implCandidatesEntry.key}:$platformKey has multiple possible implementations:\n'
         '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
         'To fix this issue, add one of these dependencies to pubspec.yaml.\n');
   }
