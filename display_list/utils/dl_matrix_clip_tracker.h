@@ -84,7 +84,15 @@ class DisplayListMatrixClipTracker {
   void setTransform(const SkMatrix& matrix) { current_->setTransform(matrix); }
   void setTransform(const SkM44& m44);
   void setIdentity() { current_->setIdentity(); }
+  // If the matrix in |other_tracker| is invertible then transform this
+  // tracker by the inverse of its matrix and return true. Otherwise,
+  // return false and leave this tracker unmodified.
+  bool inverseTransform(const DisplayListMatrixClipTracker& other_tracker);
+
   bool mapRect(SkRect* rect) const { return current_->mapRect(*rect, rect); }
+  bool mapRect(const SkRect& src, SkRect* mapped) {
+    return current_->mapRect(src, mapped);
+  }
 
   void clipRect(const SkRect& rect, ClipOp op, bool is_aa) {
     current_->clipBounds(rect, op, is_aa);

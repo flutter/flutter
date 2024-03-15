@@ -72,7 +72,7 @@ class DlDispatcher final : public flutter::DlOpReceiver {
   void save() override;
 
   // |flutter::DlOpReceiver|
-  void saveLayer(const SkRect* bounds,
+  void saveLayer(const SkRect& bounds,
                  const flutter::SaveLayerOptions options,
                  const flutter::DlImageFilter* backdrop) override;
 

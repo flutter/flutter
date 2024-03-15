@@ -75,9 +75,11 @@ class Canvas {
 
   void Save();
 
-  void SaveLayer(const Paint& paint,
-                 std::optional<Rect> bounds = std::nullopt,
-                 const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr);
+  void SaveLayer(
+      const Paint& paint,
+      std::optional<Rect> bounds = std::nullopt,
+      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
+      ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown);
 
   bool Restore();
 

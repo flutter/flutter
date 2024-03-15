@@ -783,7 +783,8 @@ void Canvas::AddEntityToCurrentPass(Entity entity) {
 
 void Canvas::SaveLayer(const Paint& paint,
                        std::optional<Rect> bounds,
-                       const std::shared_ptr<ImageFilter>& backdrop_filter) {
+                       const std::shared_ptr<ImageFilter>& backdrop_filter,
+                       ContentBoundsPromise bounds_promise) {
   TRACE_EVENT0("flutter", "Canvas::saveLayer");
   Save(true, paint.blend_mode, backdrop_filter);
 
@@ -796,7 +797,9 @@ void Canvas::SaveLayer(const Paint& paint,
   }
 
   auto& new_layer_pass = GetCurrentPass();
-  new_layer_pass.SetBoundsLimit(bounds);
+  if (bounds) {
+    new_layer_pass.SetBoundsLimit(bounds, bounds_promise);
+  }
 
   if (paint.image_filter) {
     MipCountVisitor mip_count_visitor;
