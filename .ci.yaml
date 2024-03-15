@@ -806,6 +806,7 @@ targets:
       task_name: gradle_plugin_fat_apk_test
     runIf:
       - dev/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -824,6 +825,7 @@ targets:
       task_name: gradle_plugin_light_apk_test
     runIf:
       - dev/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
