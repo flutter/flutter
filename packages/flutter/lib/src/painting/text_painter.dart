@@ -307,11 +307,6 @@ class _UntilTextBoundary extends TextBoundary {
   }
 }
 
-// This is a wrapper class around ui.Paragraph. Despite having immutable
-// semantics, we can't define it as an extension type because the ui.Paragraph
-// class is mutable, and the equality of a TextLayout only depends on the paint
-// offset and the layoutEqualityId.
-
 /// An immutable class that represents the result of calling [TextPainter.layout].
 ///
 /// This class discribes the text layout in a 2D coordinate system where the text
@@ -572,6 +567,8 @@ class TextLayout {
   }
 
   @override
+  // This class is considerd immutable
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -582,6 +579,7 @@ class TextLayout {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => Object.hash(_paintOffset, _layoutEqualityId);
 }
 

@@ -2171,8 +2171,6 @@ void main() {
       expect(foregroundPainter.paintCount, 2);
       expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
-
-      editable.dispose();
     });
 
     test('Repaints when scroll offset changes', () async {
@@ -2225,8 +2223,6 @@ void main() {
         editable.textLayout.value?.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds.topLeft,
         const Offset(-1000, 0), // Single line
       );
-
-      editable.dispose();
     });
 
     test('Repaints on constraints changes', () async {
@@ -2266,12 +2262,10 @@ void main() {
       expect(foregroundPainter.paintCount, 2);
       expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
-
-      editable.dispose();
     });
 
     test('Repaints on TextAlign changes', () async {
-      final RenderEditable paragraph = RenderEditable(
+      final RenderEditable editable = RenderEditable(
         text: const TextSpan(text: 'AAAAA'),
         textDirection: TextDirection.ltr,
         cursorColor: const Color(0x00000000),
@@ -2280,12 +2274,12 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
       );
-      final _TestPainter foregroundPainter = _TestPainter(paragraph.textLayout);
-      final _TestPainter backgroundPainter = _TestPainter(paragraph.textLayout);
+      final _TestPainter foregroundPainter = _TestPainter(editable.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(editable.textLayout);
       final RenderCustomPaint root = RenderCustomPaint(
         foregroundPainter: foregroundPainter,
         painter: backgroundPainter,
-        child: paragraph,
+        child: editable,
       );
 
       expect(foregroundPainter.lastTextLayout, isNull);
@@ -2293,26 +2287,52 @@ void main() {
 
       layout(root, phase: EnginePhase.composite);
 
-      TextLayout? previousLayout = paragraph.textLayout.value;
-      expect(paragraph.textLayout.value, isNotNull);
-      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      TextLayout? previousLayout = editable.textLayout.value;
+      expect(editable.textLayout.value, isNotNull);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
       expect(foregroundPainter.paintCount, 1);
-      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
       expect(backgroundPainter.paintCount, 1);
 
-      previousLayout = paragraph.textLayout.value;
-      paragraph.textAlign = TextAlign.center;
-      expect(paragraph.textLayout.value, isNull);
+      previousLayout = editable.textLayout.value;
+      editable.textAlign = TextAlign.center;
+      expect(editable.textLayout.value, isNull);
 
       pumpFrame(phase: EnginePhase.composite);
-      expect(paragraph.textLayout.value, isNotNull);
-      expect(paragraph.textLayout.value, isNot(previousLayout));
-      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(editable.textLayout.value, isNotNull);
+      expect(editable.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
       expect(foregroundPainter.paintCount, 2);
-      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
+    });
 
-      paragraph.dispose();
+    test('intrinsic calculation is not observable', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+      );
+      layout(editable, phase: EnginePhase.composite);
+      bool textLayoutChanged = false;
+      void onLayoutChanged() {
+        textLayoutChanged = true;
+      }
+
+      editable.textLayout.addListener(onLayoutChanged);
+      expect(textLayoutChanged, isFalse);
+
+      editable.getDryLayout(BoxConstraints.tight(Size.zero));
+      editable.getMaxIntrinsicHeight(10);
+      editable.getMinIntrinsicHeight(10);
+      editable.getMaxIntrinsicWidth(10);
+      editable.getMinIntrinsicWidth(10);
+
+      expect(textLayoutChanged, isFalse);
     });
   });
 }

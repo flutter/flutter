@@ -1494,8 +1494,6 @@ void main() {
       expect(foregroundPainter.paintCount, 2);
       expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
-
-      paragraph.dispose();
     });
 
     test('Repaints on constraints changes', () async {
@@ -1529,8 +1527,6 @@ void main() {
       expect(foregroundPainter.paintCount, 2);
       expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
-
-      paragraph.dispose();
     });
 
     test('Repaints on TextAlign changes', () async {
@@ -1569,8 +1565,29 @@ void main() {
       expect(foregroundPainter.paintCount, 2);
       expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
       expect(backgroundPainter.paintCount, 2);
+    });
 
-      paragraph.dispose();
+    test('intrinsic calculation is not observable', () async {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+      );
+      layout(paragraph, phase: EnginePhase.composite);
+      bool textLayoutChanged = false;
+      void onLayoutChanged() {
+        textLayoutChanged = true;
+      }
+
+      paragraph.textLayout.addListener(onLayoutChanged);
+      expect(textLayoutChanged, isFalse);
+
+      paragraph.getDryLayout(BoxConstraints.tight(Size.zero));
+      paragraph.getMaxIntrinsicHeight(10);
+      paragraph.getMinIntrinsicHeight(10);
+      paragraph.getMaxIntrinsicWidth(10);
+      paragraph.getMinIntrinsicWidth(10);
+
+      expect(textLayoutChanged, isFalse);
     });
   });
 }
