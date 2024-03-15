@@ -508,25 +508,36 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomLeft);
     assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomRight);
     final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
-    Radius animated({required bool isStart}) {
-      final MergeableMaterialItem? neighbor = index > 0
-          ? _children.elementAtOrNull(isStart ? index - 1 : index + 1)
-          : null;
-      if (neighbor is MaterialGap) {
-        final _AnimationTuple tuple = _animationTuples[neighbor.key]!;
-        final double t = isStart ? tuple.startAnimation.value : tuple.endAnimation.value;
-        return Radius.lerp(Radius.zero, cardRadius, t)!;
-      }
-      return Radius.zero;
+
+    Radius startRadius = Radius.zero;
+    Radius endRadius = Radius.zero;
+
+    if (index > 0 && _children[index - 1] is MaterialGap) {
+      startRadius = Radius.lerp(
+        Radius.zero,
+        cardRadius,
+        _animationTuples[_children[index - 1].key]!.startAnimation.value,
+      )!;
+    }
+    if (index < _children.length - 2 && _children[index + 1] is MaterialGap) {
+      endRadius = Radius.lerp(
+        Radius.zero,
+        cardRadius,
+        _animationTuples[_children[index + 1].key]!.endAnimation.value,
+      )!;
     }
 
-    final Radius startRadius = start ? cardRadius : animated(isStart: true);
-    final Radius endRadius = end ? cardRadius : animated(isStart: false);
-
-    return switch (widget.mainAxis) {
-      Axis.horizontal => BorderRadius.horizontal(left: startRadius, right: endRadius),
-      Axis.vertical   => BorderRadius.vertical(top: startRadius, bottom: endRadius),
-    };
+    if (widget.mainAxis == Axis.vertical) {
+      return BorderRadius.vertical(
+        top: start ? cardRadius : startRadius,
+        bottom: end ? cardRadius : endRadius,
+      );
+    } else {
+      return BorderRadius.horizontal(
+        left: start ? cardRadius : startRadius,
+        right: end ? cardRadius : endRadius,
+      );
+    }
   }
 
   double _getGapSize(int index) {

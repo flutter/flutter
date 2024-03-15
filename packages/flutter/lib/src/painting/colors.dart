@@ -31,16 +31,15 @@ Color _colorFromHue(
   double secondary,
   double match,
 ) {
-  final List<double> rgb = switch (hue) {
-    <  60.0 => <double>[chroma, secondary, 0.0],
-    < 120.0 => <double>[secondary, chroma, 0.0],
-    < 180.0 => <double>[0.0, chroma, secondary],
-    < 240.0 => <double>[0.0, secondary, chroma],
-    < 300.0 => <double>[secondary, 0.0, chroma],
-    _       => <double>[chroma, 0.0, secondary],
+  final (double red, double green, double blue) = switch (hue) {
+    <  60.0 => (chroma, secondary, 0.0),
+    < 120.0 => (secondary, chroma, 0.0),
+    < 180.0 => (0.0, chroma, secondary),
+    < 240.0 => (0.0, secondary, chroma),
+    < 300.0 => (secondary, 0.0, chroma),
+    _       => (chroma, 0.0, secondary),
   };
-  final [int red, int green, int blue] = <int>[for (final double value in rgb) ((value + match) * 0xFF).round()];
-  return Color.fromRGBO(red, green, blue, alpha);
+  return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [value].
