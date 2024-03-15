@@ -586,6 +586,27 @@ enum DeviceConnectionInterface {
   wireless,
 }
 
+/// Returns the `DeviceConnectionInterface` enum based on its string name.
+DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
+  switch (name) {
+    case 'attached':
+      return DeviceConnectionInterface.attached;
+    case 'wireless':
+      return DeviceConnectionInterface.wireless;
+  }
+  throw Exception('Unsupported DeviceConnectionInterface name "$name"');
+}
+
+/// Returns a `DeviceConnectionInterface`'s string name.
+String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
+  switch (connectionInterface) {
+    case DeviceConnectionInterface.attached:
+      return 'attached';
+    case DeviceConnectionInterface.wireless:
+      return 'wireless';
+  }
+}
+
 /// A device is a physical hardware that can run a Flutter application.
 ///
 /// This may correspond to a connected iOS or Android device, or represent
