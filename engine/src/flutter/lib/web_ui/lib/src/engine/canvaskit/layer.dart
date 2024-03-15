@@ -178,11 +178,16 @@ class BackdropFilterEngineLayer extends ContainerLayer
   @override
   void paint(PaintContext paintContext) {
     final CkPaint paint = CkPaint()..blendMode = _blendMode;
-    paintContext.internalNodesCanvas
-        .saveLayerWithFilter(paintBounds, _filter, paint);
+
+    // Only apply the backdrop filter to the current canvas. If we apply the
+    // backdrop filter to every canvas (i.e. by applying it to the
+    // [internalNodesCanvas]), then later when we compose the canvases into a
+    // single canvas, the backdrop filter will be applied multiple times.
+    final CkCanvas currentCanvas = paintContext.leafNodesCanvas!;
+    currentCanvas.saveLayerWithFilter(paintBounds, _filter, paint);
     paint.dispose();
     paintChildren(paintContext);
-    paintContext.internalNodesCanvas.restore();
+    currentCanvas.restore();
   }
 
   // TODO(dnfield): dispose of the _filter
