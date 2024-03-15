@@ -92,6 +92,7 @@ void main() {
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),
     );
@@ -139,6 +140,7 @@ void main() {
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,
+      useWasm: false,
       serverFactory: () async => server,
       testPackageUri: Uri.parse('test'),
     );

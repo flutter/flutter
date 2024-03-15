@@ -82,6 +82,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required this.webRenderer,
+    required this.useWasm,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _testDartJs = testDartJs,
@@ -128,6 +129,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
   final WebRendererMode webRenderer;
+  final bool useWasm;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -155,6 +157,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required WebRendererMode webRenderer,
+    required bool useWasm,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
     Future<shelf.Server> Function() serverFactory = defaultServerFactory,
@@ -203,6 +206,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       nullAssertions: nullAssertions,
       processManager: processManager,
       webRenderer: webRenderer,
+      useWasm: useWasm,
       testTimeRecorder: testTimeRecorder,
     );
   }
@@ -487,7 +491,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           <title>${htmlEscape.convert(test)} Test</title>
           <script src="flutter.js"></script>
           <script>
-            _flutter.buildConfig = {"engineRevision":"7e8fefe4a0842b58f1d79ac6fe3587758c0847ce","builds":[{"compileTarget":"dartdevc","renderer":"auto","mainJsPath":"main.dart.browser_test.dart.js"}]};
+            _flutter.buildConfig = {"builds":[{"compileTarget":"dartdevc","renderer":"${webRenderer.name}","mainJsPath":"main.dart.browser_test.dart.js"}]};
             window.testSelector = "$scriptBase";
             _flutter.loader.load({
               config: {

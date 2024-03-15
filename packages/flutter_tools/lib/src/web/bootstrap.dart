@@ -404,13 +404,13 @@ String generateTestEntrypoint({
   for (int index = 0; index < testInfos.length; index++) {
     final WebTestInfo testInfo = testInfos[index];
     final String entryPointPath = testInfo.entryPoint;
-    importMainStatements.add("import '${Uri.file(entryPointPath)}' as test_$index show main;");
+    importMainStatements.add("import 'org-dartlang-app:///${Uri.file(entryPointPath)}' as test_$index show main;");
     entryPointPairs.add("  '$entryPointPath': test_$index.main,");
 
     final String? testConfigPath = testInfo.configFile;
     if (testConfigPath != null) {
       importTestConfigStatements.add(
-        "import '${Uri.file(testConfigPath)}' as test_config_$index show testExecutable"
+        "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable"
       );
       testConfigPairs.add("  '$testConfigPath': test_config_$index.testExecutable,");
     }
@@ -420,7 +420,6 @@ String generateTestEntrypoint({
   import 'dart:ui' as ui;
   import 'dart:ui_web' as ui_web;
   import 'dart:async';
-  import 'dart:html';
   import 'dart:js_interop';
 
   ${importMainStatements.join('\n')}
@@ -442,25 +441,55 @@ String generateTestEntrypoint({
     ${testConfigPairs.join('\n')}
   };
 
-  @JS('window.testSelector')
-  external JSString? get testSelector;
+  @JS()
+  external Window get window;
+
+  extension type Window._(JSObject _) implements JSObject {
+    external JSString? get testSelector;
+    external Location get location;
+    external Window? get parent;
+    external void postMessage(JSAny message, JSString targetOrigin, JSArray transfers);
+  }
+
+  extension type Location._(JSObject _) implements JSObject {
+    external JSString get origin;
+  }
+
+  extension type MessageChannel._(JSObject _) implements JSObject {
+    external factory MessageChannel();
+
+    external MessagePort port1;
+    external MessagePort port2;
+  }
+
+  extension type MessagePort._(JSObject _) implements JSObject {
+    external void addEventListener(JSString eventName, JSFunction callback);
+    external void removeEventListener(JSString eventName, JSFunction callback);
+    external void postMessage(JSAny? message);
+
+    external void start();
+  }
+
+  extension type Event._(JSObject _) implements JSObject {
+    external JSObject? get data;
+  }
 
   Future<void> main() async {
-    final JSString? jsTestSelector = testSelector;
+    final JSString? jsTestSelector = window.testSelector;
     if (jsTestSelector == null) {
       throw Exception('Test selector not set');
     }
-    final String dartTestSelector = jsTestSelector.toDart;
-    final EntryPoint? entryPoint = entryPointMap[dartTestSelector];
+    final String testSelector = jsTestSelector.toDart;
+    final EntryPoint? entryPoint = entryPointMap[testSelector];
     if (entryPoint == null) {
-      throw Exception('Test entrypoint for \${dartTestSelector} not found');
+      throw Exception('Test entrypoint for \${testSelector} not found');
     }
-    final EntryPointRunner? entryPointRunner = testConfigMap[dartTestSelector];
+    final EntryPointRunner? entryPointRunner = testConfigMap[testSelector];
     ui_web.debugEmulateFlutterTesterEnvironment = true;
     final Completer<void> completer = Completer<void>();
     await ui_web.bootstrapEngine(runApp: () => completer.complete());
     await completer.future;
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.file(jsTestSelector.toDart));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.file(testSelector));
     ui_web.debugOverrideDevicePixelRatio(3.0);
     ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
@@ -479,13 +508,17 @@ String generateTestEntrypoint({
   StreamChannel postMessageChannel() {
     var controller = StreamChannelController<Object?>(sync: true);
     var channel = MessageChannel();
-    window.parent!.postMessage('port', window.location.origin, [channel.port2]);
+    window.parent!.postMessage('port'.toJS, window.location.origin, [channel.port2].toJS);
 
-    var portSubscription = channel.port1.onMessage.listen((message) {
-      controller.local.sink.add(message.data);
-    });
-    controller.local.stream
-        .listen(channel.port1.postMessage, onDone: portSubscription.cancel);
+    var eventCallback = (Event event) {
+      controller.local.sink.add(event.data.dartify());
+    }.toJS;
+    channel.port1.addEventListener('message'.toJS, eventCallback);
+    channel.port1.start();
+    controller.local.stream.listen(
+      (Object? message) => channel.port1.postMessage(message.jsify()),
+      onDone: () => channel.port1.removeEventListener('message'.toJS, eventCallback),
+    );
 
     return controller.foreign;
   }

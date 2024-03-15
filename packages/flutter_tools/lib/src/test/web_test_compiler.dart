@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:package_config/package_config.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -11,6 +12,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -49,7 +51,57 @@ class WebTestCompiler {
   final ProcessManager _processManager;
   final Config _config;
 
+  Future<File> _generateTestEntrypoint({
+    required List<String> testFiles,
+    required Directory projectDirectory,
+    required Directory outputDirectory,
+    required LanguageVersion languageVersion,
+  }) async {
+    final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
+      final List<String> relativeTestSegments = _fileSystem.path.split(
+        _fileSystem.path.relative(
+          testFilePath,
+          from: projectDirectory.childDirectory('test').path
+        )
+      );
+      return (
+        entryPoint: relativeTestSegments.join('/'),
+        configFile: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
+      );
+    }).toList();
+    return _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(generateTestEntrypoint(
+        testInfos: testInfos,
+        languageVersion: languageVersion
+      )
+    );
+  }
+
   Future<WebMemoryFS> initialize({
+    required Directory projectDirectory,
+    required String testOutputDir,
+    required List<String> testFiles,
+    required BuildInfo buildInfo,
+    required WebRendererMode webRenderer,
+    required bool useWasm,
+  }) async {
+    return useWasm ? _compileWasm(
+      projectDirectory: projectDirectory,
+      testOutputDir: testOutputDir,
+      testFiles: testFiles,
+      buildInfo: buildInfo,
+      webRenderer: webRenderer,
+    ) : _compileJS(
+      projectDirectory: projectDirectory,
+      testOutputDir: testOutputDir,
+      testFiles: testFiles,
+      buildInfo: buildInfo,
+      webRenderer: webRenderer,
+    );
+  }
+
+  Future<WebMemoryFS> _compileJS({
     required Directory projectDirectory,
     required String testOutputDir,
     required List<String> testFiles,
@@ -83,24 +135,11 @@ class WebTestCompiler {
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
-    final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
-        final List<String> relativeTestSegments = _fileSystem.path.split(
-          _fileSystem.path.relative(
-            testFilePath,
-            from: projectDirectory.childDirectory('test').path
-          )
-        );
-        return (
-          entryPoint: relativeTestSegments.join('/'),
-          configFile: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
-        );
-    }).toList();
-    _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync(generateTestEntrypoint(
-        testInfos: testInfos,
-        languageVersion: languageVersion
-      )
+    final File testFile = await _generateTestEntrypoint(
+      testFiles: testFiles,
+      projectDirectory: projectDirectory,
+      outputDirectory: outputDirectory,
+      languageVersion: languageVersion
     );
 
     final String cachedKernelPath = getDefaultCachedKernelPath(
@@ -137,7 +176,7 @@ class WebTestCompiler {
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(
-      Uri.parse('org-dartlang-app:///main.dart'),
+      Uri.parse('org-dartlang-app:///${testFile.basename}'),
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
@@ -158,5 +197,64 @@ class WebTestCompiler {
 
     return WebMemoryFS()
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
+  }
+
+  Future<WebMemoryFS> _compileWasm({
+    required Directory projectDirectory,
+    required String testOutputDir,
+    required List<String> testFiles,
+    required BuildInfo buildInfo,
+    required WebRendererMode webRenderer,
+  }) async {
+    final Directory outputDirectory = _fileSystem.directory(testOutputDir)
+      ..createSync(recursive: true);
+    final File testFile = await _generateTestEntrypoint(
+      testFiles: testFiles,
+      projectDirectory: projectDirectory,
+      outputDirectory: outputDirectory,
+      languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
+    );
+
+    final String dartSdkPath = _artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
+    final String platformBinariesPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
+    final String platformFilePath = _fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
+    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
+    final File outputWasmFile = outputDirectory.childFile('main.dart.wasm');
+
+    final List<String> compilationArgs = <String>[
+      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      'compile',
+      'wasm',
+      '--packages=.dart_tool/package_config.json',
+      '--extra-compiler-option=--dart-sdk=$dartSdkPath',
+      '--extra-compiler-option=--platform=$platformFilePath',
+      '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
+      '--extra-compiler-option=--multi-root=${projectDirectory.childDirectory('test').path}',
+      '--extra-compiler-option=--multi-root=${outputDirectory.path}',
+      if (webRenderer == WebRendererMode.skwasm) ...<String>[
+        '--extra-compiler-option=--import-shared-memory',
+        '--extra-compiler-option=--shared-memory-max-pages=32768',
+        ],
+      ...buildInfo.extraFrontEndOptions,
+      for (final String dartDefine in dartDefines)
+        '-D$dartDefine',
+
+      '-O1',
+      '-o',
+      outputWasmFile.path,
+      testFile.path, // dartfile
+    ];
+
+    final ProcessUtils processUtils = ProcessUtils(
+      logger: _logger,
+      processManager: _processManager,
+    );
+
+    await processUtils.run(
+      throwOnError: true,
+      compilationArgs,
+    );
+
+    return WebMemoryFS();
   }
 }
