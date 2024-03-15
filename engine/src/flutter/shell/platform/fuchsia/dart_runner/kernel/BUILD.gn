@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
-import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/tools/fuchsia/dart.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 import("$dart_src/utils/compile_platform.gni")
 
 compile_platform("kernel_platform_files") {

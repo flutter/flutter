@@ -1,9 +1,0 @@
-{
-    "deps": [],
-    "name": "dart.test",
-    "root": "dart.test",
-    "sources": [
-        "../../../flutter/shell/platform/fuchsia/dart_runner/fidl/echo.fidl"
-    ],
-    "type": "fidl_library"
-}

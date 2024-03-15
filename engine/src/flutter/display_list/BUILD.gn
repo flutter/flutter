@@ -2,10 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
+
+if (is_fuchsia) {
+  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+}
 
 config("display_list_config") {
   defines = []
@@ -142,8 +145,7 @@ if (enable_unittests) {
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
     if (is_fuchsia) {
-      libs =
-          [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
+      libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
   }
 
@@ -174,8 +176,7 @@ if (enable_unittests) {
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
     if (is_fuchsia) {
-      libs =
-          [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
+      libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
   }
 
