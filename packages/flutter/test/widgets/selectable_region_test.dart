@@ -967,7 +967,7 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Text.rich(
+            child: const Text.rich(
               WidgetSpan(
                 child: Column(
                   children: <Widget>[
