@@ -10,7 +10,7 @@ import("$_skia_root/gn/toolchain/wasm.gni")
 import("flutter_defines.gni")
 
 if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
+  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 }
 
 # Skia public API, generally provided by :skia.
@@ -287,8 +287,8 @@ optional("fontmgr_fuchsia") {
 
   deps = []
 
-  if (is_fuchsia && using_fuchsia_sdk) {
-    deps += [ "//build/fuchsia/fidl:fuchsia.fonts" ]
+  if (is_fuchsia) {
+    deps += [ "${fuchsia_sdk}/fidl/fuchsia.fonts" ]
   } else {
     deps = [ "//sdk/fidl/fuchsia.fonts" ]
   }
@@ -458,11 +458,7 @@ optional("gpu") {
     public += skia_gpu_vk_public
     sources += skia_gpu_vk_private
     if (is_fuchsia) {
-      if (using_fuchsia_sdk) {
-        public_deps += [ "$fuchsia_sdk_root/pkg:vulkan" ]
-      } else {
-        public_deps += [ "$_skia_root/src/graphics/lib/vulkan" ]
-      }
+      public_deps += [ "${fuchsia_sdk}/pkg/vulkan" ]
     }
     if (is_android) {
       sources += skia_gpu_vk_android_private

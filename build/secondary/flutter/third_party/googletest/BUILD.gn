@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
+  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 }
 
 config("gtest_private_config") {
@@ -34,8 +34,8 @@ static_library("gtest") {
   if (is_fuchsia) {
     if (using_fuchsia_sdk) {
       deps = [
-        "$fuchsia_sdk_root/pkg:fdio",
-        "$fuchsia_sdk_root/pkg:zx",
+        "${fuchsia_sdk}/pkg/fdio",
+        "${fuchsia_sdk}/pkg/zx",
       ]
     } else {
       deps = [

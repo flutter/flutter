@@ -4,6 +4,8 @@
 
 assert(is_fuchsia)
 
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+
 source_set("scenic") {
   testonly = true
 
@@ -15,13 +17,13 @@ source_set("scenic") {
   ]
 
   public_deps = [
-    "//build/fuchsia/fidl:fuchsia.images",
-    "//build/fuchsia/fidl:fuchsia.scenic.scheduling",
-    "//build/fuchsia/fidl:fuchsia.ui.composition",
-    "//build/fuchsia/fidl:fuchsia.ui.views",
-    "//build/fuchsia/pkg:async-cpp",
-    "//build/fuchsia/pkg:async-testing",
-    "//build/fuchsia/pkg:fidl_cpp",
+    "${fuchsia_sdk}/fidl/fuchsia.images",
+    "${fuchsia_sdk}/fidl/fuchsia.scenic.scheduling",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.composition",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.views",
+    "${fuchsia_sdk}/pkg/async-cpp",
+    "${fuchsia_sdk}/pkg/async-testing",
+    "${fuchsia_sdk}/pkg/fidl_cpp",
     "//flutter/fml",
   ]
 }

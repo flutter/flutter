@@ -2,9 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
+
+if (is_fuchsia) {
+  import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+}
 
 source_set("fml") {
   sources = [
@@ -227,16 +230,16 @@ source_set("fml") {
     ]
 
     public_deps += [
-      "$fuchsia_sdk_root/fidl:fuchsia.diagnostics",
-      "$fuchsia_sdk_root/fidl:fuchsia.logger",
-      "$fuchsia_sdk_root/pkg:async-cpp",
-      "$fuchsia_sdk_root/pkg:async-loop-cpp",
-      "$fuchsia_sdk_root/pkg:async-loop-default",
-      "$fuchsia_sdk_root/pkg:component_incoming_cpp",
-      "$fuchsia_sdk_root/pkg:syslog_structured_backend",
-      "$fuchsia_sdk_root/pkg:trace",
-      "$fuchsia_sdk_root/pkg:trace-engine",
-      "$fuchsia_sdk_root/pkg:zx",
+      "${fuchsia_sdk}/fidl/fuchsia.diagnostics:fuchsia.diagnostics_cpp",
+      "${fuchsia_sdk}/fidl/fuchsia.logger:fuchsia.logger_cpp",
+      "${fuchsia_sdk}/pkg/async-cpp",
+      "${fuchsia_sdk}/pkg/async-loop-cpp",
+      "${fuchsia_sdk}/pkg/async-loop-default",
+      "${fuchsia_sdk}/pkg/component_incoming_cpp",
+      "${fuchsia_sdk}/pkg/syslog_structured_backend",
+      "${fuchsia_sdk}/pkg/trace",
+      "${fuchsia_sdk}/pkg/trace-engine",
+      "${fuchsia_sdk}/pkg/zx",
     ]
   }
 
@@ -407,14 +410,13 @@ if (enable_unittests) {
 
     if (is_fuchsia) {
       deps += [
-        "$fuchsia_sdk_root/pkg:async-loop-testing",
-        "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
+        "${fuchsia_sdk}/pkg/async-loop-testing",
+        "${fuchsia_sdk}/pkg/sys_component_cpp_testing",
       ]
 
       # This is needed for //flutter/third_party/googletest for linking zircon
       # symbols.
-      libs =
-          [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
+      libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
   }
 

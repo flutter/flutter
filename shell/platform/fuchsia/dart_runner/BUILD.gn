@@ -4,12 +4,12 @@
 
 assert(is_fuchsia)
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/common/fuchsia_config.gni")
 import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
@@ -43,28 +43,28 @@ template("runner_sources") {
     }
 
     public_deps = [
-                    "$fuchsia_sdk_root/pkg:sys_cpp",
+                    "${fuchsia_sdk}/fidl/fuchsia.component.runner",
+                    "${fuchsia_sdk}/fidl/fuchsia.test",
+                    "${fuchsia_sdk}/pkg/sys_cpp",
                     "//flutter/fml",
                   ] + dart_public_deps
 
     deps = [
-      "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
-      "$fuchsia_sdk_root/fidl:fuchsia.logger",
-      "$fuchsia_sdk_root/fidl:fuchsia.test",
-      "$fuchsia_sdk_root/pkg:async",
-      "$fuchsia_sdk_root/pkg:async-cpp",
-      "$fuchsia_sdk_root/pkg:async-default",
-      "$fuchsia_sdk_root/pkg:async-loop",
-      "$fuchsia_sdk_root/pkg:async-loop-cpp",
-      "$fuchsia_sdk_root/pkg:async-loop-default",
-      "$fuchsia_sdk_root/pkg:fidl_cpp",
-      "$fuchsia_sdk_root/pkg:inspect",
-      "$fuchsia_sdk_root/pkg:inspect_component_cpp",
-      "$fuchsia_sdk_root/pkg:sys_cpp",
-      "$fuchsia_sdk_root/pkg:sys_cpp_testing",
-      "$fuchsia_sdk_root/pkg:trace",
-      "$fuchsia_sdk_root/pkg:vfs_cpp",
-      "$fuchsia_sdk_root/pkg:zx",
+      "${fuchsia_sdk}/fidl/fuchsia.logger",
+      "${fuchsia_sdk}/pkg/async",
+      "${fuchsia_sdk}/pkg/async-cpp",
+      "${fuchsia_sdk}/pkg/async-default",
+      "${fuchsia_sdk}/pkg/async-loop",
+      "${fuchsia_sdk}/pkg/async-loop-cpp",
+      "${fuchsia_sdk}/pkg/async-loop-default",
+      "${fuchsia_sdk}/pkg/fidl_cpp",
+      "${fuchsia_sdk}/pkg/inspect",
+      "${fuchsia_sdk}/pkg/inspect_component_cpp",
+      "${fuchsia_sdk}/pkg/sys_cpp",
+      "${fuchsia_sdk}/pkg/sys_cpp_testing",
+      "${fuchsia_sdk}/pkg/trace",
+      "${fuchsia_sdk}/pkg/vfs_cpp",
+      "${fuchsia_sdk}/pkg/zx",
       "fidl:dart_test",
       "//flutter/common",
       "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
@@ -100,8 +100,8 @@ template("runner") {
 
     deps = [
              ":" + target_name + "_runner_sources",
-             "$fuchsia_sdk_root/pkg:inspect_component_cpp",
-             "$fuchsia_sdk_root/pkg:trace-provider-so",
+             "${fuchsia_sdk}/pkg/inspect_component_cpp",
+             "${fuchsia_sdk}/pkg/trace-provider-so",
            ] + extra_deps
   }
 }
@@ -317,7 +317,7 @@ if (enable_unittests) {
 
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
-    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+    libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
     deps = [
       ":jit_runner_sources_for_test",

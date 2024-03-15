@@ -17,6 +17,6 @@ if (current_toolchain == default_toolchain) {
 
 if (current_toolchain != default_toolchain) {
   sdk_targets("dart_library") {
-    meta = "$fuchsia_sdk_path/meta/manifest.json"
+    meta = "$fuchsia_sdk/meta/manifest.json"
   }
 }

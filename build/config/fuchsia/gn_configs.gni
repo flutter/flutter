@@ -2,49 +2,40 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(richkadel): added this import and modified the fuchsia_sdk assignment.
-# See below.
-import("//build/fuchsia/sdk.gni")
+# This file is copied from
+# https://crsrc.org/c/build/config/fuchsia/gn_configs.gni?q=gn_configs.gni
+# with some local modifications to match the flutter setup.
+
 declare_args() {
-  # Path to the fuchsia SDK. This is intended for use in other templates & rules
-  # to reference the contents of the fuchsia SDK.
-  fuchsia_sdk = "$fuchsia_sdk_path"
+  # Path to the fuchsia SDK. This is intended for use in other templates &
+  # rules to reference the contents of the fuchsia SDK.
+  fuchsia_sdk = "//fuchsia/sdk/$host_os"
 
-  # TODO(richkadel): Since flutter needs build rules from the GN SDK, but also
-  # requires the Fuchsia _Core_ SDK (for dart libraries, in the core SDK, but
-  # excluded from the GN SDK), the Fuchsia SDK assumption that the build files
-  # are in the same SDK directory path as the APIs does not hold true. (And
-  # there are a couple of other minor tweaks that appear to be needed, at
-  # this time.) This use case will be discussed with the SDK team, to see if we
-  # can come up with a cleaner solution.
-
-  # Build ID uniquely identifying the Fuchsia IDK. This is exposed as a property so
-  # it can be used to locate images and packages on GCS and as a marker to indicate the
-  # "version" of the IDK. If it is empty, then it is most likely that something is fatally wrong.
+  # ID uniquely identifying the Fuchsia IDK build. This is exposed as a
+  # property so it can be used to locate images and packages on GCS and
+  # as a marker to indicate the "version" of the IDK.
+  # Defaults to the id found in the manifest.json file of the SDK.
   fuchsia_sdk_id = ""
 }
 
-declare_args() {
-  # The SDK manifest file. This is useful to include as a dependency
-  # for some targets in order to cause a rebuild when the version of the
-  # SDK is changed.
-  fuchsia_sdk_manifest_file = "$fuchsia_sdk/meta/manifest.json"
+# TODO(zijiehe): Remove the override and move it into declare_args once the one
+# in //build/config/sdk.gni being removed. - b/40935282
 
-  # fuchsia_tool_dir is use to specify the directory in the SDK to locate tools for the
-  # host cpu architecture. If the host_cpu is not recognized, then tool dir
-  # defaults to x64.
-  fuchsia_tool_dir = "$fuchsia_sdk/tools/x64"
-  if (host_cpu == "x64" || host_cpu == "arm64") {
-    fuchsia_tool_dir = "${fuchsia_sdk}/tools/${host_cpu}"
-  }
+# The target API level for this repository. Embedders should override this
+# value to specify the API level the packages produced from this repository
+# should be targeting, e.g. in their top-level //.gn file. A value of -1
+# means that no API level will be passed to the tools that consumes it.
+fuchsia_target_api_level = 16
 
-  # fuchsia_auto_index_symbols when true adds the ids.txt file generated from a `fuchsia_package`
-  # to the Fuchsia symbol index used to symbolize logs and to find source when using zxdb.
-  # The default value is false, in order to be backwards compatibility with existing builds, and
-  # only makes sense to set to true when building as a developer that will need to symbolize logs
-  # or use the debugger with locally build code.
-  fuchsia_auto_index_symbols = false
-}
+# The SDK manifest file. This is useful to include as a dependency
+# for some targets in order to cause a rebuild when the version of the
+# SDK is changed.
+fuchsia_sdk_manifest_file = "${fuchsia_sdk}/meta/manifest.json"
+
+# fuchsia_tool_dir is used to specify the directory in the SDK to locate
+# tools for the host cpu architecture. If the host_cpu is not recognized,
+# then tool dir defaults to x64.
+fuchsia_tool_dir = "${fuchsia_sdk}/tools/${host_cpu}"
 
 if (fuchsia_sdk_id == "") {
   # Note: If we need to expose more than just the id in the future,
@@ -64,3 +55,6 @@ declare_args() {
     fuchsia_sdk_readelf_exec = ""
   }
 }
+
+# third_party/googletest is still using this condition.
+using_fuchsia_sdk = true

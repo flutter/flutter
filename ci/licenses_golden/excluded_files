@@ -330,7 +330,6 @@
 ../../../flutter/shell/platform/fuchsia/dart_runner/.gitignore
 ../../../flutter/shell/platform/fuchsia/dart_runner/README.md
 ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/pubspec.yaml
-../../../flutter/shell/platform/fuchsia/dart_runner/fidl/meta.json
 ../../../flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.json
 ../../../flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.yaml
 ../../../flutter/shell/platform/fuchsia/dart_runner/tests

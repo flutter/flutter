@@ -4,7 +4,6 @@
 
 assert(is_fuchsia)
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
@@ -12,6 +11,7 @@ import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
+import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 import("//flutter/vulkan/config.gni")
 
 # Fuchsia uses its own custom Surface implementation.
@@ -138,41 +138,44 @@ template("runner_sources") {
       "//flutter/vulkan/procs",
     ]
 
+    # TODO(zijiehe): Considering which deps should belong to the public_deps,
+    # multiple dependencies of this target use the following deps without
+    # explicitly claiming the dependencies.
     public_deps = [
-                    "$fuchsia_sdk_root/pkg:inspect",
-                    "$fuchsia_sdk_root/pkg:inspect_component_cpp",
-                    "$fuchsia_sdk_root/pkg:sys_cpp",
+                    "${fuchsia_sdk}/fidl/fuchsia.accessibility.semantics",
+                    "${fuchsia_sdk}/fidl/fuchsia.component.runner",
+                    "${fuchsia_sdk}/fidl/fuchsia.fonts",
+                    "${fuchsia_sdk}/fidl/fuchsia.images",
+                    "${fuchsia_sdk}/fidl/fuchsia.intl",
+                    "${fuchsia_sdk}/fidl/fuchsia.io",
+                    "${fuchsia_sdk}/fidl/fuchsia.media",
+                    "${fuchsia_sdk}/fidl/fuchsia.memorypressure",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.app",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.composition",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.input",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.input3",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.pointer",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.pointerinjector",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.test.input",
+                    "${fuchsia_sdk}/fidl/fuchsia.ui.views",
+                    "${fuchsia_sdk}/pkg/inspect",
+                    "${fuchsia_sdk}/pkg/inspect_component_cpp",
+                    "${fuchsia_sdk}/pkg/sys_cpp",
                     "//flutter/shell/platform/fuchsia/runtime/dart/utils",
                   ] + flutter_public_deps
 
     deps = [
-             "$fuchsia_sdk_root/fidl:fuchsia.accessibility.semantics",
-             "$fuchsia_sdk_root/fidl:fuchsia.component.runner",
-             "$fuchsia_sdk_root/fidl:fuchsia.fonts",
-             "$fuchsia_sdk_root/fidl:fuchsia.images",
-             "$fuchsia_sdk_root/fidl:fuchsia.intl",
-             "$fuchsia_sdk_root/fidl:fuchsia.io",
-             "$fuchsia_sdk_root/fidl:fuchsia.media",
-             "$fuchsia_sdk_root/fidl:fuchsia.memorypressure",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.input3",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.pointer",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.pointerinjector",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.views",
-             "$fuchsia_sdk_root/pkg:async-cpp",
-             "$fuchsia_sdk_root/pkg:async-default",
-             "$fuchsia_sdk_root/pkg:async-loop",
-             "$fuchsia_sdk_root/pkg:async-loop-cpp",
-             "$fuchsia_sdk_root/pkg:fdio",
-             "$fuchsia_sdk_root/pkg:fidl_cpp",
-             "$fuchsia_sdk_root/pkg:trace",
-             "$fuchsia_sdk_root/pkg:trace-engine",
-             "$fuchsia_sdk_root/pkg:trace-provider-so",
-             "$fuchsia_sdk_root/pkg:vfs_cpp",
-             "$fuchsia_sdk_root/pkg:zx",
+             "${fuchsia_sdk}/pkg/async-cpp",
+             "${fuchsia_sdk}/pkg/async-default",
+             "${fuchsia_sdk}/pkg/async-loop",
+             "${fuchsia_sdk}/pkg/async-loop-cpp",
+             "${fuchsia_sdk}/pkg/fdio",
+             "${fuchsia_sdk}/pkg/fidl_cpp",
+             "${fuchsia_sdk}/pkg/trace",
+             "${fuchsia_sdk}/pkg/trace-engine",
+             "${fuchsia_sdk}/pkg/trace-provider-so",
+             "${fuchsia_sdk}/pkg/vfs_cpp",
+             "${fuchsia_sdk}/pkg/zx",
              "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
              "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
            ] + flutter_deps
@@ -226,9 +229,9 @@ template("flutter_runner") {
 
     deps = [
              ":flutter_runner_sources${product_suffix}",
-             "$fuchsia_sdk_root/pkg:async-loop-cpp",
-             "$fuchsia_sdk_root/pkg:trace",
-             "$fuchsia_sdk_root/pkg:trace-provider-so",
+             "${fuchsia_sdk}/pkg/async-loop-cpp",
+             "${fuchsia_sdk}/pkg/trace",
+             "${fuchsia_sdk}/pkg/trace-provider-so",
            ] + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the
@@ -506,7 +509,7 @@ if (enable_unittests) {
 
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
-    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+    libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
@@ -524,8 +527,8 @@ if (enable_unittests) {
              "tests/fakes",
              ":flutter_runner_fixtures",
              ":flutter_runner_sources",
-             "//build/fuchsia/pkg:async-testing",
-             "//build/fuchsia/pkg:sys_cpp_testing",
+             "${fuchsia_sdk}/pkg/async-testing",
+             "${fuchsia_sdk}/pkg/sys_cpp_testing",
              "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
              "//flutter/testing",
            ] + flutter_deps
@@ -540,7 +543,7 @@ if (enable_unittests) {
 
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
-    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+    libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.
@@ -567,7 +570,7 @@ if (enable_unittests) {
 
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
-    libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+    libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
 
     # The use of these dependencies is temporary and will be moved behind the
     # embedder API.

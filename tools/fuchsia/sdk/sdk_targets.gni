@@ -2,11 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/dart/dart_library.gni")
-import("//flutter/tools/fuchsia/fidl/fidl.gni")
-
-_fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
+import("//flutter/tools/fuchsia/gn-sdk/src/fidl_library.gni")
 
 template("_fuchsia_dart_library") {
   assert(defined(invoker.meta), "The meta file content must be specified.")
@@ -63,28 +60,11 @@ template("_fuchsia_dart_library") {
   }
 
   dart_library(target_name) {
-    package_root = "${_fuchsia_sdk_path}/${meta.root}"
+    package_root = "${fuchsia_sdk}/${meta.root}"
     package_name = _output_name
     language_version = _dart_language_version
     sources = _sources
     deps = _deps
-  }
-}
-
-template("_fuchsia_fidl_library") {
-  assert(defined(invoker.meta), "The meta file content must be specified.")
-  meta = invoker.meta
-  assert(meta.type == "fidl_library")
-
-  fidl(target_name) {
-    sources = []
-    foreach(source, meta.sources) {
-      sources += [ "$fuchsia_sdk_path/$source" ]
-    }
-    public_deps = []
-    foreach(dep, meta.deps) {
-      public_deps += [ ":$dep" ]
-    }
   }
 }
 
@@ -99,7 +79,7 @@ template("sdk_targets") {
     part_meta_json = {
     }
     part_meta = part.meta
-    part_meta_rebased = "$fuchsia_sdk_path/$part_meta"
+    part_meta_rebased = "$fuchsia_sdk/$part_meta"
 
     if (part_meta != "version_history.json") {
       part_meta_json = read_file(part_meta_rebased, "json")
@@ -119,7 +99,7 @@ template("sdk_targets") {
             meta = part_meta_json
           }
         } else if (target_type == "fidl_library") {
-          _fuchsia_fidl_library(subtarget_name) {
+          fidl_library(subtarget_name) {
             meta = part_meta_json
           }
         }
