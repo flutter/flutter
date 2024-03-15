@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/ndk_helpers.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
@@ -12,6 +13,9 @@
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   // Initialize the Java VM.
   fml::jni::InitJavaVM(vm);
+
+  // Registery dlsym lookups for NDK functions
+  flutter::NDKHelpers::Init();
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
   bool result = false;
