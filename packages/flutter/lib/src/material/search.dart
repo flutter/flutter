@@ -9,6 +9,7 @@ import 'app_bar.dart';
 import 'app_bar_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
@@ -599,6 +600,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         child: Scaffold(
           appBar: AppBar(
             leadingWidth: widget.delegate.leadingWidth,
+            toolbarHeight: kM2ToolbarHeight,
             automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
             title: TextField(

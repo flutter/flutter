@@ -271,9 +271,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, visible: true, paintExtent: 56.0);
+      verifyGeometry(key: appBarKey, visible: true, paintExtent: 64.0);
 
       // Pointer scroll the app bar away, we will scroll back less to validate the
       // app bar floats back in.
@@ -295,7 +295,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
@@ -307,9 +307,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
     });
 
     testWidgets('SliverPersistentHeader', (WidgetTester tester) async {
@@ -368,9 +368,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, visible: true, paintExtent: 56.0);
+      verifyGeometry(key: appBarKey, visible: true, paintExtent: 64.0);
 
       // Pointer scroll the app bar away, we will scroll back less to validate the
       // app bar floats back in and then snaps to full size.
@@ -392,7 +392,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 30.0, visible: true);
       await tester.pumpAndSettle();
@@ -403,9 +403,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
 
       // Float back out a bit and trigger snap close animation.
@@ -416,9 +416,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 6.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 14.0, visible: true);
       await tester.pumpAndSettle();
       // The snap animation should have completed and the app bar should no
       // longer be visible.

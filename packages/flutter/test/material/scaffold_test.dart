@@ -149,7 +149,7 @@ void main() {
       ),
     ));
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 536.0)));
 
     await tester.pumpWidget(boilerplate(MediaQuery(
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
@@ -161,7 +161,7 @@ void main() {
     ));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 444.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 436.0)));
 
     await tester.pumpWidget(boilerplate(MediaQuery(
       data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
@@ -173,7 +173,7 @@ void main() {
     )));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 536.0)));
   });
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {

@@ -75,19 +75,19 @@ void main() {
         find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
-      expect(tester.getCenter(find.text('Test')).dy, 28.0);
+      expect(tester.getCenter(find.text('Test')).dy, 32.0);
       // First scroll the header away
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(anchor)));
       await gesture.moveBy(const Offset(0.0, -100.0));
       await tester.pump(const Duration(milliseconds: 10));
-      expect(header.child!.size.height, equals(56.0));
-      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
+      expect(header.child!.size.height, equals(64.0));
+      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -32.0);
       // With the same gesture, scroll back and into overscroll
       await gesture.moveBy(const Offset(0.0, 200.0));
       await tester.pump(const Duration(milliseconds: 10));
       // Header should stretch in overscroll
       expect(header.child!.size.height, equals(200.0));
-      expect(tester.getCenter(find.text('Test')).dy, 28.0);
+      expect(tester.getCenter(find.text('Test')).dy, 32.0);
       await gesture.up();
       await tester.pumpAndSettle();
     });
@@ -125,19 +125,19 @@ void main() {
         find.byType(SliverAppBar),
       );
       expect(header.child!.size.height, equals(100.0));
-      expect(tester.getCenter(find.text('Test')).dy, 28.0);
+      expect(tester.getCenter(find.text('Test')).dy, 32.0);
       // First scroll the header away
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(anchor)));
       await gesture.moveBy(const Offset(0.0, -100.0));
       await tester.pump(const Duration(milliseconds: 10));
-      expect(header.child!.size.height, equals(56.0));
-      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -28.0);
+      expect(header.child!.size.height, equals(64.0));
+      expect(tester.getCenter(find.text('Test', skipOffstage: false)).dy, -32.0);
       // With the same gesture, scroll back and into overscroll
       await gesture.moveBy(const Offset(0.0, 200.0));
       await tester.pump(const Duration(milliseconds: 10));
       // Header should stretch in overscroll
       expect(header.child!.size.height, equals(200.0));
-      expect(tester.getCenter(find.text('Test')).dy, 28.0);
+      expect(tester.getCenter(find.text('Test')).dy, 32.0);
       await gesture.up();
       await tester.pumpAndSettle();
     });

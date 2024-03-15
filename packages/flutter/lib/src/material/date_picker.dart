@@ -13,6 +13,7 @@ import 'back_button.dart';
 import 'button_style.dart';
 import 'calendar_date_picker.dart';
 import 'color_scheme.dart';
+import 'constants.dart';
 import 'date.dart';
 import 'date_picker_theme.dart';
 import 'debug.dart';
@@ -1656,6 +1657,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
       right: false,
       child: Scaffold(
         appBar: AppBar(
+          toolbarHeight: kM2ToolbarHeight,
           iconTheme: iconTheme,
           actionsIconTheme: iconTheme,
           elevation: useMaterial3 ? 0 : null,

@@ -14,11 +14,11 @@ void main() {
 
     // The menu icon is in the top left corner of the screen.
     Offset menuIcon = tester.getCenter(find.byIcon(Icons.menu));
-    expect(menuIcon, const Offset(80.0, 144.0));
+    expect(menuIcon, const Offset(80.0, 152.0));
 
     // The home icon is also in the top left corner of the screen.
     Offset homeIcon = tester.getCenter(find.byIcon(Icons.home));
-    expect(homeIcon, const Offset(80.0, 144.0));
+    expect(homeIcon, const Offset(80.0, 152.0));
 
     // Tap the menu icon to open the flow menu.
     await tester.tapAt(menuIcon);
@@ -26,10 +26,10 @@ void main() {
 
     // The home icon is still in the top left corner of the screen.
     homeIcon = tester.getCenter(find.byIcon(Icons.home));
-    expect(homeIcon, const Offset(80.0, 144.0));
+    expect(homeIcon, const Offset(80.0, 152.0));
 
     // The menu icon is now in the top right corner of the screen.
     menuIcon = tester.getCenter(find.byIcon(Icons.menu));
-    expect(menuIcon, const Offset(720.0, 144.0));
+    expect(menuIcon, const Offset(720.0, 152.0));
   });
 }

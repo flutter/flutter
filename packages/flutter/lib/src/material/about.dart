@@ -882,6 +882,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             titleTextStyle: theme.appBarTheme.titleTextStyle,
             foregroundColor: theme.appBarTheme.foregroundColor,
           ),
+          toolbarHeight: kM2ToolbarHeight,
         ),
         body: Center(
           child: Material(
@@ -1273,6 +1274,7 @@ class _MasterPage extends StatelessWidget {
         title: title,
         leading: leading,
         actions: const <Widget>[],
+        toolbarHeight: kM2ToolbarHeight,
       ),
       body: masterViewBuilder!(context, false),
     );
@@ -1357,8 +1359,9 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           appBar: AppBar(
             title: widget.title,
             actions: widget.actionBuilder!(context, _ActionLevel.top),
+            toolbarHeight: kM2ToolbarHeight,
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight),
+              preferredSize: const Size.fromHeight(kM2ToolbarHeight),
               child: Row(
                 children: <Widget>[
                   ConstrainedBox(
@@ -1430,6 +1433,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               appBar: AppBar(
                 title: widget.title,
                 actions: widget.actionBuilder!(context, _ActionLevel.top),
+                toolbarHeight: kM2ToolbarHeight,
               ),
               body: widget.masterViewBuilder(context, true),
             )
@@ -1454,7 +1458,7 @@ class _DetailView extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
+    final double minHeight = (screenHeight - kM2ToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(
       initialChildSize: minHeight,

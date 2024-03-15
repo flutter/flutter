@@ -470,7 +470,7 @@ void main() {
     final RenderBox barBox = tester.renderObject(find.byType(AppBar));
     final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
     expect(iconBox.size.height, material3 ? 48 : equals(barBox.size.height));
-    expect(tester.getCenter(find.byType(IconButton)).dy, 28);
+    expect(tester.getCenter(find.byType(IconButton)).dy, 32);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test

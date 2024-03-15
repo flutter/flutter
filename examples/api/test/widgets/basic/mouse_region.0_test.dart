@@ -22,14 +22,14 @@ void main() {
     await tester.pump();
 
     expect(find.text('1 Entries\n0 Exits'), findsOneWidget);
-    expect(find.text('The cursor is here: (400.00, 328.00)'), findsOneWidget);
+    expect(find.text('The cursor is here: (400.00, 332.00)'), findsOneWidget);
 
     await gesture.moveTo(
       tester.getCenter(find.byType(ColoredBox)) + const Offset(50.0, 30.0),
     );
     await tester.pump();
 
-    expect(find.text('The cursor is here: (450.00, 358.00)'), findsOneWidget);
+    expect(find.text('The cursor is here: (450.00, 362.00)'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();

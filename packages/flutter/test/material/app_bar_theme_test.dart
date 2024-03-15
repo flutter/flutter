@@ -73,7 +73,7 @@ void main() {
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
     expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().white.bodyMedium));
-    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).height, kM2ToolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
@@ -113,7 +113,7 @@ void main() {
         .merge(Typography.material2021().black.bodyMedium)
         .copyWith(color: theme.colorScheme.onSurface, decorationColor: theme.colorScheme.onSurface),
     );
-    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).height, kM3ToolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 

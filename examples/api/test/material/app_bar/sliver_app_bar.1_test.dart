@@ -20,6 +20,6 @@ void main() {
     await tester.drag(find.text('0'), _kOffset, touchSlopY: 0, warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(tester.getBottomLeft(find.text('SliverAppBar')).dy, 40.0);
+    expect(tester.getBottomLeft(find.text('SliverAppBar')).dy, 48.0);
   });
 }

@@ -199,7 +199,7 @@ void main() {
   });
 
   testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
+    'AppBar centerTitle:false leading button title left edge is 80.0 (LTR)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -214,12 +214,12 @@ void main() {
         ),
       );
 
-      expect(tester.getTopLeft(find.text('X')).dx, 72.0);
+      expect(tester.getTopLeft(find.text('X')).dx, 80.0);
     },
   );
 
   testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
+    'AppBar centerTitle:false leading button title left edge is 80.0 (RTL)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -237,7 +237,7 @@ void main() {
         ),
       );
 
-      expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
+      expect(tester.getTopRight(find.text('X')).dx, 800.0 - 80.0);
     },
   );
 
@@ -268,12 +268,12 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).dx, 72.0);
+    expect(tester.getTopLeft(title).dx, 80.0);
     expect(
       tester.getSize(title).width,
       equals(
         800.0 // Screen width.
-        - 56.0 // Leading button width.
+        - 64.0 // Leading button width.
         - 16.0 // Leading button to title padding.
         - 16.0, // Title right side padding.
       ),
@@ -285,11 +285,11 @@ void main() {
     ];
     await tester.pumpWidget(buildApp());
 
-    expect(tester.getTopLeft(title).dx, 72.0);
+    expect(tester.getTopLeft(title).dx, 80.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
     expect(tester.getSize(title).width, equals(
       800.0 // Screen width.
-      - 56.0 // Leading button width.
+      - 64.0 // Leading button width.
       - 16.0 // Leading button to title padding.
       - 16.0 // Title to actions padding
       - 200.0,
@@ -297,9 +297,9 @@ void main() {
 
     leading = Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 72.0);
+    expect(tester.getTopLeft(title).dx, 80.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 64.0 - 16.0 - 16.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
@@ -334,7 +334,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).dx, 72.0);
+    expect(tester.getTopLeft(title).dx, 80.0);
     expect(tester.getSize(title).width, equals(700.0));
 
     // Centering a title with width 620 within the 800 pixel wide test widget
@@ -389,7 +389,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopRight(title).dx, 800.0 - 72.0);
+    expect(tester.getTopRight(title).dx, 800.0 - 80.0);
     expect(tester.getSize(title).width, equals(700.0));
 
     // Centering a title with width 620 within the 800 pixel wide test widget
@@ -413,7 +413,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox(
-          height: kToolbarHeight,
+          height: kM3ToolbarHeight,
           child: AppBar(
             leading: const Text('L'),
             title: const Text('No Scaffold'),
@@ -653,7 +653,7 @@ void main() {
 
     // Default IconButton has a size of (48x48).
     final Finder hamburger = find.byType(IconButton);
-    expect(tester.getTopLeft(hamburger), const Offset(4.0, 4.0));
+    expect(tester.getTopLeft(hamburger), const Offset(8.0, 8.0));
     expect(tester.getSize(hamburger), const Size(48.0, 48.0));
 
     await tester.pumpWidget(
@@ -671,7 +671,7 @@ void main() {
     // Default leading widget has a size of (56x56).
     final Finder leadingBox = find.byType(Container);
     expect(tester.getTopLeft(leadingBox), Offset.zero);
-    expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
+    expect(tester.getSize(leadingBox), const Size(64.0, 64.0));
 
     // The custom leading widget should still be 56x56 even if its size is smaller.
     await tester.pumpWidget(
@@ -688,7 +688,7 @@ void main() {
 
     final Finder leading = find.byType(SizedBox);
     expect(tester.getTopLeft(leading), Offset.zero);
-    expect(tester.getSize(leading), const Size(56.0, 56.0));
+    expect(tester.getSize(leading), const Size(64.0, 64.0));
   });
 
   testWidgets('Material3 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
@@ -724,7 +724,7 @@ void main() {
     final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
-    expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
+    expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 64.0));
 
     final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
@@ -858,7 +858,7 @@ void main() {
       ),
     );
     expect(appBarTop(tester), 0.0);
-    expect(appBarHeight(tester), kToolbarHeight);
+    expect(appBarHeight(tester), kM3ToolbarHeight);
 
     await tester.pumpWidget(
       Localizations(
@@ -882,7 +882,7 @@ void main() {
     );
     expect(appBarTop(tester), 0.0);
     expect(tester.getTopLeft(find.text('title')).dy, greaterThan(100.0));
-    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+    expect(appBarHeight(tester), kM3ToolbarHeight + 100.0);
 
     await tester.pumpWidget(
       Localizations(
@@ -909,7 +909,7 @@ void main() {
       ),
     );
     expect(appBarTop(tester), 0.0);
-    expect(appBarHeight(tester), kToolbarHeight + 200.0);
+    expect(appBarHeight(tester), kM3ToolbarHeight + 200.0);
 
     await tester.pumpWidget(
       Localizations(
@@ -935,7 +935,7 @@ void main() {
       ),
     );
     expect(appBarTop(tester), 0.0);
-    expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
+    expect(appBarHeight(tester), kM3ToolbarHeight + 100.0 + 200.0);
 
     await tester.pumpWidget(
       Localizations(
@@ -987,7 +987,7 @@ void main() {
       ),
     );
     expect(appBarTop(tester), 0.0);
-    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+    expect(appBarHeight(tester), kM3ToolbarHeight + 100.0);
   });
 
   testWidgets('AppBar.title sees the correct padding from MediaQuery', (WidgetTester tester) async {
@@ -1210,7 +1210,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(64.0, 64.0));
   });
 
   testWidgets('AppBar handles loose children 1', (WidgetTester tester) async {
@@ -1240,7 +1240,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(64.0, 64.0));
   });
 
   testWidgets('AppBar handles loose children 2', (WidgetTester tester) async {
@@ -1266,7 +1266,7 @@ void main() {
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: const Size(0.0, kToolbarHeight),
+              preferredSize: const Size(0.0, kM3ToolbarHeight),
               child: Container(
                 height: 50.0,
                 padding: const EdgeInsets.all(4.0),
@@ -1280,7 +1280,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(64.0, 64.0));
   });
 
   testWidgets('AppBar handles loose children 3', (WidgetTester tester) async {
@@ -1297,7 +1297,7 @@ void main() {
               Placeholder(fallbackWidth: 10.0),
             ],
             bottom: PreferredSize(
-              preferredSize: const Size(0.0, kToolbarHeight),
+              preferredSize: const Size(0.0, kM3ToolbarHeight),
               child: Container(
                 height: 50.0,
                 padding: const EdgeInsets.all(4.0),
@@ -1311,7 +1311,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(64.0, 64.0));
   });
 
   testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
@@ -1334,8 +1334,8 @@ void main() {
             child: Scaffold(
               primary: false,
               appBar: AppBar(
-                leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
-                title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
+                leading: Placeholder(key: leadingKey), // Forced to 64x64, to square with toolbar
+                title: Placeholder(key: titleKey, fallbackHeight: kM3ToolbarHeight),
                 actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
               ),
             ),
@@ -1344,17 +1344,17 @@ void main() {
       ),
     );
     expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 64.0, 100));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
     // Because the topPadding eliminates the vertical space for the
     // NavigationToolbar within the AppBar, the toolbar is constrained
     // with minHeight=maxHeight=0. The _AppBarTitle widget vertically centers
-    // the title, so its Y coordinate relative to the toolbar is -kToolbarHeight / 2
-    // (-28). The top of the toolbar is at (screen coordinates) y=100, so the
-    // top of the title is 100 + -28 = 72. The toolbar clips its contents
+    // the title, so its Y coordinate relative to the toolbar is -toolbarHeight / 2
+    // (-32). The top of the toolbar is at (screen coordinates) y=100, so the
+    // top of the title is 100 + -32 = 68. The toolbar clips its contents
     // so the title isn't actually visible.
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(10 + NavigationToolbar.kMiddleSpacing, 72));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(10 + NavigationToolbar.kMiddleSpacing, 68));
   });
 
   testWidgets('AppBar excludes header semantics correctly', (WidgetTester tester) async {
@@ -1670,32 +1670,32 @@ void main() {
     // "Jumbo" title is 100x20.
 
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 18, 116, 38));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 22, 116, 42));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     textScaleFactor = 3; // "Jumbo" title is 300x60.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -2, 316, 58));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 2, 316, 62));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     textScaleFactor = 3.5; // "Jumbo" title is 350x70.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -7, 366, 63));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -3, 366, 67));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     textScaleFactor = 4; // "Jumbo" title is 400x80.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -12, 416, 68));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -8, 416, 72));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     textDirection = TextDirection.rtl; // Changed to rtl. "Jumbo" title is still 400x80.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(800.0 - 400.0 - 16.0, -12, 800.0 - 16.0, 68));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(800.0 - 400.0 - 16.0, -8, 800.0 - 16.0, 72));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     centerTitle = true; // Changed to true. "Jumbo" title is still 400x80.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
+    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -8, 800.0 - 200.0, 72));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 
@@ -1728,7 +1728,7 @@ void main() {
     ));
 
     // By default toolbarHeight is 56.0.
-    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
+    expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 64));
   });
 
   testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
@@ -2314,29 +2314,29 @@ void main() {
       );
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await tester.pump();
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       gesture = await tester.startGesture(const Offset(50.0, 300.0));
       // Scroll horizontally
-      await gesture.moveBy(const Offset(-kToolbarHeight, 0.0));
+      await gesture.moveBy(const Offset(-kM3ToolbarHeight, 0.0));
       await tester.pump();
-      await gesture.moveBy(const Offset(-kToolbarHeight, 0.0));
+      await gesture.moveBy(const Offset(-kM3ToolbarHeight, 0.0));
       await gesture.up();
       await tester.pumpAndSettle();
       // The app bar is still scrolled under vertically, so it should not have
       // changed back in response to horizontal scrolling.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('backgroundColor', (WidgetTester tester) async {
@@ -2345,23 +2345,23 @@ void main() {
       );
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       gesture = await tester.startGesture(const Offset(50.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
@@ -2370,23 +2370,23 @@ void main() {
       );
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       gesture = await tester.startGesture(const Offset(50.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
@@ -2398,23 +2398,23 @@ void main() {
       // In this test case, the content always extends under the AppBar, so it
       // should always be the scrolledColor.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       gesture = await tester.startGesture(const Offset(50.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('backgroundColor with FlexibleSpace - reverse', (WidgetTester tester) async {
@@ -2430,23 +2430,23 @@ void main() {
       // In this test case, the content always extends under the AppBar, so it
       // should always be the scrolledColor.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       gesture = await tester.startGesture(const Offset(50.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, -kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
@@ -2529,15 +2529,15 @@ void main() {
       // In reverse, the content here is not long enough to scroll under the app
       // bar.
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
 
     testWidgets('backgroundColor with FlexibleSpace - not triggered in reverse for short content', (WidgetTester tester) async {
@@ -2553,15 +2553,15 @@ void main() {
       // In reverse, the content here is not long enough to scroll under the app
       // bar.
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
 
       final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, kToolbarHeight));
+      await gesture.moveBy(const Offset(0.0, kM3ToolbarHeight));
       await gesture.up();
       await tester.pumpAndSettle();
 
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+      expect(tester.getSize(findAppBarMaterial()).height, kM3ToolbarHeight);
     });
   });
 
@@ -2658,9 +2658,9 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
-    expect(preferredHeight, kToolbarHeight);
-    expect(preferredSize.height, kToolbarHeight);
+    expect(tester.getSize(find.byType(AppBar)).height, kM3ToolbarHeight);
+    expect(preferredHeight, kM3ToolbarHeight);
+    expect(preferredSize.height, kM3ToolbarHeight);
 
     await tester.pumpWidget(buildFrame(themeToolbarHeight: 96));
     await tester.pumpAndSettle(); // Animate MaterialApp theme change.
@@ -2668,7 +2668,7 @@ void main() {
     expect(preferredHeight, 96);
     // Special case: AppBarTheme.toolbarHeight specified,
     // AppBar.theme.toolbarHeight is null.
-    expect(preferredSize.height, kToolbarHeight);
+    expect(preferredSize.height, kM3ToolbarHeight);
 
     await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64));
     await tester.pumpAndSettle(); // Animate MaterialApp theme change.

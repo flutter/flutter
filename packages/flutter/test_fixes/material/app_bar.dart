@@ -21,4 +21,7 @@ void main() {
   appBar = AppBar(backwardsCompatibility: true);
   appBar = AppBar(backwardsCompatibility: false));
   appBar.backwardsCompatibility; // Removing field reference not supported.
+
+  // Changes made in TBD
+  AppBar appBar = AppBar(toolbarHeight: kToolbarHeight);
 }

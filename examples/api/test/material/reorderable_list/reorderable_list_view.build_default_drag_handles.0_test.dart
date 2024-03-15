@@ -24,13 +24,13 @@ void main() {
       ),
     );
 
-    expect(tester.getCenter(find.text('Item 3')).dy, 280.0);
+    expect(tester.getCenter(find.text('Item 3')).dy, 288.0);
     await longPressDrag(
       tester,
       tester.getCenter(find.text('Item 3')),
       tester.getCenter(find.text('Item 2')),
     );
     await tester.pumpAndSettle();
-    expect(tester.getCenter(find.text('Item 3')).dy, 216.0);
+    expect(tester.getCenter(find.text('Item 3')).dy, 224.0);
   });
 }

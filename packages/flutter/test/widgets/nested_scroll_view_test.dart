@@ -1070,7 +1070,7 @@ void main() {
       ));
 
       double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       final double scrollExtent = appBarHeight - 50.0;
       expect(globalKey.currentState!.outerController.offset, 0.0);
       expect(globalKey.currentState!.innerController.offset, 0.0);
@@ -1086,10 +1086,10 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is not an expanded AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
-      expect(globalKey.currentState!.outerController.offset, 54.0);
+      expect(globalKey.currentState!.outerController.offset, 62.0);
       // the inner scroll controller should not have scrolled.
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
@@ -1102,7 +1102,7 @@ void main() {
       ));
 
       double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       final double scrollExtent = appBarHeight;
       expect(globalKey.currentState!.outerController.offset, 0.0);
       expect(globalKey.currentState!.innerController.offset, 0.0);
@@ -1118,10 +1118,10 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is not an expanded AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
-      expect(globalKey.currentState!.outerController.offset, 104.0);
+      expect(globalKey.currentState!.outerController.offset, 112.0);
       // the inner scroll controller should not have scrolled.
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
@@ -1134,7 +1134,7 @@ void main() {
       ));
 
       double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       final double scrollExtent = appBarHeight + 50.0;
       expect(globalKey.currentState!.outerController.offset, 0.0);
       expect(globalKey.currentState!.innerController.offset, 0.0);
@@ -1150,7 +1150,7 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is not an expanded AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
       expect(globalKey.currentState!.outerController.offset, appBarHeight);
@@ -1170,7 +1170,7 @@ void main() {
       ));
 
       double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       final double scrollExtent = appBarHeight + 50.0;
       expect(globalKey.currentState!.outerController.offset, 0.0);
       expect(globalKey.currentState!.innerController.offset, 0.0);
@@ -1186,7 +1186,7 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is not an expanded AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
       expect(globalKey.currentState!.outerController.offset, appBarHeight);
@@ -1231,7 +1231,7 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is an expanding AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
       expect(globalKey.currentState!.outerController.offset, 150.0);
@@ -1260,7 +1260,7 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is an expanding AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
       expect(globalKey.currentState!.outerController.offset, 200.0);
@@ -1289,7 +1289,7 @@ void main() {
 
       appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
       // This is an expanding AppBar.
-      expect(appBarHeight, 104.0);
+      expect(appBarHeight, 112.0);
       // The outer scroll controller should show an offset of the applied
       // scrollExtent.
       expect(globalKey.currentState!.outerController.offset, 200.0);
@@ -1600,9 +1600,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away the outer scroll view and some of the inner scroll view.
       // We will not scroll back the same amount to indicate that we are
@@ -1623,7 +1623,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
@@ -1635,9 +1635,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
     });
 
     testWidgets('float expanded', (WidgetTester tester) async {
@@ -1677,7 +1677,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
@@ -1713,9 +1713,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away the outer scroll view and some of the inner scroll view.
       // We will not scroll back the same amount to indicate that we are
@@ -1735,7 +1735,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
@@ -1747,9 +1747,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
     });
 
     testWidgets('snap with pointer signal', (WidgetTester tester) async {
@@ -1770,9 +1770,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away the outer scroll view and some of the inner scroll view.
       // We will not scroll back the same amount to indicate that we are
@@ -1792,9 +1792,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away a bit more to trigger the snap close animation.
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 30.0)));
@@ -1848,7 +1848,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
       verifyGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
 
@@ -1880,9 +1880,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll down the list, the app bar should scroll away and no longer be
       // visible.
@@ -1895,7 +1895,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
       // The outer scroll view should be at its full extent, here the size of
       // the app bar.
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       // Animate In
 
@@ -1908,7 +1908,7 @@ void main() {
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       await animateInGesture.moveBy(const Offset(0.0, -50.0)); // No float out
       await tester.pump();
@@ -1916,7 +1916,7 @@ void main() {
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       // Trigger the snap open animation: drag down and release
       await animateInGesture.moveBy(const Offset(0.0, 10.0));
@@ -1935,7 +1935,7 @@ void main() {
         visible: true,
       );
       // The outer scroll offset should remain unchanged.
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -1948,15 +1948,15 @@ void main() {
         extentGreaterThan: true,
         visible: true,
       );
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       // The animation finishes when the appbar is full height.
       await tester.pumpAndSettle();
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 5'), findsOneWidget);
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       // Animate Out
 
@@ -1973,11 +1973,11 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       lastExtent = verifyGeometry(
         key: appBarKey,
-        paintExtent: 46.0, // <46.0 since 56.0 - 10.0
+        paintExtent: 54.0, // <46.0 since 64.0 - 10.0
         extentLessThan: true,
         visible: true,
       );
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -1990,7 +1990,7 @@ void main() {
         extentLessThan: true,
         visible: true,
       );
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
 
       // The animation finishes when the appbar is no longer in view.
       await tester.pumpAndSettle();
@@ -1998,7 +1998,7 @@ void main() {
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
-      expect(nestedKey.currentState!.outerController.offset, 56.0);
+      expect(nestedKey.currentState!.outerController.offset, 64.0);
     });
 
     testWidgets('only snap expanded', (WidgetTester tester) async {
@@ -2152,9 +2152,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away the outer scroll view and some of the inner scroll view.
       final Offset point1 = tester.getCenter(find.text('Item 5'));
@@ -2165,9 +2165,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
       await tester.pump();
@@ -2176,9 +2176,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       await tester.dragFrom(point1, const Offset(0.0, 150.0));
       await tester.pump();
@@ -2187,9 +2187,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
     });
 
     testWidgets('float pinned expanded', (WidgetTester tester) async {
@@ -2222,9 +2222,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll back some, the app bar should expand.
       await tester.dragFrom(point1, const Offset(0.0, 50.0));
@@ -2234,9 +2234,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        106.0, // 56.0 + 50.0
+        114.0, // 64.0 + 50.0
       );
-      verifyGeometry(key: appBarKey, paintExtent: 106.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 114.0, visible: true);
 
       // Finish scrolling the rest of the way in.
       await tester.dragFrom(point1, const Offset(0.0, 150.0));
@@ -2272,9 +2272,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll away the outer scroll view and some of the inner scroll view.
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
@@ -2284,9 +2284,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
       await tester.pump();
@@ -2295,9 +2295,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -150.0)));
       await tester.pump();
@@ -2306,9 +2306,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
     });
 
     testWidgets('float pinned expanded with pointer signal', (WidgetTester tester) async {
@@ -2346,9 +2346,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        56.0,
+        64.0,
       );
-      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 64.0, visible: true);
 
       // Scroll back some, the app bar should expand.
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
@@ -2358,9 +2358,9 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       expect(
         tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-        106.0, // 56.0 + 50.0
+        114.0, // 64.0 + 50.0
       );
-      verifyGeometry(key: appBarKey, paintExtent: 106.0, visible: true);
+      verifyGeometry(key: appBarKey, paintExtent: 114.0, visible: true);
 
       // Finish scrolling the rest of the way in.
       await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -150.0)));

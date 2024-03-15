@@ -25,6 +25,16 @@
 #     * ThemeData: fix_theme_data.yaml
 version: 1
 transforms:
+  # Changes made in TBD
+  - title: "Migrate to 'kM3ToolbarHeight' or 'kM2ToolbarHeight'"
+    date: 2024-01-31
+    element:
+      uris: [ 'material.dart' ]
+      variable: 'kToolbarHeight'
+    changes:
+    - kind: 'rename'
+      newName: 'kM2ToolbarHeight'
+
   # Changes made in https://github.com/flutter/flutter/pull/86198
   - title: "Remove 'backwardsCompatibility'"
     date: 2020-07-12

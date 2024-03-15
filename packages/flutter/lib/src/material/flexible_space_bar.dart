@@ -218,9 +218,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-
+        final ThemeData theme = Theme.of(context);
         final List<Widget> children = <Widget>[];
-
         final double deltaExtent = settings.maxExtent - settings.minExtent;
 
         // 0.0 -> Expanded
@@ -229,7 +228,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // background
         if (widget.background != null) {
-          final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
+          final double toolbarHeight = theme.useMaterial3 ? kM3ToolbarHeight : kM2ToolbarHeight;
+          final double fadeStart = math.max(0.0, 1.0 - toolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
           // If the min and max extent are the same, the app bar cannot collapse
@@ -279,8 +279,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // title
         if (widget.title != null) {
-          final ThemeData theme = Theme.of(context);
-
           Widget? title;
           switch (theme.platform) {
             case TargetPlatform.iOS:

@@ -55,7 +55,7 @@ void main() {
     testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
       await tester.pumpWidget(_buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 64.0));
 
       await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat));
       expect(tester.binding.transientCallbackCount, greaterThan(0));
@@ -71,7 +71,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 64.0));
       expect(tester.binding.transientCallbackCount, 0);
 
     });
@@ -328,7 +328,7 @@ void main() {
       ),
     );
     expect(tester.getCenter(find.byType(FloatingActionButton)).dx, tester.getCenter(find.byType(CircleAvatar)).dx);
-    expect(tester.getCenter(find.byType(FloatingActionButton)).dy, kToolbarHeight);
+    expect(tester.getCenter(find.byType(FloatingActionButton)).dy, kM3ToolbarHeight);
   });
 
   testWidgets('Start-top floating action button location LTR', (WidgetTester tester) async {
@@ -341,7 +341,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(16.0, 36.0, 72.0, 92.0)));
   });
 
   testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
@@ -357,7 +357,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(16.0, 36.0, 72.0, 92.0)));
   });
 
   testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
@@ -373,7 +373,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(728.0, 36.0, 784.0, 92.0)));
   });
 
   testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
@@ -386,7 +386,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(728.0, 36.0, 784.0, 92.0)));
   });
 
   group('New Floating Action Button Locations', () {

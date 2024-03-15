@@ -85,7 +85,7 @@ void main() {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
-    const double kExpandedAppBarHeight = 56.0;
+    const double kExpandedAppBarHeight = 64.0;
 
     final List<Widget> containers = List<Widget>.generate(80, (int i) => MergeSemantics(
       child: SizedBox(
@@ -208,7 +208,7 @@ void main() {
     tester.binding.pipelineOwner.semanticsOwner!.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kM3ToolbarHeight);
 
     semantics.dispose();
   });
