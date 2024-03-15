@@ -1279,21 +1279,16 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
   for (final String platformKey in platformKeys) {
     try {
-      final Iterable<Plugin> finalPluginResolution = _finalPluginResolution(
+      final Iterable<PluginInterfaceResolution> finalPluginResolution = _finalPluginResolution(
         plugins,
         platformKey,
         selectDartPluginsOnly: selectDartPluginsOnly,
-      );
+      ).map((Plugin plugin) {
+        return PluginInterfaceResolution(plugin: plugin, platform: platformKey);
+      });
 
       // Add final plugin resolutions to the result array
-      final Iterable<PluginInterfaceResolution> finalPluginInterfaceResolution =
-      finalPluginResolution.map(
-            (Plugin plugin) => PluginInterfaceResolution(
-          plugin: plugin,
-          platform: platformKey,
-        ),
-      );
-      finalResolution.addAll(finalPluginInterfaceResolution);
+      finalResolution.addAll(finalPluginResolution);
     } on ToolExit catch (e) {
       if (e.message != null) {
         globals.printError(e.message!);
