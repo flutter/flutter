@@ -75,6 +75,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.buildInfo,
     required this.webMemoryFS,
     required FileSystem fileSystem,
+    required Directory buildDirectory,
     required File testDartJs,
     required File testHostDartJs,
     required ChromiumLauncher chromiumLauncher,
@@ -85,6 +86,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.useWasm,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
+      _buildDirectory = buildDirectory,
       _testDartJs = testDartJs,
       _testHostDartJs = testHostDartJs,
       _chromiumLauncher = chromiumLauncher,
@@ -118,6 +120,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final WebMemoryFS webMemoryFS;
   final BuildInfo buildInfo;
   final FileSystem _fileSystem;
+  final Directory _buildDirectory;
   final File _testDartJs;
   final File _testHostDartJs;
   final ChromiumLauncher _chromiumLauncher;
@@ -152,6 +155,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required BuildInfo buildInfo,
     required WebMemoryFS webMemoryFS,
     required FileSystem fileSystem,
+    required Directory buildDirectory,
     required Logger logger,
     required ChromiumLauncher chromiumLauncher,
     required Artifacts? artifacts,
@@ -200,6 +204,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       testDartJs: testDartJs,
       testHostDartJs: testHostDartJs,
       fileSystem: fileSystem,
+      buildDirectory: buildDirectory,
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
@@ -367,6 +372,16 @@ class FlutterWebPlatform extends PlatformPlugin {
         _flutterJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
+    } else if (request.requestedUri.path.contains('main.dart.mjs')) {
+      return shelf.Response.ok(
+        _buildDirectory.childFile('main.dart.mjs').openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('main.dart.wasm')) {
+      return shelf.Response.ok(
+        _buildDirectory.childFile('main.dart.wasm').openRead(),
+        headers: <String, String>{'Content-Type': 'application/wasm'},
+      );
     } else {
       return shelf.Response.notFound('Not Found');
     }
@@ -478,6 +493,23 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
+  String _makeBuildConfigString() {
+    return useWasm ? '''
+      {
+        compileTarget: "dart2wasm",
+        renderer: "${webRenderer.name}",
+        mainWasmPath: "main.dart.wasm",
+        jsSupportRuntimePath: "main.dart.mjs",
+      }
+''' : '''
+      {
+        compileTarget: "dartdevc",
+        renderer: "${webRenderer.name}",
+        mainJsPath: "main.dart.js",
+      }
+''';
+  }
+
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = _fileSystem.path.fromUri(request.url);
@@ -491,7 +523,11 @@ class FlutterWebPlatform extends PlatformPlugin {
           <title>${htmlEscape.convert(test)} Test</title>
           <script src="flutter.js"></script>
           <script>
-            _flutter.buildConfig = {"builds":[{"compileTarget":"dartdevc","renderer":"${webRenderer.name}","mainJsPath":"main.dart.browser_test.dart.js"}]};
+            _flutter.buildConfig = {
+              builds: [
+                ${_makeBuildConfigString()}
+              ]
+            }
             window.testSelector = "$scriptBase";
             _flutter.loader.load({
               config: {

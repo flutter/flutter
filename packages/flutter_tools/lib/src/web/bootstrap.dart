@@ -489,7 +489,7 @@ String generateTestEntrypoint({
     final Completer<void> completer = Completer<void>();
     await ui_web.bootstrapEngine(runApp: () => completer.complete());
     await completer.future;
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.file(testSelector));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse(testSelector));
     ui_web.debugOverrideDevicePixelRatio(3.0);
     ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 

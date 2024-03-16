@@ -208,6 +208,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             webMemoryFS: result,
             logger: globals.logger,
             fileSystem: globals.fs,
+            buildDirectory: globals.fs.directory(tempBuildDir),
             artifacts: globals.artifacts,
             processManager: globals.processManager,
             chromiumLauncher: ChromiumLauncher(
