@@ -16,8 +16,6 @@
 #include "flutter/impeller/toolkit/egl/egl.h"
 #include "flutter/impeller/toolkit/egl/image.h"
 #include "flutter/impeller/toolkit/gles/texture.h"
-
-#include "flutter/fml/platform/android/ndk_helpers.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 
 namespace flutter {
