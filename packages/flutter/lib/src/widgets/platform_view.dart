@@ -512,9 +512,12 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// the `element` must be injected into the DOM for the selector to work.**
 ///
 /// The example below demonstrates **how to create an `onElementInjected` function**
-/// that gets called when the root `element` is injected into the DOM:
+/// that gets called when the root `element` is injected into the DOM
+/// using a `ResizeObserver` through `package:web` from the `onElementCreated`
+/// lifecycle method:
 ///
 /// ```dart
+/// import 'dart:js_interop';
 /// import 'package:web/web.dart' as web;
 ///
 /// // Called after `element` is injected into the DOM.
@@ -524,14 +527,6 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///   // Do things with `element` or `located`, or call your code now...
 ///   element.style.backgroundColor = 'green';
 /// }
-/// ```
-///
-/// Using a `ResizeObserver` through `package:web` in `onElementCreated`:
-/// method:
-///
-/// ```js
-/// import 'dart:js_interop';
-/// import 'package:web/web.dart' as web;
 ///
 /// void onElementCreated(Object element) {
 ///   element as web.HTMLDivElement;
@@ -540,7 +535,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 ///   // Create the observer
 ///   final web.ResizeObserver observer = web.ResizeObserver((
-///     JSArray<ResizeObserverEntry> entries,
+///     JSArray<web.ResizeObserverEntry> entries,
 ///     web.ResizeObserver observer,
 ///   ) {
 ///     if (element.isConnected) {
