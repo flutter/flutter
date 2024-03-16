@@ -1497,4 +1497,28 @@ void main() {
     expect(find.text('Child 0'), findsOneWidget);
     expect(controller.isExpanded, isTrue);
   });
+
+  testWidgets('ExpansionTile does not include the default trailing icon when showTrailingIcon: false', (WidgetTester tester) async {
+    const double expansionTileWidth = 200;
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SizedBox(
+          width: expansionTileWidth,
+          child: ExpansionTile(
+            enabled: false,
+            title: ColoredBox(color: Colors.red, child: Text('Title')),
+            showTrailingIcon: false,
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Title'), findsOneWidget);
+    expect(find.byType(ColoredBox), findsOneWidget);
+
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, expansionTileWidth);
+  });
 }
