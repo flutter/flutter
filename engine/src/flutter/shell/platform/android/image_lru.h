@@ -9,7 +9,6 @@
 #include <cstddef>
 
 #include "display_list/image/dl_image.h"
-#include "fml/platform/android/ndk_helpers.h"
 
 namespace flutter {
 
@@ -19,6 +18,8 @@ namespace flutter {
 // images, while if it is too large we may retain images longer than
 // necessary.
 static constexpr size_t kImageReaderSwapchainSize = 6u;
+
+using HardwareBufferKey = uint64_t;
 
 class ImageLRU {
  public:
