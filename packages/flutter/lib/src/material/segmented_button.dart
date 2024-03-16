@@ -193,8 +193,6 @@ class SegmentedButton<T> extends StatefulWidget {
 
   /// Determines whether the segmented button should expand to fill
   /// the available space.
-  /// If true, the segmented button expands to fill its parent's
-  /// horizontal space, evenly dividing this space among its segments.
   ///
   /// If false (default), the button's size is based on the intrinsic
   /// sizes of its segments, maintaining their natural width. Ideal for
@@ -799,7 +797,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
     double maxHeight = 0;
     double childWidth = _isExpanded ? constraints.maxWidth : constraints.minWidth / childCount;
     RenderBox? child = firstChild;
-    while (child != null) {
+    while (child != null && !_isExpanded) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
       child = childAfter(child);
     }
