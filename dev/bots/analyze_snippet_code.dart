@@ -675,7 +675,6 @@ class _SnippetChecker {
                        line.contains('```objectivec') ||
                        line.contains('```kotlin') ||
                        line.contains('```swift') ||
-                       line.contains('```js') ||
                        line.contains('```glsl') ||
                        line.contains('```json') ||
                        line.contains('```csv')) {
