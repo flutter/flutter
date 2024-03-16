@@ -135,7 +135,7 @@ class AndroidRunOutputTest extends RunOutputTask {
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
-        (!release || line.contains('MB).')),
+        (!release || line.contains('MB)')),
       'Built build/app/outputs/flutter-apk/$apk',
     );
 
