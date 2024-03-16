@@ -422,19 +422,24 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// Flutter web will call this factory function to create the `element` that will
 /// be injected later:
 ///
-/// ```js
+/// ```dart
 /// import 'dart:ui_web' as ui_web;
 /// import 'package:web/web.dart' as web;
 ///
-/// ui_web.platformViewRegistry.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
-///   // Create and return an HTML Element from here
-///   final web.HTMLDivElement myDiv = web.HTMLDivElement()
-///       ..id = 'some_id_$viewId'
-///       ..style.backgroundColor = 'red'
-///       ..style.width = '100%'
-///       ..style.height = '100%';
-///   return myDiv;
-/// });
+/// void registerRedDivFactory() {
+///   ui_web.platformViewRegistry.registerViewFactory(
+///     'my-view-type',
+///     (int viewId, {Object? params}) {
+///       // Create and return an HTML Element from here
+///       final web.HTMLDivElement myDiv = web.HTMLDivElement()
+///         ..id = 'some_id_$viewId'
+///         ..style.backgroundColor = 'red'
+///         ..style.width = '100%'
+///         ..style.height = '100%';
+///       return myDiv;
+///     },
+///   );
+/// }
 /// ```
 ///
 /// **`registerViewFactory` must be called outside of `build` methods,** so the
