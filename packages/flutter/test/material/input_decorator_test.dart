@@ -2167,6 +2167,34 @@ void main() {
         );
       });
     });
+
+    group('Helper widget', () {
+      testWidgets('InputDecorator shows helper widget', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              helper: Text('helper', style: TextStyle(fontSize: 20.0)),
+            ),
+          ),
+        );
+
+        expect(find.text('helper'), findsOneWidget);
+      });
+
+      testWidgets('InputDecorator throws when helper text and helper widget are provided', (WidgetTester tester) async {
+        expect(
+          () {
+            buildInputDecorator(
+              decoration: InputDecoration(
+                helperText: 'helperText',
+                helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
+              ),
+            );
+          },
+          throwsAssertionError,
+        );
+      });
+    });
   });
 
   testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
