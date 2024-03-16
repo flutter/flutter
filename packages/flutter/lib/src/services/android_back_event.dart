@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-/// Enum represents the edge from which a swipe starts in a back gesture.
+/// Enum representing the edge from which a swipe starts in a back gesture.
 ///
 /// This is used in [AndroidBackEvent] to indicate the starting edge of the
 /// swipe gesture.
@@ -20,8 +20,8 @@ enum SwipeEdge {
 class AndroidBackEvent {
   /// Creates a new [AndroidBackEvent] instance.
   const AndroidBackEvent({
-    required this.touchX,
-    required this.touchY,
+    required this.x,
+    required this.y,
     required this.progress,
     required this.swipeEdge,
   });
@@ -30,8 +30,8 @@ class AndroidBackEvent {
   /// data received from a platform channel.
   factory AndroidBackEvent.fromMap(Map<dynamic, dynamic> json) {
     return AndroidBackEvent(
-      touchX: (json['touchX'] as num?)?.toDouble(),
-      touchY: (json['touchY'] as num?)?.toDouble(),
+      x: (json['x'] as num?)?.toDouble(),
+      y: (json['y'] as num?)?.toDouble(),
       progress: (json['progress'] as num).toDouble(),
       swipeEdge: SwipeEdge.values[json['swipeEdge'] as int],
     );
@@ -39,11 +39,11 @@ class AndroidBackEvent {
 
   /// The global X location of the touch point, or `null` if the event is from a
   /// button press.
-  final double? touchX;
+  final double? x;
 
   /// The global Y location of the touch point, or `null` if the event is from a
   /// button press.
-  final double? touchY;
+  final double? y;
 
   /// Returns a value between 0 and 1 representing how far along the back
   /// gesture is.
@@ -53,13 +53,13 @@ class AndroidBackEvent {
   /// Specifically,
   ///
   /// - The progress is 0 when the touch is at the starting edge of the screen
-  ///   (left or right), and animation should seek to its start state.
+  ///   (left or right), and the animation should seek to its start state.
   /// - The progress is approximately 1 when the touch is at the opposite side
-  ///   of the screen, and animation should seek to its end state. Exact end
+  ///   of the screen, and the animation should seek to its end state. Exact end
   ///   value may vary depending on screen size.
   ///
-  /// After the gesture finishes in cancel state, this method keeps getting
-  /// invoked until the progress value animates back to 0.
+  /// When the gesture is cancelled, the progress value continues to update,
+  /// animating back to 0 until the cancellation animation completes.
   ///
   /// In-between locations are linearly interpolated based on horizontal
   /// distance from the starting edge and smooth clamped to 1 when the distance
@@ -74,8 +74,8 @@ class AndroidBackEvent {
   /// It returns true when the back button is pressed, such as when the user
   /// opts for 3-button navigation. In cases of gesture navigation, it returns
   /// false.
-  bool get isBackPressed =>
-      touchX == null || touchY == null || (touchX == 0 && touchY == 0);
+  bool get isButtonEvent =>
+      x == null || y == null || (progress == 0 && x == 0 && y == 0);
 
   @override
   bool operator ==(Object other) {
@@ -86,17 +86,17 @@ class AndroidBackEvent {
       return false;
     }
     return other is AndroidBackEvent &&
-        touchX == other.touchX &&
-        touchY == other.touchY &&
+        x == other.x &&
+        y == other.y &&
         progress == other.progress &&
         swipeEdge == other.swipeEdge;
   }
 
   @override
-  int get hashCode => Object.hash(touchX, touchY, progress, swipeEdge);
+  int get hashCode => Object.hash(x, y, progress, swipeEdge);
 
   @override
   String toString() {
-    return 'AndroidBackEvent{touchX: $touchX, touchY: $touchY, progress: $progress, swipeEdge: $swipeEdge}';
+    return 'AndroidBackEvent{x: $x, y: $y, progress: $progress, swipeEdge: $swipeEdge}';
   }
 }

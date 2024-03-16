@@ -206,7 +206,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     //
     // In the middle of a back gesture drag, let the transition be linear to
     // match finger motions.
-    final bool linearTransition = PageRoute.isPopGestureInProgress(route);
+    final bool linearTransition = route.popGestureInProgress;
     if (route.fullscreenDialog) {
       return CupertinoFullscreenDialogTransition(
         primaryRouteAnimation: animation,

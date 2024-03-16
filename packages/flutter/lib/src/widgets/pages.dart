@@ -50,7 +50,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
 
-  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
+  /// True if a back gesture (iOS-style back swipe or Android predictive back)
+  /// is currently underway for [route].
   ///
   /// This just checks the route's [NavigatorState.userGestureInProgress].
   ///
@@ -62,7 +63,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     return route.navigator!.userGestureInProgress;
   }
 
-  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
+  /// True if a back gesture (iOS-style back swipe or Android predictive back)
+  /// is currently underway for this route.
   ///
   /// See also:
   ///
@@ -124,7 +126,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
       return false;
     }
     // If we're in a gesture already, we cannot start another.
-    if (isPopGestureInProgress(route)) {
+    if (route.popGestureInProgress) {
       return false;
     }
 

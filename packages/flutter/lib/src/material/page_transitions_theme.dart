@@ -822,7 +822,7 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
       },
       builder: (BuildContext context, AndroidBackEvent? startBackEvent,
           AndroidBackEvent? currentBackEvent) {
-        final bool linearTransition = PageRoute.isPopGestureInProgress(route);
+        final bool linearTransition = route.popGestureInProgress;
 
         if (linearTransition) {
           return backGestureTransitionBuilder(
@@ -896,8 +896,9 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   set startBackEvent(AndroidBackEvent? startBackEvent) {
     if (_startBackEvent != startBackEvent && mounted) {
-      _startBackEvent = startBackEvent;
-      setState(() {});
+      setState(() {
+        _startBackEvent = startBackEvent;
+      });
     }
   }
 
@@ -907,8 +908,9 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   set currentBackEvent(AndroidBackEvent? currentBackEvent) {
     if (_currentBackEvent != currentBackEvent && mounted) {
-      _currentBackEvent = currentBackEvent;
-      setState(() {});
+      setState(() {
+        _currentBackEvent = currentBackEvent;
+      });
     }
   }
 
@@ -928,7 +930,7 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 
   @override
   Future<bool> startBackGesture(AndroidBackEvent backEvent) {
-    gestureInProgress = !backEvent.isBackPressed && widget.enabledCallback();
+    gestureInProgress = !backEvent.isButtonEvent && widget.enabledCallback();
     if (gestureInProgress) {
       widget.backGestureController.dragStart(progress: 1 - backEvent.progress);
       startBackEvent = currentBackEvent = backEvent;
