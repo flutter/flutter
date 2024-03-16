@@ -5,16 +5,15 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -524,17 +523,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return FlutterCommandResult.success();
     }
 
-    final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
-    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-      ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsPlatformMB(directorySize)})';
-
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$appSize',
-      color: TerminalColor.green,
-    );
+    globals.printStatus('Built IPA to $absoluteOutputPath.');
 
     if (isAppStoreUpload) {
       globals.printStatus('To upload to the App Store either:');
@@ -748,17 +737,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     }
 
     if (result.output != null) {
-      final Directory outputDirectory = globals.fs.directory(result.output);
-      final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-      final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-        ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsPlatformMB(directorySize)})';
-
-      globals.printStatus(
-        '${globals.terminal.successMark} '
-        'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
-        color: TerminalColor.green,
-      );
+      globals.printStatus('Built ${result.output}.');
 
       // When an app is successfully built, record to analytics whether Impeller
       // is enabled or disabled.
