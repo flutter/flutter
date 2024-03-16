@@ -19,6 +19,8 @@ import 'framework.dart';
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
 // Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{};
 // late PlatformViewController _controller;
+// void myOnElementCreated(Object element) {}
+// void myOnPlatformViewCreated(int viewId) {}
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
@@ -399,7 +401,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// // In a `build` method...
 /// HtmlElementView.fromTagName(
 ///   tagName: 'div',
-///   onElementCreated: onElementCreated,
+///   onElementCreated: myOnElementCreated,
 /// );
 /// ```
 ///
@@ -420,11 +422,12 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// Flutter web will call this factory function to create the `element` that will
 /// be injected later:
 ///
-/// ```dart
-/// // import dart:ui_web
+/// ```js
+/// import 'dart:ui_web' as ui_web;
+/// import 'package:web' as web;
+///
 /// ui_web.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
 ///   // Create and return an HTML Element from here
-///   // import package:web as web
 ///   final web.HTMLDivElement myDiv = web.HTMLDivElement()
 ///       ..id = 'some_id_$viewId'
 ///       ..style.backgroundColor = 'red'
@@ -449,9 +452,9 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// ```dart
 /// // In a `build` method...
-/// HtmlElementView(
+/// const HtmlElementView(
 ///   viewType: 'my-view-type',
-///   onPlatformViewCreated: onElementCreated,
+///   onPlatformViewCreated: myOnPlatformViewCreated,
 ///   creationParams: <String, Object?>{
 ///     'key': 'someValue',
 ///   },
@@ -506,7 +509,9 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// The example below demonstrates **how to create an `onElementInjected` function**
 /// that gets called when the root `element` is injected into the DOM:
 ///
-/// ```dart
+/// ```js
+/// import 'package:web' as web;
+///
 /// // Called after `element` is injected into the DOM.
 /// void onElementInjected(web.HTMLDivElement element) {
 ///   final web.Element? located = web.document.querySelector('#someIdThatICanFindLater');
@@ -516,12 +521,15 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// }
 /// ```
 ///
-/// Using a `ResizeObserver` through `package:web` in the [onPlatformViewCreated]
+/// Using a `ResizeObserver` through `package:web` in `onElementCreated`:
 /// method:
 ///
-/// ```dart
-/// void onPlatformViewCreated(Object element) {
-///   element as web.HTMLDivElement; // import package:web
+/// ```js
+/// import 'dart:js_interop';
+/// import 'package:web' as web;
+///
+/// void onElementCreated(Object element) {
+///   element as web.HTMLDivElement;
 ///   element.style.backgroundColor = 'red';
 ///   element.id = 'someIdThatICanFindLater';
 ///
@@ -536,7 +544,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///       // Call our callback.
 ///       onElementInjected(element);
 ///     }
-///   }.toJS); // import dart:js_interop
+///   }.toJS);
 ///
 ///   // Connect the observer.
 ///   observer.observe(element);
@@ -559,9 +567,12 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// The `hostElement` of the current [FlutterView] can be retrieved through:
 ///
-/// ```dart
+/// ```js
+/// import 'dart:ui_web' as ui_web;
+///
+/// //...
+///
 /// final int flutterViewId = View.of(context).viewId;
-/// // import dart:ui_web
 /// final JSAny? hostElement = ui_web.views.getHostElement(flutterViewId);
 /// ```
 ///
