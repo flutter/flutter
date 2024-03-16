@@ -194,6 +194,7 @@ abstract class ProcessUtils {
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
     ProcessStartMode mode = ProcessStartMode.normal,
+    void Function(Object, StackTrace)? stdinWriteErrorHandler,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to

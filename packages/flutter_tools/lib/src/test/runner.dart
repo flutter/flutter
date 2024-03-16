@@ -817,7 +817,7 @@ class SpawnPlugin extends PlatformPlugin {
 
     globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-    final Process process = await globals.processManager.start(command, environment: environment);
+    final Process process = await globals.processUtils.start(command, environment: environment);
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final Stream<List<int>> stream in <Stream<List<int>>>[

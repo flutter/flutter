@@ -11,6 +11,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -41,7 +42,7 @@ class IconTreeShaker {
     required FileSystem fileSystem,
     required Artifacts artifacts,
     required TargetPlatform targetPlatform,
-  }) : _processManager = processManager,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
@@ -78,7 +79,7 @@ class IconTreeShaker {
   Future<void>? _iconDataProcessing;
   Map<String, _IconTreeShakerData>? _iconData;
 
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
@@ -203,14 +204,13 @@ class IconTreeShaker {
       .followedBy(optionalCodePointStrings).join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
                        'using codepoints $codePointsString');
-    final Process fontSubsetProcess = await _processManager.start(cmd);
-    try {
-      fontSubsetProcess.stdin.writeln(codePointsString);
-      await fontSubsetProcess.stdin.flush();
-      await fontSubsetProcess.stdin.close();
-    } on Exception {
+    final Process fontSubsetProcess = await _processUtils.start(
+      cmd,
       // handled by checking the exit code.
-    }
+      stdinWriteErrorHandler: (Object err, StackTrace st) {},
+    );
+    fontSubsetProcess.stdin.writeln(codePointsString);
+    await fontSubsetProcess.stdin.flush();
 
     final int code = await fontSubsetProcess.exitCode;
     if (code != 0) {
@@ -292,12 +292,12 @@ class IconTreeShaker {
       '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
-    final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
+    final RunResult constFinderProcessResult = await _processUtils.run(cmd);
 
     if (constFinderProcessResult.exitCode != 0) {
       throw IconTreeShakerException._('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
-    final Object? constFinderMap = json.decode(constFinderProcessResult.stdout as String);
+    final Object? constFinderMap = json.decode(constFinderProcessResult.stdout);
     if (constFinderMap is! Map<String, Object?>) {
       throw IconTreeShakerException._(
         'Invalid ConstFinder output: expected a top level JSON object, '

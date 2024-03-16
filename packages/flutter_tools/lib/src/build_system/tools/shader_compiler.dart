@@ -14,6 +14,7 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -94,12 +95,12 @@ class ShaderCompiler {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-  }) : _processManager = processManager,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts;
 
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
@@ -179,7 +180,7 @@ class ShaderCompiler {
       '--include=$shaderLibPath',
     ];
     _logger.printTrace('shaderc command: $cmd');
-    final Process impellercProcess = await _processManager.start(cmd);
+    final Process impellercProcess = await _processUtils.start(cmd);
     final int code = await impellercProcess.exitCode;
     if (code != 0) {
       final String stdout = await utf8.decodeStream(impellercProcess.stdout);

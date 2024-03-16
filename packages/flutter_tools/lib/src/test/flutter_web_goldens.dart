@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../convert.dart';
 import '../web/compile.dart';
 import 'test_compiler.dart';
@@ -32,14 +33,14 @@ class TestGoldenComparator {
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
        _fileSystem = fileSystem,
-       _processManager = processManager;
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final String? shellPath;
   final Directory tempDir;
   final TestCompiler Function() compilerFactory;
   final Logger _logger;
   final FileSystem _fileSystem;
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final WebRendererMode webRenderer;
 
   TestCompiler? _compiler;
@@ -95,7 +96,7 @@ class TestGoldenComparator {
       'FLUTTER_TEST_BROWSER': 'chrome',
       'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
     };
-    return _processManager.start(command, environment: environment);
+    return _processUtils.start(command, environment: environment);
   }
 
   Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {

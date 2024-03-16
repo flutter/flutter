@@ -14,6 +14,7 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/process.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
@@ -77,12 +78,12 @@ class SceneImporter {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-  })  : _processManager = processManager,
+  })  : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
         _logger = logger,
         _fs = fileSystem,
         _artifacts = artifacts;
 
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
@@ -125,7 +126,7 @@ class SceneImporter {
       '--output=$outputPath',
     ];
     _logger.printTrace('scenec command: $cmd');
-    final Process scenecProcess = await _processManager.start(cmd);
+    final Process scenecProcess = await _processUtils.start(cmd);
     final int code = await scenecProcess.exitCode;
     if (code != 0) {
       final String stdout = await utf8.decodeStream(scenecProcess.stdout);

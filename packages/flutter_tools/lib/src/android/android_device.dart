@@ -616,7 +616,7 @@ class AndroidDevice extends Device {
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
-          _processManager,
+          _processUtils,
         ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -789,13 +789,13 @@ class AndroidDevice extends Device {
     if (includePastLogs) {
       return _pastLogReader ??= await AdbLogReader.createLogReader(
         this,
-        _processManager,
+        _processUtils,
         includePastLogs: true,
       );
     } else {
       return _logReader ??= await AdbLogReader.createLogReader(
         this,
-        _processManager,
+        _processUtils,
       );
     }
   }
@@ -1024,7 +1024,7 @@ class AdbLogReader extends DeviceLogReader {
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
-    ProcessManager processManager, {
+    ProcessUtils processUtils, {
     bool includePastLogs = false,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
@@ -1058,7 +1058,7 @@ class AdbLogReader extends DeviceLogReader {
         if (lastLogcatTimestamp != null) "'$lastLogcatTimestamp'" else '0',
       ]);
     }
-    final Process process = await processManager.start(device.adbCommandForDevice(args));
+    final Process process = await processUtils.start(device.adbCommandForDevice(args));
     return AdbLogReader._(process, device.name);
   }
 
