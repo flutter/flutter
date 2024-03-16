@@ -27494,7 +27494,6 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file
 --------------------------------------------------------------------------------
 accessibility
-fuchsia_sdk
 
 Copyright 2019 The Chromium Authors. All rights reserved.
 
@@ -31736,7 +31735,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/934c41c1c18e7c602140dd337d8cf53c17fa0b6e
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/6eb2bc37b91c383e7d427b14fb2e9024fe128828
 /third_party/fallback_root_certificates/
 
 --------------------------------------------------------------------------------
