@@ -207,6 +207,7 @@
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_ad_banners__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
