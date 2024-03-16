@@ -11,6 +11,7 @@ import '../base/context.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../convert.dart';
@@ -231,7 +232,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   }) : _java = java,
        _androidSdk = androidSdk,
        _platform = platform,
-       _processManager = processManager,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _stdio = stdio,
        _userMessages = userMessages,
@@ -241,7 +242,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   final AndroidSdk? _androidSdk;
   final Stdio _stdio;
   final Platform _platform;
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final UserMessages _userMessages;
 
@@ -284,14 +285,14 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (javaBinary == null) {
       return false;
     }
-    if (!_processManager.canRun(javaBinary)) {
+    if (!_processUtils.canRun(javaBinary)) {
       return false;
     }
     String? javaVersion;
     try {
-      final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
+      final RunResult result = await _processUtils.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
-        final List<String> versionLines = (result.stderr as String).split('\n');
+        final List<String> versionLines = result.stderr.split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
     } on Exception catch (error) {
@@ -330,7 +331,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await _processManager.start(
+      final Process process = await _processUtils.start(
         <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
         environment: _java?.environment,
       );
@@ -370,7 +371,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await _processManager.start(
+      final Process process = await _processUtils.start(
         <String>[_androidSdk.sdkManagerPath!, '--licenses'],
         environment: _java?.environment,
       );
@@ -424,7 +425,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (sdkManagerPath == null) {
       return false;
     }
-    return _processManager.canRun(sdkManagerPath);
+    return _processUtils.canRun(sdkManagerPath);
   }
 
   String _messageForSdkManagerError(

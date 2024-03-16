@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'build_info.dart';
 import 'bundle_builder.dart';
 import 'desktop_device.dart';
@@ -101,14 +102,14 @@ class PreviewDevice extends Device {
     required File previewBinary,
     @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _previewBinary = previewBinary,
-       _processManager = processManager,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
        _artifacts = artifacts,
        super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.windowsPreview);
 
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final FileSystem _fileSystem;
   final BundleBuilderFactory _bundleBuilderFactory;
@@ -205,7 +206,7 @@ class PreviewDevice extends Device {
     windowsDll.copySync(assetDirectory.childFile('flutter_windows.dll').path);
     icu.copySync(assetDirectory.childDirectory('data').childFile('icudtl.dat').path);
 
-    final Process process = await _processManager.start(
+    final Process process = await _processUtils.start(
       <String>[copiedPreviewBinaryPath],
     );
     _process = process;

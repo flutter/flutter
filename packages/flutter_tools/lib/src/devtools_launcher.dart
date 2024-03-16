@@ -13,6 +13,7 @@ import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'convert.dart';
 import 'resident_runner.dart';
 
@@ -24,12 +25,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     required String dartExecutable,
     required Logger logger,
     required BotDetector botDetector,
-  })  : _processManager = processManager,
+  })  : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
         _dartExecutable = dartExecutable,
         _logger = logger,
         _botDetector = botDetector;
 
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final String _dartExecutable;
   final Logger _logger;
   final BotDetector _botDetector;
@@ -51,7 +52,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
-      _devToolsProcess = await _processManager.start(<String>[
+      _devToolsProcess = await _processUtils.start(<String>[
         _dartExecutable,
         'devtools',
         '--no-launch-browser',

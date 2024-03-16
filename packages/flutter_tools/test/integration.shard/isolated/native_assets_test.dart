@@ -19,6 +19,7 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../src/common.dart';
@@ -67,7 +68,7 @@ void main() {
   }
 
   setUpAll(() {
-    processManager.runSync(<String>[
+    processUtils.runSync(<String>[
       flutterBin,
       'config',
       '--enable-native-assets',
@@ -189,7 +190,7 @@ void main() {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-          final ProcessResult result = processManager.runSync(
+          final RunResult result = processUtils.runSync(
             <String>[
               flutterBin,
               'build',
@@ -241,7 +242,7 @@ void main() {
         await buildDotDart.writeAsString(buildDotDartContentsNew);
         final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-        final ProcessResult result = processManager.runSync(
+        final RunResult result = processUtils.runSync(
           <String>[
             flutterBin,
             'build',
@@ -252,7 +253,7 @@ void main() {
           workingDirectory: exampleDirectory.path,
         );
         expect(
-          (result.stdout as String) + (result.stderr as String),
+          result.stdout + result.stderr,
           contains('link mode set to static, but this is not yet supported'),
         );
         expect(result.exitCode, isNot(0));
@@ -266,7 +267,7 @@ void main() {
         final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
         final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-        final ProcessResult result = processManager.runSync(
+        final RunResult result = processUtils.runSync(
           <String>[
             flutterBin,
             'build',
@@ -385,7 +386,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     platform: platform,
-    processManager: processManager,
+    processManager: const LocalProcessManager(),
   );
   final Directory apkUnzipped = appDirectory.childDirectory('apk-unzipped');
   apkUnzipped.createSync();

@@ -11,6 +11,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -29,7 +30,7 @@ abstract class DesktopDevice extends Device {
       required FileSystem fileSystem,
       required OperatingSystemUtils operatingSystemUtils,
     }) : _logger = logger,
-         _processManager = processManager,
+         _processUtils = ProcessUtils(processManager: processManager, logger: logger),
          _fileSystem = fileSystem,
          _operatingSystemUtils = operatingSystemUtils,
          super(
@@ -37,7 +38,7 @@ abstract class DesktopDevice extends Device {
         );
 
   final Logger _logger;
-  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
   final Set<Process> _runningProcesses = <Process>{};
@@ -137,7 +138,7 @@ abstract class DesktopDevice extends Device {
       ...debuggingOptions.dartEntrypointArgs,
     ];
     try {
-      process = await _processManager.start(
+      process = await _processUtils.start(
         command,
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
@@ -185,7 +186,7 @@ abstract class DesktopDevice extends Device {
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final Process process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= _processManager.killPid(process.pid);
+      succeeded &= process.kill();
     }
     return succeeded;
   }

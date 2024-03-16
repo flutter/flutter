@@ -109,7 +109,7 @@ abstract class FlutterTestDriver {
       processManager: const LocalProcessManager(),
       logger: BufferLogger.test(),
     );
-    _process = await processUtils.start(
+    _process = await processUtils.startWithStdin(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),

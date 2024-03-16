@@ -185,7 +185,7 @@ Future<ProcessTestResult> runFlutter(
 }) async {
   const LocalPlatform platform = LocalPlatform();
   final Stopwatch clock = Stopwatch()..start();
-  final Process process = await processUtils.start(
+  final Process process = await processUtils.startWithStdin(
     <String>[
       // In a container with no X display, use the virtual framebuffer.
       if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) '/usr/bin/xvfb-run',
