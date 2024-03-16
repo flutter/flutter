@@ -567,13 +567,16 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// The `hostElement` of the current [FlutterView] can be retrieved through:
 ///
-/// ```js
+/// ```dart
+/// import 'dart:js_interop';
 /// import 'dart:ui_web' as ui_web;
+/// import 'package:flutter/widgets.dart';
 ///
-/// //...
-///
-/// final int flutterViewId = View.of(context).viewId;
-/// final JSAny? hostElement = ui_web.views.getHostElement(flutterViewId);
+/// void useHostElement(BuildContext context) {
+///   final int flutterViewId = View.of(context).viewId;
+///   final JSAny? hostElement = ui_web.views.getHostElement(flutterViewId);
+///   // Use `package:web` with `hostElement`...
+/// }
 /// ```
 ///
 /// **Important:** If your flutter App uses `registerViewFactory` to register a
