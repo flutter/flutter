@@ -152,6 +152,8 @@
                     "flutter/build/dart:copy_dart_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
+                    "flutter/display_list:display_list_region_benchmarks",
+                    "flutter/display_list:display_list_transform_benchmarks",
                     "flutter/fml:fml_benchmarks",
                     "flutter/impeller/geometry:geometry_benchmarks",
                     "flutter/impeller/aiks:canvas_benchmarks",
