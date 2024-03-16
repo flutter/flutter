@@ -998,6 +998,7 @@ abstract class _CachedLayoutCalculation<Input extends Object, Output> {
 
   Output memoize(_LayoutCacheStorage cacheStorage, Input input, Output Function(Input) computer);
 
+  // Debug information that will be used to generate the Timeline event for this type of calculation.
   Map<String, String> debugFillTimelineArguments(Map<String, String> timelineArguments, Input input);
   String eventLabel(RenderBox renderBox);
 }
@@ -1926,9 +1927,6 @@ abstract class RenderBox extends RenderObject {
     return 0.0;
   }
 
-  bool _computingThisDryLayout = false;
-  bool _computingThisDryBaseline = false;
-
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
   ///
@@ -1952,42 +1950,7 @@ abstract class RenderBox extends RenderObject {
     return _computeIntrinsics(_CachedLayoutCalculation.dryLayout, constraints, _computeDryLayout);
   }
 
-  /// Returns the distance from the top of the box to the first baseline of the
-  /// box's contents at the given `constraints`, or `null` if this [RenderBox]
-  /// does not have any baselines.
-  ///
-  /// This method calls [computeDryBaseline] under the hood and caches the result.
-  /// When implementing a new [RenderBox] subclass, this method is typically not
-  /// overridden. Instead, consider overriding [computeDryBaseline] such that it
-  /// returns a baseline location that is consistent with
-  /// [getDistanceToActualBaseline]. See the documentation for the
-  /// [computeDryBaseline] method for more details.
-  ///
-  /// This method is usually called by the [computeDryBaseline] or the
-  /// [computeDryLayout] implementation of a parent [RenderBox] to get the
-  /// baseline location of a [RenderBox] child. Unlike [getDistanceToBaseline],
-  /// this method takes a [BoxConstraints] as an argument and computes the
-  /// baseline location as if the [RenderBox] was laid out by the parent using
-  /// that [BoxConstraints].
-  ///
-  /// The "dry" in the method name means this method, like [getDryLayout], has
-  /// no observable side effects when called, as opposed to "wet" layout methods
-  /// such as [performLayout] (which changes this [RenderBox]'s [size], and the
-  /// offsets of its children if any). Since this method does not depend on the
-  /// current layout, unlike [getDistanceToBaseline], it's ok to call this method
-  /// when this [RenderBox]'s layout is outdated.
-  ///
-  /// Calling this function in [performLayout] directly or indirectly can be
-  /// expensive, as it can result in O(N^2) layout performance, where N is the
-  /// number of render objects in the render subtree. Consider using
-  /// [getDistanceToBaseline] when appropriate.
-  double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
-    // This assert makes sure computeDryBaseline always gets called in debug mode, in case it asserts.
-    assert(baselineOffset == computeDryBaseline(constraints, baseline));
-    return baselineOffset;
-  }
-
+  bool _computingThisDryLayout = false;
   Size _computeDryLayout(BoxConstraints constraints) {
     assert(() {
       assert(!_computingThisDryLayout);
@@ -1998,21 +1961,6 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
-      return true;
-    }());
-    return result;
-  }
-
-  BaselineOffset _computeDryBaseline((BoxConstraints, TextBaseline) pair) {
-    assert(() {
-      assert(!_computingThisDryBaseline);
-      _computingThisDryBaseline = true;
-      return true;
-    }());
-    final BaselineOffset result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
-    assert(() {
-      assert(_computingThisDryBaseline);
-      _computingThisDryBaseline = false;
       return true;
     }());
     return result;
@@ -2061,10 +2009,63 @@ abstract class RenderBox extends RenderObject {
     return Size.zero;
   }
 
+  /// Returns the distance from the top of the box to the first baseline of the
+  /// box's contents for the given `constraints`, or `null` if this [RenderBox]
+  /// does not have any baselines.
+  ///
+  /// This method calls [computeDryBaseline] under the hood and caches the result.
+  /// [RenderBox] subclasses typically don't overridden [getDryBaseline]. Instead,
+  /// consider overriding [computeDryBaseline] such that it returns a baseline
+  /// location that is consistent with [getDistanceToActualBaseline]. See the
+  /// documentation for the [computeDryBaseline] method for more details.
+  ///
+  /// This method is usually called by the [computeDryBaseline] or the
+  /// [computeDryLayout] implementation of a parent [RenderBox] to get the
+  /// baseline location of a [RenderBox] child. Unlike [getDistanceToBaseline],
+  /// this method takes a [BoxConstraints] as an argument and computes the
+  /// baseline location as if the [RenderBox] was laid out by the parent using
+  /// that [BoxConstraints].
+  ///
+  /// The "dry" in the method name means this method, like [getDryLayout], has
+  /// no observable side effects when called, as opposed to "wet" layout methods
+  /// such as [performLayout] (which changes this [RenderBox]'s [size], and the
+  /// offsets of its children if any). Since this method does not depend on the
+  /// current layout, unlike [getDistanceToBaseline], it's ok to call this method
+  /// when this [RenderBox]'s layout is outdated.
+  ///
+  /// Similar to the intrinsic width/height and [getDryLayout], calling this
+  /// function in [performLayout] is expensive, as it can result in O(N^2) layout
+  /// performance, where N is the number of render objects in the render subtree.
+  /// Typically this method should be only called by the parent [RenderBox]'s
+  /// [computeDryBaseline] or [computeDryLayout] implementation.
+  double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
+    // This assert makes sure computeDryBaseline always gets called in debug mode,
+    // in case the computeDryBaseline implementation invokes debugCannotComputeDryLayout.
+    assert(baselineOffset == computeDryBaseline(constraints, baseline));
+    return baselineOffset;
+  }
+
+  bool _computingThisDryBaseline = false;
+  BaselineOffset _computeDryBaseline((BoxConstraints, TextBaseline) pair) {
+    assert(() {
+      assert(!_computingThisDryBaseline);
+      _computingThisDryBaseline = true;
+      return true;
+    }());
+    final BaselineOffset result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
+    assert(() {
+      assert(_computingThisDryBaseline);
+      _computingThisDryBaseline = false;
+      return true;
+    }());
+    return result;
+  }
+
   /// Computes the value returned by [getDryBaseline].
   ///
   /// This method is for overriding only and shouldn't be called directly. To
-  /// get this [RenderBox]'s speculative baseline location at the given
+  /// get this [RenderBox]'s speculative baseline location for the given
   /// `constraints`, call [getDryBaseline] instead.
   ///
   /// The "dry" in the method name means the implementation must not produce
@@ -2080,10 +2081,11 @@ abstract class RenderBox extends RenderObject {
   /// implementatin, use the [getDryLayout] method instead.
   ///
   /// The implementation must return a value that represents the distance from
-  /// the top of the box to the first baseline of the box's contents, at the
-  /// given `constraints`. It's the same exact value
-  /// [RenderBox.computeDistanceToActualBaseline] would return, when this
-  /// [RenderBox] was laid out at `constraints` in the same exact state.
+  /// the top of the box to the first baseline of the box's contents, for the
+  /// given `constraints`, or `null` if the [RenderBox] has no baselines. It's
+  /// the same exact value [RenderBox.computeDistanceToActualBaseline] would
+  /// return, when this [RenderBox] was laid out at `constraints` in the same
+  /// exact state.
   ///
   /// Not all [RenderBox]es support dry baseline computation. For example, to
   /// compute the dry baseline of a [LayoutBuilder], its `builder` may have to
@@ -2183,7 +2185,7 @@ abstract class RenderBox extends RenderObject {
         assert(renderBoxDoingDryBaseline == null,
           'RenderBox.size accessed in '
           '${objectRuntimeType(renderBoxDoingDryBaseline, 'RenderBox')}.computeDryBaseline.'
-          'The computeDryBaseline method should not access '
+          'The computeDryBaseline method must not access '
           '${renderBoxDoingDryBaseline == this ? "the RenderBox's own size" : "the size of its child"},'
           "because it's established in peformLayout or peformResize using different BoxConstraints."
         );
@@ -2403,9 +2405,6 @@ abstract class RenderBox extends RenderObject {
   ///    computation, call [getDistanceToActualBaseline] on the child (not
   ///    [computeDistanceToActualBaseline], the internal implementation, and not
   ///    [getDistanceToBaseline], the public entry point for this API).
-  ///
-  /// The [computeDryBaseline] method typically also needs overridding if this
-  /// method is overridden.
   @protected
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
@@ -2570,10 +2569,6 @@ abstract class RenderBox extends RenderObject {
         )
       ];
 
-      // Only perform the baseline checks after performLayout. Currently this
-      // method is also run in the RenderBox.size setter and after
-      // performResize, and it's not safe to access the baseline location in
-      // those two places since it may depend on the child layout.
       for (final TextBaseline baseline in TextBaseline.values) {
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
@@ -2618,11 +2613,10 @@ abstract class RenderBox extends RenderObject {
             ErrorDescription(
               'The computeDryBaseline method returned $dryBaseline,\n'
               'while the computeDistanceToActualBaseline method returned $realBaseline.\n'
-              'Consider checking the implementations of:\n'
+              'Consider checking the implementations of the following methods on the ${objectRuntimeType(this, 'RenderBox')} class and make sure they are consistent:\n'
               ' * computeDistanceToActualBaseline\n'
               ' * computeDryBaseline\n'
               ' * performLayout\n'
-              'methods of the ${objectRuntimeType(this, 'RenderBox')} class and make sure they are consistent.'
             ),
             ...messages,
           ]);
@@ -2650,7 +2644,6 @@ abstract class RenderBox extends RenderObject {
     // dependency is still established, but only from the RenderBox that failed
     // to compute the dry baseline to the ancestor that queried the dry baseline.
     if (_layoutCacheStorage.clear() && parent != null) {
-      _layoutCacheStorage.clear();
       markParentNeedsLayout();
       return;
     }
@@ -2971,6 +2964,19 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugPaint(PaintingContext context, Offset offset) {
     assert(() {
+      // Only perform the baseline checks after `PipelineOwner.flushLayout` completes.
+      // We can't run this check in the same places we run other intrinsics checks
+      // (in the `RenderBox.size` setter, or after `performResize`), because
+      // `getDistanceToBaseline` may depend on the layout of the child so it's
+      // the safest to only call `getDistanceToBaseline` after the entire tree
+      // finishes doing layout.
+      //
+      // Descendant `RenderObject`s typically call `debugPaint` before their
+      // parents do. This means the baseline implementations are checked from
+      // descendants to ancestors, allowing us to spot the `RenderBox` with an
+      // inconsistent implementation, instead of its ancestors that only reported
+      // inconsistent baseline values because one of its ancestors has an
+      // inconsistent implementation.
       if (debugCheckIntrinsicSizes) {
         _debugVerifyDryBaselines();
       }
