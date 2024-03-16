@@ -424,9 +424,9 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// ```js
 /// import 'dart:ui_web' as ui_web;
-/// import 'package:web' as web;
+/// import 'package:web/web.dart' as web;
 ///
-/// ui_web.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
+/// ui_web.platformViewRegistry.registerViewFactory('my-view-type', (int viewId, { Object? params}) {
 ///   // Create and return an HTML Element from here
 ///   final web.HTMLDivElement myDiv = web.HTMLDivElement()
 ///       ..id = 'some_id_$viewId'
@@ -509,8 +509,8 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// The example below demonstrates **how to create an `onElementInjected` function**
 /// that gets called when the root `element` is injected into the DOM:
 ///
-/// ```js
-/// import 'package:web' as web;
+/// ```dart
+/// import 'package:web/web.dart' as web;
 ///
 /// // Called after `element` is injected into the DOM.
 /// void onElementInjected(web.HTMLDivElement element) {
@@ -526,7 +526,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// ```js
 /// import 'dart:js_interop';
-/// import 'package:web' as web;
+/// import 'package:web/web.dart' as web;
 ///
 /// void onElementCreated(Object element) {
 ///   element as web.HTMLDivElement;
