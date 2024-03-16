@@ -116,6 +116,7 @@ class _CarouselExampleState extends State<CarouselExample> {
 
   @override
   Widget build(BuildContext context) {
+    print('SCREEN WIDTH: ${MediaQuery.of(context).size.width}');
     return MaterialApp(
       home: Scaffold(
         body: CustomScrollView(
@@ -123,8 +124,9 @@ class _CarouselExampleState extends State<CarouselExample> {
           controller: controller,
           slivers: <Widget>[
             SliverCarousel(
-              maxChildExtent: 200,
-              minChildExtent: 10,
+              // maxChildExtent: 200,
+              clipExtent: 20,
+              childExtentList: const <int>[3,3,3,2,1],
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Padding(
