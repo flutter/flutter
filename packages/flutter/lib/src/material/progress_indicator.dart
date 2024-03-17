@@ -458,8 +458,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     final double strokeOffset = strokeWidth / 2 * -strokeAlign;
     final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
     final Size arcActualSize = Size(
-      size.width - strokeOffset * 2,
-      size.height - strokeOffset * 2,
+      size.width - strokeOffset * 5,
+      size.height - strokeOffset * 5,
     );
 
     if (backgroundColor != null) {
