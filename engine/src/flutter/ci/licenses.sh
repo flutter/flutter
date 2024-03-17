@@ -81,7 +81,7 @@ dart --version
 # Runs the tests for the license script.
 function run_tests() (
   cd "$SRC_DIR/flutter/tools/licenses"
-  find . -name "*_test.dart" | xargs -n 1 dart --enable-asserts
+  find . -name "*_test.dart" | xargs -n 1 dart --disable-dart-dev --enable-asserts
 )
 
 # Collects the license information from the repo.
@@ -93,7 +93,11 @@ function collect_licenses() (
   # For very large RegExps that are currently used in license script using
   # interpreter is faster than using unoptimized machine code, which has
   # no chance of being optimized(due to its size).
-  dart --enable-asserts --interpret_irregexp lib/main.dart \
+  dart \
+    --disable-dart-dev \
+    --enable-asserts \
+    --interpret_irregexp \
+    lib/main.dart \
     --src ../../.. \
     --out ../../../out/license_script_output \
     --golden ../../ci/licenses_golden \
