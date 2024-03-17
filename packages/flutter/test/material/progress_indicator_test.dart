@@ -1165,6 +1165,26 @@ void main() {
     }),
   );
 
+ testWidgets(
+    'Adaptive CircularProgressIndicator should have default size  is 36x36 - android',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          ),
+        ),
+      );
+
+     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.android,
+    }),
+  );
   testWidgets('ProgressIndicatorTheme.wrap() always creates a new ProgressIndicatorTheme', (WidgetTester tester) async {
 
     late BuildContext builderContext;
