@@ -129,7 +129,7 @@ def main():
   dart = 'dart'
   if os.name == 'nt':
     dart = 'dart.exe'
-  pubcmd = [os.path.join(dart_sdk_bin, dart), 'pub', 'get', '--offline']
+  pubcmd = [os.path.join(dart_sdk_bin, dart), 'pub', '--suppress-analytics', 'get', '--offline']
 
   pub_count = 0
   for package in ALL_PACKAGES:
