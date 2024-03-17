@@ -837,7 +837,7 @@ def gather_dart_tests(build_dir, test_filter):
       build_dir,
       os.path.join('dart-sdk', 'bin', 'dart'),
       None,
-      flags=['pub', 'get', '--offline'],
+      flags=['pub', '--suppress-analytics', 'get', '--offline'],
       cwd=dart_tests_dir,
   )
 
@@ -1061,7 +1061,7 @@ def run_impeller_golden_tests(build_dir: str):
     golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
     script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
     diff_result = subprocess.run(
-        f'{dart_bin} run {script_path} {golden_path} {temp_dir}',
+        f'{dart_bin} --disable-dart-dev {script_path} {golden_path} {temp_dir}',
         check=False,
         shell=True,
         stdout=subprocess.PIPE,
@@ -1084,7 +1084,7 @@ def run_impeller_golden_tests(build_dir: str):
 
     with DirectoryChange(harvester_path):
       bin_path = Path('.').joinpath('bin').joinpath('golden_tests_harvester.dart')
-      run_cmd([dart_bin, 'run', str(bin_path), temp_dir])
+      run_cmd([dart_bin, '--disable-dart-dev', str(bin_path), temp_dir])
 
 
 def main():
