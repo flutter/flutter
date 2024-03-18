@@ -4673,6 +4673,7 @@ targets:
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     bringup: true
     timeout: 60
     properties:
