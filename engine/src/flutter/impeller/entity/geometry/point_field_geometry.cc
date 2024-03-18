@@ -216,7 +216,12 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   if (!compute_pass->EncodeCommands()) {
     return {};
   }
-  renderer.RecordCommandBuffer(std::move(cmd_buffer));
+  if (!renderer.GetContext()
+           ->GetCommandQueue()
+           ->Submit({std::move(cmd_buffer)})
+           .ok()) {
+    return {};
+  }
 
   return {
       .type = PrimitiveType::kTriangle,
