@@ -2458,14 +2458,14 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('MenuItemButton layout is updated by menuDirection', (WidgetTester tester) async {
-      Widget buildMenuButton({ required Axis menuDirection, bool constrainedLayout = false }) {
+    testWidgets('MenuItemButton layout is updated by menuFlexDirection', (WidgetTester tester) async {
+      Widget buildMenuButton({ required Axis menuFlexDirection, bool constrainedLayout = false }) {
         return MaterialApp(
           home: Scaffold(
             body: SizedBox(
               width: constrainedLayout ? 200 : null,
               child: MenuItemButton(
-                menuDirection: menuDirection,
+                menuFlexDirection: menuFlexDirection,
                 onPressed: () {},
                 child: const Text('This is a very long text that will wrap to the multiple lines.'),
               ),
@@ -2475,19 +2475,19 @@ void main() {
       }
 
       // Test a long MenuItemButton in an unconstrained layout with vertical menuDirection.
-      await tester.pumpWidget(buildMenuButton(menuDirection: Axis.vertical));
+      await tester.pumpWidget(buildMenuButton(menuFlexDirection: Axis.vertical));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
 
       // Test a long MenuItemButton in an unconstrained layout with horizontal menuDirection.
-      await tester.pumpWidget(buildMenuButton(menuDirection: Axis.horizontal));
+      await tester.pumpWidget(buildMenuButton(menuFlexDirection: Axis.horizontal));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
 
       // Test a long MenuItemButton in a constrained layout with vertical menuDirection.
-      await tester.pumpWidget(buildMenuButton(menuDirection: Axis.vertical, constrainedLayout: true));
+      await tester.pumpWidget(buildMenuButton(menuFlexDirection: Axis.vertical, constrainedLayout: true));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
 
       // Test a long MenuItemButton in a constrained layout with horizontal menuDirection.
-      await tester.pumpWidget(buildMenuButton(menuDirection: Axis.horizontal, constrainedLayout: true));
+      await tester.pumpWidget(buildMenuButton(menuFlexDirection: Axis.horizontal, constrainedLayout: true));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
       // This should throw an error.
       final AssertionError exception = tester.takeException() as AssertionError;

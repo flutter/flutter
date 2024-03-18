@@ -854,7 +854,7 @@ class MenuItemButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
-    this.menuDirection = Axis.vertical,
+    this.menuFlexDirection = Axis.vertical,
     required this.child,
   });
 
@@ -926,12 +926,15 @@ class MenuItemButton extends StatefulWidget {
 
   /// The direction in which the menu item expands.
   ///
-  /// If [menuDirection] is [Axis.vertical], the menu will be expanded vertically.
-  /// If [menuDirection] is [Axis.horizontal], then the menu  will be
+  /// If the menu item button is created by the [MenuAnchor] or [MenuBar], then
+  /// this property is ignored.
+  ///
+  /// If [menuFlexDirection] is [Axis.vertical], the menu will be expanded vertically.
+  /// If [menuFlexDirection] is [Axis.horizontal], then the menu  will be
   /// expanded horizontally.
   ///
   /// Defaults to [Axis.vertical].
-  final Axis menuDirection;
+  final Axis menuFlexDirection;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1062,6 +1065,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
+  _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
 
   @override
   void initState() {
@@ -1117,7 +1121,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         shortcut: widget.shortcut,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
-        menuDirection: widget.menuDirection,
+        menuDirection: _anchor?._orientation ?? widget.menuFlexDirection,
         child: widget.child!,
       ),
     );
