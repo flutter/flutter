@@ -1199,6 +1199,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.forceMaterialTransparency,
     required this.clipBehavior,
     required this.variant,
+    required this.accessibleNavigation,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1236,6 +1237,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool forceMaterialTransparency;
   final Clip? clipBehavior;
   final _SliverAppVariant variant;
+  final bool accessibleNavigation;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1263,7 +1265,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
     final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
+    final double toolbarOpacity =  !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
     final Widget? effectiveTitle = switch (variant) {
@@ -1354,7 +1356,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || toolbarTextStyle != oldDelegate.toolbarTextStyle
         || titleTextStyle != oldDelegate.titleTextStyle
         || systemOverlayStyle != oldDelegate.systemOverlayStyle
-        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency;
+        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency
+        || accessibleNavigation != oldDelegate.accessibleNavigation;
   }
 
   @override
@@ -2036,6 +2039,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           forceMaterialTransparency: widget.forceMaterialTransparency,
           clipBehavior: widget.clipBehavior,
           variant: widget._variant,
+          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
         ),
       ),
     );
