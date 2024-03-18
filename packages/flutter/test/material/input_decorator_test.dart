@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const Duration kTransitionDuration = Duration(milliseconds: 167);
+
 const String hintText = 'hint';
 const String inputText = 'text';
 const String labelText = 'label';
@@ -441,44 +443,44 @@ void main() {
       }
 
       await pumpDecorator(focused: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       const Size labelSize= Size(82.5, 16);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true, empty: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: false, enabled: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false, enabled: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       // Focused and disabled happens with NavigationMode.directional.
       await pumpDecorator(focused: true, enabled: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: true, empty: false, enabled: false);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
     });
@@ -500,8 +502,6 @@ void main() {
         ),
       ));
 
-      await tester.pumpAndSettle();
-
       expect(
         find.text(longStringA),
         paints..clipRect(rect: const Rect.fromLTWH(0, 0, 100.0, 16.0)),
@@ -521,7 +521,7 @@ void main() {
         ),
       ));
 
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
 
       expect(
         find.text(longStringB),
@@ -552,7 +552,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
 
       // floatingLabelHeight = 12 (font size 16dps * 0.75 = 12)
       // labelY = -floatingLabelHeight/2 + borderWidth/2
@@ -711,7 +711,7 @@ void main() {
         ),
       );
 
-      // Verify that the styles were passed along
+      // Verify that the styles were passed along.
       expect(getLabelStyle(tester).color, floatingLabelStyle.color);
     });
 
@@ -879,16 +879,16 @@ void main() {
         ),
       );
 
-      // TextField has the given border
+      // TextField has the given border.
       expect(getBorderRadius(tester), BorderRadius.zero);
 
-      // Focusing does not change the border
+      // Focusing does not change the border.
       await tester.tap(find.byKey(key));
       await tester.pump();
       expect(getBorderRadius(tester), BorderRadius.zero);
       await tester.pump(const Duration(milliseconds: 100));
       expect(getBorderRadius(tester), BorderRadius.zero);
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
       expect(getBorderRadius(tester), BorderRadius.zero);
     });
 
@@ -921,10 +921,10 @@ void main() {
       );
 
       await tester.tap(find.byType(StatefulBuilder));
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
 
       completer.complete();
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
     });
 
     test('InputBorder equality', () {
@@ -1039,7 +1039,7 @@ void main() {
             labelText: 'label text',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.only(
-                // Intentionally large values that are larger than the InputDecorator
+                // Intentionally large values that are larger than the InputDecorator.
                 topLeft: Radius.circular(smallerBorderRadius),
                 bottomLeft: Radius.circular(smallerBorderRadius),
                 topRight: Radius.circular(largerBorderRadius),
@@ -1319,7 +1319,7 @@ void main() {
 
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
-      // Fill is the border's outer path, a rounded rectangle
+      // Fill is the border's outer path, a rounded rectangle.
       expect(box, paints
       ..drrect(
         style: PaintingStyle.fill,
@@ -1603,7 +1603,7 @@ void main() {
           double hintOpacity18ms = getHintOpacity(tester);
           expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
 
-          await tester.pumpAndSettle(); // Let the animation finish.
+          await tester.pump(kTransitionDuration);
           // Hint is fully visible (opacity 1.0).
           expect(getHintOpacity(tester), 1.0);
 
@@ -1828,7 +1828,7 @@ void main() {
 
             // `alignLabelWithHint: false` centers the label vertically in the TextField.
             await tester.pumpWidget(buildFrame(false));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1839,7 +1839,7 @@ void main() {
 
             // `alignLabelWithHint: true` aligns the label vertically with the hint.
             await tester.pumpWidget(buildFrame(true));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1879,7 +1879,7 @@ void main() {
 
             // `alignLabelWithHint: false` centers the label vertically in the TextField.
             await tester.pumpWidget(buildFrame(false));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1890,7 +1890,7 @@ void main() {
 
             // `alignLabelWithHint: true` aligns the label vertically with the hint.
             await tester.pumpWidget(buildFrame(true));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1933,7 +1933,7 @@ void main() {
 
             // `alignLabelWithHint: false` centers the label vertically in the TextField.
             await tester.pumpWidget(buildFrame(false));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1944,7 +1944,7 @@ void main() {
 
             // alignLabelWithHint: true aligns the label vertically with the hint at the top.
             await tester.pumpWidget(buildFrame(true));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
 
             // Entering text still happens at the top.
@@ -1988,7 +1988,7 @@ void main() {
 
             // `alignLabelWithHint: false` centers the label vertically in the TextField.
             await tester.pumpWidget(buildFrame(false));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
             expect(getLabelCenter(tester).dy, getDecoratorCenter(tester).dy);
 
             // Entering text happens in the center as well.
@@ -2000,7 +2000,7 @@ void main() {
             // `alignLabelWithHint: true` aligns keeps the label in the center because
             // that's where the hint is.
             await tester.pumpWidget(buildFrame(true));
-            await tester.pumpAndSettle();
+            await tester.pump(kTransitionDuration);
 
             // On M3, hint centering is slightly wrong.
             // TODO(bleroux): remove closeTo usage when this is fixed.
@@ -2099,7 +2099,7 @@ void main() {
           decoration: decoration,
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
 
       final Finder hintTextFinder = find.text(hintText);
       final Text hintTextWidget = tester.widget(hintTextFinder);
@@ -2791,7 +2791,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump(kTransitionDuration);
 
       expect(find.byType(InputDecorator), findsOneWidget);
       expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
@@ -3191,7 +3191,7 @@ void main() {
 
     // Focused.
     focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
     final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
     expect(getLabelStyle(tester).color, theme.colorScheme.primary);
 
@@ -3202,7 +3202,7 @@ void main() {
     );
     await gesture.addPointer();
     await gesture.moveTo(center);
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
     expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
   });
 
@@ -3721,6 +3721,7 @@ void main() {
 
     // Tap to focus.
     await tester.tap(find.byType(TextField));
+    // TODO(bleroux): investigate why this pumpAndSettle is required.
     await tester.pumpAndSettle();
 
     // The prefix and suffix are visible, and the label is floating and still
@@ -3756,7 +3757,7 @@ void main() {
     final double labelWidth = getLabelRect(tester).width;
 
     await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
 
     final double floatedLabelWidth = getLabelRect(tester).width;
 
@@ -3764,7 +3765,7 @@ void main() {
 
     final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
     await tester.pumpWidget(target);
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
 
     expect(getLabelRect(tester).width, labelWidth);
 
@@ -3776,7 +3777,7 @@ void main() {
     expect(getLabelRect(tester).width, greaterThan(labelWidth));
     expect(getLabelRect(tester).width, lessThanOrEqualTo(floatedLabelWidth));
 
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
 
     expect(getLabelRect(tester).width, floatedLabelWidth);
   });
@@ -4193,7 +4194,7 @@ void main() {
     final TextStyle beforeStyle = getLabelStyle(tester);
     // Focused.
     focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    await tester.pump(kTransitionDuration);
 
     expect(getLabelStyle(tester).height, beforeStyle.height);
   });
