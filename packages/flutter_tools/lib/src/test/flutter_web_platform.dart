@@ -38,7 +38,7 @@ import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
 import 'test_time_recorder.dart';
 
-shelf.Handler createDirectoryHandler(Directory directory) {
+shelf.Handler createDirectoryHandler(Directory directory, { required bool crossOriginIsolated} ) {
   final mime.MimeTypeResolver resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
   return (shelf.Request request) async {
@@ -57,10 +57,17 @@ shelf.Handler createDirectoryHandler(Directory directory) {
       return shelf.Response.notFound('Not Found');
     }
     final String? contentType = resolver.lookup(file.path);
+    print('serving ${file.path} with content type $contentType');
+    final bool needsCrossOriginIsolated = crossOriginIsolated && uriPath.endsWith('.html');
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        if (contentType != null) 'Content-Type': contentType
+        if (contentType != null) 'Content-Type': contentType,
+        if (needsCrossOriginIsolated)
+          ...<String, String>{
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Embedder-Policy': 'require-corp',
+          },
       },
     );
   };
@@ -96,6 +103,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_webSocketHandler.handler)
         .add(createDirectoryHandler(
           fileSystem.directory(fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools')),
+          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
         ))
         .add(_handleStaticArtifact)
         .add(_localCanvasKitHandler)
@@ -103,7 +111,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_wrapperHandler)
         .add(_handleTestRequest)
         .add(createDirectoryHandler(
-          fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test'))
+          fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
+          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
         ))
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
@@ -396,7 +405,10 @@ class FlutterWebPlatform extends PlatformPlugin {
       if (fileUri != null) {
         final String dirname = _fileSystem.path.dirname(fileUri.toFilePath());
         final String basename = _fileSystem.path.basename(fileUri.toFilePath());
-        final shelf.Handler handler = createDirectoryHandler(_fileSystem.directory(dirname));
+        final shelf.Handler handler = createDirectoryHandler(
+          _fileSystem.directory(dirname),
+          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+        );
         final shelf.Request modifiedRequest = shelf.Request(
           request.method,
           request.requestedUri.replace(path: basename),
@@ -537,7 +549,14 @@ class FlutterWebPlatform extends PlatformPlugin {
           </script>
         </head>
         </html>
-      ''', headers: <String, String>{'Content-Type': 'text/html'});
+      ''', headers: <String, String>{
+        'Content-Type': 'text/html',
+        if (webRenderer == WebRendererMode.skwasm)
+          ...<String, String>{
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Embedder-Policy': 'require-corp',
+          }
+      });
     }
     return shelf.Response.notFound('Not found.');
   }
