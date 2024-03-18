@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
 import '../custom_rules/analyze.dart';
+import '../custom_rules/debug_assert.dart';
 import '../custom_rules/no_double_clamp.dart';
 import '../custom_rules/no_stop_watches.dart';
 import '../utils.dart';
@@ -266,5 +267,98 @@ void main() {
       '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
+  });
+
+  test('analyze.dart - debugAssert', () async {
+    final String result = await capture(() => analyzeWithRules(
+      testRootPath,
+      <AnalyzeRule>[debugAssert],
+      includePaths: <String>['packages/flutter/lib'],
+    ), shouldHaveErrors: true);
+
+    final String badAnnotations = <String>[
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.value is not annotated wtih @debugAssert, but its override MixinOnBaseClass.value is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.~ is not annotated wtih @debugAssert, but its override MixinOnBaseClass.~ is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @debugAssert, but its override ClassWithBadAnnotation1.run is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @debugAssert, but its override ClassWithBadAnnotation2.run is.',
+    ]
+    .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+    .join('\n');
+
+    expect(result,
+      startsWith(
+        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '║ Overriding a framework class member that was not annotated with @debugAssert and marking the override @debugAssert is not allowed.\n'
+        '║ A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.\n'
+        '║ \n'
+        '$badAnnotations\n'
+        '║ \n'
+        '║ Consider either removing the @debugAssert annotation, or adding the annotation to the class member that is being overridden instead.\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n'
+      )
+    );
+
+    final String badConstructorAccesses = <String>[
+      '║ packages/flutter/lib/debug_only_constructors.dart:10: ClassFromDebugLibWithNamedConstructor.constructor accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:20: ClassFromDebugLibWithExplicitDefaultConstructor.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:21: ClassFromDebugLibWithExplicitDefaultConstructor.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:27: ClassFromDebugLibWithExplicitConstructorAndFormalParameters.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:31: debugOnlyField accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:32: debugOnlyField accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:49: _DebugOnlyClass3.named accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:56: _DebugOnlyClass2.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:58: _DebugOnlyClass3.named accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:70: ProductionClass32.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:71: ProductionClass32.new accessed outside of an assert.\n',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+     .join();
+
+    final String otherBadAccesses = <String>[
+      '║ packages/flutter/lib/debug_only_access.dart:15: globalVariableFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:15: globalVariableFromDebugLib= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:16: globalFunctionFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:17: globalFunctionFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:18: globalFunctionFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:19: MixinFromDebugLib.staticMethodFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:20: MixinFromDebugLib.staticMethodFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:21: MixinFromDebugLib.fieldFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:22: MixinFromDebugLib.fieldFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:23: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:24: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:25: MixinFromDebugLib.debugGetSet= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:26: MixinFromDebugLib.debugGetSet= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:27: MixinFromDebugLib.fieldFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:27: MixinFromDebugLib.fieldFromDebugLib= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:27: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:28: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:28: MixinFromDebugLib.debugGetSet= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:28: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:29: MixinFromDebugLib.fieldFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:29: MixinFromDebugLib.fieldFromDebugLib= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:29: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:30: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:30: MixinFromDebugLib.debugGetSet= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:30: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:31: MixinFromDebugLib.methodFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:32: debugOnlyExtensionMethod accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:33: debugOnlyExtensionMethod accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:34: DebugOnlyEnum.foo accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:35: DebugOnlyEnum.values accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:36: DebugOnlyMixinOnRegularEnum.debugOnlyMethod accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:39: ProductionClassWithDebugOnlyMixin.+ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:40: ProductionClassWithDebugOnlyMixin.+ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:41: ProductionClassWithDebugOnlyMixin.+ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:42: ProductionClassWithDebugOnlyMixin.+ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:43: MixinFromDebugLib.~ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:44: MixinFromDebugLib.~ accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.[] accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.[] accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.debugGetSet accessed outside of an assert.',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+     .join();
+
+    expect(result, contains(badConstructorAccesses));
+    expect(result, contains(otherBadAccesses));
   });
 }

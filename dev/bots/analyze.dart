@@ -174,7 +174,7 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches, debugAssert];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,

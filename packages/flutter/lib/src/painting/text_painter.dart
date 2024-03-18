@@ -697,6 +697,7 @@ class TextPainter {
   // updated. See: https://github.com/flutter/flutter/issues/85108
   bool _rebuildParagraphForPaint = true;
 
+  @debugAssert
   bool get _debugAssertTextLayoutIsValid {
     assert(!debugDisposed);
     if (_layoutCache == null) {
@@ -709,6 +710,7 @@ class TextPainter {
     return true;
   }
 
+  @debugAssert
   StackTrace? _debugMarkNeedsLayoutCallStack;
 
   /// Marks this text painter's layout information as dirty and removes cached
@@ -1646,6 +1648,7 @@ class TextPainter {
   /// Whether this object has been disposed or not.
   ///
   /// Only for use when asserts are enabled.
+  @debugAssert
   bool get debugDisposed {
     bool? disposed;
     assert(() {

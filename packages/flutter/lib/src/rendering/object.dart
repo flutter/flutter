@@ -211,6 +211,7 @@ class PaintingContext extends ClipContext {
   ///
   ///  * [repaintCompositedChild], for repainting a composited child without
   ///    instrumentation.
+  @debugAssert
   static void debugInstrumentRepaintCompositedChild(
     RenderObject child, {
     bool debugAlsoPaintedParent = false,
@@ -800,6 +801,7 @@ abstract class Constraints {
   /// then included in the message after the error line.
   ///
   /// Returns the same as [isNormalized] if asserts are disabled.
+  @debugAssert
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
     InformationCollector? informationCollector,
@@ -1338,7 +1340,9 @@ class PipelineOwner with DiagnosticableTreeMixin {
   final Set<PipelineOwner> _children = <PipelineOwner>{};
   PipelineManifold? _manifold;
 
+  @debugAssert
   PipelineOwner? _debugParent;
+  @debugAssert
   bool _debugSetParent(PipelineOwner child, PipelineOwner? parent) {
     child._debugParent = parent;
     return true;
@@ -1409,9 +1413,10 @@ class PipelineOwner with DiagnosticableTreeMixin {
     assert(!_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
-    if (!kReleaseMode) {
+    assert(() {
       _debugSetParent(child, this);
-    }
+      return true;
+    }());
     if (_manifold != null) {
       child.attach(_manifold!);
     }
@@ -1429,9 +1434,10 @@ class PipelineOwner with DiagnosticableTreeMixin {
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
-    if (!kReleaseMode) {
+    assert(() {
       _debugSetParent(child, null);
-    }
+      return true;
+    }());
     if (_manifold != null) {
       child.detach();
     }
@@ -1694,6 +1700,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Whether this has been disposed.
   ///
   /// If asserts are disabled, this property is always null.
+  @debugAssert
   bool? get debugDisposed {
     bool? disposed;
     assert(() {
@@ -1703,6 +1710,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     return disposed;
   }
 
+  @debugAssert
   bool _debugDisposed = false;
 
   /// Release any resources held by this render object.
@@ -1877,6 +1885,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// See also:
   ///
   ///  * [DebugCreator], which the [widgets] library uses as values for this field.
+  @debugAssert
   Object? debugCreator;
 
   void _reportException(String method, Object exception, StackTrace stack) {
@@ -2211,6 +2220,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// mode and only when needsLayout is false. If the constraints are
   /// not met, it should assert or throw an exception.
   @protected
+  @debugAssert
   void debugAssertDoesMeetConstraints();
 
   /// When true, debugAssertDoesMeetConstraints() is currently
@@ -2222,7 +2232,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// custom layout callbacks. It should not be set outside of
   /// debugAssertDoesMeetConstraints(), and should not be checked in
   /// release mode (where it will always be false).
+  @debugAssert
   static bool debugCheckingIntrinsics = false;
+  @debugAssert
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
@@ -4011,6 +4023,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   /// Does nothing if assertions are disabled.
   ///
   /// Always returns true.
+  @debugAssert
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
@@ -4135,6 +4148,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 ///  * [SlottedContainerRenderObjectMixin], which organizes its children
 ///    in different named slots.
 mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
+  @debugAssert
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType? equals }) {
     ParentDataType childParentData = child.parentData! as ParentDataType;
     while (childParentData.previousSibling != null) {
@@ -4144,6 +4158,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     }
     return child == equals;
   }
+  @debugAssert
   bool _debugUltimateNextSiblingOf(ChildType child, { ChildType? equals }) {
     ParentDataType childParentData = child.parentData! as ParentDataType;
     while (childParentData.nextSibling != null) {
@@ -4164,6 +4179,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   /// Does nothing if assertions are disabled.
   ///
   /// Always returns true.
+  @debugAssert
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {

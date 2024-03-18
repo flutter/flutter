@@ -1653,6 +1653,7 @@ class EditableText extends StatefulWidget {
   /// to appear in the first place.
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
+  @debugAssert
   static bool debugDeterministicCursor = false;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
