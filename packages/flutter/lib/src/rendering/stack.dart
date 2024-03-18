@@ -700,8 +700,9 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (index != null && firstChild != null) {
-      visitor(_childAtIndex());
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild != null) {
+      visitor(displayedChild);
     }
   }
 
@@ -715,45 +716,55 @@ class RenderIndexedStack extends RenderStack {
     }
   }
 
-  RenderBox _childAtIndex() {
-    assert(index != null);
-    RenderBox? child = firstChild;
-    int i = 0;
-    while (child != null && i < index!) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      child = childParentData.nextSibling;
-      i += 1;
+  RenderBox? _childAtIndex() {
+    final int? index = this.index;
+    if (index == null) {
+      return null;
     }
-    assert(i == index);
-    assert(child != null);
-    return child!;
+    RenderBox? child = firstChild;
+    for (int i = 0; i < index && child != null; i += 1) {
+      child = childAfter(child);
+    }
+    assert(firstChild == null || child != null);
+    return child;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
+      return null;
+    }
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    final BaselineOffset offset = BaselineOffset(displayedChild.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
+    return offset.offset;
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    if (firstChild == null || index == null) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
       return false;
     }
-    final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData! as StackParentData;
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
         assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed);
+        return displayedChild.hitTest(result, position: transformed);
       },
     );
   }
 
   @override
   void paintStack(PaintingContext context, Offset offset) {
-    if (firstChild == null || index == null) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
       return;
     }
-    final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    context.paintChild(child, childParentData.offset + offset);
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    context.paintChild(displayedChild, childParentData.offset + offset);
   }
 
   @override
