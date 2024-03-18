@@ -148,9 +148,9 @@ void main() {
       languageVersion: LanguageVersion(2, 8),
     );
 
-    expect(result, contains("import 'foo_test.dart'"));
-    expect(result, contains("import 'bar_test.dart'"));
-    expect(result, contains("import 'bar_config.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///foo_test.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar_test.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar_config.dart'"));
   });
 
   group('Using the DDC module system', () {
