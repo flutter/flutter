@@ -168,6 +168,7 @@ group("unittests") {
   public_deps = []
   if (is_android) {
     public_deps += [
+      "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
     ]

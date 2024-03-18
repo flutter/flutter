@@ -21,6 +21,8 @@ source_set("testing_lib") {
     "debugger_detection.h",
     "display_list_testing.cc",
     "display_list_testing.h",
+    "logger_listener.cc",
+    "logger_listener.h",
     "mock_canvas.cc",
     "mock_canvas.h",
     "post_task_sync.cc",
