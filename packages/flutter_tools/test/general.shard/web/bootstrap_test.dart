@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/test/web_test_compiler.dart';
 import 'package:flutter_tools/src/web/bootstrap.dart';
 import 'package:package_config/package_config.dart';
 
