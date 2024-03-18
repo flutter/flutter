@@ -1961,7 +1961,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
-    : super(trackHeight: 4.0);
+    : super(trackHeight: 16.0);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -1970,7 +1970,7 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get activeTrackColor => _colors.primary;
 
   @override
-  Color? get inactiveTrackColor => _colors.surfaceContainerHighest;
+  Color? get inactiveTrackColor => _colors.secondaryContainer;
 
   @override
   Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);
@@ -1979,22 +1979,22 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get disabledActiveTrackColor => _colors.onSurface.withOpacity(0.38);
 
   @override
-  Color? get disabledInactiveTrackColor => _colors.onSurface.withOpacity(0.12);
+  Color? get disabledInactiveTrackColor => _colors.surfaceVariant.withOpacity(0.12);
 
   @override
   Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.12);
 
   @override
-  Color? get activeTickMarkColor => _colors.onPrimary.withOpacity(0.38);
+  Color? get activeTickMarkColor => null;
 
   @override
-  Color? get inactiveTickMarkColor => _colors.onSurfaceVariant.withOpacity(0.38);
+  Color? get inactiveTickMarkColor => null;
 
   @override
-  Color? get disabledActiveTickMarkColor => _colors.onSurface.withOpacity(0.38);
+  Color? get disabledActiveTickMarkColor => null;
 
   @override
-  Color? get disabledInactiveTickMarkColor => _colors.onSurface.withOpacity(0.38);
+  Color? get disabledInactiveTickMarkColor => null;
 
   @override
   Color? get thumbColor => _colors.primary;
@@ -2005,21 +2005,21 @@ class _SliderDefaultsM3 extends SliderThemeData {
   @override
   Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.dragged)) {
-      return _colors.primary.withOpacity(0.1);
+      return null;
     }
     if (states.contains(MaterialState.hovered)) {
-      return _colors.primary.withOpacity(0.08);
+      return null;
     }
     if (states.contains(MaterialState.focused)) {
-      return _colors.primary.withOpacity(0.1);
+      return null;
     }
 
     return Colors.transparent;
   });
 
   @override
-  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelMedium!.copyWith(
-    color: _colors.onPrimary,
+  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.null!.copyWith(
+    color: _colors.onInverseSurface,
   );
 
   @override
