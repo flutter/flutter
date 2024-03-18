@@ -1686,7 +1686,7 @@ void main() {
       const double fontSize = 10;
       const String text = '12345';
       const Offset additionalOffset = Offset(100, 1000);
-      final TextLayout layout = TextPainter(
+      final TextPainterLayout layout = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
       ).layout().shift(additionalOffset);
@@ -1728,7 +1728,7 @@ void main() {
     test('shift operation throws if given an infinite offset', () {
       const double fontSize = 10;
       const String text = '12345';
-      final TextLayout layout = TextPainter(
+      final TextPainterLayout layout = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
       ).layout();
@@ -1776,7 +1776,7 @@ void main() {
         text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
       );
 
-      final TextLayout initialLayout = painter.layout();
+      final TextPainterLayout initialLayout = painter.layout();
       expect(initialLayout.debugIsValid, isTrue);
 
       painter..layout()..layout();
@@ -1788,7 +1788,7 @@ void main() {
       painter.layout(maxWidth: 10);
       expect(initialLayout.debugIsValid, isFalse);
 
-      final TextLayout lastLayout = painter.layout(maxWidth: 10);
+      final TextPainterLayout lastLayout = painter.layout(maxWidth: 10);
       expect(lastLayout.debugIsValid, isTrue);
       painter.dispose();
       expect(lastLayout.debugIsValid, isFalse);

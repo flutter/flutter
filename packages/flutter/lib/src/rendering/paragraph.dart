@@ -27,7 +27,7 @@ typedef _WordBoundaryRecord = ({TextPosition wordStart, TextPosition wordEnd});
 
 const String _kEllipsis = '\u2026';
 
-class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
+class _TextLayoutValueNotifier extends ValueNotifier<TextPainterLayout?> {
   _TextLayoutValueNotifier(this.paragraph) : super(paragraph._textPainter.textLayout.value);
 
   final RenderParagraph paragraph;
@@ -40,14 +40,14 @@ class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
   /// [RenderParagraph.textAlign] does not affect the size of the text so the
   /// setter typically only needs to [markNeedsPaint] when the value changes.
   ///
-  /// However if a [TextLayout] listener is present (which can be, as is common,
+  /// However if a [TextPainterLayout] listener is present (which can be, as is common,
   /// tied to another RenderObject's paint process), to allow that RenderObject
-  /// make use of the [TextLayout] regardless of the paint order, the [TextLayout]
+  /// make use of the [TextPainterLayout] regardless of the paint order, the [TextPainterLayout]
   /// must be computed before [PipelineOwner.flushPaint].
   bool get eagerTextLayout => hasListeners;
 
   @override
-  TextLayout? get value => paragraph._textPainter.textLayout.value;
+  TextPainterLayout? get value => paragraph._textPainter.textLayout.value;
 
   @override
   void addListener(VoidCallback listener) {
@@ -836,14 +836,45 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
-  /// A [ValueListenable] that reflects current layout of the [RenderParagraph],
-  /// in this [RenderParagraph]'s coordinates.
+  /// A [ValueListenable] that reflects the current text layout of the
+  /// [RenderParagraph], in the [RenderParagraph]'s coordinates.
   ///
-  /// This [ValueListenable] can **not** be used to drive the layout process of
-  /// a [RenderObject], because when that [RenderObject] is ready to do layout,
-  /// it typically is not guaranteed that the [RenderParagraph] have computed the
-  /// text layout. But it can be used to drive the painting process of a
-  /// [CustomPainter] that depends on the text layout of this [RenderParagraph]:
+  /// {@template flutter.rendering.renderParagraph.textLayout}
+  /// The `value` of [textLayout] is the most recent text layout computed by
+  /// this [RenderObject], or `null` if the text layout is invalidated and has
+  /// yet to be re-computed. It can be used to, for example, paint contents based
+  /// on the location of a line or a character. When the `value` of the
+  /// [ValueListenable] changes, the previous [TextPainterLayout] values becomes
+  /// invalid and must not be used.
+  ///
+  /// The `value` of the [TextPainterLayout] typically should not be accessed from
+  /// another [RenderObject]'s [performLayout] implementation, or any other layout
+  /// methods from a different [RenderObject], as it's not guaranteed that this
+  /// [RenderObject] have computed the text layout at that point. If you're
+  /// accessing a [textLayout] from anthor [RenderObject], consider doing that in
+  /// paint methods (such as [RenderObject.paint] or [CustomPainter.paint]), or
+  /// at later stages such as [hitTest].
+  ///
+  /// In rare occasions, the `value` may still report a null [TextPainterLayout]
+  /// even when accessed during or after paint, if this [RenderObject] is not
+  /// laid out due to it being invisible (for example, when it's in a scrollable
+  /// list and not in the visible part of the viewport).
+  ///
+  /// The [TextPainterLayout.-] operator can be used to compare two
+  /// [TextPainterLayout] objects. This can be useful for caching the results of
+  /// text layout APIs that are potentially expensive (notably,
+  /// [TextPainterLayout.getBoxesForSelection] when the method returns a large
+  /// number of boxes): if the previous [TextPainterLayout] is the same as the
+  /// new [TextPainterLayout], or only the paint offset is different, then the
+  /// cached [TextBox]es can be reused instead of having to call
+  /// [TextPainterLayout.getBoxesForSelection] again.
+  ///
+  /// The [Listenable] interface can be used to drive the paint process of any
+  /// [RenderObject]s in the tree. The [markNeedsPaint] method can be added as
+  /// listeners of this [Listenable] and the [paint] implementation can then read
+  /// the `value` of the [textLayout]. Or more succinctly:
+  /// {@endtemplate}
+  ///
   /// ```dart
   /// final RenderParagraph paragraph = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
   /// final CustomPainter foreground = MyTextCustomPainter(repaint: paragraph.textLayout);
@@ -855,24 +886,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// );
   /// ```
   ///
-  /// {@template flutter.rendering.renderParagraph.textLayout}
-  /// For text layout APIs that can be potentially computationally intensive
-  /// (notably, [TextLayout.getBoxesForSelection], when the method returns a
-  /// large number of boxes), the [TextLayout] value of [ValueListenable] can be
-  /// used for cache invalidation: if the previous [TextLayout] is the same as
-  /// the new [TextLayout], or only the paint offset is different, then the
-  /// cached [TextBox]es can be reused instead of having to call
-  /// [TextLayout.getBoxesForSelection] again.
-  ///
-  /// When the `value` of the [ValueListenable] changes, the old [TextLayout]
-  /// values becomes invalid and must not be used. The [ValueListenable] usually
-  /// reports a non-null [TextLayout] when accessend in paint methods (such as
-  /// [RenderObject.paint] or [CustomPainter.paint]), however the `value` can
-  /// be null if this [RenderObject] is not laid out due to invisibility. In such
-  /// cases painting can generally be skipped because the text isn't visible on
-  /// screen.
-  /// {@endtemplate}
-  ValueListenable<TextLayout?> get textLayout => _textLayout;
+  /// The [addListener] method of this [ValueListenable] should not be called
+  /// during paint.
+  ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
   late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
   @override

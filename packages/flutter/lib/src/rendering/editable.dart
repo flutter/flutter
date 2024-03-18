@@ -20,6 +20,10 @@ import 'object.dart';
 import 'paragraph.dart';
 import 'viewport_offset.dart';
 
+// Examples can assume:
+// late RenderEditable renderEditable;
+// class MyTextCustomPainter extends CustomPainter { MyTextCustomPainter({ super.repaint }); @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true; @override void paint(Canvas canvas, Size size) {} }
+
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 
@@ -37,7 +41,7 @@ const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 // This behavior is consistent with the one observed in iOS UITextField.
 const double _kShortestDistanceSquaredWithFloatingAndRegularCursors = 15.0 * 15.0;
 
-class _TextLayoutValueNotifier extends ValueNotifier<TextLayout?> {
+class _TextLayoutValueNotifier extends ValueNotifier<TextPainterLayout?> {
   _TextLayoutValueNotifier(this.renderEditable) : super(renderEditable._textPainter.textLayout.value?.shift(renderEditable._paintOffset));
 
   final RenderEditable renderEditable;
@@ -2363,14 +2367,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// A [ValueListenable] that reflects current layout of the [RenderEditable],
   /// in this [RenderEditable]'s coordinates.
   ///
-  /// This [ValueListenable] can **not** be used to drive the layout process of
-  /// a [RenderObject], because when that [RenderObject] is ready to do layout,
-  /// it typically is not guaranteed that the [RenderEditable] have computed the
-  /// text layout. But it can be used to drive the painting process of a
-  /// [CustomPainter] that depends on the text layout of this [RenderEditable].
-  ///
   /// {@macro flutter.rendering.renderParagraph.textLayout}
-  ValueListenable<TextLayout?> get textLayout => _textLayout;
+  ///
+  /// ```dart
+  /// final CustomPainter foreground = MyTextCustomPainter(repaint: renderEditable.textLayout);
+  /// final CustomPainter background = MyTextCustomPainter(repaint: renderEditable.textLayout);
+  /// final RenderCustomPaint renderCustomPaint = RenderCustomPaint(
+  ///   foregroundPainter: foreground,
+  ///   painter: background,
+  ///   child: renderEditable,
+  /// );
+  /// ```
+  ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
   late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
   @override

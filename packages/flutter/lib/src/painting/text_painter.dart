@@ -313,15 +313,15 @@ class _UntilTextBoundary extends TextBoundary {
 /// is axis-aligned. The [shift] method can be used to change the origin of the
 /// coordinate system.
 ///
-/// The immutability allows different [TextLayout] objects to be compared for
-/// equality: a cached value computed from an outdated [TextLayout] may need to
-/// be discarded. See the [-] operator for more details.
+/// The immutability allows different [TextPainterLayout] objects to be compared
+/// for equality: a cached value computed from an outdated [TextPainterLayout]
+/// may need to be discarded. See the [-] operator for more details.
 ///
-/// Unlike many other immutable classes, each [TextLayout] has a limited lifespan.
-/// A [TextLayout] is typically invalidated when the text it represents changes
-/// layout, or no longer exists.
-class TextLayout {
-  TextLayout._(this._paragraph, this._paintOffset, [int? layoutEqualityId])
+/// Unlike many other immutable classes, each [TextPainterLayout] has a limited
+/// lifespan. A [TextPainterLayout] is typically invalidated when the text it
+/// represents changes layout, or no longer exists.
+class TextPainterLayout {
+  TextPainterLayout._(this._paragraph, this._paintOffset, [int? layoutEqualityId])
     : assert(!_paragraph.debugDisposed),
       assert(_paintOffset.dx != double.negativeInfinity),
       assert(!_paintOffset.dx.isNaN),
@@ -410,7 +410,7 @@ class TextLayout {
     return _paragraph.numberOfLines;
   }
 
-  /// Returns the distance from the top of this [TextLayout], to the first
+  /// Returns the distance from the top of this [TextPainterLayout], to the first
   /// baseline of the given type.
   double getDistanceToBaseline(TextBaseline baseline) {
     assert(debugIsValid);
@@ -526,34 +526,34 @@ class TextLayout {
 
   // PAINT OFFSET
 
-  /// Whether the [TextLayout] has an infinite paint offset, and as a result no
+  /// Whether the [TextPainterLayout] has an infinite paint offset, and as a result no
   /// text will be painted on screen.
   ///
   /// This is typically true when [TextPainter] is given an infinite width to
   /// layout the text, and the text is set to be right-aligned. When this is
   /// true, [TextPainter] may skip performing text layout, in which case this
-  /// [TextLayout] object behaves as if the text was empty.
+  /// [TextPainterLayout] object behaves as if the text was empty.
   bool get hasInfinitePaintOffset => _paintOffset.isFinite;
 
-  /// Creates a [TextLayout] with the same text layout, but shifts the paint
+  /// Creates a [TextPainterLayout] with the same text layout, but shifts the paint
   /// offset away from the origin by `offset` logical pixels.
-  TextLayout shift(Offset offset) {
+  TextPainterLayout shift(Offset offset) {
     assert(debugIsValid);
     assert(offset.isFinite);
     if (offset == Offset.zero) {
       return this;
     }
     final Offset newOffset = _paintOffset + offset;
-    return TextLayout._(_paragraph, newOffset, _layoutEqualityId);
+    return TextPainterLayout._(_paragraph, newOffset, _layoutEqualityId);
   }
 
-  /// Returns the paint offset difference between this [TextLayout] and `other`,
-  /// or returns null if they are completely different [TextLayout]s.
+  /// Returns the paint offset difference between this [TextPainterLayout] and `other`,
+  /// or returns null if they are completely different [TextPainterLayout]s.
   ///
   /// This is the inverse of the [shift] operation. It's typically used to
-  /// determine if a cached value that's computed from the previous [TextLayout]
-  /// needs to be discarded and recomputed from the latest [TextLayout], or
-  Offset? operator -(TextLayout other) {
+  /// determine if a cached value that's computed from the previous [TextPainterLayout]
+  /// needs to be discarded and recomputed from the latest [TextPainterLayout], or
+  Offset? operator -(TextPainterLayout other) {
     if (other._layoutEqualityId != _layoutEqualityId) {
       return null;
     }
@@ -572,7 +572,7 @@ class TextLayout {
     if (identical(this, other)) {
       return true;
     }
-    return other is TextLayout
+    return other is TextPainterLayout
         && other._paintOffset == _paintOffset
         && other._layoutEqualityId == _layoutEqualityId;
   }
@@ -593,7 +593,7 @@ class _TextPainterLayoutCache {
     : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
       assert(!layoutMaxWidth.isNaN),
       assert(!contentWidth.isNaN),
-      textLayout = TextLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, contentWidth));
+      textLayout = TextPainterLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, contentWidth));
 
   static Offset _paintOffsetFrom(ui.Paragraph paragraph, double textAlignment, double contentWidth) {
     assert(textAlignment >= 0.0);
@@ -615,7 +615,7 @@ class _TextPainterLayoutCache {
 
   final String rawString;
   final TextDirection writingDirection;
-  TextLayout textLayout;
+  TextPainterLayout textLayout;
 
   // The input width used to lay out the paragraph. The value should typically
   // equal to `paragraph.width`, but `paragraph.width` may lose precision during
@@ -672,7 +672,7 @@ class _TextPainterLayoutCache {
 
     final double newContentWidth = _contentWidthFrom(paragraph, minWidth, maxWidth, widthBasis);
     if (newContentWidth != contentWidth && textAlignment > 0.0 && paragraph.width.isFinite) {
-      textLayout = TextLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, newContentWidth), textLayout._layoutEqualityId);
+      textLayout = TextPainterLayout._(paragraph, _paintOffsetFrom(paragraph, textAlignment, newContentWidth), textLayout._layoutEqualityId);
     }
     contentWidth = newContentWidth;
     return true;
@@ -1414,10 +1414,10 @@ class TextPainter {
   /// when [layout] is called, with which this [TextPainter] establishes a new
   /// text layout.
   ///
-  /// When the value of the [ValueListenable] changes, the old [TextLayout]
+  /// When the value of the [ValueListenable] changes, the old [TextPainterLayout]
   /// values becomes invalid and must not be used.
-  ValueListenable<TextLayout?> get textLayout => _textLayout;
-  final ValueNotifier<TextLayout?> _textLayout = ValueNotifier<TextLayout?>(null);
+  ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
+  final ValueNotifier<TextPainterLayout?> _textLayout = ValueNotifier<TextPainterLayout?>(null);
 
   /// Computes the visual position of the glyphs for painting the text.
   ///
@@ -1428,7 +1428,7 @@ class TextPainter {
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
-  TextLayout layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+  TextPainterLayout layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(!maxWidth.isNaN);
     assert(!minWidth.isNaN);
     assert(maxWidth >= minWidth);

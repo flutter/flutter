@@ -2104,7 +2104,7 @@ void main() {
       expect(backgroundPainter.lastTextLayout, isNull);
       layout(root, phase: EnginePhase.composite);
 
-      final TextLayout? previousLayout = editable.textLayout.value;
+      final TextPainterLayout? previousLayout = editable.textLayout.value;
       expect(editable.textLayout.value, isNotNull);
       expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
       expect(foregroundPainter.paintCount, 1);
@@ -2207,7 +2207,7 @@ void main() {
         ),
         phase: EnginePhase.composite,
       );
-      final TextLayout? previousLayout = editable.textLayout.value;
+      final TextPainterLayout? previousLayout = editable.textLayout.value;
 
       constrainedBox.additionalConstraints = const BoxConstraints.tightFor(width: 10);
       pumpFrame(phase: EnginePhase.composite);
@@ -2241,7 +2241,7 @@ void main() {
 
       layout(root, phase: EnginePhase.composite);
 
-      TextLayout? previousLayout = editable.textLayout.value;
+      TextPainterLayout? previousLayout = editable.textLayout.value;
       expect(editable.textLayout.value, isNotNull);
       expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
       expect(foregroundPainter.paintCount, 1);
@@ -2339,9 +2339,9 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
 class _TestPainter extends CustomPainter {
   _TestPainter(this.listenable) : super(repaint: listenable);
 
-  final ValueListenable<TextLayout?> listenable;
+  final ValueListenable<TextPainterLayout?> listenable;
 
-  TextLayout? lastTextLayout;
+  TextPainterLayout? lastTextLayout;
   int paintCount = 0;
 
   @override
