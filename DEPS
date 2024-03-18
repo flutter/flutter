@@ -110,9 +110,7 @@ vars = {
   # Checkout Fuchsia dependencies only on Linux. This is the umbrella flag which
   # controls the behavior of all fuchsia related flags. I.e. any fuchsia related
   # logic or condition may not work if this flag is False.
-  # TODO(zijiehe): Make this condition more strict to only download fuchsia
-  # dependencies when necessary: b/40935282
-  'download_fuchsia_deps': 'host_os == "linux"',
+  'download_fuchsia_deps': False,
   # Downloads the fuchsia SDK as listed in fuchsia_sdk_path var. This variable
   # is currently only used for the Fuchsia LSC process and is not intended for
   # local development.
@@ -1210,7 +1208,7 @@ hooks = [
   {
     'name': 'Download Fuchsia system images',
     'pattern': '.',
-    'condition': 'run_fuchsia_emu',
+    'condition': 'download_fuchsia_deps and run_fuchsia_emu',
     'action': [
       'env',
       'DOWNLOAD_FUCHSIA_SDK={download_fuchsia_sdk}',
