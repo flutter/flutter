@@ -232,7 +232,7 @@ void main() {
         // Initialize with progress support.
         await adapter.initializeRequest(
           MockRequest(),
-          InitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
+          DartInitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
           (_) {},
         );
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
@@ -274,7 +274,7 @@ void main() {
         // Initialize with progress support.
         await adapter.initializeRequest(
           MockRequest(),
-          InitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
+          DartInitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
           (_) {},
         );
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
