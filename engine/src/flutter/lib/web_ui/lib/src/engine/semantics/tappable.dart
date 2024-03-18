@@ -12,6 +12,7 @@ class Button extends PrimaryRoleManager {
     semanticsObject,
     labelRepresentation: LeafLabelRepresentation.domText,
   ) {
+    addTappable();
     setAriaRole('button');
   }
 
