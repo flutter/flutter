@@ -286,14 +286,11 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
 
   @override
   Widget? childForSlot(_DiagonalSlot? slot) {
-    switch (slot) {
-      case null:
-        return nullSlot;
-      case _DiagonalSlot.topLeft:
-        return topLeft;
-      case _DiagonalSlot.bottomRight:
-        return bottomRight;
-    }
+    return switch (slot) {
+      null => nullSlot,
+      _DiagonalSlot.topLeft     => topLeft,
+      _DiagonalSlot.bottomRight => bottomRight,
+    };
   }
 
   @override
