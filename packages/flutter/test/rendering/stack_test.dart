@@ -119,6 +119,7 @@ void main() {
         visitedChildren.add(child);
       }
 
+      layout(stack);
       stack.visitChildrenForSemantics(visitor);
 
       expect(visitedChildren, hasLength(1));

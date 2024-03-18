@@ -1249,10 +1249,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
     final BoxParentData parentData = title!.parentData! as BoxParentData;
-    return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
+    final BaselineOffset offset = BaselineOffset(title!.getDistanceToActualBaseline(baseline))
+                                + parentData.offset.dy;
+    return offset.offset;
   }
 
   static double? _boxBaseline(RenderBox box, TextBaseline baseline) {
