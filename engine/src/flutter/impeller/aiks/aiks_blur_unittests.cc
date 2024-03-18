@@ -1146,5 +1146,40 @@ TEST_P(AiksTest, GaussianBlurMipMapSolidColor) {
 #endif
 }
 
+TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
+  Scalar sigma = 70;
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Sigma", &sigma, 0, 500);
+      ImGui::End();
+    }
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+
+    std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
+    ColorSource image_source = ColorSource::MakeImage(
+        boston, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {}, {});
+
+    canvas.Transform(Matrix::MakeTranslation({100, 100, 0}) *
+                     Matrix::MakeScale({0.5, 0.5, 1.0}));
+    Paint paint = {
+        .color_source = image_source,
+        .mask_blur_descriptor =
+            Paint::MaskBlurDescriptor{
+                .style = FilterContents::BlurStyle::kNormal,
+                .sigma = Sigma(sigma),
+            },
+    };
+    canvas.DrawRect(
+        Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height),
+        paint);
+
+    return canvas.EndRecordingAsPicture();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller

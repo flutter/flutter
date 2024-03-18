@@ -183,7 +183,6 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   }
   color_source_contents->SetGeometry(
       Geometry::MakeRect(*expanded_local_bounds));
-
   std::shared_ptr<Contents> color_contents = color_source_contents;
 
   /// 4. Apply the user set color filter on the GPU, if applicable.
