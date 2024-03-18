@@ -209,13 +209,6 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_fuchsia
-      # pm in fuchsia-sdk is required when uploading artifacts, so we have to
-      # download the fuchsia-deps in root builder.
-      gclient_variables: >-
-        {
-          "download_android_deps": false,
-          "download_fuchsia_deps": true
-        }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
@@ -311,11 +304,6 @@ targets:
       add_recipes_cq: "true"
       config_name: linux_license
       clobber: "true"
-      # Ensure licenses in fuchsia deps can be correctly processed.
-      gclient_variables: >-
-        {
-          "download_fuchsia_deps": true
-        }
 
   - name: Linux linux_web_engine
     recipe: engine_v2/engine_v2
