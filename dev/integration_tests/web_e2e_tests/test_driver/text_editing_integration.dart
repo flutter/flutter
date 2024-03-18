@@ -224,7 +224,7 @@ void main() {
 
     // Make sure the entire text is selected.
     TextRange? range =
-        TextRange(start: input.selectionStart!, end: input.selectionEnd!);
+        TextRange(start: input.selectionStart, end: input.selectionEnd);
     expect(range.textInside(text), text);
 
     // Double tap to select the first word.
@@ -236,7 +236,7 @@ void main() {
     await gesture.up();
     await gesture.down(firstWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
+    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
     expect(range.textInside(text), 'Lorem');
 
     // Double tap to select the last word.
@@ -248,7 +248,7 @@ void main() {
     await gesture.up();
     await gesture.down(lastWordOffset);
     await gesture.up();
-    range = TextRange(start: input.selectionStart!, end: input.selectionEnd!);
+    range = TextRange(start: input.selectionStart, end: input.selectionEnd);
     expect(range.textInside(text), 'amet');
   }, semanticsEnabled: false);
 }
