@@ -50,7 +50,6 @@
 		0AC232F724BA71D300A85907 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
 		0AC2330324BA71D300A85907 /* accessibility_bridge_test.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = accessibility_bridge_test.mm; sourceTree = "<group>"; };
 		0AC2330B24BA71D300A85907 /* FlutterTextInputPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterTextInputPluginTest.mm; sourceTree = "<group>"; };
-		0AC2330F24BA71D300A85907 /* FlutterBinaryMessengerRelayTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterBinaryMessengerRelayTest.mm; sourceTree = "<group>"; };
 		0AC2331024BA71D300A85907 /* connection_collection_test.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = connection_collection_test.mm; sourceTree = "<group>"; };
 		0AC2331224BA71D300A85907 /* FlutterEnginePlatformViewTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEnginePlatformViewTest.mm; sourceTree = "<group>"; };
 		0AC2331924BA71D300A85907 /* FlutterPluginAppLifeCycleDelegateTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterPluginAppLifeCycleDelegateTest.mm; sourceTree = "<group>"; };
@@ -72,7 +71,6 @@
 		3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterUndoManagerPluginTest.mm; sourceTree = "<group>"; };
 		689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSpellCheckPluginTest.mm; sourceTree = "<group>"; };
 		68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VsyncWaiterIosTest.mm; sourceTree = "<group>"; };
-		73F12C22288F92FF00AFC3A6 /* FlutterViewControllerTest_mrc.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewControllerTest_mrc.mm; sourceTree = "<group>"; };
 		D2D361A52B234EAC0018964E /* FlutterMetalLayerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterMetalLayerTest.mm; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
 		F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libocmock_shared.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libocmock_shared.dylib"; sourceTree = "<group>"; };
@@ -109,12 +107,10 @@
 				0AC232F724BA71D300A85907 /* FlutterEngineTest.mm */,
 				0AC2330324BA71D300A85907 /* accessibility_bridge_test.mm */,
 				0AC2330B24BA71D300A85907 /* FlutterTextInputPluginTest.mm */,
-				0AC2330F24BA71D300A85907 /* FlutterBinaryMessengerRelayTest.mm */,
 				0AC2331024BA71D300A85907 /* connection_collection_test.mm */,
 				0AC2331224BA71D300A85907 /* FlutterEnginePlatformViewTest.mm */,
 				0AC2331924BA71D300A85907 /* FlutterPluginAppLifeCycleDelegateTest.mm */,
 				0AC2332124BA71D300A85907 /* FlutterViewControllerTest.mm */,
-				73F12C22288F92FF00AFC3A6 /* FlutterViewControllerTest_mrc.mm */,
 				D2D361A52B234EAC0018964E /* FlutterMetalLayerTest.mm */,
 			);
 			name = Source;
