@@ -2092,7 +2092,7 @@ abstract class RenderBox extends RenderObject {
   /// be called with different constraints, which may have side effects such as
   /// updating the widget tree, violating the "dry" contract. In such cases the
   /// [RenderBox] must call [debugCannotComputeDryLayout] in an assert, and
-  /// returns a fallback baseline offset value.
+  /// return a dummy baseline offset value (such as `null`).
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(debugCannotComputeDryLayout(
