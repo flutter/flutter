@@ -59,6 +59,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
+import 'package:matcher/expect.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -242,6 +243,8 @@ Future<void> main(List<String> args) async {
       'web_tests': _runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
       'web_canvaskit_tests': _runWebCanvasKitUnitTests,
+      // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
+      'web_skwasm_tests': _runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPackagesTests,
@@ -1117,14 +1120,18 @@ Future<void> _runFrameworkCoverage() async {
 }
 
 Future<void> _runWebHtmlUnitTests() {
-  return _runWebUnitTests('html');
+  return _runWebUnitTests('html', false);
 }
 
 Future<void> _runWebCanvasKitUnitTests() {
-  return _runWebUnitTests('canvaskit');
+  return _runWebUnitTests('canvaskit', false);
 }
 
-Future<void> _runWebUnitTests(String webRenderer) async {
+Future<void> _runWebSkwasmUnitTests() {
+  return _runWebUnitTests('skwasm', true);
+}
+
+Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
   final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
   final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
@@ -1160,6 +1167,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
         index * testsPerShard,
         (index + 1) * testsPerShard,
       ),
+      useWasm,
     );
   }
 
@@ -2302,13 +2310,19 @@ Future<void> _runWebDebugTest(String target, {
   }
 }
 
-Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, List<String> tests) async {
+Future<void> _runFlutterWebTest(
+  String webRenderer,
+  String workingDirectory,
+  List<String> tests,
+  bool useWasm,
+) async {
   await runCommand(
     flutter,
     <String>[
       'test',
       '-v',
       '--platform=chrome',
+      if (useWasm) '--wasm',
       '--web-renderer=$webRenderer',
       '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
       ...flutterTestArgs,
