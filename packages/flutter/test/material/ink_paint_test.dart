@@ -406,7 +406,7 @@ void main() {
         home: Material(
           child: Center(
             child: InkWell( // This is at a different depth in the tree so it's now a new InkWell.
-                key: inkWellKey,
+              key: inkWellKey,
               splashColor: Colors.green,
               onTap: () { },
             ),
