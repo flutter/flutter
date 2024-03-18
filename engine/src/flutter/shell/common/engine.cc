@@ -301,8 +301,8 @@ void Engine::AddView(int64_t view_id, const ViewportMetrics& view_metrics) {
   runtime_controller_->AddView(view_id, view_metrics);
 }
 
-void Engine::RemoveView(int64_t view_id) {
-  runtime_controller_->RemoveView(view_id);
+bool Engine::RemoveView(int64_t view_id) {
+  return runtime_controller_->RemoveView(view_id);
 }
 
 void Engine::SetViewportMetrics(int64_t view_id,

@@ -2120,7 +2120,7 @@ void Shell::AddView(int64_t view_id, const ViewportMetrics& viewport_metrics) {
   });
 }
 
-void Shell::RemoveView(int64_t view_id) {
+void Shell::RemoveView(int64_t view_id, RemoveViewCallback callback) {
   TRACE_EVENT0("flutter", "Shell::RemoveView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -2133,10 +2133,12 @@ void Shell::RemoveView(int64_t view_id) {
       [&task_runners = task_runners_,           //
        engine = engine_->GetWeakPtr(),          //
        rasterizer = rasterizer_->GetWeakPtr(),  //
-       view_id                                  //
+       view_id,                                 //
+       callback = std::move(callback)           //
   ] {
         if (engine) {
-          engine->RemoveView(view_id);
+          bool removed = engine->RemoveView(view_id);
+          callback(removed);
         }
         // Don't wait for the raster task here, which only cleans up memory and
         // does not affect functionality. Make sure it is done after Dart

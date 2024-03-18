@@ -1265,6 +1265,49 @@ TEST_F(EmbedderTest, CanDeinitializeAnEngine) {
   engine.reset();
 }
 
+TEST_F(EmbedderTest, CanRemoveView) {
+  // TODO(loicsharma): We can't test this until views can be added!
+  // https://github.com/flutter/flutter/issues/144806
+}
+
+TEST_F(EmbedderTest, CannotRemoveImplicitView) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterRemoveViewInfo info = {};
+  info.struct_size = sizeof(FlutterRemoveViewInfo);
+  info.view_id = kFlutterImplicitViewId;
+  info.remove_view_callback = [](const FlutterRemoveViewResult* result) {
+    FAIL();
+  };
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &info), kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, CannotRemoveUnknownView) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent latch;
+  FlutterRemoveViewInfo info = {};
+  info.struct_size = sizeof(FlutterRemoveViewInfo);
+  info.view_id = 123;
+  info.user_data = &latch;
+  info.remove_view_callback = [](const FlutterRemoveViewResult* result) {
+    ASSERT_FALSE(result->removed);
+    reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data)->Signal();
+  };
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &info), kSuccess);
+  latch.Wait();
+}
+
 TEST_F(EmbedderTest, CanUpdateLocales) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);

@@ -2139,6 +2139,44 @@ FlutterEngineResult FlutterEngineRunInitialized(
 }
 
 FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                engine,
+                                            const FlutterRemoveViewInfo* info) {
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!info || !info->remove_view_callback) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Remove view info handle was invalid.");
+  }
+
+  if (info->view_id == kFlutterImplicitViewId) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Remove view info was invalid. The implicit view cannot be removed.");
+  }
+
+  // The engine must be running to remove a view.
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  flutter::Shell::RemoveViewCallback callback =
+      [c_callback = info->remove_view_callback,
+       user_data = info->user_data](bool removed) {
+        FlutterRemoveViewResult result = {};
+        result.struct_size = sizeof(FlutterRemoveViewResult);
+        result.removed = removed;
+        result.user_data = user_data;
+        c_callback(&result);
+      };
+
+  embedder_engine->GetShell().RemoveView(info->view_id, callback);
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
                                                   engine) {
   if (engine == nullptr) {
