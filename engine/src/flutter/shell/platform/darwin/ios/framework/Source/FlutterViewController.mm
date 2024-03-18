@@ -2104,6 +2104,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return flags;
 }
 
+- (BOOL)accessibilityPerformEscape {
+  FlutterMethodChannel* navigationChannel = [_engine.get() navigationChannel];
+  if (navigationChannel) {
+    [self popRoute];
+    return YES;
+  }
+  return NO;
+}
+
 + (BOOL)accessibilityIsOnOffSwitchLabelsEnabled {
   if (@available(iOS 13, *)) {
     return UIAccessibilityIsOnOffSwitchLabelsEnabled();
