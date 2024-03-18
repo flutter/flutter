@@ -228,8 +228,12 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     bool msaa_enabled,
     int32_t mip_count,
     const std::string& label) const {
+  std::optional<Rect> geometry_coverage = GetGeometry()->GetCoverage({});
   if (GetInverseEffectTransform().IsIdentity() &&
-      GetGeometry()->IsAxisAlignedRect()) {
+      GetGeometry()->IsAxisAlignedRect() &&
+      (!geometry_coverage.has_value() ||
+       Rect::MakeSize(texture_->GetSize())
+           .Contains(geometry_coverage.value()))) {
     auto coverage = GetCoverage(entity);
     if (!coverage.has_value()) {
       return std::nullopt;
