@@ -28,7 +28,7 @@ struct Version {
 
   static std::optional<Version> FromVector(const std::vector<size_t>& version);
 
-  constexpr bool IsAtLeast(const Version& other) {
+  constexpr bool IsAtLeast(const Version& other) const {
     return std::tie(major_version, minor_version, patch_version) >=
            std::tie(other.major_version, other.minor_version,
                     other.patch_version);

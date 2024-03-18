@@ -439,6 +439,8 @@ void ContextVK::Setup(Settings settings) {
   /// All done!
   ///
   device_holder_ = std::move(device_holder);
+  driver_info_ =
+      std::make_unique<DriverInfoVK>(device_holder_->physical_device);
   debug_report_ = std::move(debug_report);
   allocator_ = std::move(allocator);
   shader_library_ = std::move(shader_library);
@@ -619,6 +621,10 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
 const std::shared_ptr<YUVConversionLibraryVK>&
 ContextVK::GetYUVConversionLibrary() const {
   return yuv_conversion_library_;
+}
+
+const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
+  return driver_info_;
 }
 
 }  // namespace impeller

@@ -86,6 +86,8 @@ class SurfaceContextVK : public Context,
 
   const vk::Device& GetDevice() const;
 
+  const ContextVK& GetParent() const;
+
  private:
   std::shared_ptr<ContextVK> parent_;
   std::shared_ptr<KHRSwapchainVK> swapchain_;

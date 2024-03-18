@@ -67,6 +67,33 @@ class PlaygroundTest : public Playground,
         return PlaygroundBackendToString(info.param);                        \
       });
 
+#define INSTANTIATE_METAL_PLAYGROUND_SUITE(playground)                       \
+  [[maybe_unused]] const char* kYouInstantiated##playground##MultipleTimes = \
+      "";                                                                    \
+  INSTANTIATE_TEST_SUITE_P(                                                  \
+      Play, playground, ::testing::Values(PlaygroundBackend::kMetal),        \
+      [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
+        return PlaygroundBackendToString(info.param);                        \
+      });
+
+#define INSTANTIATE_VULKAN_PLAYGROUND_SUITE(playground)                      \
+  [[maybe_unused]] const char* kYouInstantiated##playground##MultipleTimes = \
+      "";                                                                    \
+  INSTANTIATE_TEST_SUITE_P(                                                  \
+      Play, playground, ::testing::Values(PlaygroundBackend::kVulkan),       \
+      [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
+        return PlaygroundBackendToString(info.param);                        \
+      });
+
+#define INSTANTIATE_OPENGLES_PLAYGROUND_SUITE(playground)                    \
+  [[maybe_unused]] const char* kYouInstantiated##playground##MultipleTimes = \
+      "";                                                                    \
+  INSTANTIATE_TEST_SUITE_P(                                                  \
+      Play, playground, ::testing::Values(PlaygroundBackend::kOpenGLES),     \
+      [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
+        return PlaygroundBackendToString(info.param);                        \
+      });
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_PLAYGROUND_PLAYGROUND_TEST_H_
