@@ -125,7 +125,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           slivers: <Widget>[
             SliverCarousel(
               // maxChildExtent: 200,
-              clipExtent: 20,
+              clipExtent: 200/3, // Clip extent must <= min child extent
               childExtentList: const <int>[3,3,3,2,1],
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
