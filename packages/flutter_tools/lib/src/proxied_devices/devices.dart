@@ -277,11 +277,11 @@ class ProxiedDevice extends Device {
   /// [proxiedPortForwarder] forwards a port from the remote host to local host.
   ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= ProxiedPortForwarder(connection, logger: _logger);
 
-  DevicePortForwarder? _portForwarder;
+  ProxiedPortForwarder? _portForwarder;
   /// [portForwarder] forwards a port from the remote device to remote host, and
   /// then forward the port from remote host to local host.
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= ProxiedPortForwarder(connection, deviceId: id, logger: _logger);
+  ProxiedPortForwarder get portForwarder => _portForwarder ??= ProxiedPortForwarder(connection, deviceId: id, logger: _logger);
 
   ProxiedDartDevelopmentService? _proxiedDds;
   @override
@@ -290,7 +290,7 @@ class ProxiedDevice extends Device {
       return super.dds;
     }
     return _proxiedDds ??= ProxiedDartDevelopmentService(connection, id,
-        logger: _logger, proxiedPortForwarder: proxiedPortForwarder);
+        logger: _logger, proxiedPortForwarder: proxiedPortForwarder, devicePortForwarder: portForwarder);
   }
 
   @override
@@ -715,9 +715,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     this.deviceId, {
     required Logger logger,
     required ProxiedPortForwarder proxiedPortForwarder,
+    required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
   })  : _logger = logger,
         _proxiedPortForwarder = proxiedPortForwarder,
+        _devicePortForwarder = devicePortForwarder,
         _localDds = localDds ?? DartDevelopmentService();
 
   final String deviceId;
@@ -728,6 +730,7 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   final DaemonConnection connection;
 
   final ProxiedPortForwarder _proxiedPortForwarder;
+  final ProxiedPortForwarder _devicePortForwarder;
 
   Uri? _localUri;
 
@@ -752,7 +755,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     bool cacheStartupProfile = false,
   }) async {
     // Locate the original VM service port on the remote daemon.
-    final int? remoteVMServicePort = _proxiedPortForwarder.originalRemotePort(vmServiceUri.port);
+    // A proxied device has two PortForwarder. Check both to determine which
+    // one forwarded the VM service port.
+    final int? remoteVMServicePort =
+        _proxiedPortForwarder.originalRemotePort(vmServiceUri.port) ??
+        _devicePortForwarder.originalRemotePort(vmServiceUri.port);
 
     if (remoteVMServicePort == null) {
       _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
