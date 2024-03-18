@@ -5,6 +5,9 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -28,6 +31,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
@@ -64,6 +68,9 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -87,6 +94,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
@@ -123,6 +131,9 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -162,6 +173,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
@@ -198,6 +210,9 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -221,6 +236,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
@@ -257,6 +273,10 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "run_fuchsia_emu": true
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -280,6 +300,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
@@ -316,6 +337,10 @@
                 "device_type=none",
                 "os=Linux"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "run_fuchsia_emu": true
+            },
             "gn": [
                 "--fuchsia",
                 "--fuchsia-cpu",
@@ -355,6 +380,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
+                "download_android_deps": false,
                 "run_fuchsia_emu": true
             },
             "gn": [
