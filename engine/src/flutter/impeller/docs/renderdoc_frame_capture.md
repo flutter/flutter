@@ -29,13 +29,24 @@
    You may also need to click the message that says "Click here to set up Vulkan capture".
    This will probably be needed if you built from source.
 
-4. Fill out the configuration fields and click launch.
+4. Fill out the configuration fields.
    Here, we will configure RenderDoc to specifically capture the "CanDrawRect" test:
 
-   - executable path: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
+   - executable path: `$ENGINE_SRC/out/host_debug/impeller_unittests` (expand `ENGINE_SRC`).
    - working directory: `$ENGINE_SRC` (expand `ENGINE_SRC`)
    - command-line arguments: `--gtest_filter="*CanDrawRect/Vulkan*" --enable_playground`
 
-5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state.
+5. Click "Launch". If everything is working, you'll get a window with the selected unit test rendering,
+   with a prompt in the top-left corner telling you to press `F12` or `Print Screen` to capture a frame.
+   (If you do not, try capturing a different program, like factorio. On at least one occasion that has
+   shaken things loose, though we have no explanation for why.)
+
+   Press `ESC` to move on to the next test.
+
+5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state:
 
    ![Renderdoc Capture](assets/renderdoc_frame_capture/render-doc-capture.png)
+
+_See also:_
+
+ * [Learning to Read GPU Frame Captures](https://github.com/flutter/engine/blob/main/impeller/docs/read_frame_captures.md)
