@@ -23,11 +23,6 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
-typedef WebTestInfo = ({
-  String entryPoint,
-  String? configFile,
-});
-
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
