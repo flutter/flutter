@@ -4,8 +4,6 @@
 
 import 'package:package_config/package_config.dart';
 
-import '../test/web_test_compiler.dart';
-
 String generateDDCBootstrapScript({
   required String entrypoint,
   required String ddcModuleLoaderUrl,
@@ -388,6 +386,11 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 });
 ''';
 }
+
+typedef WebTestInfo = ({
+  String entryPoint,
+  String? configFile,
+});
 
 /// Generates the bootstrap logic required for a flutter test running in a browser.
 ///
