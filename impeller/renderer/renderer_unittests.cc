@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/logging.h"
-
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"

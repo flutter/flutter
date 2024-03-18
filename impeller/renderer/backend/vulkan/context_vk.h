@@ -15,6 +15,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
+#include "impeller/renderer/backend/vulkan/driver_info_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
@@ -138,6 +139,8 @@ class ContextVK final : public Context,
 
   const vk::Device& GetDevice() const;
 
+  const std::unique_ptr<DriverInfoVK>& GetDriverInfo() const;
+
   const std::shared_ptr<fml::ConcurrentTaskRunner>
   GetConcurrentWorkerTaskRunner() const;
 
@@ -178,6 +181,7 @@ class ContextVK final : public Context,
   };
 
   std::shared_ptr<DeviceHolderImpl> device_holder_;
+  std::unique_ptr<DriverInfoVK> driver_info_;
   std::unique_ptr<DebugReportVK> debug_report_;
   std::shared_ptr<Allocator> allocator_;
   std::shared_ptr<ShaderLibraryVK> shader_library_;
