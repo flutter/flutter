@@ -374,7 +374,18 @@ class FlutterPlugin implements Plugin<Project> {
                     shrinkResources(isBuiltAsApp(project))
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles(project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro")
+                    File defaultProguardFile;
+                    try {
+                        defaultProguardFile = project.android.getDefaultProguardFile("proguard-android-optimize.txt");
+                    } catch (UnsupportedClassVersionError e) {
+                        // There is a bug in a number of AGP versions that fall within our support
+                        // range that causes an error when trying to find proguard-android.txt.
+                        // Catch the error and default to the non-optimized proguard file for these
+                        // versions. TODO(gmackall): Remove this conditionality once the bad AGP
+                        // versions fall out of our AGP support window.
+                        defaultProguardFile = project.android.getDefaultProguardFile("proguard-android.txt");
+                    }
+                    proguardFiles(defaultProguardFile, flutterProguardRules, "proguard-rules.pro")
                 }
             }
         }
