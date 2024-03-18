@@ -410,7 +410,7 @@ String generateTestEntrypoint({
     final String? testConfigPath = testInfo.configFile;
     if (testConfigPath != null) {
       importTestConfigStatements.add(
-        "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable"
+        "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable;"
       );
       testConfigPairs.add("  '$testConfigPath': test_config_$index.testExecutable,");
     }
