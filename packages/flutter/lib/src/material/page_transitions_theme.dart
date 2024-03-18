@@ -494,9 +494,9 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 }
 
-class AndroidBackGestureTransition extends StatelessWidget {
-  const AndroidBackGestureTransition({
-    super.key,
+/// Android's predictive back page transition.
+class _PredictiveBackPageTransition extends StatelessWidget {
+  const _PredictiveBackPageTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
@@ -652,6 +652,8 @@ abstract class PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that slides the page up.
   const FadeUpwardsPageTransitionsBuilder();
@@ -680,6 +682,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
@@ -713,6 +717,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
@@ -786,25 +792,28 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-typedef AndroidBackGestureTransitionBuilder<T> = Widget Function(
-  PageRoute<T> route,
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-  AndroidBackEvent? startBackEvent,
-  AndroidBackEvent? currentBackEvent,
-);
-
-class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
-  const AndroidBackGesturePageTransitionsBuilder({
-    this.parent = const ZoomPageTransitionsBuilder(),
-    this.backGestureTransitionBuilder = defaultBackGestureTransitionBuilder,
-  });
-
-  final PageTransitionsBuilder parent;
-  final AndroidBackGestureTransitionBuilder<dynamic>
-      backGestureTransitionBuilder;
+/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
+/// transition animation that looks like the default page transition used on
+/// Android U and above when using predictive back.
+///
+/// When used on Android, animates along with the back gesture to reveal the
+/// destination route. Can be canceled by dragging back towards the edge of the
+/// screen.
+///
+/// See also:
+///
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android O.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
+///  * [ZoomPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided in Android Q.
+class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
+  /// predictive back transition.
+  const PredictiveBackPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -814,29 +823,26 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return AndroidBackGestureDetector(
+    return _AndroidBackGestureDetector(
       backGestureController:
           TransitionRoute.createDefaultGestureTransitionController(route),
       enabledCallback: () {
         return route.isCurrent && route.popGestureEnabled;
       },
-      builder: (BuildContext context, AndroidBackEvent? startBackEvent,
-          AndroidBackEvent? currentBackEvent) {
-        final bool linearTransition = route.popGestureInProgress;
-
-        if (linearTransition) {
-          return backGestureTransitionBuilder(
-            route,
-            context,
-            animation,
-            secondaryAnimation,
-            child,
-            startBackEvent,
-            currentBackEvent,
+      builder: (BuildContext context, AndroidBackEvent? startBackEvent, AndroidBackEvent? currentBackEvent) {
+        // Only do a predictive back transition when the user is performing a
+        // pop gesture. Otherwise, for things like button presses or other
+        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+        if (route.popGestureInProgress) {
+          return _PredictiveBackPageTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            getIsCurrent: () => route.isCurrent,
+            child: child,
           );
         }
 
-        return parent.buildTransitions(
+        return const ZoomPageTransitionsBuilder().buildTransitions(
           route,
           context,
           animation,
@@ -846,34 +852,16 @@ class AndroidBackGesturePageTransitionsBuilder extends PageTransitionsBuilder {
       },
     );
   }
-
-  static Widget defaultBackGestureTransitionBuilder<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-    AndroidBackEvent? startBackEvent,
-    AndroidBackEvent? currentBackEvent,
-  ) {
-    return AndroidBackGestureTransition(
-      animation: animation,
-      secondaryAnimation: secondaryAnimation,
-      getIsCurrent: () => route.isCurrent,
-      child: child,
-    );
-  }
 }
 
-typedef AndroidBackGestureDetectorWidgetBuilder = Widget Function(
+typedef _AndroidBackGestureDetectorWidgetBuilder = Widget Function(
   BuildContext context,
   AndroidBackEvent? startBackEvent,
   AndroidBackEvent? currentBackEvent,
 );
 
-class AndroidBackGestureDetector extends StatefulWidget {
-  const AndroidBackGestureDetector({
-    super.key,
+class _AndroidBackGestureDetector extends StatefulWidget {
+  const _AndroidBackGestureDetector({
     required this.enabledCallback,
     required this.backGestureController,
     required this.builder,
@@ -881,14 +869,14 @@ class AndroidBackGestureDetector extends StatefulWidget {
 
   final ValueGetter<bool> enabledCallback;
   final GestureTransitionController backGestureController;
-  final AndroidBackGestureDetectorWidgetBuilder builder;
+  final _AndroidBackGestureDetectorWidgetBuilder builder;
 
   @override
-  State<AndroidBackGestureDetector> createState() =>
+  State<_AndroidBackGestureDetector> createState() =>
       _AndroidBackGestureDetectorState();
 }
 
-class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
+class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector>
     with WidgetsBindingObserver {
   AndroidBackEvent? _startBackEvent;
 
@@ -992,6 +980,8 @@ class _AndroidBackGestureDetectorState extends State<AndroidBackGestureDetector>
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
