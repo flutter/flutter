@@ -59,7 +59,6 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
-import 'package:matcher/expect.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -1183,16 +1182,19 @@ Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
         (webShardCount - 1) * testsPerShard,
         allTests.length,
       ),
+      useWasm,
     );
     await _runFlutterWebTest(
       webRenderer,
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
+      useWasm,
     );
     await _runFlutterWebTest(
       webRenderer,
       path.join(flutterRoot, 'packages', 'flutter_driver'),
       <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+      useWasm,
     );
   };
 
@@ -1341,11 +1343,19 @@ Future<void> _runWebLongRunningTests() async {
       'html',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
+      false,
     ),
     () => _runFlutterWebTest(
       'canvaskit',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
+      false,
+    ),
+    () => _runFlutterWebTest(
+      'skwasm',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+      true,
     ),
   ];
 
