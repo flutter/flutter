@@ -3741,7 +3741,7 @@ void main() {
               label: const Text('Chip'),
               selected: selected,
               onSelected: enabled ? (_) {} : null,
-              side: _MaterialStateBorderSide(getBorderSide),
+              side: MaterialStateBorderSide.resolveWith(getBorderSide),
             ),
           ),
         ),
@@ -4221,7 +4221,7 @@ void main() {
             child: ChoiceChip(
               selected: selected,
               label: const Text('Chip'),
-              shape: _MaterialStateOutlinedBorder(getShape),
+              shape: MaterialStateOutlinedBorder.resolveWith(getShape),
               onSelected: enabled ? (_) {} : null,
             ),
           ),
@@ -4367,8 +4367,8 @@ void main() {
           body: ChoiceChip(
             selected: selected,
             label: const Text('Chip'),
-            shape: _MaterialStateOutlinedBorder(getShape),
-            side: _MaterialStateBorderSide(getBorderSide),
+            shape: MaterialStateOutlinedBorder.resolveWith(getShape),
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
             onSelected: enabled ? (_) {} : null,
           ),
         ),
@@ -5684,22 +5684,4 @@ void main() {
       expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     });
   });
-}
-
-class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
-  const _MaterialStateOutlinedBorder(this.resolver);
-
-  final MaterialPropertyResolver<OutlinedBorder?> resolver;
-
-  @override
-  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
-}
-
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
-  const _MaterialStateBorderSide(this.resolver);
-
-  final MaterialPropertyResolver<BorderSide?> resolver;
-
-  @override
-  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
 }
