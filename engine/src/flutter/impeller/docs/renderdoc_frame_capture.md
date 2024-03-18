@@ -4,8 +4,11 @@
 
 1. First step is to set up RenderDoc. Follow the [quickstart instructions](https://renderdoc.org/docs/getting_started/quick_start.html).
    For the purposes of this guide it is assumed that you are able to get RenderDoc running.
-3. The next step would be to run the application you wish the capture the frames of.
-   Typically these would be one of the [playground tests](https://github.com/flutter/engine/tree/main/impeller/playground).
+   If the RenderDoc installed from your package manager crashes on startup, consider [building from source](https://github.com/baldurk/renderdoc/blob/v1.x/docs/CONTRIBUTING/Compiling.md).
+   
+2. The next step would be to run the application you wish the capture the frames of.
+   Typically these would be one of the [playground tests](https://github.com/flutter/engine/tree/main/impeller/playground),
+   for example [those in entity_unittests.cc](https://github.com/flutter/engine/blob/main/impeller/entity/entity_unittests.cc).
    To build these, do:
 
    ```bash
@@ -17,15 +20,21 @@
 
    Building a "debug_unopt" build ensures that you have tracing enabled. Without this, RenderDoc will not have much to show.
 
-3. Start RenderDoc, and click the "Launch Application" button.
+3. Start RenderDoc and (if necessary) select "Launch Application" button from the menu:
 
    ![Launch App](assets/renderdoc_frame_capture/launch-app.png)
 
-4. Fill out the following parameters, and click launch:
+   On Linux, the executable is `qrenderdoc`.
 
-   - executable: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
-   - args: `--gtest_filter="*CanDrawRect/Vulkan*" --enable_playground`
-   - working dir: `$ENGINE_SRC` (expand `ENGINE_SRC`)
+   You may also need to click the message that says "Click here to set up Vulkan capture".
+   This will probably be needed if you built from source.
+
+4. Fill out the configuration fields and click launch.
+   Here, we will configure RenderDoc to specifically capture the "CanDrawRect" test:
+
+   - executable path: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
+   - working directory: `$ENGINE_SRC` (expand `ENGINE_SRC`)
+   - command-line arguments: `--gtest_filter="*CanDrawRect/Vulkan*" --enable_playground`
 
 5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state.
 
