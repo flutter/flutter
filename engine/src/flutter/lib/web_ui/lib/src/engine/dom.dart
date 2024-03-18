@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:js/js_util.dart' as js_util;
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 import 'browser_detection.dart';
 
@@ -37,6 +38,15 @@ import 'browser_detection.dart';
 /// used carefully and only on types that are known to not contains `JSNull` and
 /// `JSUndefined`.
 extension ObjectToJSAnyExtension on Object {
+  // Once `Object.toJSBox` is faster (see
+  // https://github.com/dart-lang/sdk/issues/55183) we can remove this
+  // backend-specific workaround.
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  JSAny get toJSWrapper => dartToJsWrapper(this);
+
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   JSAny get toJSAnyShallow {
     if (isWasm) {
       return toJSAnyDeep;
@@ -45,10 +55,18 @@ extension ObjectToJSAnyExtension on Object {
     }
   }
 
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   JSAny get toJSAnyDeep => js_util.jsify(this) as JSAny;
 }
 
 extension JSAnyToObjectExtension on JSAny {
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  Object get fromJSWrapper => jsWrapperToDart(this);
+
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   Object get toObjectShallow {
     if (isWasm) {
       return toObjectDeep;
@@ -57,6 +75,8 @@ extension JSAnyToObjectExtension on JSAny {
     }
   }
 
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   Object get toObjectDeep => js_util.dartify(this)!;
 }
 
@@ -3648,37 +3668,23 @@ extension DomTextDecoderExtension on DomTextDecoder {
 
 @JS('window.FinalizationRegistry')
 @staticInterop
-class DomFinalizationRegistry {}
-
-@JS('window.FinalizationRegistry')
-external JSAny? get _finalizationRegistryConstructor;
-
-// Note: We don't use a factory constructor here because there is an issue in
-// dart2js that causes a crash in the Google3 build if we do use a factory
-// constructor. See b/284478971
-DomFinalizationRegistry createDomFinalizationRegistry(JSFunction cleanup) =>
-    js_util.callConstructor(
-        _finalizationRegistryConstructor!.toObjectShallow, <Object>[cleanup]);
+class DomFinalizationRegistry {
+  external factory DomFinalizationRegistry(JSFunction cleanup);
+}
 
 extension DomFinalizationRegistryExtension on DomFinalizationRegistry {
   @JS('register')
-  external JSVoid _register1(JSAny target, JSAny value);
+  external JSVoid register(JSAny target, JSAny value);
 
   @JS('register')
-  external JSVoid _register2(JSAny target, JSAny value, JSAny token);
-  void register(Object target, Object value, [Object? token]) {
-    if (token != null) {
-      _register2(
-          target.toJSAnyShallow, value.toJSAnyShallow, token.toJSAnyShallow);
-    } else {
-      _register1(target.toJSAnyShallow, value.toJSAnyShallow);
-    }
-  }
+  external JSVoid registerWithToken(JSAny target, JSAny value, JSAny token);
 
   @JS('unregister')
-  external JSVoid _unregister(JSAny token);
-  void unregister(Object token) => _unregister(token.toJSAnyShallow);
+  external JSVoid unregister(JSAny token);
 }
+
+@JS('window.FinalizationRegistry')
+external JSAny? get _finalizationRegistryConstructor;
 
 /// Whether the current browser supports `FinalizationRegistry`.
 bool browserSupportsFinalizationRegistry =
