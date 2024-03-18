@@ -121,26 +121,28 @@ void PlatformConfiguration::AddView(int64_t view_id,
       }));
 }
 
-void PlatformConfiguration::RemoveView(int64_t view_id) {
+bool PlatformConfiguration::RemoveView(int64_t view_id) {
   if (view_id == kFlutterImplicitViewId) {
-    FML_LOG(ERROR) << "The implicit view #" << view_id << " cannot be removed.";
-    FML_DCHECK(false);
-    return;
+    FML_LOG(FATAL) << "The implicit view #" << view_id << " cannot be removed.";
+    return false;
   }
   size_t erased_elements = metrics_.erase(view_id);
-  FML_DCHECK(erased_elements != 0) << "View #" << view_id << " doesn't exist.";
-  (void)erased_elements;  // Suppress unused variable warning
+  if (erased_elements == 0) {
+    FML_LOG(ERROR) << "View #" << view_id << " doesn't exist.";
+    return false;
+  }
 
   std::shared_ptr<tonic::DartState> dart_state =
       remove_view_.dart_state().lock();
   if (!dart_state) {
-    return;
+    return false;
   }
   tonic::DartState::Scope scope(dart_state);
   tonic::CheckAndHandleError(
       tonic::DartInvoke(remove_view_.Get(), {
                                                 tonic::ToDart(view_id),
                                             }));
+  return true;
 }
 
 bool PlatformConfiguration::UpdateViewMetrics(

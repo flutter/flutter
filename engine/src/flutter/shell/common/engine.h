@@ -735,7 +735,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   /// @param[in]  view_id  The ID of the view.
   ///
-  void RemoveView(int64_t view_id);
+  /// @return     Whether the view was removed.
+  ///
+  bool RemoveView(int64_t view_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Updates the viewport metrics for a view. The viewport metrics

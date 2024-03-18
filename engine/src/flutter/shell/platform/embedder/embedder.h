@@ -831,6 +831,53 @@ typedef struct {
   };
 } FlutterRendererConfig;
 
+typedef struct {
+  /// The size of this struct.
+  /// Must be sizeof(FlutterRemoveViewResult).
+  size_t struct_size;
+
+  /// True if the remove view operation succeeded.
+  bool removed;
+
+  /// The |FlutterRemoveViewInfo.user_data|.
+  void* user_data;
+} FlutterRemoveViewResult;
+
+/// The callback invoked by the engine when the engine has attempted to remove
+/// a view.
+///
+/// The |FlutterRemoveViewResult| will be deallocated once the callback returns.
+typedef void (*FlutterRemoveViewCallback)(
+    const FlutterRemoveViewResult* /* result */);
+
+typedef struct {
+  /// The size of this struct.
+  /// Must be sizeof(FlutterRemoveViewInfo).
+  size_t struct_size;
+
+  /// The identifier for the view to remove.
+  ///
+  /// The implicit view cannot be removed if it is enabled.
+  FlutterViewId view_id;
+
+  /// A baton that is not interpreted by the engine in any way.
+  /// It will be given back to the embedder in |remove_view_callback|.
+  /// Embedder resources may be associated with this baton.
+  void* user_data;
+
+  /// Called once the engine has attempted to remove the view.
+  /// This callback is required.
+  ///
+  /// The embedder must not destroy the underlying surface until the callback is
+  /// invoked with a `removed` value of `true`.
+  ///
+  /// This callback is invoked on an internal engine managed thread.
+  /// Embedders must re-thread if necessary.
+  ///
+  /// The |result| argument will be deallocated when the callback returns.
+  FlutterRemoveViewCallback remove_view_callback;
+} FlutterRemoveViewInfo;
+
 /// Display refers to a graphics hardware system consisting of a framebuffer,
 /// typically a monitor or a screen. This ID is unique per display and is
 /// stable until the Flutter application restarts.
@@ -2457,6 +2504,25 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Removes a view.
+///
+///             This is an asynchronous operation. The view's resources must not
+///             be cleaned up until the |remove_view_callback| is invoked with
+///             a |removed| value of `true`.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The remove view arguments. This can be deallocated
+///                     once |FlutterEngineRemoveView| returns, before
+///                     |remove_view_callback| is invoked.
+///
+/// @return     The result of *starting* the asynchronous operation. If
+///             `kSuccess`, the |remove_view_callback| will be invoked.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                engine,
+                                            const FlutterRemoveViewInfo* info);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
