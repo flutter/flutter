@@ -156,7 +156,6 @@ void main() {
   testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: SingleChildScrollView(
             child: RepaintBoundary(
@@ -168,8 +167,8 @@ void main() {
                     child: Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: Container(
-                          color: Colors.blue,
-                          height: 50,
+                        color: Colors.blue,
+                        height: 50,
                       ),
                     ),
                   );
