@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 /// Enum representing the edge from which a swipe starts in a back gesture.
 ///
-/// This is used in [AndroidBackEvent] to indicate the starting edge of the
+/// This is used in [PredictiveBackEvent] to indicate the starting edge of the
 /// swipe gesture.
 enum SwipeEdge {
   /// Indicates that the swipe starts from the left edge of the screen.
@@ -17,19 +17,19 @@ enum SwipeEdge {
 /// Holds information about the touch event, swipe direction and the animation
 /// progress that predictive back animations should seek to.
 @immutable
-class AndroidBackEvent {
-  /// Creates a new [AndroidBackEvent] instance.
-  const AndroidBackEvent({
+class PredictiveBackEvent {
+  /// Creates a new [PredictiveBackEvent] instance.
+  const PredictiveBackEvent({
     required this.x,
     required this.y,
     required this.progress,
     required this.swipeEdge,
   });
 
-  /// Creates an [AndroidBackEvent] from a Map, typically used when converting
+  /// Creates an [PredictiveBackEvent] from a Map, typically used when converting
   /// data received from a platform channel.
-  factory AndroidBackEvent.fromMap(Map<dynamic, dynamic> json) {
-    return AndroidBackEvent(
+  factory PredictiveBackEvent.fromMap(Map<dynamic, dynamic> json) {
+    return PredictiveBackEvent(
       x: (json['x'] as num?)?.toDouble(),
       y: (json['y'] as num?)?.toDouble(),
       progress: (json['progress'] as num).toDouble(),
@@ -85,7 +85,7 @@ class AndroidBackEvent {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AndroidBackEvent &&
+    return other is PredictiveBackEvent &&
         x == other.x &&
         y == other.y &&
         progress == other.progress &&
@@ -97,6 +97,6 @@ class AndroidBackEvent {
 
   @override
   String toString() {
-    return 'AndroidBackEvent{x: $x, y: $y, progress: $progress, swipeEdge: $swipeEdge}';
+    return 'PredictiveBackEvent{x: $x, y: $y, progress: $progress, swipeEdge: $swipeEdge}';
   }
 }

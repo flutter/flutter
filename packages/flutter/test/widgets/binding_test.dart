@@ -114,14 +114,14 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> startBackGesture(AndroidBackEvent backEvent) {
+  Future<bool> startBackGesture(PredictiveBackEvent backEvent) {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<bool>.value(true);
   }
 
   @override
-  Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
+  Future<bool> updateBackGestureProgress(PredictiveBackEvent backEvent) {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<bool>.value(true);

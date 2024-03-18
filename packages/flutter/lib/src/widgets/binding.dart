@@ -76,10 +76,10 @@ abstract mixin class WidgetsBindingObserver {
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
-  Future<bool> startBackGesture(AndroidBackEvent backEvent) =>
+  Future<bool> startBackGesture(PredictiveBackEvent backEvent) =>
       Future<bool>.value(false);
 
-  Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) =>
+  Future<bool> updateBackGestureProgress(PredictiveBackEvent backEvent) =>
       Future<bool>.value(false);
 
   Future<bool> commitBackGesture() => Future<bool>.value(false);
@@ -796,7 +796,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @visibleForTesting
   Future<void> handleStartBackGesture(Map<dynamic, dynamic> arguments) async {
-    final AndroidBackEvent backEvent = AndroidBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.startBackGesture(backEvent)) {
         return;
@@ -808,7 +808,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @visibleForTesting
   Future<void> handleUpdateBackGestureProgress(
       Map<dynamic, dynamic> arguments) async {
-    final AndroidBackEvent backEvent = AndroidBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.updateBackGestureProgress(backEvent)) {
         return;

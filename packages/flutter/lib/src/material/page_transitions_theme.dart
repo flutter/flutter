@@ -829,7 +829,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
       enabledCallback: () {
         return route.isCurrent && route.popGestureEnabled;
       },
-      builder: (BuildContext context, AndroidBackEvent? startBackEvent, AndroidBackEvent? currentBackEvent) {
+      builder: (BuildContext context, PredictiveBackEvent? startBackEvent, PredictiveBackEvent? currentBackEvent) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
@@ -856,8 +856,8 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
 typedef _AndroidBackGestureDetectorWidgetBuilder = Widget Function(
   BuildContext context,
-  AndroidBackEvent? startBackEvent,
-  AndroidBackEvent? currentBackEvent,
+  PredictiveBackEvent? startBackEvent,
+  PredictiveBackEvent? currentBackEvent,
 );
 
 class _AndroidBackGestureDetector extends StatefulWidget {
@@ -878,11 +878,11 @@ class _AndroidBackGestureDetector extends StatefulWidget {
 
 class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector>
     with WidgetsBindingObserver {
-  AndroidBackEvent? _startBackEvent;
+  PredictiveBackEvent? _startBackEvent;
 
-  AndroidBackEvent? get startBackEvent => _startBackEvent;
+  PredictiveBackEvent? get startBackEvent => _startBackEvent;
 
-  set startBackEvent(AndroidBackEvent? startBackEvent) {
+  set startBackEvent(PredictiveBackEvent? startBackEvent) {
     if (_startBackEvent != startBackEvent && mounted) {
       setState(() {
         _startBackEvent = startBackEvent;
@@ -890,11 +890,11 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
     }
   }
 
-  AndroidBackEvent? _currentBackEvent;
+  PredictiveBackEvent? _currentBackEvent;
 
-  AndroidBackEvent? get currentBackEvent => _currentBackEvent;
+  PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
 
-  set currentBackEvent(AndroidBackEvent? currentBackEvent) {
+  set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
     if (_currentBackEvent != currentBackEvent && mounted) {
       setState(() {
         _currentBackEvent = currentBackEvent;
@@ -917,7 +917,7 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
   }
 
   @override
-  Future<bool> startBackGesture(AndroidBackEvent backEvent) {
+  Future<bool> startBackGesture(PredictiveBackEvent backEvent) {
     gestureInProgress = !backEvent.isButtonEvent && widget.enabledCallback();
     if (gestureInProgress) {
       widget.backGestureController.dragStart(progress: 1 - backEvent.progress);
@@ -928,7 +928,7 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
   }
 
   @override
-  Future<bool> updateBackGestureProgress(AndroidBackEvent backEvent) {
+  Future<bool> updateBackGestureProgress(PredictiveBackEvent backEvent) {
     if (gestureInProgress) {
       widget.backGestureController.dragUpdate(progress: 1 - backEvent.progress);
       currentBackEvent = backEvent;
