@@ -25,7 +25,6 @@ import 'test_config.dart';
 
 typedef WebTestInfo = ({
   String entryPoint,
-  Uri fileUri,
   String? configFile,
 });
 
@@ -67,7 +66,6 @@ class WebTestCompiler {
       );
       return (
         entryPoint: relativeTestSegments.join('/'),
-        fileUri: Uri.file(testFilePath),
         configFile: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
       );
     }).toList();
