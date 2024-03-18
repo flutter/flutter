@@ -11,7 +11,9 @@ class Link extends PrimaryRoleManager {
     PrimaryRole.link,
     semanticsObject,
     labelRepresentation: LeafLabelRepresentation.domText,
-  );
+  ) {
+    addTappable();
+  }
 
   @override
   DomElement createElement() {

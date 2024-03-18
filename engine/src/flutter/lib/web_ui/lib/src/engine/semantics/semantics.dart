@@ -439,7 +439,6 @@ abstract class PrimaryRoleManager {
     addLiveRegion();
     addRouteName();
     addLabelAndValue(labelRepresentation: labelRepresentation);
-    addTappable();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -625,7 +624,17 @@ final class GenericRole extends PrimaryRoleManager {
     PrimaryRole.generic,
     semanticsObject,
     labelRepresentation: LeafLabelRepresentation.domText,
-  );
+  ) {
+    // Typically a tappable widget would have a more specific role, such as
+    // "link", "button", "checkbox", etc. However, there are situations when a
+    // tappable is not a leaf node, but contains other nodes, which can also be
+    // tappable. For example, the dismiss barrier of a pop-up menu is a tappable
+    // ancestor of the menu itself, while the menu may contain tappable
+    // children.
+    if (semanticsObject.isTappable) {
+      addTappable();
+    }
+  }
 
   @override
   void update() {

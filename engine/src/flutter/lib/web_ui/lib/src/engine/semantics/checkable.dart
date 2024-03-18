@@ -56,7 +56,9 @@ class Checkable extends PrimaryRoleManager {
           PrimaryRole.checkable,
           semanticsObject,
           labelRepresentation: LeafLabelRepresentation.ariaLabel,
-        );
+        ) {
+    addTappable();
+  }
 
   final _CheckableKind _kind;
 

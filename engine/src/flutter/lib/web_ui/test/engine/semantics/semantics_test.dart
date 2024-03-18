@@ -51,6 +51,9 @@ void runSemanticsTests() {
   group('Role managers', () {
     _testRoleManagerLifecycle();
   });
+  group('Text', () {
+    _testText();
+  });
   group('container', () {
     _testContainer();
   });
@@ -715,6 +718,74 @@ void _testLongestIncreasingSubsequence() {
         <int>[count - 1],
       );
     }
+  });
+}
+
+void _testText() {
+  test('renders a piece of plain text', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      label: 'plain text',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    owner().updateSemantics(builder.build());
+
+    expectSemanticsTree(
+      owner(),
+      '''<sem role="text" style="$rootSemanticStyle">plain text</sem>''',
+    );
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.primaryRole?.role, PrimaryRole.generic);
+    expect(
+      node.primaryRole!.secondaryRoleManagers!.map((RoleManager m) => m.runtimeType).toList(),
+      <Type>[
+        Focusable,
+        LiveRegion,
+        RouteName,
+        LabelAndValue,
+      ],
+    );
+    semantics().semanticsEnabled = false;
+  });
+
+  test('renders a tappable piece of text', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      hasTap: true,
+      label: 'tappable text',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expectSemanticsTree(
+      owner(),
+      '''<sem flt-tappable="" role="text" style="$rootSemanticStyle">tappable text</sem>''',
+    );
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.primaryRole?.role, PrimaryRole.generic);
+    expect(
+      node.primaryRole!.secondaryRoleManagers!.map((RoleManager m) => m.runtimeType).toList(),
+      <Type>[
+        Focusable,
+        LiveRegion,
+        RouteName,
+        LabelAndValue,
+        Tappable,
+      ],
+    );
+    semantics().semanticsEnabled = false;
   });
 }
 
