@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
 import 'dart:js_util' as js_util;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:web/web.dart' as web;
 import 'package:web_e2e_tests/common.dart';
 import 'package:web_e2e_tests/text_editing_main.dart' as app;
 
@@ -26,9 +26,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = findElements('input');
+    final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input = nodeList[0] as InputElement;
+    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
     // The element's value will be the same as the textFormField's value.
     expect(input.value, 'Text1');
 
@@ -50,9 +50,9 @@ void main() {
     await tester.tap(find.byKey(const Key('empty-input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = findElements('input');
+    final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input = nodeList[0] as InputElement;
+    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
     // The element's value will be empty.
     expect(input.value, '');
 
@@ -81,7 +81,7 @@ void main() {
     await tester.tap(find.byKey(const Key('input2')));
 
     // Press Tab. This should trigger `onFieldSubmitted` of TextField.
-    final InputElement input = findElements('input')[0] as InputElement;
+    final web.HTMLInputElement input = findElements('input').item(0)! as web.HTMLInputElement;
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
       'keyCode': 13, // Enter.
       'cancelable': true,
@@ -111,9 +111,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = findElements('input');
+    final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input = nodeList[0] as InputElement;
+    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -136,7 +136,7 @@ void main() {
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final InputElement input2 = findElements('input')[0] as InputElement;
+    final web.HTMLInputElement input2 = findElements('input').item(0)! as web.HTMLInputElement;
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
@@ -150,9 +150,9 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = findElements('input');
+    final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final InputElement input = nodeList[0] as InputElement;
+    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press and release CapsLock.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -191,7 +191,7 @@ void main() {
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final InputElement input2 = findElements('input')[0] as InputElement;
+    final web.HTMLInputElement input2 = findElements('input').item(0)! as web.HTMLInputElement;
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
@@ -215,9 +215,9 @@ void main() {
     await gesture.up();
 
     // A native input element will be appended to the DOM.
-    final List<Node> nodeList = findElements('textarea');
+    final web.NodeList nodeList = findElements('textarea');
     expect(nodeList.length, equals(1));
-    final TextAreaElement input = nodeList[0] as TextAreaElement;
+    final web.HTMLTextAreaElement input = nodeList.item(0)! as web.HTMLTextAreaElement;
     // The element's value should contain the selectable text.
     expect(input.value, text);
     expect(input.hasAttribute('readonly'), isTrue);
@@ -253,16 +253,16 @@ void main() {
   }, semanticsEnabled: false);
 }
 
-KeyboardEvent dispatchKeyboardEvent(
-    EventTarget target, String type, Map<String, dynamic> args) {
-  final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
+web.KeyboardEvent dispatchKeyboardEvent(
+    web.EventTarget target, String type, Map<String, dynamic> args) {
+  final Object jsKeyboardEvent = js_util.getProperty(web.window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     args,
   ];
-  final KeyboardEvent event = js_util.callConstructor(
+  final web.KeyboardEvent event = js_util.callConstructor(
           jsKeyboardEvent, js_util.jsify(eventArgs) as List<dynamic>)
-      as KeyboardEvent;
+      as web.KeyboardEvent;
   target.dispatchEvent(event);
 
   return event;

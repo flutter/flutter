@@ -4,9 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;
 import 'dart:js';
 import 'dart:js_util' as js_util;
+
+import 'package:web/web.dart' as web;
 
 /// The web implementation of [registerWebServiceExtension].
 ///
@@ -22,7 +23,7 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   // undefined at the time of the check, WebDriver throws an exception.
   context[r'$flutterDriverResult'] = null;
 
-  js_util.setProperty(html.window, r'$flutterDriver', allowInterop((dynamic message) async {
+  js_util.setProperty(web.window, r'$flutterDriver', allowInterop((dynamic message) async {
     try {
       final Map<String, dynamic> messageJson = jsonDecode(message as String) as Map<String, dynamic>;
       final Map<String, String> params = messageJson.cast<String, String>();
