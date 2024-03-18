@@ -127,4 +127,8 @@ void SurfaceContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
   parent_->InitializeCommonlyUsedShadersIfNeeded();
 }
 
+const ContextVK& SurfaceContextVK::GetParent() const {
+  return *parent_;
+}
+
 }  // namespace impeller
