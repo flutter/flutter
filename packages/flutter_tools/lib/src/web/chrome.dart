@@ -228,11 +228,6 @@ class ChromiumLauncher {
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
 
-    if (!headless) {
-      print('Browser loaded. Press enter to start tests...');
-      stdin.readLineSync();
-    }
-
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {

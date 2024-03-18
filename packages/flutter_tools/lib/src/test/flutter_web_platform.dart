@@ -57,7 +57,6 @@ shelf.Handler createDirectoryHandler(Directory directory, { required bool crossO
       return shelf.Response.notFound('Not Found');
     }
     final String? contentType = resolver.lookup(file.path);
-    print('serving ${file.path} with content type $contentType');
     final bool needsCrossOriginIsolated = crossOriginIsolated && uriPath.endsWith('.html');
     return shelf.Response.ok(
       file.openRead(),
