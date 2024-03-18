@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/dart2js.dart';
+import 'package:web/web.dart' as web;
 
 /// Expected sequence of method calls.
 const List<String> callChain = <String>['baz', 'bar', 'foo'];
@@ -97,10 +98,12 @@ void main() {
     output.writeln('--- TEST FAILED ---');
   }
   print(output);
-  html.HttpRequest.request(
-    '/test-result',
-    method: 'POST',
-    sendData: '$output',
+  web.window.fetch(
+    '/test-result'.toJS,
+    web.RequestInit(
+      method: 'POST',
+      body: '$output'.toJS,
+    )
   );
 }
 
