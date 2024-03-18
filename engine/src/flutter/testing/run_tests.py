@@ -734,7 +734,17 @@ def run_android_unittest(test_runner_name, android_variant, adb_path):
   remote_path = '/data/local/tmp'
   remote_tests_path = os.path.join(remote_path, test_runner_name)
   run_cmd([adb_path, 'push', tests_path, remote_path], cwd=BUILDROOT_DIR)
-  run_cmd([adb_path, 'shell', remote_tests_path])
+
+  try:
+    run_cmd([adb_path, 'shell', remote_tests_path])
+  except:
+    luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
+    if luci_test_outputs_path:
+      print('>>>>> Test %s failed. Capturing logcat.' % test_runner_name)
+      logcat_path = os.path.join(luci_test_outputs_path, '%s_logcat' % test_runner_name)
+      logcat_file = open(logcat_path, 'w')
+      subprocess.run([adb_path, 'logcat', '-d'], stdout=logcat_file, check=False)
+    raise
 
 
 def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
