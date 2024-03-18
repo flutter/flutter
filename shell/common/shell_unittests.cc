@@ -4511,8 +4511,9 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   ASSERT_EQ(viewIds.size(), 2u);
   ASSERT_EQ(viewIds[1], 2ll);
 
-  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell] { shell->RemoveView(2); });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
+    shell->RemoveView(2, [](bool removed) { ASSERT_TRUE(removed); });
+  });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
   ASSERT_EQ(viewIds.size(), 1u);

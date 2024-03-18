@@ -151,8 +151,7 @@ bool RuntimeController::AddView(int64_t view_id,
 bool RuntimeController::RemoveView(int64_t view_id) {
   platform_data_.viewport_metrics_for_views.erase(view_id);
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->RemoveView(view_id);
-    return true;
+    return platform_configuration->RemoveView(view_id);
   }
 
   return false;

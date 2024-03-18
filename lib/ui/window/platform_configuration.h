@@ -327,7 +327,9 @@ class PlatformConfiguration final {
   ///
   /// @param[in]  view_id  The ID of the view.
   ///
-  void RemoveView(int64_t view_id);
+  /// @return     Whether the view was removed.
+  ///
+  bool RemoveView(int64_t view_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Update the view metrics for the specified view.
