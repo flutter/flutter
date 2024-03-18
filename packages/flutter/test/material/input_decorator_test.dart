@@ -8961,16 +8961,8 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      Center(
-        child: buildInputDecorator(
-          decoration: decoration,
-        ),
-      ),
-    );
-
+    await tester.pumpWidget(buildInputDecorator(decoration: decoration));
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
-
     expect(box, isNot(paints..drrect()));
   });
 }
