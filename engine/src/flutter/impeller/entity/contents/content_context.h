@@ -779,10 +779,6 @@ class ContentContext {
 
   void SetWireframe(bool wireframe);
 
-  void RecordCommandBuffer(std::shared_ptr<CommandBuffer> command_buffer) const;
-
-  void FlushCommandBuffers() const;
-
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
 

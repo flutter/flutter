@@ -53,7 +53,6 @@ bool AiksContext::Render(const Picture& picture,
   }
 
   fml::ScopedCleanupClosure closure([&]() {
-    content_context_->FlushCommandBuffers();
     if (reset_host_buffer) {
       content_context_->GetTransientsBuffer().Reset();
     }
