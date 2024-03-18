@@ -689,15 +689,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _actionHandler(_AdjustSliderIntent intent) {
-    final bool rtl = switch (Directionality.of(_renderObjectKey.currentContext!)) {
-      TextDirection.rtl => true,
-      TextDirection.ltr => false,
-    };
+    final TextDirection directionality = Directionality.of(_renderObjectKey.currentContext!);
     final bool shouldIncrease = switch (intent.type) {
-      _SliderAdjustmentType.up => true,
-      _SliderAdjustmentType.down => false,
-      _SliderAdjustmentType.left => rtl,
-      _SliderAdjustmentType.right => !rtl,
+      _SliderAdjustmentType.up    => true,
+      _SliderAdjustmentType.down  => false,
+      _SliderAdjustmentType.left  => directionality == TextDirection.rtl,
+      _SliderAdjustmentType.right => directionality == TextDirection.ltr,
     };
 
     final _RenderSlider slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
