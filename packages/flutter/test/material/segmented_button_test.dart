@@ -884,6 +884,10 @@ void main() {
   });
 
   testWidgets('SegmentedButton does not expand when isExpanded is false', (WidgetTester tester) async {
+    const Size screenSize = Size(800.0, 600.0);
+    // Set the screen size.
+    tester.binding.window.physicalSizeTestValue = screenSize;
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
