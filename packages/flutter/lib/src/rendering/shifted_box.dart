@@ -10,6 +10,7 @@ import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
@@ -1419,16 +1420,39 @@ class RenderBaseline extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  (Size, double) _computeSizes(covariant BoxConstraints constraints, ChildLayouter layoutChild, ChildBaselineGetter computeBaseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return (constraints.smallest, 0);
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    final Size childSize = layoutChild(child, childConstraints);
+    final double childBaseline = computeBaseline(child, childConstraints, baselineType) ?? childSize.height;
+    final double top = baseline - childBaseline;
+    return (constraints.constrain(Size(childSize.width, top + childSize.height)), top);
+  }
+
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (child != null) {
-      assert(debugCannotComputeDryLayout(
-        reason: 'Baseline metrics are only available after a full layout.',
-      ));
-      return Size.zero;
+    return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline).$1;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
     }
-    return constraints.smallest;
+    if (baseline == baselineType) {
+      return this.baseline;
+    }
+    final double? result1 = child.getDryBaseline(constraints.loosen(), baseline);
+    final double? result2 = child.getDryBaseline(constraints.loosen(), baselineType);
+    if (result1 == null || result2 == null) {
+      return this.baseline;
+    }
+    return this.baseline + result1 - result2;
   }
 
   @override

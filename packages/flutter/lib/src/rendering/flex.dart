@@ -620,49 +620,26 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // children, after the flexible children are fit into the available space,
       // with the children sized using their max intrinsic dimensions.
 
-      // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
-      final double availableMainSpace = extent;
-      int totalFlex = 0;
-      double inflexibleSpace = 0.0;
-      double maxCrossSize = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        final int flex = _getFlex(child);
-        totalFlex += flex;
-        final double mainSize;
-        final double crossSize;
-        if (flex == 0) {
-          switch (_direction) {
-            case Axis.horizontal:
-              mainSize = child.getMaxIntrinsicWidth(double.infinity);
-              crossSize = childSize(child, mainSize);
-            case Axis.vertical:
-              mainSize = child.getMaxIntrinsicHeight(double.infinity);
-              crossSize = childSize(child, mainSize);
-          }
-          inflexibleSpace += mainSize;
-          maxCrossSize = math.max(maxCrossSize, crossSize);
+      Size computeIntrinsicCrossExtentForChild(RenderBox child, BoxConstraints constraints) {
+        final bool isFlexChild = _getFlex(child) > 0;
+        switch (_direction) {
+          case Axis.horizontal:
+            final double width = isFlexChild
+              ? constraints.maxWidth
+              : child.getMaxIntrinsicWidth(constraints.maxHeight);
+            return Size(width, childSize(child, width));
+          case Axis.vertical:
+            final double height = isFlexChild
+              ? constraints.maxHeight
+              : child.getMaxIntrinsicHeight(constraints.maxWidth);
+            return Size(childSize(child, height), height);
         }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
-        child = childParentData.nextSibling;
       }
-
-      // Determine the spacePerFlex by allocating the remaining available space.
-      // When you're overconstrained spacePerFlex can be negative.
-      final double spacePerFlex = math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
-
-      // Size remaining (flexible) items, find the maximum cross size.
-      child = firstChild;
-      while (child != null) {
-        final int flex = _getFlex(child);
-        if (flex > 0) {
-          maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
-        child = childParentData.nextSibling;
-      }
-
-      return maxCrossSize;
+      final BoxConstraints constraints = switch (direction) {
+        Axis.horizontal => BoxConstraints(maxWidth: extent),
+        Axis.vertical   => BoxConstraints(maxHeight: extent),
+      };
+      return _computeSizes(constraints: constraints, layoutChild: computeIntrinsicCrossExtentForChild, computeBaseline: ChildLayoutHelper.getDryBaseline).size.crossAxisExtent;
     }
   }
 
@@ -717,6 +694,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   static FlexFit _getFit(RenderBox child) {
     final FlexParentData childParentData = child.parentData! as FlexParentData;
     return childParentData.fit ?? FlexFit.tight;
+  }
+
+  bool get _isBaselineAligned {
+    return switch (crossAxisAlignment) {
+      CrossAxisAlignment.baseline => switch (direction) {
+        Axis.horizontal => true,
+        Axis.vertical => false,
+      },
+      CrossAxisAlignment.start || CrossAxisAlignment.center || CrossAxisAlignment.end || CrossAxisAlignment.stretch  => false,
+    };
   }
 
   double _getCrossSize(Size size) {
@@ -832,6 +819,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       computeBaseline: ChildLayoutHelper.getDryBaseline,
     );
 
+    if (_isBaselineAligned) {
+      return sizes.ascentDescent?.ascent;
+    }
+
     BoxConstraints constraintsForChild(RenderBox child) {
       final _LayoutFlexDimensions? flexDimensions = sizes.flexDimensions;
       final int flex;
@@ -845,10 +836,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    switch ((crossAxisAlignment, direction)) {
-      case (CrossAxisAlignment.baseline, Axis.horizontal):
-        return sizes.ascentDescent?.ascent;
-      case (_, Axis.vertical):
+    switch (direction) {
+      case Axis.vertical:
         final double freeSpace = math.max(0.0, sizes.size.mainAxisExtent - sizes.allocatedMainAxisSize);
         final bool flipMainAxis = _flipMainAxis;
         final (double leadingSpaceY, double spaceBetween) = mainAxisAlignment._distributeSpace(freeSpace, childCount, flipMainAxis);
@@ -861,7 +850,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           y += spaceBetween + childSize.height;
         }
         return baselineOffset.offset;
-      case (_, Axis.horizontal):
+      case Axis.horizontal:
         for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
           final BoxConstraints childConstraints = constraintsForChild(child);
           final double? distance = child.getDryBaseline(childConstraints, baseline);
@@ -995,13 +984,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final bool canFlex = maxMainSize.isFinite;
     final BoxConstraints nonFlexChildConstraints = _constraintsForNonFlexChild(constraints);
     // Null indicates the children are not baseline aligned.
-    final TextBaseline? textBaseline = switch (crossAxisAlignment) {
-      CrossAxisAlignment.baseline => switch (direction) {
-        Axis.horizontal => this.textBaseline ?? (throw FlutterError('To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.')),
-        Axis.vertical => null,
-      },
-      CrossAxisAlignment.start || CrossAxisAlignment.center || CrossAxisAlignment.end || CrossAxisAlignment.stretch  => null,
-    };
+    final TextBaseline? textBaseline = _isBaselineAligned
+      ? (this.textBaseline ?? (throw FlutterError('To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.')))
+      : null;
 
     // The first pass lays out non-flex children and computes total flex.
     int totalFlex = 0;
