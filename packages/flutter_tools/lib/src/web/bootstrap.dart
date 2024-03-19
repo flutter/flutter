@@ -388,8 +388,8 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 }
 
 typedef WebTestInfo = ({
-  String testSelector,
   String entryPoint,
+  Uri goldensUri,
   String? configFile,
 });
 
@@ -408,22 +408,28 @@ String generateTestEntrypoint({
 }) {
   final List<String> importMainStatements = <String>[];
   final List<String> importTestConfigStatements = <String>[];
-  final List<String> entryPointPairs = <String>[];
-  final List<String> testConfigPairs = <String>[];
+  final List<String> webTestPairs = <String>[];
 
   for (int index = 0; index < testInfos.length; index++) {
     final WebTestInfo testInfo = testInfos[index];
     final String entryPointPath = testInfo.entryPoint;
     importMainStatements.add("import 'org-dartlang-app:///${Uri.file(entryPointPath)}' as test_$index show main;");
-    entryPointPairs.add("  '$entryPointPath': test_$index.main,");
 
     final String? testConfigPath = testInfo.configFile;
+    String? testConfigFunction = 'null';
     if (testConfigPath != null) {
       importTestConfigStatements.add(
         "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable;"
       );
-      testConfigPairs.add("  '$entryPointPath': test_config_$index.testExecutable,");
+      testConfigFunction = 'test_config_$index.testExecutable';
     }
+    webTestPairs.add('''
+  '$entryPointPath': (
+    entryPoint: test_$index.main,
+    entryPointRunner: $testConfigFunction,
+    goldensUri: Uri.parse('${testInfo.goldensUri}'),
+  ),
+''');
   }
   return '''
 // @dart = ${languageVersion.major}.${languageVersion.minor}
@@ -434,25 +440,16 @@ ${importTestConfigStatements.join('\n')}
 
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, EntryPoint> entryPointMap = <String, EntryPoint>{
-  ${entryPointPairs.join('\n')}
-};
-
-Map<String, EntryPointRunner> testConfigMap = <String, EntryPointRunner>{
-  ${testConfigPairs.join('\n')}
+Map<String, WebTest> webTestMap = <String, WebTest>{
+  ${webTestPairs.join('\n')}
 };
 
 Future<void> main() {
-  final EntryPoint? entryPoint = entryPointMap[testSelector];
-  if (entryPoint == null) {
-    throw Exception('Test entrypoint for \${testSelector} not found');
+  final WebTest? webTest = webTestMap[testSelector];
+  if (webTest == null) {
+    throw Exception('Web test for \${testSelector} not found');
   }
-  final EntryPointRunner? entryPointRunner = testConfigMap[testSelector];
-  return runWebTest((
-    testSelector: testSelector,
-    entryPoint: entryPoint,
-    entryPointRunner: entryPointRunner,
-  ));
+  return runWebTest(webTest);
 }
   ''';
 }

@@ -25,9 +25,9 @@ typedef EntryPointRunner = Future<void> Function(EntryPoint);
 
 /// Metadata about a web test to run
 typedef WebTest = ({
-  String testSelector,
   EntryPoint entryPoint,
   EntryPointRunner? entryPointRunner,
+  Uri goldensUri,
 });
 
 /// Gets the test selector set by the test bootstrapping logic
@@ -45,8 +45,7 @@ Future<void> runWebTest(WebTest test) async {
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
-  final String testSelector = test.testSelector;
-  webGoldenComparator = DefaultWebGoldenComparator(Uri.parse(testSelector));
+  webGoldenComparator = DefaultWebGoldenComparator(test.goldensUri);
 
   /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window
   /// size for the purposes of testing.
