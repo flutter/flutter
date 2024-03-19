@@ -477,10 +477,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    String relativePath = fullPath.replaceFirst('canvaskit/', '');
-    if (relativePath.startsWith('/')) {
-      relativePath = relativePath.substring(1);
-    }
+    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
     final String extension = _fileSystem.path.extension(relativePath);
     String contentType;
     switch (extension) {
