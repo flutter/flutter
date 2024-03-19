@@ -2522,10 +2522,10 @@ NumberFormat.decimalPatternDigits(
   testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
     const String dollarSignWithSelect = r'''
 {
-  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
-    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifestation #1 $_temp0'));
   });
 
   testWithoutContext('can generate method with named parameter', () {

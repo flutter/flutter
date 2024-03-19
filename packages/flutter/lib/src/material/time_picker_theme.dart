@@ -271,7 +271,7 @@ class TimePickerThemeData with Diagnosticable {
   /// `RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)))`.
   final ShapeBorder? shape;
 
-  /// The color of the time selector seperator between the hour and minute controls.
+  /// The color of the time selector separator between the hour and minute controls.
   ///
   /// if this is null, the time picker defaults to the overall theme's
   /// [ColorScheme.onSurface].
@@ -280,7 +280,7 @@ class TimePickerThemeData with Diagnosticable {
   /// [hourMinuteTextColor].
   final MaterialStateProperty<Color?>? timeSelectorSeparatorColor;
 
-  /// Used to configure the text style for the time selector seperator between the hour
+  /// Used to configure the text style for the time selector separator between the hour
   /// and minute controls.
   ///
   /// If this is null, the time picker defaults to the overall theme's

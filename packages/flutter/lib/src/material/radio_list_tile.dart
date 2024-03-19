@@ -35,7 +35,7 @@ enum _RadioType { material, adaptive }
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. The [fillColor] in the selected state is used for the selected item's
-/// text color. It it is null, the [activeColor] is used.
+/// text color. If it is null, the [activeColor] is used.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the

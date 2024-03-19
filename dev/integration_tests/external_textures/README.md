@@ -24,7 +24,7 @@ subtle translation issues.
 ## How it works
 
 - Each `lib/*_main.dart` file is a Flutter app instrumenting a test case.
-- There is a cooresponding `test_driver/*_test.dart` that runs assertions.
+- There is a corresponding `test_driver/*_test.dart` that runs assertions.
 
 To run the test cases locally, use `flutter drive`[^2]:
 

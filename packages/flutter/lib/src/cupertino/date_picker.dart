@@ -405,7 +405,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to null, which disables background painting entirely.
   final Color? backgroundColor;
 
-  /// Whether to to show day of week alongside day. Defaults to false.
+  /// Whether to show day of week alongside day. Defaults to false.
   final bool showDayOfWeek;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
