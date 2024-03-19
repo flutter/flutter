@@ -252,6 +252,7 @@ class ExpansionTile extends StatefulWidget {
     this.controller,
     this.dense,
     this.visualDensity,
+    this.minTileHeight,
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
@@ -516,6 +517,9 @@ class ExpansionTile extends StatefulWidget {
   /// {@macro flutter.material.themedata.visualDensity}
   final VisualDensity? visualDensity;
 
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
@@ -724,6 +728,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 title: widget.title,
                 subtitle: widget.subtitle,
                 trailing: trailing,
+                minTileHeight: widget.minTileHeight,
               ),
             ),
           ),
