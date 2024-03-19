@@ -191,12 +191,11 @@ class SegmentedButton<T> extends StatefulWidget {
   /// [onSelectionChanged] will not be called.
   final bool emptySelectionAllowed;
 
-  /// Determines whether the segmented button should expand to fill
-  /// the available space.
+  /// Determines the segmented button's size and padding based on [expandedInsets].
   ///
-  /// If false (default), the button's size is based on the intrinsic
-  /// sizes of its segments, maintaining their natural width. Ideal for
-  /// maintaining consistent segment sizes regardless of the container size.
+  /// If null (default), the button adopts its intrinsic content size. When specified,
+  /// the button expands to fill its parent's space, with the EdgeInsets
+  /// defining the padding.
   final EdgeInsets? expandedInsets;
 
   /// A static convenience method that constructs a segmented button
@@ -556,7 +555,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
             enabledBorder: _enabled ? enabledBorder : disabledBorder,
             disabledBorder: disabledBorder,
             direction: direction,
-            expandedInsets: widget.expandedInsets,
+            isExpanded: widget.expandedInsets != null,
             children: buttons,
           ),
         ),
@@ -601,7 +600,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required this.disabledBorder,
     required this.direction,
     required this.tapTargetVerticalPadding,
-    required this.expandedInsets,
+    required this.isExpanded,
     required super.children,
   }) : assert(children.length == segments.length);
 
@@ -610,7 +609,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   final OutlinedBorder disabledBorder;
   final TextDirection direction;
   final double tapTargetVerticalPadding;
-  final EdgeInsets? expandedInsets;
+  final bool isExpanded;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -620,7 +619,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
       disabledBorder: disabledBorder,
       textDirection: direction,
       tapTargetVerticalPadding: tapTargetVerticalPadding,
-      expandedInsets: expandedInsets,
+      isExpanded: isExpanded,
     );
   }
 
@@ -649,13 +648,13 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
     required double tapTargetVerticalPadding,
-    required EdgeInsets? expandedInsets,
+    required bool isExpanded,
   }) : _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection,
        _tapTargetVerticalPadding = tapTargetVerticalPadding,
-       _expandedInsets = expandedInsets;
+       _isExpanded = isExpanded;
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -707,13 +706,13 @@ class _RenderSegmentedButton<T> extends RenderBox with
     markNeedsLayout();
   }
 
-  EdgeInsets? get expandedInsets => _expandedInsets;
-  EdgeInsets? _expandedInsets;
-  set expandedInsets(EdgeInsets? value) {
-    if (value == _expandedInsets) {
+  bool get isExpanded => _isExpanded;
+  bool _isExpanded;
+  set isExpanded(bool value) {
+    if (value == _isExpanded) {
       return;
     }
-    _expandedInsets = value;
+    _isExpanded = value;
     markNeedsLayout();
   }
 
@@ -800,7 +799,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
     double maxHeight = 0;
     RenderBox? child = firstChild;
     double childWidth;
-    if (_expandedInsets != null) {
+    if (_isExpanded) {
       childWidth = constraints.maxWidth / childCount;
     } else {
       childWidth = constraints.minWidth / childCount;
