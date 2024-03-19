@@ -866,7 +866,7 @@ void main() {
               ButtonSegment<int>(value: 2, label: Text('Segment 2')),
             ],
             selected: const <int>{1},
-            isExpanded: true,
+           expandedInsets: EdgeInsets.zero,
           ),
         ),
       ),
@@ -884,11 +884,13 @@ void main() {
   });
 
   testWidgets('SegmentedButton does not expand when isExpanded is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const Size screenSize = Size(800.0, 600.0);
     // Set the screen size.
     tester.binding.window.physicalSizeTestValue = screenSize;
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpWidget(MaterialApp(
+      theme: theme,
       home: Scaffold(
         body: Center(
           child: SegmentedButton<int>(
