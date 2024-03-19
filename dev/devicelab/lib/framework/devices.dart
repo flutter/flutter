@@ -793,9 +793,9 @@ class AndroidDevice extends Device {
           // (to let us know when app starts), flutter (needed by tests to see
           // log output), and fatal messages (hopefully catches tombstones).
           // For local testing, this can just be:
-          //   <String>['-s', deviceId, 'logcat']
+            <String>['-s', deviceId, 'logcat']
           // to view the whole log, or just run logcat alongside this.
-          <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
+          // <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
         );
         process.stdout
           .transform<String>(utf8.decoder)
