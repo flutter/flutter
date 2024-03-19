@@ -856,7 +856,7 @@ void main() {
     );
   });
 
-  testWidgets('SegmentedButton expands to fill the available width when isExpanded is true', (WidgetTester tester) async {
+  testWidgets('SegmentedButton expands to fill the available width when expandedInsets is not null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -865,7 +865,7 @@ void main() {
               ButtonSegment<int>(value: 1, label: Text('Segment 1')),
               ButtonSegment<int>(value: 2, label: Text('Segment 2')),
             ],
-            selected: const <int>{1},
+           selected: const <int>{1},
            expandedInsets: EdgeInsets.zero,
           ),
         ),
@@ -883,7 +883,7 @@ void main() {
     expect(segmentedButtonWidth, equals(screenWidth));
   });
 
-  testWidgets('SegmentedButton does not expand when isExpanded is false', (WidgetTester tester) async {
+  testWidgets('SegmentedButton does not expand when expandedInsets is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
