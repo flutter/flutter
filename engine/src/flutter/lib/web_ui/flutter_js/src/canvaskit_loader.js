@@ -17,7 +17,7 @@ export const loadCanvasKit = (deps, config, browserEnvironment, engineRevision) 
     const useChromiumCanvasKit = supportsChromiumCanvasKit && (config.canvasKitVariant !== "full");
     let baseUrl = config.canvasKitBaseUrl ?? `https://www.gstatic.com/flutter-canvaskit/${engineRevision}/`;
     if (useChromiumCanvasKit) {
-      baseUrl = `${baseUrl}/chromium/`;
+      baseUrl = `${baseUrl}chromium/`;
     }
     let canvasKitUrl = `${baseUrl}canvaskit.js`;
     if (deps.flutterTT.policy) {

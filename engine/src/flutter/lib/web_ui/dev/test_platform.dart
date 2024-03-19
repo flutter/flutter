@@ -485,7 +485,7 @@ class BrowserPlatform extends PlatformPlugin {
         request.url.path,
       ));
 
-      if (!fileInDirectory.existsSync()) {
+      if (request.url.path.contains('//') || !fileInDirectory.existsSync()) {
         return shelf.Response.notFound('File not found: ${request.url.path}');
       }
 
