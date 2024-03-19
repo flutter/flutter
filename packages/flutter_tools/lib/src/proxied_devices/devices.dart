@@ -729,7 +729,12 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
+  /// [_proxiedPortForwarder] matches the [proxiedPortForwarder] of a ProxiedDevice.
+  /// It forwards a port on the remote host to the local host.
   final ProxiedPortForwarder _proxiedPortForwarder;
+
+  /// [_devicePortForwarder] matches the [portForwarder] of a ProxiedDevice.
+  /// It forwards a port on the remotely connected device, to the remote host, then to the local host.
   final ProxiedPortForwarder _devicePortForwarder;
 
   Uri? _localUri;
