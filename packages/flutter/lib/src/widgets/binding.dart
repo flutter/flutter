@@ -76,15 +76,15 @@ abstract mixin class WidgetsBindingObserver {
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
-  Future<bool> startBackGesture(PredictiveBackEvent backEvent) =>
+  Future<bool> handleStartBackGesture(PredictiveBackEvent backEvent) =>
       Future<bool>.value(false);
 
-  Future<bool> updateBackGestureProgress(PredictiveBackEvent backEvent) =>
+  Future<bool> handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) =>
       Future<bool>.value(false);
 
-  Future<bool> commitBackGesture() => Future<bool>.value(false);
+  Future<bool> handleCommitBackGesture() => Future<bool>.value(false);
 
-  Future<bool> cancelBackGesture() => Future<bool>.value(false);
+  Future<bool> handleCancelBackGesture() => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
@@ -793,45 +793,66 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     SystemNavigator.pop();
   }
 
+  // TODO(justinmc): Move this predictive back stuff to a mixin?
+  /// Called at the start of a predictive back gesture.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   @protected
   @visibleForTesting
   Future<void> handleStartBackGesture(Map<dynamic, dynamic> arguments) async {
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.startBackGesture(backEvent)) {
+      if (await observer.handleStartBackGesture(backEvent)) {
         return;
       }
     }
   }
 
+  /// Called when a predictive back gesture moves.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   @protected
   @visibleForTesting
   Future<void> handleUpdateBackGestureProgress(
       Map<dynamic, dynamic> arguments) async {
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.updateBackGestureProgress(backEvent)) {
+      if (await observer.handleUpdateBackGestureProgress(backEvent)) {
         return;
       }
     }
   }
 
+  /// Called when a predictive back gesture is finished successfully.
+  ///
+  /// Indicates that the current route should be popped.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   @protected
   @visibleForTesting
   Future<void> handleCommitBackGesture() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.commitBackGesture()) {
+      if (await observer.handleCommitBackGesture()) {
         return;
       }
     }
     await handlePopRoute();
   }
 
+  /// Called when a predictive back gesture is canceled.
+  ///
+  /// Indicates that no navigation should occur.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   @protected
   @visibleForTesting
   Future<void> handleCancelBackGesture() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.cancelBackGesture()) {
+      if (await observer.handleCancelBackGesture()) {
         return;
       }
     }

@@ -99,7 +99,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class TransitionRoute<T> extends OverlayRoute<T> {
+abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRoute {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
@@ -177,19 +177,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animation<double>? get animation => _animation;
   Animation<double>? _animation;
 
+  // TODO(justinmc): The point of this is that only the route can drive the
+  // animation, but others can listen to it.
   /// The animation controller that the route uses to drive the transitions.
   ///
   /// The animation itself is exposed by the [animation] property.
   @protected
   AnimationController? get controller => _controller;
   AnimationController? _controller;
-
-  static GestureTransitionController createDefaultGestureTransitionController(
-      TransitionRoute<dynamic> route) {
-    return _AndroidBackGestureTransitionController(
-      route: route,
-    );
-  }
 
   /// The animation for the route being pushed on top of this route. This
   /// animation lets this route coordinate with the entrance and exit transition
@@ -280,6 +275,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
+  // TODO(justinmc): This is where the animation is kicked off/moved.
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
@@ -485,6 +481,74 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
+  // Begin PredictiveBackRoute.
+
+  @override
+  void handleStartBackGesture({double progress = 0}) {
+    _controller?.value = progress;
+    navigator?.didStartUserGesture();
+  }
+
+  @override
+  void handleUpdateBackGestureProgress({required double progress}) {
+    // If some other navigation happened during this gesture, don't mess with
+    // the transition anymore.
+    if (!isCurrent) {
+      return;
+    }
+    _controller?.value = progress;
+  }
+
+  @override
+  void handleDragEnd({required bool animateForward}) {
+    if (isCurrent) {
+      if (animateForward) {
+        if (_controller != null) {
+          // The closer the panel is to dismissing, the shorter the animation is.
+          // We want to cap the animation time, but we want to use a linear curve
+          // to determine it.
+          final int droppedPageForwardAnimationTime = min(
+            lerpDouble(800, 0, _controller!.value)!.floor(),
+            300,
+          );
+          _controller!.animateTo(
+            1.0,
+            duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+            curve: Curves.fastLinearToSlowEaseIn,
+          );
+        }
+      } else {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator?.pop();
+
+        // The popping may have finished inline if already at the target destination.
+        if (_controller?.isAnimating ?? false) {
+          // Otherwise, use a custom popping animation duration and curve.
+          final int droppedPageBackAnimationTime =
+              lerpDouble(0, 800, _controller!.value)!.floor();
+          _controller!.animateBack(0.0,
+              duration: Duration(milliseconds: droppedPageBackAnimationTime),
+              curve: Curves.fastLinearToSlowEaseIn);
+        }
+      }
+    }
+
+    if (_controller?.isAnimating ?? false) {
+      // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
+      // depends on userGestureInProgress
+      late AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator?.didStopUserGesture();
+        _controller!.removeStatusListener(animationStatusCallback);
+      };
+      _controller!.addStatusListener(animationStatusCallback);
+    } else {
+      navigator?.didStopUserGesture();
+    }
+  }
+
+  // End PredictiveBackRoute.
+
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
@@ -505,86 +569,22 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';
 }
 
-abstract class GestureTransitionController {
-  void dragStart({double progress = 0});
+/// An interface for a route that supports predictive back gestures.
+///
+/// See also:
+///
+///  * [PredictiveBackPageTransitionsBuilder], which builds page transitions for
+///    predictive back.
+mixin PredictiveBackRoute {
+  bool get isCurrent;
+  bool get popGestureEnabled;
 
-  void dragUpdate({required double progress});
+  // TODO(justinmc): Docs.
+  void handleStartBackGesture({double progress = 0});
 
-  void dragEnd({required bool animateForward});
-}
+  void handleUpdateBackGestureProgress({required double progress});
 
-class _AndroidBackGestureTransitionController
-    extends GestureTransitionController {
-  _AndroidBackGestureTransitionController({
-    required this.route,
-  });
-
-  final TransitionRoute<dynamic> route;
-
-  NavigatorState get _navigator => route.navigator!;
-  AnimationController get _controller => route.controller!;
-
-  @override
-  void dragStart({double progress = 0}) {
-    _controller.value = progress;
-    _navigator.didStartUserGesture();
-  }
-
-  @override
-  void dragUpdate({required double progress}) {
-    // If some other navigation happened during this gesture, don't mess with
-    // the transition anymore.
-    if (!route.isCurrent) {
-      return;
-    }
-    _controller.value = progress;
-  }
-
-  @override
-  void dragEnd({required bool animateForward}) {
-    if (route.isCurrent) {
-      if (animateForward) {
-        // The closer the panel is to dismissing, the shorter the animation is.
-        // We want to cap the animation time, but we want to use a linear curve
-        // to determine it.
-        final int droppedPageForwardAnimationTime = min(
-          lerpDouble(800, 0, _controller.value)!.floor(),
-          300,
-        );
-        _controller.animateTo(
-          1.0,
-          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
-      } else {
-        // This route is destined to pop at this point. Reuse navigator's pop.
-        _navigator.pop();
-
-        // The popping may have finished inline if already at the target destination.
-        if (_controller.isAnimating) {
-          // Otherwise, use a custom popping animation duration and curve.
-          final int droppedPageBackAnimationTime =
-              lerpDouble(0, 800, _controller.value)!.floor();
-          _controller.animateBack(0.0,
-              duration: Duration(milliseconds: droppedPageBackAnimationTime),
-              curve: Curves.fastLinearToSlowEaseIn);
-        }
-      }
-    }
-
-    if (_controller.isAnimating) {
-      // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
-      // depends on userGestureInProgress
-      late AnimationStatusListener animationStatusCallback;
-      animationStatusCallback = (AnimationStatus status) {
-        _navigator.didStopUserGesture();
-        _controller.removeStatusListener(animationStatusCallback);
-      };
-      _controller.addStatusListener(animationStatusCallback);
-    } else {
-      _navigator.didStopUserGesture();
-    }
-  }
+  void handleDragEnd({required bool animateForward});
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
