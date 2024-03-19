@@ -385,7 +385,7 @@ class ListTileTheme extends InheritedTheme {
       horizontalTitleGap: _horizontalTitleGap,
       minVerticalPadding: _minVerticalPadding,
       minLeadingWidth: _minLeadingWidth,
-      minTileHeight:_minTileHeight,
+      minTileHeight: _minTileHeight,
     );
   }
 
