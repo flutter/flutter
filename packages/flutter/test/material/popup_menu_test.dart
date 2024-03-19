@@ -3451,7 +3451,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test default text style.
-    expect(_labelStyle(tester, 'Item 1')!.fontSize, 14.0);
+    expect(_labelStyle(tester, 'Item 1')!.fontSize, 16.0);
     expect(_labelStyle(tester, 'Item 1')!.color, theme.colorScheme.onSurface);
 
     // Close the menu.
@@ -3465,7 +3465,7 @@ void main() {
       fontStyle: FontStyle.italic,
     );
     theme = theme.copyWith(
-      textTheme: const TextTheme(labelLarge: customTextStyle),
+      textTheme: const TextTheme(bodyLarge: customTextStyle),
     );
     await tester.pumpWidget(buildMenu());
 
