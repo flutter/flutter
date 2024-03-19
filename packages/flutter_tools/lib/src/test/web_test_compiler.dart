@@ -4,7 +4,6 @@
 
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:path/path.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';

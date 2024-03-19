@@ -4,9 +4,11 @@
 
 import 'dart:convert';
 import 'dart:js';
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 
-import 'package:web/web.dart' as web;
+@JS('window')
+external JSObject get _window;
 
 /// The web implementation of [registerWebServiceExtension].
 ///
@@ -24,7 +26,7 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   // undefined at the time of the check, WebDriver throws an exception.
   context[r'$flutterDriverResult'] = null;
 
-  js_util.setProperty(web.window, r'$flutterDriver', allowInterop((dynamic message) async {
+  js_util.setProperty(_window, r'$flutterDriver', allowInterop((dynamic message) async {
     final Map<String, String> params = Map<String, String>.from(
         jsonDecode(message as String) as Map<String, dynamic>);
     final Map<String, dynamic> result = Map<String, dynamic>.from(

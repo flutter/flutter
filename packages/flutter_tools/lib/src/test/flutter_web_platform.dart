@@ -9,7 +9,6 @@ import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
-import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;

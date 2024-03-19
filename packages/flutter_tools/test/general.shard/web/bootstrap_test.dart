@@ -141,14 +141,14 @@ void main() {
   test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
       testInfos: <WebTestInfo>[
-        (entryPoint: 'foo_test.dart', configFile: null),
-        (entryPoint: 'bar_test.dart', configFile: 'bar_config.dart'),
+        (testSelector: 'foo.dart', entryPoint: 'foo.dart', configFile: null),
+        (testSelector: 'bar.dart', entryPoint: 'bar.dart', configFile: 'bar_config.dart'),
       ],
       languageVersion: LanguageVersion(2, 8),
     );
 
-    expect(result, contains("import 'org-dartlang-app:///foo_test.dart'"));
-    expect(result, contains("import 'org-dartlang-app:///bar_test.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///foo.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar.dart'"));
     expect(result, contains("import 'org-dartlang-app:///bar_config.dart'"));
   });
 

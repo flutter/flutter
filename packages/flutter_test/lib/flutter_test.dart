@@ -57,6 +57,7 @@ export 'dart:async' show Future;
 
 export 'src/_goldens_io.dart' if (dart.library.js_interop) 'src/_goldens_web.dart';
 export 'src/_matchers_io.dart' if (dart.library.js_interop) 'src/_matchers_web.dart';
+export 'src/_test_selector_io.dart' if (dart.library.js_interop) 'src/_test_selector_web.dart';
 export 'src/accessibility.dart';
 export 'src/animation_sheet.dart';
 export 'src/binding.dart';
@@ -83,6 +84,5 @@ export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';
 export 'src/tree_traversal.dart';
-export 'src/web_test_selector.dart';
 export 'src/widget_tester.dart';
 export 'src/window.dart';
