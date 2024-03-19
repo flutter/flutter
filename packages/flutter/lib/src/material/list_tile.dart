@@ -890,7 +890,7 @@ class ListTile extends StatelessWidget {
                   horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
                   minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
                   minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
-                  minTileHeight: minTileHeight,
+                  minTileHeight: minTileHeight ?? tileTheme.minTileHeight,
                   titleAlignment: effectiveTitleAlignment,
                 ),
               ),
