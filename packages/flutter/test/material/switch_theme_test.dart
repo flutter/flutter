@@ -73,15 +73,15 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
-    expect(description[1], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'trackOutlineColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[3], 'trackOutlineWidth: MaterialStatePropertyAll(6.0)');
+    expect(description[0], 'thumbColor: WidgetStatePropertyAll(Color(0xfffffff0))');
+    expect(description[1], 'trackColor: WidgetStatePropertyAll(Color(0xfffffff1))');
+    expect(description[2], 'trackOutlineColor: WidgetStatePropertyAll(Color(0xfffffff3))');
+    expect(description[3], 'trackOutlineWidth: WidgetStatePropertyAll(6.0)');
     expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[5], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[6], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[5], 'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[6], 'overlayColor: WidgetStatePropertyAll(Color(0xfffffff2))');
     expect(description[7], 'splashRadius: 1.0');
-    expect(description[8], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[8], 'thumbIcon: WidgetStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
   testWidgets('Material2 - Switch is themeable', (WidgetTester tester) async {

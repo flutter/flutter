@@ -117,9 +117,9 @@ void main() {
       'shadowColor: Color(0xfffffff2)',
       'surfaceTintColor: Color(0xfffffff3)',
       'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
-      "labelTextStyle: Instance of '_MaterialStatePropertyWith<TextStyle?>'",
+      "labelTextStyle: Instance of '_WidgetStatePropertyWith<TextStyle?>'",
       'enableFeedback: false',
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'mouseCursor: WidgetStateMouseCursor(clickable)',
       'position: over',
       'iconColor: Color(0xfffffff8)',
       'iconSize: 31.0'

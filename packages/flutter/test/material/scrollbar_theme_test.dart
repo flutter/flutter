@@ -741,12 +741,12 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      "thumbVisibility: Instance of '_MaterialStatePropertyWith<bool?>'",
-      "thickness: Instance of '_MaterialStatePropertyWith<double?>'",
+      "thumbVisibility: Instance of '_WidgetStatePropertyWith<bool?>'",
+      "thickness: Instance of '_WidgetStatePropertyWith<double?>'",
       'radius: Radius.circular(3.0)',
-      "thumbColor: Instance of '_MaterialStatePropertyWith<Color?>'",
-      "trackColor: Instance of '_MaterialStatePropertyWith<Color?>'",
-      "trackBorderColor: Instance of '_MaterialStatePropertyWith<Color?>'",
+      "thumbColor: Instance of '_WidgetStatePropertyWith<Color?>'",
+      "trackColor: Instance of '_WidgetStatePropertyWith<Color?>'",
+      "trackBorderColor: Instance of '_WidgetStatePropertyWith<Color?>'",
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
       'minThumbLength: 120.0',

@@ -129,7 +129,7 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'color: MaterialStatePropertyAll(Color(0xfffffff0))',
+      'color: WidgetStatePropertyAll(Color(0xfffffff0))',
       'backgroundColor: Color(0xfffffff1)',
       'deleteIconColor: Color(0xfffffff2)',
       'disabledColor: Color(0xfffffff3)',

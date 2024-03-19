@@ -138,7 +138,7 @@ void main() {
         'minVerticalPadding: 300.0',
         'minLeadingWidth: 400.0',
         'enableFeedback: true',
-        'mouseCursor: MaterialStateMouseCursor(clickable)',
+        'mouseCursor: WidgetStateMouseCursor(clickable)',
         'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
         'titleAlignment: ListTileTitleAlignment.top',
       ]),

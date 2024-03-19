@@ -91,8 +91,8 @@ void main() {
       shape: RoundedRectangleBorder(
         side: BorderSide(color: Color(0xfffffff3)),
       ),
-      timeSelectorSeparatorColor: MaterialStatePropertyAll<Color>(Color(0xfffffff4)),
-      timeSelectorSeparatorTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(color: Color(0xfffffff5))),
+      timeSelectorSeparatorColor: WidgetStatePropertyAll<Color>(Color(0xfffffff4)),
+      timeSelectorSeparatorTextStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(color: Color(0xfffffff5))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -102,8 +102,8 @@ void main() {
 
     expect(description, equalsIgnoringHashCodes(<String>[
       'backgroundColor: Color(0xfffffff0)',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff1)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2)))',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff1)))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff2)))',
       'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
       'dayPeriodColor: Color(0x00000000)',
       'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
@@ -123,8 +123,8 @@ void main() {
       'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: Color(0xfffffff2)))',
       'padding: EdgeInsets.all(1.0)',
       'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)',
-      'timeSelectorSeparatorColor: MaterialStatePropertyAll(Color(0xfffffff4))',
-      'timeSelectorSeparatorTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, color: Color(0xfffffff5)))'
+      'timeSelectorSeparatorColor: WidgetStatePropertyAll(Color(0xfffffff4))',
+      'timeSelectorSeparatorTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, color: Color(0xfffffff5)))'
     ]));
   });
 

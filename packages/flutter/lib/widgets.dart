@@ -164,4 +164,5 @@ export 'src/widgets/viewport.dart';
 export 'src/widgets/visibility.dart';
 export 'src/widgets/widget_inspector.dart';
 export 'src/widgets/widget_span.dart';
+export 'src/widgets/widget_state.dart';
 export 'src/widgets/will_pop_scope.dart';

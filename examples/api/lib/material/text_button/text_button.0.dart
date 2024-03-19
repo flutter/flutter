@@ -358,13 +358,13 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             late final ImageProvider image;
             if (currentAction != null) {
               image = runningImage;
-            } else if (states.contains(MaterialState.pressed)) {
+            } else if (states.contains(WidgetState.pressed)) {
               image = pressedImage;
-            } else if (states.contains(MaterialState.hovered)) {
+            } else if (states.contains(WidgetState.hovered)) {
               image = hoveredImage;
             } else {
               image = defaultImage;
