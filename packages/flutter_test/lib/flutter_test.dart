@@ -83,5 +83,6 @@ export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';
 export 'src/tree_traversal.dart';
+export 'src/web_test_selector.dart';
 export 'src/widget_tester.dart';
 export 'src/window.dart';

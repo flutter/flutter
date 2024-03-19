@@ -4,6 +4,7 @@
 
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:path/path.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -59,9 +60,21 @@ class WebTestCompiler {
           from: projectDirectory.childDirectory('test').path
         )
       );
+
+      final File? testConfigFile = findTestConfigFile(_fileSystem.file(testFilePath), _logger);
+      String? testConfigPath;
+      if (testConfigFile != null) {
+        testConfigPath = _fileSystem.path.split(
+          _fileSystem.path.relative(
+            testConfigFile.path,
+            from: projectDirectory.childDirectory('test').path
+          )
+        ).join('/');
+      }
       return (
+        testSelector: relativeTestSegments.join('_'),
         entryPoint: relativeTestSegments.join('/'),
-        configFile: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
+        configFile: testConfigPath,
       );
     }).toList();
     return _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))

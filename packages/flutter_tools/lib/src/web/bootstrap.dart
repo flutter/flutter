@@ -388,13 +388,20 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 }
 
 typedef WebTestInfo = ({
+  String testSelector,
   String entryPoint,
   String? configFile,
 });
 
-/// Generates the bootstrap logic required for a flutter test running in a browser.
+/// Generates the bootstrap logic required for running a group of unit test
+/// files in the browser.
 ///
-/// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
+/// This creates one "switchboard" main function that imports all the main
+/// functions of the unit test files that need to be run. The javascript code
+/// that starts the test sets a `window.testSelector` that specifies which main
+/// function to invoke. This allows us to compile all the unit test files as a
+/// single web application and invoke that with a different selector for each
+/// test.
 String generateTestEntrypoint({
   required List<WebTestInfo> testInfos,
   required LanguageVersion languageVersion,
@@ -415,116 +422,38 @@ String generateTestEntrypoint({
       importTestConfigStatements.add(
         "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable;"
       );
-      testConfigPairs.add("  '$testConfigPath': test_config_$index.testExecutable,");
+      testConfigPairs.add("  '$entryPointPath': test_config_$index.testExecutable,");
     }
   }
   return '''
-  // @dart = ${languageVersion.major}.${languageVersion.minor}
-  import 'dart:ui' as ui;
-  import 'dart:ui_web' as ui_web;
-  import 'dart:async';
-  import 'dart:js_interop';
+// @dart = ${languageVersion.major}.${languageVersion.minor}
 
-  ${importMainStatements.join('\n')}
+${importMainStatements.join('\n')}
 
-  ${importTestConfigStatements.join('\n')}
+${importTestConfigStatements.join('\n')}
 
-  import 'package:stream_channel/stream_channel.dart';
-  import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/backend.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-  typedef EntryPoint = FutureOr<void> Function();
-  typedef EntryPointRunner = Future<void> Function(EntryPoint);
+Map<String, EntryPoint> entryPointMap = <String, EntryPoint>{
+  ${entryPointPairs.join('\n')}
+};
 
-  Map<String, EntryPoint> entryPointMap = <String, EntryPoint>{
-    ${entryPointPairs.join('\n')}
-  };
+Map<String, EntryPointRunner> testConfigMap = <String, EntryPointRunner>{
+  ${testConfigPairs.join('\n')}
+};
 
-  Map<String, EntryPointRunner> testConfigMap = <String, EntryPointRunner>{
-    ${testConfigPairs.join('\n')}
-  };
-
-  @JS()
-  external Window get window;
-
-  extension type Window._(JSObject _) implements JSObject {
-    external JSString? get testSelector;
-    external Location get location;
-    external Window? get parent;
-    external void postMessage(JSAny message, JSString targetOrigin, JSArray transfers);
+Future<void> main() {
+  final EntryPoint? entryPoint = entryPointMap[testSelector];
+  if (entryPoint == null) {
+    throw Exception('Test entrypoint for \${testSelector} not found');
   }
-
-  extension type Location._(JSObject _) implements JSObject {
-    external JSString get origin;
-  }
-
-  extension type MessageChannel._(JSObject _) implements JSObject {
-    external factory MessageChannel();
-
-    external MessagePort port1;
-    external MessagePort port2;
-  }
-
-  extension type MessagePort._(JSObject _) implements JSObject {
-    external void addEventListener(JSString eventName, JSFunction callback);
-    external void removeEventListener(JSString eventName, JSFunction callback);
-    external void postMessage(JSAny? message);
-
-    external void start();
-  }
-
-  extension type Event._(JSObject _) implements JSObject {
-    external JSObject? get data;
-  }
-
-  Future<void> main() async {
-    final JSString? jsTestSelector = window.testSelector;
-    if (jsTestSelector == null) {
-      throw Exception('Test selector not set');
-    }
-    final String testSelector = jsTestSelector.toDart;
-    final EntryPoint? entryPoint = entryPointMap[testSelector];
-    if (entryPoint == null) {
-      throw Exception('Test entrypoint for \${testSelector} not found');
-    }
-    final EntryPointRunner? entryPointRunner = testConfigMap[testSelector];
-    ui_web.debugEmulateFlutterTesterEnvironment = true;
-    final Completer<void> completer = Completer<void>();
-    await ui_web.bootstrapEngine(runApp: () => completer.complete());
-    await completer.future;
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse(testSelector));
-    ui_web.debugOverrideDevicePixelRatio(3.0);
-    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
-
-    internalBootstrapBrowserTest(() {
-      return entryPointRunner != null ? () => entryPointRunner(entryPoint) : entryPoint;
-    });
-  }
-
-  void internalBootstrapBrowserTest(Function getMain()) {
-    var channel = serializeSuite(getMain, hidePrints: false);
-    postMessageChannel().pipe(channel);
-  }
-
-  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
-
-  StreamChannel postMessageChannel() {
-    var controller = StreamChannelController<Object?>(sync: true);
-    var channel = MessageChannel();
-    window.parent!.postMessage('port'.toJS, window.location.origin, [channel.port2].toJS);
-
-    var eventCallback = (Event event) {
-      controller.local.sink.add(event.data.dartify());
-    }.toJS;
-    channel.port1.addEventListener('message'.toJS, eventCallback);
-    channel.port1.start();
-    controller.local.stream.listen(
-      (Object? message) => channel.port1.postMessage(message.jsify()),
-      onDone: () => channel.port1.removeEventListener('message'.toJS, eventCallback),
-    );
-
-    return controller.foreign;
-  }
+  final EntryPointRunner? entryPointRunner = testConfigMap[testSelector];
+  return runWebTest((
+    testSelector: testSelector,
+    entryPoint: entryPoint,
+    entryPointRunner: entryPointRunner,
+  ));
+}
   ''';
 }
 

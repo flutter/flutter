@@ -7,9 +7,9 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:matcher/expect.dart' show fail;
-import 'package:web/web.dart' as web;
 
 import 'goldens.dart';
+import 'web.dart' as web;
 
 /// An unsupported [GoldenFileComparator] that exists for API compatibility.
 class LocalFileComparator extends GoldenFileComparator {

@@ -9,6 +9,7 @@ import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
+import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -299,24 +300,20 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
-    if (request.url.path.endsWith('.dart.browser_test.dart.js')) {
-      final String leadingPath = request.url.path.split('.browser_test.dart.js')[0];
-      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.bootstrap.js';
+    if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
       return shelf.Response.ok(generateTestBootstrapFileContents(
-        '/$generatedFile', 'require.js', 'dart_stack_trace_mapper.js'),
+        '/main.dart.bootstrap.js', 'require.js', 'dart_stack_trace_mapper.js'),
         headers: <String, String>{
           HttpHeaders.contentTypeHeader: 'text/javascript',
         }
       );
     }
-    if (request.url.path.endsWith('.dart.bootstrap.js')) {
-      final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
-      final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.js';
+    if (request.url.path.endsWith('main.dart.bootstrap.js')) {
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
-        bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
-        entrypoint: '/$generatedFile'
+        bootstrapModule: 'main.dart.bootstrap',
+        entrypoint: '/main.dart.js'
        ), headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
@@ -481,7 +478,10 @@ class FlutterWebPlatform extends PlatformPlugin {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
+    String relativePath = fullPath.replaceFirst('canvaskit/', '');
+    if (relativePath.startsWith('/')) {
+      relativePath = relativePath.substring(1);
+    }
     final String extension = _fileSystem.path.extension(relativePath);
     String contentType;
     switch (extension) {
@@ -495,8 +495,9 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.internalServerError(body: error);
     }
 
+    final File canvasKitFile = _canvasKitFile(relativePath);
     return shelf.Response.ok(
-      _canvasKitFile(relativePath).openRead(),
+      canvasKitFile.openRead(),
       headers: <String, Object>{
         HttpHeaders.contentTypeHeader: contentType,
       },
@@ -515,7 +516,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       {
         compileTarget: "dartdevc",
         renderer: "${webRenderer.name}",
-        mainJsPath: "main.dart.js",
+        mainJsPath: "main.dart.browser_test.dart.js",
       }
 ''';
   }
@@ -525,7 +526,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     final String path = _fileSystem.path.fromUri(request.url);
     if (path.endsWith('.html')) {
       final String test = '${_fileSystem.path.withoutExtension(path)}.dart';
-      final String scriptBase = htmlEscape.convert(_fileSystem.path.basename(test));
       return shelf.Response.ok('''
         <!DOCTYPE html>
         <html>
@@ -538,7 +538,7 @@ class FlutterWebPlatform extends PlatformPlugin {
                 ${_makeBuildConfigString()}
               ]
             }
-            window.testSelector = "$scriptBase";
+            window.testSelector = "$test";
             _flutter.loader.load({
               config: {
                 canvasKitBaseUrl: "/canvaskit/",
