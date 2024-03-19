@@ -312,6 +312,14 @@ action("_generate_symlinks") {
   }
 }
 
+group("universal_flutter_framework") {
+  visibility = [ ":*" ]
+  deps = [
+    ":_generate_symlinks",
+    ":_generate_symlinks_and_verify_framework_module",
+  ]
+}
+
 action("flutter_framework") {
   script = "//flutter/sky/tools/create_xcframework.py"
   outputs = [ "$root_out_dir/FlutterMacOS.xcframework" ]
@@ -323,7 +331,7 @@ action("flutter_framework") {
     "--location",
     rebase_path(root_out_dir),
   ]
-  deps = [ ":_generate_symlinks_and_verify_framework_module" ]
+  deps = [ ":universal_flutter_framework" ]
 }
 
 if (build_glfw_shell) {
