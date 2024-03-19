@@ -194,7 +194,7 @@ class SegmentedButton<T> extends StatefulWidget {
   /// Determines the segmented button's size and padding based on [expandedInsets].
   ///
   /// If null (default), the button adopts its intrinsic content size. When specified,
-  /// the button expands to fill its parent's space, with the EdgeInsets
+  /// the button expands to fill its parent's space, with the [EdgeInsets]
   /// defining the padding.
   final EdgeInsets? expandedInsets;
 
