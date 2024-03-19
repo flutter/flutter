@@ -204,6 +204,7 @@ void main() {
       fileSystem: globals.fs,
       artifacts: globals.artifacts!,
       logger: testLogger,
+      projectDir: globals.fs.currentDirectory,
     );
 
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
