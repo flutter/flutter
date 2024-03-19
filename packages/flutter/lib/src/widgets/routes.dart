@@ -1042,9 +1042,26 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The given [BuildContext] will be rebuilt if the state of the route changes
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
-  static ModalRoute<T>? of<T extends Object?>(BuildContext context) {
-    final _ModalScopeStatus? widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
+  static ModalRoute<T>? of<T extends Object?>(
+    BuildContext context, {
+    bool listen = true,
+  }) {
+    _ModalScopeStatus? widget;
+    if (listen) {
+      widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
+    } else {
+      widget = context
+          .getElementForInheritedWidgetOfExactType<_ModalScopeStatus>()
+          ?.widget as _ModalScopeStatus?;
+    }
     return widget?.route as ModalRoute<T>?;
+  }
+
+  /// Obtains the element corresponding to the nearest widget of
+  /// [_ModalScopeStatus] within the given [context].
+  @visibleForTesting
+  static InheritedElement? scopeStatusAncestor(BuildContext context) {
+    return context.getElementForInheritedWidgetOfExactType<_ModalScopeStatus>();
   }
 
   /// Schedule a call to [buildTransitions].
