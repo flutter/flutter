@@ -886,7 +886,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// );
   /// ```
   ///
-  /// The [addListener] method of this [ValueListenable] should not be called
+  /// The `addListener` method of this [ValueListenable] must not be called
   /// during paint.
   ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
   late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
