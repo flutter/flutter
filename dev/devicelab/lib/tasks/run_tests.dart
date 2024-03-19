@@ -177,7 +177,7 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     multiLine: true,
   );
   static final RegExp _builtOutput = RegExp(
-    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?',
   );
 
   @override
