@@ -1372,13 +1372,13 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     double titleY;
     double? subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(minTileHeight?? _defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(minTileHeight ?? _defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline! - _boxBaseline(title!, titleBaselineType)!;
       subtitleY = subtitleBaseline! - _boxBaseline(subtitle!, subtitleBaselineType!)! + visualDensity.vertical * 2.0;
-      tileHeight = minTileHeight?? _defaultTileHeight;
+      tileHeight = minTileHeight ?? _defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
       // the overlap and the subtitle down by the same amount, and adjust
