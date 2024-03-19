@@ -70,38 +70,21 @@ class LabelAndValue extends RoleManager {
     }
   }
 
+  /// Computes the final label to be assigned to the node.
+  ///
+  /// The label is a concatenation of tooltip, label, hint, and value, whichever
+  /// combination is present.
   String? _computeLabel() {
-    final bool hasValue = semanticsObject.hasValue;
-    final bool hasLabel = semanticsObject.hasLabel;
-    final bool hasTooltip = semanticsObject.hasTooltip;
-
     // If the node is incrementable the value is reported to the browser via
     // the respective role manager. We do not need to also render it again here.
-    final bool shouldDisplayValue = hasValue && !semanticsObject.isIncrementable;
+    final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
 
-    if (!hasLabel && !shouldDisplayValue && !hasTooltip) {
-      return null;
-    }
-
-    final StringBuffer combinedValue = StringBuffer();
-    if (hasTooltip) {
-      combinedValue.write(semanticsObject.tooltip);
-      if (hasLabel || shouldDisplayValue) {
-        combinedValue.write('\n');
-      }
-    }
-    if (hasLabel) {
-      combinedValue.write(semanticsObject.label);
-      if (shouldDisplayValue) {
-        combinedValue.write(' ');
-      }
-    }
-
-    if (shouldDisplayValue) {
-      combinedValue.write(semanticsObject.value);
-    }
-
-    return combinedValue.toString();
+    return computeDomSemanticsLabel(
+      tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
+      label: semanticsObject.hasLabel ? semanticsObject.label : null,
+      hint: semanticsObject.hint,
+      value: shouldDisplayValue ? semanticsObject.value : null,
+    );
   }
 
   void _cleanUpDom() {
@@ -114,4 +97,45 @@ class LabelAndValue extends RoleManager {
     super.dispose();
     _cleanUpDom();
   }
+}
+
+String? computeDomSemanticsLabel({
+  String? tooltip,
+  String? label,
+  String? hint,
+  String? value,
+}) {
+  final String? labelHintValue = _computeLabelHintValue(label: label, hint: hint, value: value);
+
+  if (tooltip == null && labelHintValue == null) {
+    return null;
+  }
+
+  final StringBuffer combinedValue = StringBuffer();
+  if (tooltip != null) {
+    combinedValue.write(tooltip);
+
+    // Separate the tooltip from the rest via a line-break (if the rest exists).
+    if (labelHintValue != null) {
+      combinedValue.writeln();
+    }
+  }
+
+  if (labelHintValue != null) {
+    combinedValue.write(labelHintValue);
+  }
+
+  return combinedValue.isNotEmpty ? combinedValue.toString() : null;
+}
+
+String? _computeLabelHintValue({
+  String? label,
+  String? hint,
+  String? value,
+}) {
+  final String combinedValue = <String?>[label, hint, value]
+    .whereType<String>() // poor man's null filter
+    .where((String element) => element.trim().isNotEmpty)
+    .join(' ');
+  return combinedValue.isNotEmpty ? combinedValue : null;
 }

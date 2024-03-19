@@ -54,6 +54,9 @@ void runSemanticsTests() {
   group('Text', () {
     _testText();
   });
+  group('labels', () {
+    _testLabels();
+  });
   group('container', () {
     _testContainer();
   });
@@ -786,6 +789,90 @@ void _testText() {
       ],
     );
     semantics().semanticsEnabled = false;
+  });
+}
+
+void _testLabels() {
+  test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
+    expect(
+      computeDomSemanticsLabel(tooltip: 'tooltip'),
+      'tooltip',
+    );
+    expect(
+      computeDomSemanticsLabel(label: 'label'),
+      'label',
+    );
+    expect(
+      computeDomSemanticsLabel(value: 'value'),
+      'value',
+    );
+    expect(
+      computeDomSemanticsLabel(hint: 'hint'),
+      'hint',
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint', value: 'value'),
+      '''
+tooltip
+label hint value'''
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: 'tooltip', hint: 'hint', value: 'value'),
+      '''
+tooltip
+hint value'''
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'),
+      '''
+tooltip
+label value'''
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint'),
+      '''
+tooltip
+label hint'''
+    );
+  });
+
+  test('computeDomSemanticsLabel collapses empty labels to null', () {
+    expect(
+      computeDomSemanticsLabel(),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(label: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(value: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(hint: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: '', label: '', hint: '', value: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: '', hint: '', value: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: '', label: '', value: ''),
+      isNull,
+    );
+    expect(
+      computeDomSemanticsLabel(tooltip: '', label: '', hint: ''),
+      isNull,
+    );
   });
 }
 
