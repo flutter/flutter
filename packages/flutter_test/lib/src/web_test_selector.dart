@@ -14,15 +14,23 @@ import '_goldens_web.dart';
 import 'goldens.dart';
 import 'web.dart' as web;
 
+// This file contains APIs that are used by the generated test harness for
+// running flutter unit tests.
+
+/// A `main` entry point for a test.
 typedef EntryPoint = FutureOr<void> Function();
+
+/// An entry point runner provided by a test config file
 typedef EntryPointRunner = Future<void> Function(EntryPoint);
 
+/// Metadata about a web test to run
 typedef WebTest = ({
   String testSelector,
   EntryPoint entryPoint,
   EntryPointRunner? entryPointRunner,
 });
 
+/// Gets the test selector set by the test bootstrapping logic
 String get testSelector {
   final JSString? jsTestSelector = web.window.testSelector;
   if (jsTestSelector == null) {
@@ -31,6 +39,7 @@ String get testSelector {
   return  jsTestSelector.toDart;
 }
 
+/// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
   ui_web.debugEmulateFlutterTesterEnvironment = true;
   final Completer<void> completer = Completer<void>();
@@ -38,6 +47,9 @@ Future<void> runWebTest(WebTest test) async {
   await completer.future;
   final String testSelector = test.testSelector;
   webGoldenComparator = DefaultWebGoldenComparator(Uri.parse(testSelector));
+
+  /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window
+  /// size for the purposes of testing.
   ui_web.debugOverrideDevicePixelRatio(3.0);
   ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
