@@ -1073,7 +1073,10 @@ class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color get color => null;
+  Color get color => _colors.primary;
+
+  @override
+  Color get circularTrackColor => _colors.secondaryContainer;
 }
 
 class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
@@ -1083,13 +1086,13 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color get color => null;
+  Color get color => _colors.primary;
 
   @override
-  Color get linearTrackColor => null;
+  Color get linearTrackColor => _colors.secondaryContainer;
 
   @override
-  double get linearMinHeight => null;
+  double get linearMinHeight => 4.0;
 }
 
 // END GENERATED TOKEN PROPERTIES - ProgressIndicator
