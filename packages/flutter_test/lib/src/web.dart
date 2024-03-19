@@ -31,7 +31,7 @@ extension type Window._(JSObject _) implements JSObject {
   ]);
   external Location get location;
   external Window? get parent;
-  external void postMessage(JSAny message, JSString targetOrigin, JSArray transfers);
+  external void postMessage(JSAny message, JSString targetOrigin, JSArray<JSAny> transfers);
 
   external JSString? get testSelector;
 }
