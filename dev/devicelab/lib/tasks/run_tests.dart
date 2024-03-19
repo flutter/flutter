@@ -197,7 +197,7 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
         }
 
         // Size information is only included in release builds.
-        final bool hasSize = line.contains('MB).');
+        final bool hasSize = line.contains('MB)');
         if (release != hasSize) {
           return false;
         }
