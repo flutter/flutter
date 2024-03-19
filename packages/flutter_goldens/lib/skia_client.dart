@@ -23,6 +23,9 @@ const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
 
+/// Signature of callbacks used to inject [print] replacements.
+typedef LogCallback = void Function(String);
+
 /// Exception thrown when an error is returned from the [SkiaClient].
 class SkiaException implements Exception {
   /// Creates a new `SkiaException` with a required error [message].
@@ -52,6 +55,7 @@ class SkiaGoldClient {
     this.platform = const LocalPlatform(),
     Abi? abi,
     io.HttpClient? httpClient,
+    required this.log,
   }) : httpClient = httpClient ?? io.HttpClient(),
        abi = abi ?? Abi.current();
 
@@ -89,6 +93,9 @@ class SkiaGoldClient {
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
   final Directory workDirectory;
+
+  /// The logging function to use when reporting messages to the console.
+  final LogCallback log;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -436,10 +443,7 @@ class SkiaGoldClient {
         }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
-        // Ideally we'd use something like package:test's printOnError, but best reliability
-        // in getting logs on CI for now we're just using print.
-        // See also: https://github.com/flutter/flutter/issues/91285
-        print( // ignore: avoid_print
+        log(
           'Formatting error detected requesting expectations from Flutter Gold.\n'
           'error: $error\n'
           'url: $requestForExpectations\n'
