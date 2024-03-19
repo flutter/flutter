@@ -70,7 +70,7 @@ StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hide
 StreamChannel<Object?> _postMessageChannel() {
   final StreamChannelController<Object?> controller = StreamChannelController<Object?>(sync: true);
   final web.MessageChannel channel = web.MessageChannel();
-  web.window.parent!.postMessage('port'.toJS, web.window.location.origin, [channel.port2].toJS);
+  web.window.parent!.postMessage('port'.toJS, web.window.location.origin, <JSObject>[channel.port2].toJS);
 
   final JSFunction eventCallback = (web.Event event) {
     controller.local.sink.add(event.data.dartify());
