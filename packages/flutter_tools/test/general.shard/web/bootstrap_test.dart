@@ -141,8 +141,8 @@ void main() {
   test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
       testInfos: <WebTestInfo>[
-        (testSelector: 'foo.dart', entryPoint: 'foo.dart', configFile: null),
-        (testSelector: 'bar.dart', entryPoint: 'bar.dart', configFile: 'bar_config.dart'),
+        (entryPoint: 'foo.dart', goldensUri: Uri.parse('foo.dart'), configFile: null),
+        (entryPoint: 'bar.dart', goldensUri: Uri.parse('bar.dart'), configFile: 'bar_config.dart'),
       ],
       languageVersion: LanguageVersion(2, 8),
     );
