@@ -475,11 +475,11 @@ const BorderSide lerpToBorder = BorderSide(width: 5, color: lerpToColor);
 
 ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to = true}) {
   final OutlinedBorder targetBorder = switch (target) {
-    LerpTarget.circle  => const CircleBorder(side: lerpToBorder, eccentricity: 0.5),
-    LerpTarget.rect    => const RoundedRectangleBorder(side: lerpToBorder),
-    LerpTarget.stadium => const StadiumBorder(side: lerpToBorder),
-    LerpTarget.polygon => const StarBorder.polygon(side: lerpToBorder, sides: 4),
-    LerpTarget.star    => const StarBorder(side: lerpToBorder, innerRadiusRatio: .5),
+    LerpTarget.circle      => const CircleBorder(side: lerpToBorder, eccentricity: 0.5),
+    LerpTarget.rect        => const RoundedRectangleBorder(side: lerpToBorder),
+    LerpTarget.stadium     => const StadiumBorder(side: lerpToBorder),
+    LerpTarget.polygon     => const StarBorder.polygon(side: lerpToBorder, sides: 4),
+    LerpTarget.star        => const StarBorder(side: lerpToBorder, innerRadiusRatio: 0.5),
     LerpTarget.roundedRect => RoundedRectangleBorder(side: lerpToBorder, borderRadius: BorderRadius.circular(10)),
   };
   return to ? border.lerpTo(targetBorder, t) : border.lerpFrom(targetBorder, t);
