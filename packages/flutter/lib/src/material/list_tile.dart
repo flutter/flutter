@@ -674,10 +674,9 @@ class ListTile extends StatelessWidget {
   /// The minimum height allocated for the [ListTile] widget.
   ///
   /// If this is null, default tile heights are 56.0, 72.0, and 88.0 for one,
-  /// two, and three lines of text respectively. If 'isDensity' is true, these
-  ///  defaults are changed to 48.0, 64.0, and 76.0. A visual density value or
-  ///  a large title will also adjust the default tile heights.
-  ///
+  /// two, and three lines of text respectively. If [isDensity] is true, these
+  /// defaults are changed to 48.0, 64.0, and 76.0. A visual density value or
+  /// a large title will also adjust the default tile heights.
   /// {@endtemplate}
   final double? minTileHeight;
 
