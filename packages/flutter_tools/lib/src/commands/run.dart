@@ -469,6 +469,7 @@ class RunCommand extends RunCommandBase {
       commandRunModeName: record.runModeName,
       commandRunProjectModule: record.runProjectModule,
       commandRunProjectHostLanguage: record.runProjectHostLanguage,
+      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
       commandRunEnableImpeller: record.runEnableImpeller,
       commandRunIOSInterfaceType: record.runIOSInterfaceType,
       commandRunIsTest: record.runIsTest,

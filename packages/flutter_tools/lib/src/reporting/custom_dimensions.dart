@@ -55,6 +55,8 @@ class CustomDimensions {
     this.commandBuildAppBundleBuildMode,
     this.buildEventError,
     this.commandResultEventMaxRss,
+    this.commandRunAndroidEmbeddingVersion,
+    this.commandPackagesAndroidEmbeddingVersion,
     this.nullSafety,
     this.nullSafeMigratedLibraries,
     this.nullSafeTotalLibraries,
@@ -112,9 +114,8 @@ class CustomDimensions {
   final String? commandBuildAppBundleBuildMode; // cd42
   final String? buildEventError;  // cd43
   final int? commandResultEventMaxRss;  // cd44
-  // cd45 and cd46 were commandRunAndroidEmbeddingVersion and
-  // commandPackagesAndroidEmbeddingVersion respectively, which were removed
-  // with the deletion of the v1 android embedding.
+  final String? commandRunAndroidEmbeddingVersion;  // cd45
+  final String? commandPackagesAndroidEmbeddingVersion;  // cd46
   final bool? nullSafety;  // cd47
   // cd48 was fastReassemble but that feature was removed
   final int? nullSafeMigratedLibraries;  // cd49
@@ -174,6 +175,8 @@ class CustomDimensions {
       if (commandBuildAppBundleBuildMode != null) CustomDimensionsEnum.commandBuildAppBundleBuildMode.cdKey: commandBuildAppBundleBuildMode.toString(),
       if (buildEventError != null) CustomDimensionsEnum.buildEventError.cdKey: buildEventError.toString(),
       if (commandResultEventMaxRss != null) CustomDimensionsEnum.commandResultEventMaxRss.cdKey: commandResultEventMaxRss.toString(),
+      if (commandRunAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandRunAndroidEmbeddingVersion.cdKey: commandRunAndroidEmbeddingVersion.toString(),
+      if (commandPackagesAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion.cdKey: commandPackagesAndroidEmbeddingVersion.toString(),
       if (nullSafety != null) CustomDimensionsEnum.nullSafety.cdKey: nullSafety.toString(),
       if (nullSafeMigratedLibraries != null) CustomDimensionsEnum.nullSafeMigratedLibraries.cdKey: nullSafeMigratedLibraries.toString(),
       if (nullSafeTotalLibraries != null) CustomDimensionsEnum.nullSafeTotalLibraries.cdKey: nullSafeTotalLibraries.toString(),
@@ -239,6 +242,8 @@ class CustomDimensions {
       commandBuildAppBundleBuildMode: other.commandBuildAppBundleBuildMode ?? commandBuildAppBundleBuildMode,
       buildEventError: other.buildEventError ?? buildEventError,
       commandResultEventMaxRss: other.commandResultEventMaxRss ?? commandResultEventMaxRss,
+      commandRunAndroidEmbeddingVersion: other.commandRunAndroidEmbeddingVersion ?? commandRunAndroidEmbeddingVersion,
+      commandPackagesAndroidEmbeddingVersion: other.commandPackagesAndroidEmbeddingVersion ?? commandPackagesAndroidEmbeddingVersion,
       nullSafety: other.nullSafety ?? nullSafety,
       nullSafeMigratedLibraries: other.nullSafeMigratedLibraries ?? nullSafeMigratedLibraries,
       nullSafeTotalLibraries: other.nullSafeTotalLibraries ?? nullSafeTotalLibraries,
@@ -298,6 +303,8 @@ class CustomDimensions {
       commandBuildAppBundleBuildMode: _extractString(map, CustomDimensionsEnum.commandBuildAppBundleBuildMode),
       buildEventError: _extractString(map, CustomDimensionsEnum.buildEventError),
       commandResultEventMaxRss: _extractInt(map, CustomDimensionsEnum.commandResultEventMaxRss),
+      commandRunAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandRunAndroidEmbeddingVersion),
+      commandPackagesAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion),
       nullSafety: _extractBool(map, CustomDimensionsEnum.nullSafety),
       nullSafeMigratedLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeMigratedLibraries),
       nullSafeTotalLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeTotalLibraries),
@@ -383,8 +390,8 @@ enum CustomDimensionsEnum {
   commandBuildAppBundleBuildMode, // cd42
   buildEventError,  // cd43
   commandResultEventMaxRss,  // cd44
-  obsolete2,  // cd45 (was commandRunAndroidEmbeddingVersion)
-  obsolete3,  // cd46 (was commandPackagesAndroidEmbeddingVersion)
+  commandRunAndroidEmbeddingVersion,  // cd45
+  commandPackagesAndroidEmbeddingVersion,  // cd46
   nullSafety,  // cd47
   obsolete1,  // cd48 (was fastReassemble)
   nullSafeMigratedLibraries,  // cd49
