@@ -1274,7 +1274,7 @@ void main() {
   });
 
   testWidgets('Material2 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
-    // The point size of the fonts must be a multiple of 4 until
+    // The font size must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       boilerplate(

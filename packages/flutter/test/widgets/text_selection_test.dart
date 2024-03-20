@@ -2008,14 +2008,17 @@ class TextSelectionControlsSpy extends TextSelectionControls {
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    switch (type) {
-      case TextSelectionHandleType.left:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: leftHandleKey));
-      case TextSelectionHandleType.right:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: rightHandleKey));
-      case TextSelectionHandleType.collapsed:
-        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: collapsedHandleKey));
-    }
+    return ElevatedButton(
+      onPressed: onTap,
+      child: Text(
+        key: switch (type) {
+          TextSelectionHandleType.left      => leftHandleKey,
+          TextSelectionHandleType.right     => rightHandleKey,
+          TextSelectionHandleType.collapsed => collapsedHandleKey,
+        },
+        'height ${textLineHeight.toInt()}',
+      ),
+    );
   }
 
   @override

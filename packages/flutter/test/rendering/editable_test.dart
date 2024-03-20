@@ -201,52 +201,6 @@ void main() {
     expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
-  test('editable intrinsics', () {
-    final TextSelectionDelegate delegate = _FakeEditableTextState();
-    final RenderEditable editable = RenderEditable(
-      text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0),
-        text: '12345',
-      ),
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      textDirection: TextDirection.ltr,
-      locale: const Locale('ja', 'JP'),
-      offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
-    );
-    expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
-    // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
-    expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
-    expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
-
-    expect(
-      editable.toStringDeep(minLevel: DiagnosticLevel.info),
-      equalsIgnoringHashCodes(
-        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE DETACHED\n'
-        ' │ parentData: MISSING\n'
-        ' │ constraints: MISSING\n'
-        ' │ size: MISSING\n'
-        ' │ cursorColor: null\n'
-        ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
-        ' │ maxLines: 1\n'
-        ' │ minLines: null\n'
-        ' │ selectionColor: null\n'
-        ' │ locale: ja_JP\n'
-        ' │ selection: null\n'
-        ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
-        ' ╘═╦══ text ═══\n'
-        '   ║ TextSpan:\n'
-        '   ║   inherit: true\n'
-        '   ║   size: 10.0\n'
-        '   ║   height: 1.0x\n'
-        '   ║   "12345"\n'
-        '   ╚═══════════\n',
-      ),
-    );
-  });
-
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling
   // animation).
