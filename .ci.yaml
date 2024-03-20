@@ -2335,6 +2335,7 @@ targets:
   # linux motog4 benchmark
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
