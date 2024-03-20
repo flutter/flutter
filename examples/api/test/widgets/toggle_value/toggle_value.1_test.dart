@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
-        child: example.ToggleValueExample(),
+        child: example.ToggleValueWithNotifierExample(),
       ),
     );
     final Finder toggleFinder = find.byType(ToggleValue<AlignmentGeometry>);

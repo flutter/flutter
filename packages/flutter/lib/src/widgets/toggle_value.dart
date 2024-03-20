@@ -27,11 +27,20 @@ typedef ToggleValueBuilder<T> = Widget Function(BuildContext context, T value);
 /// stateful widget just to trigger a change in another widget on creation.
 ///
 /// {@tool dartpad}
-/// This example shows how to use the [ToggleValue] widget to
-/// trigger a fade-in animation when a widget is shown for the first time.
+/// This example shows how to use the [ToggleValue] widget to trigger an
+/// animation when a widget is shown for the first time.
 ///
-/// ** See example in examples/api/widgets/toggle_value/toggle_value.0.dart **
+/// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to use the [ToggleValue] widget to trigger an
+/// alignment animation when a widget is shown for the first time, and then
+/// change the value of the alignment each time a button is pressed.
+///
+/// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.1.dart **
+/// {@end-tool}
+
 class ToggleValue<T> extends StatefulWidget {
   /// Creates a [ToggleValue] widget.
   ///

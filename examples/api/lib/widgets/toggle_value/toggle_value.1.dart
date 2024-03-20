@@ -6,21 +6,21 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [ToggleValue].
 
-void main() => runApp(const ToggleValueExampleApp());
+void main() => runApp(const ToggleValueWithNotifierExampleApp());
 
-class ToggleValueExampleApp extends StatelessWidget {
-  const ToggleValueExampleApp({super.key});
+class ToggleValueWithNotifierExampleApp extends StatelessWidget {
+  const ToggleValueWithNotifierExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ToggleValueExample(),
+      home: ToggleValueWithNotifierExample(),
     );
   }
 }
 
-class ToggleValueExample extends StatelessWidget {
-  ToggleValueExample({super.key});
+class ToggleValueWithNotifierExample extends StatelessWidget {
+  ToggleValueWithNotifierExample({super.key});
 
   final ValueNotifier<AlignmentGeometry> _notifier = ValueNotifier<AlignmentGeometry>(Alignment.bottomLeft);
 
