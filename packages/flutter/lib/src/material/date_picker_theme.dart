@@ -333,7 +333,7 @@ class DatePickerThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? rangeSelectionOverlayColor;
 
   /// Overrides the default color used to paint the horizontal divider
-  /// below the header text when dialog is in in portrait orientation
+  /// below the header text when dialog is in portrait orientation
   /// and vertical divider when the dialog is in landscape orientation.
   final Color? dividerColor;
 

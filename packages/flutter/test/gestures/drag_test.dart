@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
@@ -553,9 +554,9 @@ void main() {
 
   testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
-    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     final VerticalDragGestureRecognizer drag2 =
-    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag1.dispose);
     addTearDown(drag2.dispose);
 
@@ -592,7 +593,7 @@ void main() {
     tester.route(down6);
     log.add('-d');
 
-    // Current latest active pointer is pointer6.
+    // Current active pointer is pointer6.
 
     // Should not trigger the drag1-update.
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
@@ -600,19 +601,19 @@ void main() {
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
     log.add('-f');
 
-    // Latest active pointer can trigger the drag1-update.
+    // The active pointer can trigger the drag1-update.
     tester.route(pointer6.move(const Offset(0.0, 100.0)));
     log.add('-g');
     tester.route(pointer6.move(const Offset(70.0, 70.0)));
     log.add('-h');
 
-    // Release the latest active pointer.
+    // Release the active pointer.
     tester.route(pointer6.up());
     log.add('-i');
 
-    // Current latest active pointer is pointer5.
+    // Current active pointer should be pointer5.
 
-    // Latest active pointer can trigger the drag1-update.
+    // The active pointer can trigger the drag1-update.
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-j');
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
@@ -645,6 +646,622 @@ void main() {
       'drag1-update',
       '-k',
       'drag1-end'
+    ]);
+  });
+
+  testGesture('Drag with multiple pointers in down behavior - latestPointer', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+      HorizontalDragGestureRecognizer()
+        ..multitouchDragStrategy = MultitouchDragStrategy.latestPointer
+        ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+      VerticalDragGestureRecognizer()
+        ..multitouchDragStrategy = MultitouchDragStrategy.latestPointer
+        ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag1.dispose);
+    addTearDown(drag2.dispose);
+
+    final List<String> log = <String>[];
+    drag1.onDown = (_) { log.add('drag1-down'); };
+    drag1.onStart = (_) { log.add('drag1-start'); };
+    drag1.onUpdate = (_) { log.add('drag1-update'); };
+    drag1.onEnd = (_) { log.add('drag1-end'); };
+    drag1.onCancel = () { log.add('drag1-cancel'); };
+    drag2.onDown = (_) { log.add('drag2-down'); };
+    drag2.onStart = (_) { log.add('drag2-start'); };
+    drag2.onUpdate = (_) { log.add('drag2-update'); };
+    drag2.onEnd = (_) { log.add('drag2-end'); };
+    drag2.onCancel = () { log.add('drag2-cancel'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
+    drag1.addPointer(down5);
+    drag2.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    log.add('-a');
+
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    log.add('-b');
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+    log.add('-c');
+
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down6);
+    drag2.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    log.add('-d');
+
+    // Current active pointer is pointer6.
+
+    // Should not trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-e');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-f');
+
+    // The active pointer can trigger the drag1-update.
+    tester.route(pointer6.move(const Offset(0.0, 100.0)));
+    log.add('-g');
+    tester.route(pointer6.move(const Offset(70.0, 70.0)));
+    log.add('-h');
+
+    final TestPointer pointer7 = TestPointer(7);
+    final PointerDownEvent down7 = pointer7.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down7);
+    drag2.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+    log.add('-i');
+
+    // Current active pointer is pointer7.
+
+    // Release the active pointer.
+    tester.route(pointer7.up());
+    log.add('-j');
+
+    // Current active pointer should be pointer5 (the first accepted pointer).
+
+    // The active pointer can trigger the drag1-update.
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-k');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-l');
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      '-a',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      '-b',
+      'drag1-update',
+      '-c',
+      'drag2-down',
+      'drag2-cancel',
+      '-d',
+      '-e',
+      '-f',
+      'drag1-update',
+      '-g',
+      'drag1-update',
+      '-h',
+      'drag2-down',
+      'drag2-cancel',
+      '-i',
+      '-j',
+      'drag1-update',
+      '-k',
+      'drag1-update',
+      '-l',
+      'drag1-end'
+    ]);
+  });
+
+  testGesture('Horizontal drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+    HorizontalDragGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move to right 100.0, received delta should be (100.0, 0.0).
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(100, 0), }
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    log.add('-b');
+    // #6 pointer move to right 110.0, received delta should be (10, 0.0).
+    tester.route(pointer6.move(const Offset(110.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(100, 0), 6: Offset(110, 0),}
+
+    // Put down the second pointer 7.
+    final TestPointer pointer7 = TestPointer(7);
+    final PointerDownEvent down7 = pointer7.down(Offset.zero);
+    drag.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+
+    log.add('-c');
+    // #7 pointer move to left 100, received delta should be (-100.0, 0.0).
+    tester.route(pointer7.move(const Offset(-100.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(100, 0),
+    //   6: Offset(110, 0),
+    //   7: Offset(-100, 0),
+    // }
+
+    // Put down the second pointer 8.
+    final TestPointer pointer8= TestPointer(8);
+    final PointerDownEvent down8 = pointer8.down(Offset.zero);
+    drag.addPointer(down8);
+    tester.closeArena(8);
+    tester.route(down8);
+
+    log.add('-d');
+    // #8 pointer move to left 110, received delta should be (-10, 0.0).
+    tester.route(pointer8.move(const Offset(-110.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(100, 0),
+    //   6: Offset(110, 0),
+    //   7: Offset(-100, 0),
+    //   8: Offset(-110, 0),
+    // }
+
+    log.add('-e');
+    // #5 pointer move to right 20.0, received delta should be (10.0, 0.0).
+    tester.route(pointer5.move(const Offset(120.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(120, 0),
+    //   6: Offset(110, 0),
+    //   7: Offset(-100, 0),
+    //   8: Offset(-110, 0),
+    // }
+
+    log.add('-f');
+    // #7 pointer move to left 20, received delta should be (-10.0, 0.0).
+    tester.route(pointer7.move(const Offset(-120.0, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(120, 0),
+    //   6: Offset(110, 0),
+    //   7: Offset(-120, 0),
+    //   8: Offset(-110, 0),
+    // }
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    // _moveDeltaBeforeFrame = { }
+
+    log.add('-g');
+    // #6 pointer move to right 10.0, received delta should be (10, 0.0).
+    tester.route(pointer6.move(const Offset(120, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(10, 0),
+    // }
+
+    log.add('-h');
+    // #8 pointer move to left 10, received delta should be (-10, 0.0).
+    tester.route(pointer8.move(const Offset(-120, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(10, 0),
+    //   8: Offset(-10, 0),
+    // }
+
+    log.add('-i');
+    // #5 pointer move to right 10.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(130, 0.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(10, 0),
+    //   6: Offset(10, 0),
+    //   8: Offset(-10, 0),
+    // }
+
+    log.add('-j');
+    // #7 pointer move to left 10, received delta should be (0.0, 0.0).
+    tester.route(pointer7.move(const Offset(-130.0, 0.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+    tester.route(pointer7.up());
+    tester.route(pointer8.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(100.0, 0.0))',
+      '-b',
+      'drag-update (Offset(10.0, 0.0))',
+      '-c',
+      'drag-update (Offset(-100.0, 0.0))',
+      '-d',
+      'drag-update (Offset(-10.0, 0.0))',
+      '-e',
+      'drag-update (Offset(10.0, 0.0))',
+      '-f',
+      'drag-update (Offset(-10.0, 0.0))',
+      '-g',
+      'drag-update (Offset(10.0, 0.0))',
+      '-h',
+      'drag-update (Offset(-10.0, 0.0))',
+      '-i',
+      'drag-update (Offset(0.0, 0.0))',
+      '-j',
+      'drag-update (Offset(0.0, 0.0))'
+    ]);
+  });
+
+  testGesture('Vertical drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+    final VerticalDragGestureRecognizer drag =
+    VerticalDragGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move to down 100.0, received delta should be (0.0, 100.0).
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(0, 100), }
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    log.add('-b');
+    // #6 pointer move to down 110.0, received delta should be (0, 10.0).
+    tester.route(pointer6.move(const Offset(0.0, 110.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(0, 100), 6: Offset(0, 110),}
+
+    // Put down the second pointer 7.
+    final TestPointer pointer7 = TestPointer(7);
+    final PointerDownEvent down7 = pointer7.down(Offset.zero);
+    drag.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+
+    log.add('-c');
+    // #7 pointer move to up 100, received delta should be (0.0, -100.0).
+    tester.route(pointer7.move(const Offset(0.0, -100.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(0, 100),
+    //   6: Offset(0, 110),
+    //   7: Offset(0, -100),
+    // }
+
+    // Put down the second pointer 8.
+    final TestPointer pointer8= TestPointer(8);
+    final PointerDownEvent down8 = pointer8.down(Offset.zero);
+    drag.addPointer(down8);
+    tester.closeArena(8);
+    tester.route(down8);
+
+    log.add('-d');
+    // #8 pointer move to up 110, received delta should be (0, -10.0).
+    tester.route(pointer8.move(const Offset(0.0, -110.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(0, 100),
+    //   6: Offset(0, 110),
+    //   7: Offset(0, -100),
+    //   8: Offset(0, -110),
+    // }
+
+    log.add('-e');
+    // #5 pointer move to down 20.0, received delta should be (0.0, 10.0).
+    tester.route(pointer5.move(const Offset(0.0, 120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(0, 120),
+    //   6: Offset(0, 110),
+    //   7: Offset(0, -100),
+    //   8: Offset(0, -110),
+    // }
+
+    log.add('-f');
+    // #7 pointer move to up 20, received delta should be (0.0, -10.0).
+    tester.route(pointer7.move(const Offset(0.0, -120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(0, 120),
+    //   6: Offset(0, 110),
+    //   7: Offset(0, -120),
+    //   8: Offset(0, -110),
+    // }
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    // _moveDeltaBeforeFrame = { }
+
+    log.add('-g');
+    // #6 pointer move to down 10.0, received delta should be (0, 10.0).
+    tester.route(pointer6.move(const Offset(0, 120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(0, 10),
+    // }
+
+    log.add('-h');
+    // #8 pointer move to up 10, received delta should be (0, -10.0).
+    tester.route(pointer8.move(const Offset(0, -120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(0, 10),
+    //   8: Offset(0, -10),
+    // }
+
+    log.add('-i');
+    // #5 pointer move to down 10.0, received delta should be (0.0, 0.0).
+    tester.route(pointer5.move(const Offset(0, 130.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(0, 10),
+    //   6: Offset(0, 10),
+    //   8: Offset(0, -10),
+    // }
+
+    log.add('-j');
+    // #7 pointer move to up 10, received delta should be (0.0, 0.0).
+    tester.route(pointer7.move(const Offset(0.0, -130.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+    tester.route(pointer7.up());
+    tester.route(pointer8.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(0.0, 100.0))',
+      '-b',
+      'drag-update (Offset(0.0, 10.0))',
+      '-c',
+      'drag-update (Offset(0.0, -100.0))',
+      '-d',
+      'drag-update (Offset(0.0, -10.0))',
+      '-e',
+      'drag-update (Offset(0.0, 10.0))',
+      '-f',
+      'drag-update (Offset(0.0, -10.0))',
+      '-g',
+      'drag-update (Offset(0.0, 10.0))',
+      '-h',
+      'drag-update (Offset(0.0, -10.0))',
+      '-i',
+      'drag-update (Offset(0.0, 0.0))',
+      '-j',
+      'drag-update (Offset(0.0, 0.0))'
+    ]);
+  });
+
+  testGesture('Pan drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+    final PanGestureRecognizer drag =
+    PanGestureRecognizer()
+      ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
+
+    final List<String> log = <String>[];
+    drag.onUpdate = (DragUpdateDetails details) { log.add('drag-update (${details.delta})'); };
+
+    final TestPointer pointer5 = TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(Offset.zero);
+    drag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+
+    log.add('-a');
+    // #5 pointer move (100.0, 100.0), received delta should be (100.0, 100.0).
+    // offset = 100 / 1
+    // delta = offset - 0 (last offset)
+    tester.route(pointer5.move(const Offset(100.0, 100.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(100, 100), }
+
+    // Put down the second pointer 6.
+    final TestPointer pointer6 = TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(Offset.zero);
+    drag.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+
+    log.add('-b');
+    // #6 pointer move (110.0, 110.0), received delta should be (5, 5).
+    // offset = (100 + 110) / 2
+    // delta = offset - 100 (last offset)
+
+    tester.route(pointer6.move(const Offset(110.0, 110.0)));
+
+    // _moveDeltaBeforeFrame = { 5: Offset(100, 100), 6: Offset(110, 110),}
+
+    // Put down the second pointer 7.
+    final TestPointer pointer7 = TestPointer(7);
+    final PointerDownEvent down7 = pointer7.down(Offset.zero);
+    drag.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+
+    log.add('-c');
+    // #7 pointer move (-100.0, -100.0), received delta should be (-68.3, -68.3).
+    // offset = (100 + 110 -100) / 3
+    // delta = offset - 105(last offset)
+    tester.route(pointer7.move(const Offset(-100.0, -100.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(100, 100),
+    //   6: Offset(110, 110),
+    //   7: Offset(-100, -100),
+    // }
+
+    // Put down the second pointer 8.
+    final TestPointer pointer8= TestPointer(8);
+    final PointerDownEvent down8 = pointer8.down(Offset.zero);
+    drag.addPointer(down8);
+    tester.closeArena(8);
+    tester.route(down8);
+
+    log.add('-d');
+    // #8 pointer (-110.0, -110.0), received delta should be (-36.7, -36.7).
+    // offset = (100 + 110 -100 - 110) / 4
+    // delta = offset - 36.7(last offset)
+    tester.route(pointer8.move(const Offset(-110.0, -110.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(100, 100),
+    //   6: Offset(110, 110),
+    //   7: Offset(-100, -100),
+    //   8: Offset(-110, -110),
+    // }
+
+    log.add('-e');
+    // #5 pointer move (20.0, 20.0), received delta should be (5.0, 5.0).
+    // offset = (100 + 110 -100 - 110 + 20) / 4
+    // delta = offset - 0 (last offset)
+    tester.route(pointer5.move(const Offset(120.0, 120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(120, 120),
+    //   6: Offset(110, 110),
+    //   7: Offset(-100, -100),
+    //   8: Offset(-110, -110),
+    // }
+
+    log.add('-f');
+    // #7 pointer move (-20.0, -20.0), received delta should be (-5.0, -5.0).
+    // offset = (120 + 110 -100 - 110 - 20) / 4
+    // delta = offset - 5 (last offset)
+    tester.route(pointer7.move(const Offset(-120.0, -120.0)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(120, 120),
+    //   6: Offset(110, 110),
+    //   7: Offset(-120, -120),
+    //   8: Offset(-110, -110),
+    // }
+
+    // Trigger a new frame.
+    SchedulerBinding.instance.handleBeginFrame(const Duration(milliseconds: 100));
+    SchedulerBinding.instance.handleDrawFrame();
+
+    // _moveDeltaBeforeFrame = { }
+
+    log.add('-g');
+    // #6 pointer move (10.0, 10.0), received delta should be (2.5, 2.5).
+    // offset = 10 / 4
+    // delta = offset - 0 (last offset)
+    tester.route(pointer6.move(const Offset(120, 120)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(10, 10),
+    // }
+
+    log.add('-h');
+    // #8 pointer move (-10.0, -10.0), received delta should be (-2.5, -2.5).
+    // offset = (10 - 10) / 4
+    // delta = offset - 2.5 (last offset)
+    tester.route(pointer8.move(const Offset(-120, -120)));
+
+    // _moveDeltaBeforeFrame = {
+    //   6: Offset(10, 10),
+    //   8: Offset(-10, -10),
+    // }
+
+    log.add('-i');
+    // #5 pointer move (10.0, 10.0), received delta should be (2.5, 2.5).
+    // offset = (10 - 10 + 10) / 4
+    // delta = offset - 0 (last offset)
+    tester.route(pointer5.move(const Offset(130, 130)));
+
+    // _moveDeltaBeforeFrame = {
+    //   5: Offset(10, 10),
+    //   6: Offset(10, 10),
+    //   8: Offset(-10, -10),
+    // }
+
+    log.add('-j');
+    // #7 pointer move (-10.0, -10.0), received delta should be (-2.5, -2.5).
+    // offset = (10 + 10 - 10 - 10) / 4
+    // delta = offset - 2.5 (last offset)
+    tester.route(pointer7.move(const Offset(-130.0, -130.0)));
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+    tester.route(pointer7.up());
+    tester.route(pointer8.up());
+
+    // Tear down 'currentSystemFrameTimeStamp'
+    SchedulerBinding.instance.handleBeginFrame(Duration.zero);
+    SchedulerBinding.instance.handleDrawFrame();
+
+    expect(log, <String>[
+      '-a',
+      'drag-update (Offset(100.0, 100.0))',
+      '-b',
+      'drag-update (Offset(5.0, 5.0))',
+      '-c',
+      'drag-update (Offset(-68.3, -68.3))',
+      '-d',
+      'drag-update (Offset(-36.7, -36.7))',
+      '-e',
+      'drag-update (Offset(5.0, 5.0))',
+      '-f',
+      'drag-update (Offset(-5.0, -5.0))',
+      '-g',
+      'drag-update (Offset(2.5, 2.5))',
+      '-h',
+      'drag-update (Offset(-2.5, -2.5))',
+      '-i',
+      'drag-update (Offset(2.5, 2.5))',
+      '-j',
+      'drag-update (Offset(-2.5, -2.5))'
     ]);
   });
 
@@ -1789,6 +2406,11 @@ void main() {
     pan.addPointer(touchDown);
     competingPan.addPointer(touchDown);
     tester.closeArena(3);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(touchDown);
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, isNull);
     expect(didEndPan, isFalse);

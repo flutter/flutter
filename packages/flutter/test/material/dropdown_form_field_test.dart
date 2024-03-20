@@ -10,11 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
-
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
     of: find.byKey(iconKey),
@@ -566,8 +561,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
@@ -588,9 +582,11 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item,
-                          key: ValueKey<String>('${item}Text'),
-                          style: const TextStyle(fontSize: 20.0)),
+                      child: Text(
+                        item,
+                        key: ValueKey<String>('${item}Text'),
+                        style: const TextStyle(fontSize: 20.0),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -601,8 +597,7 @@ void main() {
       ),
     );
 
-    final RenderBox box =
-    tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, 64.0);
   });
 
@@ -633,7 +628,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, 48.0);
   });
 
@@ -1077,7 +1072,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
 
     // Tap the DropdownButtonFormField widget
-    await tester.tap(find.byType(dropdownButtonType));
+    await tester.tap(find.byType(DropdownButton<String>));
     await tester.pumpAndSettle();
 
     // Tap the first dropdown menu item.
