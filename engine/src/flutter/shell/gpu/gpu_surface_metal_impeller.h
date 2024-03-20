@@ -14,7 +14,7 @@
 #include "flutter/impeller/renderer/backend/metal/context_mtl.h"
 #include "flutter/impeller/renderer/renderer.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
-#include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
 namespace flutter {
 
