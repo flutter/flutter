@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:js';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 
 @JS('window')
 external JSObject get _window;
@@ -26,11 +26,11 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   // undefined at the time of the check, WebDriver throws an exception.
   context[r'$flutterDriverResult'] = null;
 
-  js_util.setProperty(_window, r'$flutterDriver', allowInterop((dynamic message) async {
+  _window.setProperty(r'$flutterDriver'.toJS, (JSString message) async {
     final Map<String, String> params = Map<String, String>.from(
-        jsonDecode(message as String) as Map<String, dynamic>);
+        jsonDecode(message.toDart) as Map<String, dynamic>);
     final Map<String, dynamic> result = Map<String, dynamic>.from(
         await call(params));
     context[r'$flutterDriverResult'] = json.encode(result);
-  }));
+  }.toJS);
 }
