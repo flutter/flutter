@@ -22,6 +22,6 @@ void main() {
     expect(_window.getProperty(r'$flutterDriver'.toJS), isNotNull);
 
     expect(_window.hasProperty(r'$flutterDriverResult'.toJS), true);
-    expect(_window.getProperty(r'$flutterDriverResult'.toJS), isNotNull);
+    expect(_window.getProperty(r'$flutterDriverResult'.toJS), isNull);
   });
 }
