@@ -96,6 +96,9 @@ class PointerSignalResolver {
   void resolve(PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);
+      if (event is PointerScrollEvent) {
+        event.ignore();
+      }
       return;
     }
     assert(_isSameEvent(_currentEvent!, event));

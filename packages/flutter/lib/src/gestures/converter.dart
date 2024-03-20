@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
+import 'dart:ui' as ui show PointerChange, PointerData, PointerDataPacket, PointerSignalKind;
 
 import 'events.dart';
 
@@ -57,8 +57,8 @@ abstract final class PointerEventConverter {
   /// the view a particular event occurred in to convert its data from physical
   /// coordinates to logical pixels. See the discussion at [PointerEvent] for
   /// more details on the [PointerEvent] coordinate space.
-  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, DevicePixelRatioGetter devicePixelRatioForView) {
-    return data
+  static Iterable<PointerEvent> expand(ui.PointerDataPacket packet, DevicePixelRatioGetter devicePixelRatioForView) {
+    return packet.data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
         .map<PointerEvent?>((ui.PointerData datum) {
           final double? devicePixelRatio = devicePixelRatioForView(datum.viewId);
@@ -283,6 +283,9 @@ abstract final class PointerEventConverter {
                 position: position,
                 scrollDelta: scrollDelta,
                 embedderId: datum.embedderId,
+                whenIgnored: () {
+                  packet.handled = false;
+                },
               );
             case ui.PointerSignalKind.scrollInertiaCancel:
               return PointerScrollInertiaCancelEvent(
