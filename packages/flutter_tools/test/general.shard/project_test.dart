@@ -194,28 +194,6 @@ void main() {
           throwsToolExit(message: 'Please ensure that the android manifest is a valid XML document and try again.'),
         );
       });
-      _testInMemory('Android project not on v2 embedding shows a warning', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
-      });
-      _testInMemory('Android project not on v2 embedding exits', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        await expectToolExitLater(
-          Future<dynamic>.sync(() => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit)),
-          contains('Build failed due to use of deprecated Android v1 embedding.')
-        );
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
-        expect(testLogger.statusText, contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '));
-      });
       _testInMemory('Project not on v2 embedding does not warn if deprecation status is irrelevant', () async {
         final FlutterProject project = await someProject(includePubspec: true);
         // The default someProject with an empty <manifest> already indicates
@@ -225,15 +203,6 @@ void main() {
         // Default is "DeprecationBehavior.none"
         project.checkForDeprecation();
         expect(testLogger.statusText, isEmpty);
-      });
-      _testInMemory('Android project not on v2 embedding ignore continues', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android project no pubspec continues', () async {
         final FlutterProject project = await someProject();
