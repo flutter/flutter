@@ -196,7 +196,8 @@ public class FlutterLoader {
                     // cpu architecture.
 
                     String cpuArch = System.getProperty("os.arch");
-                    String[] nativeLibs = new File(flutterApplicationInfo.nativeLibraryDir).list();
+                    File nativeLibsDir = new File(flutterApplicationInfo.nativeLibraryDir);
+                    String[] nativeLibsContents = nativeLibsDir.list();
 
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
@@ -205,8 +206,10 @@ public class FlutterLoader {
                             + " for more detail.\n"
                             + "App is using cpu architecture: "
                             + cpuArch
-                            + ", and the native libraries directory contains the following files: "
-                            + Arrays.toString(nativeLibs),
+                            + ", and the native libraries directory (with path "
+                            + nativeLibsDir.getAbsolutePath()
+                            + ") contains the following files: "
+                            + Arrays.toString(nativeLibsContents),
                         unsatisfiedLinkError);
                   }
 
