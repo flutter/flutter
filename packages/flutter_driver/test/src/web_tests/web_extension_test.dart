@@ -25,10 +25,10 @@ void main() {
       expect(() => registerWebServiceExtension(call),
           returnsNormally);
 
-      expect(_window.hasProperty(r'$flutterDriver'.toJS), true);
+      expect(_window.hasProperty(r'$flutterDriver'.toJS).toDart, true);
       expect(_window.getProperty(r'$flutterDriver'.toJS), isNotNull);
 
-      expect(_window.hasProperty(r'$flutterDriverResult'.toJS), true);
+      expect(_window.hasProperty(r'$flutterDriverResult'.toJS).toDart, true);
       expect(_window.getProperty(r'$flutterDriverResult'.toJS), isNull);
     });
   });
