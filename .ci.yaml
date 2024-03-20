@@ -2394,6 +2394,7 @@ targets:
   # linux motog4 benchmark
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4690,7 +4691,8 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: hot_mode_dev_cycle_ios__benchmark
+      # TODO(vashworth): Use "hot_mode_dev_cycle_ios__benchmark" once https://github.com/flutter/flutter/issues/142305 is fixed.
+      task_name: hot_mode_dev_cycle_ios__benchmark_no_dds
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone

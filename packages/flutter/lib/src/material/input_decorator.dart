@@ -1316,7 +1316,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
+    final RenderBox? input = this.input;
+    return input == null
+      ? 0.0
+      : _boxParentData(input).offset.dy + (input.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
