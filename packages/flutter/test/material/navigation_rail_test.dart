@@ -3631,6 +3631,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text(
+              'Longer bookmark text',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(12.0, 6.0, 68.0, 38.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(12.0, 58.0, 68.0, 90.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

@@ -665,14 +665,16 @@ class _RailDestination extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     iconPart,
-                    Align(
-                      heightFactor: 1.0,
-                      widthFactor: extendedTransitionAnimation.value,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: FadeTransition(
-                        alwaysIncludeSemantics: true,
-                        opacity: labelFadeAnimation,
-                        child: styledLabel,
+                    Expanded(
+                      child: Align(
+                        heightFactor: 1.0,
+                        widthFactor: extendedTransitionAnimation.value,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FadeTransition(
+                          alwaysIncludeSemantics: true,
+                          opacity: labelFadeAnimation,
+                          child: styledLabel,
+                        ),
                       ),
                     ),
                     SizedBox(width: _horizontalDestinationPadding * extendedTransitionAnimation.value),
