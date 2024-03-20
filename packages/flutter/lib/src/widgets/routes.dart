@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -505,7 +504,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
           // We want to cap the animation time, but we want to use a linear curve
           // to determine it.
           final int droppedPageForwardAnimationTime = min(
-            lerpDouble(800, 0, _controller!.value)!.floor(),
+            ui.lerpDouble(800, 0, _controller!.value)!.floor(),
             300,
           );
           _controller!.animateTo(
@@ -522,7 +521,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
         if (_controller?.isAnimating ?? false) {
           // Otherwise, use a custom popping animation duration and curve.
           final int droppedPageBackAnimationTime =
-              lerpDouble(0, 800, _controller!.value)!.floor();
+              ui.lerpDouble(0, 800, _controller!.value)!.floor();
           _controller!.animateBack(0.0,
               duration: Duration(milliseconds: droppedPageBackAnimationTime),
               curve: Curves.fastLinearToSlowEaseIn);
