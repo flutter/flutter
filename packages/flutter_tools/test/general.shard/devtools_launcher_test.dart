@@ -30,7 +30,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'dart',
+            'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
           ],
@@ -59,7 +59,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'dart',
+            'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
             // TODO(kenz): uncomment once the Dart CLI supports this flag. See
@@ -94,7 +94,7 @@ Serving DevTools at http://127.0.0.1:9100.
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'dart',
+            'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
           ],
@@ -119,7 +119,7 @@ Serving DevTools at http://127.0.0.1:9100.
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'dart',
+          'Artifact.engineDartBinary',
           'devtools',
           '--no-launch-browser',
           '--vm-uri=localhost:8181/abcdefg',
@@ -150,7 +150,7 @@ Serving DevTools at http://127.0.0.1:9100.
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'dart',
+            'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
@@ -175,7 +175,7 @@ Serving DevTools at http://127.0.0.1:9100.
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'dart',
+            'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
           ],
