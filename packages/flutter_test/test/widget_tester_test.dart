@@ -256,7 +256,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byTooltip('Back'), findsNothing);
-      expect(find.byType(BackButton), findsOneWidget);
+      expect(find.backButton(), findsOneWidget);
       expect(find.byTooltip('Custom_Back'), findsOneWidget);
 
       await tester.pageBack();
@@ -270,9 +270,6 @@ void main() {
     testWidgets('successfully taps localized custom back buttons', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-            _CustomLocalizationsDelegate(),
-          ],
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -284,8 +281,8 @@ void main() {
                         return Scaffold(
                           appBar: AppBar(
                             leading: IconButton(
-                              icon: const Icon(Icons.arrow_back_ios),
-                              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                              icon: const BackButtonIcon(),
+                              tooltip: 'Custom_Back',
                               onPressed: () => Navigator.maybePop(context),
                             ),
                             title: const Text('Page 2'),
@@ -306,9 +303,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byTooltip('Back'), findsNothing);
-      expect(find.byType(BackButton), findsNothing);
-      expect(find.byTooltip('Custom_Back'), findsOneWidget);
+      expect(find.backButton(), findsOneWidget);
 
       await tester.pageBack();
       await tester.pump();

@@ -1163,22 +1163,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// a [CupertinoPageScaffold].
   ///
   /// Will throw an error if there is no back button in the page.
+  ///
+  /// See also:
+  ///   * [CommonFinders.backButton] that is used to find the back button.
   Future<void> pageBack() async {
     return TestAsyncUtils.guard<void>(() async {
-      Finder backButton = find.byType(BackButton);
-      if (backButton.evaluate().isEmpty) {
-        backButton = find.byElementPredicate((Element element) {
-          if (element.widget case final Tooltip tooltip) {
-            final MaterialLocalizations localizations = MaterialLocalizations.of(element);
-            return tooltip.message == localizations.backButtonTooltip;
-          }
-          return false;
-        });
-      }
-
-      if (backButton.evaluate().isEmpty) {
-        backButton = find.byType(CupertinoNavigationBarBackButton);
-      }
+      final Finder backButton = find.backButton();
 
       expectSync(backButton, findsOneWidget, reason: 'One back button expected on screen');
 
