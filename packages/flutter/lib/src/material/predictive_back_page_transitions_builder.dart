@@ -114,53 +114,52 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
 
   // Begin WidgetsBinding.
 
-  // TODO(justinmc): Futures needed all over here?
   @override
-  Future<bool> handleStartBackGesture(PredictiveBackEvent backEvent) {
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
     _gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
-    if (_gestureInProgress) {
-      widget.predictiveBackRoute.handleStartBackGesture(progress: 1 - backEvent.progress);
-      startBackEvent = currentBackEvent = backEvent;
+    if (!_gestureInProgress) {
+      return false;
     }
 
-    return SynchronousFuture<bool>(_gestureInProgress);
+    widget.predictiveBackRoute.handleStartBackGesture(progress: 1 - backEvent.progress);
+    startBackEvent = currentBackEvent = backEvent;
+    return true;
   }
 
   // TODO(justinmc): Is this logic properly divided between here and PBR?
   @override
-  Future<bool> handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
-    if (_gestureInProgress) {
-      widget.predictiveBackRoute.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
-      currentBackEvent = backEvent;
+  bool handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    if (!_gestureInProgress) {
+      return false;
     }
 
-    return SynchronousFuture<bool>(_gestureInProgress);
+    widget.predictiveBackRoute.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
+    currentBackEvent = backEvent;
+    return true;
   }
 
   @override
-  Future<bool> handleCancelBackGesture() {
-    if (_gestureInProgress) {
-      widget.predictiveBackRoute.handleDragEnd(animateForward: true);
-      _gestureInProgress = false;
-      startBackEvent = currentBackEvent = null;
-
-      return Future<bool>.value(true);
+  bool handleCancelBackGesture() {
+    if (!_gestureInProgress) {
+      return false;
     }
 
-    return Future<bool>.value(false);
+    widget.predictiveBackRoute.handleDragEnd(animateForward: true);
+    _gestureInProgress = false;
+    startBackEvent = currentBackEvent = null;
+    return true;
   }
 
   @override
-  Future<bool> handleCommitBackGesture() {
-    if (_gestureInProgress) {
-      widget.predictiveBackRoute.handleDragEnd(animateForward: false);
-      _gestureInProgress = false;
-      startBackEvent = currentBackEvent = null;
-
-      return Future<bool>.value(true);
+  bool handleCommitBackGesture() {
+    if (!_gestureInProgress) {
+      return false;
     }
 
-    return Future<bool>.value(false);
+    widget.predictiveBackRoute.handleDragEnd(animateForward: false);
+    _gestureInProgress = false;
+    startBackEvent = currentBackEvent = null;
+    return true;
   }
 
   // End WidgetsBinding.
