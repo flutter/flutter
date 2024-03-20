@@ -804,10 +804,7 @@ $javaGradleCompatUrl
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-    // The v1 android embedding has been deleted. `TODO`(gmackall): I think we
-    // will never get here (the imports will fail to resolve), so figure out a
-    // better way. This is just to simulate it so I can hunt down tests to
-    // modify or delete.
+    // The v1 android embedding has been deleted.
     throwToolExit(
       'Build failed due to use of deleted Android v1 embedding.',
       exitCode: 1,
