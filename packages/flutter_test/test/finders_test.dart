@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1349,6 +1350,51 @@ void main() {
         expect(finder.hasFound, true);
         expect(finder.found, orderedEquals(expected));
       });
+    });
+  });
+
+  group('find.backButton', () {
+    testWidgets('finds BackButton', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(leading: const BackButton()),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.backButton(), findsOneWidget);
+    });
+
+    testWidgets('finds CupertinoNavigationBarBackButton', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return CupertinoPageScaffold(
+                          navigationBar: const CupertinoNavigationBar(
+                            middle: Text('Page 2'),
+                          ),
+                          child: Container(),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      expect(find.backButton(), findsOneWidget);
     });
   });
 }

@@ -5,9 +5,8 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show BackButton, BackButtonIcon, Tooltip;
+import 'package:flutter/material.dart' show BackButtonIcon, Tooltip;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import 'binding.dart';
 import 'tree_traversal.dart';
@@ -505,16 +504,23 @@ class CommonFinders {
 
   /// Makes an effort to find a back button widget.
   ///
-  /// This finder is used by [WidgetTester.pageBack].
+  /// This finder looks for a [BackButtonIcon] or a [CupertinoNavigationBarBackButton]
+  /// which are typically available as back button in app bars.
+  ///
+  /// This is useful to find a tappable widget to navigate back to the previous route.
   ///
   /// ## Sample code
   ///
   /// ```dart
   /// expect(find.backButton(), findsOneWidget);
+  /// await tester.tap(find.backButton());
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
+  ///
+  /// See also:
+  /// * [WidgetTester.pageBack] which tries to tap a back button.
   Finder backButton({ bool skipOffstage = true }) {
     Finder backButton = find.byType(BackButtonIcon, skipOffstage: skipOffstage);
     if (backButton.evaluate().isEmpty) {
