@@ -10,6 +10,9 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendContext.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h"
 
 namespace flutter {
 
@@ -28,9 +31,12 @@ TestMetalContext::TestMetalContext() {
 
   [command_queue.get() setLabel:@"Flutter Test Queue"];
 
+  GrMtlBackendContext backendContext = {};
   // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
   // when the GrDirectContext is collected.
-  skia_context_ = GrDirectContext::MakeMetal([device.get() retain], [command_queue.get() retain]);
+  backendContext.fDevice.reset([device.get() retain]);
+  backendContext.fQueue.reset([command_queue.get() retain]);
+  skia_context_ = GrDirectContexts::MakeMetal(backendContext);
   if (!skia_context_) {
     FML_LOG(ERROR) << "Could not create the GrDirectContext from the Metal Device "
                       "and command queue.";
