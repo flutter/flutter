@@ -58,6 +58,26 @@ abstract final class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A JSON [MethodChannel] for handling predictive back gestures.
+  ///
+  /// Currently, this feature is only available on Android U and above.
+  ///
+  /// No outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]).
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `startBackGesture`: The user has started a predictive back gesture.
+  ///  * `updateBackGestureProgress`: The user has continued dragging the
+  ///    predictive back gesture.
+  ///  * `commitBackGesture`: The user has finished a predictive back gesture,
+  ///    indicating that the current route should be popped.
+  ///  * `cancelBackGesture`: The user has canceled a predictive back gesture,
+  ///    indicating that no navigation should occur.
+  ///
+  /// Calls to methods that are not implemented on the shell side are ignored
+  /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel backGesture = OptionalMethodChannel(
     'flutter/backGesture',
     JSONMethodCodec(),

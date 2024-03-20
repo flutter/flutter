@@ -1,14 +1,14 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 /// Enum representing the edge from which a swipe starts in a back gesture.
 ///
 /// This is used in [PredictiveBackEvent] to indicate the starting edge of the
 /// swipe gesture.
 enum SwipeEdge {
-  /// Indicates that the swipe starts from the left edge of the screen.
+  /// Indicates that the swipe gesture starts from the left edge of the screen.
   left,
 
-  /// Indicates that the swipe starts from the right edge of the screen.
+  /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
 }
 
@@ -58,7 +58,7 @@ class PredictiveBackEvent {
   ///   of the screen, and the animation should seek to its end state. Exact end
   ///   value may vary depending on screen size.
   ///
-  /// When the gesture is cancelled, the progress value continues to update,
+  /// When the gesture is canceled, the progress value continues to update,
   /// animating back to 0 until the cancellation animation completes.
   ///
   /// In-between locations are linearly interpolated based on horizontal

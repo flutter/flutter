@@ -76,12 +76,36 @@ abstract mixin class WidgetsBindingObserver {
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
+  /// Called at the start of a predictive back gesture.
+  ///
+  /// Returns true if the call should be considered handled.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   bool handleStartBackGesture(PredictiveBackEvent backEvent) => false;
 
+  /// Called when a predictive back gesture moves.
+  ///
+  /// Returns true if the call should be considered handled.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   bool handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) => false;
 
+  /// Called when a predictive back gesture is finished successfully, indicating
+  /// that the current route should be popped.
+  ///
+  /// Returns true if the call should be considered handled.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   bool handleCommitBackGesture() => false;
 
+  /// Called when a predictive back gesture is canceled, indicating that no
+  /// navigation should occur.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
   bool handleCancelBackGesture() => false;
 
   /// Called when the host tells the application to push a new route onto the
@@ -791,7 +815,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     SystemNavigator.pop();
   }
 
-  // TODO(justinmc): Move this predictive back stuff to a mixin?
   /// Called at the start of a predictive back gesture.
   ///
   /// Returns true if the call should be considered handled.

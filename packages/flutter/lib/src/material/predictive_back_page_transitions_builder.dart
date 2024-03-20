@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'page_transitions_theme.dart';
@@ -85,17 +84,14 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
   PredictiveBackEvent? _startBackEvent;
   bool _gestureInProgress = false;
 
-  PredictiveBackEvent? get startBackEvent => _startBackEvent;
-
-  PredictiveBackEvent? _currentBackEvent;
-  PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
-
   /// True when the predictive back gesture is enabled.
   bool get _isEnabled {
     return widget.predictiveBackRoute.isCurrent
         && widget.predictiveBackRoute.popGestureEnabled;
   }
 
+  /// The back event when the gesture first started.
+  PredictiveBackEvent? get startBackEvent => _startBackEvent;
   set startBackEvent(PredictiveBackEvent? startBackEvent) {
     if (_startBackEvent != startBackEvent && mounted) {
       setState(() {
@@ -104,6 +100,9 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
     }
   }
 
+  /// The most recent back event during the gesture.
+  PredictiveBackEvent? _currentBackEvent;
+  PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
   set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
     if (_currentBackEvent != currentBackEvent && mounted) {
       setState(() {
@@ -126,7 +125,6 @@ class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector
     return true;
   }
 
-  // TODO(justinmc): Is this logic properly divided between here and PBR?
   @override
   bool handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
     if (!_gestureInProgress) {

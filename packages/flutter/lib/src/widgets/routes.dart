@@ -177,8 +177,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
   Animation<double>? get animation => _animation;
   Animation<double>? _animation;
 
-  // TODO(justinmc): The point of this is that only the route can drive the
-  // animation, but others can listen to it.
   /// The animation controller that the route uses to drive the transitions.
   ///
   /// The animation itself is exposed by the [animation] property.
@@ -275,7 +273,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
     }
   }
 
-  // TODO(justinmc): This is where the animation is kicked off/moved.
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
@@ -576,14 +573,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
 ///  * [PredictiveBackPageTransitionsBuilder], which builds page transitions for
 ///    predictive back.
 mixin PredictiveBackRoute {
+  /// Whether this route is the top-most route on the navigator.
   bool get isCurrent;
+
+  /// Whether a pop gesture can be started by the user for this route.
   bool get popGestureEnabled;
 
-  // TODO(justinmc): Docs.
+  /// Handles a predictive back gesture starting.
   void handleStartBackGesture({double progress = 0});
 
+  /// Handles a predictive back gesture updating as the user drags across the
+  /// screen.
   void handleUpdateBackGestureProgress({required double progress});
 
+  /// Handles a predictive back gesture ending.
   void handleDragEnd({required bool animateForward});
 }
 
@@ -1570,6 +1573,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Returns true if the user can edge-swipe to a previous route.
   ///
   /// This should only be used between frames, not during build.
+  @override
   bool get popGestureEnabled {
     // If there's nothing to go back to, then obviously we don't support
     // the back gesture.
