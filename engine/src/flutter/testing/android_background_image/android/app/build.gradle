@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'dev.flutter.android_background_image'
     lintOptions {
         abortOnError true
         checkAllWarnings true
