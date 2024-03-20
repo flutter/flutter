@@ -821,9 +821,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  @protected
-  @visibleForTesting
-  Future<bool> handleStartBackGesture(Map<dynamic, dynamic> arguments) {
+  Future<bool> _handleStartBackGesture(Map<dynamic, dynamic> arguments) {
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
@@ -839,10 +837,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  @protected
-  @visibleForTesting
-  Future<bool> handleUpdateBackGestureProgress(
-      Map<dynamic, dynamic> arguments) {
+  Future<bool> _handleUpdateBackGestureProgress(Map<dynamic, dynamic> arguments) {
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleUpdateBackGestureProgress(backEvent)) {
@@ -859,9 +854,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  @protected
-  @visibleForTesting
-  Future<bool> handleCommitBackGesture() async {
+  Future<bool> _handleCommitBackGesture() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleCommitBackGesture()) {
         return true;
@@ -878,9 +871,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  @protected
-  @visibleForTesting
-  Future<void> handleCancelBackGesture() {
+  Future<void> _handleCancelBackGesture() {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleCancelBackGesture()) {
         return Future<bool>.value(true);
@@ -934,10 +925,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
     return switch (methodCall.method) {
-      'startBackGesture' => handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
-      'updateBackGestureProgress' => handleUpdateBackGestureProgress(methodCall.arguments as Map<dynamic, dynamic>),
-      'commitBackGesture' => handleCommitBackGesture(),
-      'cancelBackGesture' => handleCancelBackGesture(),
+      'startBackGesture' => _handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
+      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(methodCall.arguments as Map<dynamic, dynamic>),
+      'commitBackGesture' => _handleCommitBackGesture(),
+      'cancelBackGesture' => _handleCancelBackGesture(),
       _ => Future<dynamic>.value(),
     };
   }

@@ -38,7 +38,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return _AndroidBackGestureDetector(
+    return _PredictiveBackGestureDetector(
       predictiveBackRoute: route,
       builder: (BuildContext context) {
         // Only do a predictive back transition when the user is performing a
@@ -65,8 +65,8 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-class _AndroidBackGestureDetector extends StatefulWidget {
-  const _AndroidBackGestureDetector({
+class _PredictiveBackGestureDetector extends StatefulWidget {
+  const _PredictiveBackGestureDetector({
     required this.predictiveBackRoute,
     required this.builder,
   });
@@ -75,11 +75,11 @@ class _AndroidBackGestureDetector extends StatefulWidget {
   final PredictiveBackRoute predictiveBackRoute;
 
   @override
-  State<_AndroidBackGestureDetector> createState() =>
-      _AndroidBackGestureDetectorState();
+  State<_PredictiveBackGestureDetector> createState() =>
+      _PredictiveBackGestureDetectorState();
 }
 
-class _AndroidBackGestureDetectorState extends State<_AndroidBackGestureDetector>
+class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDetector>
     with WidgetsBindingObserver {
   PredictiveBackEvent? _startBackEvent;
   bool _gestureInProgress = false;
@@ -237,26 +237,35 @@ class _PredictiveBackPageTransition extends StatelessWidget {
     final double screenWidth = size.width;
     final double xShift = (screenWidth / 20) - 8;
 
-    final Animatable<double> xShiftTween =
-        TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> xShiftTween = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.0, end: 0.0), weight: 65.0),
+        tween: Tween<double>(begin: 0.0, end: 0.0),
+        weight: 65.0,
+      ),
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: xShift, end: 0.0), weight: 35.0),
+        tween: Tween<double>(begin: xShift, end: 0.0),
+        weight: 35.0,
+      ),
     ]);
-    final Animatable<double> scaleTween =
-        TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> scaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 1.0, end: 1.0), weight: 65.0),
+        tween: Tween<double>(begin: 1.0, end: 1.0),
+        weight: 65.0,
+      ),
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.95, end: 1.0), weight: 35.0),
+        tween: Tween<double>(begin: 0.95, end: 1.0),
+        weight: 35.0,
+      ),
     ]);
-    final Animatable<double> fadeTween =
-        TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> fadeTween = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.0, end: 0.0), weight: 65.0),
+        tween: Tween<double>(begin: 0.0, end: 0.0),
+        weight: 65.0,
+      ),
       TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 0.95, end: 1.0), weight: 35.0),
+        tween: Tween<double>(begin: 0.95, end: 1.0),
+        weight: 35.0,
+      ),
     ]);
 
     return Transform.translate(
