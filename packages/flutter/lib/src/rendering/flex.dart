@@ -12,9 +12,8 @@ import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
 
-// A type that describes a 2D , but instead of describing a 2D size along the x-axis and the
-// y-axis, an _AxisSize's width is along the main axis and its height is along the
-// cross axis.
+// A type that describes a 2D size along the main axis and the cross axis of a
+// [RenderFlex].
 extension type const _AxisSize(Size _size) {
   _AxisSize.fromAxisExtents({ required double mainAxisExtent, required double crossAxisExtent }) : this(Size(mainAxisExtent, crossAxisExtent));
   _AxisSize.fromSize({ required Size size, required Axis direction }) : this(_convert(size, direction));
