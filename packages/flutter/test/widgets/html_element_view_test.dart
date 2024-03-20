@@ -442,13 +442,11 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'  => _create(call),
+      'dispose' => _dispose(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {

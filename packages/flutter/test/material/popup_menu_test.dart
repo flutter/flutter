@@ -926,6 +926,39 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const RouteSettings popupRoute = RouteSettings(name: '/popup');
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: Scaffold(
+         body: PopupMenuButton<int>(
+          key: buttonKey,
+          routeSettings: popupRoute,
+          itemBuilder: (_) => <PopupMenuItem<int>>[
+            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+          ],
+          child: const Text('Show Menu'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    expect(currentRouteSetting, popupRoute);
+  });
+
   testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
