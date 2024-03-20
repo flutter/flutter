@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
+import 'scroll_configuration.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
@@ -1020,6 +1021,7 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    final ScrollBehavior configuration = ScrollConfiguration.of(context);
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -1137,6 +1139,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },
@@ -1158,6 +1161,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },
@@ -1179,6 +1183,7 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
+            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
             ..gestureSettings = gestureSettings
             ..supportedDevices = supportedDevices;
         },

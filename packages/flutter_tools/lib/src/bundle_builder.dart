@@ -14,6 +14,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
@@ -145,6 +146,7 @@ Future<void> writeBundle(
   required FileSystem fileSystem,
   required Artifacts artifacts,
   required Logger logger,
+  required Directory projectDir,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -172,6 +174,12 @@ Future<void> writeBundle(
     artifacts: artifacts,
   );
 
+  final AssetTransformer assetTransformer = AssetTransformer(
+    processManager: processManager,
+    fileSystem: fileSystem,
+    dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -190,8 +198,20 @@ Future<void> writeBundle(
           final File input = devFSContent.file as File;
           bool doCopy = true;
           switch (entry.value.kind) {
-            case AssetKind.regular:
+          case AssetKind.regular:
+            if (entry.value.transformers.isEmpty) {
               break;
+            }
+            final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+              asset: input,
+              outputPath: file.path,
+              workingDirectory: projectDir.path,
+              transformerEntries: entry.value.transformers,
+            );
+            doCopy = false;
+            if (failure != null) {
+              throwToolExit(failure.message);
+            }
             case AssetKind.font:
               break;
             case AssetKind.shader:

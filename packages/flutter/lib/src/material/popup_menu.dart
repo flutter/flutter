@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
@@ -1149,6 +1150,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.useRootNavigator = false,
     this.popUpAnimationStyle,
+    this.routeSettings,
+    this.style,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1343,6 +1346,20 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this is null, then the default animation will be used.
   final AnimationStyle? popUpAnimationStyle;
 
+  /// Optional route settings for the menu.
+  ///
+  /// See [RouteSettings] for details.
+  final RouteSettings? routeSettings;
+
+  /// Customizes this icon button's appearance.
+  ///
+  /// The [style] is only used for Material 3 [IconButton]s. If [ThemeData.useMaterial3]
+  /// is set to true, [style] is preferred for icon button customization, and any
+  /// parameters defined in [style] will override the same parameters in [IconButton].
+  ///
+  /// Null by default.
+  final ButtonStyle? style;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1401,6 +1418,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
         popUpAnimationStyle: widget.popUpAnimationStyle,
+        routeSettings: widget.routeSettings,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
@@ -1455,6 +1473,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
+      style: widget.style,
     );
   }
 }

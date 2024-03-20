@@ -926,6 +926,39 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const RouteSettings popupRoute = RouteSettings(name: '/popup');
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: Scaffold(
+         body: PopupMenuButton<int>(
+          key: buttonKey,
+          routeSettings: popupRoute,
+          itemBuilder: (_) => <PopupMenuItem<int>>[
+            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+          ],
+          child: const Text('Show Menu'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    expect(currentRouteSetting, popupRoute);
+  });
+
   testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
@@ -4059,6 +4092,33 @@ void main() {
     expect(listViewportBounds.topLeft.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
     expect(listViewportBounds, overlaps(buttonBounds));
+  });
+
+  testWidgets('PopupMenuButton honors style', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PopupMenuButton<int>(
+            style: const ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('One'),
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(PopupMenuButton<int>),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style?.color, Colors.red);
   });
 }
 

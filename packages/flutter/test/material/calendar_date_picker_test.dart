@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,10 +26,11 @@ void main() {
     DatePickerMode initialCalendarMode = DatePickerMode.day,
     SelectableDayPredicate? selectableDayPredicate,
     TextDirection textDirection = TextDirection.ltr,
+    ThemeData? theme,
     bool? useMaterial3,
   }) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: useMaterial3),
+      theme: theme ?? ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Directionality(
           textDirection: textDirection,
@@ -1131,6 +1133,43 @@ void main() {
 
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/141350.
+    testWidgets('Default day selection overlay', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await tester.pumpWidget(calendarDatePicker(
+        firstDate: DateTime(2016, DateTime.december, 15),
+        initialDate: DateTime(2017, DateTime.january, 15),
+        lastDate: DateTime(2017, DateTime.february, 15),
+        onDisplayedMonthChanged: (DateTime date) {},
+        theme: theme,
+      ));
+
+      RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      expect(inkFeatures, isNot(paints..circle(radius: 35.0, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08))));
+      expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.text('25')));
+      await tester.pumpAndSettle();
+      inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      expect(inkFeatures, paints..circle(radius: 35.0, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+      expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+
+      final Rect expectedClipRect = Rect.fromCircle(center: const Offset(400.0, 241.0), radius: 35.0);
+      final Path expectedClipPath = Path()..addRect(expectedClipRect);
+      expect(
+        inkFeatures,
+        paints..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect,
+          sampleSize: 100,
+        )),
+      );
     });
   });
 

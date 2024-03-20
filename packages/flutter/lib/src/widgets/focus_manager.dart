@@ -1521,8 +1521,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
-    WidgetsBinding.instance.addObserver(_appLifecycleListener);
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      // It appears that some Android keyboard implementations can cause
+      // app lifecycle state changes: adding this listener would cause the
+      // text field to unfocus as the user is trying to type.
+      //
+      // Until this is resolved, we won't be adding the listener to Android apps.
+      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+      _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener!);
+    }
     rootScope._manager = this;
   }
 
@@ -1539,7 +1547,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(_appLifecycleListener);
+    if (_appLifecycleListener != null) {
+      WidgetsBinding.instance.removeObserver(_appLifecycleListener!);
+    }
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1700,7 +1710,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Allows FocusManager to respond to app lifecycle state changes,
   // temporarily suspending the primaryFocus when the app is inactive.
-  late final _AppLifecycleListener _appLifecycleListener;
+  _AppLifecycleListener? _appLifecycleListener;
 
   // Stores the node that was focused before the app lifecycle changed.
   // Will be restored as the primary focus once app is resumed.
