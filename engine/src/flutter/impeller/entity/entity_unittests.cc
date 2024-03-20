@@ -2798,6 +2798,20 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   }
 }
 
+TEST_P(EntityTest, FailOnValidationError) {
+  if (GetParam() != PlaygroundBackend::kVulkan) {
+    GTEST_SKIP() << "Validation is only fatal on Vulkan backend.";
+  }
+  EXPECT_DEATH(
+      // The easiest way to trigger a validation error is to try to compile
+      // a shader with an unsupported pixel format.
+      GetContentContext()->GetBlendColorBurnPipeline({
+          .color_attachment_pixel_format = PixelFormat::kUnknown,
+          .has_depth_stencil_attachments = false,
+      }),
+      "");
+}
+
 }  // namespace testing
 }  // namespace impeller
 
