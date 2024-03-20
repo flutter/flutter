@@ -1977,16 +1977,9 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
 }
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
-  final Uri kotlinLinterUrl = Uri.https('github.com',
-      '/pinterest/ktlint/releases/download/1.1.1/ktlint');
-  final http.Response response = await http.get(kotlinLinterUrl);
-  final File kotlinLinterFile = File('$workingDirectory/ktlint');
-  kotlinLinterFile.writeAsBytesSync(response.bodyBytes);
-
-  // TODO(gmackall): should this be on CIPD? Or downloaded like in packages repo, like above?
-  // TODO(gmackall): Where to put the baseline file in this repo?
-  _evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
-  final EvalResult lintResult = await _evalCommand(kotlinLinterFile.path,
+  // TODO(gmackall): does ktlint live on the path when we include it in ci.yaml?
+  //_evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
+  final EvalResult lintResult = await _evalCommand('ktlint',
       <String>['--baseline=$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml'],
       workingDirectory: workingDirectory);
   if (lintResult.exitCode != 0) {
