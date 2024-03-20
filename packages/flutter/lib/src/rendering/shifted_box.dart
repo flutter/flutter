@@ -1457,19 +1457,9 @@ class RenderBaseline extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    if (child != null) {
-      final BoxConstraints constraints = this.constraints;
-      child!.layout(constraints.loosen(), parentUsesSize: true);
-      final double childBaseline = child!.getDistanceToBaseline(baselineType)!;
-      final double actualBaseline = baseline;
-      final double top = actualBaseline - childBaseline;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = Offset(0.0, top);
-      final Size childSize = child!.size;
-      size = constraints.constrain(Size(childSize.width, top + childSize.height));
-    } else {
-      size = constraints.smallest;
-    }
+    final (Size size, double top) = _computeSizes(constraints, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
+    this.size = size;
+    (child?.parentData as BoxParentData?)?.offset = Offset(0.0, top);
   }
 
   @override
