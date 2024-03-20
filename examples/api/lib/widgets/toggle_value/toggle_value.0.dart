@@ -27,8 +27,8 @@ class ToggleValueExample extends StatelessWidget {
     return ColoredBox(
       color: Colors.white,
       child: ToggleValue<AlignmentGeometry>(
-        offValue: Alignment.bottomLeft,
-        onValue: Alignment.topRight,
+        initialValue: Alignment.bottomLeft,
+        value: Alignment.topRight,
         builder: (BuildContext context, AlignmentGeometry value) {
           return AnimatedAlign(
             alignment: value,
