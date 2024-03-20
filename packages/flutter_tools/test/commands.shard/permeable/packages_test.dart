@@ -457,6 +457,33 @@ flutter:
       ),
     });
 
+    testUsingContext('indicate that Android project reports v2 in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+
+      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v2',
+      );
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+    });
+
     testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
