@@ -191,9 +191,9 @@ class WebDriverService extends DriverService {
     }
     final int result = await _processUtils.stream(<String>[
       _dartSdkPath,
+      'test',
       ...arguments,
       testFile,
-      '-rexpanded',
     ], environment: <String, String>{
       'VM_SERVICE_URL': _webUri.toString(),
       ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),

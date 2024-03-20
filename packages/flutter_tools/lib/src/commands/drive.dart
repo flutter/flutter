@@ -137,7 +137,7 @@ class DriveCommand extends RunCommandBase {
         help: 'Attempts to write an SkSL file when the drive process is finished '
               'to the provided file, overwriting it if necessary.')
       ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
-          'Dart VM running The test script.')
+          'package:test runner.')
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
           valueHelp: 'profile_memory.json')
