@@ -341,8 +341,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget? _helper;
   Widget? _error;
 
-  bool get _hasError => widget.errorText != null || widget.error != null;
   bool get _hasHelper => widget.helperText != null || widget.helper != null;
+  bool get _hasError => widget.errorText != null || widget.error != null;
 
   @override
   void initState() {
@@ -2815,8 +2815,15 @@ class InputDecoration {
   /// Optional widget that appears below the [InputDecorator.child].
   ///
   /// If non-null, the [helper] is displayed below the [InputDecorator.child], in
-  /// the same location as [error]. If a non-null [error] value is
+  /// the same location as [error]. If a non-null [error] or [errorText] value is
   /// specified then the [helper] is not shown.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a `TextField` with a [Text.rich] widget as the [helper].
+  /// The widget contains [Text] and [Icon] widgets with different styles.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.helper.0.dart **
+  /// {@end-tool}
   ///
   /// Only one of [helper] and [helperText] can be specified.
   final Widget? helper;
