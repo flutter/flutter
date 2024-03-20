@@ -1044,10 +1044,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @optionalTypeArgs
   static ModalRoute<T>? of<T extends Object?>(
     BuildContext context, {
-    bool listen = true,
+    bool createDependency = true,
   }) {
     _ModalScopeStatus? widget;
-    if (listen) {
+    if (createDependency) {
       widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
     } else {
       widget = context

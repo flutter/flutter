@@ -1942,7 +1942,7 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
-  testWidgets('ModalRoute.of works for listen parameter',
+  testWidgets('ModalRoute.of works for createDependency parameter',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Text('home'),
@@ -1952,14 +1952,15 @@ void main() {
     final InheritedElement? ancestor = ModalRoute.scopeStatusAncestor(context);
     expect(ancestor, isNotNull);
 
-    final ModalRoute<void>? routeWithoutListen = ModalRoute.of<void>(
+    final ModalRoute<void>? routeWithoutCreateDependency = ModalRoute.of<void>(
       context,
-      listen: false,
+      createDependency: false,
     );
-    expect(routeWithoutListen, isNotNull);
+    expect(routeWithoutCreateDependency, isNotNull);
     expect(context.doesDependOnInheritedElement(ancestor!), false);
-    final ModalRoute<void>? routeWithListen = ModalRoute.of<void>(context);
-    expect(routeWithListen, isNotNull);
+    final ModalRoute<void>? routeWithCreateDependency =
+        ModalRoute.of<void>(context);
+    expect(routeWithCreateDependency, isNotNull);
     expect(context.doesDependOnInheritedElement(ancestor), true);
   });
 
