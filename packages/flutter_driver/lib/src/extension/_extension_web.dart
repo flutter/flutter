@@ -25,11 +25,11 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   // undefined at the time of the check, WebDriver throws an exception.
   _window.setProperty(r'$flutterDriverResult'.toJS, null);
 
-  _window.setProperty(r'$flutterDriver'.toJS, (JSAny message) async {
+  _window.setProperty(r'$flutterDriver'.toJS, (JSAny message) {
     final Map<String, String> params = Map<String, String>.from(
         jsonDecode((message as JSString).toDart) as Map<String, dynamic>);
-    final Map<String, dynamic> result = Map<String, dynamic>.from(
-        await call(params));
-    _window.setProperty(r'$flutterDriverResult'.toJS, json.encode(result).toJS);
+    call(params).then((Map<String, dynamic> result) {
+      _window.setProperty(r'$flutterDriverResult'.toJS, json.encode(result).toJS);
+    });
   }.toJS);
 }
