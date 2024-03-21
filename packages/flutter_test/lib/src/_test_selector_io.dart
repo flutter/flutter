@@ -2,6 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'my_app.dart' if (dart.library.js_interop) 'my_web_app.dart';
-
-void main() => startApp();
+// This is an empty file that is imported instead of web_test_selector.dart on
+// non-web platforms.

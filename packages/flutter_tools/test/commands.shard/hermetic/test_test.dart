@@ -1386,6 +1386,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
+    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,

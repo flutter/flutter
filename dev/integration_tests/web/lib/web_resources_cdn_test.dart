@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
 
 // Attempt to load CanvasKit resources hosted on gstatic.
 Future<void> main() async {
@@ -12,12 +14,13 @@ Future<void> main() async {
     return;
   }
   try {
-    final html.HttpRequest request = await html.HttpRequest.request(
-      'https://www.gstatic.com/flutter-canvaskit/$engineVersion/canvaskit.js',
-      method: 'GET',
-    );
-    final dynamic response = request.response;
-    if (response != null) {
+    final web.Response response = await web.window.fetch(
+      'https://www.gstatic.com/flutter-canvaskit/$engineVersion/canvaskit.js'.toJS,
+      web.RequestInit(
+        method: 'GET',
+      ),
+    ).toDart;
+    if (response.ok) {
       print('--- TEST SUCCEEDED ---');
     } else {
       print('--- TEST FAILED ---');
@@ -27,12 +30,13 @@ Future<void> main() async {
     print('--- TEST FAILED ---');
   }
   try {
-    final html.HttpRequest request = await html.HttpRequest.request(
-      'https://www.gstatic.com/flutter-canvaskit/$engineVersion/canvaskit.wasm',
-      method: 'GET',
-    );
-    final dynamic response = request.response;
-    if (response != null) {
+    final web.Response response = await web.window.fetch(
+      'https://www.gstatic.com/flutter-canvaskit/$engineVersion/canvaskit.wasm'.toJS,
+      web.RequestInit(
+        method: 'GET',
+      )
+    ).toDart;
+    if (response.ok) {
       print('--- TEST SUCCEEDED ---');
     } else {
       print('--- TEST FAILED ---');

@@ -9,12 +9,11 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
 import 'package:integration_test_example/main.dart' as app;
+import 'package:web/web.dart' as web;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +30,7 @@ void main() {
         (Widget widget) =>
             widget is Text &&
             widget.data!
-                .startsWith('Platform: ${html.window.navigator.platform}\n'),
+                .startsWith('Platform: ${web.window.navigator.platform}\n'),
       ),
       findsOneWidget,
     );

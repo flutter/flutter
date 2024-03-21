@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../common.dart';
 
-/// The dart:html implementation of [CallbackManager].
+/// The web implementation of [CallbackManager].
 ///
 /// See also:
 ///

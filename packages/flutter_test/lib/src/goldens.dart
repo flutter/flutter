@@ -8,7 +8,7 @@ import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as goldens;
 
 /// Compares image pixels against a golden image file.
 ///

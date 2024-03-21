@@ -387,59 +387,70 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 ''';
 }
 
-/// Generates the bootstrap logic required for a flutter test running in a browser.
+typedef WebTestInfo = ({
+  String entryPoint,
+  Uri goldensUri,
+  String? configFile,
+});
+
+/// Generates the bootstrap logic required for running a group of unit test
+/// files in the browser.
 ///
-/// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
+/// This creates one "switchboard" main function that imports all the main
+/// functions of the unit test files that need to be run. The javascript code
+/// that starts the test sets a `window.testSelector` that specifies which main
+/// function to invoke. This allows us to compile all the unit test files as a
+/// single web application and invoke that with a different selector for each
+/// test.
 String generateTestEntrypoint({
-  required String relativeTestPath,
-  required String absolutePath,
-  required String? testConfigPath,
+  required List<WebTestInfo> testInfos,
   required LanguageVersion languageVersion,
 }) {
+  final List<String> importMainStatements = <String>[];
+  final List<String> importTestConfigStatements = <String>[];
+  final List<String> webTestPairs = <String>[];
+
+  for (int index = 0; index < testInfos.length; index++) {
+    final WebTestInfo testInfo = testInfos[index];
+    final String entryPointPath = testInfo.entryPoint;
+    importMainStatements.add("import 'org-dartlang-app:///${Uri.file(entryPointPath)}' as test_$index show main;");
+
+    final String? testConfigPath = testInfo.configFile;
+    String? testConfigFunction = 'null';
+    if (testConfigPath != null) {
+      importTestConfigStatements.add(
+        "import 'org-dartlang-app:///${Uri.file(testConfigPath)}' as test_config_$index show testExecutable;"
+      );
+      testConfigFunction = 'test_config_$index.testExecutable';
+    }
+    webTestPairs.add('''
+  '$entryPointPath': (
+    entryPoint: test_$index.main,
+    entryPointRunner: $testConfigFunction,
+    goldensUri: Uri.parse('${testInfo.goldensUri}'),
+  ),
+''');
+  }
   return '''
-  // @dart = ${languageVersion.major}.${languageVersion.minor}
-  import 'org-dartlang-app:///$relativeTestPath' as test;
-  import 'dart:ui' as ui;
-  import 'dart:ui_web' as ui_web;
-  import 'dart:html';
-  import 'dart:js';
-  ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
-  import 'package:stream_channel/stream_channel.dart';
-  import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/backend.dart';
+// @dart = ${languageVersion.major}.${languageVersion.minor}
 
-  Future<void> main() async {
-    ui_web.debugEmulateFlutterTesterEnvironment = true;
-    await ui_web.bootstrapEngine();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
-    ui_web.debugOverrideDevicePixelRatio(3.0);
-    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
+${importMainStatements.join('\n')}
 
-    internalBootstrapBrowserTest(() {
-      return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
-    });
+${importTestConfigStatements.join('\n')}
+
+import 'package:flutter_test/flutter_test.dart';
+
+Map<String, WebTest> webTestMap = <String, WebTest>{
+  ${webTestPairs.join('\n')}
+};
+
+Future<void> main() {
+  final WebTest? webTest = webTestMap[testSelector];
+  if (webTest == null) {
+    throw Exception('Web test for \${testSelector} not found');
   }
-
-  void internalBootstrapBrowserTest(Function getMain()) {
-    var channel = serializeSuite(getMain, hidePrints: false);
-    postMessageChannel().pipe(channel);
-  }
-
-  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
-
-  StreamChannel postMessageChannel() {
-    var controller = StreamChannelController<Object?>(sync: true);
-    var channel = MessageChannel();
-    window.parent!.postMessage('port', window.location.origin, [channel.port2]);
-
-    var portSubscription = channel.port1.onMessage.listen((message) {
-      controller.local.sink.add(message.data);
-    });
-    controller.local.stream
-        .listen(channel.port1.postMessage, onDone: portSubscription.cancel);
-
-    return controller.foreign;
-  }
+  return runWebTest(webTest);
+}
   ''';
 }
 
