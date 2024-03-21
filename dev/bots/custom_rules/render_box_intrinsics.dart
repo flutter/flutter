@@ -32,7 +32,6 @@ class _RenderBoxIntrinsicCalculationRule implements AnalyzeRule {
   @override
   void applyTo(ResolvedUnitResult unit) {
     final _RenderBoxSubclassVisitor visitor = _RenderBoxSubclassVisitor();
-    //printProgress(unit.path);
     unit.unit.visitChildren(visitor);
     final List<(AstNode, String)> violationsInUnit = visitor.violationNodes;
     if (violationsInUnit.isNotEmpty) {
@@ -61,20 +60,20 @@ class _RenderBoxIntrinsicCalculationRule implements AnalyzeRule {
 class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
   final List<(AstNode, String)> violationNodes = <(AstNode, String)>[];
 
-  static final Map<ClassElement, bool> _isRenderBoxClassElementCache = <ClassElement, bool>{};
+  static final Map<InterfaceElement, bool> _isRenderBoxClassElementCache = <InterfaceElement, bool>{};
   // The cached version, call this method instead of _checkIfImplementsRenderBox.
-  bool _implementsRenderBox(ClassElement classElement) {
+  bool _implementsRenderBox(InterfaceElement interfaceElement) {
     // Framework naming convention: RenderObject subclass names must start with
     // _Render or Render.
-    if (!classElement.name.contains('Render')) {
+    if (!interfaceElement.name.contains('Render')) {
       return false;
     }
-    return classElement.name == 'RenderBox'
-        || _isRenderBoxClassElementCache.putIfAbsent(classElement, () => _checkIfImplementsRenderBox(classElement));
+    return interfaceElement.name == 'RenderBox'
+        || _isRenderBoxClassElementCache.putIfAbsent(interfaceElement, () => _checkIfImplementsRenderBox(interfaceElement));
   }
 
-  bool _checkIfImplementsRenderBox(ClassElement classElement) {
-    return classElement.allSupertypes.any((InterfaceType interface) {
+  bool _checkIfImplementsRenderBox(InterfaceElement element) {
+    return element.allSupertypes.any((InterfaceType interface) {
       final InterfaceElement interfaceElement = interface.element;
       return interfaceElement is ClassElement && _implementsRenderBox(interfaceElement);
     });
@@ -114,7 +113,7 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
       return;
     }
     final Element? declaredInClassElement = node.staticElement?.declaration?.enclosingElement;
-    if (declaredInClassElement is ClassElement && _implementsRenderBox(declaredInClassElement)) {
+    if (declaredInClassElement is InterfaceElement && _implementsRenderBox(declaredInClassElement)) {
       violationNodes.add((node, correctMethodName));
     }
   }

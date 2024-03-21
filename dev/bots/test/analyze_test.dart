@@ -276,6 +276,12 @@ void main() {
       includePaths: <String>['packages/flutter/lib'],
     ), shouldHaveErrors: true);
     final String lines = <String>[
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:12: computeMaxIntrinsicWidth(). Consider calling getMaxIntrinsicWidth instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:16: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:23: computeDryBaseline(). Consider calling getDryBaseline instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:24: computeDryLayout(). Consider calling getDryLayout instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:31: computeDistanceToActualBaseline(). Consider calling getDistanceToBaseline, or getDistanceToActualBaseline instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:36: computeMaxIntrinsicHeight(). Consider calling getMaxIntrinsicHeight instead.',
     ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');

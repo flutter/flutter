@@ -9,31 +9,40 @@ mixin ARenderBoxMixin on RenderBox {
   void computeMaxIntrinsicWidth() {  }
 
   @override
-  void computeMinIntrinsicWidth() => computeMaxIntrinsicWidth();
+  void computeMinIntrinsicWidth() => computeMaxIntrinsicWidth(); // BAD
 
   @override
   void computeMinIntrinsicHeight() {
-    final void Function() f = computeMaxIntrinsicWidth;
+    final void Function() f = computeMaxIntrinsicWidth; // BAD
     f();
+  }
+}
+
+extension ARenderBoxExtension on RenderBox {
+  void test() {
+    computeDryBaseline(); // BAD
+    computeDryLayout(); // BAD
   }
 }
 
 class RenderBoxSubclass1 extends RenderBox {
   @override
   void computeDryLayout() {
-    computeDistanceToActualBaseline();
+    computeDistanceToActualBaseline(); // BAD
   }
 
   @override
   void computeDistanceToActualBaseline() {
-    computeMaxIntrinsicHeight();
+    computeMaxIntrinsicHeight(); // BAD
   }
 }
 
 class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
   @override
   void computeMaxIntrinsicWidth() {
-    super.computeMinIntrinsicHeight();
-    super.computeMaxIntrinsicWidth();
+    super.computeMinIntrinsicHeight(); // OK
+    super.computeMaxIntrinsicWidth();  // OK
+    final void Function() f = super.computeDryBaseline; // OK
+    f();
   }
 }
