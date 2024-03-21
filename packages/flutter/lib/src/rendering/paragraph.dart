@@ -2053,6 +2053,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // selection.
       final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
       final RenderParagraph originParagraph = _getOriginParagraph();
+      final bool fragmentBelongsToOriginParagraph = originParagraph == paragraph;
+      if (fragmentBelongsToOriginParagraph) {
+        return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
+          getTextBoundary,
+          paragraphContainsPosition,
+          isEnd,
+          position,
+          existingSelectionStart,
+          existingSelectionEnd,
+        );
+      }
       final Matrix4 originTransform = originParagraph.getTransformTo(null);
       originTransform.invert();
       final Offset originParagraphLocalPosition = MatrixUtils.transformPoint(originTransform, globalPosition);
@@ -2141,7 +2152,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
       // traverse the selectable fragments relative to the root paragraph.
-      if (existingSelectionEnd != null && !paragraphContainsPosition) {
+      if (paragraphContainsPosition) {
+        return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
+          getTextBoundary,
+          paragraphContainsPosition,
+          isEnd,
+          position,
+          existingSelectionStart,
+          existingSelectionEnd,
+        );
+      }
+      if (existingSelectionEnd != null) {
         final RenderParagraph rootParagraph = _getEncompassingParagraph()!;
         final Matrix4 rootTransform = rootParagraph.getTransformTo(null);
         rootTransform.invert();
@@ -2216,6 +2237,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // selection.
       final bool forwardSelection = existingSelectionEnd.offset >= existingSelectionStart.offset;
       final RenderParagraph originParagraph = _getOriginParagraph();
+      final bool fragmentBelongsToOriginParagraph = originParagraph == paragraph;
+      if (fragmentBelongsToOriginParagraph) {
+        return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
+          getTextBoundary,
+          paragraphContainsPosition,
+          isEnd,
+          position,
+          existingSelectionStart,
+          existingSelectionEnd,
+        );
+      }
       final Matrix4 originTransform = originParagraph.getTransformTo(null);
       originTransform.invert();
       final Offset originParagraphLocalPosition = MatrixUtils.transformPoint(originTransform, globalPosition);
@@ -2304,7 +2336,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
       // traverse the selectable fragments relative to the root paragraph.
-      if (existingSelectionStart != null && !paragraphContainsPosition) {
+      if (paragraphContainsPosition) {
+        return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
+          getTextBoundary,
+          paragraphContainsPosition,
+          isEnd,
+          position,
+          existingSelectionStart,
+          existingSelectionEnd,
+        );
+      }
+      if (existingSelectionStart != null) {
         final RenderParagraph rootParagraph = _getEncompassingParagraph()!;
         final Matrix4 rootTransform = rootParagraph.getTransformTo(null);
         rootTransform.invert();
@@ -2396,7 +2438,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
               globalPosition,
               paragraph.paintBounds.contains(localPosition),
               isEnd,
-              position,
+              positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
             )
@@ -2405,7 +2447,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
               globalPosition,
               paragraph.paintBounds.contains(localPosition),
               isEnd,
-              position,
+              positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
             );
