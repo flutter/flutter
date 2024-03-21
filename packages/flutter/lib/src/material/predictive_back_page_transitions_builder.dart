@@ -12,7 +12,7 @@ import 'page_transitions_theme.dart';
 /// Android U and above when using predictive back.
 ///
 /// Currently predictive back is only supported on Android U and above, and if
-/// this [PageTransitionBuilder] is used by any other platform, it will fall
+/// this [PageTransitionsBuilder] is used by any other platform, it will fall
 /// back to [ZoomPageTransitionsBuilder].
 ///
 /// When used on Android U and above, animates along with the back gesture to
