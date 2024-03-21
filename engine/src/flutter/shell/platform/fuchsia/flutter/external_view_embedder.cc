@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #include "external_view_embedder.h"
+
 #include <algorithm>
 #include <cstdint>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -115,6 +117,9 @@ void ExternalViewEmbedder::BeginFrame(
 void ExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id,
                                               SkISize frame_size,
                                               double device_pixel_ratio) {
+  // Fuchsia only supports operating the implicit view for now.
+  FML_DCHECK(flutter_view_id == flutter::kFlutterImplicitViewId);
+
   // Reset for new view.
   Reset();
   frame_size_ = frame_size;
