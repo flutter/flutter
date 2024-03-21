@@ -14,11 +14,12 @@ import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
-  print(
-    "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
-    'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
-    "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
-  );
+  const String usageMessage = "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
+      'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
+      "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
+      "If you don't wish to re-generate the settings.gradle, build.gradle, and gradle-wrapper.properties files,\n"
+      "add the flag '--no-gradle-generation'";
+  print(usageMessage);
 
   final ArgParser argParser = ArgParser()
     ..addFlag(
@@ -31,8 +32,7 @@ void main(List<String> arguments) {
     args = argParser.parse(arguments);
   } on FormatException catch (error) {
     stderr.writeln('${error.message}\n');
-    stderr.writeln('Usage:\n');
-    stderr.writeln(argParser.usage);
+    stderr.writeln(usageMessage);
     exit(1);
   }
 
