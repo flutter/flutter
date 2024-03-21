@@ -62,9 +62,8 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
 
   static final Map<InterfaceElement, bool> _isRenderBoxClassElementCache = <InterfaceElement, bool>{};
   // The cached version, call this method instead of _checkIfImplementsRenderBox.
-  bool _implementsRenderBox(InterfaceElement interfaceElement) {
-    // Framework naming convention: RenderObject subclass names must start with
-    // _Render or Render.
+  static bool _implementsRenderBox(InterfaceElement interfaceElement) {
+    // Framework naming convention: a RenderObject subclass names have "Render" in its name.
     if (!interfaceElement.name.contains('Render')) {
       return false;
     }
@@ -72,11 +71,8 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
         || _isRenderBoxClassElementCache.putIfAbsent(interfaceElement, () => _checkIfImplementsRenderBox(interfaceElement));
   }
 
-  bool _checkIfImplementsRenderBox(InterfaceElement element) {
-    return element.allSupertypes.any((InterfaceType interface) {
-      final InterfaceElement interfaceElement = interface.element;
-      return interfaceElement is ClassElement && _implementsRenderBox(interfaceElement);
-    });
+  static bool _checkIfImplementsRenderBox(InterfaceElement element) {
+    return element.allSupertypes.any((InterfaceType interface) => _implementsRenderBox(interface.element));
   }
 
   // We don't care about directives, comments, or asserts.
