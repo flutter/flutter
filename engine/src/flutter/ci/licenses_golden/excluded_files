@@ -9,7 +9,6 @@
 ../../../README.md
 ../../../build
 ../../../build_overrides
-../../../buildtools
 ../../../flutter/.ci.yaml
 ../../../flutter/.clang-format
 ../../../flutter/.clang-tidy
@@ -27,6 +26,7 @@
 ../../../flutter/analysis_options.yaml
 ../../../flutter/build
 ../../../flutter/build_overrides
+../../../flutter/buildtools
 ../../../flutter/ci
 ../../../flutter/common/README.md
 ../../../flutter/display_list/benchmarking/dl_complexity_unittests.cc

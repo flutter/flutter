@@ -329,7 +329,7 @@ final class BuildRunner extends Runner {
       Platform.windows => 'windows-$_hostCpu',
       _ => throw StateError('This host OS "$os" is not supported.'),
     };
-    return p.join(engineSrcDir.path, 'buildtools', platformDir);
+    return p.join(engineSrcDir.path, 'flutter', 'buildtools', platformDir);
   }();
 
   Future<bool> _bootstrapRbe(

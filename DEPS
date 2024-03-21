@@ -842,7 +842,7 @@ deps = {
 
   # Clang on mac and linux are expected to typically be the same revision.
   # They are separated out so that the autoroller can more easily manage them.
-  'src/buildtools/mac-x64/clang': {
+  'src/flutter/buildtools/mac-x64/clang': {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
@@ -853,7 +853,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/mac-arm64/clang': {
+  'src/flutter/buildtools/mac-arm64/clang': {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-arm64',
@@ -864,7 +864,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/linux-x64/clang': {
+  'src/flutter/buildtools/linux-x64/clang': {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
@@ -875,7 +875,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/linux-arm64/clang': {
+  'src/flutter/buildtools/linux-arm64/clang': {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-arm64',
@@ -886,7 +886,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/windows-x64/clang': {
+  'src/flutter/buildtools/windows-x64/clang': {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
@@ -898,7 +898,7 @@ deps = {
   },
 
   # GOMA
-  'src/buildtools/mac-x64/goma': {
+  'src/flutter/buildtools/mac-x64/goma': {
     'packages': [
       {
         'package': 'fuchsia/third_party/goma/client/mac-amd64',
@@ -909,7 +909,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/linux-x64/goma': {
+  'src/flutter/buildtools/linux-x64/goma': {
     'packages': [
       {
         'package': 'fuchsia/third_party/goma/client/linux-amd64',
@@ -920,7 +920,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/windows-x64/goma': {
+  'src/flutter/buildtools/windows-x64/goma': {
     'packages': [
       {
         'package': 'fuchsia/third_party/goma/client/windows-amd64',
@@ -932,7 +932,7 @@ deps = {
   },
 
   # RBE binaries and configs.
-  'src/buildtools/linux-x64/reclient': {
+  'src/flutter/buildtools/linux-x64/reclient': {
     'packages': [
       {
         'package': 'infra/rbe/client/${{platform}}',
@@ -943,7 +943,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/mac-arm64/reclient': {
+  'src/flutter/buildtools/mac-arm64/reclient': {
     'packages': [
       {
         'package': 'infra/rbe/client/${{platform}}',
@@ -954,7 +954,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/mac-x64/reclient': {
+  'src/flutter/buildtools/mac-x64/reclient': {
     'packages': [
       {
         'package': 'infra/rbe/client/${{platform}}',
@@ -965,7 +965,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/windows-x64/reclient': {
+  'src/flutter/buildtools/windows-x64/reclient': {
     'packages': [
       {
         'package': 'infra/rbe/client/${{platform}}',
@@ -980,7 +980,7 @@ deps = {
     'packages': [
       {
         'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': 'PKYzmgx_GlWBAq7PEphD7bsfZ55WSOifmWisD0N-4e4C',
+        'version': 'ZuU_165luvP45DTYUP6WlEXb5EXyVxEuAm45ZB1c3zoC',
       }
     ],
     'condition': 'use_rbe',
@@ -988,7 +988,7 @@ deps = {
   },
 
   # gcloud
-  'src/buildtools/linux-x64/gcloud': {
+  'src/flutter/buildtools/linux-x64/gcloud': {
     'packages': [
       {
         'package': 'infra/3pp/tools/gcloud/${{platform}}',
@@ -999,7 +999,7 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  'src/buildtools/mac-arm64/gcloud': {
+  'src/flutter/buildtools/mac-arm64/gcloud': {
     'packages': [
       {
         'package': 'infra/3pp/tools/gcloud/${{platform}}',
@@ -1051,7 +1051,7 @@ deps = {
   },
 
   # cmake is only used by impeller-cmake-example.
-  'src/buildtools/mac-x64/cmake': {
+  'src/flutter/buildtools/mac-x64/cmake': {
     'packages': [
       {
         'package': 'infra/3pp/tools/cmake/mac-amd64',
@@ -1162,7 +1162,7 @@ hooks = [
     'condition': 'use_cipd_goma and host_os == "mac"',
     'action': [
       'python3',
-      'src/buildtools/mac-x64/goma/goma_ctl.py',
+      'src/flutter/buildtools/mac-x64/goma/goma_ctl.py',
       'ensure_start'
     ]
   },
@@ -1172,7 +1172,7 @@ hooks = [
     'condition': 'use_cipd_goma and host_os == "linux"',
     'action': [
       'python3',
-      'src/buildtools/linux-x64/goma/goma_ctl.py',
+      'src/flutter/buildtools/linux-x64/goma/goma_ctl.py',
       'ensure_start'
     ]
   },
@@ -1182,7 +1182,7 @@ hooks = [
     'condition': 'use_cipd_goma and download_windows_deps',
     'action': [
       'python3',
-      'src/buildtools/windows-x64/goma/goma_ctl.py',
+      'src/flutter/buildtools/windows-x64/goma/goma_ctl.py',
       'ensure_start'
     ]
   },

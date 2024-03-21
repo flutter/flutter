@@ -326,6 +326,7 @@ class ClangFormatChecker extends FormatChecker {
     clangFormat = File(
       path.join(
         srcDir.absolute.path,
+        'flutter',
         'buildtools',
         clangOs,
         'clang',

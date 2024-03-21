@@ -231,7 +231,9 @@ def setup_rbe(args):
   if args.rbe_platform:
     rbe_gn_args['rbe_platform'] = args.rbe_platform
 
-  rbe_gn_args['rbe_dir'] = os.path.join(SRC_ROOT, 'buildtools', buildtools_dir(), 'reclient')
+  rbe_gn_args['rbe_dir'] = os.path.join(
+      SRC_ROOT, 'flutter', 'buildtools', buildtools_dir(), 'reclient'
+  )
 
   rbe_gn_args['rbe_cfg'] = os.path.join(
       SRC_ROOT, 'flutter', 'build', 'rbe', 'rewrapper-' + buildtools_dir() + '.cfg'
@@ -271,7 +273,7 @@ def setup_goma(args):
     buildtools_platform = 'mac-x64'
 
   # Prefer the goma fetched by gclient if it exists.
-  cipd_goma_dir = os.path.join(SRC_ROOT, 'buildtools', buildtools_platform, 'goma')
+  cipd_goma_dir = os.path.join(SRC_ROOT, 'flutter', 'buildtools', buildtools_platform, 'goma')
 
   # Next, if GOMA_DIR is set, use that install.
   goma_dir = os.environ.get('GOMA_DIR')
@@ -456,6 +458,8 @@ def to_gn_args(args):
   runtime_mode = args.runtime_mode
 
   gn_args = {}
+
+  gn_args['buildtools_path'] = '//flutter/buildtools'
 
   gn_args['is_debug'] = args.unoptimized
 

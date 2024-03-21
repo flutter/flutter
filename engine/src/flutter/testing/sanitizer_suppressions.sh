@@ -3,10 +3,10 @@ ENGINE_BUILDROOT=$(cd $TESTING_DIRECTORY/../..; pwd -P)
 
 case "$(uname -s)" in
   Linux)
-    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/buildtools/linux-x64"
+    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/flutter/buildtools/linux-x64"
     ;;
   Darwin)
-    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/buildtools/mac-x64"
+    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/flutter/buildtools/mac-x64"
     ;;
 esac
 

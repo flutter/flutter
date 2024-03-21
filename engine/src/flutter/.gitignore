@@ -134,6 +134,9 @@ app.*.symbols
 # GN build support for protobufs vended by Fuchsia.
 # /build/secondary/third_party/protobuf
 
+# Build tools vended from CIPD
+/buildtools
+
 # RBE support configurations and scripts vended from CIPD
 /build/rbe
 

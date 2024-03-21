@@ -18,9 +18,7 @@ import sys
 
 # Path constants. (All of these should be absolute paths.)
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
-LLVM_BUILD_DIR = os.path.abspath(
-    os.path.join(THIS_DIR, '..', '..', 'buildtools', 'windows-x64', 'clang')
-)
+LLVM_BUILD_DIR = os.path.abspath(os.path.join(THIS_DIR, '..', 'buildtools', 'windows-x64', 'clang'))
 
 
 def GetDiaDll():

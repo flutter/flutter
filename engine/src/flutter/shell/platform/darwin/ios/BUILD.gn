@@ -6,6 +6,7 @@ assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
 import("//build/toolchain/clang.gni")
+import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
@@ -344,7 +345,7 @@ copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
   _libclang_base_path =
-      "//buildtools/mac-x64/clang/lib/clang/13.0.0/lib/darwin/"
+      "$buildtools_path/mac-x64/clang/lib/clang/13.0.0/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"

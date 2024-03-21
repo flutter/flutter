@@ -40,7 +40,7 @@ void main(List<String> arguments) {
     outPath = p.join(engineCheckoutPath, outPath);
   }
   final String buildToolsPath = arguments.length == 1
-      ? p.join(p.dirname(outPath), 'buildtools')
+      ? p.join(p.dirname(outPath), 'flutter', 'buildtools')
       : arguments[1];
 
   String platform;

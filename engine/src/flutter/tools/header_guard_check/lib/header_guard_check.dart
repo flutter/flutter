@@ -183,6 +183,7 @@ final ArgParser _parser = ArgParser()
     valueHelp: 'path/to/dir/or/file (relative to the engine root)',
     defaultsTo: _engine != null ? <String>[
       'build',
+      'buildtools',
       'impeller/compiler/code_gen_template.h',
       'prebuilts',
       'third_party',

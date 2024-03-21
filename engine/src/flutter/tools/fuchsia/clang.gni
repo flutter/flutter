@@ -2,10 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/toolchain.gni")
+
 declare_args() {
   # The default clang toolchain provided by the prebuilt. This variable is
   # additionally consumed by the Go toolchain.
-  clang_base = rebase_path("//buildtools/${host_os}-${host_cpu}/clang/lib")
+  clang_base = rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/lib")
 }
 
 if (current_cpu == "arm64") {
