@@ -1,4 +1,4 @@
-Signature: 536cb7e12a84d02e71ba0b1ac3859707
+Signature: fb521492a9d80fd11e2dc0898c2be5fc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7139,9 +7139,9 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/SharpenEff
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/SkSLEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/SphereEffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_builtin.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_runtime.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icupriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeImage.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeLightSource.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGImage.h + ../../../flutter/third_party/skia/LICENSE
@@ -7223,9 +7223,9 @@ FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/SharpenEffec
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/SkSLEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
-FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_builtin.cpp
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_runtime.cpp
+FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icupriv.h
 FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeImage.h
 FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeLightSource.h
 FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGImage.h
@@ -7955,7 +7955,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skottie/src/text/Font.h + ../.
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextEditor.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextEditor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_client.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_client.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_libgrapheme.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -7985,7 +7984,6 @@ FILE: ../../../flutter/third_party/skia/modules/skottie/src/text/Font.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextEditor.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextEditor.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_client.cpp
-FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_client.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_libgrapheme.cpp
 FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../flutter/third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
@@ -9521,6 +9519,10 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/gl/epoxy/GrGLMakeEpoxyEGLI
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_coretext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_harfbuzz.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_skunicode.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_client.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu4x.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_libgrapheme.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h + ../../../flutter/third_party/skia/LICENSE
@@ -9544,6 +9546,10 @@ FILE: ../../../flutter/third_party/skia/include/gpu/gl/epoxy/GrGLMakeEpoxyEGLInt
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_coretext.h
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_harfbuzz.h
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_skunicode.h
+FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_client.h
+FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu.h
+FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu4x.h
+FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_libgrapheme.h
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h
 FILE: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h
