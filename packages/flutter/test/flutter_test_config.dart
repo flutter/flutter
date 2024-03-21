@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart'
     as flutter_goldens;
 
 /// If true, leak tracking is enabled for all `testWidgets`.
