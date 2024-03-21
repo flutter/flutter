@@ -49,7 +49,7 @@ class _RenderBoxIntrinsicCalculationRule implements AnalyzeRule {
       for (final MapEntry<ResolvedUnitResult, List<(AstNode, String)>> entry in _errors.entries)
         for (final (AstNode node, String suggestion) in entry.value)
           '${locationInFile(entry.key, node, workingDirectory)}: ${node.parent}. Consider calling $suggestion instead.',
-      '\n${bold}Typically the get* methods should be used to compute the intrinsics of a RenderBox.$reset',
+      '\n${bold}Typically the get* methods should be used to obtain the intrinsics of a RenderBox.$reset',
     ]);
   }
 

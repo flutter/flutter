@@ -289,7 +289,7 @@ void main() {
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
       '║ \n'
-      '║ Typically the get* methods should be used to compute the intrinsics of a RenderBox.\n'
+      '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
