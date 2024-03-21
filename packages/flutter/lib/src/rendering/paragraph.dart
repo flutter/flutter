@@ -1779,10 +1779,13 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           targetPosition = boundaryAtPosition.boundaryEnd;
         } else {
           // Keep the origin text boundary in bounds when position is at the static edge.
-          targetPosition = existingSelectionStart;
+          targetPosition = forwardSelection ? existingSelectionStart : existingSelectionEnd;
         }
         if (shouldSwapEdges) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(
+            _clampTextPosition(forwardSelection ? originTextBoundary.boundaryStart : originTextBoundary.boundaryEnd),
+            isEnd: !isEnd,
+          );
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
         final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
@@ -1923,10 +1926,13 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           targetPosition = boundaryAtPosition.boundaryEnd;
         } else {
           // Keep the origin text boundary in bounds when position is at the static edge.
-          targetPosition = existingSelectionEnd;
+          targetPosition = forwardSelection ? existingSelectionEnd : existingSelectionStart;
         }
         if (shouldSwapEdges) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(
+            _clampTextPosition(forwardSelection ? originTextBoundary.boundaryEnd : originTextBoundary.boundaryStart),
+            isEnd: !isEnd,
+          );
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
         final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
