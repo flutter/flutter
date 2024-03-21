@@ -1,4 +1,4 @@
-Signature: 973316a2d1d1e3b6c5f83c1ec7746acb
+Signature: ba6ee660bc19818ad76a5fe05a950e21
 
 ====================================================================================================
 LIBRARY: dart
@@ -4131,22 +4131,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/builders.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/code.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/diagnostic.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/exceptions.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/introspection.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/macro.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_macros/macros.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/developer/http_profiling.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/sdk/lib/_macros/builders.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/code.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/diagnostic.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/exceptions.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/introspection.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/macro.dart
-FILE: ../../../third_party/dart/sdk/lib/_macros/macros.dart
 FILE: ../../../third_party/dart/sdk/lib/developer/http_profiling.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2024, the Dart project authors. Please see the AUTHORS file
@@ -4751,7 +4737,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/7c64e31f4c3eaa0bcfd29ce40459b74cf20a806d
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/5e825c7fcf59d40f2fe1df99926878d4ba5e14a3
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
