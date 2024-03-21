@@ -2070,7 +2070,7 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('MenuItemButton', () {
     testWidgets('Shortcut mnemonics are displayed', (WidgetTester tester) async {
@@ -2193,7 +2193,7 @@ void main() {
       expect(mnemonic2.data, equals('↵'));
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb && !isCanvasKit,
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
     );
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
@@ -2250,7 +2250,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
-    }, skip: kIsWeb && !isCanvasKit);
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
       final MenuController submenuController = MenuController();
@@ -3216,7 +3216,7 @@ void main() {
       expect(find.text(allExpected), findsOneWidget);
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('CheckboxMenuButton', () {
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -3623,7 +3623,7 @@ void main() {
     expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
     expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
     expect(material.textStyle?.decoration, menuTextStyle.decoration);
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
