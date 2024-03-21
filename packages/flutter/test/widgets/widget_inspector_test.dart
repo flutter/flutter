@@ -4198,6 +4198,97 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(WidgetsBinding.instance.debugShowWidgetInspectorOverride, isFalse);
     });
 
+    testWidgets('ext.flutter.inspector.show via WidgetsApp.debugShowWidgetInspectorOverride', (WidgetTester tester) async {
+      final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
+      Map<Object, Object?> extensionChangedEvent;
+      int debugShowChangeCounter = 0;
+
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        WidgetsApp(
+          key: key,
+          builder: (BuildContext context, Widget? child) {
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = tester.widget(
+        find.byType(ValueListenableBuilder<bool>),
+      );
+      void debugShowWidgetInspectorOverrideCallback() {
+        debugShowChangeCounter++;
+      }
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+      valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
+
+      service.rebuildCount = 0;
+      expect(extensionChangedEvents, isEmpty);
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+      expect(extensionChangedEvents.length, equals(1));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{},
+        ),
+        equals('true'),
+      );
+      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(extensionChangedEvents.length, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+      expect(extensionChangedEvents.length, equals(2));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'false'},
+        ),
+        equals('false'),
+      );
+      expect(extensionChangedEvents.length, equals(3));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isFalse);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{},
+        ),
+        equals('false'),
+      );
+      expect(extensionChangedEvents.length, equals(3));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
+      expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
+    });
+
     testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
       final GlobalKey outerContainerKey = GlobalKey();
       final GlobalKey paddingKey = GlobalKey();
