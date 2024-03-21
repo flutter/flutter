@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This code is copied from `package:web` which still needs its own
+// documentation for public members. Since this is a shim that users should not
+// use, we ignore this lint for this file.
 // ignore_for_file: public_member_api_docs
 
 /// A stripped down version of `package:web` to avoid pinning that repo in
