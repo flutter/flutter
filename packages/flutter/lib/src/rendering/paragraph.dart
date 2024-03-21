@@ -1452,7 +1452,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           case TextGranularity.word:
             result = _updateSelectionEdgeByTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getWordBoundaryAtPosition);
           case TextGranularity.paragraph:
-            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition);
+            result = _updateSelectionEdgeByMultiSelectableTextBoundary(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate, getTextBoundary: _getParagraphBoundaryAtPosition, getClampedTextBoundary: _getClampedParagraphBoundaryAtPosition);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1842,7 +1842,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // boundary. Do not search when the current drag position is on a placeholder
       // to allow traversal to reach that placeholder.
       final bool positionOnPlaceholder = paragraph.getWordBoundary(position).textInside(fullText) == _placeholderCharacter;
-      if (existingSelectionEnd != null && paragraphContainsPosition && !positionOnPlaceholder) {
+      if (!paragraphContainsPosition || positionOnPlaceholder) {
+        return null;
+      }
+      if (existingSelectionEnd != null) {
         final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(position, fullText);
         final bool backwardSelection = existingSelectionStart == null && existingSelectionEnd.offset == range.start
             || existingSelectionStart == existingSelectionEnd && existingSelectionEnd.offset == range.start
@@ -1983,7 +1986,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // boundary. Do not search when the current drag position is on a placeholder
       // to allow traversal to reach that placeholder.
       final bool positionOnPlaceholder = paragraph.getWordBoundary(position).textInside(fullText) == _placeholderCharacter;
-      if (existingSelectionStart != null && paragraphContainsPosition && !positionOnPlaceholder) {
+      if (!paragraphContainsPosition || positionOnPlaceholder) {
+        return null;
+      }
+      if (existingSelectionStart != null) {
         final _TextBoundaryRecord boundaryAtPosition = getTextBoundary(position, fullText);
         final bool backwardSelection = existingSelectionEnd == null && existingSelectionStart.offset == range.end
             || existingSelectionStart == existingSelectionEnd && existingSelectionStart.offset == range.end
@@ -2347,7 +2353,14 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return null;
   }
 
-  SelectionResult _updateSelectionEdgeByMultiSelectableTextBoundary(Offset globalPosition, {required bool isEnd, required _TextBoundaryAtPositionInText getTextBoundary}) {
+  SelectionResult _updateSelectionEdgeByMultiSelectableTextBoundary(
+    Offset globalPosition,
+    {
+      required bool isEnd,
+      required _TextBoundaryAtPositionInText getTextBoundary,
+      required _TextBoundaryAtPosition getClampedTextBoundary,
+    }
+  ) {
     // When the start/end edges are swapped, i.e. the start is after the end, and
     // the scrollable synthesizes an event for the opposite edge, this will potentially
     // move the opposite edge outside of the origin text boundary and we are unable to recover.
@@ -2423,7 +2436,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     // we do not need to look up the text boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    _TextBoundaryRecord? textBoundary = _boundingBoxesContains(localPosition) ? _getClampedParagraphBoundaryAtPosition(position) : null;
+    _TextBoundaryRecord? textBoundary = _boundingBoxesContains(localPosition) ? getClampedTextBoundary(position) : null;
     if (textBoundary != null
         && (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start
         || textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end)) {
@@ -2433,7 +2446,23 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       // computing the target position.
       textBoundary = null;
     }
-    final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByTextBoundary(textBoundary, _getClampedParagraphBoundaryAtPosition, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByTextBoundary(textBoundary, _getClampedParagraphBoundaryAtPosition, position, existingSelectionStart, existingSelectionEnd));
+    final TextPosition targetPosition = _clampTextPosition(
+      isEnd
+          ? _updateSelectionEndEdgeByTextBoundary(
+              textBoundary,
+              getClampedTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            )
+          : _updateSelectionStartEdgeByTextBoundary(
+              textBoundary,
+              getClampedTextBoundary,
+              position,
+              existingSelectionStart,
+              existingSelectionEnd,
+            ),
+    );
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
