@@ -24,7 +24,7 @@ void main(List<String> arguments) {
   final ArgParser argParser = ArgParser()
     ..addFlag(
       'gradle-generation',
-      help: 'Skip re-generating gradle files in each processed directory.',
+      help: 'Re-generate gradle files in each processed directory.',
       defaultsTo: true,
     );
 
