@@ -1771,7 +1771,7 @@ abstract class RenderBox extends RenderObject {
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
-  @protected
+  @visibleForOverriding
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
   }
@@ -1845,7 +1845,7 @@ abstract class RenderBox extends RenderObject {
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   ///  * [computeMaxIntrinsicHeight], which computes the smallest height beyond
   ///    which increasing the height never decreases the preferred width.
-  @protected
+  @visibleForOverriding
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
   }
@@ -1922,7 +1922,7 @@ abstract class RenderBox extends RenderObject {
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
-  @protected
+  @visibleForOverriding
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;
   }
@@ -1995,7 +1995,7 @@ abstract class RenderBox extends RenderObject {
   /// return a valid answer. In such cases, the function should call
   /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
-  @protected
+  @visibleForOverriding
   Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
@@ -2093,7 +2093,7 @@ abstract class RenderBox extends RenderObject {
   /// updating the widget tree, violating the "dry" contract. In such cases the
   /// [RenderBox] must call [debugCannotComputeDryLayout] in an assert, and
   /// return a dummy baseline offset value (such as `null`).
-  @protected
+  @visibleForOverriding
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
@@ -2405,7 +2405,7 @@ abstract class RenderBox extends RenderObject {
   ///    computation, call [getDistanceToActualBaseline] on the child (not
   ///    [computeDistanceToActualBaseline], the internal implementation, and not
   ///    [getDistanceToBaseline], the public entry point for this API).
-  @protected
+  @visibleForOverriding
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return null;
