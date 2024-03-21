@@ -7,15 +7,12 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -361,84 +358,6 @@ void main() {
           '10',
         ]);
         // Finishes normally without error.
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
-      testUsingContext('fails when v1 FlutterApplication is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-             <application
-                  android:name="io.flutter.app.FlutterApplication">
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
-      testUsingContext('fails when v1 metadata is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-              <application >
-                <meta-data
-                    android:name="flutterEmbedding"
-                    android:value="1" />
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1286,11 +1205,6 @@ class TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk {
-  @override
-  String get adbPath => 'adb';
 }
 
 class FakeDevice extends Fake implements Device {
