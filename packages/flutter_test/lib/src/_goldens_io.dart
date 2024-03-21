@@ -292,7 +292,7 @@ ByteData _invert(ByteData imageBytes) {
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
-  /// This is provided to prevent warnings from the analyzer
+  /// This is provided to prevent warnings from the analyzer.
   DefaultWebGoldenComparator(Uri _) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
