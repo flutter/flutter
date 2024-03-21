@@ -366,6 +366,78 @@ class PlatformViewMaxOverlaysScenario extends Scenario
   }
 }
 
+/// A platform view with adjacent surrounding layers should not create overlays.
+class PlatformViewSurroundingLayersScenario extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  PlatformViewSurroundingLayersScenario(
+    super.view, {
+    required this.id,
+  });
+
+  /// The platform view identifier.
+  final int id;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    // Simulate partial pixel offsets as we would see while scrolling.
+    // All objects in the scene below are then on sub-pixel boundaries.
+    builder.pushOffset(0.5, 0.5);
+
+    // a platform view from (100, 100) to (200, 200)
+    builder.pushOffset(100, 100);
+    addPlatformView(
+      id,
+      width: 100,
+      height: 100,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+    builder.pop();
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    const Rect rect = Rect.fromLTWH(100, 100, 100, 100);
+
+    // Rect at the left of platform view
+    canvas.drawRect(
+      rect.shift(const Offset(-100, 0)),
+      Paint()..color = const Color(0x22FF0000),
+    );
+
+    // Rect at the right of platform view
+    canvas.drawRect(
+      rect.shift(const Offset(100, 0)),
+      Paint()..color = const Color(0x22FF0000),
+    );
+
+    // Rect at the top of platform view
+    canvas.drawRect(
+      rect.shift(const Offset(0, -100)),
+      Paint()..color = const Color(0x22FF0000),
+    );
+
+    // Rect at the bottom of platform view
+    canvas.drawRect(
+      rect.shift(const Offset(0, 100)),
+      Paint()..color = const Color(0x22FF0000),
+    );
+
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    // Pop the (0.5, 0.5) offset.
+    builder.pop();
+
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
 /// Builds a scene with 2 platform views.
 class MultiPlatformViewScenario extends Scenario
     with _BasePlatformViewScenarioMixin {
