@@ -1,4 +1,4 @@
-Signature: 92b664c5b6675c28ebe0bdca196e00a1
+Signature: 20e516e43f4cd145d010f783d5487f58
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -6697,7 +6697,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-vthread/include/trace-vthread/event
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-vthread/include/trace-vthread/internal/event_vthread.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event_args.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_args.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/composed_service_dir.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/composed_service_dir.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/bti.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/debuglog.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -7065,7 +7064,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-vthread/include/trace-vthread/event_v
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-vthread/include/trace-vthread/internal/event_vthread.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event_args.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_args.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/composed_service_dir.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/composed_service_dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/bti.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/debuglog.cc
@@ -12000,35 +11998,13 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/c
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_aggregate.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_watcher.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/flags.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/connection.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/directory.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/directory_connection.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/dirent_filler.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/file.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/file_connection.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/node.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/node_connection.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/lazy_dir.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/pseudo_dir.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/pseudo_file.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/remote_dir.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/vmo_file.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/connection.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/directory.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/directory_connection.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/dirent_filler.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/file.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/file_connection.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/node.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/node_connection.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/lazy_dir.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/pseudo_dir.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/pseudo_file.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/remote_dir.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/vmo_file.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/clock.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/exception.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/pager.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12449,35 +12425,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_aggregate.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_watcher.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/flags.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/connection.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/directory.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/directory_connection.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/dirent_filler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/file.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/file_connection.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/node.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/node_connection.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/lazy_dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/pseudo_dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/pseudo_file.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/remote_dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/service.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/vmo_file.h
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/connection.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/directory.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/directory_connection.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/dirent_filler.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/file.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/file_connection.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/node.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/internal/node_connection.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/lazy_dir.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/pseudo_dir.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/pseudo_file.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/remote_dir.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/service.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/vmo_file.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/clock.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/pager.h
