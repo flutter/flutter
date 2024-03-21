@@ -360,8 +360,8 @@ class AppKitView extends _DarwinView {
   State<AppKitView> createState() => _AppKitViewState();
 }
 
-/// The signature of the function that gets called when the platform view's DOM
-/// element is created.
+/// The signature of the function that gets called when the [HtmlElementView]
+/// DOM element is created.
 ///
 /// [element] is the DOM element that was created.
 ///
@@ -387,9 +387,9 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// {@macro flutter.widgets.AndroidView.layout}
 ///
 /// Embedding HTML is a _potentially expensive_ operation and should be avoided
-/// when a Flutter equivalent is possible. This widget is useful to integrate
-/// native HTML elements to a Flutter web app, like a `<video>` tag, or
-/// a `<div>` where a [Google Map](https://pub.dev/packages/google_maps_flutter)
+/// when a Flutter equivalent is possible. (See **`isVisible` parameter** below.)
+/// This widget is useful to integrate native HTML elements to a Flutter web app,
+/// like a `<video>` tag, or a `<div>` where a [Google Map](https://pub.dev/packages/google_maps_flutter)
 /// can be rendered.
 ///
 /// This widget **only works on Flutter web.** To embed web content on other
@@ -414,8 +414,8 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// ```
 ///
 /// The example creates a `<div>` element, then calls the `onElementCreated`
-/// callback with the created `<div>`, so it can be customized **before it is
-/// attached to the DOM.**
+/// callback with the created `<div>`, so it can be customized **before** it is
+/// attached to the DOM.
 ///
 /// (See more details about `onElementCreated` in the **Lifecycle** section below.)
 ///
@@ -462,8 +462,8 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// #### 2. `HtmlElementView` widget
 ///
-/// Once a factory is registered, an `HtmlElementView` widget of `viewType`
-/// can be added to the widget tree, like so:
+/// Once a factory is registered, an `HtmlElementView` widget of `viewType` can
+/// be added to the widget tree, like so:
 ///
 /// ```dart
 /// // In a `build` method...
@@ -476,17 +476,16 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// );
 /// ```
 ///
-/// `viewType` can be any string, but **must match** the value used to
-/// `registerViewFactory` before.
+/// [viewType] **must** match the value used to `registerViewFactory` before.
 ///
-/// `creationParams` (optional) will be passed to your `viewFactory` function,
+/// [creationParams] (optional) will be passed to your `viewFactory` function,
 /// if it accepts them.
 ///
 /// [onPlatformViewCreated] will be called with the `viewId` of the platform
 /// view (`element`) created by the `viewFactory`, before it gets attached to
 /// the DOM.
 ///
-/// The `viewId` can be used to retrieve the created `element` (The same
+/// The `viewId` can be used to retrieve the created `element` (The same one
 /// passed to `onElementCreated` in [HtmlElementView.fromTagName]) with the
 /// `ui_web.platformViewRegistry.`[`getViewById` method](https://api.flutter.dev/flutter/dart-ui_web/PlatformViewRegistry/getViewById.html).
 ///
@@ -499,7 +498,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// with an additional lifecycle method: `onPlatformViewCreated` / `onElementCreated`
 /// (depending on the constructor, see **Usage** above).
 ///
-/// The only difference between the callbacks is the parameter they receive:
+/// The difference between the two callbacks is the parameter they receive:
 ///
 /// * `onPlatformViewCreated` will be called with the created `viewId` as a parameter,
 ///   and needs `ui_web.platformViewRegistry.getViewById` to retrieve the created
@@ -606,7 +605,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// In order for the `HtmlElementView` contents to be interactive, they're allowed
 /// to handle `pointer-events`. This may result in Flutter missing some events
-/// because they've been handled by the `HtmlElementView`, and never seen by
+/// because they've been handled by the `HtmlElementView`, and not seen by
 /// Flutter.
 ///
 /// [`package:pointer_interceptor`](https://pub.dev/packages/pointer_interceptor)
@@ -627,8 +626,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 ///
 /// Rendering custom HTML content (from `HtmlElementView`) in between `canvas`
 /// pixels means that the Flutter web engine needs to _split_ the canvas drawing
-/// into elements drawn _behind_ the HTML content, and those drawn _above_ the
-/// HTML content.
+/// into elements drawn _behind_ the HTML content, and those drawn _above_ it.
 ///
 /// In the Flutter web engine, each of these _splits of the canvas to sandwich
 /// HTML content in between_ is referred to as an **overlay**.
@@ -637,8 +635,8 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// execution performance, and it is best to minimize their amount; browsers
 /// support a limited number of _overlays_ on a single scene at a given time.
 ///
-/// `HtmlElementView` objects have an `isVisible` property that can be passed when
-/// registering the factory function, or calling `fromTagName`. _isVisible_ refers
+/// `HtmlElementView` objects have an `isVisible` property that can be passed
+/// through `registerViewFactory`, or `fromTagName`. `isVisible` refers
 /// to whether the `HtmlElementView` will paint pixels on the screen or not.
 ///
 /// Correctly defining this value helps the Flutter web rendering engine optimize
