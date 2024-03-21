@@ -7,7 +7,7 @@ This is a command line Dart program that automates workflows in the
 
 > [!NOTE]
 > This tool is under development and is not yet ready for general use. Consider
-> filing a [feature request](https://github.com/flutter/flutter/issues/new?labels=e:engine-tool,team-engine).
+> filing a [feature request](https://github.com/flutter/flutter/issues/new?labels=e:%20engine-tool,team-engine).
 
 ## Prerequisites
 
