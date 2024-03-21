@@ -377,14 +377,6 @@ void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache,
             ->CollectBackingStore(backing_store);
       };
   if (use_present_layers_callback) {
-    compositor_.present_view_callback = [](const FlutterPresentViewInfo* info) {
-      auto compositor =
-          reinterpret_cast<EmbedderTestCompositor*>(info->user_data);
-
-      return compositor->Present(info->view_id, info->layers,
-                                 info->layers_count);
-    };
-  } else {
     compositor_.present_layers_callback = [](const FlutterLayer** layers,
                                              size_t layers_count,
                                              void* user_data) {
@@ -393,6 +385,14 @@ void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache,
       // The present layers callback is incompatible with multiple views;
       // it can only be used to render the implicit view.
       return compositor->Present(kFlutterImplicitViewId, layers, layers_count);
+    };
+  } else {
+    compositor_.present_view_callback = [](const FlutterPresentViewInfo* info) {
+      auto compositor =
+          reinterpret_cast<EmbedderTestCompositor*>(info->user_data);
+
+      return compositor->Present(info->view_id, info->layers,
+                                 info->layers_count);
     };
   }
   compositor_.avoid_backing_store_cache = avoid_backing_store_cache;
