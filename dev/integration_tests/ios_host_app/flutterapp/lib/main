@@ -36,12 +36,12 @@ void main() {
   // will be made to let us know when we should be changing the app state.
   _kReloadChannel.setMessageHandler(run);
   // Start off with whatever the initial route is supposed to be.
-  run(ui.window.defaultRouteName);
+  run(ui.PlatformDispatcher.instance.defaultRouteName);
 }
 
 Future<String> run(String? name) async {
   // The platform-specific component will call [setInitialRoute] on the Flutter
-  // view (or view controller for iOS) to set [ui.window.defaultRouteName].
+  // view (or view controller for iOS) to set [ui.PlatformDispatcher.defaultRouteName].
   // We then dispatch based on the route names to show different Flutter
   // widgets.
   // Since we don't really care about Flutter-side navigation in this app, we're
