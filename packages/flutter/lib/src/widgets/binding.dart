@@ -822,7 +822,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
   Future<bool> _handleStartBackGesture(Map<dynamic, dynamic> arguments) {
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromJSON(arguments as Map<String, dynamic>);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
         return Future<bool>.value(true);
@@ -838,7 +838,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
   Future<bool> _handleUpdateBackGestureProgress(Map<dynamic, dynamic> arguments) {
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromJSON(arguments as Map<String, dynamic>);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleUpdateBackGestureProgress(backEvent)) {
         return Future<bool>.value(true);

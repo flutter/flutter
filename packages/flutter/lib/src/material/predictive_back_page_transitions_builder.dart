@@ -11,9 +11,13 @@ import 'page_transitions_theme.dart';
 /// transition animation that looks like the default page transition used on
 /// Android U and above when using predictive back.
 ///
-/// When used on Android, animates along with the back gesture to reveal the
-/// destination route. Can be canceled by dragging back towards the edge of the
-/// screen.
+/// Currently predictive back is only supported on Android U and above, and if
+/// this [PageTransitionBuilder] is used by any other platform, it will fall
+/// back to [ZoomPageTransitionsBuilder].
+///
+/// When used on Android U and above, animates along with the back gesture to
+/// reveal the destination route. Can be canceled by dragging back towards the
+/// edge of the screen.
 ///
 /// See also:
 ///

@@ -23,17 +23,17 @@ enum SwipeEdge {
 @immutable
 class PredictiveBackEvent {
   /// Creates a new [PredictiveBackEvent] instance.
-  const PredictiveBackEvent({
+  const PredictiveBackEvent._({
     required this.x,
     required this.y,
     required this.progress,
     required this.swipeEdge,
-  });
+  }) : assert(progress >= 0.0 && progress <= 1.0);
 
   /// Creates an [PredictiveBackEvent] from a Map, typically used when converting
   /// data received from a platform channel.
-  factory PredictiveBackEvent.fromMap(Map<dynamic, dynamic> json) {
-    return PredictiveBackEvent(
+  factory PredictiveBackEvent.fromJSON(Map<String, dynamic> json) {
+    return PredictiveBackEvent._(
       x: (json['x'] as num?)?.toDouble(),
       y: (json['y'] as num?)?.toDouble(),
       progress: (json['progress'] as num).toDouble(),
