@@ -38,7 +38,7 @@ void main(List<String> arguments) {
 
   print(usageMessage);
 
-  /// Skip re-generating gradle files in each processed directory.
+  /// Re-generate gradle files in each processed directory.
   final bool gradleGeneration = (args['gradle-generation'] as bool?) ?? true;
 
   const FileSystem fileSystem = LocalFileSystem();
