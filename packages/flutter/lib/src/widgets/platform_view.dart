@@ -619,9 +619,6 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// In those cases, the `HtmlElementView` will seem like it's _swallowing_
 /// the events and not participating in Flutter's gesture detection.
 ///
-/// `package:webview_flutter` for the web is implemented as an `HtmlElementView`
-/// backed by an `<iframe>` element.
-///
 /// ## `isVisible` parameter
 ///
 /// Rendering custom HTML content (from `HtmlElementView`) in between `canvas`
