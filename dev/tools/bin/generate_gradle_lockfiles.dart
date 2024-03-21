@@ -19,7 +19,6 @@ void main(List<String> arguments) {
       "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
       "If you don't wish to re-generate the settings.gradle, build.gradle, and gradle-wrapper.properties files,\n"
       "add the flag '--no-gradle-generation'";
-  print(usageMessage);
 
   final ArgParser argParser = ArgParser()
     ..addFlag(
@@ -36,6 +35,8 @@ void main(List<String> arguments) {
     stderr.writeln(usageMessage);
     exit(1);
   }
+
+  print(usageMessage);
 
   /// Skip re-generating gradle files in each processed directory.
   final bool gradleGeneration = (args['gradle-generation'] as bool?) ?? true;
