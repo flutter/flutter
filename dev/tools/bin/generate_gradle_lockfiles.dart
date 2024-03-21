@@ -8,6 +8,7 @@
 
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -18,6 +19,25 @@ void main(List<String> arguments) {
     'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
     "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
   );
+
+  final ArgParser argParser = ArgParser()
+    ..addFlag(
+      'no-gradle-generation',
+      help: 'Skip re-generating gradle files in each processed directory.'
+    );
+
+  ArgResults args;
+  try {
+    args = argParser.parse(arguments);
+  } on FormatException catch (error) {
+    stderr.writeln('${error.message}\n');
+    stderr.writeln('Usage:\n');
+    stderr.writeln(argParser.usage);
+    exit(1);
+  }
+
+  /// Skip re-generating gradle files in each processed directory.
+  final bool noGradleRegeneration = (args['no-gradle-generation'] as bool?) ?? false;
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
@@ -86,9 +106,11 @@ void main(List<String> arguments) {
       // noop
     }
 
-    rootBuildGradle.writeAsStringSync(rootGradleFileContent);
-    settingsGradle.writeAsStringSync(settingGradleFile);
-    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
+    if (!noGradleRegeneration) {
+      rootBuildGradle.writeAsStringSync(rootGradleFileContent);
+      settingsGradle.writeAsStringSync(settingGradleFile);
+      wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
+    }
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
