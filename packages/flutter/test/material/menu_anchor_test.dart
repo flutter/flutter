@@ -2191,7 +2191,10 @@ void main() {
       expect(mnemonic1.data, equals('Fn'));
       mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
       expect(mnemonic2.data, equals('↵'));
-    }, variant: TargetPlatformVariant.all());
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit,
+    );
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
