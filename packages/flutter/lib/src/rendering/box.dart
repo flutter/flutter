@@ -1772,6 +1772,7 @@ abstract class RenderBox extends RenderObject {
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   @visibleForOverriding
+  @protected
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
   }
@@ -1846,6 +1847,7 @@ abstract class RenderBox extends RenderObject {
   ///  * [computeMaxIntrinsicHeight], which computes the smallest height beyond
   ///    which increasing the height never decreases the preferred width.
   @visibleForOverriding
+  @protected
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
   }
@@ -1923,6 +1925,7 @@ abstract class RenderBox extends RenderObject {
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   @visibleForOverriding
+  @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;
   }
@@ -1996,6 +1999,7 @@ abstract class RenderBox extends RenderObject {
   /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @visibleForOverriding
+  @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
@@ -2094,6 +2098,7 @@ abstract class RenderBox extends RenderObject {
   /// [RenderBox] must call [debugCannotComputeDryLayout] in an assert, and
   /// return a dummy baseline offset value (such as `null`).
   @visibleForOverriding
+  @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
@@ -2406,6 +2411,7 @@ abstract class RenderBox extends RenderObject {
   ///    [computeDistanceToActualBaseline], the internal implementation, and not
   ///    [getDistanceToBaseline], the public entry point for this API).
   @visibleForOverriding
+  @protected
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return null;
