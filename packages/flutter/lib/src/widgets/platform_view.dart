@@ -588,7 +588,7 @@ typedef ElementCreatedCallback = void Function(Object element);
 /// }
 /// ```
 ///
-/// Note that `FlutterView.viewId` and the `viewId` parameter passed to
+/// **Important:** `FlutterView.viewId` and the `viewId` parameter passed to
 /// the `viewFactory` identify **different objects**:
 ///
 /// * `flutterViewId` (from `View.of(context)`) represents the [FlutterView]
