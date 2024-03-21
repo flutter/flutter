@@ -2662,21 +2662,14 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget build(BuildContext context) {
     return CupertinoApp(
       initialRoute: 'home',
-      onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch (settings.name) {
-              case 'home':
-                return _buildHome(context);
-              case 'sub':
-                return _buildSub(context);
-              default:
-                throw UnimplementedError();
-            }
-          },
-        );
-      },
+      onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        settings: settings,
+        builder: (BuildContext context) => switch (settings.name) {
+          'home' => _buildHome(context),
+          'sub'  => _buildSub(context),
+          _ => throw UnimplementedError(),
+        },
+      ),
     );
   }
 }

@@ -375,6 +375,27 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
+  test('textAlign triggers TextPainter relayout in the paint method', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: 'A', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    Rect getRectForA() => paragraph.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).single.toRect();
+
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
+
+    expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
+
+    paragraph.textAlign = TextAlign.right;
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isTrue);
+
+    paragraph.paint(MockPaintingContext(), Offset.zero);
+    expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
+
   group('didExceedMaxLines', () {
     RenderParagraph createRenderParagraph({
       int? maxLines,

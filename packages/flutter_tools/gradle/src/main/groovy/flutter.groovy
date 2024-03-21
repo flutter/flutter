@@ -53,7 +53,7 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 33
+    public final int targetSdkVersion = 34
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
