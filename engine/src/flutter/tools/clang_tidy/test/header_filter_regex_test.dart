@@ -39,6 +39,7 @@ void main() {
       '.git',
       '.github',
       'build_overrides',
+      'buildtools',
       'prebuilts',
       'third_party',
     };

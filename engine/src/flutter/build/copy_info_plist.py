@@ -23,7 +23,7 @@ import git_revision
 
 def get_clang_version():
   clang_executable = str(
-      os.path.join('..', '..', 'buildtools', 'mac-x64', 'clang', 'bin', 'clang++')
+      os.path.join('..', '..', 'flutter', 'buildtools', 'mac-x64', 'clang', 'bin', 'clang++')
   )
   version = subprocess.check_output([clang_executable, '--version'])
   return version.splitlines()[0]

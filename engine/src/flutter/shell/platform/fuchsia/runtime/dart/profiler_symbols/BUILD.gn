@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/toolchain.gni")
 import("//flutter/build/dart/dart.gni")
 import("//flutter/tools/fuchsia/clang.gni")
 
@@ -23,7 +24,7 @@ template("generate_dart_profiler_symbols") {
 
     args = [
       "--nm",
-      rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin/llvm-nm"),
+      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin/llvm-nm"),
       "--binary",
       rebase_path(invoker.library_path),
       "--output",
