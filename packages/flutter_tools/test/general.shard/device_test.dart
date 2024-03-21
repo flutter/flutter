@@ -1092,8 +1092,6 @@ void main() {
 
   group('PollingDeviceDiscovery', () {
     final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-    final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-    final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
 
     testWithoutContext('initial call to devices returns the correct list', () async {
       final List<Device> deviceList = <Device>[device1];
@@ -1106,7 +1104,7 @@ void main() {
       testDeviceDiscovery.onAdded.listen(addedDevice.add);
       testDeviceDiscovery.onRemoved.listen(removedDevice.add);
 
-      final devices = await testDeviceDiscovery.devices();
+      final List<Device> devices = await testDeviceDiscovery.devices();
       expect(devices.length, 1);
       expect(devices.first.id, device1.id);
     });
@@ -1122,7 +1120,7 @@ void main() {
       testDeviceDiscovery.onAdded.listen(addedDevice.add);
       testDeviceDiscovery.onRemoved.listen(removedDevice.add);
 
-      final devices = await testDeviceDiscovery.devices();
+      final List<Device> devices = await testDeviceDiscovery.devices();
       expect(devices.length, 1);
       expect(devices.first.id, device1.id);
 
