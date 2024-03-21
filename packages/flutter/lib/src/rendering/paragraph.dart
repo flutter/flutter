@@ -1751,11 +1751,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   SelectionResult? _updateSelectionStartEdgeByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     bool paragraphContainsPosition,
-    bool isEnd,
     TextPosition position,
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
+    const bool isEnd = false;
     if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
       // If this selectable contains the origin boundary, maintain the existing
       // selection.
@@ -1784,7 +1784,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         if (shouldSwapEdges) {
           _setSelectionPosition(
             _clampTextPosition(forwardSelection ? originTextBoundary.boundaryStart : originTextBoundary.boundaryEnd),
-            isEnd: !isEnd,
+            isEnd: true,
           );
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
@@ -1829,12 +1829,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           return SelectionResult.next;
         }
         if (forwardSelection && clampedPosition.offset == range.end) {
-          _setSelectionPosition(_clampTextPosition(isEnd ? originTextBoundary.boundaryEnd : originTextBoundary.boundaryStart), isEnd: !isEnd);
+          _setSelectionPosition(_clampTextPosition(originTextBoundary.boundaryStart), isEnd: true);
           _setSelectionPosition(clampedPosition, isEnd: isEnd);
           return SelectionResult.next;
         }
         if (!forwardSelection && clampedPosition.offset == range.start) {
-          _setSelectionPosition(_clampTextPosition(isEnd ? originTextBoundary.boundaryStart : originTextBoundary.boundaryEnd), isEnd: !isEnd);
+          _setSelectionPosition(_clampTextPosition(originTextBoundary.boundaryEnd), isEnd: true);
           _setSelectionPosition(clampedPosition, isEnd: isEnd);
           return SelectionResult.previous;
         }
@@ -1898,11 +1898,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   SelectionResult? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
     _TextBoundaryAtPositionInText getTextBoundary,
     bool paragraphContainsPosition,
-    bool isEnd,
     TextPosition position,
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
+    const bool isEnd = true;
     if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
       // If this selectable contains the origin boundary, maintain the existing
       // selection.
@@ -1931,7 +1931,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         if (shouldSwapEdges) {
           _setSelectionPosition(
             _clampTextPosition(forwardSelection ? originTextBoundary.boundaryEnd : originTextBoundary.boundaryStart),
-            isEnd: !isEnd,
+            isEnd: false,
           );
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
@@ -1968,12 +1968,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         // targets the subsequent text boundary.
         final _TextBoundaryRecord originTextBoundary = getTextBoundary(forwardSelection ? existingSelectionStart : TextPosition(offset: existingSelectionStart.offset - 1, affinity: existingSelectionStart.affinity), fullText);
         if (forwardSelection && clampedPosition.offset == range.start) {
-          _setSelectionPosition(_clampTextPosition(isEnd ? originTextBoundary.boundaryEnd : originTextBoundary.boundaryStart), isEnd: !isEnd);
+          _setSelectionPosition(_clampTextPosition(originTextBoundary.boundaryEnd), isEnd: false);
           _setSelectionPosition(clampedPosition, isEnd: isEnd);
           return SelectionResult.previous;
         }
         if (!forwardSelection && clampedPosition.offset == range.end) {
-          _setSelectionPosition(_clampTextPosition(isEnd ? originTextBoundary.boundaryStart : originTextBoundary.boundaryEnd), isEnd: !isEnd);
+          _setSelectionPosition(_clampTextPosition(originTextBoundary.boundaryStart), isEnd: false);
           _setSelectionPosition(clampedPosition, isEnd: isEnd);
           return SelectionResult.next;
         }
@@ -2049,11 +2049,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     _TextBoundaryAtPositionInText getTextBoundary,
     Offset globalPosition,
     bool paragraphContainsPosition,
-    bool isEnd,
     TextPosition position,
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
+    const bool isEnd = false;
     if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
       // If this selectable contains the origin boundary, maintain the existing
       // selection.
@@ -2064,7 +2064,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
           paragraphContainsPosition,
-          isEnd,
           position,
           existingSelectionStart,
           existingSelectionEnd,
@@ -2094,7 +2093,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           targetPosition = existingSelectionStart;
         }
         if (shouldSwapEdges) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionStart, isEnd: true);
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
         final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
@@ -2145,12 +2144,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           return SelectionResult.next;
         }
         if (forwardSelection && adjustedPositionRelativeToOriginParagraph.offset >= originParagraphPlaceholderRange.end) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionStart, isEnd: true);
           _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
           return SelectionResult.next;
         }
         if (!forwardSelection && adjustedPositionRelativeToOriginParagraph.offset <= originParagraphPlaceholderRange.start) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionStart, isEnd: true);
           _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
           return SelectionResult.previous;
         }
@@ -2162,7 +2161,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
           paragraphContainsPosition,
-          isEnd,
           position,
           existingSelectionStart,
           existingSelectionEnd,
@@ -2233,11 +2231,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     _TextBoundaryAtPositionInText getTextBoundary,
     Offset globalPosition,
     bool paragraphContainsPosition,
-    bool isEnd,
     TextPosition position,
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
+    const bool isEnd = true;
     if (_selectableContainsOriginTextBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
       // If this selectable contains the origin boundary, maintain the existing
       // selection.
@@ -2248,7 +2246,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
           paragraphContainsPosition,
-          isEnd,
           position,
           existingSelectionStart,
           existingSelectionEnd,
@@ -2278,7 +2275,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           targetPosition = existingSelectionEnd;
         }
         if (shouldSwapEdges) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionEnd, isEnd: false);
         }
         _setSelectionPosition(_clampTextPosition(targetPosition), isEnd: isEnd);
         final bool finalSelectionIsForward = _textSelectionEnd!.offset >= _textSelectionStart!.offset;
@@ -2321,12 +2318,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         final TextPosition originParagraphPlaceholderTextPosition = _getPositionInParagraph(originParagraph);
         final TextRange originParagraphPlaceholderRange = TextRange(start: originParagraphPlaceholderTextPosition.offset, end: originParagraphPlaceholderTextPosition.offset + _placeholderLength);
         if (forwardSelection && adjustedPositionRelativeToOriginParagraph.offset <= originParagraphPlaceholderRange.start) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionEnd, isEnd: false);
           _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
           return SelectionResult.previous;
         }
         if (!forwardSelection && adjustedPositionRelativeToOriginParagraph.offset >= originParagraphPlaceholderRange.end) {
-          _setSelectionPosition(isEnd ? existingSelectionEnd : existingSelectionStart, isEnd: !isEnd);
+          _setSelectionPosition(existingSelectionEnd, isEnd: false);
           _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
           return SelectionResult.next;
         }
@@ -2346,7 +2343,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
           paragraphContainsPosition,
-          isEnd,
           position,
           existingSelectionStart,
           existingSelectionEnd,
@@ -2443,7 +2439,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
               getTextBoundary,
               globalPosition,
               paragraph.paintBounds.contains(localPosition),
-              isEnd,
               positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
@@ -2452,7 +2447,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
               getTextBoundary,
               globalPosition,
               paragraph.paintBounds.contains(localPosition),
-              isEnd,
               positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
@@ -2462,7 +2456,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           ? _updateSelectionEndEdgeByMultiSelectableTextBoundary(
               getTextBoundary,
               paragraph.paintBounds.contains(localPosition),
-              isEnd,
               positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
@@ -2470,7 +2463,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
           : _updateSelectionStartEdgeByMultiSelectableTextBoundary(
               getTextBoundary,
               paragraph.paintBounds.contains(localPosition),
-              isEnd,
               positionInFullText,
               existingSelectionStart,
               existingSelectionEnd,
