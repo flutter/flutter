@@ -1264,7 +1264,7 @@ void main() {
       paints..rect(color: cursorColor, rect: caretRect),
     );
   },
-  skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+  skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
   );
 
   testWidgets(
