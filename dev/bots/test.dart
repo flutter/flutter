@@ -103,6 +103,10 @@ String get platformFolderName {
 }
 final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
 
+// TODO(fujino): namespace this so that subsequent test runs in a single
+// builder do not clobber previous metrics files.
+File metricFile(fs.FileSystem fileSystem) => fileSystem.file(path.join(flutterRoot, 'metrics.json'));
+
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
@@ -1374,6 +1378,7 @@ Future<void> _runFlutterDriverWebTest({
   bool silenceBrowserOutput = false,
   bool expectWriteResponseFile = false,
   String expectResponseFileContent = '',
+  fs.FileSystem fileSystem = const LocalFileSystem(),
 }) async {
   printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
   await runCommand(
@@ -1398,6 +1403,7 @@ Future<void> _runFlutterDriverWebTest({
       'web-server',
       '--$buildMode',
       '--web-renderer=$renderer',
+      "--test-arguments='--reporter=expanded,--file-reporter=json:${metricFile(fileSystem).path}'",
     ],
     expectNonZeroExit: expectFailure,
     workingDirectory: testAppDirectory,
@@ -2130,7 +2136,11 @@ Future<void> _stopChromeDriver() async {
 ///
 /// The test is written using `package:integration_test` (despite the "e2e" in
 /// the name, which is there for historic reasons).
-Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
+Future<void> _runGalleryE2eWebTest(
+  String buildMode, {
+  bool canvasKit = false,
+  fs.FileSystem fileSystem = const LocalFileSystem(),
+}) async {
   printProgress('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
   await runCommand(
@@ -2155,6 +2165,7 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       '-d',
       'web-server',
       '--$buildMode',
+      "--test-arguments='--reporter=expanded,--file-reporter=json:${metricFile(fileSystem).path}'",
     ],
     workingDirectory: testAppDirectory,
     environment: <String, String>{
@@ -2337,6 +2348,7 @@ Future<void> _runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
+  fs.FileSystem fileSystem = const LocalFileSystem(),
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -2358,12 +2370,10 @@ Future<void> _runDartTest(String workingDirectory, {
     cpus = 1;
   }
 
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final File metricFile = fileSystem.file(path.join(flutterRoot, 'metrics.json'));
   final List<String> args = <String>[
     'run',
     'test',
-    '--file-reporter=json:${metricFile.path}',
+    '--file-reporter=json:${metricFile(fileSystem).path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
     if (!hasColor)
@@ -2400,7 +2410,7 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
-  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
+  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile(fileSystem)); // --file-reporter name
   final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
   info.writeAsStringSync(json.encode(test.errors));
 
