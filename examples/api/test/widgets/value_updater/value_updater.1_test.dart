@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/toggle_value/toggle_value.1.dart' as example;
+import 'package:flutter_api_samples/widgets/value_updater/value_updater.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,7 +14,7 @@ void main() {
         child: example.ToggleValueWithNotifierExample(),
       ),
     );
-    final Finder toggleFinder = find.byType(ToggleValue<AlignmentGeometry>);
+    final Finder toggleFinder = find.byType(ValueUpdater<AlignmentGeometry>);
     expect(toggleFinder, findsOneWidget);
     final Finder logoFinder = find.byType(FlutterLogo);
     expect(logoFinder, findsOneWidget);

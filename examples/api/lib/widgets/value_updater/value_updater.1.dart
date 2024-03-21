@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ToggleValue].
+/// Flutter code sample for [ValueUpdater].
 
 void main() => runApp(const ToggleValueWithNotifierExampleApp());
 
@@ -31,7 +31,7 @@ class ToggleValueWithNotifierExample extends StatelessWidget {
         Expanded(
           child: ColoredBox(
             color: Colors.white,
-            child: ToggleValue<AlignmentGeometry>(
+            child: ValueUpdater<AlignmentGeometry>(
               initialValue: Alignment.center,
               valueNotifier: _notifier,
               builder: (BuildContext context, AlignmentGeometry value) {

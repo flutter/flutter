@@ -1,17 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 
-/// A builder function used by the [ToggleValue] widget that takes the current
+/// A builder function used by the [ValueUpdater] widget that takes the current
 /// value and returns a widget.
-typedef ToggleValueBuilder<T> = Widget Function(BuildContext context, T value);
+typedef ValueUpdaterBuilder<T> = Widget Function(BuildContext context, T value);
 
-/// A widget that toggles between values, using a builder to build with the new
-/// value.
+/// A widget that updates a value for the widgets built using a builder.
 ///
-/// The [ToggleValue] widget can be used to avoid the need for creating a
+/// The [ValueUpdater] widget can be used to avoid the need for creating a
 /// stateful widget just to trigger a change in another widget on creation.
 ///
 /// If not given a [valueNotifier], will start at the [initialValue] (or the
@@ -27,41 +25,51 @@ typedef ToggleValueBuilder<T> = Widget Function(BuildContext context, T value);
 /// reused instead of recreated.
 ///
 /// {@tool dartpad}
-/// This example shows how to use the [ToggleValue] widget to trigger an
+/// This example shows how to use the [ValueUpdater] widget to trigger an
 /// [AnimatedAlign] animation when a widget is shown for the first time. This is
 /// done without needing to create a stateful widget.
 ///
-/// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.0.dart **
+/// ** See code in examples/api/lib/widgets/value_updater/value_updater.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to use the [ToggleValue] widget to trigger an
+/// This example shows how to use the [ValueUpdater] widget to trigger an
 /// [AnimatedAlign] animation when a widget is shown for the first time, and
 /// then change the value of the alignment and animate each time a button is
 /// pressed. This is done without needing to create a stateful widget.
 ///
-/// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.1.dart **
+/// ** See code in examples/api/lib/widgets/value_updater/value_updater.1.dart **
 /// {@end-tool}
 
-class ToggleValue<T> extends StatefulWidget {
-  /// Creates a [ToggleValue] widget.
+class ValueUpdater<T> extends StatefulWidget {
+  /// Creates a [ValueUpdater] widget that updates the value based on
+  /// [valueNotifier] changes.
   ///
-  /// The [builder], [initialValue], and one of [value] or [valueNotifier] are
+  /// The [builder], [initialValue], and [valueNotifier] are
   /// required.
-  const ToggleValue({
+  const ValueUpdater({
+    super.key,
+    required this.builder,
+    required this.initialValue,
+    this.valueNotifier,
+  })  : value = null;
+
+  /// Creates a [ValueUpdater] widget that updates the value only once (the
+  /// first time it is built) based on [value].
+  ///
+  /// The [builder], [initialValue], and [value] are required.
+  const ValueUpdater.once({
     super.key,
     required this.builder,
     required this.initialValue,
     this.value,
-    this.valueNotifier,
-  })  : assert(value != null || valueNotifier != null, 'One of value or valueNotifier must be set.'),
-        assert(value == null || valueNotifier == null, 'Cannot set both value and valueNotifier.');
+  })  : valueNotifier = null;
 
   /// A builder function which takes a [BuildContext], and the current [value]
   /// (or the value of the [valueNotifier]) and returns a widget.
   ///
   /// Required.
-  final ToggleValueBuilder<T> builder;
+  final ValueUpdaterBuilder<T> builder;
 
   /// The value to pass to the [builder] when the widget is first built.
   ///
@@ -91,17 +99,17 @@ class ToggleValue<T> extends StatefulWidget {
   final ValueNotifier<T>? valueNotifier;
 
   @override
-  State<ToggleValue<T>> createState() => _ToggleValueState<T>();
+  State<ValueUpdater<T>> createState() => _ValueUpdaterState<T>();
 }
 
-enum _ToggleValueStatus {
+enum _ValueUpdaterStatus {
   initial,
   off,
   on,
 }
 
-class _ToggleValueState<T> extends State<ToggleValue<T>> {
-  _ToggleValueStatus _triggered = _ToggleValueStatus.initial;
+class _ValueUpdaterState<T> extends State<ValueUpdater<T>> {
+  _ValueUpdaterStatus _triggered = _ValueUpdaterStatus.initial;
   late T _value;
 
   @override
@@ -112,9 +120,9 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
       setState(() {
         _value = widget.valueNotifier?.value ?? widget.value ?? _value;
         _triggered = switch (_triggered) {
-          _ToggleValueStatus.off => _ToggleValueStatus.on,
-          _ToggleValueStatus.on => _ToggleValueStatus.off,
-          _ToggleValueStatus.initial => _ToggleValueStatus.on,
+          _ValueUpdaterStatus.off => _ValueUpdaterStatus.on,
+          _ValueUpdaterStatus.on => _ValueUpdaterStatus.off,
+          _ValueUpdaterStatus.initial => _ValueUpdaterStatus.on,
         };
       });
     });
@@ -128,7 +136,7 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
   }
 
   @override
-  void didUpdateWidget(covariant ToggleValue<T> oldWidget) {
+  void didUpdateWidget(covariant ValueUpdater<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.valueNotifier != widget.valueNotifier) {
       oldWidget.valueNotifier?.removeListener(_trigger);
@@ -154,9 +162,9 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
     return widget.builder(
       context,
       switch (_triggered) {
-        _ToggleValueStatus.off => widget.value != null ? widget.initialValue : _value,
-        _ToggleValueStatus.on => widget.value ?? _value,
-        _ToggleValueStatus.initial => widget.initialValue,
+        _ValueUpdaterStatus.off => widget.value != null ? widget.initialValue : _value,
+        _ValueUpdaterStatus.on => widget.value ?? _value,
+        _ValueUpdaterStatus.initial => widget.initialValue,
       },
     );
   }

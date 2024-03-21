@@ -26,7 +26,7 @@ class ToggleValueExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.white,
-      child: ToggleValue<AlignmentGeometry>(
+      child: ValueUpdater<AlignmentGeometry>.once(
         initialValue: Alignment.bottomLeft,
         value: Alignment.topRight,
         builder: (BuildContext context, AlignmentGeometry value) {

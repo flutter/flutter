@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ToggleValue<int>(
+        child: ValueUpdater<int>.once(
           initialValue: 0,
           value: 1,
           builder: (BuildContext context, int value) {
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ToggleValue<int>(
+        child: ValueUpdater<int>(
           initialValue: 0,
           valueNotifier: valueNotifier,
           builder: (BuildContext context, int value) {
@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ToggleValue<int>(
+        child: ValueUpdater<int>(
           initialValue: 0,
           valueNotifier: valueNotifier,
           builder: (BuildContext context, int value) {
@@ -79,7 +79,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ToggleValue<int>(
+        child: ValueUpdater<int>.once(
           initialValue: 1,
           value: 3,
           builder: (BuildContext context, int value) {
@@ -96,7 +96,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ToggleValue<int>(
+        child: ValueUpdater<int>(
           initialValue: 2,
           valueNotifier: valueNotifier,
           builder: (BuildContext context, int value) {
