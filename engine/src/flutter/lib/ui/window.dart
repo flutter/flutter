@@ -42,6 +42,8 @@ class Display {
 /// Each [FlutterView] has its own layer tree that is rendered
 /// whenever [render] is called on it with a [Scene].
 ///
+/// References to [FlutterView] objects are obtained via the [PlatformDispatcher].
+///
 /// ## Insets and Padding
 ///
 /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4}
