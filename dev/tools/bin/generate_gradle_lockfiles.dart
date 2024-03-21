@@ -23,8 +23,9 @@ void main(List<String> arguments) {
 
   final ArgParser argParser = ArgParser()
     ..addFlag(
-      'no-gradle-generation',
-      help: 'Skip re-generating gradle files in each processed directory.'
+      'gradle-generation',
+      help: 'Skip re-generating gradle files in each processed directory.',
+      defaultsTo: true,
     );
 
   ArgResults args;
@@ -37,7 +38,7 @@ void main(List<String> arguments) {
   }
 
   /// Skip re-generating gradle files in each processed directory.
-  final bool noGradleRegeneration = (args['no-gradle-generation'] as bool?) ?? false;
+  final bool gradleGeneration = (args['gradle-generation'] as bool?) ?? true;
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
@@ -106,7 +107,7 @@ void main(List<String> arguments) {
       // noop
     }
 
-    if (!noGradleRegeneration) {
+    if (gradleGeneration) {
       rootBuildGradle.writeAsStringSync(rootGradleFileContent);
       settingsGradle.writeAsStringSync(settingGradleFile);
       wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
