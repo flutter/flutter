@@ -339,8 +339,29 @@ class EmbedderViewSlice {
   virtual DlCanvas* canvas() = 0;
   virtual void end_recording() = 0;
   virtual const DlRegion& getRegion() const = 0;
+  // TODO(hellohuanlin): We should deprecate this function if we migrate
+  // all platforms to use `roundedInRegion`. Then we should rename
+  // `roundedInRegion` to just `region`.
   DlRegion region(const SkRect& query) const {
     return DlRegion::MakeIntersection(getRegion(), DlRegion(query.roundOut()));
+  }
+
+  // TODO(hellohuanlin): iOS only for now, but we should try it on other
+  // platforms.
+  DlRegion roundedInRegion(const SkRect& query) const {
+    // Use `roundIn` to address a performance issue when we interleave embedded
+    // view (the queried rect) and flutter widgets (the slice regions).
+    // Rounding out both the queried rect and slice regions will
+    // result in an intersection region of 1 px height, which is then used to
+    // create an overlay layer. For each overlay, we acquire a surface frame,
+    // paint the pixels and submit the frame. This resulted in performance
+    // issues since the surface frame acquisition is expensive. Since slice
+    // regions are already rounded out (see:
+    // https://github.com/flutter/engine/blob/5f40c9f49f88729bc3e71390356209dbe29ec788/display_list/geometry/dl_rtree.cc#L209),
+    // we can simply round in the queried rect to avoid the situation.
+    // After rounding in, it will ignore a single (or partial) pixel overlap,
+    // and give the ownership to the platform view.
+    return DlRegion::MakeIntersection(getRegion(), DlRegion(query.roundIn()));
   }
 
   virtual void render_into(DlCanvas* canvas) = 0;
