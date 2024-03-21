@@ -8,35 +8,35 @@ import 'framework.dart';
 /// value and returns a widget.
 typedef ToggleValueBuilder<T> = Widget Function(BuildContext context, T value);
 
-/// A widget that toggles between values.
-///
-/// This widget is used to toggle the state of a widget created by the builder.
-///
-/// If not given a [valueNotifier], will start at the [offValue] (or the
-/// [initialValue], if given) and toggle to the [value] on the frame after the
-/// widget is first built. It will only toggle once.
-///
-/// If given a [valueNotifier], will also alternate between [offValue] and
-/// [value] whenever the [valueNotifier] notifies of a change.
-///
-/// Like all stateful widgets in Flutter, if this widget is recreated, it will
-/// lose the toggle state. To prevent this, give it a [Key] to allow it to be
-/// reused instead of recreated.
+/// A widget that toggles between values, using a builder to build with the new
+/// value.
 ///
 /// The [ToggleValue] widget can be used to avoid the need for creating a
 /// stateful widget just to trigger a change in another widget on creation.
 ///
-/// {@tool dartpad}
-/// This example shows how to use the [ToggleValue] widget to trigger an
-/// animation when a widget is shown for the first time.
+/// If not given a [valueNotifier], will start at the [initialValue] (or the
+/// [initialValue], if given) and toggle to the [value] on the frame after the
+/// widget is first built. It will only toggle once.
+///
+/// If given a [valueNotifier], will start at [initialValue] and
+/// switch to the value of the [valueNotifier], and then continue to switch
+/// to each new value as the [valueNotifier] changes.
+///
+/// Like all stateful widgets in Flutter, if this widget is recreated, it will
+/// lose its current state. To prevent this, give it a [Key] to allow it to be
+/// reused instead of recreated.
+///
+/// {@tool dartpad} This example shows how to use the [ToggleValue] widget to
+/// trigger an [AnimatedAlign] animation when a widget is shown for the first
+/// time. This is done without needing to create a stateful widget.
 ///
 /// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This example shows how to use the [ToggleValue] widget to trigger an
-/// alignment animation when a widget is shown for the first time, and then
-/// change the value of the alignment each time a button is pressed.
+/// {@tool dartpad} This example shows how to use the [ToggleValue] widget to
+/// trigger an [AnimatedAlign] animation when a widget is shown for the first
+/// time, and then change the value of the alignment and animate each time a
+/// button is pressed. This is done without needing to create a stateful widget.
 ///
 /// ** See code in examples/api/lib/widgets/toggle_value/toggle_value.1.dart **
 /// {@end-tool}
@@ -65,19 +65,19 @@ class ToggleValue<T> extends StatefulWidget {
   /// Defaults to [offValue].
   final T initialValue;
 
-  /// The value to use when the widget is in the "on" state.
+  /// The value to use when the widget is the widget is toggled on.
   ///
   /// Ignored if [valueNotifier] is set.
   ///
-  /// If not specified, then the initial value of valueNotifier is used. One of
+  /// If not specified, then the current value of valueNotifier is used. One of
   /// [value] or [valueNotifier] must be set.
   final T? value;
 
   /// The optional [ValueNotifier] to listen to.
   ///
-  /// If specified, instead toggling between [offValue] and [value], whenever
-  /// the [ValueNotifier] notifies of a change, the widget will use the value
-  /// set in the notifier as the next value to build the [builder] with.
+  /// If specified, instead toggling between [initialValue] and [value],
+  /// whenever the [ValueNotifier] notifies of a change, the widget will use the
+  /// value set in the notifier as the next value to build the [builder] with.
   final ValueNotifier<T>? valueNotifier;
 
   @override
@@ -98,7 +98,16 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
   void initState() {
     super.initState();
     _value = widget.value ?? widget.initialValue;
-    _scheduleUpdate();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _value = widget.valueNotifier?.value ?? widget.value ?? _value;
+        _triggered = switch (_triggered) {
+          _ToggleValueStatus.off => _ToggleValueStatus.on,
+          _ToggleValueStatus.on => _ToggleValueStatus.off,
+          _ToggleValueStatus.initial => _ToggleValueStatus.on,
+        };
+      });
+    });
     widget.valueNotifier?.addListener(_trigger);
   }
 
@@ -124,19 +133,6 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
     }
   }
 
-  void _scheduleUpdate() {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _value = widget.valueNotifier?.value ?? widget.value ?? _value;
-        _triggered = switch (_triggered) {
-          _ToggleValueStatus.off => _ToggleValueStatus.on,
-          _ToggleValueStatus.on => _ToggleValueStatus.off,
-          _ToggleValueStatus.initial => _ToggleValueStatus.on,
-        };
-      });
-    });
-  }
-
   void _trigger() {
     setState(() {
       _value = widget.valueNotifier?.value ?? _value;
@@ -145,16 +141,15 @@ class _ToggleValueState<T> extends State<ToggleValue<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final T value = switch (_triggered) {
-      _ToggleValueStatus.off => widget.value != null ? widget.initialValue : _value,
-      _ToggleValueStatus.on => widget.value ?? _value,
-      _ToggleValueStatus.initial => widget.initialValue,
-    };
     return Builder(
       builder: (BuildContext context) {
         return widget.builder(
           context,
-          value,
+          switch (_triggered) {
+            _ToggleValueStatus.off => widget.value != null ? widget.initialValue : _value,
+            _ToggleValueStatus.on => widget.value ?? _value,
+            _ToggleValueStatus.initial => widget.initialValue,
+          },
         );
       },
     );
