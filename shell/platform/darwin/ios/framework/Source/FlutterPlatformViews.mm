@@ -705,7 +705,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
     for (size_t j = i + 1; j > 0; j--) {
       int64_t current_platform_view_id = composition_order_[j - 1];
       SkRect platform_view_rect = GetPlatformViewRect(current_platform_view_id);
-      std::vector<SkIRect> intersection_rects = slice->region(platform_view_rect).getRects();
+      std::vector<SkIRect> intersection_rects =
+          slice->roundedInRegion(platform_view_rect).getRects();
       auto allocation_size = intersection_rects.size();
 
       // For testing purposes, the overlay id is used to find the overlay view.

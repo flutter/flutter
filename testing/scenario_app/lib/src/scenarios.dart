@@ -34,6 +34,7 @@ Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
   'platform_view_one_overlay_two_intersecting_overlays': (FlutterView view) => PlatformViewOneOverlayTwoIntersectingOverlaysScenario(view, id: _viewId++),
   'platform_view_multiple_without_overlays': (FlutterView view) => MultiPlatformViewWithoutOverlaysScenario(view, firstId: _viewId++, secondId: _viewId++),
   'platform_view_max_overlays': (FlutterView view) => PlatformViewMaxOverlaysScenario(view, id: _viewId++),
+  'platform_view_surrounding_layers': (FlutterView view) => PlatformViewSurroundingLayersScenario(view, id: _viewId++),
   'platform_view_cliprect': (FlutterView view) => PlatformViewClipRectScenario(view, id: _viewId++),
   'platform_view_cliprect_with_transform': (FlutterView view) => PlatformViewClipRectWithTransformScenario(view, id: _viewId++),
   'platform_view_cliprect_after_moved': (FlutterView view) => PlatformViewClipRectAfterMovedScenario(view, id: _viewId++),
