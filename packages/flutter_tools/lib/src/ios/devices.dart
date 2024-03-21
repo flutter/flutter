@@ -102,8 +102,6 @@ class IOSDevices extends PollingDeviceDiscovery {
       return;
     }
 
-    deviceNotifier ??= ItemListNotifier<Device>();
-
     // Start by populating all currently attached devices.
     _updateCachedDevices(await pollingGetDevices());
     _updateNotifierFromCache();
@@ -127,10 +125,8 @@ class IOSDevices extends PollingDeviceDiscovery {
 
   @visibleForTesting
   Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
-    final ItemListNotifier<Device>? notifier = deviceNotifier;
-    if (notifier == null) {
-      return;
-    }
+    final ItemListNotifier<Device> notifier = deviceNotifier;
+
     Device? knownDevice;
     for (final Device device in notifier.items) {
       if (device.id == event.deviceIdentifier) {
@@ -186,10 +182,8 @@ class IOSDevices extends PollingDeviceDiscovery {
   /// Updates notifier with devices found in the cache that are determined
   /// to be connected.
   void _updateNotifierFromCache() {
-    final ItemListNotifier<Device>? notifier = deviceNotifier;
-    if (notifier == null) {
-      return;
-    }
+    final ItemListNotifier<Device> notifier = deviceNotifier;
+
     // Device is connected if it has either an observed usb or wifi connection
     // or it has not been observed but was found as connected in the cache.
     final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {

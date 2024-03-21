@@ -480,18 +480,15 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @protected
   @visibleForTesting
-  ItemListNotifier<Device>? deviceNotifier;
+  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
   Future<List<Device>> pollingGetDevices({Duration? timeout});
 
   void startPolling() {
-    if (_timer == null) {
-      deviceNotifier ??= ItemListNotifier<Device>();
-      // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null, initialCall: true);
-    }
+    // Make initial population the default, fast polling timeout.
+    _timer ??= _initTimer(null, initialCall: true);
   }
 
   Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
@@ -499,7 +496,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
-        deviceNotifier!.updateWithNewList(devices);
+        deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
         // Do nothing on a timeout.
       }
@@ -546,32 +543,28 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
   }) async {
-    if (deviceNotifier == null || resetCache) {
+    if (!deviceNotifier.isPopulated || resetCache) {
       final List<Device> devices = await pollingGetDevices(timeout: timeout);
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
-      if (resetCache) {
-        deviceNotifier = ItemListNotifier<Device>.from(devices);
-      } else {
-        deviceNotifier ??= ItemListNotifier<Device>.from(devices);
+      if (!deviceNotifier.isPopulated || resetCache) {
+        deviceNotifier.updateWithNewList(devices);
       }
     }
 
     // If a filter is provided, filter cache to only return devices matching.
     if (filter != null) {
-      return filter.filterDevices(deviceNotifier!.items);
+      return filter.filterDevices(deviceNotifier.items);
     }
-    return deviceNotifier!.items;
+    return deviceNotifier.items;
   }
 
   Stream<Device> get onAdded {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onAdded;
+    return deviceNotifier.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onRemoved;
+    return deviceNotifier.onRemoved;
   }
 
   void dispose() => stopPolling();

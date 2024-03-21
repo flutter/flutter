@@ -539,11 +539,11 @@ void main() {
 
       proxiedDevices.startPolling();
 
-      final ItemListNotifier<Device>? deviceNotifier = proxiedDevices.deviceNotifier;
+      final ItemListNotifier<Device> deviceNotifier = proxiedDevices.deviceNotifier;
       expect(deviceNotifier, isNotNull);
 
       final List<Device> devicesAdded = <Device>[];
-      deviceNotifier!.onAdded.listen((Device device) {
+      deviceNotifier.onAdded.listen((Device device) {
         devicesAdded.add(device);
       });
 
