@@ -380,7 +380,7 @@ void main() {
       final double caretHeight = painter.getFullHeightForCaret(
         const ui.TextPosition(offset: 0),
         ui.Rect.zero,
-      )!;
+      );
       expect(caretHeight, 50.0);
       painter.dispose();
     }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308

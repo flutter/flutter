@@ -1352,7 +1352,7 @@ class TextPainter {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+  double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
     final TextBox textBox = _getOrCreateLayoutTemplate().getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut).single;
     return textBox.toRect().height;
   }
