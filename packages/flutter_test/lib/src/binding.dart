@@ -18,7 +18,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/scaffolding.dart' as test_package show Timeout;
 import 'package:vector_math/vector_math_64.dart';
 
-import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
+import '_binding_io.dart' if (dart.library.js_interop) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
 import 'restoration.dart';
