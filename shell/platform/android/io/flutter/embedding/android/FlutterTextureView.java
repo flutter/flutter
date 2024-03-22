@@ -124,6 +124,11 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     return flutterRenderer;
   }
 
+  @VisibleForTesting
+  /* package */ boolean isSurfaceAvailableForRendering() {
+    return isSurfaceAvailableForRendering;
+  }
+
   /**
    * Invoked by the owner of this {@code FlutterTextureView} when it wants to begin rendering a
    * Flutter UI to this {@code FlutterTextureView}.
@@ -170,8 +175,6 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
         disconnectSurfaceFromRenderer();
       }
 
-      pause();
-
       flutterRenderer = null;
     } else {
       Log.w(TAG, "detachFromRenderer() invoked when no FlutterRenderer was attached.");
@@ -198,7 +201,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
 
     // If we're already attached to an Android window then we're now attached to both a renderer
     // and the Android window. We can begin rendering now.
-    if (isSurfaceAvailableForRendering) {
+    if (isSurfaceAvailableForRendering()) {
       Log.v(
           TAG,
           "Surface is available for rendering. Connecting FlutterRenderer to Android surface.");
