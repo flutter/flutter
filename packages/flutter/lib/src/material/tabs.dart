@@ -1410,7 +1410,7 @@ class _TabBarState extends State<TabBar> {
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
 
-    final oldPainter = _indicatorPainter;
+    final _IndicatorPainter? oldPainter = _indicatorPainter;
 
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
