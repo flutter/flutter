@@ -651,15 +651,14 @@ class Text extends StatelessWidget {
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final GlobalKey? textKey = registrar == null ? null : GlobalKey();
-    final _SelectableTextContainerDelegate? selectionDelegate = registrar == null ? null : _SelectableTextContainerDelegate(textKey!);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _)     => textScaler,
       // For unmigrated apps, fall back to textScaleFactor.
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
-    Widget result = RichText(
-      key: textKey,
+    Widget result = _RichText(
+      textKey: textKey,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -670,7 +669,6 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionRegistrar: selectionDelegate,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
         style: effectiveTextStyle,
@@ -681,8 +679,8 @@ class Text extends StatelessWidget {
     if (registrar != null) {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-        child: SelectionContainer(
-          delegate: selectionDelegate!,
+        child: _SelectableTextContainer(
+          textKey: textKey!,
           child: result,
         ),
       );
@@ -719,6 +717,96 @@ class Text extends StatelessWidget {
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
+  }
+}
+
+class _RichText extends StatelessWidget {
+  const _RichText({
+    this.textKey,
+    required this.text,
+    this.textAlign = TextAlign.start,
+    this.textDirection,
+    this.softWrap = true,
+    this.overflow = TextOverflow.clip,
+    this.textScaler = TextScaler.noScaling,
+    this.maxLines,
+    this.locale,
+    this.strutStyle,
+    this.textWidthBasis = TextWidthBasis.parent,
+    this.textHeightBehavior,
+    this.selectionColor,
+  }) : assert(maxLines == null || maxLines > 0);
+
+  final GlobalKey? textKey;
+  final InlineSpan text;
+  final TextAlign textAlign;
+  final TextDirection? textDirection;
+  final bool softWrap;
+  final TextOverflow overflow;
+  final TextScaler textScaler;
+  final int? maxLines;
+  final Locale? locale;
+  final StrutStyle? strutStyle;
+  final TextWidthBasis textWidthBasis;
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final Color? selectionColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    return RichText(
+      key: textKey,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale,
+      softWrap: softWrap,
+      overflow: overflow,
+      textScaler: textScaler,
+      maxLines: maxLines,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      selectionRegistrar: registrar,
+      selectionColor: selectionColor,
+      text: text,
+    );
+  }
+}
+
+class _SelectableTextContainer extends StatefulWidget {
+  const _SelectableTextContainer({
+    required this.textKey,
+    required this.child,
+  });
+
+  final GlobalKey textKey;
+  final Widget child;
+
+  @override
+  State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
+}
+
+class _SelectableTextContainerState extends State<_SelectableTextContainer> {
+  late final _SelectableTextContainerDelegate _selectionDelegate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionDelegate = _SelectableTextContainerDelegate(widget.textKey);
+  }
+
+  @override
+  void dispose() {
+    _selectionDelegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(
+      delegate: _selectionDelegate,
+      child: widget.child,
+    );
   }
 }
 
