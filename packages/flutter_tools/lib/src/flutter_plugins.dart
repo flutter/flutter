@@ -277,38 +277,6 @@ String? _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
 }
 
-const String _androidPluginRegistryTemplateOldEmbedding = '''
-package io.flutter.plugins;
-
-import io.flutter.plugin.common.PluginRegistry;
-{{#methodChannelPlugins}}
-import {{package}}.{{class}};
-{{/methodChannelPlugins}}
-
-/**
- * Generated file. Do not edit.
- */
-public final class GeneratedPluginRegistrant {
-  public static void registerWith(PluginRegistry registry) {
-    if (alreadyRegisteredWith(registry)) {
-      return;
-    }
-{{#methodChannelPlugins}}
-    {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
-{{/methodChannelPlugins}}
-  }
-
-  private static boolean alreadyRegisteredWith(PluginRegistry registry) {
-    final String key = GeneratedPluginRegistrant.class.getCanonicalName();
-    if (registry.hasPlugin(key)) {
-      return true;
-    }
-    registry.registrarFor(key);
-    return false;
-  }
-}
-''';
-
 const String _androidPluginRegistryTemplateNewEmbedding = '''
 package io.flutter.plugins;
 
@@ -317,9 +285,6 @@ import androidx.annotation.NonNull;
 import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
-{{#needsShim}}
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
-{{/needsShim}}
 
 /**
  * Generated file. Do not edit.
@@ -330,9 +295,6 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
-{{#needsShim}}
-    ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
-{{/needsShim}}
 {{#methodChannelPlugins}}
   {{#supportsEmbeddingV2}}
     try {
@@ -340,15 +302,6 @@ public final class GeneratedPluginRegistrant {
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
-  {{/supportsEmbeddingV2}}
-  {{^supportsEmbeddingV2}}
-    {{#supportsEmbeddingV1}}
-    try {
-      {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-    } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
-    }
-    {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/methodChannelPlugins}}
   }
@@ -364,12 +317,6 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
     }
   }
   return pluginConfigs;
-}
-
-/// Returns the version of the Android embedding that the current
-/// [project] is using.
-AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
-  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -393,65 +340,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'plugins',
     'GeneratedPluginRegistrant.java',
   );
-  String templateContent;
-  final AndroidEmbeddingVersion appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
-  switch (appEmbeddingVersion) {
-    case AndroidEmbeddingVersion.v2:
-      templateContext['needsShim'] = false;
-      // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
-      // then add shim for the old plugins.
-
-      final List<String> pluginsUsingV1 = <String>[];
-      for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
-        if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
-          templateContext['needsShim'] = true;
-          if (plugin['name'] != null) {
-            pluginsUsingV1.add(plugin['name']! as String);
-          }
-        }
-      }
-      if (pluginsUsingV1.length > 1) {
-        globals.printWarning(
-          'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
-          'support the Android V2 embedding. Otherwise, consider removing them since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
-      } else if (pluginsUsingV1.isNotEmpty) {
-        globals.printWarning(
-          'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
-          'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
-      }
-      templateContent = _androidPluginRegistryTemplateNewEmbedding;
-    case AndroidEmbeddingVersion.v1:
-      globals.printWarning(
-        'This app is using a deprecated version of the Android embedding.\n'
-        'To avoid unexpected runtime failures, or future build failures, try to migrate this '
-        'app to the V2 embedding.\n'
-        'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
-      );
-      for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
-        if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
-          throwToolExit(
-            'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on the migration doc above '
-            'and re-run this command.'
-          );
-        }
-      }
-      templateContent = _androidPluginRegistryTemplateOldEmbedding;
-  }
+  const String templateContent = _androidPluginRegistryTemplateNewEmbedding;
   globals.printTrace('Generating $registryPath');
   await _renderTemplateToFile(
     templateContent,
