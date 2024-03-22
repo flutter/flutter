@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
@@ -27,7 +28,9 @@ void setUpUnitTests({
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);
     debugOnlyAssetManager = fakeAssetManager;
     await bootstrapAndRunApp(withImplicitView: withImplicitView);
-    engine.renderer.fontCollection.fontFallbackManager?.downloadQueue.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
+    engine.debugOverrideJsConfiguration(<String, Object?>{
+      'fontFallbackBaseUrl': 'assets/fallback_fonts/',
+    }.jsify() as engine.JsFlutterConfiguration?);
 
     if (setUpTestViewDimensions) {
       // The following parameters are hard-coded in Flutter's test embedder. Since

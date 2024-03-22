@@ -119,6 +119,10 @@ void testMain() {
       testAssetScope.setAsset('FontManifest.json', stringAsUtf8Data('''
         [
           {
+            "family":"Roboto",
+            "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
+          },
+          {
             "family":"Ahem",
             "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
           }
