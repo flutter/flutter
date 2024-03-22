@@ -429,7 +429,7 @@ flutter:
       );
     });
 
-    testWithoutContext("AssetBundleEntry::isModified is true when an asset's transformers change in between builds", () async {
+    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
 
       fileSystem.file('my-asset.txt').createSync();
@@ -465,7 +465,7 @@ flutter:
         ),
       );
 
-      expect(bundle.entries['my-asset.txt']!.isModified, isTrue);
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
 
       await bundle.build(
         packagesPath: '.packages',
@@ -474,7 +474,7 @@ flutter:
         ),
       );
 
-      expect(bundle.entries['my-asset.txt']!.isModified, isFalse);
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
 
       fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
 name: example
@@ -493,7 +493,7 @@ flutter:
         ),
       );
 
-      expect(bundle.entries['my-asset.txt']!.isModified, isTrue);
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
     });
   });
 
