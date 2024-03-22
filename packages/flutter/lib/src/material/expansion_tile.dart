@@ -701,10 +701,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     );
 
     final Widget? trailing = widget.trailing
-      ?? (widget.showTrailingIcon
-        ? _buildTrailingIcon(context)
-        : null
-    );
+      ?? (widget.showTrailingIcon ? _buildTrailingIcon(context) : null);
 
     final Widget tile = Padding(
       padding: decoration.padding,
