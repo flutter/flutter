@@ -53,6 +53,7 @@ export interface FlutterConfiguration {
   canvasKitVariant: CanvasKitVariant?;
   renderer: WebRenderer?;
   hostElement: HtmlElement?;
+  fontFallbackBaseUrl: string?;
 }
 
 export interface ServiceWorkerSettings {

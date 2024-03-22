@@ -449,11 +449,7 @@ class FallbackFontDownloadQueue {
 
   final FontFallbackManager fallbackManager;
 
-  static const String _defaultFallbackFontsUrlPrefix =
-      'https://fonts.gstatic.com/s/';
-  String? fallbackFontUrlPrefixOverride;
-  String get fallbackFontUrlPrefix =>
-      fallbackFontUrlPrefixOverride ?? _defaultFallbackFontsUrlPrefix;
+  String get fallbackFontUrlPrefix => configuration.fontFallbackBaseUrl;
 
   final Set<NotoFont> downloadedFonts = <NotoFont>{};
   final Map<String, NotoFont> pendingFonts = <String, NotoFont>{};
@@ -497,7 +493,8 @@ class FallbackFontDownloadQueue {
           downloadedFontFamilies.add(font.url);
         } catch (e) {
           pendingFonts.remove(font.url);
-          printWarning('Failed to load font ${font.name} at ${font.url}');
+          printWarning('Failed to load font ${font.name} at '
+              '$fallbackFontUrlPrefix${font.url}');
           printWarning(e.toString());
           return;
         }
