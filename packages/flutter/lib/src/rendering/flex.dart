@@ -796,12 +796,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       computeBaseline: ChildLayoutHelper.getDryBaseline,
+      flexChildConstraints: flexChildConstraints,
     );
 
-    BoxConstraints constraintsForChild(RenderBox child) {
-      assert((_getFlex(child) != 0) == flexChildConstraints.containsKey(child));
-      return flexChildConstraints[child] ?? _constraintsForNonFlexChild(constraints);
-    }
+    final BoxConstraints nonFlexConstraints = _constraintsForNonFlexChild(constraints);
+    BoxConstraints constraintsForChild(RenderBox child) => flexChildConstraints[child] ?? nonFlexConstraints;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     switch (direction) {
