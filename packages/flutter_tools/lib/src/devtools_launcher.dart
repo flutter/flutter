@@ -57,9 +57,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _dartExecutable,
         'devtools',
         '--no-launch-browser',
-        // TODO(kenz): add the `--print-dtd` flag here once the Dart CLI
-        // supports it. See https://github.com/dart-lang/sdk/issues/55034.
-        // if (printDtdUri ?? false) '--print-dtd',
+        if (printDtdUri) '--print-dtd',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
         ...?additionalArguments,
       ]);

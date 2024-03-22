@@ -62,9 +62,7 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            // TODO(kenz): uncomment once the Dart CLI supports this flag. See
-            // https://github.com/dart-lang/sdk/issues/55034.
-            // '--print-dtd',
+            '--print-dtd',
           ],
           stdout: '''
 Serving the Dart Tooling Daemon at ws://127.0.0.1:53449/
