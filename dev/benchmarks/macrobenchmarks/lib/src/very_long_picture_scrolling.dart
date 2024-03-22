@@ -97,7 +97,7 @@ class PaintTest extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double height = size.height;
+    final double halfHeight = size.height / 2;
     double x = 0;
     const double strokeSize = .5;
     const double zoomFactor = .5;
@@ -125,19 +125,12 @@ class PaintTest extends CustomPainter {
     final Float32List offsets = Float32List(consolidate ? waveData.length * 4 : 4);
     int used = 0;
     for (index = 0; index < waveData.length; index++) {
-      Paint curPaint;
-      Offset p1;
-      if (waveData[index].isNegative) {
-        curPaint = paintPos;
-        p1 = Offset(x, height * 1 / 2 - waveData[index] / 32768 * (height / 2));
-      } else if (waveData[index] == 0) {
-        curPaint = paintZero;
-        p1 = Offset(x, height * 1 / 2 + 1);
-      } else {
-        curPaint = (waveData[index] == 0) ? paintZero : paintNeg;
-        p1 = Offset(x, height * 1 / 2 - waveData[index] / 32767 * (height / 2));
-      }
-      final Offset p0 = Offset(x, height * 1 / 2);
+      final (Paint curPaint, Offset p1) = switch (waveData[index]) {
+        < 0 => (paintPos,  Offset(x, halfHeight * (1 - waveData[index] / 32768))),
+        > 0 => (paintNeg,  Offset(x, halfHeight * (1 - waveData[index] / 32767))),
+        _   => (paintZero, Offset(x, halfHeight + 1)),
+      };
+      final Offset p0 = Offset(x, halfHeight);
       if (consolidate) {
         if (listPaint != null && listPaint != curPaint) {
           canvas.drawRawPoints(PointMode.lines, offsets.sublist(0, used), listPaint);
@@ -179,7 +172,7 @@ class PaintSomeTest extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double height = size.height;
+    final double halfHeight = size.height / 2;
     double x = 0;
     const double strokeSize = .5;
     const double zoomFactor = .5;
@@ -203,19 +196,12 @@ class PaintSomeTest extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     for (int index = from; index <= to; index++) {
-      Paint curPaint;
-      Offset p1;
-      if (waveData[index].isNegative) {
-        curPaint = paintPos;
-        p1 = Offset(x, height * 1 / 2 - waveData[index] / 32768 * (height / 2));
-      } else if (waveData[index] == 0) {
-        curPaint = paintZero;
-        p1 = Offset(x, height * 1 / 2 + 1);
-      } else {
-        curPaint = (waveData[index] == 0) ? paintZero : paintNeg;
-        p1 = Offset(x, height * 1 / 2 - waveData[index] / 32767 * (height / 2));
-      }
-      final Offset p0 = Offset(x, height * 1 / 2);
+      final (Paint curPaint, Offset p1) = switch (waveData[index]) {
+        < 0 => (paintPos,  Offset(x, halfHeight * (1 - waveData[index] / 32768))),
+        > 0 => (paintNeg,  Offset(x, halfHeight * (1 - waveData[index] / 32767))),
+        _   => (paintZero, Offset(x, halfHeight + 1)),
+      };
+      final Offset p0 = Offset(x, halfHeight);
       canvas.drawLine(p0, p1, curPaint);
       x += zoomFactor;
     }
