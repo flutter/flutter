@@ -14,6 +14,31 @@ extern "C" {
 // Declare functions that are currently in-progress and shall be exposed to the
 // public facing API upon completion.
 
+// Properties for configuring a Flutter view controller.
+typedef struct {
+  // The view's initial width.
+  int width;
+
+  // The view's initial height.
+  int height;
+} FlutterDesktopViewControllerProperties;
+
+// Creates a view for the given engine.
+//
+// The |engine| will be started if it is not already running.
+//
+// The caller owns the returned reference, and is responsible for calling
+// |FlutterDesktopViewControllerDestroy|. Returns a null pointer in the event of
+// an error.
+//
+// Unlike |FlutterDesktopViewControllerCreate|, this does *not* take ownership
+// of |engine| and |FlutterDesktopEngineDestroy| must be called to destroy
+// the engine.
+FLUTTER_EXPORT FlutterDesktopViewControllerRef
+FlutterDesktopEngineCreateViewController(
+    FlutterDesktopEngineRef engine,
+    const FlutterDesktopViewControllerProperties* properties);
+
 typedef int64_t PlatformViewId;
 
 typedef struct {
