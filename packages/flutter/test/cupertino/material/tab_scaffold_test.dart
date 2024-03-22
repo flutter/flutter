@@ -14,6 +14,9 @@ import '../../image_data.dart';
 late List<int> selectedTabs;
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   setUp(() {
     selectedTabs = <int>[];
   });
@@ -185,10 +188,7 @@ void main() {
     expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgets('dark mode background color',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('dark mode background color', (WidgetTester tester) async {
     const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),

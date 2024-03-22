@@ -40,6 +40,9 @@ class MockCupertinoTabController extends CupertinoTabController {
 }
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   setUp(() {
     selectedTabs = <int>[];
   });
@@ -245,7 +248,9 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing the index of an existing controller',
+    experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
     final List<int> tabsPainted = <int>[];
@@ -627,10 +632,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
     addTearDown(controller.dispose);
