@@ -13,8 +13,8 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 // this, list out all of the fonts and find the URL for the regular
 // Roboto font. The API reference is here:
 // https://developers.google.com/fonts/docs/developer_api
-const String _robotoUrl =
-    'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
+String _robotoUrl =
+    '${configuration.fontFallbackBaseUrl}roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
 /// Manages the fonts used in the Skia-based backend.
 class SkiaFontCollection implements FlutterFontCollection {
