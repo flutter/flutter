@@ -116,4 +116,23 @@ Future<void> testMain() async {
         expect(metrics, hasLength(1));
     }
   }, skip: isHtml); // The rounding hack doesn't apply to the html renderer
+
+  test('uses flutter test fonts when debugEmulateFlutterTesterEnvironment is enabled', () {
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    builder.pushStyle(ui.TextStyle(
+      fontSize: 10.0,
+      fontFamily: 'SomeOtherFontFamily',
+    ));
+    builder.addText('XXXX');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 400));
+
+    expect(paragraph.numberOfLines, 1);
+
+    final ui.LineMetrics? metrics = paragraph.getLineMetricsAt(0);
+    expect(metrics, isNotNull);
+
+    // FlutterTest font's 'X' character is a square, so it's the font size (10.0) * 4 characters.
+    expect(metrics!.width, 40.0);
+  });
 }
