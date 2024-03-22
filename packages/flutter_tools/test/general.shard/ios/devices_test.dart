@@ -659,7 +659,7 @@ void main() {
       await iosDevices.startPolling();
       expect(xcdevice.getAvailableIOSDevicesCount, 1);
 
-      expect(iosDevices.deviceNotifier!.items, isEmpty);
+      expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       xcdevice.deviceEventController.add(
@@ -670,9 +670,9 @@ void main() {
         ),
       );
       await added.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 1);
 
       iosDevices.resetEventCompleter();
@@ -684,9 +684,9 @@ void main() {
         ),
       );
       await iosDevices.receivedEvent.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 2);
 
       iosDevices.resetEventCompleter();
@@ -698,9 +698,9 @@ void main() {
         ),
       );
       await iosDevices.receivedEvent.future;
-      expect(iosDevices.deviceNotifier!.items.length, 2);
-      expect(iosDevices.deviceNotifier!.items, contains(device1));
-      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
       expect(iosDevices.eventsReceived, 3);
 
       xcdevice.deviceEventController.add(
@@ -711,7 +711,7 @@ void main() {
         ),
       );
       await removed.future;
-      expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
+      expect(iosDevices.deviceNotifier.items, <Device>[device2]);
       expect(iosDevices.eventsReceived, 4);
 
       iosDevices.resetEventCompleter();
@@ -777,7 +777,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
 
       await iosDevices.startPolling();
-      expect(iosDevices.deviceNotifier!.items, isEmpty);
+      expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       iosDevices.dispose();

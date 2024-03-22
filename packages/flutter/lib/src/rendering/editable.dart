@@ -1798,7 +1798,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype) ?? _textPainter.preferredLineHeight;
+        final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype);
         final double heightDiff = fullHeight - caretRect.height;
         // Center the caret vertically along the text.
         caretRect = Rect.fromLTWH(
@@ -1922,7 +1922,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) => getMaxIntrinsicHeight(width);
 
   @override
   double computeMaxIntrinsicHeight(double width) {
