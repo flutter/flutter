@@ -12,6 +12,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
@@ -168,6 +169,10 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     return flutterRenderer;
   }
 
+  @VisibleForTesting
+  /* package */ boolean isSurfaceAvailableForRendering() {
+    return isSurfaceAvailableForRendering;
+  }
   /**
    * Invoked by the owner of this {@code FlutterSurfaceView} when it wants to begin rendering a
    * Flutter UI to this {@code FlutterSurfaceView}.
@@ -215,8 +220,6 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
         disconnectSurfaceFromRenderer();
       }
 
-      pause();
-
       // Make the SurfaceView invisible to avoid showing a black rectangle.
       setAlpha(0.0f);
       flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
@@ -248,7 +251,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
 
     // If we're already attached to an Android window then we're now attached to both a renderer
     // and the Android window. We can begin rendering now.
-    if (isSurfaceAvailableForRendering) {
+    if (isSurfaceAvailableForRendering()) {
       Log.v(
           TAG,
           "Surface is available for rendering. Connecting FlutterRenderer to Android surface.");
