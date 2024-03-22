@@ -1441,16 +1441,10 @@ class RenderBaseline extends RenderShiftedBox {
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final RenderBox? child = this.child;
-    if (child == null) {
-      return null;
-    }
-    if (baseline == baselineType) {
-      return this.baseline;
-    }
-    final double? result1 = child.getDryBaseline(constraints.loosen(), baseline);
-    final double? result2 = child.getDryBaseline(constraints.loosen(), baselineType);
+    final double? result1 = child?.getDryBaseline(constraints.loosen(), baseline);
+    final double? result2 = child?.getDryBaseline(constraints.loosen(), baselineType);
     if (result1 == null || result2 == null) {
-      return this.baseline;
+      return null;
     }
     return this.baseline + result1 - result2;
   }

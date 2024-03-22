@@ -599,35 +599,43 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     };
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
-      Size computeIntrinsicMainExtentForChild(RenderBox child, BoxConstraints constraints) {
+      Size layoutChildWithCrossSizeConstrained(RenderBox child, BoxConstraints constraints) {
         switch (_direction) {
           case Axis.horizontal:
-            final double height = constraints.maxHeight;
-            return Size(childSize(child, height), height);
+            final double crossExtent = constraints.maxHeight;
+            return Size(childSize(child, crossExtent), crossExtent);
           case Axis.vertical:
-            final double width = constraints.maxWidth;
-            return Size(width, childSize(child, width));
+            final double crossExtent = constraints.maxWidth;
+            return Size(crossExtent, childSize(child, crossExtent));
         }
       }
-      return _computeSizes(constraints: extentConstraints, layoutChild: computeIntrinsicMainExtentForChild, getBaseline: ChildLayoutHelper.getDryBaseline).axisSize.mainAxisExtent;
+      return _computeSizes(
+        constraints: extentConstraints,
+        layoutChild: layoutChildWithCrossSizeConstrained,
+        getBaseline: ChildLayoutHelper.getDryBaseline,
+      ).axisSize.mainAxisExtent;
     } else {
       // INTRINSIC CROSS SIZE
-      Size computeIntrinsicCrossExtentForChild(RenderBox child, BoxConstraints constraints) {
+      Size layoutChildWithMainSizeConstraied(RenderBox child, BoxConstraints constraints) {
         final bool isFlexChild = _getFlex(child) > 0;
         switch (_direction) {
           case Axis.horizontal:
-            final double width = isFlexChild
+            final double mainExtent = isFlexChild
               ? math.min(child.getMaxIntrinsicWidth(constraints.maxHeight), constraints.maxWidth)
               : child.getMaxIntrinsicWidth(constraints.maxHeight);
-            return Size(width, childSize(child, width));
+            return Size(mainExtent, childSize(child, mainExtent));
           case Axis.vertical:
-            final double height = isFlexChild
+            final double mainExtent = isFlexChild
               ? math.min(child.getMaxIntrinsicHeight(constraints.maxWidth), constraints.maxHeight)
               : child.getMaxIntrinsicHeight(constraints.maxWidth);
-            return Size(childSize(child, height), height);
+            return Size(childSize(child, mainExtent), mainExtent);
         }
       }
-      return _computeSizes(constraints: extentConstraints, layoutChild: computeIntrinsicCrossExtentForChild, getBaseline: ChildLayoutHelper.getDryBaseline).axisSize.crossAxisExtent;
+      return _computeSizes(
+        constraints: extentConstraints,
+        layoutChild: layoutChildWithMainSizeConstraied,
+        getBaseline: ChildLayoutHelper.getDryBaseline,
+      ).axisSize.crossAxisExtent;
     }
   }
 
@@ -937,10 +945,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   _LayoutSizes _computeSizes({
-      required BoxConstraints constraints,
-      required ChildLayouter layoutChild,
-      required ChildBaselineGetter getBaseline,
-      Map<RenderBox, BoxConstraints>? flexChildConstraints, // This is only needed by computeDryLayout.
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    required ChildBaselineGetter getBaseline,
+    Map<RenderBox, BoxConstraints>? flexChildConstraints, // This is only needed by computeDryBaseline.
   }) {
     assert(_debugHasNecessaryDirections);
 

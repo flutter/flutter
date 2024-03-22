@@ -627,30 +627,40 @@ void main() {
 
   test('Vertical Flex Baseline', () {
     const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square, child: RenderBaseline(baseline: 10, baselineType: TextBaseline.alphabetic, child: RenderBaseline(baseline: 10, baselineType: TextBaseline.alphabetic)));
-    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square, child: RenderBaseline(baseline: 10, baselineType: TextBaseline.alphabetic, child: RenderBaseline(baseline: 10, baselineType: TextBaseline.alphabetic)));
+    final RenderConstrainedBox box1 = RenderConstrainedBox(
+      additionalConstraints: square,
+      child: RenderFlowBaselineTestBox()
+        ..gridCount = 1
+        ..baselinePlacer = (double height) => 10,
+    );
+    final RenderConstrainedBox box2 = RenderConstrainedBox(
+      additionalConstraints: square,
+      child: RenderFlowBaselineTestBox()
+        ..gridCount = 1
+        ..baselinePlacer = (double height) => 10,
+    );
     final RenderFlex flex = RenderFlex(
       textDirection: TextDirection.ltr,
       children: <RenderBox>[box1, box2],
       direction: Axis.vertical,
     );
-    layout(flex);
+    layout(flex, phase: EnginePhase.paint);
 
     // We can't call the getDistanceToBaseline method directly. Check the dry
-    // baesline instead because in debug mode there are asserts that verify
+    // baesline instead, and in debug mode there are asserts that verify
     // the two methods return the same results.
     expect(flex.getDryBaseline(flex.constraints, TextBaseline.alphabetic), 10);
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.paint);
     expect(flex.getDryBaseline(flex.constraints, TextBaseline.alphabetic), 410);
 
     flex.verticalDirection = VerticalDirection.up;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.paint);
     expect(flex.getDryBaseline(flex.constraints, TextBaseline.alphabetic), 10);
 
     flex.mainAxisAlignment = MainAxisAlignment.start;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.paint);
     expect(flex.getDryBaseline(flex.constraints, TextBaseline.alphabetic), 410);
   });
 

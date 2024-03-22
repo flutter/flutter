@@ -64,6 +64,7 @@ void main() {
       child: child,
     );
 
+    layout(renderBaseline, phase: EnginePhase.paint);
     expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic), 1.0);
     expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), 11.0);
 
@@ -72,8 +73,11 @@ void main() {
      ..ideographicBaselineOffset = null
      ..markNeedsLayout(); // Clears baseline cache.
 
-    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic), 1.0);
-    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), 1.0);
+    renderBaseline.markNeedsLayout();
+
+    pumpFrame(phase: EnginePhase.paint);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic), isNull);
+    expect(renderBaseline.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), isNull);
   });
 
   test('RenderFlex and RenderIgnoreBaseline (control test -- with baseline)', () {
