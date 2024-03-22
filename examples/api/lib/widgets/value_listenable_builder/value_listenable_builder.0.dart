@@ -28,7 +28,6 @@ class ValueListenableBuilderExample extends StatefulWidget {
 
 class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
-  final Widget goodJob = const Text('Good job!');
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +62,7 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
                 child: SizedBox(
                   width: 40,
                   height: 40,
-                  child: FlutterLogo(
-                    size: 40,
-                  ),
+                  child: FlutterLogo(size: 40),
                 ),
               ),
             ),
