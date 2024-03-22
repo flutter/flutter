@@ -239,6 +239,7 @@ class WebTestCompiler {
       '--extra-compiler-option=--multi-root=${projectDirectory.childDirectory('test').path}',
       '--extra-compiler-option=--multi-root=${outputDirectory.path}',
       '--extra-compiler-option=--enable-asserts',
+      '--extra-compiler-option=--no-inlining',
       if (webRenderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',
