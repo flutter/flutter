@@ -36,6 +36,10 @@ RenderTarget RenderTargetCache::CreateOffscreen(
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_texture,
     const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+  if (size.IsEmpty()) {
+    return {};
+  }
+
   FML_DCHECK(existing_color_texture == nullptr &&
              existing_depth_stencil_texture == nullptr);
   auto config = RenderTargetConfig{
@@ -81,6 +85,10 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
     const std::shared_ptr<Texture>& existing_color_msaa_texture,
     const std::shared_ptr<Texture>& existing_color_resolve_texture,
     const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+  if (size.IsEmpty()) {
+    return {};
+  }
+
   FML_DCHECK(existing_color_msaa_texture == nullptr &&
              existing_color_resolve_texture == nullptr &&
              existing_depth_stencil_texture == nullptr);
