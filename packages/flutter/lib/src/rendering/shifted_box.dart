@@ -1420,22 +1420,22 @@ class RenderBaseline extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  (Size, double) _computeSizes(covariant BoxConstraints constraints, ChildLayouter layoutChild, ChildBaselineGetter computeBaseline) {
+  ({Size size, double top}) _computeSizes(covariant BoxConstraints constraints, ChildLayouter layoutChild, ChildBaselineGetter getBaseline) {
     final RenderBox? child = this.child;
     if (child == null) {
-      return (constraints.smallest, 0);
+      return (size: constraints.smallest, top: 0);
     }
     final BoxConstraints childConstraints = constraints.loosen();
     final Size childSize = layoutChild(child, childConstraints);
-    final double childBaseline = computeBaseline(child, childConstraints, baselineType) ?? childSize.height;
+    final double childBaseline = getBaseline(child, childConstraints, baselineType) ?? childSize.height;
     final double top = baseline - childBaseline;
-    return (constraints.constrain(Size(childSize.width, top + childSize.height)), top);
+    return (size: constraints.constrain(Size(childSize.width, top + childSize.height)), top: top);
   }
 
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline).$1;
+    return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline).size;
   }
 
   @override
@@ -1457,7 +1457,7 @@ class RenderBaseline extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    final (Size size, double top) = _computeSizes(constraints, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
+    final (:Size size, :double top) = _computeSizes(constraints, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     this.size = size;
     (child?.parentData as BoxParentData?)?.offset = Offset(0.0, top);
   }

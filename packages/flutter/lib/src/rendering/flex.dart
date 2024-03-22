@@ -65,7 +65,6 @@ extension type const _LayoutAxisDimensions(({_AxisSize axisSize, _AscentDescent?
   }
 }
 
-typedef _LayoutFlexDimensions = ({double sizePerFlex, RenderBox lastFlexChild, double lastFlexChildMaxMainExtent});
 typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 typedef _NextChild = RenderBox? Function(RenderBox child);
 
@@ -74,7 +73,6 @@ class _LayoutSizes {
     required this.size,
     required this.baselineOffset,
     required this.allocatedMainAxisSize,
-    required this.flexDimensions,
   });
 
   // The final constrained Size of the RenderFlex.
@@ -86,8 +84,6 @@ class _LayoutSizes {
   // Null if the RenderFlex is not baseline aligned, or none of its children has
   // a valid baseline of the given [TextBaseline] type.
   final double? baselineOffset;
-
-  final _LayoutFlexDimensions? flexDimensions;
 }
 
 /// How the child is inscribed into the available space.
@@ -787,26 +783,24 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    if (_isBaselineAligned) {
+      return _computeSizes(
+        constraints: constraints,
+        layoutChild: ChildLayoutHelper.dryLayoutChild,
+        computeBaseline: ChildLayoutHelper.getDryBaseline,
+      ).baselineOffset;
+    }
+
+    final Map<RenderBox, BoxConstraints> flexChildConstraints = <RenderBox, BoxConstraints>{};
     final _LayoutSizes sizes = _computeSizes(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       computeBaseline: ChildLayoutHelper.getDryBaseline,
     );
 
-    if (_isBaselineAligned) {
-      return sizes.baselineOffset;
-    }
-
     BoxConstraints constraintsForChild(RenderBox child) {
-      final _LayoutFlexDimensions? flexDimensions = sizes.flexDimensions;
-      final int flex;
-      if (flexDimensions != null && (flex = _getFlex(child)) > 0) {
-        return child == flexDimensions.lastFlexChild
-          ? _constraintsForFlexChild(child, constraints, flexDimensions.lastFlexChildMaxMainExtent)
-          : _constraintsForFlexChild(child, constraints, flex * flexDimensions.sizePerFlex);
-      } else {
-        return _constraintsForNonFlexChild(constraints);
-      }
+      assert((_getFlex(child) != 0) == flexChildConstraints.containsKey(child));
+      return flexChildConstraints[child] ?? _constraintsForNonFlexChild(constraints);
     }
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -950,7 +944,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return result;
   }
 
-  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild, required ChildBaselineGetter computeBaseline}) {
+  _LayoutSizes _computeSizes({
+      required BoxConstraints constraints,
+      required ChildLayouter layoutChild,
+      required ChildBaselineGetter computeBaseline,
+      Map<RenderBox, BoxConstraints>? flexChildConstraints,
+  }) {
     assert(_debugHasNecessaryDirections);
 
     // Determine used flex factor, size inflexible items, calculate free space.
@@ -980,32 +979,30 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     assert((totalFlex == 0) == (firstFlexChild == null));
     assert(firstFlexChild == null || canFlex); // If we are given infinite space there's no need for this extra step.
-    _LayoutFlexDimensions? flexDimensions;
 
     // The second pass distributes free space to flexible children.
     final double flexSpace = math.max(0.0, maxMainSize - layoutAxisDimensions.mainAxisExtent);
-    int remainingFlex = totalFlex;
+    final double spacePerFlex = flexSpace / totalFlex;
     for (RenderBox? child = firstFlexChild; child != null; child = childAfter(child)) {
       final int flex = _getFlex(child);
       if (flex == 0) {
         continue;
       }
-      final double spacePerFlex = flexSpace / totalFlex;
-      final bool isLastFlexChild = (remainingFlex -= flex) == 0;
+      final bool isLastFlexChild = (totalFlex -= flex) == 0;
       final double maxChildExtent = isLastFlexChild
         ? math.max(0.0, maxMainSize - layoutAxisDimensions.mainAxisExtent)
         : spacePerFlex * flex;
       assert(_getFit(child) == FlexFit.loose || maxChildExtent < double.infinity);
       final BoxConstraints childConstraints = _constraintsForFlexChild(child, constraints, maxChildExtent);
+      flexChildConstraints?[child] = childConstraints;
       final _AxisSize childSize = _AxisSize.fromSize(size: layoutChild(child, childConstraints), direction: direction);
       final double? baselineOffset = textBaseline == null ? null : computeBaseline(child, childConstraints, textBaseline);
       layoutAxisDimensions = layoutAxisDimensions.update(childSize, BaselineOffset(baselineOffset));
       if (isLastFlexChild) {
-        flexDimensions = (sizePerFlex: spacePerFlex, lastFlexChild: child, lastFlexChildMaxMainExtent: maxChildExtent);
         break;
       }
     }
-    assert(remainingFlex == 0);
+    assert(totalFlex == 0);
     final double idealMainSize = switch (mainAxisSize) {
       MainAxisSize.max when maxMainSize.isFinite => maxMainSize,
       MainAxisSize.max || MainAxisSize.min => layoutAxisDimensions.mainAxisExtent,
@@ -1016,7 +1013,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _LayoutSizes(
       size: _AxisSize.fromSize(size: constrainedSize, direction: direction),
       allocatedMainAxisSize: layoutAxisDimensions.mainAxisExtent,
-      flexDimensions: flexDimensions,
       baselineOffset: layoutAxisDimensions.ascentDescent?.ascent,
     );
   }
