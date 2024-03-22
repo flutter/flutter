@@ -431,6 +431,26 @@ void testMain() {
         }
       }
     });
+
+    test('fallback fonts do not download when debugDisableFontFallbacks is set', () async {
+      debugDisableFontFallbacks = true;
+
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+
+      // Creating this paragraph would cause us to start to download the
+      // fallback font if we didn't disable font fallbacks.
+      final ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
+      );
+      pb.addText('Hello 😊');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+
+      // Make sure we didn't download the fallback font.
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+          isNot(contains('Noto Color Emoji')));
+    });
   },
   // HTML renderer doesn't use the fallback font manager.
   skip: isHtml,

@@ -113,7 +113,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   @override
   void layout(ui.ParagraphConstraints constraints) {
     paragraphLayout(handle, constraints.width);
-    if (!_hasCheckedForMissingCodePoints) {
+    if (!debugDisableFontFallbacks && !_hasCheckedForMissingCodePoints) {
       _hasCheckedForMissingCodePoints = true;
       final int missingCodePointCount = paragraphGetUnresolvedCodePoints(handle, nullptr, 0);
       if (missingCodePointCount > 0) {
