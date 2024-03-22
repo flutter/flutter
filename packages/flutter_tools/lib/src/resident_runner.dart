@@ -1965,7 +1965,7 @@ abstract class DevtoolsLauncher {
   ///
   /// This will always return false when there is not a DTD instance being
   /// served from the DevTools server.
-  bool get printDtdUri => dtdUri != null && (_printDtdUri ?? false);
+  bool get printDtdUri => _printDtdUri ?? false;
   bool? _printDtdUri;
   set printDtdUri(bool value) {
     _printDtdUri = value;

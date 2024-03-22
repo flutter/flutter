@@ -367,11 +367,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
-        try {
-          DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
-        } on Exception catch (_) {
-          // Fail gracefully if an error is thrown.
-        }
+        DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
 
         await super.runCommand(topLevelResults);
       },
