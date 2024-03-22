@@ -1448,6 +1448,9 @@ void main() {
     await tester.pumpWidget(buildAnchor(viewTrailing: <Widget>[const Icon(Icons.history)]));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
+    // Icon button with history icon is shown when input is not empty.
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
     expect(find.byIcon(Icons.close), findsNothing);
     expect(find.byIcon(Icons.history), findsOneWidget);
   });
@@ -3088,6 +3091,44 @@ void main() {
     await tester.enterText(findTextField(), '');
     await tester.pump();
     expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/144939.
+  testWidgets('SearchAnchor hides custom viewTrailing when input text is empty', (WidgetTester tester) async {
+    Widget buildAnchor({Iterable<Widget>? viewTrailing}) {
+      return MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            viewTrailing: viewTrailing,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: controller.openView,
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAnchor(viewTrailing: <Widget>[const Icon(Icons.delete)]));
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+    // Icon button with delete icon is not shown when input is empty.
+    expect(find.widgetWithIcon(IconButton, Icons.delete), findsNothing);
+
+    // Icon button with delete icon is shown when input is not empty.
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
+    expect(find.byIcon(Icons.delete), findsOneWidget);
+
+    // Clear the input text to hide the icon button.
+    await tester.enterText(findTextField(), '');
+    await tester.pump();
+    expect(find.byIcon(Icons.delete), findsNothing);
   });
 }
 

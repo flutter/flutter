@@ -811,7 +811,7 @@ class _ViewContentState extends State<_ViewContent> {
     );
 
     final List<Widget> defaultTrailing = <Widget>[
-      if (_controller.text.isNotEmpty) IconButton(
+      IconButton(
         icon: const Icon(Icons.close),
         tooltip: MaterialLocalizations.of(context).clearButtonTooltip,
         onPressed: () {
@@ -901,7 +901,7 @@ class _ViewContentState extends State<_ViewContent> {
                             autoFocus: true,
                             constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
                             leading: widget.viewLeading ?? defaultLeading,
-                            trailing: widget.viewTrailing ?? defaultTrailing,
+                            trailing: _controller.text.isNotEmpty ? (widget.viewTrailing ?? defaultTrailing) : null,
                             hintText: widget.viewHintText,
                             backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
                             overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
