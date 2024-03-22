@@ -107,10 +107,6 @@ final class AssetBundleEntry {
 
   final DateTime creationTime = DateTime.now();
 
-  bool isModifiedAfter(DateTime dateTime) {
-    return content.isModifiedAfter(dateTime) || creationTime.isAfter(dateTime);
-  }
-
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
 
   bool hasEquivalentConfigurationWith(AssetBundleEntry other) {
