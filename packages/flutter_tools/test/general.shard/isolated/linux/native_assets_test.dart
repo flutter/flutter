@@ -460,12 +460,13 @@ void main() {
     );
     final NativeAssetsBuildRunner runner =
         NativeAssetsBuildRunnerImpl(projectUri, packageConfig, fileSystem, logger);
-    final CCompilerConfig result = await runner.cCompilerConfig;
+    final CCompilerConfigImpl result = await runner.cCompilerConfig;
     expect(result.cc, Uri.file('/some/path/to/clang'));
   });
 }
 
 class _BuildRunnerWithoutClang extends FakeNativeAssetsBuildRunner {
   @override
-  Future<CCompilerConfig> get cCompilerConfig async => throwToolExit('Failed to find clang++ on the PATH.');
+  Future<CCompilerConfigImpl> get cCompilerConfig async =>
+      throwToolExit('Failed to find clang++ on the PATH.');
 }

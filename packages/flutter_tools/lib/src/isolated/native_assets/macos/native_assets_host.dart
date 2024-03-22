@@ -131,7 +131,7 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfig> cCompilerConfigMacOS() async {
+Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
   final ProcessResult xcrunResult = await globals.processManager.run(
     <String>['xcrun', 'clang', '--version'],
   );
@@ -142,10 +142,10 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
       .firstWhere((String s) => s.startsWith('InstalledDir: '))
       .split(' ')
       .last;
-  return CCompilerConfig(
-    cc: Uri.file('$installPath/clang'),
-    ar: Uri.file('$installPath/ar'),
-    ld: Uri.file('$installPath/ld'),
+  return CCompilerConfigImpl(
+    compiler: Uri.file('$installPath/clang'),
+    archiver: Uri.file('$installPath/ar'),
+    linker: Uri.file('$installPath/ld'),
   );
 }
 

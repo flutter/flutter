@@ -382,6 +382,6 @@ class _BuildRunnerWithoutNdk extends FakeNativeAssetsBuildRunner {
   });
 
   @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async =>
+  Future<CCompilerConfigImpl> get ndkCCompilerConfigImpl async =>
       throwToolExit('Android NDK Clang could not be found.');
 }

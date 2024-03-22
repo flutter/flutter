@@ -492,7 +492,7 @@ void main() {
       fileSystem,
       logger,
     );
-    final CCompilerConfig result = await runner.cCompilerConfig;
+    final CCompilerConfigImpl result = await runner.cCompilerConfig;
     expect(result.cc?.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
     expect(result.ar?.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
     expect(result.ld?.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
