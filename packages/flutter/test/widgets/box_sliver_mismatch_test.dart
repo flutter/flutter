@@ -35,7 +35,9 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('Box in a sliver', (WidgetTester tester) async {
+  testWidgets('Box in a sliver',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     late ViewportOffset offset1;
     addTearDown(() => offset1.dispose());
     await tester.pumpWidget(
