@@ -2747,6 +2747,34 @@ void main() {
       });
     });
 
+    group('Helper widget', () {
+      testWidgets('InputDecorator shows helper widget', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              helper: Text('helper', style: TextStyle(fontSize: 20.0)),
+            ),
+          ),
+        );
+
+        expect(find.text('helper'), findsOneWidget);
+      });
+
+      testWidgets('InputDecorator throws when helper text and helper widget are provided', (WidgetTester tester) async {
+        expect(
+          () {
+            buildInputDecorator(
+              decoration: InputDecoration(
+                helperText: 'helperText',
+                helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
+              ),
+            );
+          },
+          throwsAssertionError,
+        );
+      });
+    });
+
     group('Error widget', () {
       testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -5937,6 +5965,45 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
       expect(tester.getTopLeft(find.text(kHelper1)), const Offset(12.0, 64.0));
       expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
+    });
+
+    testWidgets('InputDecorator shows helper text', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecoratorM2(
+          decoration: const InputDecoration(
+            helperText: 'helperText',
+          ),
+        ),
+      );
+
+      expect(find.text('helperText'), findsOneWidget);
+    });
+
+    testWidgets('InputDecorator shows helper widget', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecoratorM2(
+          decoration: const InputDecoration(
+            helper: Text('helper', style: TextStyle(fontSize: 20.0)),
+          ),
+        ),
+      );
+
+      expect(find.text('helper'), findsOneWidget);
+    });
+
+    testWidgets('InputDecorator throws when helper text and helper widget are provided',
+        (WidgetTester tester) async {
+      expect(
+        () {
+          buildInputDecoratorM2(
+            decoration: InputDecoration(
+              helperText: 'helperText',
+              helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
+            ),
+          );
+        },
+        throwsAssertionError,
+      );
     });
 
     testWidgets('InputDecorator shows error text', (WidgetTester tester) async {

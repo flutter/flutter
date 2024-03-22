@@ -2074,11 +2074,11 @@ abstract class RenderBox extends RenderObject {
   /// would results in UI changes when [paint] is called, or hit-testing behavior
   /// changes when [hitTest] is called. Moreover, accessing the current layout
   /// of this [RenderBox] or child [RenderBox]es (including accessing [size], or
-  /// `child.size`) usually indicates a bug in the implementaion, as the current
+  /// `child.size`) usually indicates a bug in the implementation, as the current
   /// layout is typically calculated using a set of [BoxConstraints] that's
   /// different from the `constraints` given as the first parameter. To get the
   /// size of this [RenderBox] or a child [RenderBox] in this method's
-  /// implementatin, use the [getDryLayout] method instead.
+  /// implementation, use the [getDryLayout] method instead.
   ///
   /// The implementation must return a value that represents the distance from
   /// the top of the box to the first baseline of the box's contents, for the
