@@ -657,7 +657,10 @@ class Text extends StatelessWidget {
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
-    Widget result = _RichText(
+    // Use the [_RichText] wrapper when the [SelectionRegistrar] is non-null
+    // for the underlying [RenderParagraph] to register its [Selectable]s to the
+    // [SelectionContainer] created by this widget.
+    Widget result = registrar != null ? _RichText(
       textKey: textKey,
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
@@ -670,6 +673,22 @@ class Text extends StatelessWidget {
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+      text: TextSpan(
+        style: effectiveTextStyle,
+        text: data,
+        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+      ),
+    ) : RichText(
+      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+      softWrap: softWrap ?? defaultTextStyle.softWrap,
+      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+      textScaler: textScaler,
+      maxLines: maxLines ?? defaultTextStyle.maxLines,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
