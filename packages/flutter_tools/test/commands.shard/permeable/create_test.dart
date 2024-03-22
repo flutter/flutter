@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroi
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -2791,27 +2790,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await expectLater(
-      runner.run(
-          <String>['create', '--no-pub', '--template=plugin', projectDir.path]),
-      throwsToolExit(message: 'Unable to read the template manifest at path'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(
-      opHandle: (String context, FileSystemOp operation) {
-        if (context.contains('template_manifest.json')) {
-          throw PathNotFoundException(
-              context, const OSError(), 'Cannot open file');
-        }
-      },
-    ),
-    ProcessManager: () => fakeProcessManager,
-  });
-
   testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
     Cache.flutterRoot = '../..';
 
@@ -3722,6 +3700,27 @@ void main() {
     const String expectedDescription = '"description": "A new Flutter project."';
 
     expect(rawManifestJson.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await expectLater(
+      runner.run(
+          <String>['create', '--no-pub', '--template=plugin', projectDir.path]),
+      throwsToolExit(message: 'Unable to read the template manifest at path'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (context.contains('template_manifest.json')) {
+          throw PathNotFoundException(
+              context, const OSError(), 'Cannot open file');
+        }
+      },
+    ),
+    ProcessManager: () => fakeProcessManager,
   });
 }
 
