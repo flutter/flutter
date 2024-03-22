@@ -187,11 +187,11 @@ String get shuffleSeed {
   return _shuffleSeed!;
 }
 
-bool _isRandomizationOff() {
+final bool _isRandomizationOff = () {
   // The values can be different, one is compile time, another is run time.
   return const bool.fromEnvironment('TEST_RANDOMIZATION_OFF') ||
       (bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false);
-}
+} ();
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -217,9 +217,7 @@ Future<void> main(List<String> args) async {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--test-randomize-ordering-seed=')) {
-        if (!_isRandomizationOff()) {
-          _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
-        }
+        _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
       } else if (arg.startsWith('--verbose')) {
         print = (Object? message) {
           system.print(message);
@@ -2477,7 +2475,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   final List<String> args = <String>[
     'test',
-    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,
