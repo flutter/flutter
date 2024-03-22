@@ -1059,6 +1059,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Obtains the element corresponding to the nearest widget of
   /// [_ModalScopeStatus] within the given [context].
+  @protected
   @visibleForTesting
   static InheritedElement? scopeStatusAncestor(BuildContext context) {
     return context.getElementForInheritedWidgetOfExactType<_ModalScopeStatus>();
