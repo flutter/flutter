@@ -796,13 +796,13 @@ void main() {
       expect(flex.getMinIntrinsicHeight(double.infinity), 10.0);
       expect(flex.getMaxIntrinsicHeight(double.infinity), 10.0);
 
-      // 65.0 is the max intrinsic width of the RenderFlex.
-      // width distribution = 5, 30, 30.
-      expect(flex.getMinIntrinsicHeight(65.0), 10.0);
-      expect(flex.getMaxIntrinsicHeight(65.0), 10.0);
+      // 95.0 is the max intrinsic width of the RenderFlex.
+      expect(flex.getMinIntrinsicHeight(95.0), 10.0);
+      expect(flex.getMaxIntrinsicHeight(95.0), 10.0);
 
-      expect(flex.getMinIntrinsicHeight(64.0), 20.0);
-      expect(flex.getMaxIntrinsicHeight(64.0), 20.0);
+      // width distribution = 5, 40, 20.
+      expect(flex.getMinIntrinsicHeight(65.0), 20.0);
+      expect(flex.getMaxIntrinsicHeight(65.0), 20.0);
 
       // width distribution = 5, 20, 10
       expect(flex.getMinIntrinsicHeight(35.0), 30.0);
