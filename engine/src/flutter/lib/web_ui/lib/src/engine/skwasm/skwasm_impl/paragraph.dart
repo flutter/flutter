@@ -9,9 +9,17 @@ import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 const int _kSoftLineBreak = 0;
 const int _kHardLineBreak = 100;
+
+final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
+String _computeEffectiveFontFamily(String fontFamily) {
+  return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
+    ? _testFonts.first
+    : fontFamily;
+}
 
 class SkwasmLineMetrics extends SkwasmObjectWrapper<RawLineMetrics> implements ui.LineMetrics {
   factory SkwasmLineMetrics({
@@ -430,8 +438,8 @@ class SkwasmTextStyle implements ui.TextStyle {
   }
 
   List<String> get fontFamilies => <String>[
-    if (fontFamily != null) fontFamily!,
-    if (fontFamilyFallback != null) ...fontFamilyFallback!,
+    if (fontFamily != null) _computeEffectiveFontFamily(fontFamily!),
+    if (fontFamilyFallback != null) ...fontFamilyFallback!.map(_computeEffectiveFontFamily),
   ];
 
   final ui.Color? color;
