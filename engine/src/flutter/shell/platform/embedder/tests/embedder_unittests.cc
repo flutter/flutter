@@ -3009,6 +3009,72 @@ TEST_F(EmbedderTest, RegisterChannelListener) {
   ASSERT_TRUE(listening);
 }
 
+TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  static fml::AutoResetWaitableEvent latch;
+
+  static std::thread::id ffi_call_thread_id;
+  static void (*ffi_signal_native_test)() = []() -> void {
+    ffi_call_thread_id = std::this_thread::get_id();
+    latch.Signal();
+  };
+
+  Dart_FfiNativeResolver ffi_resolver = [](const char* name,
+                                           uintptr_t args_n) -> void* {
+    if (std::string_view(name) == "FFISignalNativeTest") {
+      return reinterpret_cast<void*>(ffi_signal_native_test);
+    }
+    return nullptr;
+  };
+
+  // The test's Dart code will call this native function which overrides the
+  // FFI resolver.  After that, the Dart code will invoke the FFI function
+  // using runOnPlatformThread.
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        Dart_SetFfiNativeResolver(Dart_RootLibrary(), ffi_resolver);
+      }));
+
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  std::thread::id platform_thread_id;
+  platform_task_runner->PostTask([&]() {
+    platform_thread_id = std::this_thread::get_id();
+
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSoftwareRendererConfig();
+    builder.SetPlatformTaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("invokePlatformThreadIsolate");
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+
+  latch.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask(fml::MakeCopyable([&]() mutable {
+    engine.reset();
+
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  }));
+  kill_latch.Wait();
+
+  // Check that the FFI call was executed on the platform thread.
+  ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

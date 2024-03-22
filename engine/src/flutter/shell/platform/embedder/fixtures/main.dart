@@ -60,6 +60,12 @@ void invokePlatformTaskRunner() {
   PlatformDispatcher.instance.sendPlatformMessage('OhHi', null, null);
 }
 
+@pragma('vm:entry-point')
+void invokePlatformThreadIsolate() {
+  signalNativeTest();
+  runOnPlatformThread(ffiSignalNativeTest);
+}
+
 Float64List kTestTransform = () {
   final Float64List values = Float64List(16);
   values[0] = 1.0; // scaleX
@@ -86,6 +92,9 @@ external void notifySemanticsEnabled(bool enabled);
 external void notifyAccessibilityFeatures(bool reduceMotion);
 @pragma('vm:external-name', 'NotifySemanticsAction')
 external void notifySemanticsAction(int nodeId, int action, List<int> data);
+
+@ffi.Native<ffi.Void Function()>(symbol: 'FFISignalNativeTest')
+external void ffiSignalNativeTest();
 
 /// Returns a future that completes when
 /// `PlatformDispatcher.instance.onSemanticsEnabledChanged` fires.

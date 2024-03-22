@@ -504,9 +504,12 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
     Dart_SetCurrentUserTag(Dart_NewUserTag("AppStartUp"));
   }
 
-  SetMessageHandlingTaskRunner(is_platform_isolate_
-                                   ? GetTaskRunners().GetPlatformTaskRunner()
-                                   : GetTaskRunners().GetUITaskRunner());
+  if (is_platform_isolate_) {
+    SetMessageHandlingTaskRunner(GetTaskRunners().GetPlatformTaskRunner(),
+                                 true);
+  } else {
+    SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(), false);
+  }
 
   if (tonic::CheckAndHandleError(
           Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag))) {
@@ -562,30 +565,41 @@ void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
 }
 
 void DartIsolate::SetMessageHandlingTaskRunner(
-    const fml::RefPtr<fml::TaskRunner>& runner) {
+    const fml::RefPtr<fml::TaskRunner>& runner,
+    bool post_directly_to_runner) {
   if (!runner) {
     return;
   }
 
   message_handling_task_runner_ = runner;
 
-  message_handler().Initialize([runner](std::function<void()> task) {
+  tonic::DartMessageHandler::TaskDispatcher dispatcher;
+
 #ifdef OS_FUCHSIA
-    runner->PostTask([task = std::move(task)]() {
-      TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
-      task();
-    });
-#else
-    auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
-    task_queues->RegisterTask(
-        runner->GetTaskQueueId(),
-        [task = std::move(task)]() {
-          TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
-          task();
-        },
-        fml::TimePoint::Now(), fml::TaskSourceGrade::kDartEventLoop);
+  post_directly_to_runner = true;
 #endif
-  });
+
+  if (post_directly_to_runner) {
+    dispatcher = [runner](std::function<void()> task) {
+      runner->PostTask([task = std::move(task)]() {
+        TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
+        task();
+      });
+    };
+  } else {
+    dispatcher = [runner](std::function<void()> task) {
+      auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
+      task_queues->RegisterTask(
+          runner->GetTaskQueueId(),
+          [task = std::move(task)]() {
+            TRACE_EVENT0("flutter", "DartIsolate::HandleMessage");
+            task();
+          },
+          fml::TimePoint::Now(), fml::TaskSourceGrade::kDartEventLoop);
+    };
+  }
+
+  message_handler().Initialize(dispatcher);
 }
 
 // Updating thread names here does not change the underlying OS thread names.

@@ -470,7 +470,8 @@ class DartIsolate : public UIDartState {
   ///
   [[nodiscard]] bool Initialize(Dart_Isolate dart_isolate);
 
-  void SetMessageHandlingTaskRunner(const fml::RefPtr<fml::TaskRunner>& runner);
+  void SetMessageHandlingTaskRunner(const fml::RefPtr<fml::TaskRunner>& runner,
+                                    bool post_directly_to_runner);
 
   bool LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
                   bool last_piece);
