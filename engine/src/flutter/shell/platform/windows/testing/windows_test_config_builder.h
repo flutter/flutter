@@ -71,7 +71,7 @@ class WindowsConfigBuilder {
   EnginePtr RunHeadless() const;
 
   // Returns a configured and initialized view controller that runs the
-  // configured Dart entrypoint.
+  // configured Dart entrypoint and owns its engine.
   //
   // Returns null on failure.
   ViewControllerPtr Run() const;
