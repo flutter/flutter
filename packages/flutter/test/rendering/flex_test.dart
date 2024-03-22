@@ -654,6 +654,29 @@ void main() {
     expect(flex.getDryBaseline(flex.constraints, TextBaseline.alphabetic), 410);
   });
 
+  test('children with no baselines are top-aligned', () {
+    const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[box1, box2],
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      verticalDirection: VerticalDirection.up,
+    );
+    layout(flex);
+
+    // Not start-aligned.
+    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 0.0);
+
+    flex.verticalDirection = VerticalDirection.down;
+    pumpFrame();
+    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 0.0);
+  });
+
   group('Intrinsics', () {
     test('main axis intrinsics with RenderAspectRatio 1', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
