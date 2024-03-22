@@ -822,7 +822,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
   Future<bool> _handleStartBackGesture(Map<dynamic, dynamic> arguments) {
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromJSON(arguments as Map<String, dynamic>);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
         return Future<bool>.value(true);
@@ -837,8 +837,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
-  Future<bool> _handleUpdateBackGestureProgress(Map<dynamic, dynamic> arguments) {
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromJSON(arguments as Map<String, dynamic>);
+  Future<bool> _handleUpdateBackGestureProgress(Map<Object?, Object?> arguments) {
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleUpdateBackGestureProgress(backEvent)) {
         return Future<bool>.value(true);
@@ -925,8 +925,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
     return switch (methodCall.method) {
-      'startBackGesture' => _handleStartBackGesture(methodCall.arguments as Map<dynamic, dynamic>),
-      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(methodCall.arguments as Map<dynamic, dynamic>),
+      'startBackGesture' => _handleStartBackGesture(methodCall.arguments as Map<Object?, Object?>),
+      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(methodCall.arguments as Map<Object?, Object?>),
       'commitBackGesture' => _handleCommitBackGesture(),
       'cancelBackGesture' => _handleCancelBackGesture(),
       _ => Future<dynamic>.value(),

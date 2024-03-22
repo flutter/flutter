@@ -6,10 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('fromJSON can be created with valid JSON - SwipeEdge.left', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 100.0,
+  test('fromMap can be created with valid Map - SwipeEdge.left', () async {
+    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
@@ -17,10 +16,9 @@ void main() {
     expect(event.isButtonEvent, isFalse);
   });
 
-  test('fromJSON can be created with valid JSON - SwipeEdge.right', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 100.0,
+  test('fromMap can be created with valid Map - SwipeEdge.right', () async {
+    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 1,
     });
@@ -28,29 +26,28 @@ void main() {
     expect(event.isButtonEvent, isFalse);
   });
 
-  test('fromJSON can be created with valid JSON - isButtonEvent zero position', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 0.0,
+  test('fromMap can be created with valid Map - isButtonEvent zero position', () async {
+    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 0.0],
       'progress': 0.0,
       'swipeEdge': 1,
     });
     expect(event.isButtonEvent, isTrue);
   });
 
-  test('fromJSON can be created with valid JSON - isButtonEvent null position', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromJSON(const <String, dynamic>{
+  test('fromMap can be created with valid Map - isButtonEvent null position', () async {
+    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': null,
       'progress': 0.0,
       'swipeEdge': 1,
     });
     expect(event.isButtonEvent, isTrue);
   });
 
-  test('fromJSON throws when given invalid progress', () async {
+  test('fromMap throws when given invalid progress', () async {
     expect(
-      () => PredictiveBackEvent.fromJSON(const <String, dynamic>{
-        'x': 0.0,
-        'y': 100.0,
+      () => PredictiveBackEvent.fromMap(const <Object?, Object?>{
+        'touchOffset': <double>[0.0, 100.0],
         'progress': 2.0,
         'swipeEdge': 1,
       }),
@@ -58,11 +55,10 @@ void main() {
     );
   });
 
-  test('fromJSON throws when given invalid swipeEdge', () async {
+  test('fromMap throws when given invalid swipeEdge', () async {
     expect(
-      () => PredictiveBackEvent.fromJSON(const <String, dynamic>{
-        'x': 0.0,
-        'y': 100.0,
+      () => PredictiveBackEvent.fromMap(const <Object?, Object?>{
+        'touchOffset': <double>[0.0, 100.0],
         'progress': 0.0,
         'swipeEdge': 2,
       }),
@@ -71,15 +67,13 @@ void main() {
   });
 
   test('equality when created with the same parameters', () async {
-    final PredictiveBackEvent eventA = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 100.0,
+    final PredictiveBackEvent eventA = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
-    final PredictiveBackEvent eventB = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 100.0,
+    final PredictiveBackEvent eventB = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
@@ -89,15 +83,13 @@ void main() {
   });
 
   test('when created with different parameters', () async {
-    final PredictiveBackEvent eventA = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 0.0,
-      'y': 100.0,
+    final PredictiveBackEvent eventA = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
-    final PredictiveBackEvent eventB = PredictiveBackEvent.fromJSON(const <String, dynamic>{
-      'x': 1.0,
-      'y': 100.0,
+    final PredictiveBackEvent eventB = PredictiveBackEvent.fromMap(const <Object?, Object?>{
+      'touchOffset': <double>[1.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });

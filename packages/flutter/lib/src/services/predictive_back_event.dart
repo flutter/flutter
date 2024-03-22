@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
 /// Enum representing the edge from which a swipe starts in a back gesture.
@@ -24,30 +26,34 @@ enum SwipeEdge {
 class PredictiveBackEvent {
   /// Creates a new [PredictiveBackEvent] instance.
   const PredictiveBackEvent._({
-    required this.x,
-    required this.y,
+    required this.touchOffset,
     required this.progress,
     required this.swipeEdge,
   }) : assert(progress >= 0.0 && progress <= 1.0);
 
   /// Creates an [PredictiveBackEvent] from a Map, typically used when converting
   /// data received from a platform channel.
-  factory PredictiveBackEvent.fromJSON(Map<String, dynamic> json) {
+  factory PredictiveBackEvent.fromMap(Map<Object?, Object?> map) {
+    final List<Object?>? touchOffset = map['touchOffset'] as List<Object?>?;
     return PredictiveBackEvent._(
-      x: (json['x'] as num?)?.toDouble(),
-      y: (json['y'] as num?)?.toDouble(),
-      progress: (json['progress'] as num).toDouble(),
-      swipeEdge: SwipeEdge.values[json['swipeEdge'] as int],
+      touchOffset: touchOffset == null
+          ? null
+          : Offset(
+              (touchOffset[0]! as num).toDouble(),
+              (touchOffset[1]! as num).toDouble(),
+            ),
+      progress: (map['progress']! as num).toDouble(),
+      swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
     );
   }
 
-  /// The global X location of the touch point, or `null` if the event is from a
-  /// button press.
-  final double? x;
-
-  /// The global Y location of the touch point, or `null` if the event is from a
-  /// button press.
-  final double? y;
+  /// The global position of the touch point as an `Offset`, or `null` if the
+  /// event is triggered by a button press.
+  ///
+  /// This represents the touch location that initiates or interacts with the
+  /// back gesture. When `null`, it indicates the gesture was not started by a
+  /// touch event, such as a back button press in devices with hardware buttons.
+  final Offset? touchOffset;
 
   /// Returns a value between 0 and 1 representing how far along the back
   /// gesture is.
@@ -79,7 +85,7 @@ class PredictiveBackEvent {
   /// opts for 3-button navigation. In cases of gesture navigation, it returns
   /// false.
   bool get isButtonEvent =>
-      x == null || y == null || (progress == 0 && x == 0 && y == 0);
+      touchOffset == null || (progress == 0 && touchOffset == Offset.zero);
 
   @override
   bool operator ==(Object other) {
@@ -90,17 +96,16 @@ class PredictiveBackEvent {
       return false;
     }
     return other is PredictiveBackEvent &&
-        x == other.x &&
-        y == other.y &&
+        touchOffset == other.touchOffset &&
         progress == other.progress &&
         swipeEdge == other.swipeEdge;
   }
 
   @override
-  int get hashCode => Object.hash(x, y, progress, swipeEdge);
+  int get hashCode => Object.hash(touchOffset, progress, swipeEdge);
 
   @override
   String toString() {
-    return 'PredictiveBackEvent{x: $x, y: $y, progress: $progress, swipeEdge: $swipeEdge}';
+    return 'PredictiveBackEvent{touchOffset: $touchOffset, progress: $progress, swipeEdge: $swipeEdge}';
   }
 }

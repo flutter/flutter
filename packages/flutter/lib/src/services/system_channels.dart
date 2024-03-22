@@ -80,7 +80,6 @@ abstract final class SystemChannels {
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel backGesture = OptionalMethodChannel(
     'flutter/backgesture',
-    JSONMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
