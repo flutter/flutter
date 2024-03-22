@@ -5,8 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
@@ -2787,6 +2789,27 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await expectLater(
+      runner.run(
+          <String>['create', '--no-pub', '--template=plugin', projectDir.path]),
+      throwsToolExit(message: 'Unable to read the template manifest at path'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (context.contains('template_manifest.json')) {
+          throw PathNotFoundException(
+              context, const OSError(), 'Cannot open file');
+        }
+      },
+    ),
+    ProcessManager: () => fakeProcessManager,
   });
 
   testUsingContext('flutter create . on and existing plugin should show "Your example app code in"', () async {
